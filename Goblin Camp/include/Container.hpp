@@ -12,7 +12,7 @@ class Container : public Item {
         int capacity;
         int reservedSpace;
 	public:
-        Container(Coordinate, int type, int cap=1000);
+        Container(Coordinate, int type, int cap=1000, int faction = 0);
 		virtual ~Container();
 		virtual bool AddItem(boost::weak_ptr<Item>);
 		virtual void RemoveItem(boost::weak_ptr<Item>);

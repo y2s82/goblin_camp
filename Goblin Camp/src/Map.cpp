@@ -20,7 +20,7 @@ GameMap* GameMap::Inst() {
 }
 
 float GameMap::getWalkCost(int x0, int y0, int x1, int y1, void *data) const {
-	if (Walkable(x1,y1)) return tileMap[x0][y0].moveCost();
+	if (Walkable(x1,y1)) return (float)tileMap[x0][y0].moveCost();
 	return 0.0f;
 }
 

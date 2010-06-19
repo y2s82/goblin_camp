@@ -11,6 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <None Include="config.ini" />
     <None Include="constructions.xml" />
     <None Include="items.xml" />
     <None Include="names.dat" />
@@ -33,6 +34,7 @@
     <ClCompile Include="src\Menu.cpp" />
     <ClCompile Include="src\NatureObject.cpp" />
     <ClCompile Include="src\NPC.cpp" />
+    <ClCompile Include="src\StockManager.cpp" />
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\UI.cpp" />
     <ClCompile Include="src\Water.cpp" />
@@ -54,6 +56,7 @@
     <ClInclude Include="include\Menu.hpp" />
     <ClInclude Include="include\NatureObject.hpp" />
     <ClInclude Include="include\NPC.hpp" />
+    <ClInclude Include="include\StockManager.hpp" />
     <ClInclude Include="include\Tile.hpp" />
     <ClInclude Include="include\UI.hpp" />
     <ClInclude Include="include\Water.hpp" />
@@ -73,6 +76,7 @@
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>MultiByte</CharacterSet>
+    <UseOfAtl>false</UseOfAtl>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -95,11 +99,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;_SCL_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;_SCL_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;ticppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -115,6 +120,9 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>libtcod-VS.lib;libboost_thread-vc100-mt-1_43.lib;ticpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <SubSystem>Windows</SubSystem>
+      <EntryPointSymbol>
+      </EntryPointSymbol>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

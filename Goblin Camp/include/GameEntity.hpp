@@ -15,6 +15,7 @@ class GameEntity: public boost::enable_shared_from_this<GameEntity>
 		int zone;
 		bool reserved;
 		std::string name;
+		int faction;
 	public:
 		GameEntity();
 		virtual ~GameEntity();
@@ -30,6 +31,9 @@ class GameEntity: public boost::enable_shared_from_this<GameEntity>
 		bool Reserved();
 		virtual std::string Name();
 		virtual void CancelJob(int=0);
+
+		virtual void Faction(int);
+		virtual int Faction();
 };
 
 #endif

@@ -37,7 +37,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	statusGraphicCounter(0),
 	health(100),
 	foundItem(boost::weak_ptr<Item>()),
-	bag(boost::shared_ptr<Container>(new Container(pos, 0))),
+	bag(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
 	FindJob(findJob),
 	React(react)
 {
@@ -393,12 +393,17 @@ AiThink NPC::Think() {
 			if (status[FLEEING]) {
 			    if (jobs.empty() && !nearNpcs.empty()) {
 			        boost::shared_ptr<Job> fleeJob(new Job("Flee"));
-			        int dx = _x - nearNpcs.begin()->lock()->_x;
-			        int dy = _y - nearNpcs.begin()->lock()->_y;
-			        if (GameMap::Inst()->Walkable(_x + dx, _y + dy)) {
-			            fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y+dy)));
-			            jobs.push_back(fleeJob);
-			        }
+					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
+						if (npci->lock()->faction != faction) {
+							int dx = _x - npci->lock()->_x;
+							int dy = _y - npci->lock()->_y;
+							if (GameMap::Inst()->Walkable(_x + dx, _y + dy)) {
+								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y+dy)));
+								jobs.push_back(fleeJob);
+							}
+							break;
+						}
+					}
 			    }
 			} else if (!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
@@ -468,9 +473,8 @@ void NPC::Kill() {
 
 void NPC::DropCarriedItem() {
     if (carried.lock()) {
-        Logger::Inst()->output<<"bag->Capacity(): "<<bag->Capacity();
         bag->RemoveItem(carried);
-        Logger::Inst()->output<<"rmItem bag->Capacity(): "<<bag->Capacity();
+		carried.lock()->PutInContainer(boost::weak_ptr<Item>());
         carried.lock()->Position(Position());
         carried.reset();
     }

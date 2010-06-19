@@ -47,26 +47,28 @@ void NatureObject::LoadPresets(ticpp::Document doc) {
     ticpp::Element* parent = doc.FirstChildElement();
 
     Logger::Inst()->output<<"Reading wildplants.xml\n";
-    Logger::Inst()->output.flush();
     try {
         ticpp::Iterator<ticpp::Node> node;
         for (node = node.begin(parent); node != node.end(); ++node) {
             if (node->Value() == "plant") {
-                Logger::Inst()->output<<"Plant\n";
-                Logger::Inst()->output.flush();
+#ifdef DEBUG
+				std::cout<<"Plant\n";
+#endif
                 Presets.push_back(NatureObjectPreset());
                 ticpp::Iterator<ticpp::Node> child;
                 for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-                    Logger::Inst()->output<<"Children\n";
-                    Logger::Inst()->output.flush();
+#ifdef DEBUG
+					std::cout<<"Children\n";
+#endif
                     if (child->Value() == "name") {
                         Presets.back().name = child->ToElement()->GetText();
-                        Logger::Inst()->output<<"Wildplant name: "<<Presets.back().name<<"\n";
                     } else if (child->Value() == "graphic") {
                         child->ToElement()->GetText(&intVal);
                         Presets.back().graphic = intVal;
                     } else if (child->Value() == "components") {
-                        Logger::Inst()->output<<"Components\n";
+#ifdef DEBUG
+                        std::cout<<"Components\n";
+#endif
                         ticpp::Iterator<ticpp::Node> comps;
                         for (comps = comps.begin(child->ToElement()); comps != comps.end(); ++comps) {
                                 Presets.back().components.push_back(Item::StringToItemType(comps->ToElement()->GetText()));

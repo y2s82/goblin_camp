@@ -19,6 +19,7 @@
     <None Include="items.xml" />
     <None Include="names.dat" />
     <None Include="wildplants.xml" />
+    <None Include="config.ini" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp">
@@ -78,6 +79,9 @@
     <ClCompile Include="src\Water.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\StockManager.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp">
@@ -135,6 +139,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Water.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\StockManager.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

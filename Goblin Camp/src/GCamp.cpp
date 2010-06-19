@@ -21,40 +21,54 @@
 #include "UI.hpp"
 #include "Graphics.hpp"
 
-void allToLower(char *string) {
-    int i = 0;
-    while (string[i] != '\0') {
-        string[i] = std::tolower(string[i]);
-        ++i;
-    }
-}
 
-int main(int argc, char* argv[]) {
-    std::string arg;
-    int width = -1, height = -1;
+int main(std::string cmdLine) {
+	int width = -1, height = -1;
     bool fullscreen = false;
 
-    for (int i = 0; i < argc; ++i) {
-        allToLower(argv[i]);
-        arg = argv[i];
-        if (arg == "-w") {
-            if (argc > i+1) {
-                width = std::atoi(argv[++i]);
-            }
-        } else if (arg == "-h") {
-            if (argc > i+1) {
-                height = std::atoi(argv[++i]);
-            }
-        } else if (arg == "-windowed") {
-            fullscreen = false;
-        } else if (arg == "-fullscreen") {
-            fullscreen = true;
-        }
-    }
+	TCODList<char*> list =  TCODSystem::getDirectoryContent("./", "config.ini");
+	if (!list.isEmpty()) {
+		ticpp::Document iniFile("config.ini");
+		try {
+			iniFile.LoadFile();
+		} catch (ticpp::Exception& ex) {
+			Logger::Inst()->output<<"Failed loading config.ini\n"<<ex.what();
+			Logger::Inst()->output<<"Using default values";
+			goto CONTINUEMAIN;
+		}
+
+		try {
+			int intVal;
+			ticpp::Element* parent = iniFile.FirstChildElement();
+			ticpp::Iterator<ticpp::Node> node;
+			for (node = node.begin(parent); node != node.end(); ++node) {
+				if (node->Value() == "fullscreen") {
+					fullscreen = (node->ToElement()->GetText() == "true") ? true : false;
+				} else if (node->Value() == "width") {
+					node->ToElement()->GetText(&intVal);
+					width = intVal;
+				} else if (node->Value() == "height") {
+					node->ToElement()->GetText(&intVal);
+					height = intVal;
+				}
+			}
+		} catch (ticpp::Exception& ex) {
+			Logger::Inst()->output<<"Failed reading config.ini\n"<<ex.what();
+			Logger::Inst()->output<<"Using default values";
+			width = -1; height = -1; fullscreen = false;
+		}
+	}
+	CONTINUEMAIN:
 
 	Game::Inst()->Init(width,height,fullscreen);
 	mainLoop();
 	return 0;
+}
+
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
+{
+    main(cmdLine);
+    return 0;
 }
 
 void mainLoop() {
@@ -117,7 +131,7 @@ void mainLoop() {
 
 		//This "weirdness" is required because the loop is not guaranteed to take longer than 1ms to execute
 		QueryPerformanceCounter(&timeNow);
-		timerAddition = ((timeNow.QuadPart - timeStart.QuadPart) * 1000 / freq.QuadPart);
+		timerAddition = (int)((timeNow.QuadPart - timeStart.QuadPart) * 1000 / freq.QuadPart);
 		logicTimer += timerAddition;
 		if (timerAddition >= 1)	QueryPerformanceCounter(&timeStart);
 		if (timerAddition < 25) TCODSystem::sleepMilli(25-timerAddition); //Stops gcamp from maxing CPU for no reason

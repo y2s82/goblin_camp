@@ -1,7 +1,7 @@
 #include "Container.hpp"
 #include "Logger.hpp"
 
-Container::Container(Coordinate pos, ItemType type, int capValue) : Item(pos, type),
+Container::Container(Coordinate pos, ItemType type, int capValue, int faction) : Item(pos, type, faction),
 capacity(capValue),
 reservedSpace(0)
 {

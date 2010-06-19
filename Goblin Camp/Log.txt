@@ -1,174 +1,29 @@
 Logging begun
 Opening constructions.xml
 Reading items.xml
-Category
 Children
 Children
-Category
 Children
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Category
 Children
-Item
-Name: Wood log
-Item
-Name: Wood plank
-Item
-Name: Granite
-Item
-Name: Chalk
-Item
-Name: Sandstone
-Item
-Name: Wine
-Item
-Name: Rat meat
-Item
-Name: Wooden door
-Item
-Name: Wooden barrel
-Item
-Name: Brick
-Item
-Name: Bloodberry shrub
-Fruits
-Item
-Name: Young Bloodberry shrub
-Item
-Name: Bloodberry seed
-Seasons
-Found seed for springFound seed for summerFound seed for fallItem
-Name: Bloodberry
-Fruits
-Item
-Name: Dead plant
-Item
-Name: Exquisite Pie
-Item
-Name: Pie
-Item
-Name: Sack
-Item
-Name: Crate
 Finished reading items.xml
 Items: 19
 Reading constructions.xml
-Construction
-Children
-Children
-Children
-Children
-Children
-Children
-Materials
-matsend
-Construction
-Children
-Children
-Children
-Children
-Products
-Children
-Children
-Children
-Materials
-matsend
-Children
-Construction
-Children
-Children
-Children
-Children
-Children
-Children
-Materials
-matsend
-Children
-Construction
-Children
-Children
-Children
-Children
-Construction
-Children
-Children
-Children
-Children
-Construction
-Children
-Children
-Children
-Children
-Products
-Children
-Children
-Children
-Materials
-matsend
-Children
-Construction
-Children
-Children
-Children
-Children
-Products
-Children
-Children
-Children
-Materials
-matsend
-Children
 Finished reading constructions.xml
 Constructions: 7
 Reading wildplants.xml
-Plant
-Children
-Wildplant name: Pine tree
-Children
-Children
-Children
-Components
-Children
-Children
-Children
-Plant
-Children
-Wildplant name: Wild Bloodberry bush
-Children
-Children
-Children
-Components
-Children
-Children
-Children
-Children
-Children
 Finished reading wildplants.xml
 Plants: 2
-Finished loading presets.Tile()
-Tile()
-Logging ended.
+Finished loading presets.Logging ended.

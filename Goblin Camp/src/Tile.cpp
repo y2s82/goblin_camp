@@ -1,6 +1,9 @@
 #include <string>
 #include <queue>
 #include <set>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 #include "Tile.hpp"
 #include "Announce.hpp"
@@ -22,7 +25,6 @@ Tile::Tile(TileType newType, int newCost) :
 	filth(boost::shared_ptr<FilthNode>())
 {
     type(newType);
-    Logger::Inst()->output<<"Tile()\n";
 }
 
 TileType Tile::type() { return _type; }
@@ -93,9 +95,11 @@ bool Tile::Buildable() const { return buildable; }
 
 void Tile::MoveFrom(int uid) {
 	if (npcList.find(uid) == npcList.end()) {
-		Logger::Inst()->output<<"\nNPC "<<uid<<" moved off of empty list";
-		Logger::Inst()->output<<"\nlist.size(): "<<npcList.size();
-		Logger::Inst()->output<<"\nNPC: "<<Game::Inst()->npcList[uid]->Position().x()<<","<<Game::Inst()->npcList[uid]->Position().y()<<'\n';
+#ifdef DEBUG
+		std::cout<<"\nNPC "<<uid<<" moved off of empty list";
+		std::cout<<"\nlist.size(): "<<npcList.size();
+		std::cout<<"\nNPC: "<<Game::Inst()->npcList[uid]->Position().x()<<","<<Game::Inst()->npcList[uid]->Position().y()<<'\n';
+#endif
 		return;
 	}
 	npcList.erase(npcList.find(uid));
@@ -107,7 +111,9 @@ bool Tile::MoveTo(int uid) {
 		if (npcList.find(uid) == npcList.end()) Logger::Inst()->output<<"NPC inserted but disappeared!?\n";
 		return true;
 	}
-	Logger::Inst()->output<<"MoveTo returned false\n";
+#ifdef DEBUG
+	std::cout<<"MoveTo returned false\n";
+#endif
 	return false;
 }
 

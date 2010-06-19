@@ -1,7 +1,7 @@
 #include "GameEntity.hpp"
 #include "Logger.hpp"
 
-GameEntity::GameEntity() : zone(0), reserved(0), name("NONAME") {
+GameEntity::GameEntity() : zone(0), reserved(0), name("NONAME"), faction(0) {
 	uid = uids++;
 }
 
@@ -25,3 +25,6 @@ bool GameEntity::Reserved() {return reserved;}
 std::string GameEntity::Name() { return name; }
 
 void GameEntity::CancelJob(int) {}
+
+int GameEntity::Faction() { return faction; }
+void GameEntity::Faction(int val) { faction = val; }

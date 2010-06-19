@@ -1,5 +1,8 @@
 #include <libtcod.hpp>
 #include <ticpp.h>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 #include "Construction.hpp"
 #include "Announce.hpp"
@@ -22,8 +25,8 @@ Construction::Construction(ConstructionType type, Coordinate target) : GameEntit
     _type(type),
     producer(false),
     progress(0),
-    container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0))),
-    materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size())))
+    container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
+    materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1)))
 {
     _x = target.x();
     _y = target.y();
@@ -45,6 +48,12 @@ Construction::~Construction() {
             GameMap::Inst()->Construction(ix,iy,-1);
         }
     }
+
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		itemi->lock()->Faction(0); //Return item to player faction
+		itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
+	}
+	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 }
 
 
@@ -74,6 +83,7 @@ int Construction::Build() {
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		    color = TCODColor::lerp(color, itemi->lock()->Color(), 0.5f);
+			itemi->lock()->Faction(-1); //Remove from player faction so it doesn't show up in stocks
 		}
 
 		_condition = maxCondition;
@@ -152,7 +162,7 @@ int Construction::Use() {
             }
 
             for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
-                Game::Inst()->CreateItem(Position()+Construction::Presets[_type].productionSpot, jobList[0], true, components);
+                Game::Inst()->CreateItem(Position()+Construction::Presets[_type].productionSpot, jobList[0], true, 0, components);
             }
 
             progress = 0;
@@ -172,18 +182,19 @@ void Construction::LoadPresets(ticpp::Document doc) {
     ticpp::Element* parent = doc.FirstChildElement();
 
     Logger::Inst()->output<<"Reading constructions.xml\n";
-    Logger::Inst()->output.flush();
     try {
         ticpp::Iterator<ticpp::Node> node;
         for (node = node.begin(parent); node != node.end(); ++node) {
             if (node->Value() == "construction") {
-                Logger::Inst()->output<<"Construction\n";
-                Logger::Inst()->output.flush();
+#ifdef DEBUG
+				std::cout<<"Construction\n";
+#endif
                 Presets.push_back(ConstructionPreset());
                 ticpp::Iterator<ticpp::Node> child;
                 for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-                    Logger::Inst()->output<<"Children\n";
-                    Logger::Inst()->output.flush();
+#ifdef DEBUG
+					std::cout<<"Children\n";
+#endif
                     if (child->Value() == "wall") {
                         Presets.back().graphic.push_back(1);
                         Presets.back().graphic.push_back('W');
@@ -199,7 +210,9 @@ void Construction::LoadPresets(ticpp::Document doc) {
                     } else if (child->Value() == "producer") {
                         Presets.back().producer = (child->ToElement()->GetText() == "true") ? true : false;
                     } else if (child->Value() == "products") {
-                        Logger::Inst()->output<<"Products\n";
+#ifdef DEBUG
+                        std::cout<<"Products\n";
+#endif
                         ticpp::Iterator<ticpp::Node> prods;
                         for (prods = prods.begin(child->ToElement());
                             prods != prods.end(); ++prods) {
@@ -208,12 +221,13 @@ void Construction::LoadPresets(ticpp::Document doc) {
                     } else if (child->Value() == "walkable") {
                         Presets.back().walkable = (child->ToElement()->GetText() == "true") ? true : false;
                     } else if (child->Value() == "materials") {
-                        Logger::Inst()->output<<"Materials\n";
+#ifdef DEBUG
+                        std::cout<<"Materials\n";
+#endif
                         ticpp::Iterator<ticpp::Node> mats;
                         for (mats = mats.begin(child->ToElement()); mats != mats.end(); ++mats) {
                                 Presets.back().materials.push_back(Item::StringToItemCategory(mats->ToElement()->GetText()));
                         }
-                        Logger::Inst()->output<<"matsend\n";
                     } else if (child->Value() == "maxCondition") {
                         child->ToElement()->GetText(&intVal);
                         Presets.back().maxCondition = intVal;
@@ -332,7 +346,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 {
 	_condition = maxCondition;
     reserved.insert(std::pair<Coordinate,bool>(target,false));
-    containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1))));
+    containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
     for (int i = 0; i < Game::ItemCatCount; ++i) {
         amount.insert(std::pair<ItemCategory, int>(i,0));
         allowed.insert(std::pair<ItemCategory, bool>(i,false));
@@ -408,7 +422,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 						if (iy < a.y()) a.y(iy);
 						if (iy > b.y()) b.y(iy);
                         reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-                        containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), 0, 1))));
+                        containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), 0, 1, -1))));
 					}
 				}
 			}

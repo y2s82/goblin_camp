@@ -83,7 +83,9 @@ class Item : public GameEntity {
         static std::map<std::string, ItemCategory> itemCategoryNames;
 
     protected:
-		Item(Coordinate, ItemType, std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
+		int ownerFaction;
+		Item(Coordinate, ItemType, int owner = 0,
+			std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
         boost::weak_ptr<Item> container;
 
 	public:
@@ -92,9 +94,12 @@ class Item : public GameEntity {
 		static ItemType StringToItemType(std::string);
 		static std::string ItemCategoryToString(ItemCategory);
 		static ItemCategory StringToItemCategory(std::string);
+
 		static std::vector<ItemCategory> Components(ItemType);
 		static ItemCategory Components(ItemType, int);
+
 		static void LoadPresets(ticpp::Document);
+
 		static std::vector<ItemCat> Categories;
 		static std::vector<ItemPreset> Presets;
 
@@ -110,6 +115,7 @@ class Item : public GameEntity {
 		TCODColor Color();
 		bool IsCategory(ItemCategory);
 		virtual void Reserve(bool);
+		virtual void Faction(int);
 };
 
 class OrganicItem : public Item {

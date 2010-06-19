@@ -1,21 +1,26 @@
 #include <libtcod.hpp>
 #include <ticpp.h>
 #include <boost/shared_ptr.hpp>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 #include "Item.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
 #include "Logger.hpp"
+#include "StockManager.hpp"
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
 std::map<std::string, ItemType> Item::itemTypeNames = std::map<std::string, ItemType>();
 std::map<std::string, ItemType> Item::itemCategoryNames = std::map<std::string, ItemType>();
 
-Item::Item(Coordinate pos, ItemType typeval, std::vector<boost::weak_ptr<Item> > components) : GameEntity(),
+Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : GameEntity(),
 	type(typeval),
 	attemptedStore(false),
 	decayCounter(-1),
+	ownerFaction(owner),
 	container(boost::weak_ptr<Item>())
 {
 	_x = pos.x();
@@ -30,10 +35,23 @@ Item::Item(Coordinate pos, ItemType typeval, std::vector<boost::weak_ptr<Item> >
     for (int i = 0; i < (signed int)components.size(); ++i) {
         color = TCODColor::lerp(color, components[i].lock()->Color(), 0.5f);
     }
+
+	if (ownerFaction == 0) { //Player owned
+		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
+			StockManager::Inst()->UpdateQuantity(*cati, 1);
+		}
+	}
 }
 
 Item::~Item() {
-    Logger::Inst()->output<<"Item destroyed\n";
+#ifdef DEBUG
+    std::cout<<"Item destroyed\n";
+#endif
+	if (ownerFaction == 0) {
+		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
+			StockManager::Inst()->UpdateQuantity(*cati, -1);
+		}
+	}
 }
 
 void Item::Draw(Coordinate center) {
@@ -107,12 +125,13 @@ void Item::LoadPresets(ticpp::Document doc) {
     ticpp::Element* parent = doc.FirstChildElement();
 
     Logger::Inst()->output<<"Reading items.xml\n";
-    Logger::Inst()->output.flush();
     try {
         ticpp::Iterator<ticpp::Node> node;
         for (node = node.begin(parent); node != node.end(); ++node) {
             if (node->Value() == "category") {
-                Logger::Inst()->output<<"Category\n";
+#ifdef DEBUG
+                std::cout<<"Category\n";
+#endif
                 Categories.push_back(ItemCat());
                 ++Game::ItemCatCount;
                 ticpp::Iterator<ticpp::Node> child;
@@ -127,14 +146,18 @@ void Item::LoadPresets(ticpp::Document doc) {
                     }
                 }
             } else if (node->Value() == "item") {
-                Logger::Inst()->output<<"Item\n";
+#ifdef DEBUG
+				std::cout<<"Item\n";
+#endif
                 Presets.push_back(ItemPreset());
                 ++Game::ItemTypeCount;
                 ticpp::Iterator<ticpp::Node> child;
                 for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
                     if (child->Value() == "name") {
                         Presets.back().name = child->ToElement()->GetText();
-                        Logger::Inst()->output<<"Name: "<<Presets.back().name<<"\n";
+#ifdef DEBUG
+                        std::cout<<"Name: "<<Presets.back().name<<"\n";
+#endif
                         itemTypeNames.insert(std::pair<std::string, ItemType>(Presets.back().name, Game::ItemTypeCount-1));
                     } else if (child->Value() == "category") {
                         Presets.back().categories.insert(Item::StringToItemCategory(child->ToElement()->GetText()));
@@ -157,13 +180,15 @@ void Item::LoadPresets(ticpp::Document doc) {
                             Presets.back().components.push_back(Item::StringToItemCategory(c->ToElement()->GetText()));
                         }
                     } else if (child->Value() == "seasons") {
-                        Logger::Inst()->output<<"Seasons\n";
+#ifdef DEBUG
+                        std::cout<<"Seasons\n";
+#endif
                         ticpp::Iterator<ticpp::Node> seasons;
                         for (seasons = seasons.begin(child->ToElement()); seasons != seasons.end(); ++seasons) {
                             strVal = seasons->ToElement()->GetText();
-                            if (strVal == "spring") { Presets.back().season |= SPRING; Logger::Inst()->output<<"Found seed for spring"; }
-                            else if (strVal == "summer") { Presets.back().season |= SUMMER; Logger::Inst()->output<<"Found seed for summer"; }
-                            else if (strVal == "fall") { Presets.back().season |= FALL; Logger::Inst()->output<<"Found seed for fall"; }
+                            if (strVal == "spring") { Presets.back().season |= SPRING; }
+                            else if (strVal == "summer") { Presets.back().season |= SUMMER; }
+                            else if (strVal == "fall") { Presets.back().season |= FALL; }
                         }
                     } else if (child->Value() == "nutrition") {
                         child->ToElement()->GetText(&intVal);
@@ -173,7 +198,9 @@ void Item::LoadPresets(ticpp::Document doc) {
                         Presets.back().growth = Item::StringToItemType(child->ToElement()->GetText());
                         Presets.back().organic = true;
                     } else if (child->Value() == "fruits") {
-                        Logger::Inst()->output<<"Fruits\n";
+#ifdef DEBUG
+                        std::cout<<"Fruits\n";
+#endif
                         ticpp::Iterator<ticpp::Node> fruits;
                         for (fruits = fruits.begin(child->ToElement()); fruits != fruits.end(); ++fruits) {
                             fruits->ToElement()->GetText(&intVal);
@@ -216,6 +243,20 @@ void Item::LoadPresets(ticpp::Document doc) {
     }
 
     Logger::Inst()->output<<"Finished reading items.xml\nItems: "<<Presets.size()<<'\n';
+}
+
+
+void Item::Faction(int val) {
+	if (val == 0 && ownerFaction != 0) { //Transferred to player
+		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
+			StockManager::Inst()->UpdateQuantity(*cati, 1);
+		}
+	} else if (val != 0 && ownerFaction == 0) { //Transferred from player
+		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
+			StockManager::Inst()->UpdateQuantity(*cati, -1);
+		}
+	}
+	ownerFaction = val;
 }
 
 ItemCat::ItemCat() {}

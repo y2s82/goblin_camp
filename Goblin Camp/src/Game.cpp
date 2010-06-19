@@ -2,6 +2,10 @@
 #include <boost/multi_array.hpp>
 #include <boost/bind.hpp>
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "Coordinate.hpp"
@@ -11,6 +15,7 @@
 #include "Map.hpp"
 #include "Announce.hpp"
 #include "GCamp.hpp"
+#include "StockManager.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -201,7 +206,10 @@ void Game::BumpEntity(int uid) {
 			++newx;
 		}
 		entity.lock()->Position(Coordinate(newx,newy));
-	} else { Logger::Inst()->output<<"\nTried to bump nonexistant entity."; }
+	} 
+#ifdef DEBUG
+	else { std::cout<<"\nTried to bump nonexistant entity."; }
+#endif
 }
 
 void Game::DoNothing() {}
@@ -222,9 +230,9 @@ void Game::Init(int width, int height, bool fullscreen) {
     resHeight /= charHeight;
     if (width < 1 || resWidth < width) width = resWidth;
     if (height < 1 || resHeight < height) height = resHeight;
-    if (!fullscreen) { width -= 20; height -= 20; }
+    if (!fullscreen) { width = std::max(75, width - 100); height = std::max(75, height - 75); }
 
-	srand(std::time(0));
+	srand((unsigned int)std::time(0));
 
     //Enabling TCOD_RENDERER_GLSL causes GCamp to crash on exit, apparently it's because of an ATI driver issue.
 	TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_SDL);
@@ -286,7 +294,9 @@ boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
     return constructionList[uid];
 }
 
-int Game::CreateItem(Coordinate pos, ItemType type, bool store, std::vector<boost::weak_ptr<Item> > comps) {
+int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction, 
+	std::vector<boost::weak_ptr<Item> > comps) {
+
     boost::shared_ptr<Item> newItem;
     if (Item::Presets[type].organic) {
         newItem.reset(static_cast<Item*>(new OrganicItem(pos, type)));
@@ -297,13 +307,14 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, std::vector<boos
     } else if (Item::Presets[type].container > 0) {
         newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container)));
     } else {
-        newItem.reset(new Item(pos, type, comps));
+        newItem.reset(new Item(pos, type, 0, comps));
     }
 
     freeItems.insert(newItem);
     GameMap::Inst()->ItemList(newItem->x(), newItem->y())->insert(newItem->Uid());
     itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 	if (store) StockpileItem(newItem);
+
 	return newItem->Uid();
 }
 
@@ -696,7 +707,7 @@ void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
                     if (GameMap::Inst()->BlocksLight(x,y)) break;
 
                     for (std::set<int>::iterator npci = GameMap::Inst()->NPCList(x,y)->begin(); npci != GameMap::Inst()->NPCList(x,y)->end(); ++npci) {
-                        npc->nearNpcs.push_back(npcList[*npci]);
+						if (*npci != npc->uid) npc->nearNpcs.push_back(npcList[*npci]);
                     }
 
                     if (npc->nearNpcs.size() > 10) break;

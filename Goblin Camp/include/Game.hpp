@@ -63,7 +63,9 @@ class Game {
 		boost::weak_ptr<Construction> GetConstruction(int);
 
 /*      ITEMS       ITEMS       ITEMS       */
-		int CreateItem(Coordinate, ItemType, bool = false, std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
+		int CreateItem(Coordinate, ItemType, bool stockpile = false,
+			int ownerFaction = 0,
+			std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 		void RemoveItem(boost::weak_ptr<Item>);
 		boost::weak_ptr<Item> GetItem(int);
 		std::map<int,boost::shared_ptr<Item> > itemList;

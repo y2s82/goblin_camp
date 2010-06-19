@@ -88,7 +88,6 @@ class NPC : public GameEntity {
 
         std::list<boost::weak_ptr<NPC> >nearNpcs;
 
-		//bool FindJob();
 		boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 		boost::function<void(boost::shared_ptr<NPC>)> React;
 
@@ -127,8 +126,6 @@ class NPC : public GameEntity {
 		static void PlayerNPCReact(boost::shared_ptr<NPC>);
 		static void PeacefulAnimalReact(boost::shared_ptr<NPC>);
 		static bool PeacefulAnimalFindJob(boost::shared_ptr<NPC>);
-
-		int faction;
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::try_mutex*, bool*, bool*);
