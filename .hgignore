@@ -29,10 +29,10 @@ syntax: glob
 *.sig
 _ReSharper*\*
 TestResults\* 
-glob:desktop.ini
-*\ipch\*
+desktop.ini
+ipch\*
 *.sdf
 *.vsp
 *.psess
-*\Release\*
-*\Debug\*
+Release\
+Debug\
