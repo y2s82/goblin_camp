@@ -32,6 +32,7 @@ TestResults\*
 desktop.ini
 ipch\*
 *.sdf
+*.opensdf
 *.vsp
 *.psess
 Release\
