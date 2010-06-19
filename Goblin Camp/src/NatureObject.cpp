@@ -1,0 +1,122 @@
+#include "NatureObject.hpp"
+#include "Game.hpp"
+#include "Logger.hpp"
+
+NatureObjectPreset::NatureObjectPreset() :
+    name("NATUREOBJECT PRESET"),
+    graphic('?'),
+    color(TCODColor::pink),
+    components(std::list<ItemType>()),
+    rarity(100),
+    cluster(1),
+    condition(1),
+    tree(false),
+    harvestable(false),
+    walkable(false)
+{}
+
+std::vector<NatureObjectPreset> NatureObject::Presets = std::vector<NatureObjectPreset>();
+
+NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : GameEntity(),
+    type(typeVal),
+    marked(false)
+{
+    Position(pos);
+
+    name = Presets[type].name;
+    graphic = Presets[type].graphic;
+    color = Presets[type].color;
+    condition = Presets[type].condition;
+    tree = Presets[type].tree;
+    harvestable = Presets[type].harvestable;
+}
+
+void NatureObject::Draw(Coordinate center) {
+	int screenx = _x - center.x() + (Game::Inst()->ScreenWidth() / 2);
+	int screeny = _y - center.y() + (Game::Inst()->ScreenHeight() / 2);
+	if (screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 && screeny < Game::Inst()->ScreenHeight()) {
+        TCODConsole::root->putCharEx(screenx, screeny, graphic, color, marked ? TCODColor::white : TCODColor::black);
+	}
+}
+
+void NatureObject::Update() {}
+
+void NatureObject::LoadPresets(ticpp::Document doc) {
+    std::string strVal;
+    int intVal = 0;
+    ticpp::Element* parent = doc.FirstChildElement();
+
+    Logger::Inst()->output<<"Reading wildplants.xml\n";
+    Logger::Inst()->output.flush();
+    try {
+        ticpp::Iterator<ticpp::Node> node;
+        for (node = node.begin(parent); node != node.end(); ++node) {
+            if (node->Value() == "plant") {
+                Logger::Inst()->output<<"Plant\n";
+                Logger::Inst()->output.flush();
+                Presets.push_back(NatureObjectPreset());
+                ticpp::Iterator<ticpp::Node> child;
+                for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
+                    Logger::Inst()->output<<"Children\n";
+                    Logger::Inst()->output.flush();
+                    if (child->Value() == "name") {
+                        Presets.back().name = child->ToElement()->GetText();
+                        Logger::Inst()->output<<"Wildplant name: "<<Presets.back().name<<"\n";
+                    } else if (child->Value() == "graphic") {
+                        child->ToElement()->GetText(&intVal);
+                        Presets.back().graphic = intVal;
+                    } else if (child->Value() == "components") {
+                        Logger::Inst()->output<<"Components\n";
+                        ticpp::Iterator<ticpp::Node> comps;
+                        for (comps = comps.begin(child->ToElement()); comps != comps.end(); ++comps) {
+                                Presets.back().components.push_back(Item::StringToItemType(comps->ToElement()->GetText()));
+                        }
+                    } else if (child->Value() == "color") {
+                        int r = -1,g = -1,b = -1;
+                        ticpp::Iterator<ticpp::Node> c;
+                        for (c = c.begin(child->ToElement()); c != c.end(); ++c) {
+                            c->ToElement()->GetTextOrDefault(&intVal, 0);
+                            if (r == -1) r = intVal;
+                            else if (g == -1) g = intVal;
+                            else b = intVal;
+                        }
+                        Presets.back().color = TCODColor(r,g,b);
+                    } else if (child->Value() == "rarity") {
+                        child->ToElement()->GetText(&intVal);
+                        Presets.back().rarity = intVal;
+                    } else if (child->Value() == "cluster") {
+                        child->ToElement()->GetText(&intVal);
+                        Presets.back().cluster = intVal;
+                    } else if (child->Value() == "condition") {
+                        child->ToElement()->GetText(&intVal);
+                        Presets.back().condition = intVal;
+                    } else if (child->Value() == "tree") {
+                        Presets.back().tree = true;
+                    } else if (child->Value() == "harvestable") {
+                        Presets.back().harvestable = true;
+                    } else if (child->Value() == "walkable") {
+                        Presets.back().walkable = true;
+                    }
+                }
+            }
+        }
+    } catch (ticpp::Exception& ex) {
+        Logger::Inst()->output<<"Failed reading wildplants.xml!\n";
+        Logger::Inst()->output<<ex.what()<<'\n';
+        Game::Inst()->Exit();
+    }
+
+    Logger::Inst()->output<<"Finished reading wildplants.xml\nPlants: "<<Presets.size()<<'\n';
+}
+
+void NatureObject::Mark() { marked = true; }
+bool NatureObject::Marked() { return marked; }
+
+void NatureObject::CancelJob(int) { marked = false; }
+
+int NatureObject::Fell() { return --condition; }
+int NatureObject::Harvest() { return --condition; }
+
+int NatureObject::Type() { return type; }
+bool NatureObject::Tree() { return tree; }
+bool NatureObject::Harvestable() { return harvestable; }

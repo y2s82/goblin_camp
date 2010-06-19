@@ -1,0 +1,298 @@
+<!-- This file contains all of the item category and item type definitions for Goblin Camp. -->
+
+
+<ItemDefinitions>
+<!-- Start of category definitions -->
+<!-- 0 -->
+    <category>
+        <name>Wood</name>
+        <flammable>true</flammable>
+    </category>
+
+<!-- 1 -->
+    <category>
+        <name>Stone</name>
+        <flammable>false</flammable>
+    </category>
+
+<!-- 2 -->
+    <category>
+        <name>Food</name>
+    </category>
+
+<!-- 3 -->
+    <category>
+        <name>Drink</name>
+    </category>
+
+<!-- 4 -->
+    <category>
+        <name>Door</name>
+    </category>
+
+    <category>
+        <name>Liquid Container</name>
+    </category>
+
+<!-- 6 -->
+    <category>
+        <name>Plank</name>
+    </category>
+
+    <category>
+        <name>Brick</name>
+    </category>
+
+<!-- 8 -->
+    <category>
+        <name>Seed</name>
+    </category>
+
+    <category>
+        <name>Raw Food</name>
+    </category>
+
+    <category>
+        <name>Plant</name>
+    </category>
+
+    <category>
+        <name>Trash</name>
+    </category>
+
+    <category>
+        <name>Berry</name>
+    </category>
+
+    <category>
+        <name>Container</name>
+    </category>
+
+    <category>
+        <name>Seed Container</name>
+    </category>
+<!-- End of categories -->
+
+<!-- Start of item definitions -->
+
+<!-- 0 -->
+    <item>
+        <name>Wood log</name>
+        <category>Wood</category>
+        <graphic>220</graphic>
+        <color><r>255</r><g>149</g><b>63</b></color>
+    </item>
+
+    <item>
+        <name>Wood plank</name>
+        <category>Plank</category>
+        <graphic>124</graphic>
+        <color><r>255</r><g>73</g><b>7</b></color>
+        <components>
+            <comp>Wood log</comp>
+        </components>
+        <fitsin>Container</fitsin>
+        <multiplier>10</multiplier>
+    </item>
+
+    <item>
+        <name>Granite</name>
+        <category>Stone</category>
+        <graphic>178</graphic>
+        <color><r>255</r><g>127</g><b>127</b></color>
+    </item>
+
+<!-- 3 -->
+    <item>
+        <name>Chalk</name>
+        <category>Stone</category>
+        <graphic>178</graphic>
+        <color><r>193</r><g>193</g><b>193</b></color>
+    </item>
+
+    <item>
+        <name>Sandstone</name>
+        <category>Stone</category>
+        <graphic>178</graphic>
+        <color><r>216</r><g>216</g><b>158</b></color>
+    </item>
+
+<!-- 5 -->
+    <item>
+        <name>Wine</name>
+        <category>Drink</category>
+        <graphic>33</graphic>
+        <color><r>127</r><g>0</g><b>0</b></color>
+        <components>
+            <comp>Berry</comp>
+            <comp>Berry</comp>
+            <comp>Berry</comp>
+        </components>
+        <nutrition>20000</nutrition>
+    </item>
+
+    <item>
+        <name>Rat meat</name>
+        <category>Food</category>
+        <graphic>37</graphic>
+        <color><r>175</r><g>70</g><b>0</b></color>
+        <nutrition>5000</nutrition>
+        <decay>
+            <speed>1</speed>
+            <item>Filth</item>
+        </decay>
+    </item>
+
+<!-- 7 -->
+    <item>
+        <name>Wooden door</name>
+        <category>Door</category>
+        <graphic>197</graphic>
+        <color><r>255</r><g>73</g><b>7</b></color>
+        <components>
+            <comp>Plank</comp>
+            <comp>Plank</comp>
+        </components>
+    </item>
+
+    <item>
+        <name>Wooden barrel</name>
+        <container>20</container>
+        <category>Liquid Container</category>
+        <graphic>155</graphic>
+        <color><r>255</r><g>73</g><b>7</b></color>
+        <components>
+            <comp>Plank</comp>
+            <comp>Plank</comp>
+        </components>
+    </item>
+
+    <item>
+        <name>Brick</name>
+        <category>Brick</category>
+        <graphic>229</graphic>
+        <color><r>200</r><g>0</g><b>0</b></color>
+        <components>
+            <comp>Stone</comp>
+        </components>
+    </item>
+
+<!-- 10 -->
+    <item>
+        <name>Bloodberry shrub</name>
+        <organic></organic>
+        <category>Plant</category>
+        <graphic>35</graphic>
+        <color><r>255</r><g>000</g><b>000</b></color>
+        <fruits>
+            <f>13</f>
+            <f>13</f>
+            <f>13</f>
+            <f>13</f>
+            <f>13</f>
+        </fruits>
+    </item>
+
+    <item>
+        <name>Young Bloodberry shrub</name>
+        <organic></organic>
+        <category>Plant</category>
+        <graphic>42</graphic>
+        <color><r>255</r><g>106</g><b>000</b></color>
+        <growth>Bloodberry shrub</growth>
+    </item>
+
+<!-- 12 -->
+    <item>
+        <name>Bloodberry seed</name>
+        <organic></organic>
+        <category>Seed</category>
+        <graphic>250</graphic>
+        <color><r>128</r><g>128</g><b>128</b></color>
+        <seasons>
+            <s>spring</s>
+            <s>summer</s>
+            <s>fall</s>
+        </seasons>
+        <growth>Young Bloodberry shrub</growth>
+        <fitsin>Seed Container</fitsin>
+    </item>
+
+<!-- 13 -->
+    <item>
+        <name>Bloodberry</name>
+        <organic></organic>
+        <category>Raw Food</category>
+        <category>Berry</category>
+        <graphic>7</graphic>
+        <color><r>255</r><g>0</g><b>0</b></color>
+        <nutrition>3000</nutrition> <!-- 2 minutes -->
+        <fruits>
+            <f>12</f>
+        </fruits>
+        <decay>
+            <speed>12</speed>
+            <item>Filth</item>
+        </decay>
+    </item>
+
+    <item>
+        <name>Dead plant</name>
+        <category>Trash</category>
+        <graphic>207</graphic>
+        <color><r>127</r><g>89</g><b>63</b></color>
+        <decay>
+            <speed>2</speed>
+            <item>Filth</item>
+        </decay>
+    </item>
+
+    <item>
+        <name>Exquisite Pie</name>
+        <category>Food</category>
+        <graphic>37</graphic>
+        <color><r>127</r><g>106</g><b>0</b></color>
+        <components>
+            <comp>Berry</comp>
+            <comp>Berry</comp>
+            <comp>Drink</comp>
+        </components>
+        <nutrition>30000</nutrition>
+    </item>
+
+    <item>
+        <name>Pie</name>
+        <category>Food</category>
+        <graphic>37</graphic>
+        <color><r>127</r><g>106</g><b>0</b></color>
+        <components>
+            <comp>Berry</comp>
+            <comp>Berry</comp>
+            <comp>Berry</comp>
+        </components>
+        <nutrition>12000</nutrition>
+    </item>
+
+    <item>
+        <name>Sack</name>
+        <category>Seed Container</category>
+        <container>50</container>
+        <graphic>11</graphic>
+        <color><r>127</r><g>50</g><b>0</b></color>
+    </item>
+
+    <item>
+        <name>Crate</name>
+        <category>Container</category>
+        <container>10</container>
+        <graphic>230</graphic>
+        <color><r>255</r><g>186</g><b>0</b></color>
+        <components>
+            <comp>Plank</comp>
+            <comp>Plank</comp>
+            <comp>Plank</comp>
+            <comp>Plank</comp>
+            <comp>Plank</comp>
+        </components>
+    </item>
+</ItemDefinitions>

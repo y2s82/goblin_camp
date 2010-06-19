@@ -1,0 +1,114 @@
+<!-- constructions.xml defines all the constructions you can build, as well if they produce (and what).
+items.xml is processed before this, so you can refer to items and categories by their names -->
+
+<ConstructionPresets>
+    <construction>
+        <wall></wall>
+        <name>Wooden wall</name>
+        <producer>false</producer>
+        <walkable>false</walkable>
+        <maxCondition>30</maxCondition>
+        <materials>
+            <mat>Wood</mat>
+        </materials>
+    </construction>
+
+    <construction>
+        <name>Carpenter's workshop</name>
+        <graphic><g>3</g>
+            <g>35</g><g>46</g><g>177</g>
+            <g>35</g><g>67</g><g>46</g>
+            <g>178</g><g>46</g><g>177</g>
+        </graphic>
+        <producer>true</producer>
+        <products>
+            <prod>Wood plank</prod>
+            <prod>Wooden door</prod>
+            <prod>Wooden barrel</prod>
+            <prod>Crate</prod>
+        </products>
+        <walkable>true</walkable>
+        <maxCondition>90</maxCondition>
+        <materials>
+            <mat>Wood</mat>
+            <mat>Wood</mat>
+            <mat>Wood</mat>
+        </materials>
+        <productionSpot><x>1</x><y>1</y></productionSpot>
+    </construction>
+
+    <construction>
+        <name>Bone carver's workshop</name>
+        <graphic><g>4</g>
+            <g>47</g><g>46 </g><g>178</g><g>127</g>
+            <g>66</g><g>178</g><g>47 </g><g>46 </g>
+        </graphic>
+        <producer>false</producer>
+        <walkable>true</walkable>
+        <maxCondition>90</maxCondition>
+        <materials>
+            <mat>Stone</mat>
+            <mat>Stone</mat>
+            <mat>Stone</mat>
+        </materials>
+        <productionSpot><x>2</x><y>0</y></productionSpot>
+    </construction>
+
+    <construction>
+        <stockpile></stockpile>
+        <name>Stockpile</name>
+        <graphic><g>1</g><g>61</g></graphic>
+        <maxCondition>10</maxCondition>
+    </construction>
+
+    <construction>
+        <farmplot></farmplot>
+        <name>Farm plot</name>
+        <graphic><g>1</g><g>126</g></graphic>
+        <maxCondition>10</maxCondition>
+    </construction>
+
+    <construction>
+        <name>Brewery</name>
+        <graphic><g>4</g>
+            <g>10</g><g>46</g><g>46</g><g>231</g>
+            <g>10</g><g>33</g><g>35</g><g>231</g>
+        </graphic>
+        <producer>true</producer>
+        <products>
+            <prod>Wine</prod>
+        </products>
+        <walkable>true</walkable>
+        <maxCondition>90</maxCondition>
+        <materials>
+            <mat>Wood</mat>
+            <mat>Wood</mat>
+            <mat>Wood</mat>
+        </materials>
+        <productionSpot><x>2</x><y>0</y></productionSpot>
+    </construction>
+
+    <construction>
+        <name>Bakery</name>
+        <graphic><g>2</g>
+            <g>10</g><g>46</g>
+            <g>33</g><g>231</g>
+            <g>10</g><g>46</g>
+            <g>35</g><g>231</g>
+        </graphic>
+        <producer>true</producer>
+        <products>
+            <prod>Pie</prod>
+        </products>
+        <walkable>true</walkable>
+        <maxCondition>90</maxCondition>
+        <materials>
+            <mat>Wood</mat>
+            <mat>Wood</mat>
+            <mat>Wood</mat>
+        </materials>
+        <productionSpot><x>1</x><y>2</y></productionSpot>
+    </construction>
+
+
+</ConstructionPresets>

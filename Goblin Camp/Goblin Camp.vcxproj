@@ -1,0 +1,123 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="constructions.xml" />
+    <None Include="items.xml" />
+    <None Include="names.dat" />
+    <None Include="wildplants.xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="src\Announce.cpp" />
+    <ClCompile Include="src\Construction.cpp" />
+    <ClCompile Include="src\Container.cpp" />
+    <ClCompile Include="src\Coordinate.cpp" />
+    <ClCompile Include="src\Filth.cpp" />
+    <ClCompile Include="src\Game.cpp" />
+    <ClCompile Include="src\GameEntity.cpp" />
+    <ClCompile Include="src\GCamp.cpp" />
+    <ClCompile Include="src\Graphics.cpp" />
+    <ClCompile Include="src\Item.cpp" />
+    <ClCompile Include="src\Job.cpp" />
+    <ClCompile Include="src\Logger.cpp" />
+    <ClCompile Include="src\Map.cpp" />
+    <ClCompile Include="src\Menu.cpp" />
+    <ClCompile Include="src\NatureObject.cpp" />
+    <ClCompile Include="src\NPC.cpp" />
+    <ClCompile Include="src\Tile.cpp" />
+    <ClCompile Include="src\UI.cpp" />
+    <ClCompile Include="src\Water.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="include\Announce.hpp" />
+    <ClInclude Include="include\Construction.hpp" />
+    <ClInclude Include="include\Container.hpp" />
+    <ClInclude Include="include\Coordinate.hpp" />
+    <ClInclude Include="include\Filth.hpp" />
+    <ClInclude Include="include\Game.hpp" />
+    <ClInclude Include="include\GameEntity.hpp" />
+    <ClInclude Include="include\GCamp.hpp" />
+    <ClInclude Include="include\Graphics.hpp" />
+    <ClInclude Include="include\Item.hpp" />
+    <ClInclude Include="include\Job.hpp" />
+    <ClInclude Include="include\Logger.hpp" />
+    <ClInclude Include="include\Map.hpp" />
+    <ClInclude Include="include\Menu.hpp" />
+    <ClInclude Include="include\NatureObject.hpp" />
+    <ClInclude Include="include\NPC.hpp" />
+    <ClInclude Include="include\Tile.hpp" />
+    <ClInclude Include="include\UI.hpp" />
+    <ClInclude Include="include\Water.hpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{225B1047-10B4-4F9E-9AE7-293BDCF764CE}</ProjectGuid>
+    <RootNamespace>GoblinCamp</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\boost_1_43_0;C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\Goblin Camp\Goblin Camp\include;C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\ticpp;C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\libtcod\include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\Goblin Camp\Goblin Camp\include;C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\ticpp;C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\libtcod\include;C:\Users\Aryoc\Documents\Visual Studio 2010\Projects\boost_1_43_0;$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;_SCL_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;ticppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalDependencies>libtcod-VS.lib;libboost_thread-vc100-mt-1_43.lib;ticpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

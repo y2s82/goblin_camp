@@ -1,0 +1,16 @@
+name "orc" {
+syllablesPre = "Blackeye, Redeye, Bloodeye, Hardhead, Terrorizing, Murderer"
+syllablesStart = "Gat, Ger, Gif, Gor, Gug, Kal, Keil, Kiv, Kour, Kuar, Kvit"
+syllablesMiddle = "tar, kil, lok, man, nik, rip, trim"
+syllablesEnd = "ak, ik, ap, pat, ru, ar"
+syllablesPost = "the_Longlegged, the_Strong, the_Fat, the_Fearless"
+rules = "$s$50m$e_$50p, $50P_$s$50m$e"
+}
+
+name "goblin" {
+syllablesPre = "Dimwitted, Shortlegged, Fearful"
+syllablesStart = "Im, Om, Am, Ip, Orp, Irp, Kap, Kop, Hip"
+syllablesEnd = "pik, pak, ak, ik, sit, it, et, ot, ol, ong, onk"
+syllablesPost = "the_Stupid, the_Slow, the_Skinny, the_Coward"
+rules = "$s$e_$50p, $50P_$s$e"
+}
