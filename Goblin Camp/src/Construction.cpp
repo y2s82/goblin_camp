@@ -38,6 +38,8 @@ Construction::Construction(ConstructionType type, Coordinate target) : GameEntit
     walkable = Construction::Presets[type].walkable;
     producer = Construction::Presets[type].producer;
     products = Construction::Presets[type].products;
+	stockpile = Construction::Presets[type].stockpile;
+	farmplot = Construction::Presets[type].farmPlot;
 	_condition = 0-maxCondition;
 }
 
@@ -323,6 +325,9 @@ void Construction::UpdateWallGraphic(bool recurse) {
     }
 }
 
+bool Construction::IsStockpile() { return stockpile; }
+bool Construction::IsFarmplot() { return farmplot; }
+
 ConstructionPreset::ConstructionPreset() :
     maxCondition(0),
     graphic(std::vector<int>()),
@@ -542,7 +547,7 @@ void FarmPlot::Draw(Coordinate center) {
 void FarmPlot::Update() {
     if (!tilled) graphic[1] = 176;
     for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin(); containerIt != containers.end(); ++containerIt) {
-        if (!containerIt->second->empty() && rand() % (SEASON_LENGTH*2) == 0) {
+        if (!containerIt->second->empty() && rand() % (MONTH_LENGTH*2) == 0) {
             boost::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
             if (plant.lock() && !plant.lock()->Reserved()) {
                 if (rand() % 10 == 0) { //Chance for the plant to die

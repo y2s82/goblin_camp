@@ -400,7 +400,7 @@ Coordinate Game::FindWater(Coordinate pos) {
 void Game::Update() {
     ++time;
 
-    if (time == SEASON_LENGTH) {
+    if (time == MONTH_LENGTH) {
         if (season < LateWinter) season = (Seasons)((int)season + 1);
         else season = EarlySpring;
 
@@ -452,7 +452,7 @@ void Game::Update() {
 		if (!npci->second->Dead()) npci->second->Think();
 	}
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
-	    if (boost::dynamic_pointer_cast<FarmPlot>(consi->second)) {
+		if (consi->second->farmplot) {
 	        boost::static_pointer_cast<FarmPlot>(consi->second)->Update();
 	    }
 	}
@@ -462,11 +462,13 @@ void Game::Update() {
 	        if (itemi->lock() && !itemi->lock()->Reserved()) StockpileItem(*itemi);
 	    }
 	}
+
+	StockManager::Inst()->Update();
 }
 
 void Game::StockpileItem(boost::weak_ptr<Item> item) {
     for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = constructionList.begin(); stocki != constructionList.end(); ++stocki) {
-        if (boost::dynamic_pointer_cast<Stockpile>(stocki->second)) {
+		if (stocki->second->stockpile) {
             boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
             if (sp->Allowed(Item::Presets[item.lock()->Type()].categories) && !sp->Full()) {
 

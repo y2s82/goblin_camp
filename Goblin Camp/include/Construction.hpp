@@ -61,6 +61,7 @@ class Construction : public GameEntity {
 		void SpawnProductionJob();
 		boost::shared_ptr<Container> container;
 		boost::shared_ptr<Container> materialsUsed;
+		bool stockpile, farmplot;
 
 		void UpdateWallGraphic(bool recurse = true);
 	public:
@@ -84,6 +85,8 @@ class Construction : public GameEntity {
 		static std::vector<ConstructionPreset> Presets;
 		static void LoadPresets(ticpp::Document);
         virtual boost::weak_ptr<Container> Storage();
+		bool IsStockpile();
+		bool IsFarmplot();
 };
 
 class Stockpile : public Construction {

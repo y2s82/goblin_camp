@@ -342,9 +342,9 @@ void ConstructionMenu::Draw(int, int) {
         }
 
         firstTimeDraw = false;
-    } else if (dynamic_cast<FarmPlot*>(construct)) { //It's a farmplot
+	} else if (construct->IsFarmplot()) { //It's a farmplot
 
-    } else if (dynamic_cast<Stockpile*>(construct)) { //A stockpile, but not a farmplot
+	} else if (construct->IsStockpile()) { //A stockpile, but not a farmplot
         Stockpile* sp = static_cast<Stockpile*>(construct);
         TCODConsole::root->setForegroundColor(TCODColor::white);
         TCODConsole::root->printFrame(topX, topY+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
@@ -389,9 +389,9 @@ MenuResult ConstructionMenu::Update(int x, int y) {
 
         if (x == topX+48 && y == topY+6) { ScrollUp(); return MENUHIT; }
         if (x == topX+48 && y == topY+53) { ScrollDown(); return MENUHIT; }
-    } else if (dynamic_cast<FarmPlot*>(construct)) { //It's a farmplot
+	} else if (construct->IsFarmplot()) { //It's a farmplot
 
-    } else if (dynamic_cast<Stockpile*>(construct)) { //A stockpile, but not a farmplot
+	} else if (construct->IsStockpile()) { //A stockpile, but not a farmplot
         int i = ((x-topX+2) / 20)*50;
         i += (y - (topY+6));
         if (i >= 0 && i < (signed int)Item::Categories.size()) {
