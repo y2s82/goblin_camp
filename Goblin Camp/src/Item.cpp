@@ -23,6 +23,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	ownerFaction(owner),
 	container(boost::weak_ptr<Item>())
 {
+	//Remember that the components are destroyed after this constructor!
 	_x = pos.x();
 	_y = pos.y();
 
@@ -33,13 +34,12 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	if (Item::Presets[type].decays) decayCounter = Item::Presets[type].decaySpeed;
 
     for (int i = 0; i < (signed int)components.size(); ++i) {
-        color = TCODColor::lerp(color, components[i].lock()->Color(), 0.5f);
+		if (components[i].lock()) 
+			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.5f);
     }
 
 	if (ownerFaction == 0) { //Player owned
-		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
-			StockManager::Inst()->UpdateQuantity(*cati, 1);
-		}
+		StockManager::Inst()->UpdateQuantity(type, 1);
 	}
 }
 
@@ -48,9 +48,7 @@ Item::~Item() {
     std::cout<<"Item destroyed\n";
 #endif
 	if (ownerFaction == 0) {
-		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
-			StockManager::Inst()->UpdateQuantity(*cati, -1);
-		}
+		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 }
 
@@ -248,13 +246,9 @@ void Item::LoadPresets(ticpp::Document doc) {
 
 void Item::Faction(int val) {
 	if (val == 0 && ownerFaction != 0) { //Transferred to player
-		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
-			StockManager::Inst()->UpdateQuantity(*cati, 1);
-		}
+			StockManager::Inst()->UpdateQuantity(type, 1);
 	} else if (val != 0 && ownerFaction == 0) { //Transferred from player
-		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
-			StockManager::Inst()->UpdateQuantity(*cati, -1);
-		}
+			StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 	ownerFaction = val;
 }

@@ -14,7 +14,7 @@
 
 #define BFS_MAX_DISTANCE 20
 
-#define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 5)
+#define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 1)
 
 enum Seasons {
     EarlySpring,

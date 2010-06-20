@@ -1,6 +1,7 @@
 #include "Menu.hpp"
 #include "UI.hpp"
 #include "Announce.hpp"
+#include "StockManager.hpp"
 
 MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
 	label = ntext;
@@ -69,6 +70,7 @@ Menu* Menu::MainMenu() {
 	if (!mainMenu) {
 		mainMenu = new Menu(std::vector<MenuChoice>());
 		mainMenu->AddChoice(MenuChoice("Construction", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
+		mainMenu->AddChoice(MenuChoice("Stock Manager", boost::bind(UI::ChangeMenu, StockManagerMenu::StocksMenu())));
 		mainMenu->AddChoice(MenuChoice("Orders", boost::bind(UI::ChangeMenu, Menu::OrdersMenu())));
 		mainMenu->AddChoice(MenuChoice("Jobs", boost::bind(UI::ChangeMenu, JobMenu::JobListingMenu())));
 		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceMenu::AnnouncementsMenu())));
@@ -415,3 +417,86 @@ void ConstructionMenu::ClearProductPlacement() { productPlacement.clear(); first
 
 void ConstructionMenu::ScrollDown() { ++scroll; }
 void ConstructionMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
+
+StockManagerMenu* StockManagerMenu::stocksMenu = 0;
+
+StockManagerMenu::StockManagerMenu() : Menu(std::vector<MenuChoice>()),
+    scroll(0)
+{
+    width = 50; height = 50;
+    topX = (Game::Inst()->ScreenWidth() - width) / 2;
+    topY = (Game::Inst()->ScreenHeight() - height) / 2;
+}
+
+void StockManagerMenu::Draw(int, int) {
+    TCODConsole::root->setForegroundColor(TCODColor::white);
+    TCODConsole::root->printFrame(topX, topY, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
+	TCODConsole::root->putChar(topX+48, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+	TCODConsole::root->putChar(topX+48, topY+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+
+	int x = topX + 8;
+	int y = topY + 3;
+
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+
+	for (std::set<ItemType>::iterator itemi = StockManager::Inst()->Producables()->begin();
+		itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
+			if (StockManager::Inst()->TypeQuantity(*itemi) > -1) { //Hide unavailable products
+				TCODConsole::root->setForegroundColor(Item::Presets[*itemi].color);
+				TCODConsole::root->print(x,y, "%c %s", Item::Presets[*itemi].graphic, Item::Presets[*itemi].name.c_str());
+				TCODConsole::root->setForegroundColor(TCODColor::white);
+				TCODConsole::root->print(x,y+1, "%d", StockManager::Inst()->TypeQuantity(*itemi));
+				TCODConsole::root->print(x,y+2, "- %d +", StockManager::Inst()->Minimum(*itemi));
+
+				x += 16;
+				if (x > topX + (width - 10)) {x = topX + 8; y += 5;}
+				if (y > topY + (height - 4)) break;
+			}
+	}
+		
+	TCODConsole::root->setAlignment(TCOD_LEFT);
+}
+
+MenuResult StockManagerMenu::Update(int x, int y) {
+	if (x >= 0 && y >= 0) {
+		int ch = TCODConsole::root->getChar(x,y);
+
+		if (ch == '-' || ch == '+') {
+#ifdef DEBUG
+			std::cout<<"Clicked StockManagerMenu::Update("<<x<<","<<y<<")\n";
+#endif
+			x -= (topX + 4); //If it's the first choice, x is now ~0
+			x /= 16; //Now x = the column
+			y -= (topY + 3 + 2); //+2 because +/- are under the text
+			y /= 5;
+			int choice = x + (y*3);
+#ifdef DEBUG
+			std::cout<<"x: "<<x<<" y: "<<y<<" choice: "<<choice<<"\n";
+#endif
+			//Because choice = index based on the visible items, we need to translate that into
+			//an actual ItemType, which might be anything. So just go through the items as in
+			//Draw() to find which index equals which itemtype.
+
+			int itemIndex = 0;
+			for (std::set<ItemType>::iterator itemi = StockManager::Inst()->Producables()->begin();
+			itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
+				if (StockManager::Inst()->TypeQuantity(*itemi) > -1) {
+					if (itemIndex++ == choice) {
+						StockManager::Inst()->AdjustMinimum(*itemi, (ch == '-') ? -1 : 1);
+						break;
+					}
+				}
+			}
+		}
+		return MENUHIT;
+	}
+    return NOMENUHIT;
+}
+
+StockManagerMenu* StockManagerMenu::StocksMenu() {
+    if (!stocksMenu) stocksMenu = new StockManagerMenu();
+    return stocksMenu;
+}
+
+void StockManagerMenu::ScrollDown() { ++scroll; }
+void StockManagerMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }

@@ -1,5 +1,4 @@
-#ifndef MENU_H
-#define MENU_H
+#pragma once
 
 #include <string>
 #include <boost/function.hpp>
@@ -103,4 +102,15 @@ class ConstructionMenu : public Menu {
 		void ClearProductPlacement();
 };
 
-#endif // MENU_H
+class StockManagerMenu : public Menu {
+    private:
+        int scroll;
+ 	public:
+		StockManagerMenu();
+		void Draw(int, int);
+		MenuResult Update(int = -1, int = -1);
+		static StockManagerMenu* stocksMenu;
+		static StockManagerMenu* StocksMenu();
+		void ScrollDown();
+		void ScrollUp();
+};

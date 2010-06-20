@@ -11,6 +11,7 @@
 #include "Map.hpp"
 #include "Job.hpp"
 #include "GCamp.hpp"
+#include "StockManager.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -56,6 +57,9 @@ Construction::~Construction() {
 		itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
+
+	if (producer) StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), false);
+
 }
 
 
@@ -98,6 +102,12 @@ int Construction::Build() {
 		}
 
 		if (Construction::Presets[_type].wall) { UpdateWallGraphic(); }
+		if (producer) {
+			StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), true);
+			for (unsigned int prod = 0; prod < Construction::Presets[_type].products.size(); ++prod) {
+				StockManager::Inst()->UpdateQuantity(Construction::Presets[_type].products[prod], 0);
+			}
+		}
 	}
 	return _condition;
 }
@@ -115,7 +125,7 @@ std::deque<ItemType>* Construction::JobList() { return &jobList; }
 ItemType Construction::JobList(int index) { return jobList[index]; }
 
 void Construction::AddJob(ItemType item) {
-    if (jobList.size() < 10) jobList.push_back(item);
+    jobList.push_back(item);
     if (jobList.size() == 1) {
         SpawnProductionJob();
     }
@@ -159,9 +169,14 @@ int Construction::Use() {
                 }
             }
 
-            for (std::list<ItemType>::iterator fruiti = Item::Presets[jobList[0]].fruits.begin(); fruiti != Item::Presets[jobList[0]].fruits.end(); ++fruiti) {
-                Game::Inst()->CreateItem(Position(), *fruiti, true);
-            }
+			for (unsigned int i = 0; i < components.size(); ++i) {
+				if (components[i].lock()) {
+					for (std::list<ItemType>::iterator fruiti = Item::Presets[components[i].lock()->Type()].fruits.begin(); fruiti != Item::Presets[components[i].lock()->Type()].fruits.end(); ++fruiti) {
+						Game::Inst()->CreateItem(Position(), *fruiti, true);
+					}
+				}
+			}
+
 
             for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
                 Game::Inst()->CreateItem(Position()+Construction::Presets[_type].productionSpot, jobList[0], true, 0, components);
@@ -354,7 +369,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
     containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
     for (int i = 0; i < Game::ItemCatCount; ++i) {
         amount.insert(std::pair<ItemCategory, int>(i,0));
-        allowed.insert(std::pair<ItemCategory, bool>(i,false));
+        allowed.insert(std::pair<ItemCategory, bool>(i,true));
     }
 }
 

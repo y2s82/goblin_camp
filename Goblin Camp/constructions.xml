@@ -98,7 +98,8 @@ items.xml is processed before this, so you can refer to items and categories by 
         </graphic>
         <producer>true</producer>
         <products>
-            <prod>Pie</prod>
+          <prod>Pie</prod>  
+          <prod>Exquisite Pie</prod>
         </products>
         <walkable>true</walkable>
         <maxCondition>90</maxCondition>

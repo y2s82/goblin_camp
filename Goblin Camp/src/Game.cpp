@@ -315,13 +315,22 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
     itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 	if (store) StockpileItem(newItem);
 
+	for (unsigned int i = 0; i < comps.size(); ++i) {
+		if (comps[i].lock()) {
+			Game::Inst()->RemoveItem(comps[i]);
+		}
+	}
+
+
 	return newItem->Uid();
 }
 
 void Game::RemoveItem(boost::weak_ptr<Item> item) {
-    GameMap::Inst()->ItemList(item.lock()->_x, item.lock()->_y)->erase(item.lock()->uid);
-    itemList.erase(item.lock()->uid);
-    if (freeItems.find(item) != freeItems.end()) freeItems.erase(item);
+	if (item.lock()) {
+		GameMap::Inst()->ItemList(item.lock()->_x, item.lock()->_y)->erase(item.lock()->uid);
+		itemList.erase(item.lock()->uid);
+		if (freeItems.find(item) != freeItems.end()) freeItems.erase(item);
+	}
 }
 
 boost::weak_ptr<Item> Game::GetItem(int uid) {

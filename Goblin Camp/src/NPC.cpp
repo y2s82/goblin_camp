@@ -3,6 +3,9 @@
 #include <boost/multi_array.hpp>
 #include <libtcod.hpp>
 #include <string>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
 #include "npc.hpp"
 #include "coordinate.hpp"
@@ -328,7 +331,13 @@ AiThink NPC::Think() {
 
                 case FIND:
                     foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item);
-                    if (!foundItem.lock()) {TaskFinished(TASKFAILFATAL, "Item not found"); break;}
+                    if (!foundItem.lock()) {
+						TaskFinished(TASKFAILFATAL); 
+#ifdef DEBUG
+						std::cout<<"Can't FIND required item\n";
+#endif
+						break;
+					}
                     else {
                         currentJob().lock()->ReserveItem(foundItem);
                         TaskFinished(TASKSUCCESS);
