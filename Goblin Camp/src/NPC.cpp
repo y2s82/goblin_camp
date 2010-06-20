@@ -206,7 +206,9 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 				case MOVE:
-                    if (name == "Bee") Announce::Inst()->AddMsg("Bee move");
+#ifdef DEBUG
+                    if (name == "Bee") std::cout<<"Bee move";
+#endif
 					if ((signed int)_x == currentTarget().x() && (signed int)_y == currentTarget().y()) {
 						TaskFinished(TASKSUCCESS);
 						break;
@@ -391,8 +393,10 @@ AiThink NPC::Think() {
 		} else {
 			//Idly meander while no jobs available
 			if (status[FLEEING]) {
+				bool enemyFound = false;
 			    if (jobs.empty() && !nearNpcs.empty()) {
 			        boost::shared_ptr<Job> fleeJob(new Job("Flee"));
+					fleeJob->internal = true;
 					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
 						if (npci->lock()->faction != faction) {
 							int dx = _x - npci->lock()->_x;
@@ -400,11 +404,19 @@ AiThink NPC::Think() {
 							if (GameMap::Inst()->Walkable(_x + dx, _y + dy)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y+dy)));
 								jobs.push_back(fleeJob);
+							} else if (GameMap::Inst()->Walkable(_x + dx, _y)) {
+								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y)));
+								jobs.push_back(fleeJob);
+							} else if (GameMap::Inst()->Walkable(_x, _y + dy)) {
+								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x,_y+dy)));
+								jobs.push_back(fleeJob);
 							}
+							enemyFound = true;
 							break;
 						}
 					}
 			    }
+				if (!enemyFound) status[FLEEING] = false;
 			} else if (!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
 			}

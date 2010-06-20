@@ -171,7 +171,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
         case 2:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::PeacefulAnimalFindJob, _1), boost::bind(NPC::PeacefulAnimalReact, _1)));
-            npc->speed(70 + rand() + 20);
+            npc->speed(75 + rand() % 20);
             npc->color(TCODColor::yellow);
             npc->graphic('a');
             npc->name = "Bee";
@@ -300,7 +300,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
     boost::shared_ptr<Item> newItem;
     if (Item::Presets[type].organic) {
         newItem.reset(static_cast<Item*>(new OrganicItem(pos, type)));
-        boost::weak_ptr<OrganicItem> orgItem(boost::dynamic_pointer_cast<OrganicItem>(newItem));
+        boost::weak_ptr<OrganicItem> orgItem(boost::static_pointer_cast<OrganicItem>(newItem));
         orgItem.lock()->Season(Item::Presets[type].season);
         orgItem.lock()->Nutrition(Item::Presets[type].nutrition);
         orgItem.lock()->Growth(Item::Presets[type].growth);
@@ -362,7 +362,7 @@ int Game::Distance(Coordinate a, Coordinate b) {
 
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = constructionList.begin(); consIter != constructionList.end(); ++consIter) {
-		if (boost::dynamic_pointer_cast<Stockpile>(consIter->second) && !boost::dynamic_pointer_cast<FarmPlot>(consIter->second)) {
+		if (consIter->second->stockpile && !boost::dynamic_pointer_cast<FarmPlot>(consIter->second)) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
@@ -527,7 +527,7 @@ Seasons Game::Season() { return season; }
 
 void Game::SpawnTillageJobs() {
    	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
-	    if (boost::dynamic_pointer_cast<FarmPlot>(consi->second)) {
+		if (consi->second->farmplot) {
 	        boost::shared_ptr<Job> tillJob(new Job("Till farmplot"));
 	        tillJob->tasks.push_back(Task(MOVE, consi->second->Position()));
 	        tillJob->tasks.push_back(Task(USE, consi->second->Position(), consi->second));
@@ -538,7 +538,7 @@ void Game::SpawnTillageJobs() {
 
 void Game::DeTillFarmPlots() {
    	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
-	    if (boost::dynamic_pointer_cast<FarmPlot>(consi->second)) {
+		if (consi->second->farmplot) {
             boost::static_pointer_cast<FarmPlot>(consi->second)->tilled = false;
 	    }
    	}

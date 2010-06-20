@@ -111,9 +111,6 @@ bool Tile::MoveTo(int uid) {
 		if (npcList.find(uid) == npcList.end()) Logger::Inst()->output<<"NPC inserted but disappeared!?\n";
 		return true;
 	}
-#ifdef DEBUG
-	std::cout<<"MoveTo returned false\n";
-#endif
 	return false;
 }
 
