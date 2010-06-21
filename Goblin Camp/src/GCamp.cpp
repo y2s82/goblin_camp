@@ -75,8 +75,6 @@ void mainLoop() {
 	LARGE_INTEGER timeStart, timeNow, freq;
 	int logicTimer = 0, timerAddition;
 
-	TCOD_key_t key;
-
 	std::stringstream sstream;
 
 	QueryPerformanceFrequency(&freq);
@@ -95,28 +93,15 @@ void mainLoop() {
 
 	while(true) {
 		while (logicTimer >= (1000 / UPDATES_PER_SECOND)) {
-			key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+			
 			logicTimer -= (1000 / UPDATES_PER_SECOND);
-			if (key.c == 'w') { if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1); }
-			if (key.c == 's') { if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)); }
-			if (key.c == 'a') { if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1); }
-			if (key.c == 'd') { if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)); }
-			if (key.c == 'q') Game::Exit();
-			if (key.vk == TCODK_PRINTSCREEN) TCODSystem::saveScreenshot(0);
-			if (key.c == 'v') {
-				for (int i = 0; i < 3; ++i) {
-					for (int e = 0; e < 3; ++e) {
-						Game::Inst()->CreateWater(Coordinate(200+i,200+e), 10000);
-					}
-				}
-			}
-			if (key.c == 'g') Game::Inst()->CreateItem(Coordinate(200,200), BERRYSEED, true);
-			if (key.c == 'k') Game::Inst()->CreateItem(Coordinate(200,200), 16, true);
 
-			UI::Inst()->Update(key, Game::Inst()->center);
-			Game::Inst()->Update();
-			Announce::Inst()->Update();
-			JobManager::Inst()->Update();
+			UI::Inst()->Update();
+			if (!Game::Inst()->Paused()) {
+				Game::Inst()->Update();
+				Announce::Inst()->Update();
+				JobManager::Inst()->Update();
+			}
 		}
 
         TCODConsole::root->clear();

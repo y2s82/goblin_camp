@@ -33,12 +33,38 @@ UI* UI::Inst() {
 	return instance;
 }
 
-void UI::Update(TCOD_key_t key, Coordinate center) {
+void UI::Update() {
+	HandleKeyboard();
+	HandleMouse();
+}
+
+void UI::HandleKeyboard() {
+	TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+	if (key.c == 'w') { if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1); }
+	if (key.c == 's') { if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)); }
+	if (key.c == 'a') { if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1); }
+	if (key.c == 'd') { if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)); }
+	if (key.c == 'q') Game::Exit();
+	if (key.vk == TCODK_PRINTSCREEN) TCODSystem::saveScreenshot(0);
+	if (key.c == 'v') {
+		for (int i = 0; i < 3; ++i) {
+			for (int e = 0; e < 3; ++e) {
+				Game::Inst()->CreateWater(Coordinate(200+i,200+e), 10000);
+			}
+		}
+	}
+	if (key.c == 'g') Game::Inst()->CreateItem(Coordinate(200,200), BERRYSEED, true);
+	if (key.c == 'k') Game::Inst()->CreateItem(Coordinate(200,200), 16, true);
+	if (key.vk == TCODK_SPACE) Game::Inst()->Pause();
+}
+
+void UI::HandleMouse() {
 	int tmp;
 	MenuResult menuResult;
 	bool xswap = false, yswap = false;
 	mouseInput = TCODMouse::getStatus();
-
+	Coordinate center = Game::Inst()->center;
+	
     if (_state == UINORMAL) {
         //underCursor = GetEntity(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2));
         HandleUnderCursor(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2));
@@ -159,7 +185,6 @@ void UI::Update(TCOD_key_t key, Coordinate center) {
 		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
     }
 }
-
 void UI::Draw(Coordinate center) {
 	int tmp;
 	bool xswap = false, yswap = false;
@@ -262,6 +287,12 @@ void UI::DrawTopBar() {
     TCODConsole::root->setAlignment(TCOD_CENTER);
     TCODConsole::root->print(Game::Inst()->ScreenWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
                              Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->Season()).c_str());
+
+	if (Game::Inst()->Paused()) {
+		TCODConsole::root->setForegroundColor(TCODColor::red);
+		TCODConsole::root->print(Game::Inst()->ScreenWidth() / 2, 1, "- - - - PAUSED - - - -");
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+	}
     TCODConsole::root->setAlignment(TCOD_LEFT);
 }
 

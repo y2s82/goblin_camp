@@ -38,10 +38,11 @@ class UI {
         boost::weak_ptr<GameEntity> GetEntity(Coordinate);
 
         void DrawTopBar();
-
+		void HandleKeyboard();
+		void HandleMouse();
 	public:
 		static UI* Inst();
-		void Update(TCOD_key_t, Coordinate);
+		void Update();
 		void Draw(Coordinate);
 		void blueprint(Coordinate);
 		void state(UIState);

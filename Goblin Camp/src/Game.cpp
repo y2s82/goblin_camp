@@ -27,6 +27,7 @@ Game::Game() :
     time(0),
     orcCount(0),
     goblinCount(0),
+	paused(false),
     center(Coordinate(0,0))
 {
 }
@@ -737,3 +738,8 @@ void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
     }
 }
 
+void Game::Pause() {
+	paused = !paused;
+}
+
+bool Game::Paused() { return paused; }

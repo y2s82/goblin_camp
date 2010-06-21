@@ -39,6 +39,7 @@ class Game {
 		Seasons season;
 		int time;
 		int orcCount, goblinCount;
+		bool paused;
 	public:
 		static Game* Inst();
 
@@ -113,6 +114,9 @@ class Game {
 		std::list<boost::weak_ptr<FilthNode> > filthList;
 		void CreateFilth(Coordinate);
 		void CreateFilth(Coordinate,int);
+
+		void Pause();
+		bool Paused();
 };
 
 #endif
