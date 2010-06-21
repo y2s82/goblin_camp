@@ -1,3 +1,5 @@
+#include <boost/lexical_cast.hpp>
+
 #include "Menu.hpp"
 #include "UI.hpp"
 #include "Announce.hpp"
@@ -35,6 +37,10 @@ void Menu::Draw(int x, int y) {
 	//Draw the menu entries
 	for (int i = 0; i < (signed int)choices.size(); ++i) {
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		if (UI::Inst()->KeyHelpTextColor() > 0) {
+			TCODConsole::root->setForegroundColor(TCODColor(0,UI::Inst()->KeyHelpTextColor(),0));
+			TCODConsole::root->print(x, y+1+(i*2), boost::lexical_cast<std::string>(i+1).c_str());
+		}
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 		if (_selected == i) {
 			TCODConsole::root->setBackgroundColor(TCODColor::white);
@@ -65,17 +71,25 @@ MenuResult Menu::Update(int x, int y) {
 void Menu::selected(int newSel) { _selected = newSel; }
 void Menu::AddChoice(MenuChoice newChoice) { choices.push_back(newChoice); CalculateSize(); }
 
+void Menu::Callback(unsigned int choice) {
+	if (choices.size() > choice) {
+		choices[choice].callback();
+	}
+}
+
 Menu* Menu::mainMenu = 0;
 Menu* Menu::MainMenu() {
 	if (!mainMenu) {
 		mainMenu = new Menu(std::vector<MenuChoice>());
 		mainMenu->AddChoice(MenuChoice("Construction", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
-		mainMenu->AddChoice(MenuChoice("Stock Manager", boost::bind(UI::ChangeMenu, StockManagerMenu::StocksMenu())));
 		mainMenu->AddChoice(MenuChoice("Orders", boost::bind(UI::ChangeMenu, Menu::OrdersMenu())));
+		mainMenu->AddChoice(MenuChoice("Stock Manager", boost::bind(UI::ChangeMenu, StockManagerMenu::StocksMenu())));
+#ifdef DEBUG
 		mainMenu->AddChoice(MenuChoice("Jobs", boost::bind(UI::ChangeMenu, JobMenu::JobListingMenu())));
 		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceMenu::AnnouncementsMenu())));
 		mainMenu->AddChoice(MenuChoice("NPC List", boost::bind(UI::ChangeMenu, NPCMenu::NPCListMenu())));
-		mainMenu->AddChoice(MenuChoice("Exit", boost::bind(Game::Exit)));
+#endif
+		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit)));
 	}
 	return mainMenu;
 }

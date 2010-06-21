@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 #include <boost/function.hpp>
-
+#include <boost/lexical_cast.hpp>
 
 #include "UI.hpp"
 #include "Announce.hpp"
@@ -19,13 +19,19 @@ UI::UI() :
 	_state(UINORMAL),
 	_blueprint(1,1),
 	placeable(false),
-	underCursor(std::list<boost::weak_ptr<GameEntity> >())
+	underCursor(std::list<boost::weak_ptr<GameEntity> >()),
+	drawCursor(false),
+	lbuttonPressed(false),
+	mbuttonPressed(false),
+	rbuttonPressed(false)
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
 	placementCallback = boost::bind(Game::CheckPlacement, _1, _2);
 	callback = boost::bind(Game::PlaceConstruction, _1, 0);
 	rectCallback = boost::bind(Game::PlaceStockpile, _1, _2, 0, 0);
+	mouseInput = TCODMouse::getStatus();
+	oldMouseInput = mouseInput;
 }
 
 UI* UI::Inst() {
@@ -34,39 +40,163 @@ UI* UI::Inst() {
 }
 
 void UI::Update() {
+	if (keyHelpTextColor > 0) keyHelpTextColor -= 3;
+	if (keyHelpTextColor < 0) keyHelpTextColor = 0;
 	HandleKeyboard();
 	HandleMouse();
 }
 
 void UI::HandleKeyboard() {
 	TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
-	if (key.c == 'w') { if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1); }
-	if (key.c == 's') { if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)); }
-	if (key.c == 'a') { if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1); }
-	if (key.c == 'd') { if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)); }
 	if (key.c == 'q') Game::Exit();
-	if (key.vk == TCODK_PRINTSCREEN) TCODSystem::saveScreenshot(0);
-	if (key.c == 'v') {
-		for (int i = 0; i < 3; ++i) {
-			for (int e = 0; e < 3; ++e) {
-				Game::Inst()->CreateWater(Coordinate(200+i,200+e), 10000);
-			}
+	else if (key.c == 'b') {
+		menuX = mouseInput.cx;
+		menuY = mouseInput.cy;
+		menuOpen = true;
+		currentMenu->selected(-1);
+		currentMenu = Menu::BasicsMenu();
+		menuHistory.clear();
+	} else if (key.c == 'w') {
+		menuX = mouseInput.cx;
+		menuY = mouseInput.cy;
+		menuOpen = true;
+		currentMenu->selected(-1);
+		currentMenu = Menu::WorkshopsMenu();
+		menuHistory.clear();
+	} else if (key.c == 'o') {
+		menuX = mouseInput.cx;
+		menuY = mouseInput.cy;
+		menuOpen = true;
+		currentMenu->selected(-1);
+		currentMenu = Menu::OrdersMenu();
+		menuHistory.clear();
+	} else if (key.c == 's') {
+		menuX = mouseInput.cx;
+		menuY = mouseInput.cy;
+		menuOpen = true;
+		currentMenu->selected(-1);
+		currentMenu = StockManagerMenu::StocksMenu();
+		menuHistory.clear();
+	} else if (key.c >= '0' && key.c <= '9') {
+		if (menuOpen) {
+			currentMenu->selected(boost::lexical_cast<int>((char)key.c)-1);
+			currentMenu->Callback(boost::lexical_cast<int>((char)key.c)-1);
 		}
+	} else if (key.c == 'h') {
+		keyHelpTextColor = 255;
 	}
-	if (key.c == 'g') Game::Inst()->CreateItem(Coordinate(200,200), BERRYSEED, true);
-	if (key.c == 'k') Game::Inst()->CreateItem(Coordinate(200,200), 16, true);
-	if (key.vk == TCODK_SPACE) Game::Inst()->Pause();
+
+	int addition = 1;
+	if (key.shift) addition *= 10;
+	if (key.vk == TCODK_UP) {
+		if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
+	} else if (key.vk == TCODK_DOWN) {
+		if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
+	} else if (key.vk == TCODK_LEFT) {
+		if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
+	} else if (key.vk == TCODK_RIGHT) {
+		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+	} else if (key.vk == TCODK_KP1) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.x -= Game::Inst()->CharWidth() * addition;
+		mouseInput.cx -= addition;
+		mouseInput.y += Game::Inst()->CharHeight() * addition;
+		mouseInput.cy += addition;
+	} else if (key.vk == TCODK_KP2) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.y += Game::Inst()->CharHeight() * addition;
+		mouseInput.cy += addition;
+	} else if (key.vk == TCODK_KP3) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.x += Game::Inst()->CharWidth() * addition;
+		mouseInput.cx += addition;
+		mouseInput.y += Game::Inst()->CharHeight() * addition;
+		mouseInput.cy += addition;
+	} else if (key.vk == TCODK_KP4) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.x -= Game::Inst()->CharWidth() * addition;
+		mouseInput.cx -= addition;
+	} else if (key.vk == TCODK_KP6) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.x += Game::Inst()->CharWidth() * addition;
+		mouseInput.cx += addition;
+	} else if (key.vk == TCODK_KP7) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.x -= Game::Inst()->CharWidth() * addition;
+		mouseInput.cx -= addition;
+		mouseInput.y -= Game::Inst()->CharHeight() * addition;
+		mouseInput.cy -= addition;
+	} else if (key.vk == TCODK_KP8) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.y -= Game::Inst()->CharHeight() * addition;
+		mouseInput.cy -= addition;
+	} else if (key.vk == TCODK_KP9) {
+		TCODMouse::showCursor(false);
+		drawCursor = true;
+		mouseInput.x += Game::Inst()->CharWidth() * addition;
+		mouseInput.cx += addition;
+		mouseInput.y -= Game::Inst()->CharHeight() * addition;
+		mouseInput.cy -= addition;
+	} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
+		lbuttonPressed = true;
+	} else if (key.vk == TCODK_CONTROL || key.vk == TCODK_KP0) {
+		rbuttonPressed = true;
+	} else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
+	} else if (key.vk == TCODK_PRINTSCREEN) { TCODSystem::saveScreenshot(0);
+	}
+
+	if (mouseInput.x < 0) {
+		Game::Inst()->center.x(Game::Inst()->center.x() + mouseInput.cx);
+		mouseInput.x = 0;
+		mouseInput.cx = 0;
+	} else if (mouseInput.cx >= Game::Inst()->ScreenWidth()) {
+		Game::Inst()->center.x(Game::Inst()->center.x() + (mouseInput.cx - Game::Inst()->ScreenWidth()));
+		mouseInput.cx = Game::Inst()->ScreenWidth() - 1;
+		mouseInput.x = (Game::Inst()->ScreenWidth() - 1)* Game::Inst()->CharWidth();
+	}
+	if (mouseInput.y < 0) {
+		Game::Inst()->center.y(Game::Inst()->center.y() + mouseInput.cy);
+		mouseInput.y = 0;
+		mouseInput.cy = 0;
+	} else if (mouseInput.cy >= Game::Inst()->ScreenHeight()) {
+		Game::Inst()->center.y(Game::Inst()->center.y() + (mouseInput.cy - Game::Inst()->ScreenHeight()));
+		mouseInput.cy = Game::Inst()->ScreenHeight() - 1;
+		mouseInput.y = (Game::Inst()->ScreenHeight() - 1) * Game::Inst()->CharHeight();
+	}
+		
+	if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
+	if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
+	if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
+	if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+
 }
 
 void UI::HandleMouse() {
 	int tmp;
 	MenuResult menuResult;
 	bool xswap = false, yswap = false;
-	mouseInput = TCODMouse::getStatus();
+	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
+	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
+		mouseInput = tempStatus;
+		oldMouseInput = mouseInput;
+		drawCursor = false;
+		TCODMouse::showCursor(true);
+	}
+
+	if (tempStatus.lbutton_pressed) lbuttonPressed = true;
+	if (tempStatus.mbutton_pressed) mbuttonPressed = true;
+	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
+
 	Coordinate center = Game::Inst()->center;
 	
     if (_state == UINORMAL) {
-        //underCursor = GetEntity(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2));
         HandleUnderCursor(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2));
     }
 
@@ -79,7 +209,7 @@ void UI::HandleMouse() {
 		b.y(mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2);
 	}
 
-	if (mouseInput.lbutton_pressed) {
+	if (lbuttonPressed) {
 	    if (menuOpen) menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy);
 		if (!menuOpen || menuResult == NOMENUHIT) {
 			if (_state == UIPLACEMENT && placeable) {
@@ -159,7 +289,7 @@ void UI::HandleMouse() {
 		}
 	} else { currentMenu->Update(); }
 
-	if (mouseInput.rbutton_pressed) {
+	if (rbuttonPressed) {
 		menuX = mouseInput.cx;
 		menuY = mouseInput.cy;
 		menuOpen = !menuOpen;
@@ -169,21 +299,25 @@ void UI::HandleMouse() {
 		if (!menuOpen) { _state = UINORMAL; a.x(0); a.y(0); }
 	}
 
-	if (mouseInput.mbutton_pressed && menuOpen && !menuHistory.empty()) {
+	if (mbuttonPressed && menuOpen && !menuHistory.empty()) {
 		currentMenu->selected(-1);
 		_state = UINORMAL; a.x(0); a.y(0);
 		currentMenu = menuHistory.back();
 		menuHistory.pop_back();
 	}
 
-	if (mouseInput.lbutton && _state == UINORMAL) {
-	    Game::Inst()->center.x(Game::Inst()->center.x() - (mouseInput.dx / 3));
-	    Game::Inst()->center.y(Game::Inst()->center.y() - (mouseInput.dy / 3));
+	if (tempStatus.lbutton && _state == UINORMAL) {
+	    Game::Inst()->center.x(Game::Inst()->center.x() - (tempStatus.dx / 3));
+	    Game::Inst()->center.y(Game::Inst()->center.y() - (tempStatus.dy / 3));
 	    if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
         if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
 		if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
 		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
     }
+
+	lbuttonPressed = false;
+	mbuttonPressed = false;
+	rbuttonPressed = false;
 }
 void UI::Draw(Coordinate center) {
 	int tmp;
@@ -281,6 +415,8 @@ void UI::Draw(Coordinate center) {
 			b.y(tmp);
 		}
 	}
+
+	if (drawCursor) TCODConsole::root->putCharEx(mouseInput.cx, mouseInput.cy, 'X', TCODColor::azure, TCODColor::black);
 }
 
 void UI::DrawTopBar() {
@@ -291,9 +427,32 @@ void UI::DrawTopBar() {
 	if (Game::Inst()->Paused()) {
 		TCODConsole::root->setForegroundColor(TCODColor::red);
 		TCODConsole::root->print(Game::Inst()->ScreenWidth() / 2, 1, "- - - - PAUSED - - - -");
-		TCODConsole::root->setForegroundColor(TCODColor::white);
 	}
     TCODConsole::root->setAlignment(TCOD_LEFT);
+
+	if (keyHelpTextColor > 0) {
+		int x = Game::Inst()->ScreenWidth() / 2 - 15;
+		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		TCODConsole::root->print(x++, 3, "Q");
+		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		TCODConsole::root->print(x, 3, "uit");
+		x += 3 + 2;
+		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		TCODConsole::root->print(x++, 3, "B");
+		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		TCODConsole::root->print(x, 3, "asics");
+		x += 5 + 2;
+		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		TCODConsole::root->print(x++, 3, "W");
+		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		TCODConsole::root->print(x, 3, "orkshops");
+		x += 8 + 2;
+		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		TCODConsole::root->print(x++, 3, "O");
+		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		TCODConsole::root->print(x, 3, "rders");
+	}
+	TCODConsole::root->setForegroundColor(TCODColor::white);
 }
 
 void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
@@ -399,3 +558,4 @@ void UI::HandleUnderCursor(Coordinate pos) {
     }
  }
 
+int UI::KeyHelpTextColor() const { return keyHelpTextColor; }

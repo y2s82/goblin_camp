@@ -90,7 +90,7 @@ void mainLoop() {
 	QueryPerformanceCounter(&timeStart);
 
     Game::Inst()->center = Coordinate(250,250);
-
+	Announce::Inst()->AddMsg("Press 'H' for keyboard shortcuts", TCODColor::cyan);
 	while(true) {
 		while (logicTimer >= (1000 / UPDATES_PER_SECOND)) {
 			

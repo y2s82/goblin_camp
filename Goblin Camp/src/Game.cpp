@@ -224,7 +224,7 @@ int Game::ScreenWidth() const {	return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
 void Game::Init(int width, int height, bool fullscreen) {
-    int resWidth, resHeight, charWidth, charHeight;
+    int resWidth, resHeight;
     TCODSystem::getCurrentResolution(&resWidth, &resHeight);
     TCODSystem::getCharSize(&charWidth, &charHeight);
     resWidth /= charWidth;
@@ -743,3 +743,6 @@ void Game::Pause() {
 }
 
 bool Game::Paused() { return paused; }
+
+int Game::CharHeight() const { return charHeight; }
+int Game::CharWidth() const { return charWidth; }

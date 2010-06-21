@@ -34,9 +34,13 @@ class UI {
 		Coordinate a,b;
 		std::vector<Menu*> menuHistory;
 		std::list<boost::weak_ptr<GameEntity> > underCursor;
+		bool drawCursor;
+		bool lbuttonPressed, mbuttonPressed, rbuttonPressed;
+		TCOD_mouse_t oldMouseInput;
+		int keyHelpTextColor;
+
 		void HandleUnderCursor(Coordinate);
         boost::weak_ptr<GameEntity> GetEntity(Coordinate);
-
         void DrawTopBar();
 		void HandleKeyboard();
 		void HandleMouse();
@@ -57,6 +61,7 @@ class UI {
 		Menu* CurrentMenu();
 		void CurrentMenu(Menu*);
 		void AddToHistory(Menu*);
+		int KeyHelpTextColor() const;
 };
 
 #endif

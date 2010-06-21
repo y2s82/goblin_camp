@@ -23,7 +23,7 @@ Announce* Announce::Inst() {
 	return instance;
 }
 
-Announce::Announce() {}
+Announce::Announce() : timer(0) {}
 
 void Announce::AddMsg(std::string msg, TCODColor color) {
 	if (!messageQueue.empty() && messageQueue.back()->msg == msg) {

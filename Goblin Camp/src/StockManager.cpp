@@ -136,12 +136,11 @@ void StockManager::UpdateWorkshops(boost::weak_ptr<Construction> cons, bool add)
 	if (add) {
 		workshops.insert(std::pair<ConstructionType, boost::weak_ptr<Construction> >(cons.lock()->type(), cons));
 	} else {
-		std::pair<std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator,
-			std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator> range =
-			workshops.equal_range(cons.lock()->type());
-		for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki = range.first;
-			worki != range.second; ++worki) {
-				if (worki->second.lock() == cons.lock()) {
+		//Because it is being removed, this has been called from a destructor which means
+		//that the construction no longer exists, and the weak_ptr should give !lock
+		for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki = workshops.begin();
+			worki != workshops.end(); ++worki) {
+				if (!worki->second.lock()) {
 					workshops.erase(worki);
 					break;
 				}

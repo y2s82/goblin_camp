@@ -58,7 +58,7 @@ Construction::~Construction() {
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
-	if (producer) StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), false);
+	if (producer) StockManager::Inst()->UpdateWorkshops(boost::weak_ptr<Construction>(), false);
 
 }
 

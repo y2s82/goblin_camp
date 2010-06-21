@@ -32,6 +32,7 @@ class Menu {
 		virtual MenuResult Update(int = -1, int = -1);
 		void selected(int);
 		void AddChoice(MenuChoice);
+		void Callback(unsigned int);
 
 		static Menu* mainMenu;
 		static Menu* MainMenu();

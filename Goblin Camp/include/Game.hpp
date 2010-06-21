@@ -40,6 +40,7 @@ class Game {
 		int time;
 		int orcCount, goblinCount;
 		bool paused;
+		int charWidth, charHeight;
 	public:
 		static Game* Inst();
 
@@ -117,6 +118,9 @@ class Game {
 
 		void Pause();
 		bool Paused();
+
+		int CharHeight() const;
+		int CharWidth() const;
 };
 
 #endif
