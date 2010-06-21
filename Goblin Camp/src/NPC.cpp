@@ -275,6 +275,7 @@ AiThink NPC::Think() {
 					break;
 
 				case TAKE:
+					if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL); break; }
 					if (Position() == currentEntity().lock()->Position()) {
 						if (boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()) {
 						    boost::weak_ptr<Container> cont(boost::static_pointer_cast<Container>(boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));

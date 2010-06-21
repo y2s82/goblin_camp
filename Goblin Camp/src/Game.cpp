@@ -703,7 +703,7 @@ void Game::DecayItems() {
         if (crit->first >= 0) {
             CreateItem(crit->second, crit->first, false);
         } else {
-            Logger::Inst()->output<<"Creating filth\n";
+            CreateFilth(crit->second);
         }
     }
 }
