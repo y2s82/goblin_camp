@@ -33,7 +33,7 @@ class GameEntity: public boost::enable_shared_from_this<GameEntity>
 		virtual void CancelJob(int=0);
 
 		virtual void Faction(int);
-		virtual int Faction();
+		virtual int Faction() const;
 };
 
 #endif

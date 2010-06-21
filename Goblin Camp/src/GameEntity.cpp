@@ -26,5 +26,5 @@ std::string GameEntity::Name() { return name; }
 
 void GameEntity::CancelJob(int) {}
 
-int GameEntity::Faction() { return faction; }
+int GameEntity::Faction() const { return faction; }
 void GameEntity::Faction(int val) { faction = val; }

@@ -39,3 +39,4 @@ Release\
 Debug\
 *.cd
 *SyncToy*
+Log.txt

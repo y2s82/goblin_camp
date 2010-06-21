@@ -466,18 +466,25 @@ void Game::Update() {
 		if (wati->lock()) wati->lock()->Update();
 	}
 
+	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		if (!npci->second->Dead()) npci->second->Think();
+		else npcsWaitingForRemoval.push_back(npci->second);
 	}
+
+	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
+		RemoveNPC(*remNpci);
+	}
+
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
 		if (consi->second->farmplot) {
 	        boost::static_pointer_cast<FarmPlot>(consi->second)->Update();
 	    }
 	}
 
-	if (rand() % (UPDATES_PER_SECOND * 30) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
 	    for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
-	        if (itemi->lock() && !itemi->lock()->Reserved()) StockpileItem(*itemi);
+			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->Faction() == 0) StockpileItem(*itemi);
 	    }
 	}
 
@@ -746,3 +753,9 @@ bool Game::Paused() { return paused; }
 
 int Game::CharHeight() const { return charHeight; }
 int Game::CharWidth() const { return charWidth; }
+
+void Game::RemoveNPC(boost::weak_ptr<NPC> npc) {
+	if (npc.lock()) {
+		npcList.erase(npc.lock()->uid);
+	}
+}

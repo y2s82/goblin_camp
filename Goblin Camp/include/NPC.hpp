@@ -17,7 +17,7 @@
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
 
-#define THIRST_THRESHOLD UPDATES_PER_SECOND * 60 * 5
+#define THIRST_THRESHOLD UPDATES_PER_SECOND * 60 * 5 * 0.01
 #define HUNGER_THRESHOLD UPDATES_PER_SECOND * 60 * 8
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
@@ -92,6 +92,7 @@ class NPC : public GameEntity {
 		boost::function<void(boost::shared_ptr<NPC>)> React;
 
 	public:
+		~NPC();
 		SkillSet Skills;
 		AiThink Think();
 		void Draw(Coordinate);

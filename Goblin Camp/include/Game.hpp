@@ -44,6 +44,8 @@ class Game {
 	public:
 		static Game* Inst();
 
+		int Distance(Coordinate,Coordinate);
+
 /*      NPCS        NPCS        NPCS        */
 		std::map<int,boost::shared_ptr<NPC> > npcList;
 		int CreateNPC(Coordinate, NPCType);
@@ -51,8 +53,8 @@ class Game {
 		int DistanceNPCToCoordinate(int, Coordinate);
         int OrcCount(); int GoblinCount();
 		void FindNearbyNPCs(boost::shared_ptr<NPC>);
+		void RemoveNPC(boost::weak_ptr<NPC>);
 
-		int Distance(Coordinate,Coordinate);
 
 /*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 		static bool CheckPlacement(Coordinate, Coordinate);

@@ -116,6 +116,7 @@ class Item : public GameEntity {
 		bool IsCategory(ItemCategory);
 		virtual void Reserve(bool);
 		virtual void Faction(int);
+		virtual int Faction() const;
 };
 
 class OrganicItem : public Item {

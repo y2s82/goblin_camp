@@ -253,6 +253,8 @@ void Item::Faction(int val) {
 	ownerFaction = val;
 }
 
+int Item::Faction() const { return ownerFaction; }
+
 ItemCat::ItemCat() {}
 
 ItemPreset::ItemPreset() :

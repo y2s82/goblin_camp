@@ -58,6 +58,10 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	for (int i = 0; i < NPC_STATUSES; ++i) { status[i] = false; }
 }
 
+NPC::~NPC() {
+	GameMap::Inst()->NPCList(_x, _y)->erase(uid);
+}
+
 void NPC::Position(Coordinate pos, bool firstTime) {
 	if (!firstTime) {
 		if (GameMap::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
@@ -490,6 +494,7 @@ void NPC::Kill() {
 	_color = TCODColor::grey;
 	for (int i = 0; i < NPC_STATUSES; ++i) { status[i] = false; }
 	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("Dead"));
+	Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
 }
 
 void NPC::DropCarriedItem() {
