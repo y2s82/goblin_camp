@@ -228,9 +228,17 @@ void Game::Init(int width, int height, bool fullscreen) {
     TCODSystem::getCharSize(&charWidth, &charHeight);
     resWidth /= charWidth;
     resHeight /= charHeight;
+	width /= charWidth;
+	height /= charHeight;
     if (width < 1 || resWidth < width) width = resWidth;
     if (height < 1 || resHeight < height) height = resHeight;
-    if (!fullscreen) { width = std::max(75, width - 100); height = std::max(75, height - 75); }
+    
+	if (!fullscreen) {
+		if (width == -1) 
+			width = std::max(75, width - 100); 
+		if (height == -1)
+			height = std::max(75, height - 75);
+	}
 
 	srand((unsigned int)std::time(0));
 
