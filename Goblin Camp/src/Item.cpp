@@ -52,11 +52,11 @@ Item::~Item() {
 	}
 }
 
-void Item::Draw(Coordinate center) {
-    int screenx = _x - center.x() + Game::Inst()->ScreenWidth() / 2;
-    int screeny = _y - center.y() + Game::Inst()->ScreenHeight() / 2;
-	if (!container.lock() && screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 && screeny < Game::Inst()->ScreenHeight()) {
-		TCODConsole::root->putCharEx(screenx, screeny, graphic, color, TCODColor::black);
+void Item::Draw(Coordinate upleft, TCODConsole* console) {
+    int screenx = _x - upleft.x();
+    int screeny = _y - upleft.y();
+	if (!container.lock() && screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
+		console->putCharEx(screenx, screeny, graphic, color, TCODColor::black);
 	}
 }
 

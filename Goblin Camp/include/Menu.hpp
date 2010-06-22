@@ -28,7 +28,7 @@ class Menu {
 	public:
 		Menu(std::vector<MenuChoice>);
 		virtual ~Menu();
-		virtual void Draw(int, int);
+		virtual void Draw(int, int, TCODConsole*);
 		virtual MenuResult Update(int = -1, int = -1);
 		void selected(int);
 		void AddChoice(MenuChoice);
@@ -51,7 +51,7 @@ class JobMenu : public Menu {
 		int scroll;
 	public:
 		JobMenu();
-		void Draw(int, int);
+		void Draw(int, int, TCODConsole*);
 		MenuResult Update(int = -1, int = -1);
 		static JobMenu* jobListingMenu;
 		static JobMenu* JobListingMenu();
@@ -64,7 +64,7 @@ class AnnounceMenu : public Menu {
 		int scroll;
 	public:
 		AnnounceMenu();
-		void Draw(int, int);
+		void Draw(int, int, TCODConsole*);
 		MenuResult Update(int = -1, int = -1);
 		static AnnounceMenu* announcementsMenu;
 		static AnnounceMenu* AnnouncementsMenu();
@@ -77,7 +77,7 @@ class NPCMenu : public Menu {
 		int scroll;
 	public:
 		NPCMenu();
-		void Draw(int, int);
+		void Draw(int, int, TCODConsole*);
 		MenuResult Update(int = -1, int = -1);
 		static NPCMenu* npcListMenu;
 		static NPCMenu* NPCListMenu();
@@ -93,7 +93,7 @@ class ConstructionMenu : public Menu {
         bool firstTimeDraw;
  	public:
 		ConstructionMenu();
-		void Draw(int, int);
+		void Draw(int, int, TCODConsole*);
 		MenuResult Update(int = -1, int = -1);
 		static ConstructionMenu* constructionInfoMenu;
 		static ConstructionMenu* ConstructionInfoMenu(Construction*);
@@ -108,7 +108,7 @@ class StockManagerMenu : public Menu {
         int scroll;
  	public:
 		StockManagerMenu();
-		void Draw(int, int);
+		void Draw(int, int, TCODConsole*);
 		MenuResult Update(int = -1, int = -1);
 		static StockManagerMenu* stocksMenu;
 		static StockManagerMenu* StocksMenu();

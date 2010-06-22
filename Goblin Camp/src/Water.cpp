@@ -20,14 +20,14 @@ WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 
 WaterNode::~WaterNode() {}
 
-void WaterNode::Draw(Coordinate center) {
-	int screenX = x - center.x() + Game::Inst()->ScreenWidth()/2;
-	int screenY = y - center.y() + Game::Inst()->ScreenHeight()/2;
+void WaterNode::Draw(Coordinate upleft, TCODConsole* console) {
+	int screenX = x - upleft.x();
+	int screenY = y - upleft.y();
 
 	if (depth > 0) {
-		if (screenX >= 0 && screenX < Game::Inst()->ScreenWidth() &&
-			screenY >= 0 && screenY < Game::Inst()->ScreenHeight()) {
-			TCODConsole::root->putCharEx(screenX, screenY, graphic, color, TCODColor::black);
+		if (screenX >= 0 && screenX < console->getWidth() &&
+			screenY >= 0 && screenY < console->getHeight()) {
+			console->putCharEx(screenX, screenY, graphic, color, TCODColor::black);
 		}
 	}
 }

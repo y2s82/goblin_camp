@@ -105,7 +105,7 @@ class Item : public Entity {
 
         ~Item();
 
-		void Draw(Coordinate);
+		void Draw(Coordinate, TCODConsole*);
         void PutInContainer(boost::weak_ptr<Item>);
         boost::weak_ptr<Item> ContainedIn();
 		virtual void Position(Coordinate);

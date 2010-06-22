@@ -10,14 +10,14 @@ FilthNode::~FilthNode() {}
 void FilthNode::Update() {
 }
 
-void FilthNode::Draw(Coordinate center) {
-    int screenX = x - center.x() + Game::Inst()->ScreenWidth()/2;
-	int screenY = y - center.y() + Game::Inst()->ScreenHeight()/2;
+void FilthNode::Draw(Coordinate upleft, TCODConsole* console) {
+	int screenX = x - upleft.x();
+	int screenY = y - upleft.y();
 
 	if (depth > 0) {
-		if (screenX >= 0 && screenX < Game::Inst()->ScreenWidth() &&
-			screenY >= 0 && screenY < Game::Inst()->ScreenHeight()) {
-			TCODConsole::root->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', TCODColor::darkerOrange, TCODColor::black);
+		if (screenX >= 0 && screenX < console->getWidth() &&
+			screenY >= 0 && screenY < console->getHeight()) {
+			console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', TCODColor::darkerOrange, TCODColor::black);
 		}
 	}
 }

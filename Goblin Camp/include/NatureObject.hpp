@@ -41,7 +41,7 @@ class NatureObject : public Entity
 
         int Type();
 
-        void Draw(Coordinate);
+        void Draw(Coordinate, TCODConsole*);
         void Update();
         virtual void CancelJob(int=0);
         void Mark();

@@ -89,7 +89,7 @@ void mainLoop() {
 
 	QueryPerformanceCounter(&timeStart);
 
-    Game::Inst()->center = Coordinate(250,250);
+    Game::Inst()->upleft = Coordinate(180,180);
 	Announce::Inst()->AddMsg("Press 'H' for keyboard shortcuts", TCODColor::cyan);
 	while(true) {
 		while (logicTimer >= (1000 / UPDATES_PER_SECOND)) {
@@ -104,15 +104,7 @@ void mainLoop() {
 			}
 		}
 
-        TCODConsole::root->clear();
-
-		Map::Inst()->Draw(Game::Inst()->center);
-        Game::Inst()->Draw(Game::Inst()->center);
-		UI::Inst()->Draw(Game::Inst()->center);
-
-		Announce::Inst()->Draw(Coordinate(Game::Inst()->ScreenWidth()/2, Game::Inst()->ScreenHeight()-1), 5);
-
-		TCODConsole::flush();
+        Game::Inst()->Draw();
 
 		//This "weirdness" is required because the loop is not guaranteed to take longer than 1ms to execute
 		QueryPerformanceCounter(&timeNow);

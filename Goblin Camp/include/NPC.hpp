@@ -96,7 +96,7 @@ class NPC : public Entity {
 		~NPC();
 		SkillSet Skills;
 		AiThink Think();
-		void Draw(Coordinate);
+		void Draw(Coordinate, TCODConsole*);
 		void Position(Coordinate,bool);
 		virtual void Position(Coordinate);
 		virtual Coordinate Position();

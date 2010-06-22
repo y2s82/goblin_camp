@@ -66,15 +66,15 @@ Construction::~Construction() {
 void Construction::condition(int value) {_condition = value;}
 int Construction::condition() {return _condition;}
 
-void Construction::Draw(Coordinate center) {
-	int y = _y - center.y() + Game::Inst()->ScreenHeight() / 2;
-	int x = _x - center.x() + Game::Inst()->ScreenWidth() / 2;
+void Construction::Draw(Coordinate upleft, TCODConsole* console) {
+	int y = _y - upleft.y();
+	int x = _x - upleft.x();
 	int ychange = 0;
-	if (x >= 0 && x < Game::Inst()->ScreenWidth() && y >= 0 && y < Game::Inst()->ScreenHeight()) {
+	if (x >= 0 && x < console->getWidth() && y >= 0 && y < console->getHeight()) {
 		for (int i = 1; i < (signed int)graphic.size(); ++i) {
-			TCODConsole::root->setFore(x+i-1,y, color);
-			if (_condition > i*-10) TCODConsole::root->setChar(x+i-1,y, (graphic[i]));
-			else TCODConsole::root->setChar(x+i-1,y, TCOD_CHAR_BLOCK2);
+			console->setFore(x+i-1,y, color);
+			if (_condition > i*-10) console->setChar(x+i-1,y, (graphic[i]));
+			else console->setChar(x+i-1,y, TCOD_CHAR_BLOCK2);
 			++ychange;
 			if (ychange == graphic[0]) { ++y; x -= graphic[0]; ychange = 0; }
 		}
@@ -450,23 +450,23 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 	}
 }
 
-void Stockpile::Draw(Coordinate center) {
+void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
     int screenx, screeny;
 
 	for (int x = a.x(); x <= b.x(); ++x) {
 		for (int y = a.y(); y <= b.y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
-			    screenx = x  - center.x() + Game::Inst()->ScreenWidth() / 2;
-			    screeny = y - center.y() + Game::Inst()->ScreenHeight() / 2;
-			    if (screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 &&
-                    screeny < Game::Inst()->ScreenHeight()) {
-                    TCODConsole::root->setFore(screenx, screeny, TCODColor::white);
-                    TCODConsole::root->setChar(screenx,	screeny, (graphic[1]));
+			    screenx = x  - upleft.x();
+			    screeny = y - upleft.y();
+			    if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
+					screeny < console->getHeight()) {
+                    console->setFore(screenx, screeny, TCODColor::white);
+                    console->setChar(screenx,	screeny, (graphic[1]));
 
                     if (!containers[Coordinate(x,y)]->empty()) {
                         boost::weak_ptr<Item> item = *containers[Coordinate(x,y)]->begin();
                         if (item.lock()) {
-                            TCODConsole::root->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
+                            console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
                         }
                     }
                 }
@@ -533,24 +533,24 @@ FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stock
 	}
 }
 
-void FarmPlot::Draw(Coordinate center) {
+void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
     int screenx, screeny;
 
 	for (int x = a.x(); x <= b.x(); ++x) {
 		for (int y = a.y(); y <= b.y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
-			    screenx = x  - center.x() + Game::Inst()->ScreenWidth() / 2;
-			    screeny = y - center.y() + Game::Inst()->ScreenHeight() / 2;
-			    if (screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 &&
-                    screeny < Game::Inst()->ScreenHeight()) {
-                    TCODConsole::root->setFore(screenx, screeny, TCODColor::white);
-                    TCODConsole::root->setChar(screenx,	screeny, (graphic[1]));
+			    screenx = x  - upleft.x();
+			    screeny = y - upleft.y();
+				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
+					screeny < console->getHeight()) {
+                    console->setFore(screenx, screeny, TCODColor::white);
+                    console->setChar(screenx,	screeny, (graphic[1]));
 
 
                     if (!containers[Coordinate(x,y)]->empty()) {
                         boost::weak_ptr<Item> item = containers[Coordinate(x,y)]->GetFirstItem();
                         if (item.lock()) {
-                            TCODConsole::root->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
+                            console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
                         }
                     }
                 }

@@ -32,8 +32,8 @@ class Announce {
 		static Announce* Inst();
 		void AddMsg(std::string, TCODColor = TCODColor::white);
 		void Update();
-		void Draw(Coordinate, unsigned int height);
-		void Draw(Coordinate, int from, int amount);
+		void Draw(unsigned int height, TCODConsole*);
+		void Draw(Coordinate, int from, int amount, TCODConsole*);
 		int AnnounceAmount();
 		void EmptyMessageQueue();
 		Coordinate CurrentCoordinate();

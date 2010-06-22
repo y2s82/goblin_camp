@@ -213,48 +213,48 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
     }
 }
 
-void JobManager::Draw(Coordinate pos, int from, int count) {
+void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console) {
 	int skip = 0;
 	int y = pos.y();
 
-	TCODConsole::root->setForegroundColor(TCODColor::lightCyan);
+	console->setForegroundColor(TCODColor::lightCyan);
 	for (std::list<boost::shared_ptr<Job> >::iterator highIter = highList.begin(); highIter != highList.end(); ++highIter) {
 		if (skip < from) ++skip;
 		else {
 
-			TCODConsole::root->print(pos.x(), y, "%s", (*highIter)->name.c_str());
+			console->print(pos.x(), y, "%s", (*highIter)->name.c_str());
 			if (++y - pos.y() >= count) return;
 		}
 	}
 
-	TCODConsole::root->setForegroundColor(TCODColor::white);
+	console->setForegroundColor(TCODColor::white);
 	for (std::list<boost::shared_ptr<Job> >::iterator medIter = medList.begin(); medIter != medList.end(); ++medIter) {
 		if (skip < from) ++skip;
 		else {
-			TCODConsole::root->print(pos.x(), y, "%s", (*medIter)->name.c_str());
+			console->print(pos.x(), y, "%s", (*medIter)->name.c_str());
 			if (++y - pos.y() >= count) return;
 		}
 	}
 
-	TCODConsole::root->setForegroundColor(TCODColor::lightGrey);
+	console->setForegroundColor(TCODColor::lightGrey);
 	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = lowList.begin(); lowIter != lowList.end(); ++lowIter) {
 		if (skip < from) ++skip;
 		else {
-			TCODConsole::root->print(pos.x(), y, "%s", (*lowIter)->name.c_str());
+			console->print(pos.x(), y, "%s", (*lowIter)->name.c_str());
 			if (++y - pos.y() >= count) return;
 		}
 	}
 
-	TCODConsole::root->setForegroundColor(TCODColor::grey);
+	console->setForegroundColor(TCODColor::grey);
 	for (std::list<boost::shared_ptr<Job> >::iterator waitIter = waitingList.begin(); waitIter != waitingList.end(); ++waitIter) {
 		if (skip < from) ++skip;
 		else {
-			TCODConsole::root->print(pos.x(), y, "%s", (*waitIter)->name.c_str());
+			console->print(pos.x(), y, "%s", (*waitIter)->name.c_str());
 			if (++y - pos.y() >= count) return;
 		}
 	}
 
-	TCODConsole::root->setForegroundColor(TCODColor::white);
+	console->setForegroundColor(TCODColor::white);
 }
 
 boost::weak_ptr<Job> JobManager::GetJob(int uid) {

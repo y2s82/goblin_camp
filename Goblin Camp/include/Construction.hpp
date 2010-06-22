@@ -70,7 +70,7 @@ class Construction : public Entity {
 		static Coordinate ProductionSpot(ConstructionType);
 		void condition(int);
 		int condition();
-		virtual void Draw(Coordinate);
+		virtual void Draw(Coordinate, TCODConsole*);
 		int Build();
 		ConstructionType type();
 		std::list<ItemCategory>* MaterialList();
@@ -106,7 +106,7 @@ class Stockpile : public Construction {
 		 std::map<Coordinate, boost::shared_ptr<Container> > containers;
 	public:
 		int Build();
-		virtual void Draw(Coordinate);
+		virtual void Draw(Coordinate, TCODConsole*);
 		boost::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0);
 		boost::weak_ptr<Item> FindItemByType(ItemType, int flags=0);
 		int Symbol();
@@ -131,7 +131,7 @@ class FarmPlot : public Stockpile {
 
     public:
         void Update();
-        virtual void Draw(Coordinate);
+        virtual void Draw(Coordinate, TCODConsole*);
         virtual int Use();
         void AllowSeed(ItemType, bool);
         bool SeedAllowed(ItemType);

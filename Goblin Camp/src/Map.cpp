@@ -45,27 +45,27 @@ void Map::MoveFrom(int x, int y, int uid) { tileMap[x][y].MoveFrom(uid); }
 void Map::Construction(int x, int y, int uid) { tileMap[x][y].Construction(uid); }
 int Map::Construction(int x, int y) { return tileMap[x][y].Construction(); }
 
-void Map::Draw(Coordinate center) {
-	int screenDeltaX = center.x() - Game::Inst()->ScreenWidth() / 2;
-	int screenDeltaY = center.y() - Game::Inst()->ScreenHeight() / 2;
-	for (int y = center.y() - Game::Inst()->ScreenHeight() / 2; y < Game::Inst()->ScreenHeight() / 2 + center.y(); ++y) {
-		for (int x = center.x() - Game::Inst()->ScreenWidth() / 2; x < Game::Inst()->ScreenWidth() / 2 + center.x(); ++x) {
+void Map::Draw(Coordinate upleft, TCODConsole *console) {
+	int screenDeltaX = upleft.x();
+	int screenDeltaY = upleft.y();
+	for (int y = upleft.y(); y < upleft.y() + console->getHeight(); ++y) {
+		for (int x = upleft.x(); x < upleft.x() + console->getWidth(); ++x) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
-			    TCODConsole::root->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), Color(x,y), TCODColor::black);
+			    console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), Color(x,y), TCODColor::black);
 
 				boost::weak_ptr<WaterNode> water = GetWater(x,y);
 				if (water.lock()) {
-					water.lock()->Draw(center);
+					water.lock()->Draw(upleft, console);
 				}
 				boost::weak_ptr<FilthNode> filth = GetFilth(x,y);
 				if (filth.lock()) {
-					filth.lock()->Draw(center);
+					filth.lock()->Draw(upleft, console);
 				}
 
 			}
 			else {
-				TCODConsole::root->putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
+				console->putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
 			}
 		}
 	}

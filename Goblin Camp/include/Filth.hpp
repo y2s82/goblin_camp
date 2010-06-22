@@ -16,7 +16,7 @@ class FilthNode : public boost::enable_shared_from_this<FilthNode> {
         FilthNode(int x=0, int y=0, int depth=0);
         ~FilthNode();
         void Update();
-        void Draw(Coordinate);
+        void Draw(Coordinate, TCODConsole*);
         int Depth();
         void Depth(int);
         Coordinate Position();

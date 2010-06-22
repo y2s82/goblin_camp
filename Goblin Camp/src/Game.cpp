@@ -16,6 +16,7 @@
 #include "Announce.hpp"
 #include "GCamp.hpp"
 #include "StockManager.hpp"
+#include "UI.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -28,7 +29,7 @@ Game::Game() :
     orcCount(0),
     goblinCount(0),
 	paused(false),
-    center(Coordinate(0,0))
+    upleft(Coordinate(0,0))
 {
 }
 
@@ -250,7 +251,6 @@ void Game::Init(int width, int height, bool fullscreen) {
     TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	screenWidth = width; screenHeight = height;
-	center = Coordinate(Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2);
 
 	TCODMouse::showCursor(true);
 
@@ -285,6 +285,7 @@ void Game::Init(int width, int height, bool fullscreen) {
     }
 
 	GenerateMap();
+	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
 }
 
@@ -534,20 +535,37 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
     }
 }
 
-void Game::Draw(Coordinate center) {
+void Game::Draw() {
+    Game::Inst()->buffer->clear();
+
+	Map::Inst()->Draw(upleft, buffer);
+
     for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = constructionList.begin(); cit != constructionList.end(); ++cit) {
-        cit->second->Draw(center);
+        cit->second->Draw(upleft, buffer);
     }
     for (std::map<int,boost::shared_ptr<Item> >::iterator iit = itemList.begin(); iit != itemList.end(); ++iit) {
-        iit->second->Draw(center);
+        iit->second->Draw(upleft, buffer);
 
     }
     for (std::map<int,boost::shared_ptr<NPC> >::iterator it = npcList.begin(); it != npcList.end(); ++it) {
-        it->second->Draw(center);
+        it->second->Draw(upleft, buffer);
     }
     for (std::map<int,boost::shared_ptr<NatureObject> >::iterator natit = natureList.begin(); natit != natureList.end(); ++natit) {
-        natit->second->Draw(center);
+        natit->second->Draw(upleft, buffer);
     }
+
+	UI::Inst()->Draw(upleft, buffer);
+
+	Announce::Inst()->Draw(5, buffer);
+
+	FlipBuffer();
+
+}
+
+void Game::FlipBuffer() {
+	buffer->flush();
+	TCODConsole::blit(buffer, 0, 0, screenWidth, screenHeight, TCODConsole::root, 0, 0);
+	TCODConsole::root->flush();
 }
 
 Seasons Game::Season() { return season; }

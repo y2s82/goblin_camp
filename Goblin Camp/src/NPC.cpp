@@ -467,18 +467,18 @@ void NPC::findPath(Coordinate target) {
 void NPC::speed(unsigned int value) {_speed=value;}
 unsigned int NPC::speed() {return _speed;}
 
-void NPC::Draw(Coordinate center) {
-	int screenx = _x - center.x() + (Game::Inst()->ScreenWidth() / 2);
-	int screeny = _y - center.y() + (Game::Inst()->ScreenHeight() / 2);
-	if (screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 && screeny < Game::Inst()->ScreenHeight()) {
+void NPC::Draw(Coordinate upleft, TCODConsole *console) {
+	int screenx = _x - upleft.x();
+	int screeny = _y - upleft.y();
+	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		if (statusGraphicCounter < 10 && status[HUNGRY]) {
-			TCODConsole::root->putCharEx(screenx, screeny, TCOD_CHAR_ARROW_S, TCODColor::orange, _bgcolor);
+			console->putCharEx(screenx, screeny, TCOD_CHAR_ARROW_S, TCODColor::orange, _bgcolor);
 		} else if (statusGraphicCounter >= 10 && statusGraphicCounter < 20 && status[THIRSTY]) {
-			TCODConsole::root->putCharEx(screenx, screeny, TCOD_CHAR_ARROW_S, TCODColor::blue, _bgcolor);
+			console->putCharEx(screenx, screeny, TCOD_CHAR_ARROW_S, TCODColor::blue, _bgcolor);
 		} else if (statusGraphicCounter >= 30 && statusGraphicCounter < 40 && status[FLEEING]) {
-			TCODConsole::root->putCharEx(screenx, screeny, '!', TCODColor::white, _bgcolor);
+			console->putCharEx(screenx, screeny, '!', TCODColor::white, _bgcolor);
 		} else {
-			TCODConsole::root->putCharEx(screenx, screeny, _graphic, _color, _bgcolor);
+			console->putCharEx(screenx, screeny, _graphic, _color, _bgcolor);
 		}
 	}
 }

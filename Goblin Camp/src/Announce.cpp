@@ -49,38 +49,38 @@ void Announce::Update() {
 	} else timer = 0;
 }
 
-void Announce::Draw(Coordinate pos, unsigned int height) {
+void Announce::Draw(unsigned int height, TCODConsole* console) {
     if (height > history.size()+1) height = history.size()+1;
 
-    if (height > 0 && (signed int)height < Game::Inst()->ScreenHeight() - 1) {
-        TCODConsole::root->hline(0, Game::Inst()->ScreenHeight()-1-height, ANNOUNCE_MAX_LENGTH);
-        TCODConsole::root->putChar(ANNOUNCE_MAX_LENGTH, Game::Inst()->ScreenHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
-        TCODConsole::root->vline(ANNOUNCE_MAX_LENGTH, Game::Inst()->ScreenHeight()-height, height);
-        TCODConsole::root->rect(0, Game::Inst()->ScreenHeight()-height, ANNOUNCE_MAX_LENGTH, height, true);
+	if (height > 0 && (signed int)height < console->getHeight() - 1) {
+        console->hline(0, console->getHeight()-1-height, ANNOUNCE_MAX_LENGTH);
+        console->putChar(ANNOUNCE_MAX_LENGTH, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
+        console->vline(ANNOUNCE_MAX_LENGTH, console->getHeight()-height, height);
+        console->rect(0, console->getHeight()-height, ANNOUNCE_MAX_LENGTH, height, true);
 
 
         while (height > 1) {
             AnnounceMessage* msg = history[history.size()-(height-1)];
-            TCODConsole::root->setForegroundColor(msg->color);
-			TCODConsole::root->print(0, Game::Inst()->ScreenHeight()-height, msg->ToString().c_str());
+            console->setForegroundColor(msg->color);
+			console->print(0, console->getHeight()-height, msg->ToString().c_str());
 			--height;
         }
 
         if (!messageQueue.empty()) {
-            TCODConsole::root->setForegroundColor(messageQueue.front()->color);
-			TCODConsole::root->print(0, Game::Inst()->ScreenHeight()-height, messageQueue.front()->ToString().c_str());
+            console->setForegroundColor(messageQueue.front()->color);
+			console->print(0, console->getHeight()-height, messageQueue.front()->ToString().c_str());
         }
 
-		TCODConsole::root->setForegroundColor(TCODColor::white);
+		console->setForegroundColor(TCODColor::white);
 	}
 }
 
-void Announce::Draw(Coordinate pos, int from, int amount) {
+void Announce::Draw(Coordinate pos, int from, int amount, TCODConsole* console) {
     EmptyMessageQueue();
     int count = 0;
     for (std::deque<AnnounceMessage*>::iterator ani = history.begin(); ani != history.end(); ++ani) {
         if (count++ >= from) {
-            TCODConsole::root->print(pos.x(), pos.y()+count-from, (*ani)->ToString().c_str());
+            console->print(pos.x(), pos.y()+count-from, (*ani)->ToString().c_str());
             if (count-from+1 == amount) return;
         }
     }

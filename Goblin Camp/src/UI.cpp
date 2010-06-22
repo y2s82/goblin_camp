@@ -89,13 +89,13 @@ void UI::HandleKeyboard() {
 	int addition = 1;
 	if (key.shift) addition *= 10;
 	if (key.vk == TCODK_UP) {
-		if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
+		if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
 	} else if (key.vk == TCODK_DOWN) {
-		if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
+		if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
 	} else if (key.vk == TCODK_LEFT) {
-		if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
+		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
 	} else if (key.vk == TCODK_RIGHT) {
-		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
 	} else if (key.vk == TCODK_KP1) {
 		TCODMouse::showCursor(false);
 		drawCursor = true;
@@ -153,29 +153,28 @@ void UI::HandleKeyboard() {
 	}
 
 	if (mouseInput.x < 0) {
-		Game::Inst()->center.x(Game::Inst()->center.x() + mouseInput.cx);
+		Game::Inst()->upleft.x(Game::Inst()->upleft.x() + mouseInput.cx);
 		mouseInput.x = 0;
 		mouseInput.cx = 0;
 	} else if (mouseInput.cx >= Game::Inst()->ScreenWidth()) {
-		Game::Inst()->center.x(Game::Inst()->center.x() + (mouseInput.cx - Game::Inst()->ScreenWidth()));
+		Game::Inst()->upleft.x(Game::Inst()->upleft.x() + (mouseInput.cx - Game::Inst()->ScreenWidth()));
 		mouseInput.cx = Game::Inst()->ScreenWidth() - 1;
 		mouseInput.x = (Game::Inst()->ScreenWidth() - 1)* Game::Inst()->CharWidth();
 	}
 	if (mouseInput.y < 0) {
-		Game::Inst()->center.y(Game::Inst()->center.y() + mouseInput.cy);
+		Game::Inst()->upleft.y(Game::Inst()->upleft.y() + mouseInput.cy);
 		mouseInput.y = 0;
 		mouseInput.cy = 0;
 	} else if (mouseInput.cy >= Game::Inst()->ScreenHeight()) {
-		Game::Inst()->center.y(Game::Inst()->center.y() + (mouseInput.cy - Game::Inst()->ScreenHeight()));
+		Game::Inst()->upleft.y(Game::Inst()->upleft.y() + (mouseInput.cy - Game::Inst()->ScreenHeight()));
 		mouseInput.cy = Game::Inst()->ScreenHeight() - 1;
 		mouseInput.y = (Game::Inst()->ScreenHeight() - 1) * Game::Inst()->CharHeight();
 	}
 		
-	if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
-	if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
-	if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
-	if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
-
+	if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
+	if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+	if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
+	if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
 }
 
 void UI::HandleMouse() {
@@ -194,30 +193,28 @@ void UI::HandleMouse() {
 	if (tempStatus.mbutton_pressed) mbuttonPressed = true;
 	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
 
-	Coordinate center = Game::Inst()->center;
-	
     if (_state == UINORMAL) {
-        HandleUnderCursor(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2));
+        HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
     }
 
 	if (_state == UIPLACEMENT || _state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		placeable = placementCallback(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2), _blueprint);
+		placeable = placementCallback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()), _blueprint);
 	}
 
 	if (_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		b.x(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2);
-		b.y(mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2);
+		b.x(mouseInput.cx + Game::Inst()->upleft.x());
+		b.y(mouseInput.cy + Game::Inst()->upleft.y());
 	}
 
 	if (lbuttonPressed) {
 	    if (menuOpen) menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy);
 		if (!menuOpen || menuResult == NOMENUHIT) {
 			if (_state == UIPLACEMENT && placeable) {
-				callback(Coordinate(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2, mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2));
+				callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
 			} else if (_state == UIABPLACEMENT && placeable) {
 				if (a.x() == 0) {
-					a.x(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2);
-					a.y(mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2);
+					a.x(mouseInput.cx + Game::Inst()->upleft.x());
+					a.y(mouseInput.cy + Game::Inst()->upleft.y());
 				}
 				else {
 					//Place construction from a->b
@@ -255,8 +252,8 @@ void UI::HandleMouse() {
 				}
 			} else if (_state == UIRECTPLACEMENT && placeable) {
 				if (a.x() == 0) {
-					a.x(mouseInput.cx + center.x() - Game::Inst()->ScreenWidth() / 2);
-					a.y(mouseInput.cy + center.y() - Game::Inst()->ScreenHeight() / 2);
+					a.x(mouseInput.cx + Game::Inst()->upleft.x());
+					a.y(mouseInput.cy + Game::Inst()->upleft.y());
 				}
 				else {
 					//Place construction from a->b
@@ -279,12 +276,14 @@ void UI::HandleMouse() {
 					a.x(0); a.y(0); b.x(0); b.y(0);
 				}
 			} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
-			    if (!underCursor.empty() && underCursor.begin()->lock()) {
+				/*if (!underCursor.empty() && underCursor.begin()->lock()) {
 			        if (dynamic_cast<Construction*>(underCursor.begin()->lock().get())) {
                         UI::ChangeMenu(ConstructionMenu::ConstructionInfoMenu(static_cast<Construction*>(underCursor.begin()->lock().get())));
                         menuOpen = true;
-			        }
-			    }
+					}
+			    }*/
+				if (!underCursor.empty()) sideBarEntity = *underCursor.begin();
+				else sideBarEntity = boost::weak_ptr<Entity>();
 			}
 		}
 	} else { currentMenu->Update(); }
@@ -307,39 +306,40 @@ void UI::HandleMouse() {
 	}
 
 	if (tempStatus.lbutton && _state == UINORMAL) {
-	    Game::Inst()->center.x(Game::Inst()->center.x() - (tempStatus.dx / 3));
-	    Game::Inst()->center.y(Game::Inst()->center.y() - (tempStatus.dy / 3));
-	    if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
-        if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
-		if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
-		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+	    Game::Inst()->upleft.x(Game::Inst()->upleft.x() - (tempStatus.dx / 3));
+	    Game::Inst()->upleft.y(Game::Inst()->upleft.y() - (tempStatus.dy / 3));
+	    if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
+        if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
+		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
     }
 
 	lbuttonPressed = false;
 	mbuttonPressed = false;
 	rbuttonPressed = false;
 }
-void UI::Draw(Coordinate center) {
+void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	int tmp;
 	bool xswap = false, yswap = false;
 
-    DrawTopBar();
+    DrawTopBar(console);
+	DrawSideBar(console);
 
 	if (menuOpen) {
-		currentMenu->Draw(menuX, menuY);
+		currentMenu->Draw(menuX, menuY, console);
 	} else if (_state == UINORMAL && !underCursor.empty() && underCursor.begin()->lock()) {
 	    int y = 0;
 	    for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-            TCODConsole::root->print(std::min(Game::Inst()->ScreenWidth()-1, mouseInput.cx+1), std::max(0, mouseInput.cy-1-y), ucit->lock()->Name().c_str());
+            console->print(std::min(console->getWidth()-1, mouseInput.cx+1), std::max(0, mouseInput.cy-1-y), ucit->lock()->Name().c_str());
             ++y;
 	    }
 	}
 
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.x() == 0)) {
-		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.x() && x < Game::Inst()->ScreenWidth(); ++x) {
-			for (int y = mouseInput.cy; y < mouseInput.cy + _blueprint.y() && y < Game::Inst()->ScreenHeight(); ++y) {
-				if (!placeable) TCODConsole::root->putCharEx(x,y, 'C', TCODColor::red, TCODColor::black);
-				else TCODConsole::root->putCharEx(x,y, 'C', TCODColor::green, TCODColor::black);
+		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.x() && x < console->getWidth(); ++x) {
+			for (int y = mouseInput.cy; y < mouseInput.cy + _blueprint.y() && y < console->getHeight(); ++y) {
+				if (!placeable) console->putCharEx(x,y, 'C', TCODColor::red, TCODColor::black);
+				else console->putCharEx(x,y, 'C', TCODColor::green, TCODColor::black);
 			}
 		}
 	} else if (_state == UIABPLACEMENT && a.x() > 0) {
@@ -355,24 +355,24 @@ void UI::Draw(Coordinate center) {
 			b.y(tmp);
 			yswap = true;
 		}
-		for (int ix = a.x()-center.x()+Game::Inst()->ScreenWidth()/2; ix <= b.x()-center.x()+Game::Inst()->ScreenWidth()/2 && ix < Game::Inst()->ScreenWidth(); ++ix) {
+		for (int ix = a.x()-upleft.x(); ix <= b.x()-upleft.x() && ix < console->getWidth(); ++ix) {
 			if (!yswap) {
-				if (!placeable) TCODConsole::root->putCharEx(ix,a.y()-center.y()+Game::Inst()->ScreenHeight()/2, 'C', TCODColor::red, TCODColor::black);
-				else TCODConsole::root->putCharEx(ix,a.y()-center.y()+Game::Inst()->ScreenHeight()/2, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,a.y()-upleft.y(), 'C', TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,a.y()-upleft.y(), 'C', TCODColor::green, TCODColor::black);
 			}
 			else {
-				if (!placeable) TCODConsole::root->putCharEx(ix,b.y()-center.y()+Game::Inst()->ScreenHeight()/2, 'C', TCODColor::red, TCODColor::black);
-				else TCODConsole::root->putCharEx(ix,b.y()-center.y()+Game::Inst()->ScreenHeight()/2, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,b.y()-upleft.y(), 'C', TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,b.y()-upleft.y(), 'C', TCODColor::green, TCODColor::black);
 			}
 		}
-		for (int iy = a.y()-center.y()+Game::Inst()->ScreenHeight()/2; iy <= b.y()-center.y()+Game::Inst()->ScreenHeight()/2 && iy < Game::Inst()->ScreenHeight(); ++iy) {
+		for (int iy = a.y()-upleft.y(); iy <= b.y()-upleft.y() && iy < console->getHeight(); ++iy) {
 			if (!xswap) {
-				if (!placeable) TCODConsole::root->putCharEx(b.x()-center.x()+Game::Inst()->ScreenWidth()/2,iy, 'C', TCODColor::red, TCODColor::black);
-				else TCODConsole::root->putCharEx(b.x()-center.x()+Game::Inst()->ScreenWidth()/2,iy, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(b.x()-upleft.x(),iy, 'C', TCODColor::red, TCODColor::black);
+				else console->putCharEx(b.x()-upleft.x(),iy, 'C', TCODColor::green, TCODColor::black);
 			}
 			else {
-				if (!placeable) TCODConsole::root->putCharEx(a.x()-center.x()+Game::Inst()->ScreenWidth()/2,iy, 'C', TCODColor::red, TCODColor::black);
-				else TCODConsole::root->putCharEx(a.x()-center.x()+Game::Inst()->ScreenWidth()/2,iy, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(a.x()-upleft.x(),iy, 'C', TCODColor::red, TCODColor::black);
+				else console->putCharEx(a.x()-upleft.x(),iy, 'C', TCODColor::green, TCODColor::black);
 			}
 		}
 		if (xswap) {
@@ -398,10 +398,10 @@ void UI::Draw(Coordinate center) {
 			b.y(tmp);
 			yswap = true;
 		}
-		for (int ix = a.x()-center.x()+Game::Inst()->ScreenWidth()/2; ix <= b.x()-center.x()+Game::Inst()->ScreenWidth()/2 && ix < Game::Inst()->ScreenWidth(); ++ix) {
-			for (int iy = a.y()-center.y()+Game::Inst()->ScreenHeight()/2; iy <= b.y()-center.y()+Game::Inst()->ScreenHeight()/2 && iy < Game::Inst()->ScreenHeight(); ++iy) {
-				if (!placeable) TCODConsole::root->putCharEx(ix,iy,'C', TCODColor::red, TCODColor::black);
-				else TCODConsole::root->putCharEx(ix,iy,'C', TCODColor::green, TCODColor::black);
+		for (int ix = a.x()-upleft.x(); ix <= b.x()-upleft.x() && ix < console->getWidth(); ++ix) {
+			for (int iy = a.y()-upleft.y(); iy <= b.y()-upleft.y() && iy < console->getHeight(); ++iy) {
+				if (!placeable) console->putCharEx(ix,iy,'C', TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,iy,'C', TCODColor::green, TCODColor::black);
 			}
 		}
 		if (xswap) {
@@ -416,43 +416,55 @@ void UI::Draw(Coordinate center) {
 		}
 	}
 
-	if (drawCursor) TCODConsole::root->putCharEx(mouseInput.cx, mouseInput.cy, 'X', TCODColor::azure, TCODColor::black);
+	if (drawCursor) console->putCharEx(mouseInput.cx, mouseInput.cy, 'X', TCODColor::azure, TCODColor::black);
 }
 
-void UI::DrawTopBar() {
-    TCODConsole::root->setAlignment(TCOD_CENTER);
-    TCODConsole::root->print(Game::Inst()->ScreenWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
+void UI::DrawTopBar(TCODConsole* console) {
+    console->setAlignment(TCOD_CENTER);
+    console->print(console->getWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
                              Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->Season()).c_str());
 
 	if (Game::Inst()->Paused()) {
-		TCODConsole::root->setForegroundColor(TCODColor::red);
-		TCODConsole::root->print(Game::Inst()->ScreenWidth() / 2, 1, "- - - - PAUSED - - - -");
+		console->setForegroundColor(TCODColor::red);
+		console->print(Game::Inst()->ScreenWidth() / 2, 1, "- - - - PAUSED - - - -");
 	}
-    TCODConsole::root->setAlignment(TCOD_LEFT);
+    console->setAlignment(TCOD_LEFT);
 
 	if (keyHelpTextColor > 0) {
-		int x = Game::Inst()->ScreenWidth() / 2 - 15;
-		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		TCODConsole::root->print(x++, 3, "Q");
-		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		TCODConsole::root->print(x, 3, "uit");
+		int x = console->getWidth() / 2 - 15;
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "Q");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "uit");
 		x += 3 + 2;
-		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		TCODConsole::root->print(x++, 3, "B");
-		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		TCODConsole::root->print(x, 3, "asics");
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "B");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "asics");
 		x += 5 + 2;
-		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		TCODConsole::root->print(x++, 3, "W");
-		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		TCODConsole::root->print(x, 3, "orkshops");
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "W");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "orkshops");
 		x += 8 + 2;
-		TCODConsole::root->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		TCODConsole::root->print(x++, 3, "O");
-		TCODConsole::root->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		TCODConsole::root->print(x, 3, "rders");
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "O");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "rders");
 	}
-	TCODConsole::root->setForegroundColor(TCODColor::white);
+	console->setForegroundColor(TCODColor::white);
+}
+
+void UI::DrawSideBar(TCODConsole* console) {
+	if (sideBarEntity.lock()) {
+		int width = 20; int height = 30;
+		int edgeX = console->getWidth()-1;
+		int y = (console->getHeight() / 2) - height;
+		console->setAlignment(TCOD_CENTER);
+		console->printFrame(edgeX - width, y, width, height, true, TCOD_BKGND_DEFAULT, sideBarEntity.lock()->Name().c_str());
+
+
+	}
 }
 
 void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }

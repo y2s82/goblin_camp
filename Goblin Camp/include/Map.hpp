@@ -29,7 +29,7 @@ class Map : public ITCODPathCallback {
 		void MoveFrom(int,int,int);
 		void Construction(int,int,int);
 		int Construction(int,int);
-		void Draw(Coordinate);
+		void Draw(Coordinate, TCODConsole*);
 		boost::weak_ptr<WaterNode> GetWater(int,int);
 		void SetWater(int,int,boost::shared_ptr<WaterNode>);
 		bool Low(int,int) const;

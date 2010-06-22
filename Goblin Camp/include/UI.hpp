@@ -34,6 +34,7 @@ class UI {
 		Coordinate a,b;
 		std::vector<Menu*> menuHistory;
 		std::list<boost::weak_ptr<Entity> > underCursor;
+		boost::weak_ptr<Entity> sideBarEntity;
 		bool drawCursor;
 		bool lbuttonPressed, mbuttonPressed, rbuttonPressed;
 		TCOD_mouse_t oldMouseInput;
@@ -41,14 +42,14 @@ class UI {
 
 		void HandleUnderCursor(Coordinate);
         boost::weak_ptr<Entity> GetEntity(Coordinate);
-        void DrawTopBar();
-		void DrawSideBar(boost::weak_ptr<Entity>);
+        void DrawTopBar(TCODConsole*);
+		void DrawSideBar(TCODConsole*);
 		void HandleKeyboard();
 		void HandleMouse();
 	public:
 		static UI* Inst();
 		void Update();
-		void Draw(Coordinate);
+		void Draw(Coordinate, TCODConsole*);
 		void blueprint(Coordinate);
 		void state(UIState);
 		static void ChangeMenu(Menu*);

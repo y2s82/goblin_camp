@@ -98,10 +98,10 @@ class Game {
 		void CreateWater(Coordinate,int,int=0);
 		Coordinate FindWater(Coordinate);
 
-		void Draw(Coordinate);
+		void Draw();
 
 		void Update();
-		Coordinate center;
+		Coordinate upleft;
 
 		Seasons Season();
 		std::string SeasonToString(Seasons);
@@ -123,6 +123,9 @@ class Game {
 
 		int CharHeight() const;
 		int CharWidth() const;
+
+		TCODConsole* buffer;
+		void FlipBuffer();
 };
 
 #endif
