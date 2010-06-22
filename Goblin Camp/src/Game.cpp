@@ -535,9 +535,7 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
     }
 }
 
-void Game::Draw() {
-    Game::Inst()->buffer->clear();
-
+void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 	Map::Inst()->Draw(upleft, buffer);
 
     for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = constructionList.begin(); cit != constructionList.end(); ++cit) {
@@ -554,12 +552,11 @@ void Game::Draw() {
         natit->second->Draw(upleft, buffer);
     }
 
-	UI::Inst()->Draw(upleft, buffer);
+	if (drawUI) {
+		UI::Inst()->Draw(upleft, buffer);
 
-	Announce::Inst()->Draw(5, buffer);
-
-	FlipBuffer();
-
+		Announce::Inst()->Draw(5, buffer);
+	}
 }
 
 void Game::FlipBuffer() {

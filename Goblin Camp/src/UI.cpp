@@ -23,7 +23,8 @@ UI::UI() :
 	drawCursor(false),
 	lbuttonPressed(false),
 	mbuttonPressed(false),
-	rbuttonPressed(false)
+	rbuttonPressed(false),
+	draggingViewport(false)
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
@@ -179,7 +180,7 @@ void UI::HandleKeyboard() {
 
 void UI::HandleMouse() {
 	int tmp;
-	MenuResult menuResult;
+	MenuResult menuResult = NOMENUHIT;
 	bool xswap = false, yswap = false;
 	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
 	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
@@ -206,84 +207,88 @@ void UI::HandleMouse() {
 		b.y(mouseInput.cy + Game::Inst()->upleft.y());
 	}
 
-	if (lbuttonPressed) {
-	    if (menuOpen) menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy);
-		if (!menuOpen || menuResult == NOMENUHIT) {
-			if (_state == UIPLACEMENT && placeable) {
-				callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
-			} else if (_state == UIABPLACEMENT && placeable) {
-				if (a.x() == 0) {
-					a.x(mouseInput.cx + Game::Inst()->upleft.x());
-					a.y(mouseInput.cy + Game::Inst()->upleft.y());
-				}
-				else {
-					//Place construction from a->b
-					if (a.x() > b.x()) {
-						tmp = a.x();
-						a.x(b.x());
-						b.x(tmp);
-						xswap = true;
+	if (lbuttonPressed && draggingViewport) draggingViewport = false;
+	else if (lbuttonPressed) {
+		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy);
+	    if (menuResult == NOMENUHIT) {
+			if (menuOpen) menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy);
+			if (!menuOpen || menuResult == NOMENUHIT) {
+				if (_state == UIPLACEMENT && placeable) {
+					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
+				} else if (_state == UIABPLACEMENT && placeable) {
+					if (a.x() == 0) {
+						a.x(mouseInput.cx + Game::Inst()->upleft.x());
+						a.y(mouseInput.cy + Game::Inst()->upleft.y());
 					}
-					if (a.y() > b.y()) {
-						tmp = a.y();
-						a.y(b.y());
-						b.y(tmp);
-						yswap = true;
-					}
-					for (int ix = a.x(); ix <= b.x(); ++ix) {
-						if (!yswap) {
-							if (placementCallback(Coordinate(ix, a.y()), _blueprint))
-								callback(Coordinate(ix, a.y()));
-						} else {
-							if (placementCallback(Coordinate(ix, b.y()), _blueprint))
-								callback(Coordinate(ix, b.y()));
+					else {
+						//Place construction from a->b
+						if (a.x() > b.x()) {
+							tmp = a.x();
+							a.x(b.x());
+							b.x(tmp);
+							xswap = true;
 						}
-					}
-					for (int iy = a.y(); iy <= b.y(); ++iy) {
-						if (!xswap) {
-							if (placementCallback(Coordinate(b.x(), iy), _blueprint))
-								callback(Coordinate(b.x(), iy));
-						} else {
-							if (placementCallback(Coordinate(a.x(), iy), _blueprint))
-								callback(Coordinate(a.x(), iy));
+						if (a.y() > b.y()) {
+							tmp = a.y();
+							a.y(b.y());
+							b.y(tmp);
+							yswap = true;
 						}
+						for (int ix = a.x(); ix <= b.x(); ++ix) {
+							if (!yswap) {
+								if (placementCallback(Coordinate(ix, a.y()), _blueprint))
+									callback(Coordinate(ix, a.y()));
+							} else {
+								if (placementCallback(Coordinate(ix, b.y()), _blueprint))
+									callback(Coordinate(ix, b.y()));
+							}
+						}
+						for (int iy = a.y(); iy <= b.y(); ++iy) {
+							if (!xswap) {
+								if (placementCallback(Coordinate(b.x(), iy), _blueprint))
+									callback(Coordinate(b.x(), iy));
+							} else {
+								if (placementCallback(Coordinate(a.x(), iy), _blueprint))
+									callback(Coordinate(a.x(), iy));
+							}
+						}
+						a.x(0); a.y(0); b.x(0); b.y(0);
 					}
-					a.x(0); a.y(0); b.x(0); b.y(0);
-				}
-			} else if (_state == UIRECTPLACEMENT && placeable) {
-				if (a.x() == 0) {
-					a.x(mouseInput.cx + Game::Inst()->upleft.x());
-					a.y(mouseInput.cy + Game::Inst()->upleft.y());
-				}
-				else {
-					//Place construction from a->b
-					if (a.x() > b.x()) {
-						tmp = a.x();
-						a.x(b.x());
-						b.x(tmp);
-						xswap = true;
+				} else if (_state == UIRECTPLACEMENT && placeable) {
+					if (a.x() == 0) {
+						a.x(mouseInput.cx + Game::Inst()->upleft.x());
+						a.y(mouseInput.cy + Game::Inst()->upleft.y());
 					}
-					if (a.y() > b.y()) {
-						tmp = a.y();
-						a.y(b.y());
-						b.y(tmp);
-						yswap = true;
-					}
+					else {
+						//Place construction from a->b
+						if (a.x() > b.x()) {
+							tmp = a.x();
+							a.x(b.x());
+							b.x(tmp);
+							xswap = true;
+						}
+						if (a.y() > b.y()) {
+							tmp = a.y();
+							a.y(b.y());
+							b.y(tmp);
+							yswap = true;
+						}
 
-                    if (placementCallback(Coordinate(a.x(), a.y()), _blueprint))
-                        rectCallback(a,b);
+						if (placementCallback(Coordinate(a.x(), a.y()), _blueprint))
+							rectCallback(a,b);
 
-					a.x(0); a.y(0); b.x(0); b.y(0);
-				}
-			} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
-				/*if (!underCursor.empty() && underCursor.begin()->lock()) {
-			        if (dynamic_cast<Construction*>(underCursor.begin()->lock().get())) {
-                        UI::ChangeMenu(ConstructionMenu::ConstructionInfoMenu(static_cast<Construction*>(underCursor.begin()->lock().get())));
-                        menuOpen = true;
+						a.x(0); a.y(0); b.x(0); b.y(0);
 					}
-			    }*/
-				if (!underCursor.empty()) sideBarEntity = *underCursor.begin();
-				else sideBarEntity = boost::weak_ptr<Entity>();
+				} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
+					/*if (!underCursor.empty() && underCursor.begin()->lock()) {
+						if (dynamic_cast<Construction*>(underCursor.begin()->lock().get())) {
+							UI::ChangeMenu(ConstructionMenu::ConstructionInfoMenu(static_cast<Construction*>(underCursor.begin()->lock().get())));
+							menuOpen = true;
+						}
+					}*/
+					if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
+					else sideBar.SetEntity(boost::weak_ptr<Entity>());
+				}
 			}
 		}
 	} else { currentMenu->Update(); }
@@ -312,6 +317,7 @@ void UI::HandleMouse() {
         if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
 		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
 		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+		if (tempStatus.dx > 0 || tempStatus.dy > 0) draggingViewport = true;
     }
 
 	lbuttonPressed = false;
@@ -323,7 +329,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	bool xswap = false, yswap = false;
 
     DrawTopBar(console);
-	DrawSideBar(console);
+	sideBar.Draw(console);
 
 	if (menuOpen) {
 		currentMenu->Draw(menuX, menuY, console);
@@ -455,18 +461,6 @@ void UI::DrawTopBar(TCODConsole* console) {
 	console->setForegroundColor(TCODColor::white);
 }
 
-void UI::DrawSideBar(TCODConsole* console) {
-	if (sideBarEntity.lock()) {
-		int width = 20; int height = 30;
-		int edgeX = console->getWidth()-1;
-		int y = (console->getHeight() / 2) - height;
-		console->setAlignment(TCOD_CENTER);
-		console->printFrame(edgeX - width, y, width, height, true, TCOD_BKGND_DEFAULT, sideBarEntity.lock()->Name().c_str());
-
-
-	}
-}
-
 void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
 void UI::state(UIState newState) { _state = newState; }
 
@@ -571,3 +565,83 @@ void UI::HandleUnderCursor(Coordinate pos) {
  }
 
 int UI::KeyHelpTextColor() const { return keyHelpTextColor; }
+
+SideBar::SideBar() :
+    width(19),
+	height(30),
+	topY(0),
+	npc(false),
+	construction(false),
+	stockpile(false),
+	farmplot(false)
+{}
+
+MenuResult SideBar::Update(int x, int y) {
+	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
+		if (stockpile) {
+			int i = y - (topY + 15);			
+			if (i >= 0 && i < (signed int)Item::Categories.size()) {
+				boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i);
+				return MENUHIT;
+			}
+		}
+	}
+	return NOMENUHIT;
+}
+
+void SideBar::Draw(TCODConsole* console) {
+	if (entity.lock()) {
+		int edgeX = console->getWidth();
+		topY = std::max(0,(console->getHeight() / 2) - height);
+		TCODConsole minimap(11,11);
+
+		if (npc) {
+			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+		} else if (construction) {
+			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+
+			console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Production");
+			for (int jobi = 0; jobi < std::min(10, (signed int)boost::static_pointer_cast<Construction>(entity.lock())->JobList()->size()); ++jobi) {
+				console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
+				console->print(edgeX - width + 2, topY+15+jobi, Item::ItemTypeToString(boost::static_pointer_cast<Construction>(entity.lock())->JobList(jobi)).c_str());
+			}		
+		} else if (stockpile) {
+			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+
+			console->printFrame(edgeX-(width-1), topY+14, width-2, 30, false, TCOD_BKGND_DEFAULT, "Categories");
+			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(entity.lock()));
+			for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+				console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
+				console->print(edgeX-(width-2),topY+15+i, sp->Allowed(i) ? "+ %s" : "- %s", Item::Categories[i].name.c_str());
+			}
+			console->setForegroundColor(TCODColor::white);
+		} else if (farmplot) {
+			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+		}
+		
+		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
+		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
+		minimap.flush();
+		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
+		console->setForegroundColor(TCODColor::white);
+	}
+}
+
+void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
+	entity = ent;
+	npc = construction = stockpile = farmplot = false;
+	if (boost::dynamic_pointer_cast<NPC>(entity.lock())) {
+			height = 30;
+			npc = true;
+		} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
+			height = 70;
+			farmplot = true;
+		} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
+			height = 70;
+			stockpile = true;
+		} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
+			height = 70;
+			construction = true;
+		}
+
+}

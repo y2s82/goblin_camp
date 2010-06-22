@@ -98,8 +98,6 @@ class Game {
 		void CreateWater(Coordinate,int,int=0);
 		Coordinate FindWater(Coordinate);
 
-		void Draw();
-
 		void Update();
 		Coordinate upleft;
 
@@ -126,6 +124,7 @@ class Game {
 
 		TCODConsole* buffer;
 		void FlipBuffer();
+		void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
 };
 
 #endif

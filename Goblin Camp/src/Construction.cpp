@@ -144,7 +144,7 @@ int Construction::Use() {
         ++progress;
         if (progress >= 100) {
 
-            bool allComponentsFound;
+            bool allComponentsFound = true;
 
             for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
                 allComponentsFound = false;

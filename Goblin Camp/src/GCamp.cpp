@@ -79,7 +79,7 @@ void mainLoop() {
 
 	QueryPerformanceFrequency(&freq);
 
-	for (int npcs = 0; npcs < 100; ++npcs) {
+	for (int npcs = 0; npcs < 10; ++npcs) {
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
 	}
 	for (int npcsiks = 0; npcsiks < 10; ++npcsiks) {
@@ -104,7 +104,9 @@ void mainLoop() {
 			}
 		}
 
+		Game::Inst()->buffer->flush();
         Game::Inst()->Draw();
+		Game::Inst()->FlipBuffer();
 
 		//This "weirdness" is required because the loop is not guaranteed to take longer than 1ms to execute
 		QueryPerformanceCounter(&timeNow);
