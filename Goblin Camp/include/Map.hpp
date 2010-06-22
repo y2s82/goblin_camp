@@ -7,15 +7,15 @@
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 
-class GameMap : public ITCODPathCallback {
+class Map : public ITCODPathCallback {
 	private:
-		GameMap();
-		static GameMap* instance;
+		Map();
+		static Map* instance;
 		boost::multi_array<Tile, 2> tileMap;
 		int width, height;
 
 	public:
-		static GameMap* Inst();
+		static Map* Inst();
 		float getWalkCost(int, int, int, int, void *) const;
 		bool Walkable(int,int) const;
 		void Walkable(int,int,bool);

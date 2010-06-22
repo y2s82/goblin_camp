@@ -24,7 +24,7 @@
     <ClCompile Include="src\Coordinate.cpp" />
     <ClCompile Include="src\Filth.cpp" />
     <ClCompile Include="src\Game.cpp" />
-    <ClCompile Include="src\GameEntity.cpp" />
+    <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\GCamp.cpp" />
     <ClCompile Include="src\Graphics.cpp" />
     <ClCompile Include="src\Item.cpp" />
@@ -46,7 +46,7 @@
     <ClInclude Include="include\Coordinate.hpp" />
     <ClInclude Include="include\Filth.hpp" />
     <ClInclude Include="include\Game.hpp" />
-    <ClInclude Include="include\GameEntity.hpp" />
+    <ClInclude Include="include\Entity.hpp" />
     <ClInclude Include="include\GCamp.hpp" />
     <ClInclude Include="include\Graphics.hpp" />
     <ClInclude Include="include\Item.hpp" />

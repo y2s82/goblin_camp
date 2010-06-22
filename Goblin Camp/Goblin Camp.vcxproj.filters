@@ -40,9 +40,6 @@
     <ClCompile Include="src\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\GameEntity.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\GCamp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -82,6 +79,9 @@
     <ClCompile Include="src\StockManager.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Entity.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp">
@@ -100,9 +100,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Game.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\GameEntity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\GCamp.hpp">
@@ -142,6 +139,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\StockManager.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Entity.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

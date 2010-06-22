@@ -41,7 +41,7 @@ void WaterNode::Update() {
 
     if (!inert || inertCounter > (UPDATES_PER_SECOND*1)) {
 
-        if (GameMap::Inst()->Type(x,y) == TILERIVERBED) {
+        if (Map::Inst()->Type(x,y) == TILERIVERBED) {
             timeFromRiverBed = 1000;
             if (depth < RIVERDEPTH) depth = RIVERDEPTH;
         }
@@ -56,9 +56,9 @@ void WaterNode::Update() {
             int depthSum = 0;
             for (int ix = x-1; ix <= x+1; ++ix) {
                 for (int iy = y-1; iy <= y+1; ++iy) {
-                    if (ix >= 0 && ix < GameMap::Inst()->Width() && iy >= 0 && iy < GameMap::Inst()->Height()) {
-                        if ((GameMap::Inst()->Low(x,y) == GameMap::Inst()->Low(ix,iy) || depth > RIVERDEPTH*3 || GameMap::Inst()->Low(ix,iy)) && !GameMap::Inst()->BlocksWater(ix,iy)) {
-                            waterList.push_back(GameMap::Inst()->GetWater(ix,iy));
+                    if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
+                        if ((Map::Inst()->Low(x,y) == Map::Inst()->Low(ix,iy) || depth > RIVERDEPTH*3 || Map::Inst()->Low(ix,iy)) && !Map::Inst()->BlocksWater(ix,iy)) {
+                            waterList.push_back(Map::Inst()->GetWater(ix,iy));
                             coordList.push_back(Coordinate(ix,iy));
                             if (waterList.back().lock()) depthSum += waterList.back().lock()->depth;
                         }
@@ -72,7 +72,7 @@ void WaterNode::Update() {
             for (unsigned int i = 0; i < waterList.size(); ++i) {
                 if (waterList[i].lock()) {
                     waterList[i].lock()->depth = (int)divided;
-                    if (GameMap::Inst()->Low(coordList[i].x(), coordList[i].y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
+                    if (Map::Inst()->Low(coordList[i].x(), coordList[i].y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
                     waterList[i].lock()->timeFromRiverBed = timeFromRiverBed;
                     waterList[i].lock()->UpdateGraphic();
                 }

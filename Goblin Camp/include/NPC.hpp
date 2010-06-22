@@ -11,7 +11,7 @@
 
 #include "Coordinate.hpp"
 #include "Job.hpp"
-#include "GameEntity.hpp"
+#include "Entity.hpp"
 #include "Container.hpp"
 
 #define LOS_DISTANCE 12
@@ -53,7 +53,7 @@ class SkillSet {
 		void operator()(Skill, int);
 };
 
-class NPC : public GameEntity {
+class NPC : public Entity {
     friend class Game;
 
 	private:
@@ -110,7 +110,7 @@ class NPC : public GameEntity {
 		Task* currentTask();
 		boost::weak_ptr<Job> currentJob();
 		Coordinate currentTarget();
-		boost::weak_ptr<GameEntity> currentEntity();
+		boost::weak_ptr<Entity> currentEntity();
 		void TaskFinished(TaskResult, std::string = "");
 		TaskResult Move();
 		void findPath(Coordinate);

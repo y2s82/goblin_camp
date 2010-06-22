@@ -21,7 +21,7 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
     return Construction::Presets[construct].productionSpot;
 }
 
-Construction::Construction(ConstructionType type, Coordinate target) : GameEntity(),
+Construction::Construction(ConstructionType type, Coordinate target) : Entity(),
     color(TCODColor::white),
     _type(type),
     producer(false),
@@ -47,8 +47,8 @@ Construction::Construction(ConstructionType type, Coordinate target) : GameEntit
 Construction::~Construction() {
     for (int ix = _x; ix <= (signed int)_x + Construction::Blueprint(_type).x(); ++ix) {
         for (int iy = _y; iy <= (signed int)_y + Construction::Blueprint(_type).y(); ++iy) {
-            GameMap::Inst()->Buildable(ix,iy,true);
-            GameMap::Inst()->Construction(ix,iy,-1);
+            Map::Inst()->Buildable(ix,iy,true);
+            Map::Inst()->Construction(ix,iy,-1);
         }
     }
 
@@ -95,9 +95,9 @@ int Construction::Build() {
 		_condition = maxCondition;
 		for (unsigned int ix = _x; ix < _x + Construction::Blueprint(_type).x(); ++ix) {
 			for (unsigned int iy = _y; iy < _y + Construction::Blueprint(_type).y(); ++iy) {
-				GameMap::Inst()->Walkable(ix, iy, walkable);
-				GameMap::Inst()->BlocksWater(ix, iy, !walkable);
-				GameMap::Inst()->BlocksLight(ix, iy, walkable);
+				Map::Inst()->Walkable(ix, iy, walkable);
+				Map::Inst()->BlocksWater(ix, iy, !walkable);
+				Map::Inst()->BlocksLight(ix, iy, walkable);
 			}
 		}
 
@@ -282,7 +282,7 @@ void Construction::SpawnProductionJob() {
 
     for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
         boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
-        newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<GameEntity>(), Item::Components(jobList.front(), compi)));
+        newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi)));
         newPickupJob->tasks.push_back(Task(MOVE));
         newPickupJob->tasks.push_back(Task(TAKE));
         newPickupJob->tasks.push_back(Task(MOVE, container->Position(), container));
@@ -306,13 +306,13 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse) {
     bool n = false,s = false,e = false,w = false;
 
-    if (GameMap::Inst()->Construction(_x - 1, _y) > -1 && Construction::Presets[Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x - 1, _y)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x - 1, _y) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].wall)
         w = true;
-    if (GameMap::Inst()->Construction(_x + 1, _y) > -1 && Construction::Presets[Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x + 1, _y)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x + 1, _y) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].wall)
         e = true;
-    if (GameMap::Inst()->Construction(_x, _y - 1) > -1 && Construction::Presets[Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x, _y - 1)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x, _y - 1) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].wall)
         n = true;
-    if (GameMap::Inst()->Construction(_x, _y + 1) > -1 && Construction::Presets[Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x, _y + 1)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x, _y + 1) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].wall)
         s = true;
 
     if (n&&s&&e&&w) graphic[1] = 197;
@@ -330,13 +330,13 @@ void Construction::UpdateWallGraphic(bool recurse) {
 
     if (recurse) {
         if (w)
-            Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x - 1, _y)).lock()->UpdateWallGraphic(false);
+            Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->UpdateWallGraphic(false);
         if (e)
-            Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x + 1, _y)).lock()->UpdateWallGraphic(false);
+            Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->UpdateWallGraphic(false);
         if (n)
-            Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x, _y - 1)).lock()->UpdateWallGraphic(false);
+            Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->UpdateWallGraphic(false);
         if (s)
-            Game::Inst()->GetConstruction(GameMap::Inst()->Construction(_x, _y + 1)).lock()->UpdateWallGraphic(false);
+            Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->UpdateWallGraphic(false);
     }
 }
 
@@ -428,14 +428,14 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
 		for (int ix = from.x(); ix <= to.x(); ++ix) {
 			for (int iy = from.y(); iy <= to.y(); ++iy) {
-				if (GameMap::Inst()->Construction(ix,iy) == -1 && GameMap::Inst()->Walkable(ix,iy)) {
-					if (GameMap::Inst()->Construction(ix-1,iy) == uid ||
-					    GameMap::Inst()->Construction(ix+1,iy) == uid ||
-					    GameMap::Inst()->Construction(ix,iy-1) == uid ||
-					    GameMap::Inst()->Construction(ix,iy+1) == uid) {
+				if (Map::Inst()->Construction(ix,iy) == -1 && Map::Inst()->Walkable(ix,iy)) {
+					if (Map::Inst()->Construction(ix-1,iy) == uid ||
+					    Map::Inst()->Construction(ix+1,iy) == uid ||
+					    Map::Inst()->Construction(ix,iy-1) == uid ||
+					    Map::Inst()->Construction(ix,iy+1) == uid) {
 						//Current tile is walkable, buildable, and adjacent to the current stockpile
-						GameMap::Inst()->Construction(ix,iy,uid);
-						GameMap::Inst()->Buildable(ix,iy,false);
+						Map::Inst()->Construction(ix,iy,uid);
+						Map::Inst()->Buildable(ix,iy,false);
 						//Update corner values
 						if (ix < a.x()) a.x(ix);
 						if (ix > b.x()) b.x(ix);
@@ -455,7 +455,7 @@ void Stockpile::Draw(Coordinate center) {
 
 	for (int x = a.x(); x <= b.x(); ++x) {
 		for (int y = a.y(); y <= b.y(); ++y) {
-			if (GameMap::Inst()->Construction(x,y) == uid) {
+			if (Map::Inst()->Construction(x,y) == uid) {
 			    screenx = x  - center.x() + Game::Inst()->ScreenWidth() / 2;
 			    screeny = y - center.y() + Game::Inst()->ScreenHeight() / 2;
 			    if (screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 &&
@@ -490,7 +490,7 @@ bool Stockpile::Full()
 {
     for (int ix = a.x(); ix <= b.x(); ++ix) {
         for (int iy = a.y(); iy <= b.y(); ++iy) {
-            if (GameMap::Inst()->Construction(ix,iy) == uid) {
+            if (Map::Inst()->Construction(ix,iy) == uid) {
                 if (containers[Coordinate(ix,iy)]->empty()) return false;
             }
         }
@@ -501,7 +501,7 @@ bool Stockpile::Full()
 Coordinate Stockpile::FreePosition() {
     for (int ix = a.x(); ix <= b.x(); ++ix) {
         for (int iy = a.y(); iy <= b.y(); ++iy) {
-            if (GameMap::Inst()->Construction(ix,iy) == uid) {
+            if (Map::Inst()->Construction(ix,iy) == uid) {
                 if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
             }
         }
@@ -538,7 +538,7 @@ void FarmPlot::Draw(Coordinate center) {
 
 	for (int x = a.x(); x <= b.x(); ++x) {
 		for (int y = a.y(); y <= b.y(); ++y) {
-			if (GameMap::Inst()->Construction(x,y) == uid) {
+			if (Map::Inst()->Construction(x,y) == uid) {
 			    screenx = x  - center.x() + Game::Inst()->ScreenWidth() / 2;
 			    screeny = y - center.y() + Game::Inst()->ScreenHeight() / 2;
 			    if (screenx >= 0 && screenx < Game::Inst()->ScreenWidth() && screeny >= 0 &&

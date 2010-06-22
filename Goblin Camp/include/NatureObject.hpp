@@ -5,7 +5,7 @@
 #include <vector>
 #include <ticpp.h>
 
-#include "GameEntity.hpp"
+#include "Entity.hpp"
 #include "Coordinate.hpp"
 #include "Item.hpp"
 
@@ -24,7 +24,7 @@ class NatureObjectPreset {
         bool tree, harvestable, walkable;
 };
 
-class NatureObject : public GameEntity
+class NatureObject : public Entity
 {
     friend class Game;
     private:

@@ -9,7 +9,7 @@
 #include <map>
 #include <ticpp.h>
 
-#include "GameEntity.hpp"
+#include "Entity.hpp"
 #include "Coordinate.hpp"
 
 typedef int ItemCategory;
@@ -67,7 +67,7 @@ class ItemPreset {
         std::vector<ItemType> decayList;
 };
 
-class Item : public GameEntity {
+class Item : public Entity {
     friend class Game;
 
 	private:

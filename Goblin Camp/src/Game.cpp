@@ -40,7 +40,7 @@ Game* Game::Inst() {
 bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 	for (int x = target.x(); x < target.x() + size.x(); ++x) {
 		for (int y = target.y(); y < target.y() + size.y(); ++y) {
-			if (x < 0 || y < 0 || x >= GameMap::Inst()->Width() || y >= GameMap::Inst()->Height() || !GameMap::Inst()->Buildable(x,y)) return false;
+			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->Buildable(x,y)) return false;
 		}
 	}
 	return true;
@@ -52,8 +52,8 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.x(); x < target.x() + blueprint.x(); ++x) {
 		for (int y = target.y(); y < target.y() + blueprint.y(); ++y) {
-			GameMap::Inst()->Buildable(x,y,false);
-			GameMap::Inst()->Construction(x,y,newCons->Uid());
+			Map::Inst()->Buildable(x,y,false);
+			Map::Inst()->Construction(x,y,newCons->Uid());
 		}
 	}
 
@@ -64,7 +64,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
         pickupJob->Parent(buildJob);
         buildJob->PreReqs()->push_back(pickupJob);
 
-        pickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<GameEntity>(), *materialIter));
+        pickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), *materialIter));
         pickupJob->tasks.push_back(Task(MOVE));
         pickupJob->tasks.push_back(Task(TAKE));
         pickupJob->tasks.push_back(Task(MOVE, newCons->Position(), newCons));
@@ -85,8 +85,8 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//We want to create 1 stockpile, at a, and then expand it from a to b.
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
 	boost::shared_ptr<Stockpile> newSp( (stockpile != FARMPLOT) ? new Stockpile(stockpile, symbol, a) : new FarmPlot(stockpile, symbol, a) );
-	GameMap::Inst()->Buildable(a.x(), a.y(), false);
-	GameMap::Inst()->Construction(a.x(), a.y(), newSp->Uid());
+	Map::Inst()->Buildable(a.x(), a.y(), false);
+	Map::Inst()->Construction(a.x(), a.y(), newSp->Uid());
 	newSp->Expand(a,b);
 	Game::Inst()->constructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
 
@@ -95,7 +95,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 }
 
 //Returns Coordinate(<0,<0) if not found
-Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<GameEntity> ent) {
+Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 	Coordinate closest(-9999, -9999);
 
     if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
@@ -104,7 +104,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<GameEntity>
             for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
                 if (ix == construct.lock()->x()-1 || ix == construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x() ||
                     iy == construct.lock()->y()-1 || iy == construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y()) {
-                    if (GameMap::Inst()->Walkable(ix,iy)) {
+                    if (Map::Inst()->Walkable(ix,iy)) {
                         if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
                             closest = Coordinate(ix,iy);
                     }
@@ -116,7 +116,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<GameEntity>
             for (int iy = ent.lock()->y()-1; iy <= ent.lock()->y()+1; ++iy) {
                 if (ix == ent.lock()->x()-1 || ix == ent.lock()->x()+1 ||
                     iy == ent.lock()->y()-1 || iy == ent.lock()->y()+1) {
-                    if (GameMap::Inst()->Walkable(ix,iy)) {
+                    if (Map::Inst()->Walkable(ix,iy)) {
                         if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
                             closest = Coordinate(ix,iy);
                     }
@@ -127,7 +127,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<GameEntity>
     return closest;
 }
 
-bool Game::Adjacent(Coordinate pos, boost::weak_ptr<GameEntity> ent) {
+bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
     if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
         boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
         for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
@@ -190,7 +190,7 @@ int Game::OrcCount() { return orcCount; }
 int Game::GoblinCount() { return goblinCount; }
 
 void Game::BumpEntity(int uid) {
-	boost::weak_ptr<GameEntity> entity;
+	boost::weak_ptr<Entity> entity;
 
 	std::map<int,boost::shared_ptr<NPC> >::iterator npc = npcList.find(uid);
 	if (npc != npcList.end()) {
@@ -205,7 +205,7 @@ void Game::BumpEntity(int uid) {
 	if (entity.lock()) {
 		int newx = entity.lock()->x();
 		int newy = entity.lock()->y();
-		while (!GameMap::Inst()->Walkable(newx,newy)) {
+		while (!Map::Inst()->Walkable(newx,newy)) {
 			++newx;
 		}
 		entity.lock()->Position(Coordinate(newx,newy));
@@ -293,8 +293,8 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
         Coordinate blueprint = Construction::Blueprint(cons.lock()->type());
         for (int x = cons.lock()->x(); x < cons.lock()->x() + blueprint.x(); ++x) {
             for (int y = cons.lock()->y(); y < cons.lock()->y() + blueprint.y(); ++y) {
-                GameMap::Inst()->Buildable(x,y,true);
-                GameMap::Inst()->Construction(x,y,-1);
+                Map::Inst()->Buildable(x,y,true);
+                Map::Inst()->Construction(x,y,-1);
             }
         }
         Game::Inst()->constructionList.erase(cons.lock()->Uid());
@@ -322,7 +322,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
     }
 
     freeItems.insert(newItem);
-    GameMap::Inst()->ItemList(newItem->x(), newItem->y())->insert(newItem->Uid());
+    Map::Inst()->ItemList(newItem->x(), newItem->y())->insert(newItem->Uid());
     itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 	if (store) StockpileItem(newItem);
 
@@ -338,7 +338,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 
 void Game::RemoveItem(boost::weak_ptr<Item> item) {
 	if (item.lock()) {
-		GameMap::Inst()->ItemList(item.lock()->_x, item.lock()->_y)->erase(item.lock()->uid);
+		Map::Inst()->ItemList(item.lock()->_x, item.lock()->_y)->erase(item.lock()->uid);
 		itemList.erase(item.lock()->uid);
 		if (freeItems.find(item) != freeItems.end()) freeItems.erase(item);
 	}
@@ -351,11 +351,11 @@ boost::weak_ptr<Item> Game::GetItem(int uid) {
 void Game::ItemContained(boost::weak_ptr<Item> item, bool con) {
     if (!con) {
         freeItems.insert(item);
-        GameMap::Inst()->ItemList(item.lock()->x(), item.lock()->y())->insert(item.lock()->Uid());
+        Map::Inst()->ItemList(item.lock()->x(), item.lock()->y())->insert(item.lock()->Uid());
     }
     else {
         freeItems.erase(item);
-        GameMap::Inst()->ItemList(item.lock()->x(), item.lock()->y())->erase(item.lock()->Uid());
+        Map::Inst()->ItemList(item.lock()->x(), item.lock()->y())->erase(item.lock()->Uid());
     }
 }
 
@@ -364,11 +364,11 @@ void Game::CreateWater(Coordinate pos) {
 }
 
 void Game::CreateWater(Coordinate pos, int amount, int time) {
-	boost::weak_ptr<WaterNode> water(GameMap::Inst()->GetWater(pos.x(), pos.y()));
+	boost::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos.x(), pos.y()));
 	if (!water.lock()) {
 		boost::shared_ptr<WaterNode> newWater(new WaterNode(pos.x(), pos.y(), amount, time));
 		waterList.push_back(boost::weak_ptr<WaterNode>(newWater));
-		GameMap::Inst()->SetWater(pos.x(), pos.y(), newWater);
+		Map::Inst()->SetWater(pos.x(), pos.y(), newWater);
 	} else {water.lock()->Depth(water.lock()->Depth()+amount);}
 }
 
@@ -519,8 +519,8 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
                 if (target.x() != -1) {
                     stockJob->ReserveSpot(sp, target);
                     stockJob->ReserveItem(item);
-                    stockJob->tasks.push_back(Task(MOVE, item.lock()->GameEntity::Position()));
-                    stockJob->tasks.push_back(Task(TAKE, item.lock()->GameEntity::Position(), item));
+                    stockJob->tasks.push_back(Task(MOVE, item.lock()->Entity::Position()));
+                    stockJob->tasks.push_back(Task(TAKE, item.lock()->Entity::Position(), item));
                     stockJob->tasks.push_back(Task(MOVE, target));
                     if (!container.lock())
                         stockJob->tasks.push_back(Task(PUTIN, target, sp->Storage(target)));
@@ -573,22 +573,22 @@ void Game::DeTillFarmPlots() {
 
 void Game::GenerateMap() {
 
-	for (int x = 0; x < GameMap::Inst()->Width(); ++x) {
+	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 260; y <= 270; ++y) {
 			if (y >= 264 && y <= 266 && rand() % 5 == 0) {
-				GameMap::Inst()->Type(x,y,TILERIVERBED);
+				Map::Inst()->Type(x,y,TILERIVERBED);
 				CreateWater(Coordinate(x,y));
 			} else if ((y == 260 || y == 270) && rand() % 3 == 0) {
 			} else {
-				GameMap::Inst()->Type(x,y,TILEDITCH);
+				Map::Inst()->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
 			}
 		}
 	}
 
-    for (int x = 0; x < GameMap::Inst()->Width(); ++x) {
-        for (int y = 0; y < GameMap::Inst()->Height(); ++y) {
-            if (GameMap::Inst()->Walkable(x,y) && GameMap::Inst()->Type(x,y) == TILEGRASS) {
+    for (int x = 0; x < Map::Inst()->Width(); ++x) {
+        for (int y = 0; y < Map::Inst()->Height(); ++y) {
+            if (Map::Inst()->Walkable(x,y) && Map::Inst()->Type(x,y) == TILEGRASS) {
                 if (rand() % 100 == 0) {
                     int r = rand() % 100;
                     for (int i = 0; i < (signed int)NatureObject::Presets.size(); ++i) {
@@ -597,15 +597,15 @@ void Game::GenerateMap() {
                             for (int clus = 0; clus < NatureObject::Presets[type].cluster; ++clus) {
                                 int ax = x + ((rand() % 5) - 2);
                                 int ay = y + ((rand() % 5) - 2);
-                                if (ax < 0) ax = 0; if (ax >= GameMap::Inst()->Width()) ax = GameMap::Inst()->Width()-1;
-                                if (ay < 0) ay = 0; if (ay >= GameMap::Inst()->Height()) ay = GameMap::Inst()->Height()-1;
-                                if (GameMap::Inst()->Walkable(ax,ay) && GameMap::Inst()->Type(ax,ay) == TILEGRASS
-                                    && GameMap::Inst()->NatureObject(ax,ay) < 0) {
+                                if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
+                                if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
+                                if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS
+                                    && Map::Inst()->NatureObject(ax,ay) < 0) {
                                     boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), type));
                                     natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-                                    GameMap::Inst()->NatureObject(ax,ay,natObj->Uid());
-                                    GameMap::Inst()->Walkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-                                    GameMap::Inst()->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+                                    Map::Inst()->NatureObject(ax,ay,natObj->Uid());
+                                    Map::Inst()->Walkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+                                    Map::Inst()->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
                                 }
                             }
                             break;
@@ -624,7 +624,7 @@ bool Game::CheckTree(Coordinate, Coordinate) {
 void Game::FellTree(Coordinate a, Coordinate b) {
     for (int x = a.x(); x <= b.x(); ++x) {
         for (int y = a.y(); y <= b.y(); ++y) {
-            int natUid = GameMap::Inst()->NatureObject(x,y);
+            int natUid = Map::Inst()->NatureObject(x,y);
             if (natUid >= 0) {
                 boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
                 if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
@@ -643,7 +643,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
     for (int x = a.x(); x <= b.x(); ++x) {
         for (int y = a.y(); y <= b.y(); ++y) {
-            int natUid = GameMap::Inst()->NatureObject(x,y);
+            int natUid = Map::Inst()->NatureObject(x,y);
             if (natUid >= 0) {
                 boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
                 if (natObj.lock() && natObj.lock()->Harvestable() && !natObj.lock()->Marked()) {
@@ -661,7 +661,7 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 
 
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
-    GameMap::Inst()->NatureObject(natObj.lock()->x(), natObj.lock()->y(), -1);
+    Map::Inst()->NatureObject(natObj.lock()->x(), natObj.lock()->y(), -1);
     natureList.erase(natObj.lock()->Uid());
 }
 
@@ -715,27 +715,27 @@ void Game::CreateFilth(Coordinate pos) {
 }
 
 void Game::CreateFilth(Coordinate pos, int amount) {
-	boost::weak_ptr<FilthNode> filth(GameMap::Inst()->GetFilth(pos.x(), pos.y()));
+	boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.x(), pos.y()));
 	if (!filth.lock()) {
 		boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.x(), pos.y(), amount));
 		filthList.push_back(boost::weak_ptr<FilthNode>(newFilth));
-		GameMap::Inst()->SetFilth(pos.x(), pos.y(), newFilth);
+		Map::Inst()->SetFilth(pos.x(), pos.y(), newFilth);
 	} else {filth.lock()->Depth(filth.lock()->Depth()+amount);}
 }
 
 void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
     npc->nearNpcs.clear();
-    for (int endx = std::max((signed int)npc->_x - LOS_DISTANCE, 0); endx < std::min((signed int)npc->_x + LOS_DISTANCE, GameMap::Inst()->Width()); endx += 3) {
-        for (int endy = std::max((signed int)npc->_y - LOS_DISTANCE, 0); endy < std::min((signed int)npc->_y + LOS_DISTANCE, GameMap::Inst()->Height()); endy += 3) {
-            if (endx == std::max((signed int)npc->_x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->_x + LOS_DISTANCE, GameMap::Inst()->Width())
-                || endy == std::max((signed int)npc->_y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->_y + LOS_DISTANCE, GameMap::Inst()->Height())) {
+    for (int endx = std::max((signed int)npc->_x - LOS_DISTANCE, 0); endx < std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width()); endx += 3) {
+        for (int endy = std::max((signed int)npc->_y - LOS_DISTANCE, 0); endy < std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height()); endy += 3) {
+            if (endx == std::max((signed int)npc->_x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width())
+                || endy == std::max((signed int)npc->_y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height())) {
                 int x = npc->_x;
                 int y = npc->_y;
                 TCODLine::init(x, y, endx, endy);
                 do {
-                    if (GameMap::Inst()->BlocksLight(x,y)) break;
+                    if (Map::Inst()->BlocksLight(x,y)) break;
 
-                    for (std::set<int>::iterator npci = GameMap::Inst()->NPCList(x,y)->begin(); npci != GameMap::Inst()->NPCList(x,y)->end(); ++npci) {
+                    for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
 						if (*npci != npc->uid) npc->nearNpcs.push_back(npcList[*npci]);
                     }
 

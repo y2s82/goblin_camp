@@ -19,7 +19,7 @@ UI::UI() :
 	_state(UINORMAL),
 	_blueprint(1,1),
 	placeable(false),
-	underCursor(std::list<boost::weak_ptr<GameEntity> >()),
+	underCursor(std::list<boost::weak_ptr<Entity> >()),
 	drawCursor(false),
 	lbuttonPressed(false),
 	mbuttonPressed(false),
@@ -91,11 +91,11 @@ void UI::HandleKeyboard() {
 	if (key.vk == TCODK_UP) {
 		if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
 	} else if (key.vk == TCODK_DOWN) {
-		if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
+		if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
 	} else if (key.vk == TCODK_LEFT) {
 		if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
 	} else if (key.vk == TCODK_RIGHT) {
-		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
 	} else if (key.vk == TCODK_KP1) {
 		TCODMouse::showCursor(false);
 		drawCursor = true;
@@ -172,9 +172,9 @@ void UI::HandleKeyboard() {
 	}
 		
 	if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
-	if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
+	if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
 	if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
-	if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+	if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
 
 }
 
@@ -310,9 +310,9 @@ void UI::HandleMouse() {
 	    Game::Inst()->center.x(Game::Inst()->center.x() - (tempStatus.dx / 3));
 	    Game::Inst()->center.y(Game::Inst()->center.y() - (tempStatus.dy / 3));
 	    if (Game::Inst()->center.y(Game::Inst()->center.y()-1) < (Game::Inst()->ScreenHeight() / 2)-1) Game::Inst()->center.y((Game::Inst()->ScreenHeight() / 2)-1);
-        if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ GameMap::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
+        if (Game::Inst()->center.y(Game::Inst()->center.y()+1) > 1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2)) Game::Inst()->center.y(1+ Map::Inst()->Height() - (Game::Inst()->ScreenHeight() / 2));
 		if (Game::Inst()->center.x(Game::Inst()->center.x()-1) < (Game::Inst()->ScreenWidth() / 2)-1) Game::Inst()->center.x((Game::Inst()->ScreenWidth() / 2)-1);
-		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ GameMap::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
+		if (Game::Inst()->center.x(Game::Inst()->center.x()+1) > 1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2)) Game::Inst()->center.x(1+ Map::Inst()->Width() - (Game::Inst()->ScreenWidth() / 2));
     }
 
 	lbuttonPressed = false;
@@ -329,7 +329,7 @@ void UI::Draw(Coordinate center) {
 		currentMenu->Draw(menuX, menuY);
 	} else if (_state == UINORMAL && !underCursor.empty() && underCursor.begin()->lock()) {
 	    int y = 0;
-	    for (std::list<boost::weak_ptr<GameEntity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
+	    for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
             TCODConsole::root->print(std::min(Game::Inst()->ScreenWidth()-1, mouseInput.cx+1), std::max(0, mouseInput.cy-1-y), ucit->lock()->Name().c_str());
             ++y;
 	    }
@@ -501,12 +501,12 @@ void UI::ChoosePlantHarvest() {
     UI::Inst()->blueprint(Coordinate(1,1));
 }
 
-boost::weak_ptr<GameEntity> UI::GetEntity(Coordinate pos) {
-    if (pos.x() >= 0 && pos.x() < GameMap::Inst()->Width() && pos.y() >= 0 && pos.y() < GameMap::Inst()->Height()) {
-        std::set<int> *npcList = GameMap::Inst()->NPCList(pos.x(), pos.y());
+boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
+    if (pos.x() >= 0 && pos.x() < Map::Inst()->Width() && pos.y() >= 0 && pos.y() < Map::Inst()->Height()) {
+        std::set<int> *npcList = Map::Inst()->NPCList(pos.x(), pos.y());
         if (!npcList->empty()) return Game::Inst()->npcList[(*npcList->begin())];
 
-        std::set<int> *itemList = GameMap::Inst()->ItemList(pos.x(), pos.y());
+        std::set<int> *itemList = Map::Inst()->ItemList(pos.x(), pos.y());
         if (!itemList->empty()) {
             std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
             if (itemi != Game::Inst()->freeItems.end()) {
@@ -514,20 +514,20 @@ boost::weak_ptr<GameEntity> UI::GetEntity(Coordinate pos) {
             }
         }
 
-        int entity = GameMap::Inst()->NatureObject(pos.x(), pos.y());
+        int entity = Map::Inst()->NatureObject(pos.x(), pos.y());
         if (entity > -1) return (Game::Inst()->natureList[entity]);
 
-        entity = GameMap::Inst()->Construction(pos.x(), pos.y());
+        entity = Map::Inst()->Construction(pos.x(), pos.y());
         if (entity > -1) return (Game::Inst()->constructionList[entity]);
     }
-    return boost::weak_ptr<GameEntity>();
+    return boost::weak_ptr<Entity>();
 }
 
 void UI::HandleUnderCursor(Coordinate pos) {
     underCursor.clear();
 
-   if (pos.x() >= 0 && pos.x() < GameMap::Inst()->Width() && pos.y() >= 0 && pos.y() < GameMap::Inst()->Height()) {
-        std::set<int> *npcList = GameMap::Inst()->NPCList(pos.x(), pos.y());
+   if (pos.x() >= 0 && pos.x() < Map::Inst()->Width() && pos.y() >= 0 && pos.y() < Map::Inst()->Height()) {
+        std::set<int> *npcList = Map::Inst()->NPCList(pos.x(), pos.y());
         if (!npcList->empty()) {
             for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
                 underCursor.push_back(Game::Inst()->npcList[*npci]);
@@ -535,7 +535,7 @@ void UI::HandleUnderCursor(Coordinate pos) {
             return;
         }
 
-        std::set<int> *itemList = GameMap::Inst()->ItemList(pos.x(), pos.y());
+        std::set<int> *itemList = Map::Inst()->ItemList(pos.x(), pos.y());
         if (!itemList->empty()) {
             std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
             if (itemi != Game::Inst()->freeItems.end()) {
@@ -544,13 +544,13 @@ void UI::HandleUnderCursor(Coordinate pos) {
             }
         }
 
-        int entity = GameMap::Inst()->NatureObject(pos.x(), pos.y());
+        int entity = Map::Inst()->NatureObject(pos.x(), pos.y());
         if (entity > -1) {
             underCursor.push_back(Game::Inst()->natureList[entity]);
             return;
         }
 
-        entity = GameMap::Inst()->Construction(pos.x(), pos.y());
+        entity = Map::Inst()->Construction(pos.x(), pos.y());
         if (entity > -1) {
             underCursor.push_back(Game::Inst()->constructionList[entity]);
             return;

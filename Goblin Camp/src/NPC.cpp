@@ -24,7 +24,7 @@ int SkillSet::operator()(Skill skill) {return skills[skill];}
 void SkillSet::operator()(Skill skill, int value) {skills[skill] = value;}
 
 NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
-            boost::function<void(boost::shared_ptr<NPC>)> react) : GameEntity(),
+            boost::function<void(boost::shared_ptr<NPC>)> react) : Entity(),
 	timeCount(0),
 	taskIndex(0),
 	nopath(false),
@@ -45,7 +45,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	FindJob(findJob),
 	React(react)
 {
-	while (!GameMap::Inst()->Walkable(pos.x(),pos.y())) {
+	while (!Map::Inst()->Walkable(pos.x(),pos.y())) {
 		pos.x(pos.x()+1);
 		pos.y(pos.y()+1);
 	}
@@ -54,25 +54,25 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	thirst += rand() % 10; //Just for some variety
 	hunger += rand() % 10;
 
-	path = new TCODPath(GameMap::Inst()->Width(), GameMap::Inst()->Height(), GameMap::Inst(), 0);
+	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), 0);
 
 	for (int i = 0; i < NPC_STATUSES; ++i) { status[i] = false; }
 }
 
 NPC::~NPC() {
-	GameMap::Inst()->NPCList(_x, _y)->erase(uid);
+	Map::Inst()->NPCList(_x, _y)->erase(uid);
 }
 
 void NPC::Position(Coordinate pos, bool firstTime) {
 	if (!firstTime) {
-		if (GameMap::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
-			GameMap::Inst()->MoveFrom(_x, _y, uid);
+		if (Map::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
+			Map::Inst()->MoveFrom(_x, _y, uid);
 			_x = pos.x();
 			_y = pos.y();
-			GameMap::Inst()->MoveTo(_x,_y,uid); //TODO: Figure out why the hell this is required
+			Map::Inst()->MoveTo(_x,_y,uid); //TODO: Figure out why the hell this is required
 		}
 	} else {
-		if (GameMap::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
+		if (Map::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
 			_x = pos.x();
 			_y = pos.y();
 		}
@@ -140,7 +140,7 @@ void NPC::HandleThirst() {
 			} else {
 				for (int ix = tmpCoord.x()-1; ix <= tmpCoord.x()+1; ++ix) {
 					for (int iy = tmpCoord.y()-1; iy <= tmpCoord.y()+1; ++iy) {
-						if (GameMap::Inst()->Walkable(ix,iy)) {
+						if (Map::Inst()->Walkable(ix,iy)) {
 								newJob->tasks.push_back(Task(MOVE, Coordinate(ix,iy)));
 								goto CONTINUEDRINKBLOCK;
 						}
@@ -185,7 +185,7 @@ AiThink NPC::Think() {
 	int tmp;
 	TaskResult result;
 
-	if (GameMap::Inst()->NPCList(_x,_y)->size() > 1) _bgcolor = TCODColor::darkGrey;
+	if (Map::Inst()->NPCList(_x,_y)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
 	++statusGraphicCounter;
@@ -316,7 +316,7 @@ AiThink NPC::Think() {
 					} else { //Drink from a water tile
 						if (std::abs((signed int)_x - currentTarget().x()) <= 1 &&
 							std::abs((signed int)_y - currentTarget().y()) <= 1) {
-							if (GameMap::Inst()->GetWater(currentTarget().x(), currentTarget().y()).lock()->Depth() > DRINKABLE_WATER_DEPTH) {
+							if (Map::Inst()->GetWater(currentTarget().x(), currentTarget().y()).lock()->Depth() > DRINKABLE_WATER_DEPTH) {
 								thirst -= (int)(THIRST_THRESHOLD / 10);
 								if (thirst < 0) { TaskFinished(TASKSUCCESS); break; }
 							} else { TaskFinished(TASKFAILFATAL, "Not enough water"); break; }
@@ -387,7 +387,7 @@ AiThink NPC::Think() {
                         for (std::list<ItemType>::iterator iti = NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.begin(); iti != NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.end(); ++iti) {
                             Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->x(), currentEntity().lock()->y()), *iti, true);
                         }
-                        GameMap::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
+                        Map::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
                         Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
                         TaskFinished(TASKSUCCESS);
                     }
@@ -399,7 +399,7 @@ AiThink NPC::Think() {
                         for (std::list<ItemType>::iterator iti = NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.begin(); iti != NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.end(); ++iti) {
                             Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->x(),currentEntity().lock()->y()), *iti, true);
                         }
-                        GameMap::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
+                        Map::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
                         Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
                         TaskFinished(TASKSUCCESS);
                     }
@@ -418,13 +418,13 @@ AiThink NPC::Think() {
 						if (npci->lock()->faction != faction) {
 							int dx = _x - npci->lock()->_x;
 							int dy = _y - npci->lock()->_y;
-							if (GameMap::Inst()->Walkable(_x + dx, _y + dy)) {
+							if (Map::Inst()->Walkable(_x + dx, _y + dy)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y+dy)));
 								jobs.push_back(fleeJob);
-							} else if (GameMap::Inst()->Walkable(_x + dx, _y)) {
+							} else if (Map::Inst()->Walkable(_x + dx, _y)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y)));
 								jobs.push_back(fleeJob);
-							} else if (GameMap::Inst()->Walkable(_x, _y + dy)) {
+							} else if (Map::Inst()->Walkable(_x, _y + dy)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x,_y+dy)));
 								jobs.push_back(fleeJob);
 							}
@@ -512,14 +512,14 @@ void NPC::DropCarriedItem() {
 
 Coordinate NPC::currentTarget() {
     if (currentTask()->target == Coordinate(0,0) && foundItem.lock()) {
-        return foundItem.lock()->GameEntity::Position();
+        return foundItem.lock()->Entity::Position();
     }
     return currentTask()->target;
 }
 
-boost::weak_ptr<GameEntity> NPC::currentEntity() {
+boost::weak_ptr<Entity> NPC::currentEntity() {
     if (currentTask()->entity.lock()) return currentTask()->entity;
-    else return boost::weak_ptr<GameEntity>(foundItem.lock());
+    else return boost::weak_ptr<Entity>(foundItem.lock());
 }
 
 

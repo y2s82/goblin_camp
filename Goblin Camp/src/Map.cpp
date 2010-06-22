@@ -1,7 +1,7 @@
 #include "Map.hpp"
 #include "Game.hpp"
 
-GameMap::GameMap() {
+Map::Map() {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 	    for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
@@ -12,40 +12,40 @@ GameMap::GameMap() {
 	height = tileMap[0].size();
 };
 
-GameMap* GameMap::instance = 0;
+Map* Map::instance = 0;
 
-GameMap* GameMap::Inst() {
-	if (!instance) instance = new GameMap();
+Map* Map::Inst() {
+	if (!instance) instance = new Map();
 	return instance;
 }
 
-float GameMap::getWalkCost(int x0, int y0, int x1, int y1, void *data) const {
+float Map::getWalkCost(int x0, int y0, int x1, int y1, void *data) const {
 	if (Walkable(x1,y1)) return (float)tileMap[x0][y0].moveCost();
 	return 0.0f;
 }
 
-bool GameMap::Walkable(int x, int y) const {
+bool Map::Walkable(int x, int y) const {
 	return tileMap[x][y].Walkable();
 }
-void GameMap::Walkable(int x,int y, bool value) { tileMap[x][y].Walkable(value); }
+void Map::Walkable(int x,int y, bool value) { tileMap[x][y].Walkable(value); }
 
-int GameMap::Width() { return width; }
-int GameMap::Height() { return height; }
-bool GameMap::Buildable(int x, int y) const { return tileMap[x][y].Buildable(); }
-void GameMap::Buildable(int x, int y, bool value) { tileMap[x][y].Buildable(value); }
-TileType GameMap::Type(int x, int y) { return tileMap[x][y].type(); }
-void GameMap::Type(int x, int y, TileType ntype) { tileMap[x][y].type(ntype); }
-bool GameMap::MoveTo(int x, int y, int uid) {
+int Map::Width() { return width; }
+int Map::Height() { return height; }
+bool Map::Buildable(int x, int y) const { return tileMap[x][y].Buildable(); }
+void Map::Buildable(int x, int y, bool value) { tileMap[x][y].Buildable(value); }
+TileType Map::Type(int x, int y) { return tileMap[x][y].type(); }
+void Map::Type(int x, int y, TileType ntype) { tileMap[x][y].type(ntype); }
+bool Map::MoveTo(int x, int y, int uid) {
     if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
         return tileMap[x][y].MoveTo(uid);
     } else return false;
 }
-void GameMap::MoveFrom(int x, int y, int uid) { tileMap[x][y].MoveFrom(uid); }
+void Map::MoveFrom(int x, int y, int uid) { tileMap[x][y].MoveFrom(uid); }
 
-void GameMap::Construction(int x, int y, int uid) { tileMap[x][y].Construction(uid); }
-int GameMap::Construction(int x, int y) { return tileMap[x][y].Construction(); }
+void Map::Construction(int x, int y, int uid) { tileMap[x][y].Construction(uid); }
+int Map::Construction(int x, int y) { return tileMap[x][y].Construction(); }
 
-void GameMap::Draw(Coordinate center) {
+void Map::Draw(Coordinate center) {
 	int screenDeltaX = center.x() - Game::Inst()->ScreenWidth() / 2;
 	int screenDeltaY = center.y() - Game::Inst()->ScreenHeight() / 2;
 	for (int y = center.y() - Game::Inst()->ScreenHeight() / 2; y < Game::Inst()->ScreenHeight() / 2 + center.y(); ++y) {
@@ -71,26 +71,26 @@ void GameMap::Draw(Coordinate center) {
 	}
 }
 
-boost::weak_ptr<WaterNode> GameMap::GetWater(int x, int y) { return tileMap[x][y].GetWater(); }
-void GameMap::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { tileMap[x][y].SetWater(value); }
+boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) { return tileMap[x][y].GetWater(); }
+void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { tileMap[x][y].SetWater(value); }
 
-bool GameMap::Low(int x, int y) const { return tileMap[x][y].Low(); }
-void GameMap::Low(int x, int y, bool value) { tileMap[x][y].Low(value); }
+bool Map::Low(int x, int y) const { return tileMap[x][y].Low(); }
+void Map::Low(int x, int y, bool value) { tileMap[x][y].Low(value); }
 
-bool GameMap::BlocksWater(int x, int y) const { return tileMap[x][y].BlocksWater(); }
-void GameMap::BlocksWater(int x, int y, bool value) { tileMap[x][y].BlocksWater(value); }
+bool Map::BlocksWater(int x, int y) const { return tileMap[x][y].BlocksWater(); }
+void Map::BlocksWater(int x, int y, bool value) { tileMap[x][y].BlocksWater(value); }
 
-std::set<int>* GameMap::NPCList(int x, int y) { return &tileMap[x][y].npcList; }
-std::set<int>* GameMap::ItemList(int x, int y) { return &tileMap[x][y].itemList; }
+std::set<int>* Map::NPCList(int x, int y) { return &tileMap[x][y].npcList; }
+std::set<int>* Map::ItemList(int x, int y) { return &tileMap[x][y].itemList; }
 
-int GameMap::Graphic(int x, int y) const { return tileMap[x][y].Graphic(); }
-TCODColor GameMap::Color(int x, int y) const { return tileMap[x][y].Color(); }
+int Map::Graphic(int x, int y) const { return tileMap[x][y].Graphic(); }
+TCODColor Map::Color(int x, int y) const { return tileMap[x][y].Color(); }
 
-void GameMap::NatureObject(int x, int y, int val) { tileMap[x][y].NatureObject(val); }
-int GameMap::NatureObject(int x, int y) const { return tileMap[x][y].NatureObject(); }
+void Map::NatureObject(int x, int y, int val) { tileMap[x][y].NatureObject(val); }
+int Map::NatureObject(int x, int y) const { return tileMap[x][y].NatureObject(); }
 
-boost::weak_ptr<FilthNode> GameMap::GetFilth(int x, int y) { return tileMap[x][y].GetFilth(); }
-void GameMap::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { tileMap[x][y].SetFilth(value); }
+boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) { return tileMap[x][y].GetFilth(); }
+void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { tileMap[x][y].SetFilth(value); }
 
-bool GameMap::BlocksLight(int x, int y) const { return tileMap[x][y].BlocksLight(); }
-void GameMap::BlocksLight(int x, int y, bool val) { tileMap[x][y].BlocksLight(val); }
+bool Map::BlocksLight(int x, int y) const { return tileMap[x][y].BlocksLight(); }
+void Map::BlocksLight(int x, int y, bool val) { tileMap[x][y].BlocksLight(val); }

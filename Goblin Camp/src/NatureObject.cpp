@@ -17,7 +17,7 @@ NatureObjectPreset::NatureObjectPreset() :
 
 std::vector<NatureObjectPreset> NatureObject::Presets = std::vector<NatureObjectPreset>();
 
-NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : GameEntity(),
+NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
     type(typeVal),
     marked(false)
 {

@@ -106,7 +106,7 @@ void mainLoop() {
 
         TCODConsole::root->clear();
 
-		GameMap::Inst()->Draw(Game::Inst()->center);
+		Map::Inst()->Draw(Game::Inst()->center);
         Game::Inst()->Draw(Game::Inst()->center);
 		UI::Inst()->Draw(Game::Inst()->center);
 

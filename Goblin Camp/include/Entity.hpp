@@ -1,5 +1,5 @@
-#ifndef GAMEENTITY_HEADER
-#define GAMEENTITY_HEADER
+#ifndef Entity_HEADER
+#define Entity_HEADER
 
 #include <set>
 #include <string>
@@ -7,7 +7,7 @@
 
 #include "Coordinate.hpp"
 
-class GameEntity: public boost::enable_shared_from_this<GameEntity>
+class Entity: public boost::enable_shared_from_this<Entity>
 {
 	protected:
 		unsigned int _x, _y;
@@ -17,8 +17,8 @@ class GameEntity: public boost::enable_shared_from_this<GameEntity>
 		std::string name;
 		int faction;
 	public:
-		GameEntity();
-		virtual ~GameEntity();
+		Entity();
+		virtual ~Entity();
 		virtual int x();
 		virtual int y();
 		int Uid();

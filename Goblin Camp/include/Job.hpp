@@ -52,9 +52,9 @@ enum TaskResult {
 class Task {
 	private:
 	public:
-		Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<GameEntity> = boost::weak_ptr<GameEntity>(), ItemCategory = 0);
+		Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0);
 		Coordinate target;
-		boost::weak_ptr<GameEntity> entity;
+		boost::weak_ptr<Entity> entity;
 		Action action;
 		ItemCategory item;
 };
@@ -73,7 +73,7 @@ class Job {
 		std::list<boost::weak_ptr<Item> > reservedItems;
 		std::pair<boost::weak_ptr<Stockpile>, Coordinate> reservedSpot;
 		int attempts;
-		boost::weak_ptr<GameEntity> connectedEntity;
+		boost::weak_ptr<Entity> connectedEntity;
 		boost::weak_ptr<Container> reservedSpace;
 	public:
 		static boost::shared_ptr<Job> MoveJob(Coordinate);
@@ -107,7 +107,7 @@ class Job {
 		void UnreserveItems();
 		void ReserveSpot(boost::weak_ptr<Stockpile>, Coordinate);
 		void UnreserveSpot();
-		void ConnectToEntity(boost::weak_ptr<GameEntity>);
+		void ConnectToEntity(boost::weak_ptr<Entity>);
 		void ReserveSpace(boost::weak_ptr<Container>);
 
 		bool internal;

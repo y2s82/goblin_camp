@@ -10,7 +10,7 @@
 #include <boost/weak_ptr.hpp>
 
 
-#include "GameEntity.hpp"
+#include "Entity.hpp"
 #include "Item.hpp"
 #include "Container.hpp"
 
@@ -42,7 +42,7 @@ class ConstructionPreset {
 	Coordinate productionSpot;
 };
 
-class Construction : public GameEntity {
+class Construction : public Entity {
     friend class Game;
 
 	protected:

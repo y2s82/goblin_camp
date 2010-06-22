@@ -1,13 +1,13 @@
-#ifndef UI_HEADER
-#define UI_HEADER
+#pragma once
 
 #include <libtcod.hpp>
 #include <vector>
 #include <string>
 #include <boost/function.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include "Menu.hpp"
-#include "GameEntity.hpp"
+#include "Entity.hpp"
 #include "Game.hpp"
 
 enum UIState {
@@ -33,15 +33,16 @@ class UI {
 		bool placeable;
 		Coordinate a,b;
 		std::vector<Menu*> menuHistory;
-		std::list<boost::weak_ptr<GameEntity> > underCursor;
+		std::list<boost::weak_ptr<Entity> > underCursor;
 		bool drawCursor;
 		bool lbuttonPressed, mbuttonPressed, rbuttonPressed;
 		TCOD_mouse_t oldMouseInput;
 		int keyHelpTextColor;
 
 		void HandleUnderCursor(Coordinate);
-        boost::weak_ptr<GameEntity> GetEntity(Coordinate);
+        boost::weak_ptr<Entity> GetEntity(Coordinate);
         void DrawTopBar();
+		void DrawSideBar(boost::weak_ptr<Entity>);
 		void HandleKeyboard();
 		void HandleMouse();
 	public:
@@ -63,5 +64,3 @@ class UI {
 		void AddToHistory(Menu*);
 		int KeyHelpTextColor() const;
 };
-
-#endif

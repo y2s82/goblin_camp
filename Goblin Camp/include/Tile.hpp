@@ -16,7 +16,7 @@ enum TileType {
 };
 
 class Tile {
-    friend class GameMap;
+    friend class Map;
 	private:
 		TileType _type;
 		bool vis; //Does light pass through this tile? Tile type, but also constructions/objects affect this

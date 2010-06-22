@@ -16,7 +16,7 @@ std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
 std::map<std::string, ItemType> Item::itemTypeNames = std::map<std::string, ItemType>();
 std::map<std::string, ItemType> Item::itemCategoryNames = std::map<std::string, ItemType>();
 
-Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : GameEntity(),
+Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
 	type(typeval),
 	attemptedStore(false),
 	decayCounter(-1),
@@ -67,7 +67,7 @@ TCODColor Item::Color() {return color;}
 void Item::Position(Coordinate pos) {
     _x = pos.x(); _y = pos.y();
 }
-Coordinate Item::Position() {return this->GameEntity::Position();}
+Coordinate Item::Position() {return this->Entity::Position();}
 
 void Item::Reserve(bool value) {
     reserved = value;

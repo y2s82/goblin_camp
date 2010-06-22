@@ -7,7 +7,7 @@
 #include "Logger.hpp"
 #include "GCamp.hpp"
 
-Task::Task(Action act, Coordinate tar, boost::weak_ptr<GameEntity> ent, ItemCategory itt) :
+Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt) :
 	target(tar),
 	entity(ent),
 	action(act),
@@ -136,7 +136,7 @@ std::string Job::ActionToString(Action action) {
     }
 }
 
-void Job::ConnectToEntity(boost::weak_ptr<GameEntity> ent) {
+void Job::ConnectToEntity(boost::weak_ptr<Entity> ent) {
     connectedEntity = ent;
 }
 
