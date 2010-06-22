@@ -156,6 +156,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->graphic('g');
             npc->name = TCODNamegen::generate("goblin");
             npc->faction = 0;
+			npc->needsNutrition = true;
             ++goblinCount;
             break;
 
@@ -167,6 +168,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->Expert(true);
             npc->name = TCODNamegen::generate("orc");
             npc->faction = 0;
+			npc->needsNutrition = true;
             ++orcCount;
             break;
 

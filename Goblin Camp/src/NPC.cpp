@@ -41,6 +41,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	health(100),
 	foundItem(boost::weak_ptr<Item>()),
 	bag(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
+	needsNutrition(false),
 	FindJob(findJob),
 	React(react)
 {
@@ -190,19 +191,21 @@ AiThink NPC::Think() {
 	++statusGraphicCounter;
 	if (statusGraphicCounter > 99) statusGraphicCounter = 0;
 
-	++thirst; ++hunger;
+	if (needsNutrition) {
+		++thirst; ++hunger;
 
-	if (thirst >= THIRST_THRESHOLD) status[THIRSTY] = true;
-	else status[THIRSTY] = false;
-	if (hunger >= HUNGER_THRESHOLD) status[HUNGRY] = true;
-	else status[HUNGRY] = false;
+		if (thirst >= THIRST_THRESHOLD) status[THIRSTY] = true;
+		else status[THIRSTY] = false;
+		if (hunger >= HUNGER_THRESHOLD) status[HUNGRY] = true;
+		else status[HUNGRY] = false;
 
-	if (thirst > THIRST_THRESHOLD && (rand() % (UPDATES_PER_SECOND*10)) == 0) {
-		HandleThirst();
-	} else if (thirst > THIRST_THRESHOLD * 5) Kill();
-	if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*10)) == 0) {
-		HandleHunger();
-	} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
+		if (thirst > THIRST_THRESHOLD && (rand() % (UPDATES_PER_SECOND*10)) == 0) {
+			HandleThirst();
+		} else if (thirst > THIRST_THRESHOLD * 5) Kill();
+		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*10)) == 0) {
+			HandleHunger();
+		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
+	}
 
 	timeCount += thinkSpeed;
 	while (timeCount > UPDATES_PER_SECOND) {

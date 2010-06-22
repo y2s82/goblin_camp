@@ -87,6 +87,7 @@ class NPC : public GameEntity {
         boost::shared_ptr<Container> bag;
 
         std::list<boost::weak_ptr<NPC> >nearNpcs;
+		bool needsNutrition;
 
 		boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 		boost::function<void(boost::shared_ptr<NPC>)> React;
