@@ -15,6 +15,7 @@
 #include "Announce.hpp"
 #include "Logger.hpp"
 #include "Map.hpp"
+#include "StatusEffect.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -37,6 +38,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	thirst(0),
 	hunger(0),
 	thinkSpeed(UPDATES_PER_SECOND),
+	statusEffects(std::list<StatusEffect>()),
+	statusEffectIterator(statusEffects.end()),
 	statusGraphicCounter(0),
 	health(100),
 	foundItem(boost::weak_ptr<Item>()),
@@ -55,8 +58,6 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	hunger += rand() % 10;
 
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), 0);
-
-	for (int i = 0; i < NPC_STATUSES; ++i) { status[i] = false; }
 }
 
 NPC::~NPC() {
@@ -105,16 +106,6 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 	taskBegun = false;
 }
 
-/*
-bool NPC::FindJob() {
-	boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(uid).lock());
-	if (newJob)  {
-		jobs.push_back(newJob);
-		return true;
-	}
-	return false;
-}
-*/
 void NPC::HandleThirst() {
 	Coordinate tmpCoord;
 	bool found = false;
@@ -189,12 +180,21 @@ AiThink NPC::Think() {
 	else _bgcolor = TCODColor::black;
 
 	++statusGraphicCounter;
-	if (statusGraphicCounter > 99) statusGraphicCounter = 0;
+	if (statusEffectIterator != statusEffects.end()) 
+		if (statusEffectIterator->cooldown > 0) 
+			if (--statusEffectIterator->cooldown == 0)
+				statusEffectIterator = statusEffects.erase(statusEffectIterator);
+
+	if (statusGraphicCounter > 10) {
+		statusGraphicCounter = 0;
+		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
+		else statusEffectIterator = statusEffects.begin();
+	}
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
 
-		if (thirst >= THIRST_THRESHOLD) status[THIRSTY] = true;
+		if (thirst >= THIRST_THRESHOLD) AddStatusEffect(THIRST);
 		else status[THIRSTY] = false;
 		if (hunger >= HUNGER_THRESHOLD) status[HUNGRY] = true;
 		else status[HUNGRY] = false;
@@ -409,7 +409,7 @@ AiThink NPC::Think() {
 			}
 		} else {
 			//Idly meander while no jobs available
-			if (status[FLEEING]) {
+			if (HasEffect(PANIC)) {
 				bool enemyFound = false;
 			    if (jobs.empty() && !nearNpcs.empty()) {
 			        boost::shared_ptr<Job> fleeJob(new Job("Flee"));
@@ -433,7 +433,7 @@ AiThink NPC::Think() {
 						}
 					}
 			    }
-				if (!enemyFound) status[FLEEING] = false;
+				//if (!enemyFound) RemoveEffect(PANIC); //The cooldown will handle this
 			} else if (!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
 			}
@@ -471,14 +471,10 @@ void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 	int screenx = _x - upleft.x();
 	int screeny = _y - upleft.y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		if (statusGraphicCounter < 10 && status[HUNGRY]) {
-			console->putCharEx(screenx, screeny, TCOD_CHAR_ARROW_S, TCODColor::orange, _bgcolor);
-		} else if (statusGraphicCounter >= 10 && statusGraphicCounter < 20 && status[THIRSTY]) {
-			console->putCharEx(screenx, screeny, TCOD_CHAR_ARROW_S, TCODColor::blue, _bgcolor);
-		} else if (statusGraphicCounter >= 30 && statusGraphicCounter < 40 && status[FLEEING]) {
-			console->putCharEx(screenx, screeny, '!', TCODColor::white, _bgcolor);
-		} else {
+		if (statusGraphicCounter < 5) {
 			console->putCharEx(screenx, screeny, _graphic, _color, _bgcolor);
+		} else if (statusEffectIterator != statusEffects.end()) {
+			console->putCharEx(screenx, screeny, statusEffectIterator->graphic, statusEffectIterator->color, _bgcolor);
 		}
 	}
 }
@@ -545,7 +541,7 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
     Game::Inst()->FindNearbyNPCs(animal);
     for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
         if (npci->lock()->faction != animal->faction) {
-            animal->Flee();
+            animal->AddEffect(PANIC);
         }
     }
 }
@@ -554,4 +550,4 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
     return false;
 }
 
-void NPC::Flee() {status[FLEEING] = true;}
+void NPC::AddEffect(StatusEffectType effect) {}

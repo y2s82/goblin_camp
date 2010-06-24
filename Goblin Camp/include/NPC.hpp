@@ -1,5 +1,4 @@
-#ifndef NPC_HEADER
-#define NPC_HEADER
+#pragma once
 
 #include <queue>
 
@@ -13,6 +12,7 @@
 #include "Job.hpp"
 #include "Entity.hpp"
 #include "Container.hpp"
+#include "StatusEffect.hpp"
 
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
@@ -22,15 +22,7 @@
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
 
-#define NPC_STATUSES 3
-
 typedef int NPCType;
-
-enum NPCStatus {
-	HUNGRY = 0,
-	THIRSTY,
-	FLEEING
-};
 
 enum AiThink {
 	AINOTHING,
@@ -78,7 +70,8 @@ class NPC : public Entity {
 		boost::weak_ptr<Item> carried;
 		int thirst, hunger;
 		int thinkSpeed;
-		bool status[NPC_STATUSES];
+		std::list<StatusEffect> statusEffects;
+		std::list<StatusEffect>::iterator statusEffectIterator;
 		int statusGraphicCounter;
 		void HandleThirst();
 		void HandleHunger();
@@ -115,7 +108,9 @@ class NPC : public Entity {
 		TaskResult Move();
 		void findPath(Coordinate);
 
-		void Flee();
+		void AddEffect(StatusEffectType);
+		void RemoveEffect(StatusEffectType);
+		bool HasEffect(StatusEffectType);
 
 		bool Expert();
 		void Expert(bool);
@@ -131,5 +126,3 @@ class NPC : public Entity {
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::try_mutex*, bool*, bool*);
-
-#endif

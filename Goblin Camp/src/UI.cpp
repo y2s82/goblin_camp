@@ -41,7 +41,7 @@ UI* UI::Inst() {
 }
 
 void UI::Update() {
-	if (keyHelpTextColor > 0) keyHelpTextColor -= 3;
+	if (keyHelpTextColor > 0) keyHelpTextColor -= 2;
 	if (keyHelpTextColor < 0) keyHelpTextColor = 0;
 	HandleKeyboard();
 	HandleMouse();
@@ -592,7 +592,7 @@ MenuResult SideBar::Update(int x, int y) {
 void SideBar::Draw(TCODConsole* console) {
 	if (entity.lock()) {
 		int edgeX = console->getWidth();
-		topY = std::max(0,(console->getHeight() / 2) - height);
+		topY = std::max(0,(console->getHeight() - height) / 2);
 		TCODConsole minimap(11,11);
 
 		if (npc) {
@@ -634,13 +634,13 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 			height = 30;
 			npc = true;
 		} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
-			height = 70;
+			height = 50;
 			farmplot = true;
 		} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
-			height = 70;
+			height = 50;
 			stockpile = true;
 		} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
-			height = 70;
+			height = 50;
 			construction = true;
 		}
 
