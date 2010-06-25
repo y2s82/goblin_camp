@@ -45,6 +45,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	foundItem(boost::weak_ptr<Item>()),
 	bag(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
 	needsNutrition(false),
+	attackSkill(0), attackPower(0), attackSpeed(0),
+	defenceSkill(0),
+	aggressive(false),
 	FindJob(findJob),
 	React(react)
 {
@@ -223,9 +226,6 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 				case MOVE:
-#ifdef DEBUG
-                    if (name == "Bee") std::cout<<"Bee move";
-#endif
 					if ((signed int)_x == currentTarget().x() && (signed int)_y == currentTarget().y()) {
 						TaskFinished(TASKSUCCESS);
 						break;
@@ -412,6 +412,31 @@ AiThink NPC::Think() {
                     }
                     break;
 
+				case KILL:
+					//The reason KILL isn't a combination of MOVEADJACENT and something else is that the other moving actions
+					//assume their target isn't a moving one
+					if (!currentEntity().lock()) {
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
+
+					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
+						Hit(currentEntity());
+						break;
+					}
+
+					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 5) == 0) { //Repath every ~5 seconds
+						findPath(currentEntity().lock()->Position());
+						taskBegun = true;
+					}
+					result = Move();
+
+					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
+					else if (result == PATHEMPTY) {
+						findPath(currentEntity().lock()->Position());
+					}
+					break;
+
 				default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -541,6 +566,21 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
+	if (npc->aggressive) {
+		if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
+			Game::Inst()->FindNearbyNPCs(npc);
+			for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
+				if (npci->lock()->faction != npc->faction) {
+					Announce::Inst()->AddMsg("kill");
+					boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
+					killJob->internal = true;
+					killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
+					if (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+					npc->jobs.push_back(killJob);
+				}
+			}
+		}
+	}
 }
 
 void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
@@ -588,3 +628,23 @@ bool NPC::HasEffect(StatusEffectType effect) {
 }
 
 std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
+
+void NPC::Hit(boost::weak_ptr<Entity> target) {
+	if (target.lock()) {
+		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
+			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(target.lock()));
+			int dif = ((rand() % 10) + attackSkill) - ((rand() % 10) + npc->defenceSkill);
+			if (dif > 0) {
+				npc->health -= dif;
+#ifdef DEBUG
+				std::cout<<"Hit connected, caused "<<dif<<" damage\n";
+#endif
+				if (npc->health <= 0) npc->Kill();
+			} else {
+#ifdef DEBUG
+				std::cout<<"Hit missed\n";
+#endif
+			}
+		}
+	}
+}

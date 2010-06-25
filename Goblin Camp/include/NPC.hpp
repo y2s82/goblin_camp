@@ -85,6 +85,10 @@ class NPC : public Entity {
 		boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 		boost::function<void(boost::shared_ptr<NPC>)> React;
 
+		int attackSkill, attackPower, attackSpeed;
+		int defenceSkill;
+		bool aggressive;
+
 	public:
 		~NPC();
 		SkillSet Skills;
@@ -119,6 +123,7 @@ class NPC : public Entity {
 		bool Dead();
 		void Kill();
 		void DropCarriedItem();
+		void Hit(boost::weak_ptr<Entity>);
 
 		static bool JobManagerFinder(boost::shared_ptr<NPC>);
 		static void PlayerNPCReact(boost::shared_ptr<NPC>);

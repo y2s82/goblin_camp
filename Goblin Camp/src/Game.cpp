@@ -170,16 +170,19 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->name = TCODNamegen::generate("orc");
             npc->faction = 0;
 			npc->needsNutrition = true;
+			npc->aggressive = true;
+			npc->attackSkill = 10;
             ++orcCount;
             break;
 
         case 2:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::PeacefulAnimalFindJob, _1), boost::bind(NPC::PeacefulAnimalReact, _1)));
-            npc->speed(75 + rand() % 20);
+            npc->speed(15 + rand() % 20);
             npc->color(TCODColor::yellow);
             npc->graphic('a');
             npc->name = "Bee";
             npc->faction = 1;
+			npc->health = 50;
             break;
     }
 

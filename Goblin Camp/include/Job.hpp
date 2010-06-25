@@ -36,7 +36,8 @@ enum Action {
 	FIND,
 	HARVEST,
 	FELL,
-	HARVESTWILDPLANT
+	HARVESTWILDPLANT,
+	KILL
 };
 
 enum TaskResult {
