@@ -28,7 +28,7 @@ syntax: glob
 *.scc
 *.sig
 _ReSharper*\*
-TestResults\* 
+TestResults\*
 desktop.ini
 ipch\*
 *.sdf
@@ -40,3 +40,4 @@ Debug\
 *.cd
 *SyncToy*
 Log.txt
+glob:*.dll
