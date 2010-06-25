@@ -649,7 +649,7 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 			height = 50;
 			stockpile = true;
 		} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
-			height = 50;
+			height = 30;
 			construction = true;
 		}
 
