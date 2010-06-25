@@ -158,7 +158,7 @@ void UI::HandleKeyboard() {
 		mouseInput.x = 0;
 		mouseInput.cx = 0;
 	} else if (mouseInput.cx >= Game::Inst()->ScreenWidth()) {
-		Game::Inst()->upleft.x(Game::Inst()->upleft.x() + (mouseInput.cx - Game::Inst()->ScreenWidth()));
+		Game::Inst()->upleft.x(Game::Inst()->upleft.x() + (mouseInput.cx - (Game::Inst()->ScreenWidth()-1)));
 		mouseInput.cx = Game::Inst()->ScreenWidth() - 1;
 		mouseInput.x = (Game::Inst()->ScreenWidth() - 1)* Game::Inst()->CharWidth();
 	}
@@ -167,7 +167,7 @@ void UI::HandleKeyboard() {
 		mouseInput.y = 0;
 		mouseInput.cy = 0;
 	} else if (mouseInput.cy >= Game::Inst()->ScreenHeight()) {
-		Game::Inst()->upleft.y(Game::Inst()->upleft.y() + (mouseInput.cy - Game::Inst()->ScreenHeight()));
+		Game::Inst()->upleft.y(Game::Inst()->upleft.y() + (mouseInput.cy - (Game::Inst()->ScreenHeight()-1)));
 		mouseInput.cy = Game::Inst()->ScreenHeight() - 1;
 		mouseInput.y = (Game::Inst()->ScreenHeight() - 1) * Game::Inst()->CharHeight();
 	}
@@ -597,6 +597,15 @@ void SideBar::Draw(TCODConsole* console) {
 
 		if (npc) {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(entity.lock()));
+			console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Effects");
+			int y = 0;
+			for (std::list<StatusEffect>::iterator effectI = npc->StatusEffects()->begin(); effectI != npc->StatusEffects()->end(); ++effectI) {
+				console->setForegroundColor(effectI->color);
+				console->print(edgeX - width + 2, topY+15+y, "%c%s", effectI->graphic, effectI->name.c_str());
+				if (++y > 10) break;
+			}
+			console->setForegroundColor(TCODColor::white);
 		} else if (construction) {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 

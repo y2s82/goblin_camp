@@ -111,6 +111,7 @@ class NPC : public Entity {
 		void AddEffect(StatusEffectType);
 		void RemoveEffect(StatusEffectType);
 		bool HasEffect(StatusEffectType);
+		std::list<StatusEffect>* StatusEffects();
 
 		bool Expert();
 		void Expert(bool);

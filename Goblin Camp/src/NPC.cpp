@@ -180,10 +180,17 @@ AiThink NPC::Think() {
 	else _bgcolor = TCODColor::black;
 
 	++statusGraphicCounter;
-	if (statusEffectIterator != statusEffects.end()) 
-		if (statusEffectIterator->cooldown > 0) 
-			if (--statusEffectIterator->cooldown == 0)
-				statusEffectIterator = statusEffects.erase(statusEffectIterator);
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
+			if (statusEffectI == statusEffectIterator) {
+				++statusEffectIterator;
+				statusGraphicCounter = 0;
+			}
+			statusEffectI = statusEffects.erase(statusEffectI);
+			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+		}
+	}
+
 
 	if (statusGraphicCounter > 10) {
 		statusGraphicCounter = 0;
@@ -194,15 +201,15 @@ AiThink NPC::Think() {
 	if (needsNutrition) {
 		++thirst; ++hunger;
 
-		if (thirst >= THIRST_THRESHOLD) AddStatusEffect(THIRST);
-		else status[THIRSTY] = false;
-		if (hunger >= HUNGER_THRESHOLD) status[HUNGRY] = true;
-		else status[HUNGRY] = false;
+		if (thirst >= THIRST_THRESHOLD) AddEffect(THIRST);
+		else RemoveEffect(THIRST);
+		if (hunger >= HUNGER_THRESHOLD) AddEffect(HUNGER);
+		else RemoveEffect(HUNGER);
 
-		if (thirst > THIRST_THRESHOLD && (rand() % (UPDATES_PER_SECOND*10)) == 0) {
+		if (thirst > THIRST_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
 			HandleThirst();
 		} else if (thirst > THIRST_THRESHOLD * 5) Kill();
-		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*10)) == 0) {
+		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
 			HandleHunger();
 		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
 	}
@@ -471,9 +478,9 @@ void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 	int screenx = _x - upleft.x();
 	int screeny = _y - upleft.y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		if (statusGraphicCounter < 5) {
+		if (statusGraphicCounter < 5 || statusEffectIterator == statusEffects.end()) {
 			console->putCharEx(screenx, screeny, _graphic, _color, _bgcolor);
-		} else if (statusEffectIterator != statusEffects.end()) {
+		} else {
 			console->putCharEx(screenx, screeny, statusEffectIterator->graphic, statusEffectIterator->color, _bgcolor);
 		}
 	}
@@ -492,7 +499,6 @@ void NPC::Kill() {
 	health = 0;
 	_bgcolor = TCODColor::darkRed;
 	_color = TCODColor::grey;
-	for (int i = 0; i < NPC_STATUSES; ++i) { status[i] = false; }
 	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("Dead"));
 	Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
 }
@@ -550,4 +556,35 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
     return false;
 }
 
-void NPC::AddEffect(StatusEffectType effect) {}
+void NPC::AddEffect(StatusEffectType effect) {
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->type == effect) {
+			statusEffectI->cooldown = statusEffectI->cooldownDefault;
+			return;
+		}
+	}
+
+	statusEffects.push_back(StatusEffect(effect));
+}
+
+void NPC::RemoveEffect(StatusEffectType effect) {
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->type == effect) {
+			if (statusEffectIterator == statusEffectI) ++statusEffectIterator;
+			statusEffects.erase(statusEffectI);
+			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+			return;
+		}
+	}
+}
+
+bool NPC::HasEffect(StatusEffectType effect) {
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->type == effect) {
+			return true;
+		}
+	}
+	return false;
+}
+
+std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }

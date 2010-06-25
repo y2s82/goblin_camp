@@ -14,6 +14,7 @@ struct StatusEffect {
 	int graphic;
 	TCODColor color;
 	std::string name;
-	int id;
+	int type;
 	int cooldown;
+	int cooldownDefault;
 };

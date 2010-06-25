@@ -246,8 +246,8 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	srand((unsigned int)std::time(0));
 
-    //Enabling TCOD_RENDERER_GLSL causes GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_SDL);
+    //Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
+	TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_GLSL);
     TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	screenWidth = width; screenHeight = height;
