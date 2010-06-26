@@ -29,7 +29,8 @@ class Entity: public boost::enable_shared_from_this<Entity>
 		int Zone();
 		virtual void Reserve(bool);
 		bool Reserved();
-		virtual std::string Name();
+		std::string Name();
+		void Name(std::string);
 		virtual void CancelJob(int=0);
 
 		virtual void Faction(int);

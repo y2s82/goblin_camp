@@ -63,6 +63,7 @@ void Item::Draw(Coordinate upleft, TCODConsole* console) {
 ItemType Item::Type() {return type;}
 bool Item::IsCategory(ItemCategory category) { return (categories.find(category) != categories.end());}
 TCODColor Item::Color() {return color;}
+void Item::Color(TCODColor col) {color = col;}
 
 void Item::Position(Coordinate pos) {
     _x = pos.x(); _y = pos.y();

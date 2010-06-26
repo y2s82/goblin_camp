@@ -23,6 +23,7 @@ void Entity::Reserve(bool value) {reserved = value;}
 bool Entity::Reserved() {return reserved;}
 
 std::string Entity::Name() { return name; }
+void Entity::Name(std::string newName) { name = newName; }
 
 void Entity::CancelJob(int) {}
 

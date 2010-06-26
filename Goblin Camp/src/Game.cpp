@@ -177,10 +177,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
         case 2:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::PeacefulAnimalFindJob, _1), boost::bind(NPC::PeacefulAnimalReact, _1)));
-            npc->speed(15 + rand() % 20);
-            npc->color(TCODColor::yellow);
-            npc->graphic('a');
-            npc->name = "Bee";
+            npc->speed(5 + rand() % 20);
+            npc->color(TCODColor::desaturatedYellow);
+            npc->graphic('b');
+            npc->name = "Giant Snail";
             npc->faction = 1;
 			npc->health = 50;
             break;
@@ -335,8 +335,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			Game::Inst()->RemoveItem(comps[i]);
 		}
 	}
-
-
+	
 	return newItem->Uid();
 }
 
@@ -743,16 +742,15 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 
 void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
     npc->nearNpcs.clear();
-    for (int endx = std::max((signed int)npc->_x - LOS_DISTANCE, 0); endx < std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width()); endx += 3) {
-        for (int endy = std::max((signed int)npc->_y - LOS_DISTANCE, 0); endy < std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height()); endy += 3) {
-            if (endx == std::max((signed int)npc->_x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width())
-                || endy == std::max((signed int)npc->_y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height())) {
+    for (int endx = std::max((signed int)npc->_x - LOS_DISTANCE, 0); endx <= std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
+        for (int endy = std::max((signed int)npc->_y - LOS_DISTANCE, 0); endy <= std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
+            if (endx == std::max((signed int)npc->_x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width()-1)
+                || endy == std::max((signed int)npc->_y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
                 int x = npc->_x;
                 int y = npc->_y;
                 TCODLine::init(x, y, endx, endy);
                 do {
                     if (Map::Inst()->BlocksLight(x,y)) break;
-
                     for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
 						if (*npci != npc->uid) npc->nearNpcs.push_back(npcList[*npci]);
                     }

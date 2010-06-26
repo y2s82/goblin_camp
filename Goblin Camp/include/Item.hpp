@@ -113,6 +113,7 @@ class Item : public Entity {
 		ItemType Type();
 		int Graphic();
 		TCODColor Color();
+		void Color(TCODColor);
 		bool IsCategory(ItemCategory);
 		virtual void Reserve(bool);
 		virtual void Faction(int);

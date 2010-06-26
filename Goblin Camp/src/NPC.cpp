@@ -425,7 +425,7 @@ AiThink NPC::Think() {
 						break;
 					}
 
-					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 5) == 0) { //Repath every ~5 seconds
+					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
 						findPath(currentEntity().lock()->Position());
 						taskBegun = true;
 					}
@@ -522,10 +522,10 @@ Coordinate NPC::Position() {return Coordinate(_x,_y);}
 bool NPC::Dead() { return health <= 0; }
 void NPC::Kill() {
 	health = 0;
-	_bgcolor = TCODColor::darkRed;
-	_color = TCODColor::grey;
+	int corpse = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
+	Game::Inst()->GetItem(corpse).lock()->Color(_color);
+	Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
 	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("Dead"));
-	Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
 }
 
 void NPC::DropCarriedItem() {
