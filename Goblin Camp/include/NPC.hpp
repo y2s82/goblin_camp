@@ -88,6 +88,8 @@ class NPC : public Entity {
 		int attackSkill, attackPower, attackSpeed;
 		int defenceSkill;
 		bool aggressive;
+		boost::weak_ptr<NPC> aggressor;
+		bool dead;
 
 	public:
 		~NPC();

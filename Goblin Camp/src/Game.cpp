@@ -38,6 +38,7 @@ Game* Game::Inst() {
 	return instance;
 }
 
+//Checks whether all the tiles under the rectangle (target is the up-left corner) are buildable
 bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 	for (int x = target.x(); x < target.x() + size.x(); ++x) {
 		for (int y = target.y(); y < target.y() + size.y(); ++y) {
@@ -128,6 +129,8 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
     return closest;
 }
 
+//Returns true/false depending on if the given position is adjacent to the entity
+//Takes into consideration if the entity is a construction, and thus may be larger than just one tile
 bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
     if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
         boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
@@ -147,6 +150,8 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
     }
 }
 
+//This is placeholder right now, creature information is going to be moved into it's own file so that it won't be
+//hardcoded.
 int Game::CreateNPC(Coordinate target, NPCType type) {
     boost::shared_ptr<NPC> npc;
     switch (type) {
@@ -171,6 +176,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->faction = 0;
 			npc->needsNutrition = true;
 			npc->aggressive = true;
+			npc->health = 100;
 			npc->attackSkill = 10;
             ++orcCount;
             break;
@@ -183,6 +189,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->name = "Giant Snail";
             npc->faction = 1;
 			npc->health = 50;
+			npc->defenceSkill = 2;
+			npc->attackSkill = 2;
             break;
     }
 
@@ -193,6 +201,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 int Game::OrcCount() { return orcCount; }
 int Game::GoblinCount() { return goblinCount; }
 
+//Moves the entity to a valid walkable tile
+//TODO: make it find the closest walkable tile instead of going right, that will lead to weirdness and problems
 void Game::BumpEntity(int uid) {
 	boost::weak_ptr<Entity> entity;
 
@@ -460,15 +470,24 @@ void Game::Update() {
         time = 0;
     }
 
+	//This actually only updates every 50th waternode. This is due to 2 things: updating one water tile actually also
+	//updates all its neighbours. Also, by updating only every 50th one, the load on the cpu is less, but you need to
+	//remember that Update gets called 25 times a second, and given the nature of rand() this means that each waternode
+	//will be updated once every 2 seconds. It turns out that from the player's viewpoint this is just fine
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (wati->lock() && rand() % 50 == 0) wati->lock()->Update();
 		else if (!wati->lock()) wati = waterList.erase(wati);
 	}
 
-    std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.end();
-	while (std::distance(wati, waterList.end()) < 10) {
-		--wati;
-		if (wati->lock()) wati->lock()->Update();
+	//Updating the last 10 waternodes each time means that recently created water moves faster.
+	//This has the effect of making water rush to new places such as a moat very quickly, which is the
+	//expected behaviour of water.
+	if (waterList.size() > 0) {
+		std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.end();
+		while (std::distance(wati, waterList.end()) < 10) {
+			--wati;
+			if (wati->lock()) wati->lock()->Update();
+		}
 	}
 
 	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
@@ -487,6 +506,8 @@ void Game::Update() {
 	    }
 	}
 
+	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
+	//15 seconds, on average.
 	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
 	    for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->Faction() == 0) StockpileItem(*itemi);
@@ -588,8 +609,8 @@ void Game::DeTillFarmPlots() {
    	}
 }
 
+//Placeholder, awaiting a real map generator
 void Game::GenerateMap() {
-
 	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 260; y <= 270; ++y) {
 			if (y >= 264 && y <= 266 && rand() % 5 == 0) {
@@ -603,7 +624,7 @@ void Game::GenerateMap() {
 		}
 	}
 
-    for (int x = 0; x < Map::Inst()->Width(); ++x) {
+	for (int x = 0; x < Map::Inst()->Width(); ++x) {
         for (int y = 0; y < Map::Inst()->Height(); ++y) {
             if (Map::Inst()->Walkable(x,y) && Map::Inst()->Type(x,y) == TILEGRASS) {
                 if (rand() % 100 == 0) {
@@ -634,6 +655,7 @@ void Game::GenerateMap() {
     }
 }
 
+//This is intentional, otherwise designating where to cut down trees would always show red unless you were over a tree
 bool Game::CheckTree(Coordinate, Coordinate) {
     return true;
 }
@@ -740,6 +762,9 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 	} else {filth.lock()->Depth(filth.lock()->Depth()+amount);}
 }
 
+//This function uses straightforward raycasting, and it is somewhat imprecise right now as it only casts a ray to every second
+//tile at the edge of the line of sight distance. This is to conserve cpu cycles, as there may be several hundred creatures
+//active at a time, and given the fact that they'll usually be constantly moving, this function needen't be 100% accurate.
 void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
     npc->nearNpcs.clear();
     for (int endx = std::max((signed int)npc->_x - LOS_DISTANCE, 0); endx <= std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {

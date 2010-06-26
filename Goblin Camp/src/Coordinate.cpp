@@ -7,9 +7,9 @@ int Coordinate::x(int value) { _x = value; return _x; }
 int Coordinate::y() const { return _y;}
 int Coordinate::y(int value) { _y = value; return _y; }
 
-//TODO: Bad hack to ensure uniquenessaaaaa
 bool Coordinate::operator<(Coordinate other) const {
-	return ((_x + _y*500) < (other.x() + other.y()*500));
+	if (_x != other.x()) return _x < other.x();
+	else return _y < other.y();
 }
 
 bool Coordinate::operator==(Coordinate other) const {

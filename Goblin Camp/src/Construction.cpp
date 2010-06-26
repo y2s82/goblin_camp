@@ -85,13 +85,16 @@ int Construction::Build() {
 	++_condition;
 	if (_condition > 0) {
 		//Check that all the required materials are inside the building
-		//This is cheating <- TODO
+		//It only checks that the amount of materials equals whats expected, but not what those materials are
+		//Theoretically it'd be possible to build a construction out of the wrong materials, but this should not
+		//be possible in practice.
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		    color = TCODColor::lerp(color, itemi->lock()->Color(), 0.5f);
 			itemi->lock()->Faction(-1); //Remove from player faction so it doesn't show up in stocks
 		}
 
+		//TODO: constructions should have the option of having both walkable and unwalkable tiles
 		_condition = maxCondition;
 		for (unsigned int ix = _x; ix < _x + Construction::Blueprint(_type).x(); ++ix) {
 			for (unsigned int iy = _y; iy < _y + Construction::Blueprint(_type).y(); ++iy) {

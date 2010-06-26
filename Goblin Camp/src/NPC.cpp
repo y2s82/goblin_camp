@@ -48,6 +48,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	attackSkill(0), attackPower(0), attackSpeed(0),
 	defenceSkill(0),
 	aggressive(false),
+	aggressor(boost::weak_ptr<NPC>()),
+	dead(false),
 	FindJob(findJob),
 	React(react)
 {
@@ -221,6 +223,9 @@ AiThink NPC::Think() {
 	while (timeCount > UPDATES_PER_SECOND) {
 
         React(boost::static_pointer_cast<NPC>(shared_from_this()));
+
+		if (aggressor.lock())
+			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
 
 		timeCount -= UPDATES_PER_SECOND;
 		if (!jobs.empty()) {
@@ -519,13 +524,20 @@ void NPC::Expert(bool value) {expert = value;}
 
 Coordinate NPC::Position() {return Coordinate(_x,_y);}
 
-bool NPC::Dead() { return health <= 0; }
+bool NPC::Dead() { return dead; }
 void NPC::Kill() {
-	health = 0;
-	int corpse = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
-	Game::Inst()->GetItem(corpse).lock()->Color(_color);
-	Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
-	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("Dead"));
+	if (!dead) {//You can't be killed if you're already dead!
+		dead = true;
+		health = 0;
+	#ifdef DEBUG
+		std::cout<<"Kill npc:"<<name<<uid<<"\n";
+	#endif
+		Logger::Inst()->output<<"Kill npc:"<<name<<uid<<"\n";
+		int corpse = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
+		Game::Inst()->GetItem(corpse).lock()->Color(_color);
+		Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
+		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("Dead"));
+	}
 }
 
 void NPC::DropCarriedItem() {
@@ -633,6 +645,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 	if (target.lock()) {
 		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
 			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(target.lock()));
+			npc->aggressor = boost::static_pointer_cast<NPC>(shared_from_this());
 			int dif = ((rand() % 10) + attackSkill) - ((rand() % 10) + npc->defenceSkill);
 			if (dif > 0) {
 				npc->health -= dif;
