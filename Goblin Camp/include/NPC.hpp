@@ -13,6 +13,7 @@
 #include "Entity.hpp"
 #include "Container.hpp"
 #include "StatusEffect.hpp"
+#include "Squad.hpp"
 
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
@@ -52,7 +53,7 @@ class NPC : public Entity {
 		NPC(Coordinate,
             boost::function<bool(boost::shared_ptr<NPC>)> findJob,
             boost::function<void(boost::shared_ptr<NPC>)> react);
-
+		NPCType type;
 		bool _visArray[LOS_DISTANCE*2 * LOS_DISTANCE*2];
 		int timeCount;
 		std::deque<boost::shared_ptr<Job> > jobs;
@@ -90,6 +91,7 @@ class NPC : public Entity {
 		bool aggressive;
 		boost::weak_ptr<NPC> aggressor;
 		bool dead;
+		boost::weak_ptr<Squad> squad;
 
 	public:
 		~NPC();
@@ -126,6 +128,8 @@ class NPC : public Entity {
 		void Kill();
 		void DropCarriedItem();
 		void Hit(boost::weak_ptr<Entity>);
+		void Squad(boost::weak_ptr<Squad>);
+		boost::weak_ptr<Squad> Squad();
 
 		static bool JobManagerFinder(boost::shared_ptr<NPC>);
 		static void PlayerNPCReact(boost::shared_ptr<NPC>);

@@ -157,6 +157,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
     switch (type) {
         case 0:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::JobManagerFinder, _1), boost::bind(NPC::PlayerNPCReact, _1)));
+			npc->type = 0;
             npc->speed(50 + rand() % 20);
             npc->color(TCODColor::grey);
             npc->graphic('g');
@@ -168,6 +169,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
         case 1:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::JobManagerFinder, _1), boost::bind(NPC::PlayerNPCReact, _1)));
+			npc->type = 1;
             npc->speed(50 + rand() % 20);
             npc->color(TCODColor::blue);
             npc->graphic('o');
@@ -183,6 +185,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
         case 2:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::PeacefulAnimalFindJob, _1), boost::bind(NPC::PeacefulAnimalReact, _1)));
+			npc->type = 2;
             npc->speed(5 + rand() % 20);
             npc->color(TCODColor::desaturatedYellow);
             npc->graphic('b');
@@ -801,4 +804,16 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> npc) {
 	if (npc.lock()) {
 		npcList.erase(npc.lock()->uid);
 	}
+}
+
+int Game::FindMilitaryRecruit() {
+	for (std::map<int, boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
+		if (npci->second.type == 1 && npci->second.faction == 0 !npci->second.squad.lock()) {
+			return npci->second.uid;
+		}
+	}
+}
+
+void Game::CreateSquad(std::string name) {
+	squadList.push_back(Squad(name));
 }

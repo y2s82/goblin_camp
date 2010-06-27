@@ -115,3 +115,13 @@ class StockManagerMenu : public Menu {
 		void ScrollDown();
 		void ScrollUp();
 };
+
+class SquadsMenu : public Menu {
+private:
+public:
+	SquadsMenu();
+	void Draw(int, int, TCODConsole*);
+	MenuResult Update(int = -1, int = -1);
+	static SquadsMenu* squadMenu;
+	static SquadsMenu* SquadMenu();
+};

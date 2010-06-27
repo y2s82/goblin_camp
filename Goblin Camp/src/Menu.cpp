@@ -514,3 +514,62 @@ StockManagerMenu* StockManagerMenu::StocksMenu() {
 
 void StockManagerMenu::ScrollDown() { ++scroll; }
 void StockManagerMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
+
+static SquadsMenu* SquadsMenu::squadMenu = 0;
+static SquadsMenu* SquadsMenu::SquadMenu() {
+	if (!squadMenu) squadMenu = new SquadsMenu();
+	return squadMenu;
+}
+
+SquadsMenu::SquadsMenu() {
+	width = 50;
+	height = 50;
+}
+
+void SquadsMenu::Draw(int, int, TCODConsole*) {
+}
+
+MenuResult SquadsMenu::Update(int = -1, int = -1) {
+}
+
+static SquadsMenu* SquadsMenu::squadMenu = 0;
+static SquadsMenu* SquadsMenu::SquadMenu() {
+	if (!squadMenu) squadMenu = new SquadsMenu();
+	return squadMenu;
+}
+
+SquadsMenu::SquadsMenu() {
+	width = 50;
+	height = 50;
+	topX = (Game::ScreenWidth() - width) / 2;
+	topY = (Game::ScreenHeight() - height) / 2;
+}
+
+void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
+	console->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "Squads");
+
+	console->printFrame(topX+1, topY+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "Existing");
+	y = topY+2;
+	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin(); squadi != Game::Inst()->squadList.end(); ++squadi) {
+		console->print(topX+2, y++, squadi->first.c_str());
+	}
+
+	x = topX+(width/2);
+	y = topY+2;
+	console->printFrame(x, topY+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "New");
+	console->print(x, y++, "Name:");
+	console->printFrame(x, y, 1, 1, false, TCOD_BKGND_SET);
+	console->printFrame(x+9, y++, 1, 1, false, TCOD_BKGND_SET);
+	console->print(x+1, y, "-");
+	console->print(x+3, y, "Members");
+	console->print(x+10, y++, "+");
+
+	console->printFrame(x, ++y, 1, 1, false, TCOD_BKGND_SET);
+	console->printFrame(x+10, y++, 1, 1, false, TCOD_BKGND_SET);
+	console->print(x+1, y, "-");
+	console->print(x+3, y, "Priority");
+	console->print(x+11, y++, "+");
+}
+
+MenuResult SquadsMenu::Update(int y, int y) {
+}

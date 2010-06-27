@@ -54,6 +54,9 @@ class Game {
         int OrcCount(); int GoblinCount();
 		void FindNearbyNPCs(boost::shared_ptr<NPC>);
 		void RemoveNPC(boost::weak_ptr<NPC>);
+		int FindMilitaryRecruit();
+		std::map<std::string, Squad> squadList;
+		void CreateSquad(std::string);
 
 
 /*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */

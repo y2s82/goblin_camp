@@ -26,6 +26,7 @@ void SkillSet::operator()(Skill skill, int value) {skills[skill] = value;}
 
 NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
             boost::function<void(boost::shared_ptr<NPC>)> react) : Entity(),
+	type(0),
 	timeCount(0),
 	taskIndex(0),
 	nopath(false),
@@ -50,6 +51,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	aggressive(false),
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
+	squad(boost::weak_ptr<Squad>()),
 	FindJob(findJob),
 	React(react)
 {
@@ -246,6 +248,8 @@ AiThink NPC::Think() {
 					}
 					break;
 
+					//TODO: Implement proper MOVENEAR
+				case MOVENEAR:
 				case MOVEADJACENT:
 					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 						TaskFinished(TASKSUCCESS);
@@ -569,6 +573,25 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex 
 }
 
 bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
+	//Either create an internal job if this npc is part of a squad, or get one from the JobManager
+	if (npc->Squad().lock()) {
+		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
+		switch (npc->Squad().lock()->Order()) {
+		case GUARD:
+			newJob->tasks.push_back(Task(MOVENEAR, npc->Squad().lock()->TargetCoordinate()));
+			//Currently WAIT waits Coordinate.x updates
+			newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0));
+			npc->jobs.push_back(newJob);
+			break;
+		
+		case ESCORT:
+			newJob->tasks.push_back(Task(MOVENEAR, npc->Squad().lock()->TargetEntity().lock()->Position()));
+			npc->jobs.push_back(newJob);
+			break;
+		}
+
+	}
+
    	boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
 	if (newJob)  {
 		npc->jobs.push_back(newJob);
@@ -661,3 +684,6 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 		}
 	}
 }
+
+void NPC::Squad(boost::weak_ptr<Squad> newSquad) {squad = newSquad;}
+boost::weak_ptr<Squad> NPC::Squad() {return squad;}
