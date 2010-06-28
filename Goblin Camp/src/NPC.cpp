@@ -224,7 +224,7 @@ AiThink NPC::Think() {
 	timeCount += thinkSpeed;
 	while (timeCount > UPDATES_PER_SECOND) {
 
-        React(boost::static_pointer_cast<NPC>(shared_from_this()));
+        if (rand() % 5 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock())
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
@@ -456,7 +456,7 @@ AiThink NPC::Think() {
 			        boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
 					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
-						if (npci->lock()->faction != faction) {
+						if (npci->lock() && npci->lock()->faction != faction) {
 							int dx = _x - npci->lock()->_x;
 							int dy = _y - npci->lock()->_y;
 							if (Map::Inst()->Walkable(_x + dx, _y + dy)) {
@@ -574,18 +574,18 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex 
 
 bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 	//Either create an internal job if this npc is part of a squad, or get one from the JobManager
-	if (npc->Squad().lock()) {
+	if (npc->MemberOf().lock()) {
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
-		switch (npc->Squad().lock()->Order()) {
+		switch (npc->MemberOf().lock()->Order()) {
 		case GUARD:
-			newJob->tasks.push_back(Task(MOVENEAR, npc->Squad().lock()->TargetCoordinate()));
+			newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
 			//Currently WAIT waits Coordinate.x updates
-			newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0));
+			newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0)));
 			npc->jobs.push_back(newJob);
 			break;
 		
 		case ESCORT:
-			newJob->tasks.push_back(Task(MOVENEAR, npc->Squad().lock()->TargetEntity().lock()->Position()));
+			newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position()));
 			npc->jobs.push_back(newJob);
 			break;
 		}
@@ -685,5 +685,5 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 	}
 }
 
-void NPC::Squad(boost::weak_ptr<Squad> newSquad) {squad = newSquad;}
-boost::weak_ptr<Squad> NPC::Squad() {return squad;}
+void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {squad = newSquad;}
+boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}

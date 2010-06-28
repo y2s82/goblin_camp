@@ -4,6 +4,7 @@
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <vector>
+#include <libtcod.hpp>
 
 #include "Game.hpp"
 
@@ -118,6 +119,9 @@ class StockManagerMenu : public Menu {
 
 class SquadsMenu : public Menu {
 private:
+	std::string squadName;
+	int squadMembers;
+	int squadPriority;
 public:
 	SquadsMenu();
 	void Draw(int, int, TCODConsole*);

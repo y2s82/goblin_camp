@@ -51,6 +51,9 @@ private:
 	int keyHelpTextColor;
 	bool draggingViewport;
 	SideBar sideBar;
+	bool textMode;
+	std::string inputString;
+	int inputStringLimit;
 
 	void HandleUnderCursor(Coordinate);
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
@@ -75,4 +78,6 @@ public:
 	void CurrentMenu(Menu*);
 	void AddToHistory(Menu*);
 	int KeyHelpTextColor() const;
+	void SetTextMode(bool, int=50);
+	std::string InputString();
 };

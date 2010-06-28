@@ -55,7 +55,7 @@ class Game {
 		void FindNearbyNPCs(boost::shared_ptr<NPC>);
 		void RemoveNPC(boost::weak_ptr<NPC>);
 		int FindMilitaryRecruit();
-		std::map<std::string, Squad> squadList;
+		std::map<std::string, boost::shared_ptr<Squad> > squadList;
 		void CreateSquad(std::string);
 
 

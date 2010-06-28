@@ -11,9 +11,9 @@ enum Orders {
 	GUARD,
 	PATROL,
 	ESCORT
-}
+};
 
-class Squad {
+class Squad : public boost::enable_shared_from_this<Squad> {
 private:
 	std::string name;
 	int memberReq;
@@ -33,4 +33,7 @@ public:
 	void TargetCoordinate(Coordinate);
 	boost::weak_ptr<Entity> TargetEntity();
 	void TargetEntity(boost::weak_ptr<Entity>);
+	int MemberCount();
+	int MemberLimit();
+	void MemberLimit(int);
 };

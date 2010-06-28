@@ -1,4 +1,6 @@
+#include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
+#include <string>
 
 #include "Menu.hpp"
 #include "UI.hpp"
@@ -89,6 +91,7 @@ Menu* Menu::MainMenu() {
 		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceMenu::AnnouncementsMenu())));
 		mainMenu->AddChoice(MenuChoice("NPC List", boost::bind(UI::ChangeMenu, NPCMenu::NPCListMenu())));
 #endif
+		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsMenu::SquadMenu())));
 		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit)));
 	}
 	return mainMenu;
@@ -515,34 +518,18 @@ StockManagerMenu* StockManagerMenu::StocksMenu() {
 void StockManagerMenu::ScrollDown() { ++scroll; }
 void StockManagerMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
 
-static SquadsMenu* SquadsMenu::squadMenu = 0;
-static SquadsMenu* SquadsMenu::SquadMenu() {
+SquadsMenu* SquadsMenu::squadMenu = 0;
+SquadsMenu* SquadsMenu::SquadMenu() {
 	if (!squadMenu) squadMenu = new SquadsMenu();
 	return squadMenu;
 }
 
-SquadsMenu::SquadsMenu() {
+SquadsMenu::SquadsMenu() : Menu(std::vector<MenuChoice>()) {
 	width = 50;
-	height = 50;
-}
-
-void SquadsMenu::Draw(int, int, TCODConsole*) {
-}
-
-MenuResult SquadsMenu::Update(int = -1, int = -1) {
-}
-
-static SquadsMenu* SquadsMenu::squadMenu = 0;
-static SquadsMenu* SquadsMenu::SquadMenu() {
-	if (!squadMenu) squadMenu = new SquadsMenu();
-	return squadMenu;
-}
-
-SquadsMenu::SquadsMenu() {
-	width = 50;
-	height = 50;
-	topX = (Game::ScreenWidth() - width) / 2;
-	topY = (Game::ScreenHeight() - height) / 2;
+	height = 20;
+	topX = (Game::Inst()->ScreenWidth() - width) / 2;
+	topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	squadName = ""; squadMembers = 1; squadPriority = 0;
 }
 
 void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
@@ -551,25 +538,69 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->printFrame(topX+1, topY+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "Existing");
 	y = topY+2;
 	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin(); squadi != Game::Inst()->squadList.end(); ++squadi) {
-		console->print(topX+2, y++, squadi->first.c_str());
+		console->print(topX+2, y++, "%s (%d/%d)", squadi->first.c_str(), squadi->second->MemberCount(),
+			squadi->second->MemberLimit());
 	}
 
 	x = topX+(width/2);
 	y = topY+2;
-	console->printFrame(x, topY+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "New");
-	console->print(x, y++, "Name:");
-	console->printFrame(x, y, 1, 1, false, TCOD_BKGND_SET);
-	console->printFrame(x+9, y++, 1, 1, false, TCOD_BKGND_SET);
-	console->print(x+1, y, "-");
-	console->print(x+3, y, "Members");
-	console->print(x+10, y++, "+");
+	console->printFrame(x, topY+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, "New");
+	console->setAlignment(TCOD_CENTER);
+	++x;
+	console->print(x+(width/4)-2, y, "Name");
+	console->print(x+(width/4)-2, y+1, squadName.c_str());
+	y += 3;
+	console->printFrame(x+3, y, 3, 3, false, TCOD_BKGND_SET);
+	console->printFrame(x+17, y++, 3, 3, false, TCOD_BKGND_SET);
+	console->setForegroundColor(TCODColor::red);
+	console->print(x+4, y, "-");
+	console->setForegroundColor(TCODColor::white);
+	console->print(x+(width/4)-1, y, "Members");
+	console->print(x+(width/4)-1, y+1, "%d", squadMembers);
+	console->setForegroundColor(TCODColor::green);
+	console->print(x+18, y, "+");
+	console->setForegroundColor(TCODColor::white);
+	y += 3;
+	console->printFrame(x+3, ++y, 3, 3, false, TCOD_BKGND_SET);
+	console->printFrame(x+17, y++, 3, 3, false, TCOD_BKGND_SET);
+	console->setForegroundColor(TCODColor::red);
+	console->print(x+4, y, "-");
+	console->setForegroundColor(TCODColor::white);
+	console->print(x+(width/4)-1, y, "Priority");
+	console->print(x+(width/4)-1, y+1, "%d", squadPriority);
+	console->setForegroundColor(TCODColor::green);
+	console->print(x+18, y++, "+");
+	console->setForegroundColor(TCODColor::white);
 
-	console->printFrame(x, ++y, 1, 1, false, TCOD_BKGND_SET);
-	console->printFrame(x+10, y++, 1, 1, false, TCOD_BKGND_SET);
-	console->print(x+1, y, "-");
-	console->print(x+3, y, "Priority");
-	console->print(x+11, y++, "+");
+	console->printFrame(x+(width/4)-6, y+2, 10, 3, false);
+	console->print(x+(width/4)-1, y+3, "Create");
+
+	console->setAlignment(TCOD_LEFT);
 }
 
-MenuResult SquadsMenu::Update(int y, int y) {
+MenuResult SquadsMenu::Update(int x, int y) {
+	UI::Inst()->SetTextMode(true, 21);
+	squadName = UI::Inst()->InputString();
+
+	if (x > topX + (width/2)) {
+		if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
+			if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) --squadMembers;
+			else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) --squadPriority;
+		} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
+			if (y > topY+2+3 && y < topY+2+6) ++squadMembers;
+			else if (y > topY+2+8 && y < topY+2+11) ++squadPriority;
+		} else if (x > topX + (width/2) + (width/4) - 6 && x < topX + (width/2) + (width/4) + 5
+			&& y > topY+2+12 && y < topY+2+15) {
+				if (squadName != "") {
+					Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
+						(squadName, new Squad(squadName, squadMembers, squadPriority)));
+					squadName = "";
+					//This is to empty the input string
+					UI::Inst()->SetTextMode(false);
+				}
+		}
+
+	}
+
+	return NOMENUHIT;
 }

@@ -90,7 +90,7 @@ void mainLoop() {
 	QueryPerformanceCounter(&timeStart);
 
     Game::Inst()->upleft = Coordinate(180,180);
-	Announce::Inst()->AddMsg("Press 'H' for keyboard shortcuts", TCODColor::cyan);
+	Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
 	while(true) {
 		while (logicTimer >= (1000 / UPDATES_PER_SECOND)) {
 			
@@ -108,7 +108,7 @@ void mainLoop() {
         Game::Inst()->Draw();
 		Game::Inst()->FlipBuffer();
 
-		//This "weirdness" is required because the loop is not guaranteed to take longer than 1ms to execute
+		//This is required because the loop is not guaranteed to take longer than 1ms to execute
 		QueryPerformanceCounter(&timeNow);
 		timerAddition = (int)((timeNow.QuadPart - timeStart.QuadPart) * 1000 / freq.QuadPart);
 		logicTimer += timerAddition;

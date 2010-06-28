@@ -128,8 +128,8 @@ class NPC : public Entity {
 		void Kill();
 		void DropCarriedItem();
 		void Hit(boost::weak_ptr<Entity>);
-		void Squad(boost::weak_ptr<Squad>);
-		boost::weak_ptr<Squad> Squad();
+		void MemberOf(boost::weak_ptr<Squad>);
+		boost::weak_ptr<Squad> MemberOf();
 
 		static bool JobManagerFinder(boost::shared_ptr<NPC>);
 		static void PlayerNPCReact(boost::shared_ptr<NPC>);

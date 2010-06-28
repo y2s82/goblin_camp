@@ -11,9 +11,9 @@ bool Squad::UpdateMembers() {
 	int newMember = Game::Inst()->FindMilitaryRecruit();
 	if (newMember >= 0) { 
 		members.push_back(newMember);
-		Game::Inst()->npcList[newMember]->Squad(shared_from_this());
+		Game::Inst()->npcList[newMember]->MemberOf(shared_from_this());
 	}
-	if (members.size() < memberReq) return true;
+	if ((signed int)members.size() < memberReq) return true;
 	return false;
 }
 
@@ -26,3 +26,7 @@ void Squad::TargetCoordinate(Coordinate newTarget) {targetCoordinate = newTarget
 
 boost::weak_ptr<Entity> Squad::TargetEntity() {return targetEntity;}
 void Squad::TargetEntity(boost::weak_ptr<Entity> newEntity) {targetEntity = newEntity;}
+
+int Squad::MemberCount() { return members.size(); }
+int Squad::MemberLimit() { return memberReq; }
+void Squad::MemberLimit(int val) { memberReq = val; }

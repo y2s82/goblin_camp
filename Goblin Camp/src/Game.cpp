@@ -263,8 +263,9 @@ void Game::Init(int width, int height, bool fullscreen) {
 	srand((unsigned int)std::time(0));
 
     //Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_GLSL);
-    TCODConsole::root->setAlignment(TCOD_LEFT);
+	//TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_GLSL);
+    TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_SDL);
+	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	screenWidth = width; screenHeight = height;
 
@@ -808,12 +809,13 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> npc) {
 
 int Game::FindMilitaryRecruit() {
 	for (std::map<int, boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
-		if (npci->second.type == 1 && npci->second.faction == 0 !npci->second.squad.lock()) {
-			return npci->second.uid;
+		if (npci->second->type == 1 && npci->second->faction == 0 && !npci->second->squad.lock()) {
+			return npci->second->uid;
 		}
 	}
+	return -1;
 }
 
 void Game::CreateSquad(std::string name) {
-	squadList.push_back(Squad(name));
+	squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >(name, new Squad(name)));
 }
