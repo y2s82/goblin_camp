@@ -8,6 +8,7 @@
 #include "Entity.hpp"
 
 enum Orders {
+	NOORDER,
 	GUARD,
 	PATROL,
 	ESCORT
@@ -36,4 +37,6 @@ public:
 	int MemberCount();
 	int MemberLimit();
 	void MemberLimit(int);
+	std::string Name();
+	void Leave(int);
 };

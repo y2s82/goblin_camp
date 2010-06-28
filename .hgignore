@@ -40,4 +40,5 @@ Debug\
 *.cd
 *SyncToy*
 Log.txt
-glob:*.dll
+*.dll
+screenshot*.png

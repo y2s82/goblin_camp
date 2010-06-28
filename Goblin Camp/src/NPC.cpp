@@ -69,6 +69,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 
 NPC::~NPC() {
 	Map::Inst()->NPCList(_x, _y)->erase(uid);
+	if (squad.lock()) squad.lock()->Leave(uid);
 }
 
 void NPC::Position(Coordinate pos, bool firstTime) {
@@ -576,16 +577,19 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 	//Either create an internal job if this npc is part of a squad, or get one from the JobManager
 	if (npc->MemberOf().lock()) {
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
+		newJob->internal = true;
+		//FIXME: Squads orders default to (0,0), which makes orcs run off.
 		switch (npc->MemberOf().lock()->Order()) {
 		case GUARD:
-			newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
+			//newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
+			newJob->tasks.push_back(Task(MOVE, npc->MemberOf().lock()->TargetCoordinate()));
 			//Currently WAIT waits Coordinate.x updates
 			newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0)));
 			npc->jobs.push_back(newJob);
 			break;
 		
 		case ESCORT:
-			newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position()));
+			newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position(), npc->MemberOf().lock()->TargetEntity()));
 			npc->jobs.push_back(newJob);
 			break;
 		}

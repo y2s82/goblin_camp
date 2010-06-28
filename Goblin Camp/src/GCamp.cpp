@@ -79,11 +79,11 @@ void mainLoop() {
 
 	QueryPerformanceFrequency(&freq);
 
-	for (int npcs = 0; npcs < 10; ++npcs) {
-		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
-	}
-	for (int npcs = 0; npcs < 10; ++npcs) {
+	for (int npcs = 0; npcs < 5; ++npcs) {
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
+	}
+	for (int npcs = 0; npcs < 15; ++npcs) {
+		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
 	}
 

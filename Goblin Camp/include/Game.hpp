@@ -57,6 +57,8 @@ class Game {
 		int FindMilitaryRecruit();
 		std::map<std::string, boost::shared_ptr<Squad> > squadList;
 		void CreateSquad(std::string);
+		static void SetSquadTargetCoordinate(Coordinate, boost::shared_ptr<Squad>);
+		static void SetSquadTargetEntity(Coordinate, boost::shared_ptr<Squad>);
 
 
 /*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */

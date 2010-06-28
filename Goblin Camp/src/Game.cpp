@@ -99,55 +99,59 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 //Returns Coordinate(<0,<0) if not found
 Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 	Coordinate closest(-9999, -9999);
-
-    if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
-        boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
-        for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
-            for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
-                if (ix == construct.lock()->x()-1 || ix == construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x() ||
-                    iy == construct.lock()->y()-1 || iy == construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y()) {
-                    if (Map::Inst()->Walkable(ix,iy)) {
-                        if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
-                            closest = Coordinate(ix,iy);
-                    }
-                }
-            }
-        }
-    } else {
-        for (int ix = ent.lock()->x()-1; ix <= ent.lock()->x()+1; ++ix) {
-            for (int iy = ent.lock()->y()-1; iy <= ent.lock()->y()+1; ++iy) {
-                if (ix == ent.lock()->x()-1 || ix == ent.lock()->x()+1 ||
-                    iy == ent.lock()->y()-1 || iy == ent.lock()->y()+1) {
-                    if (Map::Inst()->Walkable(ix,iy)) {
-                        if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
-                            closest = Coordinate(ix,iy);
-                    }
-                }
-            }
-        }
-    }
+	if (ent.lock()) {
+		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
+			boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
+			for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
+				for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
+					if (ix == construct.lock()->x()-1 || ix == construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x() ||
+						iy == construct.lock()->y()-1 || iy == construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y()) {
+						if (Map::Inst()->Walkable(ix,iy)) {
+							if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
+								closest = Coordinate(ix,iy);
+						}
+					}
+				}
+			}
+		} else {
+			for (int ix = ent.lock()->x()-1; ix <= ent.lock()->x()+1; ++ix) {
+				for (int iy = ent.lock()->y()-1; iy <= ent.lock()->y()+1; ++iy) {
+					if (ix == ent.lock()->x()-1 || ix == ent.lock()->x()+1 ||
+						iy == ent.lock()->y()-1 || iy == ent.lock()->y()+1) {
+						if (Map::Inst()->Walkable(ix,iy)) {
+							if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
+								closest = Coordinate(ix,iy);
+						}
+					}
+				}
+			}
+		}
+	}
     return closest;
 }
 
 //Returns true/false depending on if the given position is adjacent to the entity
 //Takes into consideration if the entity is a construction, and thus may be larger than just one tile
 bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
-    if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
-        boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
-        for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
-            for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
-                if (pos.x() == ix && pos.y() == iy) { return true; }
-            }
-        }
-        return false;
-    } else {
-        for (int ix = ent.lock()->x()-1; ix <= ent.lock()->x()+1; ++ix) {
-            for (int iy = ent.lock()->y()-1; iy <= ent.lock()->y()+1; ++iy) {
-                if (pos.x() == ix && pos.y() == iy) { return true; }
-            }
-        }
-        return false;
-    }
+	if (ent.lock()) {
+		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
+			boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
+			for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
+				for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
+					if (pos.x() == ix && pos.y() == iy) { return true; }
+				}
+			}
+			return false;
+		} else {
+			for (int ix = ent.lock()->x()-1; ix <= ent.lock()->x()+1; ++ix) {
+				for (int iy = ent.lock()->y()-1; iy <= ent.lock()->y()+1; ++iy) {
+					if (pos.x() == ix && pos.y() == iy) { return true; }
+				}
+			}
+			return false;
+		}
+	}
+	return false;
 }
 
 //This is placeholder right now, creature information is going to be moved into it's own file so that it won't be
@@ -518,6 +522,12 @@ void Game::Update() {
 	    }
 	}
 
+	//Squads needen't update their member rosters ALL THE TIME
+	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+		for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = squadList.begin(); squadi != squadList.end(); ++squadi) {
+			squadi->second->UpdateMembers();
+		}
+	}
 	StockManager::Inst()->Update();
 }
 
@@ -672,7 +682,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
                 boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
                 if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
                     natObj.lock()->Mark();
-                    boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, false));
+                    boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
                     fellJob->ConnectToEntity(natObj);
                     fellJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
                     fellJob->tasks.push_back(Task(FELL, natObj.lock()->Position(), natObj));
@@ -819,3 +829,16 @@ int Game::FindMilitaryRecruit() {
 void Game::CreateSquad(std::string name) {
 	squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >(name, new Squad(name)));
 }
+
+void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
+	squad->TargetCoordinate(target);
+}
+void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squad) {
+	if (target.x() >= 0 && target.x() < Map::Inst()->Width() && target.y() >= 0 && target.y() < Map::Inst()->Height()) {
+		std::set<int> *npcList = Map::Inst()->NPCList(target.x(), target.y());
+		if (!npcList->empty()) {
+		   squad->TargetEntity(Game::Inst()->npcList[*npcList->begin()]);
+		}
+	}
+}
+

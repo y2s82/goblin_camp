@@ -1,10 +1,10 @@
 name "orc" {
 syllablesPre = "Blackeye, Redeye, Bloodeye, Hardhead, Terrorizing, Murderer"
-syllablesStart = "Gat, Ger, Gif, Gor, Gug, Kal, Keil, Kiv, Kour, Kuar, Kvit"
-syllablesMiddle = "tar, kil, lok, man, nik, rip, trim"
-syllablesEnd = "ak, ik, ap, pat, ru, ar"
+syllablesStart = "Snag, Dak, Brub, Waat, Skar, Ug, Dur, Naff, Grot, Gob, Zog, Gut, Wort, Mor"
+syllablesMiddle = "yu, oi, lok, man, nik, rip, trim"
+syllablesEnd = "grim, naga, gut, snik, shak, bog, gul"
 syllablesPost = "the_Longlegged, the_Strong, the_Fat, the_Fearless"
-rules = "$s$50m$e_$50p, $50P_$s$50m$e"
+rules = "$s$30m$e_$50p, $50P_$s$30m$e"
 }
 
 name "goblin" {

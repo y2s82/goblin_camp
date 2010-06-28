@@ -1,10 +1,11 @@
 #pragma once
 
-#include <string>
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <vector>
+#include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
+#include <string>
+#include <vector>
 
 #include "Game.hpp"
 
@@ -122,6 +123,7 @@ private:
 	std::string squadName;
 	int squadMembers;
 	int squadPriority;
+	boost::weak_ptr<Squad> chosenSquad;
 public:
 	SquadsMenu();
 	void Draw(int, int, TCODConsole*);

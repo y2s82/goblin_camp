@@ -463,6 +463,7 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 				console->print(x,y, "%c %s", Item::Presets[*itemi].graphic, Item::Presets[*itemi].name.c_str());
 				console->setForegroundColor(TCODColor::white);
 				console->print(x,y+1, "%d", StockManager::Inst()->TypeQuantity(*itemi));
+
 				console->print(x,y+2, "- %d +", StockManager::Inst()->Minimum(*itemi));
 
 				x += 16;
@@ -479,17 +480,11 @@ MenuResult StockManagerMenu::Update(int x, int y) {
 		int ch = TCODConsole::root->getChar(x,y);
 
 		if (ch == '-' || ch == '+') {
-#ifdef DEBUG
-			std::cout<<"Clicked StockManagerMenu::Update("<<x<<","<<y<<")\n";
-#endif
 			x -= (topX + 4); //If it's the first choice, x is now ~0
 			x /= 16; //Now x = the column
 			y -= (topY + 3 + 2); //+2 because +/- are under the text
 			y /= 5;
 			int choice = x + (y*3);
-#ifdef DEBUG
-			std::cout<<"x: "<<x<<" y: "<<y<<" choice: "<<choice<<"\n";
-#endif
 			//Because choice = index based on the visible items, we need to translate that into
 			//an actual ItemType, which might be anything. So just go through the items as in
 			//Draw() to find which index equals which itemtype.
@@ -524,12 +519,17 @@ SquadsMenu* SquadsMenu::SquadMenu() {
 	return squadMenu;
 }
 
-SquadsMenu::SquadsMenu() : Menu(std::vector<MenuChoice>()) {
+SquadsMenu::SquadsMenu() : Menu(std::vector<MenuChoice>()),
+	squadName(""),
+	squadMembers(1),
+	squadPriority(0),
+	chosenSquad(boost::weak_ptr<Squad>())
+{
 	width = 50;
 	height = 20;
 	topX = (Game::Inst()->ScreenWidth() - width) / 2;
 	topY = (Game::Inst()->ScreenHeight() - height) / 2;
-	squadName = ""; squadMembers = 1; squadPriority = 0;
+
 }
 
 void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
@@ -575,6 +575,18 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->printFrame(x+(width/4)-6, y+2, 10, 3, false);
 	console->print(x+(width/4)-1, y+3, "Create");
 
+	if (chosenSquad.lock()) {
+		x = topX;
+		y = topY+19;
+		console->printFrame(x, y, width, 7, true, TCOD_BKGND_SET, "Orders for %s", chosenSquad.lock()->Name().c_str());
+		console->printFrame(x+2, y+2, 7, 3, false);
+		console->setBackgroundColor((chosenSquad.lock()->Order() == GUARD) ? TCODColor::blue : TCODColor::black);
+		console->print(x+5, y+3, "Guard");
+		console->printFrame(x+12, y+2, 8, 3, false);
+		console->setBackgroundColor((chosenSquad.lock()->Order() == ESCORT) ? TCODColor::blue : TCODColor::black);
+		console->print(x+16, y+3, "Escort");
+	}
+
 	console->setAlignment(TCOD_LEFT);
 }
 
@@ -582,24 +594,45 @@ MenuResult SquadsMenu::Update(int x, int y) {
 	UI::Inst()->SetTextMode(true, 21);
 	squadName = UI::Inst()->InputString();
 
-	if (x > topX + (width/2)) {
-		if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
-			if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) --squadMembers;
-			else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) --squadPriority;
-		} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
-			if (y > topY+2+3 && y < topY+2+6) ++squadMembers;
-			else if (y > topY+2+8 && y < topY+2+11) ++squadPriority;
-		} else if (x > topX + (width/2) + (width/4) - 6 && x < topX + (width/2) + (width/4) + 5
-			&& y > topY+2+12 && y < topY+2+15) {
-				if (squadName != "") {
-					Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
-						(squadName, new Squad(squadName, squadMembers, squadPriority)));
-					squadName = "";
-					//This is to empty the input string
-					UI::Inst()->SetTextMode(false);
-				}
-		}
+	if (y < topY+19) {
+		if (x > topX + (width/2)) {
+			if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
+				if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) --squadMembers;
+				else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) --squadPriority;
+			} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
+				if (y > topY+2+3 && y < topY+2+6) ++squadMembers;
+				else if (y > topY+2+8 && y < topY+2+11) ++squadPriority;
+			} else if (x > topX + (width/2) + (width/4) - 6 && x < topX + (width/2) + (width/4) + 5
+				&& y > topY+2+12 && y < topY+2+15) {
+					if (squadName != "") {
+						Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
+							(squadName, new Squad(squadName, squadMembers, squadPriority)));
+						chosenSquad = Game::Inst()->squadList[squadName];
+						squadName = "";
+						//This is to empty the input string
+						UI::Inst()->SetTextMode(false);
+					}
+			}
 
+		} else if (x > topX) {
+			y -= (topY+2);
+			if (y < (signed int)Game::Inst()->squadList.size()) {
+				std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
+				while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
+				if (squadi != Game::Inst()->squadList.end()) chosenSquad = squadi->second;
+				else chosenSquad = boost::weak_ptr<Squad>();
+			} else chosenSquad = boost::weak_ptr<Squad>();
+		}
+	} else {
+		if (y > topY+20 && y < topY+24) {
+			if (x > topX+1 && x < topX+7) { //Guard
+				chosenSquad.lock()->Order(GUARD);
+				UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
+			} else if (x > topX+13 && x < topX+20) { //Escort
+				chosenSquad.lock()->Order(ESCORT);
+				UI::ChooseOrderTargetEntity(chosenSquad.lock());
+			}
+		}
 	}
 
 	return NOMENUHIT;

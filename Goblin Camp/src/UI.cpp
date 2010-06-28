@@ -162,7 +162,7 @@ void UI::HandleKeyboard() {
 			TCODSystem::saveScreenshot(0);
 		}
 	} else {
-		if (key.c >= ' ' && key.c <= '}' && inputString.size() < inputStringLimit) {
+		if (key.c >= ' ' && key.c <= '}' && (signed int)inputString.size() < inputStringLimit) {
 			inputString += key.c;
 		} else if (key.vk == TCODK_BACKSPACE) {
 			if (inputString.size() > 0) inputString.pop_back();
@@ -525,6 +525,20 @@ void UI::ChoosePlantHarvest() {
     UI::Inst()->blueprint(Coordinate(1,1));
 }
 
+void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetCoordinate, _1, squad));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, Coordinate(1,1)));
+	UI::Inst()->blueprint(Coordinate(1,1));
+}
+
+void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad) {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, _1, squad));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, Coordinate(1,1)));
+	UI::Inst()->blueprint(Coordinate(1,1));
+}
+
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
     if (pos.x() >= 0 && pos.x() < Map::Inst()->Width() && pos.y() >= 0 && pos.y() < Map::Inst()->Height()) {
         std::set<int> *npcList = Map::Inst()->NPCList(pos.x(), pos.y());
@@ -631,6 +645,9 @@ void SideBar::Draw(TCODConsole* console) {
 				if (++y > 10) break;
 			}
 			console->setForegroundColor(TCODColor::white);
+			if (npc->MemberOf().lock()) { //Member of a squad
+				console->print(edgeX - width + 1, topY+28, npc->MemberOf().lock()->Name().c_str());
+			}
 		} else if (construction) {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
@@ -654,11 +671,12 @@ void SideBar::Draw(TCODConsole* console) {
 		}
 		
 		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
+		console->setForegroundColor(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
 		minimap.flush();
 		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
-		console->setForegroundColor(TCODColor::white);
 	}
+	console->setForegroundColor(TCODColor::white);
 }
 
 void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
