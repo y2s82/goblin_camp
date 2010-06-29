@@ -544,7 +544,7 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 
 	x = topX+(width/2);
 	y = topY+2;
-	console->printFrame(x, topY+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, "New");
+	console->printFrame(x, topY+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, (chosenSquad.lock()) ? "Modify Squad" : "New Squad");
 	console->setAlignment(TCOD_CENTER);
 	++x;
 	console->print(x+(width/4)-2, y, "Name");
@@ -572,8 +572,12 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->print(x+18, y++, "+");
 	console->setForegroundColor(TCODColor::white);
 
-	console->printFrame(x+(width/4)-6, y+2, 10, 3, false);
-	console->print(x+(width/4)-1, y+3, "Create");
+	console->printFrame(x+(width/4)-11, y+2, 10, 3, false);
+	console->print(x+(width/4)-6, y+3, (chosenSquad.lock()) ? "Modify" : "Create");
+	if (chosenSquad.lock()) {
+		console->printFrame(x+(width/4)-1, y+2, 10, 3, false);
+		console->print(x+(width/4)+4, y+3, "Delete");
+	}
 
 	if (chosenSquad.lock()) {
 		x = topX;
@@ -603,15 +607,31 @@ MenuResult SquadsMenu::Update(int x, int y) {
 			} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
 				if (y > topY+2+3 && y < topY+2+6) {++squadMembers; return MENUHIT; }
 				else if (y > topY+2+8 && y < topY+2+11) {++squadPriority; return MENUHIT; }
-			} else if (x > topX + (width/2) + (width/4) - 6 && x < topX + (width/2) + (width/4) + 5
+			} else if (x > topX + (width/2) + 1 && x < topX + (width/2) + 11
 				&& y > topY+2+12 && y < topY+2+15) {
-					if (squadName != "") {
+					if (squadName != "" && !chosenSquad.lock()) { //Create
 						Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
 							(squadName, new Squad(squadName, squadMembers, squadPriority)));
-						chosenSquad = Game::Inst()->squadList[squadName];
+//						chosenSquad = Game::Inst()->squadList[squadName];
 						squadName = "";
-						//This is to empty the input string
-						UI::Inst()->SetTextMode(false);
+						UI::Inst()->InputString("");
+						return MENUHIT;
+					} else if (chosenSquad.lock()) { //Modify
+						boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
+						Game::Inst()->squadList.erase(tempSquad->Name());
+						tempSquad->Name(squadName);
+						Game::Inst()->squadList.insert(std::pair<std::string, 
+							boost::shared_ptr<Squad> >(squadName, tempSquad));
+						tempSquad->MemberLimit(squadMembers);
+						tempSquad->Priority(squadPriority);
+						return MENUHIT;
+					}
+			} else if (x > topX + (width/2) + 12 && x < topX + (width/2) + 22
+				&& y > topY+2+12 && y < topY+2+15) {
+					if (chosenSquad.lock()) {
+						chosenSquad.lock()->RemoveAllMembers();
+						Game::Inst()->squadList.erase(chosenSquad.lock()->Name());
+						chosenSquad = boost::weak_ptr<Squad>();
 						return MENUHIT;
 					}
 			}
@@ -620,11 +640,30 @@ MenuResult SquadsMenu::Update(int x, int y) {
 			y -= (topY+2);
 			if (y < (signed int)Game::Inst()->squadList.size()) {
 				std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
-				while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
-				if (squadi != Game::Inst()->squadList.end()) chosenSquad = squadi->second;
-				else chosenSquad = boost::weak_ptr<Squad>();
+				//while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
+				squadi = boost::next(squadi, y);
+				if (squadi != Game::Inst()->squadList.end()) {
+					chosenSquad = squadi->second;
+					squadMembers = squadi->second->MemberLimit();
+					squadPriority = squadi->second->Priority();
+					UI::Inst()->InputString(squadi->first);
+				}
+				else {
+					chosenSquad = boost::weak_ptr<Squad>();
+					squadMembers = 1;
+					squadPriority = 0;
+					squadName = "";
+					UI::Inst()->InputString("");
+				}
 				return MENUHIT;
-			} else { chosenSquad = boost::weak_ptr<Squad>(); return MENUHIT; }
+			} else { 
+				chosenSquad = boost::weak_ptr<Squad>(); 
+				squadMembers = 1;
+				squadPriority = 0;
+				squadName = "";
+				UI::Inst()->InputString("");
+				return MENUHIT; 
+			}
 		}
 	} else {
 		if (y > topY+20 && y < topY+27) {

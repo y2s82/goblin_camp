@@ -8,7 +8,13 @@ Squad::Squad(std::string nameValue, int memberValue, int pri) :
 	targetCoordinate(Coordinate(-1,-1)),
 	targetEntity(boost::weak_ptr<Entity>()),
 	priority(pri)
-	{}
+{}
+
+Squad::~Squad() {
+#ifdef DEBUG
+	std::cout<<"Squad "<<name<<" destructed.\n";
+#endif
+}
 
 bool Squad::UpdateMembers() {
 #ifdef DEBUG
@@ -47,6 +53,7 @@ int Squad::MemberCount() { return members.size(); }
 int Squad::MemberLimit() { return memberReq; }
 void Squad::MemberLimit(int val) { memberReq = val; }
 std::string Squad::Name() { return name; }
+void Squad::Name(std::string value) { name = value; }
 
 void Squad::Leave(int member) {
 	for (std::list<int>::iterator membi = members.begin(); membi != members.end(); ++membi) {
@@ -55,4 +62,14 @@ void Squad::Leave(int member) {
 			break;
 		}
 	}
+}
+
+void Squad::Priority(int value) { priority = value; }
+int Squad::Priority() { return priority; }
+
+void Squad::RemoveAllMembers() {
+	for (std::list<int>::iterator membi = members.begin(); membi != members.end(); ++membi) {
+		Game::Inst()->npcList[*membi]->MemberOf(boost::weak_ptr<Squad>());
+	}
+	members.clear();
 }

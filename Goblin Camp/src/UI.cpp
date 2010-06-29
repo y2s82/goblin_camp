@@ -477,6 +477,11 @@ void UI::DrawTopBar(TCODConsole* console) {
 		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
 		console->print(x, 3, "rders");
 	}
+
+#ifdef DEBUG
+	console->print(0, 0, "%d,%d", mouseInput.x, mouseInput.y);
+#endif
+
 	console->setForegroundColor(TCODColor::white);
 }
 
@@ -610,7 +615,9 @@ void UI::SetTextMode(bool val, int limit) {
 	if (!textMode) inputString = "";
 	inputStringLimit = limit; 
 }
+
 std::string UI::InputString() { return inputString;}
+void UI::InputString(std::string value) { inputString = value; }
 
 void UI::HideMenu() {
 	menuOpen = false;

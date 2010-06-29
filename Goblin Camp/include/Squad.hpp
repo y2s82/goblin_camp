@@ -26,6 +26,7 @@ private:
 	int priority;
 public:
 	Squad(std::string name="Noname nancyboys", int members=0, int priority=0);
+	~Squad();
 	//Recruits one member if needed and returns true if the squad still requires more members
 	bool UpdateMembers();
 	Orders Order();
@@ -38,5 +39,9 @@ public:
 	int MemberLimit();
 	void MemberLimit(int);
 	std::string Name();
+	void Name(std::string);
 	void Leave(int);
+	void Priority(int);
+	int Priority();
+	void RemoveAllMembers();
 };

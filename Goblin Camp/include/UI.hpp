@@ -83,6 +83,7 @@ public:
 	int KeyHelpTextColor() const;
 	void SetTextMode(bool, int=50);
 	std::string InputString();
+	void InputString(std::string);
 	void HideMenu();
 	void CloseMenu();
 	void SetCursor(int);
