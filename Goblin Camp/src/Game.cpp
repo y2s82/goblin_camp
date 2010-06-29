@@ -1,6 +1,7 @@
 #include <map>
 #include <boost/multi_array.hpp>
 #include <boost/bind.hpp>
+#include <boost/format.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -832,12 +833,16 @@ void Game::CreateSquad(std::string name) {
 
 void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
 	squad->TargetCoordinate(target);
+	UI::Inst()->CloseMenu();
+	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.x() % target.y()).str());
 }
 void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squad) {
 	if (target.x() >= 0 && target.x() < Map::Inst()->Width() && target.y() >= 0 && target.y() < Map::Inst()->Height()) {
 		std::set<int> *npcList = Map::Inst()->NPCList(target.x(), target.y());
 		if (!npcList->empty()) {
 		   squad->TargetEntity(Game::Inst()->npcList[*npcList->begin()]);
+		   UI::Inst()->CloseMenu();
+		   Announce::Inst()->AddMsg((boost::format("[%1%] escorting %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str());
 		}
 	}
 }

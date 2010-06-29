@@ -5,7 +5,8 @@ Squad::Squad(std::string nameValue, int memberValue, int pri) :
 	name(nameValue),
 	memberReq(memberValue),
 	order(NOORDER),
-	targetCoordinate(Coordinate(0,0)),
+	targetCoordinate(Coordinate(-1,-1)),
+	targetEntity(boost::weak_ptr<Entity>()),
 	priority(pri)
 	{}
 
@@ -29,7 +30,12 @@ bool Squad::UpdateMembers() {
 
 Orders Squad::Order() {return order;}
 
-void Squad::Order(Orders newOrder) {order = newOrder;}
+//Setting an order resets the target of the order
+void Squad::Order(Orders newOrder) {
+	targetCoordinate = Coordinate(-1,-1);
+	targetEntity = boost::weak_ptr<Entity>();
+	order = newOrder;
+}
 
 Coordinate Squad::TargetCoordinate() {return targetCoordinate;}
 void Squad::TargetCoordinate(Coordinate newTarget) {targetCoordinate = newTarget;}

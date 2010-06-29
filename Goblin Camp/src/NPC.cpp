@@ -264,11 +264,15 @@ AiThink NPC::Think() {
 						taskBegun = true;
 					}
 					result = Move();
+#ifdef DEBUG
+					std::cout<<"MOVENEAR/ADJACENT result = "<<result<<"\n";
+#endif
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
 					else if (result == PATHEMPTY) {
-					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
+/*					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
 					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
-					    }
+					    } */
+						TaskFinished(TASKFAILFATAL);
 					}
 					break;
 
@@ -581,20 +585,26 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 		//FIXME: Squads orders default to (0,0), which makes orcs run off.
 		switch (npc->MemberOf().lock()->Order()) {
 		case GUARD:
-			//newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
-			newJob->tasks.push_back(Task(MOVE, npc->MemberOf().lock()->TargetCoordinate()));
-			//Currently WAIT waits Coordinate.x updates
-			newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0)));
-			npc->jobs.push_back(newJob);
+			if (npc->MemberOf().lock()->TargetCoordinate().x() >= 0) {
+				//newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
+				newJob->tasks.push_back(Task(MOVE, npc->MemberOf().lock()->TargetCoordinate()));
+				//Currently WAIT waits Coordinate.x updates
+				newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0)));
+				npc->jobs.push_back(newJob);
+				return true;
+			}
 			break;
 		
 		case ESCORT:
-			newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position(), npc->MemberOf().lock()->TargetEntity()));
-			npc->jobs.push_back(newJob);
+			if (npc->MemberOf().lock()->TargetEntity().lock()) {
+				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position(), npc->MemberOf().lock()->TargetEntity()));
+				npc->jobs.push_back(newJob);
+				return true;
+			}
 			break;
 		}
-
-	}
+		return false;
+	} 
 
    	boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
 	if (newJob)  {

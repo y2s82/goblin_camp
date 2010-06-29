@@ -579,12 +579,13 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 		x = topX;
 		y = topY+19;
 		console->printFrame(x, y, width, 7, true, TCOD_BKGND_SET, "Orders for %s", chosenSquad.lock()->Name().c_str());
-		console->printFrame(x+2, y+2, 7, 3, false);
 		console->setBackgroundColor((chosenSquad.lock()->Order() == GUARD) ? TCODColor::blue : TCODColor::black);
+		console->printFrame(x+2, y+2, 7, 3, false);
 		console->print(x+5, y+3, "Guard");
-		console->printFrame(x+12, y+2, 8, 3, false);
 		console->setBackgroundColor((chosenSquad.lock()->Order() == ESCORT) ? TCODColor::blue : TCODColor::black);
+		console->printFrame(x+12, y+2, 8, 3, false);
 		console->print(x+16, y+3, "Escort");
+		console->setBackgroundColor(TCODColor::black);
 	}
 
 	console->setAlignment(TCOD_LEFT);
@@ -597,11 +598,11 @@ MenuResult SquadsMenu::Update(int x, int y) {
 	if (y < topY+19) {
 		if (x > topX + (width/2)) {
 			if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
-				if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) --squadMembers;
-				else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) --squadPriority;
+				if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) {--squadMembers; return MENUHIT; }
+				else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) {--squadPriority;  return MENUHIT; }
 			} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
-				if (y > topY+2+3 && y < topY+2+6) ++squadMembers;
-				else if (y > topY+2+8 && y < topY+2+11) ++squadPriority;
+				if (y > topY+2+3 && y < topY+2+6) {++squadMembers; return MENUHIT; }
+				else if (y > topY+2+8 && y < topY+2+11) {++squadPriority; return MENUHIT; }
 			} else if (x > topX + (width/2) + (width/4) - 6 && x < topX + (width/2) + (width/4) + 5
 				&& y > topY+2+12 && y < topY+2+15) {
 					if (squadName != "") {
@@ -611,6 +612,7 @@ MenuResult SquadsMenu::Update(int x, int y) {
 						squadName = "";
 						//This is to empty the input string
 						UI::Inst()->SetTextMode(false);
+						return MENUHIT;
 					}
 			}
 
@@ -621,16 +623,21 @@ MenuResult SquadsMenu::Update(int x, int y) {
 				while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
 				if (squadi != Game::Inst()->squadList.end()) chosenSquad = squadi->second;
 				else chosenSquad = boost::weak_ptr<Squad>();
-			} else chosenSquad = boost::weak_ptr<Squad>();
+				return MENUHIT;
+			} else { chosenSquad = boost::weak_ptr<Squad>(); return MENUHIT; }
 		}
 	} else {
-		if (y > topY+20 && y < topY+24) {
+		if (y > topY+20 && y < topY+27) {
 			if (x > topX+1 && x < topX+7) { //Guard
 				chosenSquad.lock()->Order(GUARD);
 				UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
-			} else if (x > topX+13 && x < topX+20) { //Escort
+				UI::Inst()->HideMenu();
+				return MENUHIT;
+			} else if (x > topX+11 && x < topX+20) { //Escort
 				chosenSquad.lock()->Order(ESCORT);
 				UI::ChooseOrderTargetEntity(chosenSquad.lock());
+				UI::Inst()->HideMenu();
+				return MENUHIT;
 			}
 		}
 	}

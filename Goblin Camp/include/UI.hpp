@@ -54,6 +54,7 @@ private:
 	bool textMode;
 	std::string inputString;
 	int inputStringLimit;
+	int cursorChar;
 
 	void HandleUnderCursor(Coordinate);
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
@@ -82,4 +83,7 @@ public:
 	int KeyHelpTextColor() const;
 	void SetTextMode(bool, int=50);
 	std::string InputString();
+	void HideMenu();
+	void CloseMenu();
+	void SetCursor(int);
 };

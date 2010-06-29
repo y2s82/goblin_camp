@@ -26,7 +26,8 @@ UI::UI() :
 	rbuttonPressed(false),
 	draggingViewport(false),
 	textMode(false),
-	inputString(std::string(""))
+	inputString(std::string("")),
+	cursorChar('X')
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
@@ -227,8 +228,8 @@ void UI::HandleMouse() {
 	else if (lbuttonPressed) {
 		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy);
 	    if (menuResult == NOMENUHIT) {
-			if (menuOpen) menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy);
-			if (!menuOpen || menuResult == NOMENUHIT) {
+			if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy); lbuttonPressed = false; }
+			if (menuResult == NOMENUHIT) {
 				if (_state == UIPLACEMENT && placeable) {
 					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
 				} else if (_state == UIABPLACEMENT && placeable) {
@@ -362,8 +363,8 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.x() == 0)) {
 		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.x() && x < console->getWidth(); ++x) {
 			for (int y = mouseInput.cy; y < mouseInput.cy + _blueprint.y() && y < console->getHeight(); ++y) {
-				if (!placeable) console->putCharEx(x,y, 'C', TCODColor::red, TCODColor::black);
-				else console->putCharEx(x,y, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(x,y, cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(x,y, cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
 	} else if (_state == UIABPLACEMENT && a.x() > 0) {
@@ -381,22 +382,22 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		}
 		for (int ix = a.x()-upleft.x(); ix <= b.x()-upleft.x() && ix < console->getWidth(); ++ix) {
 			if (!yswap) {
-				if (!placeable) console->putCharEx(ix,a.y()-upleft.y(), 'C', TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,a.y()-upleft.y(), 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,a.y()-upleft.y(), cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,a.y()-upleft.y(), cursorChar, TCODColor::green, TCODColor::black);
 			}
 			else {
-				if (!placeable) console->putCharEx(ix,b.y()-upleft.y(), 'C', TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,b.y()-upleft.y(), 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,b.y()-upleft.y(), cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,b.y()-upleft.y(), cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
 		for (int iy = a.y()-upleft.y(); iy <= b.y()-upleft.y() && iy < console->getHeight(); ++iy) {
 			if (!xswap) {
-				if (!placeable) console->putCharEx(b.x()-upleft.x(),iy, 'C', TCODColor::red, TCODColor::black);
-				else console->putCharEx(b.x()-upleft.x(),iy, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(b.x()-upleft.x(),iy, cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(b.x()-upleft.x(),iy, cursorChar, TCODColor::green, TCODColor::black);
 			}
 			else {
-				if (!placeable) console->putCharEx(a.x()-upleft.x(),iy, 'C', TCODColor::red, TCODColor::black);
-				else console->putCharEx(a.x()-upleft.x(),iy, 'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(a.x()-upleft.x(),iy, cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(a.x()-upleft.x(),iy, cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
 		if (xswap) {
@@ -424,8 +425,8 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		}
 		for (int ix = a.x()-upleft.x(); ix <= b.x()-upleft.x() && ix < console->getWidth(); ++ix) {
 			for (int iy = a.y()-upleft.y(); iy <= b.y()-upleft.y() && iy < console->getHeight(); ++iy) {
-				if (!placeable) console->putCharEx(ix,iy,'C', TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,iy,'C', TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,iy,cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,iy,cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
 		if (xswap) {
@@ -501,6 +502,7 @@ void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2));
 	UI::Inst()->blueprint(Construction::Blueprint(construct));
 	UI::Inst()->state(state);
+	UI::Inst()->SetCursor('C');
 }
 
 void UI::ChooseStockpile(ConstructionType stockpile) {
@@ -509,6 +511,7 @@ void UI::ChooseStockpile(ConstructionType stockpile) {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2));
 	UI::Inst()->blueprint(Construction::Blueprint(stockpile));
 	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetCursor('=');
 }
 
 void UI::ChooseTreeFelling() {
@@ -516,6 +519,7 @@ void UI::ChooseTreeFelling() {
     UI::Inst()->SetRectCallback(boost::bind(Game::FellTree, _1, _2));
     UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
     UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('X');
 }
 
 void UI::ChoosePlantHarvest() {
@@ -523,6 +527,7 @@ void UI::ChoosePlantHarvest() {
     UI::Inst()->SetRectCallback(boost::bind(Game::HarvestWildPlant, _1, _2));
     UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
     UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('X');
 }
 
 void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
@@ -530,6 +535,7 @@ void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetCoordinate, _1, squad));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('X');
 }
 
 void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad) {
@@ -537,6 +543,7 @@ void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad) {
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, _1, squad));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('X');
 }
 
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
@@ -604,6 +611,19 @@ void UI::SetTextMode(bool val, int limit) {
 	inputStringLimit = limit; 
 }
 std::string UI::InputString() { return inputString;}
+
+void UI::HideMenu() {
+	menuOpen = false;
+}
+
+void UI::CloseMenu() {
+	menuOpen = false;
+	_state = UINORMAL;
+	a.x(0); a.y(0);
+	textMode = false;
+}
+
+void UI::SetCursor(int value) { cursorChar = value; }
 
 SideBar::SideBar() :
     width(19),
