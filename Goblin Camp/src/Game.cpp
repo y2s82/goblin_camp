@@ -169,6 +169,9 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->name = TCODNamegen::generate("goblin");
             npc->faction = 0;
 			npc->needsNutrition = true;
+			npc->health = 50;
+			npc->attackSkill = 3;
+			npc->defenceSkill = 5;
             ++goblinCount;
             break;
 
@@ -184,7 +187,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->needsNutrition = true;
 			npc->aggressive = true;
 			npc->health = 100;
-			npc->attackSkill = 10;
+			npc->attackSkill = 15;
+			npc->defenceSkill = 10;
             ++orcCount;
             break;
 
@@ -200,6 +204,45 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->defenceSkill = 2;
 			npc->attackSkill = 2;
             break;
+
+		//This creates a pack of wolves intent on your camp
+		case 3:
+			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Wolf leader", 1, 0)));
+			hostileSquadList.back()->Order(GUARD);
+			hostileSquadList.back()->TargetCoordinate(Coordinate(240, 240));
+			npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::HostileAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
+			npc->type = 2;
+            npc->speed(25 + rand() % 20);
+            npc->color(TCODColor::darkGrey);
+            npc->graphic('w');
+            npc->name = "Starving Wolf (Alpha Male)";
+            npc->faction = 2;
+			npc->health = 150;
+			npc->defenceSkill = 6;
+			npc->attackSkill = 10;
+			npc->MemberOf(hostileSquadList.back());
+			npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+
+			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Starving wolves", 4, 0)));
+			hostileSquadList.back()->Order(ESCORT);
+			hostileSquadList.back()->TargetEntity(npc);
+			for (int i = 0; i < 4; ++i) {
+				npc = boost::shared_ptr<NPC>(new NPC(target+i, boost::bind(NPC::HostileAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
+				npc->type = 2;
+				npc->speed(27 + rand() % 20);
+				npc->color(TCODColor::grey);
+				npc->graphic('w');
+				npc->name = "Starving Wolf";
+				npc->faction = 2;
+				npc->health = 50;
+				npc->defenceSkill = 6;
+				npc->attackSkill = 10;
+				npc->MemberOf(hostileSquadList.back());
+				npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+			}
+			return npc->Uid();
+            break;
+
     }
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
@@ -524,7 +567,7 @@ void Game::Update() {
 	}
 
 	//Squads needen't update their member rosters ALL THE TIME
-	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 5) == 0) {
 		for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = squadList.begin(); squadi != squadList.end(); ++squadi) {
 			squadi->second->UpdateMembers();
 		}
@@ -780,7 +823,7 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 //This function uses straightforward raycasting, and it is somewhat imprecise right now as it only casts a ray to every second
 //tile at the edge of the line of sight distance. This is to conserve cpu cycles, as there may be several hundred creatures
 //active at a time, and given the fact that they'll usually be constantly moving, this function needen't be 100% accurate.
-void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
+void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc, bool onlyHostiles) {
     npc->nearNpcs.clear();
     for (int endx = std::max((signed int)npc->_x - LOS_DISTANCE, 0); endx <= std::min((signed int)npc->_x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
         for (int endy = std::max((signed int)npc->_y - LOS_DISTANCE, 0); endy <= std::min((signed int)npc->_y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
@@ -792,7 +835,9 @@ void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc) {
                 do {
                     if (Map::Inst()->BlocksLight(x,y)) break;
                     for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
-						if (*npci != npc->uid) npc->nearNpcs.push_back(npcList[*npci]);
+						if (*npci != npc->uid) {
+							if (!onlyHostiles || (onlyHostiles && npcList[*npci]->faction != npc->faction)) npc->nearNpcs.push_back(npcList[*npci]);
+						}
                     }
 
                     if (npc->nearNpcs.size() > 10) break;

@@ -52,10 +52,11 @@ class Game {
 		void BumpEntity(int);
 		int DistanceNPCToCoordinate(int, Coordinate);
         int OrcCount(); int GoblinCount();
-		void FindNearbyNPCs(boost::shared_ptr<NPC>);
+		void FindNearbyNPCs(boost::shared_ptr<NPC>, bool onlyHostiles = false);
 		void RemoveNPC(boost::weak_ptr<NPC>);
 		int FindMilitaryRecruit();
 		std::map<std::string, boost::shared_ptr<Squad> > squadList;
+		std::list<boost::shared_ptr<Squad> > hostileSquadList;
 		void CreateSquad(std::string);
 		static void SetSquadTargetCoordinate(Coordinate, boost::shared_ptr<Squad>);
 		static void SetSquadTargetEntity(Coordinate, boost::shared_ptr<Squad>);

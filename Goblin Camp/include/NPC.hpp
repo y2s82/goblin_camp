@@ -131,10 +131,13 @@ class NPC : public Entity {
 		void MemberOf(boost::weak_ptr<Squad>);
 		boost::weak_ptr<Squad> MemberOf();
 
+		static bool GetSquadJob(boost::shared_ptr<NPC>);
 		static bool JobManagerFinder(boost::shared_ptr<NPC>);
 		static void PlayerNPCReact(boost::shared_ptr<NPC>);
 		static void PeacefulAnimalReact(boost::shared_ptr<NPC>);
 		static bool PeacefulAnimalFindJob(boost::shared_ptr<NPC>);
+		static void HostileAnimalReact(boost::shared_ptr<NPC>);
+		static bool HostileAnimalFindJob(boost::shared_ptr<NPC>);
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::try_mutex*, bool*, bool*);

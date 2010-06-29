@@ -264,9 +264,6 @@ AiThink NPC::Think() {
 						taskBegun = true;
 					}
 					result = Move();
-#ifdef DEBUG
-					std::cout<<"MOVENEAR/ADJACENT result = "<<result<<"\n";
-#endif
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
 					else if (result == PATHEMPTY) {
 /*					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
@@ -577,12 +574,10 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex 
 	*findPathWorking = false;
 }
 
-bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
-	//Either create an internal job if this npc is part of a squad, or get one from the JobManager
+bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 	if (npc->MemberOf().lock()) {
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
 		newJob->internal = true;
-		//FIXME: Squads orders default to (0,0), which makes orcs run off.
 		switch (npc->MemberOf().lock()->Order()) {
 		case GUARD:
 			if (npc->MemberOf().lock()->TargetCoordinate().x() >= 0) {
@@ -603,28 +598,36 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 			}
 			break;
 		}
-		return false;
 	} 
-
-   	boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
-	if (newJob)  {
-		npc->jobs.push_back(newJob);
-		return true;
-	}
 	return false;
+}
+
+bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
+	//Either create an internal job if this npc is part of a squad, or get one from the JobManager
+	if (!GetSquadJob(npc)) {
+   		boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
+		if (newJob)  {
+			npc->jobs.push_back(newJob);
+			return true;
+		}
+		return false;
+	}
+	return true;
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	if (npc->aggressive) {
 		if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
-			Game::Inst()->FindNearbyNPCs(npc);
+			Game::Inst()->FindNearbyNPCs(npc, true);
 			for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 				if (npci->lock()->faction != npc->faction) {
-					Announce::Inst()->AddMsg("kill");
 					boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 					killJob->internal = true;
 					killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-					if (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+					while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+#ifdef DEBUG
+					std::cout<<"Push_back(killJob)\n";
+#endif
 					npc->jobs.push_back(killJob);
 				}
 			}
@@ -644,6 +647,29 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
     return false;
 }
+
+void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
+    Game::Inst()->FindNearbyNPCs(animal);
+    for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+        if (npci->lock()->faction != animal->faction) {
+			boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
+			killJob->internal = true;
+			killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
+			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
+			animal->jobs.push_back(killJob);
+        }
+    }
+}
+
+bool NPC::HostileAnimalFindJob(boost::shared_ptr<NPC> animal) {
+	
+	if (!GetSquadJob(animal)) {
+		//TODO: Add behaviour for leaderless hostile monsters
+		return false;
+	}
+	return true;
+}
+
 
 void NPC::AddEffect(StatusEffectType effect) {
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {

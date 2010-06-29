@@ -1,5 +1,6 @@
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/scope_exit.hpp>
 #include <string>
 
 #include "Menu.hpp"
@@ -603,7 +604,7 @@ MenuResult SquadsMenu::Update(int x, int y) {
 		if (x > topX + (width/2)) {
 			if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
 				if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) {--squadMembers; return MENUHIT; }
-				else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) {--squadPriority;  return MENUHIT; }
+				else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) {--squadPriority; return MENUHIT; }
 			} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
 				if (y > topY+2+3 && y < topY+2+6) {++squadMembers; return MENUHIT; }
 				else if (y > topY+2+8 && y < topY+2+11) {++squadPriority; return MENUHIT; }
@@ -615,7 +616,7 @@ MenuResult SquadsMenu::Update(int x, int y) {
 //						chosenSquad = Game::Inst()->squadList[squadName];
 						squadName = "";
 						UI::Inst()->InputString("");
-						return MENUHIT;
+						return MENUHIT;					
 					} else if (chosenSquad.lock()) { //Modify
 						boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
 						Game::Inst()->squadList.erase(tempSquad->Name());
@@ -662,7 +663,7 @@ MenuResult SquadsMenu::Update(int x, int y) {
 				squadPriority = 0;
 				squadName = "";
 				UI::Inst()->InputString("");
-				return MENUHIT; 
+				return MENUHIT;
 			}
 		}
 	} else {

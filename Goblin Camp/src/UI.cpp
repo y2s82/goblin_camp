@@ -95,6 +95,11 @@ void UI::HandleKeyboard() {
 		} else if (key.c == 'h') {
 			keyHelpTextColor = 255;
 		}
+#ifdef DEBUG
+		if (key.c == 'p') {
+			Game::Inst()->CreateNPC(Coordinate(100,100), 3);
+		}
+#endif
 
 		int addition = 1;
 		if (key.shift) addition *= 10;
@@ -621,6 +626,7 @@ void UI::InputString(std::string value) { inputString = value; }
 
 void UI::HideMenu() {
 	menuOpen = false;
+	textMode = false;
 }
 
 void UI::CloseMenu() {
@@ -628,6 +634,7 @@ void UI::CloseMenu() {
 	_state = UINORMAL;
 	a.x(0); a.y(0);
 	textMode = false;
+	currentMenu = Menu::MainMenu();
 }
 
 void UI::SetCursor(int value) { cursorChar = value; }
