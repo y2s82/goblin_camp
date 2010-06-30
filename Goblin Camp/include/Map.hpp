@@ -46,6 +46,8 @@ class Map : public ITCODPathCallback {
 		void SetFilth(int,int,boost::shared_ptr<FilthNode>);
 		bool BlocksLight(int, int) const;
 		void BlocksLight(int, int, bool);
+		bool LineOfSight(Coordinate, Coordinate);
+		bool LineOfSight(int, int, int, int);
 };
 
 #endif

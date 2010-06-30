@@ -94,3 +94,17 @@ void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { tileMap[x
 
 bool Map::BlocksLight(int x, int y) const { return tileMap[x][y].BlocksLight(); }
 void Map::BlocksLight(int x, int y, bool val) { tileMap[x][y].BlocksLight(val); }
+
+bool Map::LineOfSight(Coordinate a, Coordinate b) {
+	return LineOfSight(a.x(), a.y(), b.x(), b.y());
+}
+
+bool Map::LineOfSight(int ax, int ay, int bx, int by) {
+	TCODLine::init(ax, ay, bx, by);
+	int x = ax;
+	int y = ay;
+	do {
+		if (BlocksLight(x,y)) return false;
+	} while(!TCODLine::step(&x, &y));
+	return true;
+}

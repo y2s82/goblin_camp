@@ -38,7 +38,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	carried(boost::weak_ptr<Item>()),
 	thirst(0),
 	hunger(0),
-	thinkSpeed(UPDATES_PER_SECOND),
+	thinkSpeed(UPDATES_PER_SECOND / 5), //Think 5 times a second
 	statusEffects(std::list<StatusEffect>()),
 	statusEffectIterator(statusEffects.end()),
 	statusGraphicCounter(0),
@@ -249,8 +249,25 @@ AiThink NPC::Think() {
 					}
 					break;
 
-					//TODO: Implement proper MOVENEAR
 				case MOVENEAR:
+					//MOVENEAR first figures out our "real" target, which is a tile near
+					//to our current target. Near means max 5 tiles away, visible and
+					//walkable. Once we have our target we can actually switch over
+					//to a normal MOVE task
+					tmp = 0;
+					while (tmp++ < 10) {
+						int tarX = ((rand() % 11) - 5) + currentTarget().x();
+						int tarY = ((rand() % 11) - 5) + currentTarget().y();
+						if (Map::Inst()->Walkable(tarX, tarY)) {
+							if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().x(), currentTarget().y())) {
+								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
+								break;
+							}
+						}
+					}
+					break;
+
+
 				case MOVEADJACENT:
 					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 						TaskFinished(TASKSUCCESS);
@@ -581,10 +598,10 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		switch (npc->MemberOf().lock()->Order()) {
 		case GUARD:
 			if (npc->MemberOf().lock()->TargetCoordinate().x() >= 0) {
-				//newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
-				newJob->tasks.push_back(Task(MOVE, npc->MemberOf().lock()->TargetCoordinate()));
-				//Currently WAIT waits Coordinate.x updates
-				newJob->tasks.push_back(Task(WAIT, Coordinate(UPDATES_PER_SECOND * 2, 0)));
+				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
+				//newJob->tasks.push_back(Task(MOVE, npc->MemberOf().lock()->TargetCoordinate()));
+				//WAIT waits Coordinate.x / 5 seconds
+				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
 				return true;
 			}
