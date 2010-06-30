@@ -222,6 +222,8 @@ AiThink NPC::Think() {
 		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
 	}
 
+	result = Move();
+
 	timeCount += thinkSpeed;
 	while (timeCount > UPDATES_PER_SECOND) {
 
@@ -238,13 +240,13 @@ AiThink NPC::Think() {
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
-					if (!taskBegun) { findPath(currentTarget()); taskBegun = true; }
-					result = Move();
+					if (!taskBegun) { findPath(currentTarget()); taskBegun = true; result = TASKCONTINUE;}
+					//result = Move();
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) {
-						TaskFinished(result, std::string("Could not find path to target")); break;
+						TaskFinished(result, std::string("Could not find path to target Move()")); break;
 					} else if (result == PATHEMPTY) {
 					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
-					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
+					        TaskFinished(TASKFAILFATAL, std::string("No path to target Move()")); break;
 					    }
 					}
 					break;
@@ -279,8 +281,9 @@ AiThink NPC::Think() {
 							findPath(tmpCoord);
 						} else { TaskFinished(TASKFAILFATAL, std::string("No walkable adjacent tiles")); break; }
 						taskBegun = true;
+						result = TASKCONTINUE;
 					}
-					result = Move();
+					//result = Move();
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
 					else if (result == PATHEMPTY) {
 /*					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
@@ -456,8 +459,9 @@ AiThink NPC::Think() {
 					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
 						findPath(currentEntity().lock()->Position());
 						taskBegun = true;
+						result = TASKCONTINUE;
 					}
-					result = Move();
+					//result = Move();
 
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
 					else if (result == PATHEMPTY) {
