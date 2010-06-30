@@ -296,8 +296,7 @@ AiThink NPC::Think() {
 					break;
 
 				case WAIT:
-					++timer;
-					if (timer > currentTarget().x()) { timer = 0; TaskFinished(TASKSUCCESS); break; }
+					if (++timer > currentTarget().x()) { timer = 0; TaskFinished(TASKSUCCESS); }
 					break;
 
 				case BUILD:
@@ -504,7 +503,7 @@ AiThink NPC::Think() {
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
 				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->MeetingPoint() : Position()));
-				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 50, 0)));
+				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
 				jobs.push_back(idleJob);
 				run = false;
 			}

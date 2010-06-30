@@ -292,14 +292,14 @@ boost::weak_ptr<Job> JobManager::GetJob(int uid) {
 	}
 
 	//Now check the distance to the job, the further away the NPC is the larger the chance is that
-	//the assignment gets cancelled. This random-chance will skew results towards closerby npc's
+	//the assignment gets cancelled. This random-chance will skew results towards closeby npc's
 	//picking up jobs rather than just anyone.
 	if (job.lock()) {
-		if (rand() % 100 < std::min(95, Game::Inst()->DistanceNPCToCoordinate(uid, job.lock()->tasks.front().target))) {
+	/*	if (rand() % 100 < std::min(95, Game::Inst()->DistanceNPCToCoordinate(uid, job.lock()->tasks.front().target))) {
 			job.reset();
-		} else {
+		} else {*/
 			job.lock()->Assign(uid);
-		}
+	//	}
 	}
 
 	return job;
@@ -316,7 +316,8 @@ void JobManager::Update() {
 		} else {
 
 			if (!(*jobIter)->PreReqs()->empty() && (*jobIter)->PreReqsCompleted()) {
-				if (rand() % (UPDATES_PER_SECOND*3) == 0) (*jobIter)->Paused(false);
+				//if (rand() % (UPDATES_PER_SECOND*3) == 0) (*jobIter)->Paused(false);
+				(*jobIter)->Paused(false);
 			}
 
 			if (!(*jobIter)->Paused()) {
@@ -324,17 +325,17 @@ void JobManager::Update() {
 				jobIter = waitingList.erase(jobIter);
 			} else if (!(*jobIter)->Parent().lock() && !(*jobIter)->PreReqs()->empty()) {
 				//Job has unfinished prereqs, itsn't removable and is NOT a prereq itself
-				if (rand() % (UPDATES_PER_SECOND*3) == 0) {
+				//if (rand() % (UPDATES_PER_SECOND*3) == 0) {
 					for (std::list<boost::weak_ptr<Job> >::iterator pri = (*jobIter)->PreReqs()->begin(); pri != (*jobIter)->PreReqs()->end(); ++pri) {
 						if (pri->lock()) {
                             pri->lock()->Paused(false);
 						}
 					}
-				}
+				//}
 			} else if (!(*jobIter)->Parent().lock()) {
-			    if (rand() % (UPDATES_PER_SECOND*3) == 0) {
+			    //if (rand() % (UPDATES_PER_SECOND*3) == 0) {
 			        (*jobIter)->Paused(false);
-			    }
+			    //}
 			}
 		}
 	}

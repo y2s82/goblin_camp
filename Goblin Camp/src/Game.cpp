@@ -493,31 +493,35 @@ void Game::Update() {
         switch (season) {
             case EarlySpring:
                 Announce::Inst()->AddMsg("Spring has begun");
+			case Spring:
+			case LateSpring:
                 SpawnTillageJobs();
-                DecayItems();
-                break;
-            case LateSpring:
-                DecayItems();
-            case LateSummer:
-                DecayItems();
+			case Summer:
+			case LateSummer:
+			case Fall:
+			case LateFall:
+			case Winter:
+				DecayItems();
+				break;
+
             case LateWinter:
-                DeTillFarmPlots();
-                DecayItems();
                 break;
-            case EarlySummer:
+
+			case EarlySummer:
                 Announce::Inst()->AddMsg("Summer has begun");
-                SpawnTillageJobs();
                 DecayItems();
                 break;
-            case EarlyFall:
+            
+			case EarlyFall:
                 Announce::Inst()->AddMsg("Fall has begun");
-                SpawnTillageJobs();
                 DecayItems();
                 break;
-            case EarlyWinter:
+            
+			case EarlyWinter:
                 Announce::Inst()->AddMsg("Winter has begun");
-                DecayItems();
+                DeTillFarmPlots();
                 break;
+
             default: break;
         }
         time = 0;

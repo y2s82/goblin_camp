@@ -100,7 +100,7 @@ int Construction::Build() {
 			for (unsigned int iy = _y; iy < _y + Construction::Blueprint(_type).y(); ++iy) {
 				Map::Inst()->Walkable(ix, iy, walkable);
 				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, walkable);
+				Map::Inst()->BlocksLight(ix, iy, !walkable);
 			}
 		}
 
@@ -382,18 +382,20 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags)
     for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
         if (!conti->second->empty()) {
             boost::weak_ptr<Item> item = *conti->second->begin();
-            if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
-                if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-                    if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
-                } else return item;
-            }
-            if (boost::dynamic_pointer_cast<Container>(item.lock())) {
-                boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
-                for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
-                    if (itemi->lock() && itemi->lock()->IsCategory(cat) && !itemi->lock()->Reserved())
-                        return *itemi;
-                }
-            }
+			if (item.lock()) {
+				if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
+					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
+						if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
+					} else return item;
+				}
+				if (boost::dynamic_pointer_cast<Container>(item.lock())) {
+					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
+					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
+						if (itemi->lock() && itemi->lock()->IsCategory(cat) && !itemi->lock()->Reserved())
+							return *itemi;
+					}
+				}
+			}
         }
 	}
 	return boost::weak_ptr<Item>();

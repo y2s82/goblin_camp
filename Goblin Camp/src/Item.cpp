@@ -99,7 +99,7 @@ std::string Item::ItemTypeToString(ItemType type) {
 }
 
 ItemType Item::StringToItemType(std::string str) {
-    return itemTypeNames[str];
+	return itemTypeNames[str];
 }
 
 std::string Item::ItemCategoryToString(ItemCategory category) {

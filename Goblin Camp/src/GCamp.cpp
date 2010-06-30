@@ -87,6 +87,10 @@ void mainLoop() {
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
 	}
 
+	for (int seeds = 0; seeds < 20; ++seeds) {
+		Game::Inst()->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
+	}
+
 	QueryPerformanceCounter(&timeStart);
 
     Game::Inst()->upleft = Coordinate(180,180);
