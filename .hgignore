@@ -42,3 +42,4 @@ Debug\
 Log.txt
 *.dll
 screenshot*.png
+*.filters

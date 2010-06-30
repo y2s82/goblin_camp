@@ -16,6 +16,7 @@
 #include "Logger.hpp"
 #include "Map.hpp"
 #include "StatusEffect.hpp"
+#include "Camp.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -33,6 +34,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	findPathWorking(false),
 	timer(0),
 	_speed(10), nextMove(0),
+	run(true),
 	taskBegun(false),
 	expert(false),
 	carried(boost::weak_ptr<Item>()),
@@ -227,7 +229,7 @@ AiThink NPC::Think() {
 	timeCount += thinkSpeed;
 	while (timeCount > UPDATES_PER_SECOND) {
 
-        if (rand() % 5 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
+        if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock())
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
@@ -497,9 +499,14 @@ AiThink NPC::Think() {
 						}
 					}
 			    }
-				//if (!enemyFound) RemoveEffect(PANIC); //The cooldown will handle this
 			} else if (!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
-				if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
+				//if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
+				boost::shared_ptr<Job> idleJob(new Job("Idle"));
+				idleJob->internal = true;
+				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->MeetingPoint() : Position()));
+				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 50, 0)));
+				jobs.push_back(idleJob);
+				run = false;
 			}
 		}
 	}
@@ -508,7 +515,7 @@ AiThink NPC::Think() {
 
 TaskResult NPC::Move() {
 	int x,y;
-	nextMove += _speed;
+	nextMove += run ? _speed : _speed/3;
 	while (nextMove > 100) {
 		nextMove -= 100;
 		boost::mutex::scoped_try_lock pathLock(pathMutex);
@@ -607,6 +614,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
+				npc->run = false;
 				return true;
 			}
 			break;
@@ -615,6 +623,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			if (npc->MemberOf().lock()->TargetEntity().lock()) {
 				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position(), npc->MemberOf().lock()->TargetEntity()));
 				npc->jobs.push_back(newJob);
+				npc->run = true;
 				return true;
 			}
 			break;
@@ -629,6 +638,7 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
    		boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
 		if (newJob)  {
 			npc->jobs.push_back(newJob);
+			npc->run = true;
 			return true;
 		}
 		return false;
@@ -650,6 +660,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 					std::cout<<"Push_back(killJob)\n";
 #endif
 					npc->jobs.push_back(killJob);
+					npc->run = true;
 				}
 			}
 		}
@@ -678,6 +689,7 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 			killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
 			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
 			animal->jobs.push_back(killJob);
+			animal->run = true;
         }
     }
 }

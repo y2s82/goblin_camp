@@ -94,12 +94,9 @@ void UI::HandleKeyboard() {
 			}
 		} else if (key.c == 'h') {
 			keyHelpTextColor = 255;
-		}
-#ifdef DEBUG
-		if (key.c == 'p') {
+		} else if (key.c == 'p') { //TODO: Remove at Release
 			Game::Inst()->CreateNPC(Coordinate(100,100), 3);
 		}
-#endif
 
 		int addition = 1;
 		if (key.shift) addition *= 10;

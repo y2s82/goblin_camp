@@ -523,7 +523,8 @@ void Stockpile::SwitchAllowed(ItemCategory cat) {
 }
 
 FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stockpile(FARMPLOT, symbol, target),
-    tilled(false)
+    tilled(false),
+	growth(std::map<Coordinate, int>())
 {
     for (int i = 0; i < Game::ItemCatCount; ++i) {
         allowed[i] = false;
@@ -565,19 +566,24 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 void FarmPlot::Update() {
     if (!tilled) graphic[1] = 176;
     for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin(); containerIt != containers.end(); ++containerIt) {
-        if (!containerIt->second->empty() && rand() % (MONTH_LENGTH*2) == 0) {
+		++growth[containerIt->first];
+		//Normal plants grow seed -> young plant -> mature plant -> fruits, which means 3
+		//growths before giving fruit. 3 * 2 months means 6 months from seed to fruits
+		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && rand() % 5 == 0) {
             boost::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
             if (plant.lock() && !plant.lock()->Reserved()) {
                 if (rand() % 10 == 0) { //Chance for the plant to die
                     containerIt->second->RemoveItem(plant);
                     Game::Inst()->CreateItem(plant.lock()->Position(), Item::StringToItemType("Dead plant"), true);
                     Game::Inst()->RemoveItem(plant);
+					growth[containerIt->first] = 0;
                 } else {
                     if (plant.lock()->Growth() > -1) { //Plant is stil growing
                         int newPlant = Game::Inst()->CreateItem(plant.lock()->Position(), plant.lock()->Growth());
                         containerIt->second->RemoveItem(plant);
                         containerIt->second->AddItem(Game::Inst()->GetItem(newPlant));
                         Game::Inst()->RemoveItem(plant);
+						growth[containerIt->first] = 0;
                     } else { //Plant has grown to full maturity, and should be harvested
                         boost::shared_ptr<Job> harvestJob(new Job("Harvest", HIGH, 0, false));
                         harvestJob->ReserveItem(plant);
@@ -585,6 +591,7 @@ void FarmPlot::Update() {
                         harvestJob->tasks.push_back(Task(TAKE, plant.lock()->Position(), plant));
                         harvestJob->tasks.push_back(Task(HARVEST, plant.lock()->Position(), plant));
                         JobManager::Inst()->AddJob(harvestJob);
+						growth[containerIt->first] = 0;
                     }
                 }
             }
@@ -606,11 +613,12 @@ int FarmPlot::Use() {
                 ++containerIt;
                 if (containerIt == containers.end()) return 100;
             }
+			growth[containerIt->first] = 0;
             seedsLeft = false;
             for (std::map<ItemType, bool>::iterator seedi = allowedSeeds.begin(); seedi != allowedSeeds.end(); ++seedi) {
                 boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first);
                 if (seed.lock()) {
-                    boost::shared_ptr<Job> plantJob(new Job("Plant", MED, 0, false));
+					boost::shared_ptr<Job> plantJob(new Job("Plant", MED, 0, false));
                     plantJob->ReserveItem(seed);
                     plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
                     plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));

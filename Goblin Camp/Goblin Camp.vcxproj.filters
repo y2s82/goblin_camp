@@ -88,6 +88,9 @@
     <ClCompile Include="src\Squad.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Camp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp">
@@ -154,6 +157,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\Squad.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Camp.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

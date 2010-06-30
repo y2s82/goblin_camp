@@ -64,6 +64,7 @@ class NPC : public Entity {
 		bool findPathWorking;
 		int timer;
 		unsigned int _speed, nextMove;
+		bool run;
 		TCODColor _color, _bgcolor;
 		int _graphic;
 		bool taskBegun;

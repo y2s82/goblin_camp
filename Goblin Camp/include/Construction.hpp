@@ -128,6 +128,7 @@ class FarmPlot : public Stockpile {
         FarmPlot(ConstructionType, int symbol, Coordinate);
         bool tilled;
         std::map<ItemType, bool> allowedSeeds;
+		std::map<Coordinate, int> growth;
 
     public:
         void Update();

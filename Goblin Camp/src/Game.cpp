@@ -163,7 +163,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
         case 0:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::JobManagerFinder, _1), boost::bind(NPC::PlayerNPCReact, _1)));
 			npc->type = 0;
-            npc->speed(50 + rand() % 20);
+            npc->speed(40 + rand() % 20);
             npc->color(TCODColor::grey);
             npc->graphic('g');
             npc->name = TCODNamegen::generate("goblin");
@@ -178,7 +178,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
         case 1:
             npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::JobManagerFinder, _1), boost::bind(NPC::PlayerNPCReact, _1)));
 			npc->type = 1;
-            npc->speed(50 + rand() % 20);
+            npc->speed(40 + rand() % 20);
             npc->color(TCODColor::blue);
             npc->graphic('o');
             npc->Expert(true);
@@ -212,7 +212,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			hostileSquadList.back()->TargetCoordinate(Coordinate(240, 240));
 			npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::HostileAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
 			npc->type = 2;
-            npc->speed(75 + rand() % 20);
+            npc->speed(55 + rand() % 20);
             npc->color(TCODColor::darkGrey);
             npc->graphic('w');
             npc->name = "Starving Wolf (Alpha Male)";
@@ -221,6 +221,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->defenceSkill = 6;
 			npc->attackSkill = 10;
 			npc->MemberOf(hostileSquadList.back());
+			npc->run = false;
 			npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Starving wolves", 4, 0)));
@@ -229,7 +230,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			for (int i = 0; i < 4; ++i) {
 				npc = boost::shared_ptr<NPC>(new NPC(target+i, boost::bind(NPC::HostileAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
 				npc->type = 2;
-				npc->speed(80 + rand() % 20);
+				npc->speed(60 + rand() % 20);
 				npc->color(TCODColor::grey);
 				npc->graphic('w');
 				npc->name = "Starving Wolf";
