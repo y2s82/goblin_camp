@@ -283,6 +283,28 @@ void Construction::SpawnProductionJob() {
     boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
     newProductionJob->ConnectToEntity(shared_from_this());
 
+	//First check that the requisite items actually exist
+	std::list<boost::weak_ptr<Item> > componentList;
+	for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
+		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi));
+		if (item.lock()) {
+			componentList.push_back(item);
+			item.lock()->Reserve(true);
+		} else {
+			//Not all items available, cancel job and unreserve the reserved items.
+			for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+				resi->lock()->Reserve(false);
+			}
+			jobList.pop_front();
+			return;
+		}
+	}
+
+	//Unreserve the items now, because the individual jobs will reserve them for themselves
+	for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+		resi->lock()->Reserve(false);
+	}
+
     for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
         boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
         newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi)));
