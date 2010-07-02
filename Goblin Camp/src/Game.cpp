@@ -199,6 +199,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->needsNutrition = true;
 			npc->health = 50;
 			npc->baseStats[ATTACKSKILL] = 3;
+			npc->baseStats[ATTACKPOWER] = 1;
 			npc->baseStats[DEFENCESKILL] = 5;
             ++goblinCount;
             break;
@@ -216,6 +217,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->aggressive = true;
 			npc->health = 100;
 			npc->baseStats[ATTACKSKILL] = 15;
+			npc->baseStats[ATTACKPOWER] = 10;
 			npc->baseStats[DEFENCESKILL] = 10;
             ++orcCount;
             break;
@@ -230,7 +232,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->faction = 1;
 			npc->health = 50;
 			npc->baseStats[ATTACKSKILL] = 2;
-			npc->baseStats[DEFENCESKILL] = 2;
+			npc->baseStats[ATTACKPOWER] = 1;
+			npc->baseStats[DEFENCESKILL] = 7;
             break;
 
 		//This creates a pack of wolves intent on your camp
@@ -247,6 +250,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->faction = 2;
 			npc->health = 150;
 			npc->baseStats[ATTACKSKILL] = 15;
+			npc->baseStats[ATTACKPOWER] = 20;
 			npc->baseStats[DEFENCESKILL] = 10;
 			npc->MemberOf(hostileSquadList.back());
 			npc->run = false;
@@ -265,6 +269,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 				npc->faction = 2;
 				npc->health = 50;
 				npc->baseStats[ATTACKSKILL] = 10;
+				npc->baseStats[ATTACKPOWER] = 15;
 				npc->baseStats[DEFENCESKILL] = 6;
 				npc->MemberOf(hostileSquadList.back());
 				npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));

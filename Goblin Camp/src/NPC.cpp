@@ -186,6 +186,9 @@ void NPC::Update() {
 	if (Map::Inst()->NPCList(_x,_y)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		effectiveStats[i] = baseStats[i];
+	}
 	++statusGraphicCounter;
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		//Apply effects to stats
@@ -754,10 +757,12 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 			int dif = ((rand() % 10) + effectiveStats[ATTACKSKILL]) - ((rand() % 10) + npc->effectiveStats[DEFENCESKILL]);
 #ifdef DEBUG
 			std::cout<<boost::format("%s hits %s for %d dif\n") % name % npc->name % dif;
+			std::cout<<boost::format("Attack skill %d - Defence skill %d\n") % effectiveStats[ATTACKSKILL] % npc->effectiveStats[DEFENCESKILL];
 #endif
 			if (dif > 0) {
+				dif += effectiveStats[ATTACKPOWER];
 				npc->health -= dif;
-				if (rand() % 20 == 0) npc->AddEffect(CONCUSSION);
+				if (dif > 10 && rand() % 5 == 0) npc->AddEffect(CONCUSSION);
 				if (npc->health <= 0) npc->Kill();
 			} else {
 #ifdef DEBUG
