@@ -1,6 +1,7 @@
 #include "NatureObject.hpp"
 #include "Game.hpp"
 #include "Logger.hpp"
+#include "StockManager.hpp"
 
 NatureObjectPreset::NatureObjectPreset() :
     name("NATUREOBJECT PRESET"),
@@ -30,6 +31,8 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
     tree = Presets[type].tree;
     harvestable = Presets[type].harvestable;
 }
+
+NatureObject::~NatureObject() {}
 
 void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = _x - upleft.x();
@@ -114,7 +117,9 @@ void NatureObject::LoadPresets(ticpp::Document doc) {
 void NatureObject::Mark() { marked = true; }
 bool NatureObject::Marked() { return marked; }
 
-void NatureObject::CancelJob(int) { marked = false; }
+void NatureObject::CancelJob(int) { 
+	marked = false; 
+}
 
 int NatureObject::Fell() { return --condition; }
 int NatureObject::Harvest() { return --condition; }

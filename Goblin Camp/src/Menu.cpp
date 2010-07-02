@@ -149,7 +149,8 @@ Menu* Menu::OrdersMenu() {
     if (!ordersMenu) {
         ordersMenu = new Menu(std::vector<MenuChoice>());
         ordersMenu->AddChoice(MenuChoice("Fell trees", boost::bind(UI::ChooseTreeFelling)));
-        ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
+        ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
+		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
     }
     return ordersMenu;
 }

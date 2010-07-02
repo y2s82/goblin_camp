@@ -115,6 +115,7 @@ class Game {
 
 		static bool CheckTree(Coordinate, Coordinate);
 		static void FellTree(Coordinate, Coordinate);
+		static void DesignateTree(Coordinate, Coordinate);
 		void RemoveNatureObject(boost::weak_ptr<NatureObject>);
 		static void HarvestWildPlant(Coordinate, Coordinate);
 

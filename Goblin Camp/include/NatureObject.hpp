@@ -36,6 +36,7 @@ class NatureObject : public Entity
         int condition;
         bool tree, harvestable;
     public:
+		~NatureObject();
         static std::vector<NatureObjectPreset> Presets;
         static void LoadPresets(ticpp::Document);
 

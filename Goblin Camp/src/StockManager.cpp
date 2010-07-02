@@ -76,8 +76,21 @@ void StockManager::Update() {
 				difference = std::max(1, difference / Item::Presets[*prodi].multiplier);
 				//Difference is now equal to how many jobs are required to fulfill the deficit
 				if (fromTrees.find(*prodi) != fromTrees.end()) { //Item is a component of trees
+					//Subtract the amount of active tree felling jobs from the difference
+					difference -= treeFellingJobs.size();
 					//Pick a designated tree and go chop it
-
+					for (std::list<boost::weak_ptr<NatureObject> >::iterator treei = designatedTrees.begin();
+						treei != designatedTrees.end() && difference > 0; ++treei) {
+							boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
+							fellJob->ConnectToEntity(*treei);
+							fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
+							fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
+							JobManager::Inst()->AddJob(fellJob);
+							--difference;
+							treeFellingJobs.push_back(
+								std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> >(fellJob, *treei));
+							treei = designatedTrees.erase(treei);
+					}
 				} else if (fromEarth.find(*prodi) != fromEarth.end()) {
 				} else {
 					//First get all the workshops capable of producing this product
@@ -103,6 +116,21 @@ void StockManager::Update() {
 			}
 		}
 	}
+
+	//We need to check our treefelling jobs for successes and cancellations
+	for (std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > >::iterator jobi =
+		treeFellingJobs.begin(); jobi != treeFellingJobs.end(); ++jobi) { //*Phew*
+			if (!jobi->first.lock()) {
+				//Job no longer exists, so remove it from our list
+				//If the tree still exists, it means that the job was cancelled, so add
+				//the tree back to our designations.
+				if (jobi->second.lock()) {
+					designatedTrees.push_back(jobi->second);
+				}
+				jobi = treeFellingJobs.erase(jobi);
+			}
+	}
+
 }
 
 void StockManager::UpdateQuantity(ItemType type, int quantity) {
@@ -153,4 +181,24 @@ int StockManager::Minimum(ItemType item) {return minimums[item];}
 void StockManager::AdjustMinimum(ItemType item, int value) {
 	minimums[item] += value;
 	if (minimums[item] < 0) minimums[item] = 0;
+}
+
+void StockManager::UpdateDesignations(boost::weak_ptr<NatureObject> nObj, bool add) {
+	if (boost::shared_ptr<NatureObject> natObj = nObj.lock()) {
+		if (add) {
+			designatedTrees.push_back(natObj);
+		} else {
+			for (std::list<boost::weak_ptr<NatureObject> >::iterator desi = designatedTrees.begin();
+				desi != designatedTrees.end(); ++desi) {
+					//Now that we're iterating through the designations anyway, might as well
+					//do some upkeeping
+					if (!desi->lock()) desi = designatedTrees.erase(desi);
+					if (desi->lock() == natObj) {
+						designatedTrees.erase(desi);
+						break;
+					}
+			}
+		}
+	}
+	return;
 }

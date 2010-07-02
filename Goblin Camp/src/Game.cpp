@@ -771,6 +771,22 @@ void Game::FellTree(Coordinate a, Coordinate b) {
    }
 }
 
+void Game::DesignateTree(Coordinate a, Coordinate b) {
+    for (int x = a.x(); x <= b.x(); ++x) {
+        for (int y = a.y(); y <= b.y(); ++y) {
+            int natUid = Map::Inst()->NatureObject(x,y);
+            if (natUid >= 0) {
+                boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+                if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
+					//TODO: Implement proper map marker system and change this to use that
+					natObj.lock()->Mark();
+					StockManager::Inst()->UpdateDesignations(natObj, true);
+				}
+			}
+		}
+	}
+}
+
 void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
     for (int x = a.x(); x <= b.x(); ++x) {
         for (int y = a.y(); y <= b.y(); ++y) {

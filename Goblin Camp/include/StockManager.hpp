@@ -6,6 +6,8 @@
 
 #include "Item.hpp"
 #include "Construction.hpp"
+#include "NatureObject.hpp"
+#include "Job.hpp"
 
 class StockManager
 {
@@ -21,6 +23,8 @@ private:
 	std::multimap<ConstructionType, boost::weak_ptr<Construction> > workshops;
 	std::set<ItemType> fromTrees; //Trees and stones are a special case, possibly fish in the future as well
 	std::set<ItemType> fromEarth;
+	std::list<boost::weak_ptr<NatureObject> > designatedTrees;
+	std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > > treeFellingJobs;
 public:
 	static StockManager* Inst();
 	~StockManager(void);
@@ -33,5 +37,6 @@ public:
 	std::set<ItemType>* Producables();
 
 	void UpdateWorkshops(boost::weak_ptr<Construction>, bool add);
+	void UpdateDesignations(boost::weak_ptr<NatureObject>, bool add);
 };
 
