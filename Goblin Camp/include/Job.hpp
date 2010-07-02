@@ -11,7 +11,8 @@
 enum JobPriority {
 	LOW,
 	MED,
-	HIGH
+	HIGH,
+	PRIORITY_COUNT
 };
 
 enum JobCompletion {
@@ -121,9 +122,7 @@ class JobManager {
 	private:
 		JobManager();
 		static JobManager *instance;
-		std::list<boost::shared_ptr<Job> > lowList;
-		std::list<boost::shared_ptr<Job> > medList;
-		std::list<boost::shared_ptr<Job> > highList;
+		std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
 		std::list<boost::shared_ptr<Job> > waitingList;
 	public:
 		static JobManager* Inst();

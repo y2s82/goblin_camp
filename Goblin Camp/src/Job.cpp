@@ -161,11 +161,8 @@ void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 	}
 
 	if (newJob->PreReqsCompleted()) {
-		switch (newJob->priority()) {
-			case LOW: lowList.push_back(newJob); return;
-			case MED: medList.push_back(newJob); return;
-			case HIGH: highList.push_back(newJob); return;
-		}
+		availableList[newJob->priority()].push_back(newJob);
+		return;
 	} else {
 		newJob->Paused(true);
 		waitingList.push_back(newJob);
@@ -181,44 +178,25 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
         oldJob.lock()->Paused(true);
         waitingList.push_back(oldJob.lock());
 
-        switch(oldJob.lock()->priority()) {
-            case LOW:
-                for(std::list<boost::shared_ptr<Job> >::iterator lowIter = lowList.begin(); lowIter != lowList.end();
-                    ++lowIter) {
-                if ((*lowIter) == oldJob.lock()) {
-                    lowList.erase(lowIter);
-                    break;
-                }
-            }
-                break;
-            case MED:
-                for(std::list<boost::shared_ptr<Job> >::iterator medIter = medList.begin(); medIter != medList.end();
-                    ++medIter) {
-                if ((*medIter) == oldJob.lock()) {
-                    medList.erase(medIter);
-                    break;
-                }
-            }
-                break;
-            case HIGH:
-                for(std::list<boost::shared_ptr<Job> >::iterator highIter = highList.begin(); highIter != highList.end();
-                    ++highIter) {
-                    if ((*highIter) == oldJob.lock()) {
-                        highList.erase(highIter);
-                        break;
-                    }
-                }
-                break;
-        }
+		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[oldJob.lock()->priority()].begin(); 
+			jobi != availableList[oldJob.lock()->priority()].end(); ++jobi) {
+				if ((*jobi) == oldJob.lock()) {
+					availableList[oldJob.lock()->priority()].erase(jobi);
+					break;
+				}
+		}
     }
 }
 
+//Draw() doesn't conform to the design, it'll only draw jobs from the 4 hardcoded lists
+//TODO: Make Draw prioritycount agnostic
+//Take into account though that right now this is a debug only view
 void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console) {
 	int skip = 0;
 	int y = pos.y();
 
 	console->setForegroundColor(TCODColor::lightCyan);
-	for (std::list<boost::shared_ptr<Job> >::iterator highIter = highList.begin(); highIter != highList.end(); ++highIter) {
+	for (std::list<boost::shared_ptr<Job> >::iterator highIter = availableList[HIGH].begin(); highIter != availableList[HIGH].end(); ++highIter) {
 		if (skip < from) ++skip;
 		else {
 
@@ -228,7 +206,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 	}
 
 	console->setForegroundColor(TCODColor::white);
-	for (std::list<boost::shared_ptr<Job> >::iterator medIter = medList.begin(); medIter != medList.end(); ++medIter) {
+	for (std::list<boost::shared_ptr<Job> >::iterator medIter = availableList[MED].begin(); medIter != availableList[MED].end(); ++medIter) {
 		if (skip < from) ++skip;
 		else {
 			console->print(pos.x(), y, "%s", (*medIter)->name.c_str());
@@ -237,7 +215,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 	}
 
 	console->setForegroundColor(TCODColor::lightGrey);
-	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = lowList.begin(); lowIter != lowList.end(); ++lowIter) {
+	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = availableList[LOW].begin(); lowIter != availableList[LOW].end(); ++lowIter) {
 		if (skip < from) ++skip;
 		else {
 			console->print(pos.x(), y, "%s", (*lowIter)->name.c_str());
@@ -260,47 +238,19 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 boost::weak_ptr<Job> JobManager::GetJob(int uid) {
 	boost::weak_ptr<Job> job;
 
-	for (std::list<boost::shared_ptr<Job> >::iterator highIter = highList.begin(); highIter != highList.end(); ++highIter) {
-		if ((*highIter)->Menial() != Game::Inst()->npcList[uid]->Expert()) {
-			if ((*highIter)->Assigned() == -1 && !(*highIter)->Removable()) {
-				job = (*highIter);
-				break;
-			}
-		}
-	}
-
-	if (!job.lock()) {
-		for (std::list<boost::shared_ptr<Job> >::iterator medIter = medList.begin(); medIter != medList.end(); ++medIter) {
-			if ((*medIter)->Menial() != Game::Inst()->npcList[uid]->Expert()) {
-				if ((*medIter)->Assigned() == -1 && !(*medIter)->Removable()) {
-					job = (*medIter);
-					break;
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
+			jobi != availableList[i].end(); ++jobi) {
+				if ((*jobi)->Menial() != Game::Inst()->npcList[uid]->Expert()) {
+					if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
+						job = (*jobi);
+						goto FoundJob;
+					}
 				}
-			}
 		}
 	}
-
-	if (!job.lock()) {
-		for (std::list<boost::shared_ptr<Job> >::iterator lowIter = lowList.begin(); lowIter != lowList.end(); ++lowIter) {
-			if ((*lowIter)->Menial() != Game::Inst()->npcList[uid]->Expert()) {
-				if ((*lowIter)->Assigned() == -1 && !(*lowIter)->Removable()) {
-					job = (*lowIter);
-					break;
-				}
-			}
-		}
-	}
-
-	//Now check the distance to the job, the further away the NPC is the larger the chance is that
-	//the assignment gets cancelled. This random-chance will skew results towards closeby npc's
-	//picking up jobs rather than just anyone.
-	if (job.lock()) {
-	/*	if (rand() % 100 < std::min(95, Game::Inst()->DistanceNPCToCoordinate(uid, job.lock()->tasks.front().target))) {
-			job.reset();
-		} else {*/
-			job.lock()->Assign(uid);
-	//	}
-	}
+	FoundJob:
+	if (job.lock()) job.lock()->Assign(uid);
 
 	return job;
 }
@@ -342,38 +292,38 @@ void JobManager::Update() {
 
 	//Check the normal queues for jobs that have all prerequisites and parents completed and
 	//remove them
-	for (std::list<boost::shared_ptr<Job> >::iterator highIter = highList.begin(); highIter != highList.end(); ++highIter) {
-		if ((*highIter)->Completed() && (*highIter)->PreReqsCompleted()) {
-			highIter = highList.erase(highIter);
-		}
-	}
-	for (std::list<boost::shared_ptr<Job> >::iterator medIter = medList.begin(); medIter != medList.end(); ++medIter) {
-		if ((*medIter)->Completed() && (*medIter)->PreReqsCompleted()) {
-			medIter = medList.erase(medIter);
-		}
-	}
-	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = lowList.begin(); lowIter != lowList.end(); ++lowIter) {
-		if ((*lowIter)->Completed() && (*lowIter)->PreReqsCompleted()) {
-			lowIter = lowList.erase(lowIter);
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
+			jobi != availableList[i].end(); ++jobi) {
+				if ((*jobi)->Completed() && (*jobi)->PreReqsCompleted()) {
+					jobi = availableList[i].erase(jobi);
+				}
 		}
 	}
 }
 
-int JobManager::JobAmount() { return highList.size() + medList.size() + lowList.size() + waitingList.size(); }
+int JobManager::JobAmount() { 
+	int count = 0;
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
+		count += availableList[i].size();
+	}
+	count += waitingList.size(); 
+	return count;
+}
 
 boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	int count = 0;
-	for (std::list<boost::shared_ptr<Job> >::iterator highIter = highList.begin(); highIter != highList.end(); ++highIter) {
-		if (count++ == index) return (*highIter);
+
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
+			jobi != availableList[i].end(); ++jobi) {
+				if (count++ == index) return (*jobi);
+		}
 	}
-	for (std::list<boost::shared_ptr<Job> >::iterator medIter = medList.begin(); medIter != medList.end(); ++medIter) {
-		if (count++ == index) return (*medIter);
-	}
-	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = lowList.begin(); lowIter != lowList.end(); ++lowIter) {
-		if (count++ == index) return (*lowIter);
-	}
+
 	for (std::list<boost::shared_ptr<Job> >::iterator waitingIter = waitingList.begin(); waitingIter != waitingList.end(); ++waitingIter) {
 		if (count++ == index) return (*waitingIter);
 	}
+
 	return boost::weak_ptr<Job>();
 }
