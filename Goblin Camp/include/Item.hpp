@@ -103,7 +103,7 @@ class Item : public Entity {
 		static std::vector<ItemCat> Categories;
 		static std::vector<ItemPreset> Presets;
 
-        ~Item();
+        virtual ~Item();
 
 		void Draw(Coordinate, TCODConsole*);
         void PutInContainer(boost::weak_ptr<Item>);

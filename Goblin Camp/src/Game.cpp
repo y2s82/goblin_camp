@@ -377,11 +377,13 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 
     boost::shared_ptr<Item> newItem;
     if (Item::Presets[type].organic) {
-        newItem.reset(static_cast<Item*>(new OrganicItem(pos, type)));
-        boost::weak_ptr<OrganicItem> orgItem(boost::static_pointer_cast<OrganicItem>(newItem));
-        orgItem.lock()->Season(Item::Presets[type].season);
-        orgItem.lock()->Nutrition(Item::Presets[type].nutrition);
-        orgItem.lock()->Growth(Item::Presets[type].growth);
+		boost::shared_ptr<OrganicItem> orgItem(new OrganicItem(pos, type));
+		newItem = boost::static_pointer_cast<Item>(orgItem);
+        //newItem.reset(static_cast<Item*>(new OrganicItem(pos, type)));
+        //boost::weak_ptr<OrganicItem> orgItem(boost::static_pointer_cast<OrganicItem>(newItem));
+        orgItem->Season(Item::Presets[type].season);
+        orgItem->Nutrition(Item::Presets[type].nutrition);
+        orgItem->Growth(Item::Presets[type].growth);
     } else if (Item::Presets[type].container > 0) {
         newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container)));
     } else {
