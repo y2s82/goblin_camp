@@ -18,6 +18,7 @@
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "UI.hpp"
+#include "StatusEffect.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -197,8 +198,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->faction = 0;
 			npc->needsNutrition = true;
 			npc->health = 50;
-			npc->attackSkill = 3;
-			npc->defenceSkill = 5;
+			npc->baseStats[ATTACKSKILL] = 3;
+			npc->baseStats[DEFENCESKILL] = 5;
             ++goblinCount;
             break;
 
@@ -214,8 +215,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->needsNutrition = true;
 			npc->aggressive = true;
 			npc->health = 100;
-			npc->attackSkill = 15;
-			npc->defenceSkill = 10;
+			npc->baseStats[ATTACKSKILL] = 15;
+			npc->baseStats[DEFENCESKILL] = 10;
             ++orcCount;
             break;
 
@@ -228,8 +229,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->name = "Giant Snail";
             npc->faction = 1;
 			npc->health = 50;
-			npc->defenceSkill = 2;
-			npc->attackSkill = 2;
+			npc->baseStats[ATTACKSKILL] = 2;
+			npc->baseStats[DEFENCESKILL] = 2;
             break;
 
 		//This creates a pack of wolves intent on your camp
@@ -245,8 +246,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
             npc->name = "Starving Wolf (Alpha Male)";
             npc->faction = 2;
 			npc->health = 150;
-			npc->defenceSkill = 6;
-			npc->attackSkill = 10;
+			npc->baseStats[ATTACKSKILL] = 15;
+			npc->baseStats[DEFENCESKILL] = 10;
 			npc->MemberOf(hostileSquadList.back());
 			npc->run = false;
 			npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
@@ -263,8 +264,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 				npc->name = "Starving Wolf";
 				npc->faction = 2;
 				npc->health = 50;
-				npc->defenceSkill = 6;
-				npc->attackSkill = 10;
+				npc->baseStats[ATTACKSKILL] = 10;
+				npc->baseStats[DEFENCESKILL] = 6;
 				npc->MemberOf(hostileSquadList.back());
 				npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 			}
@@ -576,6 +577,7 @@ void Game::Update() {
 
 	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
+		npci->second->Update();
 		if (!npci->second->Dead()) npci->second->Think();
 		else npcsWaitingForRemoval.push_back(npci->second);
 	}

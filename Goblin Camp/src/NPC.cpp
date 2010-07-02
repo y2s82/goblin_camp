@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
+#include <boost/format.hpp>
 #include <libtcod.hpp>
 #include <string>
 #ifdef DEBUG
@@ -48,8 +49,6 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	foundItem(boost::weak_ptr<Item>()),
 	bag(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
 	needsNutrition(false),
-	attackSkill(0), attackPower(0), attackSpeed(0),
-	defenceSkill(0),
 	aggressive(false),
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
@@ -67,6 +66,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	hunger += rand() % 10;
 
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), 0);
+
+	for (int i = 0; i < STAT_COUNT; ++i) {baseStats[i] = 0; effectiveStats[i] = 0;}
 }
 
 NPC::~NPC() {
@@ -181,16 +182,17 @@ void NPC::HandleHunger() {
 	}
 }
 
-AiThink NPC::Think() {
-	Coordinate tmpCoord;
-	int tmp;
-	TaskResult result;
-
+void NPC::Update() {
 	if (Map::Inst()->NPCList(_x,_y)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
 	++statusGraphicCounter;
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		//Apply effects to stats
+		for (int i = 0; i < STAT_COUNT; ++i) {
+			effectiveStats[i] = (int)(baseStats[i] * statusEffectI->statChanges[i]);
+		}
+		//Remove the statuseffect if it's cooldown has run out
 		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
 			if (statusEffectI == statusEffectIterator) {
 				++statusEffectIterator;
@@ -223,6 +225,12 @@ AiThink NPC::Think() {
 			HandleHunger();
 		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
 	}
+}
+
+AiThink NPC::Think() {
+	Coordinate tmpCoord;
+	int tmp;
+	TaskResult result;
 
 	result = Move();
 
@@ -743,12 +751,13 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
 			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(target.lock()));
 			npc->aggressor = boost::static_pointer_cast<NPC>(shared_from_this());
-			int dif = ((rand() % 10) + attackSkill) - ((rand() % 10) + npc->defenceSkill);
+			int dif = ((rand() % 10) + effectiveStats[ATTACKSKILL]) - ((rand() % 10) + npc->effectiveStats[DEFENCESKILL]);
+#ifdef DEBUG
+			std::cout<<boost::format("%s hits %s for %d dif\n") % name % npc->name % dif;
+#endif
 			if (dif > 0) {
 				npc->health -= dif;
-#ifdef DEBUG
-				std::cout<<"Hit connected, caused "<<dif<<" damage\n";
-#endif
+				if (rand() % 20 == 0) npc->AddEffect(CONCUSSION);
 				if (npc->health <= 0) npc->Kill();
 			} else {
 #ifdef DEBUG

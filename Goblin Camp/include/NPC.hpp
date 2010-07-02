@@ -36,7 +36,6 @@ enum Skill {
 	SKILLAMOUNT
 };
 
-
 class SkillSet {
 	private:
 		int skills[SKILLAMOUNT];
@@ -87,8 +86,8 @@ class NPC : public Entity {
 		boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 		boost::function<void(boost::shared_ptr<NPC>)> React;
 
-		int attackSkill, attackPower, attackSpeed;
-		int defenceSkill;
+		int baseStats[STAT_COUNT];
+		int effectiveStats[STAT_COUNT];
 		bool aggressive;
 		boost::weak_ptr<NPC> aggressor;
 		bool dead;
@@ -98,6 +97,7 @@ class NPC : public Entity {
 		~NPC();
 		SkillSet Skills;
 		AiThink Think();
+		void Update();
 		void Draw(Coordinate, TCODConsole*);
 		void Position(Coordinate,bool);
 		virtual void Position(Coordinate);
