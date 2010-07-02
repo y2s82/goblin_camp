@@ -8,7 +8,7 @@
 
 #include "Coordinate.hpp"
 
-#define ANNOUNCE_MAX_LENGTH 50
+#define ANNOUNCE_MAX_LENGTH 54
 
 class AnnounceMessage {
 	public:

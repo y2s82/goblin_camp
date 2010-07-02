@@ -339,7 +339,9 @@ AiThink NPC::Think() {
 				case PUTIN:
                     bag->RemoveItem(carried);
                     carried.lock()->Position(Position());
-                    if (!boost::static_pointer_cast<Container>(currentEntity().lock())->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+					if (currentEntity().lock()) {
+						if (!boost::static_pointer_cast<Container>(currentEntity().lock())->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+					}
                     carried.reset();
                     TaskFinished(TASKSUCCESS);
                     break;

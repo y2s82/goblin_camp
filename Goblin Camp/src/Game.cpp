@@ -50,6 +50,33 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
+
+	//Check if the required materials exist before creating the build job
+	std::list<boost::weak_ptr<Item> > componentList;
+	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
+		mati != Construction::Presets[construct].materials.end(); ++mati) {
+			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati);
+			if (boost::shared_ptr<Item> item = material.lock()) {
+				item->Reserve(true);
+				componentList.push_back(item);
+			} else {
+				for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
+					compi != componentList.end(); ++compi) {
+						compi->lock()->Reserve(false);
+				}
+				componentList.clear();
+				Announce::Inst()->AddMsg((boost::format("Cancelled %s: missing %s") % Construction::Presets[construct].name % Item::ItemCategoryToString(*mati)).str(), TCODColor::red);
+				return -1;
+			}
+	}
+
+	for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
+		compi != componentList.end(); ++compi) {
+			compi->lock()->Reserve(false);
+	}
+	componentList.clear();
+
+
 	boost::shared_ptr<Construction> newCons(new Construction(construct, target));
 	Game::Inst()->constructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
 	Coordinate blueprint = Construction::Blueprint(construct);
@@ -379,8 +406,6 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
     if (Item::Presets[type].organic) {
 		boost::shared_ptr<OrganicItem> orgItem(new OrganicItem(pos, type));
 		newItem = boost::static_pointer_cast<Item>(orgItem);
-        //newItem.reset(static_cast<Item*>(new OrganicItem(pos, type)));
-        //boost::weak_ptr<OrganicItem> orgItem(boost::static_pointer_cast<OrganicItem>(newItem));
         orgItem->Season(Item::Presets[type].season);
         orgItem->Nutrition(Item::Presets[type].nutrition);
         orgItem->Growth(Item::Presets[type].growth);

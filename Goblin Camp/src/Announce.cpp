@@ -26,11 +26,12 @@ Announce* Announce::Inst() {
 Announce::Announce() : timer(0) {}
 
 void Announce::AddMsg(std::string msg, TCODColor color) {
+	msg = msg.substr(0,ANNOUNCE_MAX_LENGTH-4);
 	if (!messageQueue.empty() && messageQueue.back()->msg == msg) {
 		messageQueue.back()->counter++;
 		if (messageQueue.size() == 1) timer = 0;
 	} else {
-		messageQueue.push_back(new AnnounceMessage(msg.substr(0,ANNOUNCE_MAX_LENGTH-4), color));
+		messageQueue.push_back(new AnnounceMessage(msg, color));
 	}
 }
 
