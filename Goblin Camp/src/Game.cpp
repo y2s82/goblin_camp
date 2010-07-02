@@ -435,11 +435,16 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 	return newItem->Uid();
 }
 
-void Game::RemoveItem(boost::weak_ptr<Item> item) {
-	if (item.lock()) {
-		Map::Inst()->ItemList(item.lock()->_x, item.lock()->_y)->erase(item.lock()->uid);
-		itemList.erase(item.lock()->uid);
-		if (freeItems.find(item) != freeItems.end()) freeItems.erase(item);
+void Game::RemoveItem(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
+		Map::Inst()->ItemList(item->_x, item->_y)->erase(item->uid);
+		if (freeItems.find(witem) != freeItems.end()) freeItems.erase(witem);
+		if (boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item->container.lock())) {
+			if (container) {
+				container->RemoveItem(witem);
+			}
+		}
+		itemList.erase(item->uid);
 	}
 }
 
