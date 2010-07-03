@@ -387,6 +387,8 @@ void Construction::UpdateWallGraphic(bool recurse) {
 bool Construction::IsStockpile() { return stockpile; }
 bool Construction::IsFarmplot() { return farmplot; }
 
+void Construction::Update() {}
+
 ConstructionPreset::ConstructionPreset() :
     maxCondition(0),
     graphic(std::vector<int>()),

@@ -72,6 +72,10 @@
   <category>
     <name>Seed Container</name>
   </category>
+
+  <category>
+    <name>Bed</name>
+  </category>
   <!-- End of categories -->
 
   <!-- Start of item definitions -->
@@ -80,7 +84,7 @@
   <item>
     <name>Wood log</name>
     <category>Wood</category>
-    <graphic>220</graphic>
+    <graphic>22</graphic>
     <color>
       <r>255</r>
       <g>149</g>
@@ -399,6 +403,22 @@
     <components>
       <comp>Plank</comp>
       <comp>Plank</comp>
+      <comp>Plank</comp>
+      <comp>Plank</comp>
+      <comp>Plank</comp>
+    </components>
+  </item>
+
+  <item>
+    <name>Wooden bed</name>
+    <category>Bed</category>
+    <graphic>22</graphic>
+    <color>
+      <r>127</r>
+      <g>106</g>
+      <b>0</b>
+    </color>
+    <components>
       <comp>Plank</comp>
       <comp>Plank</comp>
       <comp>Plank</comp>

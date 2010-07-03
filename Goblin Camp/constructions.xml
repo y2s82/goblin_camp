@@ -22,10 +22,11 @@ items.xml is processed before this, so you can refer to items and categories by 
         </graphic>
         <producer>true</producer>
         <products>
-            <prod>Wood plank</prod>
-            <prod>Wooden door</prod>
-            <prod>Wooden barrel</prod>
-            <prod>Crate</prod>
+          <prod>Wood plank</prod>
+          <prod>Wooden door</prod>
+          <prod>Wooden barrel</prod>
+          <prod>Crate</prod>
+          <prod>Wooden bed</prod>
         </products>
         <walkable>true</walkable>
         <maxCondition>90</maxCondition>
@@ -111,5 +112,17 @@ items.xml is processed before this, so you can refer to items and categories by 
         <productionSpot><x>1</x><y>2</y></productionSpot>
     </construction>
 
+  <construction>
+    <name>Bed</name>
+    <graphic>
+      <g>1</g>
+      <g>22</g>
+    </graphic>
+    <walkable>true</walkable>
+    <maxCondition>10</maxCondition>
+    <materials>
+      <mat>Bed</mat>
+    </materials>
+  </construction>
 
 </ConstructionPresets>

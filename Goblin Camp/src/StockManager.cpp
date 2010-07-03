@@ -47,10 +47,16 @@ StockManager::StockManager(void){
 			}
 
 			if (!producerFound) {//Haven't found a producer, so check NatureObjects if a tree has this item as a component
+#ifdef DEBUG
+				std::cout<<"Checking trees for production of "<<Item::Presets[item].name<<"\n";
+#endif
 				for (unsigned int natObj = 0; natObj < NatureObject::Presets.size(); ++natObj) {
 					if (NatureObject::Presets[natObj].tree) {
 						for (std::list<ItemType>::iterator compi = NatureObject::Presets[natObj].components.begin(); 
 							compi != NatureObject::Presets[natObj].components.end(); ++compi) {
+#ifdef DEBUG
+				std::cout<<"Is "<<Item::ItemTypeToString(*compi)<<" = "<<Item::Presets[item].name<<"\n";
+#endif
 							if (*compi == item) {
 								producables.insert(item);
 								fromTrees.insert(item);
@@ -98,19 +104,21 @@ void StockManager::Update() {
 						std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator> 
 						workshopRange = workshops.equal_range(producers[*prodi]);
 					//By dividing the difference by the amount of workshops we get how many jobs each one should handle
-					difference = std::max(1, difference / std::distance(workshopRange.first, workshopRange.second));
-					//Now we just check that each workshop has 'difference' amount of jobs for this product
-					for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki =
-						workshopRange.first; worki != workshopRange.second; ++worki) {
-							int jobsFound = 0;
-							for (int jobi = 0; jobi < (signed int)worki->second.lock()->JobList()->size(); ++jobi) {
-								if ((*worki->second.lock()->JobList())[jobi] == *prodi) ++jobsFound;
-							}
-							if (jobsFound < difference) {
-								for (int i = 0; i < difference - jobsFound; ++i) {
-									worki->second.lock()->AddJob(*prodi);
+					if (int workshopCount = std::distance(workshopRange.first, workshopRange.second) > 0) {
+						difference = std::max(1, difference / workshopCount);
+						//Now we just check that each workshop has 'difference' amount of jobs for this product
+						for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki =
+							workshopRange.first; worki != workshopRange.second; ++worki) {
+								int jobsFound = 0;
+								for (int jobi = 0; jobi < (signed int)worki->second.lock()->JobList()->size(); ++jobi) {
+									if ((*worki->second.lock()->JobList())[jobi] == *prodi) ++jobsFound;
 								}
-							}
+								if (jobsFound < difference) {
+									for (int i = 0; i < difference - jobsFound; ++i) {
+										worki->second.lock()->AddJob(*prodi);
+									}
+								}
+						}
 					}
 				}
 			}

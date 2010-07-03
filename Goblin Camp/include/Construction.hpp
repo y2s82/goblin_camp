@@ -87,6 +87,7 @@ class Construction : public Entity {
         virtual boost::weak_ptr<Container> Storage();
 		bool IsStockpile();
 		bool IsFarmplot();
+		virtual void Update();
 };
 
 class Stockpile : public Construction {
