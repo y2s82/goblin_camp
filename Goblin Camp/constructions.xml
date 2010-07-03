@@ -125,4 +125,18 @@ items.xml is processed before this, so you can refer to items and categories by 
     </materials>
   </construction>
 
+  <construction>
+    <name>Door</name>
+    <graphic>
+      <g>1</g>
+      <g>43</g>
+    </graphic>
+    <walkable>true</walkable>
+    <maxCondition>10</maxCondition>
+    <materials>
+      <mat>Door</mat>
+    </materials>
+    <door></door>
+  </construction>
+  
 </ConstructionPresets>

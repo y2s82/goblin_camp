@@ -90,7 +90,7 @@ int Construction::Build() {
 		//be possible in practice.
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
-		    color = TCODColor::lerp(color, itemi->lock()->Color(), 0.5f);
+		    color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->Faction(-1); //Remove from player faction so it doesn't show up in stocks
 		}
 
@@ -284,7 +284,10 @@ void Construction::LoadPresets(ticpp::Document doc) {
                                 else y = intVal;
                         }
                         Presets.back().productionSpot = Coordinate(x,y);
-                    }
+                    } else if (child->Value() == "door") {
+						Presets.back().door = true;
+						Presets.back().dynamic = true;
+					}
                 }
                 Presets.back().blueprint = Coordinate(Presets.back().graphic[0],
                     (Presets.back().graphic.size()-1)/Presets.back().graphic[0]);
@@ -351,13 +354,17 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse) {
     bool n = false,s = false,e = false,w = false;
 
-    if (Map::Inst()->Construction(_x - 1, _y) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x - 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].wall
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].door))
         w = true;
-    if (Map::Inst()->Construction(_x + 1, _y) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x + 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].wall
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].door))
         e = true;
-    if (Map::Inst()->Construction(_x, _y - 1) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x, _y - 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].wall
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].door))
         n = true;
-    if (Map::Inst()->Construction(_x, _y + 1) > -1 && Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].wall)
+    if (Map::Inst()->Construction(_x, _y + 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].wall
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].door))
         s = true;
 
     if (n&&s&&e&&w) graphic[1] = 197;
@@ -371,7 +378,9 @@ void Construction::UpdateWallGraphic(bool recurse) {
     else if (n&&w) graphic[1] = 217;
     else if (s&&e) graphic[1] = 218;
     else if (s&&w) graphic[1] = 191;
-    else graphic[1] = 224;
+	else if (e||w) graphic[1] = 196;
+	else if (n||s) graphic[1] = 179;
+    else graphic[1] = 197;
 
     if (recurse) {
         if (w)
@@ -402,6 +411,7 @@ ConstructionPreset::ConstructionPreset() :
     wall(false),
     stockpile(false),
     farmPlot(false),
+	door(false),
     productionSpot(Coordinate(0,0)),
 	dynamic(false)
 {}

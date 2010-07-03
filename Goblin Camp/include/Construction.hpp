@@ -38,6 +38,7 @@ class ConstructionPreset {
 	std::string name;
 	Coordinate blueprint;
 	bool wall, stockpile, farmPlot;
+	bool door;
 	Coordinate productionSpot;
 	bool dynamic;
 };

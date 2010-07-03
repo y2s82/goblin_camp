@@ -21,6 +21,7 @@
 #include "StatusEffect.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
+#include "Door.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -79,8 +80,12 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	}
 	componentList.clear();
 
-
-	boost::shared_ptr<Construction> newCons(new Construction(construct, target));
+	boost::shared_ptr<Construction> newCons;
+	if (Construction::Presets[construct].door) {
+		newCons = boost::shared_ptr<Construction>(new Door(construct, target));
+	} else {
+	newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
+	}
 	if (Construction::Presets[construct].dynamic) {
 		Game::Inst()->dynamicConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
 	} else {

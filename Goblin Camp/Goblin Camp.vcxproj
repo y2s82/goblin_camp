@@ -23,6 +23,7 @@
     <ClCompile Include="src\Construction.cpp" />
     <ClCompile Include="src\Container.cpp" />
     <ClCompile Include="src\Coordinate.cpp" />
+    <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Farmplot.cpp" />
     <ClCompile Include="src\Filth.cpp" />
     <ClCompile Include="src\Game.cpp" />
@@ -50,6 +51,7 @@
     <ClInclude Include="include\Construction.hpp" />
     <ClInclude Include="include\Container.hpp" />
     <ClInclude Include="include\Coordinate.hpp" />
+    <ClInclude Include="include\Door.hpp" />
     <ClInclude Include="include\Farmplot.hpp" />
     <ClInclude Include="include\Filth.hpp" />
     <ClInclude Include="include\Game.hpp" />
