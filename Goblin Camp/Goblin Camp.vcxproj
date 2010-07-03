@@ -23,6 +23,7 @@
     <ClCompile Include="src\Construction.cpp" />
     <ClCompile Include="src\Container.cpp" />
     <ClCompile Include="src\Coordinate.cpp" />
+    <ClCompile Include="src\Farmplot.cpp" />
     <ClCompile Include="src\Filth.cpp" />
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Entity.cpp" />
@@ -38,6 +39,7 @@
     <ClCompile Include="src\Squad.cpp" />
     <ClCompile Include="src\StatusEffect.cpp" />
     <ClCompile Include="src\StockManager.cpp" />
+    <ClCompile Include="src\Stockpile.cpp" />
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\UI.cpp" />
     <ClCompile Include="src\Water.cpp" />
@@ -48,6 +50,7 @@
     <ClInclude Include="include\Construction.hpp" />
     <ClInclude Include="include\Container.hpp" />
     <ClInclude Include="include\Coordinate.hpp" />
+    <ClInclude Include="include\Farmplot.hpp" />
     <ClInclude Include="include\Filth.hpp" />
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\Entity.hpp" />
@@ -63,6 +66,7 @@
     <ClInclude Include="include\Squad.hpp" />
     <ClInclude Include="include\StatusEffect.hpp" />
     <ClInclude Include="include\StockManager.hpp" />
+    <ClInclude Include="include\Stockpile.hpp" />
     <ClInclude Include="include\Tile.hpp" />
     <ClInclude Include="include\UI.hpp" />
     <ClInclude Include="include\Water.hpp" />

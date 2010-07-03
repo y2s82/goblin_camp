@@ -11,6 +11,8 @@
 #include "Logger.hpp"
 #include "Map.hpp"
 #include "Job.hpp"
+#include "Stockpile.hpp"
+#include "Farmplot.hpp"
 
 UI* UI::instance = 0;
 

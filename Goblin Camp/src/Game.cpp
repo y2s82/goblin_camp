@@ -19,6 +19,8 @@
 #include "StockManager.hpp"
 #include "UI.hpp"
 #include "StatusEffect.hpp"
+#include "Stockpile.hpp"
+#include "Farmplot.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;

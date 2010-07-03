@@ -6,6 +6,7 @@
 
 #include "Item.hpp"
 #include "Construction.hpp"
+#include "Stockpile.hpp"
 #include "Coordinate.hpp"
 
 enum JobPriority {
