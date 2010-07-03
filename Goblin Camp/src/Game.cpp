@@ -132,11 +132,11 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 	Coordinate closest(-9999, -9999);
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
-			boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
-			for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
-				for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
-					if (ix == construct.lock()->x()-1 || ix == construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x() ||
-						iy == construct.lock()->y()-1 || iy == construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y()) {
+			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
+			for (int ix = construct->x()-1; ix <= construct->x() + Construction::Blueprint(construct->type()).x(); ++ix) {
+				for (int iy = construct->y()-1; iy <= construct->y() + Construction::Blueprint(construct->type()).y(); ++iy) {
+					if (ix == construct->x()-1 || ix == construct->x() + Construction::Blueprint(construct->type()).x() ||
+						iy == construct->y()-1 || iy == construct->y() + Construction::Blueprint(construct->type()).y()) {
 						if (Map::Inst()->Walkable(ix,iy)) {
 							if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
 								closest = Coordinate(ix,iy);
@@ -166,9 +166,9 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
-			boost::weak_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
-			for (int ix = construct.lock()->x()-1; ix <= construct.lock()->x() + Construction::Blueprint(construct.lock()->type()).x(); ++ix) {
-				for (int iy = construct.lock()->y()-1; iy <= construct.lock()->y() + Construction::Blueprint(construct.lock()->type()).y(); ++iy) {
+			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
+			for (int ix = construct->x()-1; ix <= construct->x() + Construction::Blueprint(construct->type()).x(); ++ix) {
+				for (int iy = construct->y()-1; iy <= construct->y() + Construction::Blueprint(construct->type()).y(); ++iy) {
 					if (pos.x() == ix && pos.y() == iy) { return true; }
 				}
 			}
@@ -495,7 +495,7 @@ int Game::Distance(Coordinate a, Coordinate b) {
 
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = constructionList.begin(); consIter != constructionList.end(); ++consIter) {
-		if (consIter->second->stockpile && !boost::dynamic_pointer_cast<FarmPlot>(consIter->second)) {
+		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
@@ -507,7 +507,7 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 
 boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = constructionList.begin(); consIter != constructionList.end(); ++consIter) {
-		if (boost::dynamic_pointer_cast<Stockpile>(consIter->second) && !boost::dynamic_pointer_cast<FarmPlot>(consIter->second)) {
+		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
