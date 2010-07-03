@@ -139,6 +139,7 @@ void NPC::HandleThirst() {
 				newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 				newJob->tasks.push_back(Task(DRINK));
 				jobs.push_back(newJob);
+				run = true;
 			} else {
 				for (int ix = tmpCoord.x()-1; ix <= tmpCoord.x()+1; ++ix) {
 					for (int iy = tmpCoord.y()-1; iy <= tmpCoord.y()+1; ++iy) {
@@ -152,6 +153,7 @@ void NPC::HandleThirst() {
 				CONTINUEDRINKBLOCK:
 				newJob->tasks.push_back(Task(DRINK, tmpCoord));
 				jobs.push_back(newJob);
+				run = true;
 			}
 		}
 	}
@@ -178,6 +180,7 @@ void NPC::HandleHunger() {
 			newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 			newJob->tasks.push_back(Task(EAT));
 			jobs.push_back(newJob);
+			run = true;
 		}
 	}
 }

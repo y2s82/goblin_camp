@@ -176,8 +176,16 @@ void Item::LoadPresets(ticpp::Document doc) {
                     } else if (child->Value() == "components") {
                         ticpp::Iterator<ticpp::Node> c;
                         for (c = c.begin(child->ToElement()); c != c.end(); ++c) {
-                            Presets.back().components.push_back(Item::StringToItemCategory(c->ToElement()->GetText()));
-                        }
+							if (c->ToElement()->GetAttribute("containin") == "true") {
+								Presets.back().containIn = Item::StringToItemCategory(c->ToElement()->GetText());
+#ifdef DEBUG
+								std::cout<<"Contained in "<<Item::ItemCategoryToString(Presets.back().containIn)<<"\n";
+#endif
+							} 
+							//Even if it's a container for the product we still count it as a
+							//component so that its brought to the workshop correctly
+							Presets.back().components.push_back(Item::StringToItemCategory(c->ToElement()->GetText()));
+						}
                     } else if (child->Value() == "seasons") {
 #ifdef DEBUG
                         std::cout<<"Seasons\n";

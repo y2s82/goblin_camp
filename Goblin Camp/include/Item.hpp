@@ -62,6 +62,7 @@ class ItemPreset {
         int container;
         int multiplier;
         ItemCategory fitsin;
+		ItemCategory containIn;
         bool decays;
         int decaySpeed;
         std::vector<ItemType> decayList;
@@ -106,7 +107,7 @@ class Item : public Entity {
         virtual ~Item();
 
 		void Draw(Coordinate, TCODConsole*);
-        void PutInContainer(boost::weak_ptr<Item>);
+        void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
         boost::weak_ptr<Item> ContainedIn();
 		virtual void Position(Coordinate);
 		virtual Coordinate Position();

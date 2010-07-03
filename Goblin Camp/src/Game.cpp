@@ -406,7 +406,7 @@ boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
 }
 
 int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction, 
-	std::vector<boost::weak_ptr<Item> > comps) {
+	std::vector<boost::weak_ptr<Item> > comps, boost::shared_ptr<Container> container) {
 
     boost::shared_ptr<Item> newItem;
     if (Item::Presets[type].organic) {
@@ -421,16 +421,23 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
         newItem.reset(new Item(pos, type, 0, comps));
     }
 
-    freeItems.insert(newItem);
-    Map::Inst()->ItemList(newItem->x(), newItem->y())->insert(newItem->Uid());
+	if (!container) {
+		freeItems.insert(newItem);
+		Map::Inst()->ItemList(newItem->x(), newItem->y())->insert(newItem->Uid());
+	} else {
+		container->AddItem(newItem);
+	}
     itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 	if (store) StockpileItem(newItem);
 
+	//This shouldn't happen here, constructions may call CreateItem multiple times with the
+	//same components
+	/*
 	for (unsigned int i = 0; i < comps.size(); ++i) {
 		if (comps[i].lock()) {
 			Game::Inst()->RemoveItem(comps[i]);
 		}
-	}
+	}*/
 	
 	return newItem->Uid();
 }

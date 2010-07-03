@@ -161,17 +161,26 @@ int Construction::Use() {
             if (!allComponentsFound) return -1;
 
             std::vector<boost::weak_ptr<Item> > components;
+			boost::shared_ptr<Container> itemContainer;
 
             for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
                 for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
                     if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
-                        components.push_back(*itemi);
+						if (itemi->lock()->IsCategory(Item::Presets[jobList[0]].containIn)) {
+							//This component is the container our product should be placed in
+							itemContainer = boost::static_pointer_cast<Container>(itemi->lock());
+						} else {
+							//Just a component of the product
+							components.push_back(*itemi);
+						}
                         container->RemoveItem(*itemi);
                         break;
                     }
                 }
             }
 
+			//Create the "fruit" of the components. Basically fruits have their seeds as their fruits,
+			//this makes berries give their seeds when made into wine, for example.
 			for (unsigned int i = 0; i < components.size(); ++i) {
 				if (components[i].lock()) {
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[components[i].lock()->Type()].fruits.begin(); fruiti != Item::Presets[components[i].lock()->Type()].fruits.end(); ++fruiti) {
@@ -181,9 +190,19 @@ int Construction::Use() {
 			}
 
 
+			//Create the items
+			if (itemContainer) itemContainer->PutInContainer(); 
             for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
-                Game::Inst()->CreateItem(Position()+Construction::Presets[_type].productionSpot, jobList[0], true, 0, components);
+                if (itemContainer) Game::Inst()->CreateItem(Position()+Construction::Presets[_type].productionSpot, jobList[0], false, 0, components, itemContainer);
+				else Game::Inst()->CreateItem(Position()+Construction::Presets[_type].productionSpot, jobList[0], true, 0, components);
             }
+
+			//Destroy the components
+			for (unsigned int i = 0; i < components.size(); ++i) {
+				if (components[i].lock()) {
+					Game::Inst()->RemoveItem(components[i]);
+				}
+			}
 
             progress = 0;
             //~Job removes the job from the jobList
