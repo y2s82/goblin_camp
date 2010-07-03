@@ -68,7 +68,10 @@ void Item::Color(TCODColor col) {color = col;}
 void Item::Position(Coordinate pos) {
     _x = pos.x(); _y = pos.y();
 }
-Coordinate Item::Position() {return this->Entity::Position();}
+Coordinate Item::Position() {
+	if (container.lock()) return container.lock()->Position();
+	return this->Entity::Position();
+}
 
 void Item::Reserve(bool value) {
     reserved = value;
