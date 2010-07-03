@@ -274,6 +274,7 @@ void Construction::LoadPresets(ticpp::Document doc) {
                         Presets.back().stockpile = true;
                     } else if (child->Value() == "farmplot") {
                         Presets.back().farmPlot = true;
+						Presets.back().dynamic = true;
                     } else if (child->Value() == "productionSpot") {
                         ticpp::Iterator<ticpp::Node> coord;
                         int x = -1, y;
@@ -401,6 +402,7 @@ ConstructionPreset::ConstructionPreset() :
     wall(false),
     stockpile(false),
     farmPlot(false),
-    productionSpot(Coordinate(0,0))
+    productionSpot(Coordinate(0,0)),
+	dynamic(false)
 {}
 

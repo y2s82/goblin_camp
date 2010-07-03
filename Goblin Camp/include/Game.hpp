@@ -67,7 +67,9 @@ class Game {
 		static int PlaceConstruction(Coordinate, ConstructionType);
 		void RemoveConstruction(boost::weak_ptr<Construction>);
 		static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
-		std::map<int,boost::shared_ptr<Construction> > constructionList;
+		//std::map<int,boost::shared_ptr<Construction> > constructionList;
+		std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
+		std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
 		Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>);
 		bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 		boost::weak_ptr<Construction> GetConstruction(int);

@@ -81,7 +81,11 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 
 
 	boost::shared_ptr<Construction> newCons(new Construction(construct, target));
-	Game::Inst()->constructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
+	if (Construction::Presets[construct].dynamic) {
+		Game::Inst()->dynamicConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
+	} else {
+		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
+	}
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.x(); x < target.x() + blueprint.x(); ++x) {
 		for (int y = target.y(); y < target.y() + blueprint.y(); ++y) {
@@ -121,7 +125,11 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	Map::Inst()->Buildable(a.x(), a.y(), false);
 	Map::Inst()->Construction(a.x(), a.y(), newSp->Uid());
 	newSp->Expand(a,b);
-	Game::Inst()->constructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
+	if (Construction::Presets[stockpile].dynamic) {
+		Game::Inst()->dynamicConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
+	} else {
+		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
+	}
 
 	//Spawning a BUILD job is not required because stockpiles are created "built"
 	return newSp->Uid();
@@ -391,20 +399,28 @@ void Game::Init(int width, int height, bool fullscreen) {
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
-	if (cons.lock()) {
-        Coordinate blueprint = Construction::Blueprint(cons.lock()->type());
-        for (int x = cons.lock()->x(); x < cons.lock()->x() + blueprint.x(); ++x) {
-            for (int y = cons.lock()->y(); y < cons.lock()->y() + blueprint.y(); ++y) {
+	if (boost::shared_ptr<Construction> construct = cons.lock()) {
+        Coordinate blueprint = Construction::Blueprint(construct->type());
+        for (int x = construct->x(); x < construct->x() + blueprint.x(); ++x) {
+            for (int y = construct->y(); y < construct->y() + blueprint.y(); ++y) {
                 Map::Inst()->Buildable(x,y,true);
                 Map::Inst()->Construction(x,y,-1);
             }
         }
-        Game::Inst()->constructionList.erase(cons.lock()->Uid());
+		if (Construction::Presets[construct->_type].dynamic) {
+			Game::Inst()->dynamicConstructionList.erase(construct->Uid());
+		} else {
+			Game::Inst()->staticConstructionList.erase(construct->Uid());
+		}
 	}
 }
 
 boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
-    return constructionList[uid];
+    if (staticConstructionList.find(uid) != staticConstructionList.end()) 
+		return staticConstructionList[uid];
+	else if (dynamicConstructionList.find(uid) != dynamicConstructionList.end())
+		return dynamicConstructionList[uid];
+	return boost::weak_ptr<Construction>();
 }
 
 int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction, 
@@ -494,7 +510,7 @@ int Game::Distance(Coordinate a, Coordinate b) {
 }
 
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category) {
-	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = constructionList.begin(); consIter != constructionList.end(); ++consIter) {
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category));
 			if (item.lock() && !item.lock()->Reserved()) {
@@ -506,7 +522,7 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 }
 
 boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type) {
-	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = constructionList.begin(); consIter != constructionList.end(); ++consIter) {
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type));
 			if (item.lock() && !item.lock()->Reserved()) {
@@ -605,10 +621,8 @@ void Game::Update() {
 		RemoveNPC(*remNpci);
 	}
 
-	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
-		if (consi->second->farmplot) {
-	        boost::static_pointer_cast<FarmPlot>(consi->second)->Update();
-	    }
+	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
+	    consi->second->Update();
 	}
 
 	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
@@ -629,7 +643,7 @@ void Game::Update() {
 }
 
 void Game::StockpileItem(boost::weak_ptr<Item> item) {
-    for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = constructionList.begin(); stocki != constructionList.end(); ++stocki) {
+    for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
             boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
             if (sp->Allowed(Item::Presets[item.lock()->Type()].categories) && !sp->Full()) {
@@ -672,7 +686,10 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
 void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 	Map::Inst()->Draw(upleft, buffer);
 
-    for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = constructionList.begin(); cit != constructionList.end(); ++cit) {
+    for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = staticConstructionList.begin(); cit != staticConstructionList.end(); ++cit) {
+        cit->second->Draw(upleft, buffer);
+    }
+    for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = dynamicConstructionList.begin(); cit != dynamicConstructionList.end(); ++cit) {
         cit->second->Draw(upleft, buffer);
     }
     for (std::map<int,boost::shared_ptr<Item> >::iterator iit = itemList.begin(); iit != itemList.end(); ++iit) {
@@ -702,7 +719,7 @@ void Game::FlipBuffer() {
 Seasons Game::Season() { return season; }
 
 void Game::SpawnTillageJobs() {
-   	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
+   	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
 		if (consi->second->farmplot) {
 	        boost::shared_ptr<Job> tillJob(new Job("Till farmplot"));
 	        tillJob->tasks.push_back(Task(MOVE, consi->second->Position()));
@@ -713,7 +730,7 @@ void Game::SpawnTillageJobs() {
 }
 
 void Game::DeTillFarmPlots() {
-   	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = constructionList.begin(); consi != constructionList.end(); ++consi) {
+   	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
 		if (consi->second->farmplot) {
             boost::static_pointer_cast<FarmPlot>(consi->second)->tilled = false;
 	    }

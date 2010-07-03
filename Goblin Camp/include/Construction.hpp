@@ -39,6 +39,7 @@ class ConstructionPreset {
 	Coordinate blueprint;
 	bool wall, stockpile, farmPlot;
 	Coordinate productionSpot;
+	bool dynamic;
 };
 
 class Construction : public Entity {
