@@ -108,7 +108,8 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
         }
     } else {
         if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
-        else if (msg.size() > 0) Announce::Inst()->AddMsg(std::string("Job cancelled: ")+msg);
+        else if (msg.size() > 0 && faction == 0) 
+			Announce::Inst()->AddMsg((boost::format("%s cancelled: %s") % Job::ActionToString(currentTask()->action) % msg).str());
         jobs.pop_front();
         taskIndex = 0;
         DropCarriedItem();
@@ -259,10 +260,10 @@ AiThink NPC::Think() {
 					if (!taskBegun) { findPath(currentTarget()); taskBegun = true; result = TASKCONTINUE;}
 					//result = Move();
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) {
-						TaskFinished(result, std::string("Could not find path to target Move()")); break;
+						TaskFinished(result, std::string("Could not find path to target")); break;
 					} else if (result == PATHEMPTY) {
 					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
-					        TaskFinished(TASKFAILFATAL, std::string("No path to target Move()")); break;
+					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
 					    }
 					}
 					break;
@@ -318,14 +319,14 @@ AiThink NPC::Think() {
 						tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 						if (tmp > 0) {
 							TaskFinished(TASKSUCCESS);
-							Announce::Inst()->AddMsg("Finished building");
+							Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str());
 							break;
 						} else if (tmp == BUILD_NOMATERIAL) {
 							TaskFinished(TASKFAILFATAL, "Missing materials");
 							break;
 						}
 					} else {
-						TaskFinished(TASKFAILFATAL, "Not adjacent to building");
+						TaskFinished(TASKFAILFATAL);
 						break;
 					}
 					break;
@@ -374,8 +375,8 @@ AiThink NPC::Think() {
 							if (Map::Inst()->GetWater(currentTarget().x(), currentTarget().y()).lock()->Depth() > DRINKABLE_WATER_DEPTH) {
 								thirst -= (int)(THIRST_THRESHOLD / 10);
 								if (thirst < 0) { TaskFinished(TASKSUCCESS); break; }
-							} else { TaskFinished(TASKFAILFATAL, "Not enough water"); break; }
-						} else { TaskFinished(TASKFAILFATAL, "Not adjacent to water"); break; }
+							} else { TaskFinished(TASKFAILFATAL); break; }
+						} else { TaskFinished(TASKFAILFATAL); break; }
 					}
 					break;
 
@@ -414,7 +415,7 @@ AiThink NPC::Think() {
                         if (tmp >= 100) {
                             TaskFinished(TASKSUCCESS);
                         } else if (tmp < 0) {
-                            TaskFinished(TASKFAILFATAL, "Unable to use construct!"); break;
+                            TaskFinished(TASKFAILFATAL); break;
                         }
                     } else { TaskFinished(TASKFAILFATAL, "Attempted to use non-construct"); break; }
                     break;
@@ -578,14 +579,11 @@ void NPC::Kill() {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
 		health = 0;
-	#ifdef DEBUG
-		std::cout<<"Kill npc:"<<name<<uid<<"\n";
-	#endif
 		Logger::Inst()->output<<"Kill npc:"<<name<<uid<<"\n";
 		int corpse = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
 		Game::Inst()->GetItem(corpse).lock()->Color(_color);
 		Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
-		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("Dead"));
+		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
 	}
 }
 
@@ -625,7 +623,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		case GUARD:
 			if (npc->MemberOf().lock()->TargetCoordinate().x() >= 0) {
 				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
-				//newJob->tasks.push_back(Task(MOVE, npc->MemberOf().lock()->TargetCoordinate()));
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
