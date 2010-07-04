@@ -54,7 +54,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	dead(false),
 	squad(boost::weak_ptr<Squad>()),
 	FindJob(findJob),
-	React(react)
+	React(react),
+	escaped(false)
 {
 	while (!Map::Inst()->Walkable(pos.x(),pos.y())) {
 		pos.x(pos.x()+1);
@@ -280,10 +281,16 @@ AiThink NPC::Think() {
 						if (Map::Inst()->Walkable(tarX, tarY)) {
 							if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().x(), currentTarget().y())) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
-								break;
+								goto MOVENEARend;
 							}
 						}
 					}
+					//If we got here we couldn't find a near coordinate
+#ifdef DEBUG
+					std::cout<<"NO near\n";
+#endif
+					TaskFinished(TASKFAILFATAL);
+					MOVENEARend:
 					break;
 
 
@@ -311,6 +318,9 @@ AiThink NPC::Think() {
 					break;
 
 				case WAIT:
+#ifdef DEBUG
+					std::cout<<"Timer: "<<timer;
+#endif
 					if (++timer > currentTarget().x()) { timer = 0; TaskFinished(TASKSUCCESS); }
 					break;
 
@@ -318,8 +328,9 @@ AiThink NPC::Think() {
 					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 						tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 						if (tmp > 0) {
-							TaskFinished(TASKSUCCESS);
 							Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str());
+							Camp::Inst()->UpdateCenter(currentEntity().lock()->Position());
+							TaskFinished(TASKSUCCESS);
 							break;
 						} else if (tmp == BUILD_NOMATERIAL) {
 							TaskFinished(TASKFAILFATAL, "Missing materials");
@@ -403,7 +414,7 @@ AiThink NPC::Think() {
 						break;
 					}
                     else {
-                        currentJob().lock()->ReserveItem(foundItem);
+                        if (faction == 0) currentJob().lock()->ReserveItem(foundItem);
                         TaskFinished(TASKSUCCESS);
                         break;
                     }
@@ -487,6 +498,29 @@ AiThink NPC::Think() {
 					}
 					break;
 
+				case FLEEMAP:
+					if (_x == 0 || _x == Map::Inst()->Width()-1 ||
+						_y == 0 || _y == Map::Inst()->Height()-1) {
+							//We are the edge, escape!
+							Escape();
+							return AIMOVE;
+					}
+
+					//Find the closest edge and change into a MOVE task and a new FLEEMAP task
+					//Unfortunately this assumes that FLEEMAP is the last task in a job,
+					//which might not be.
+					tmp = std::abs((signed int)_x - Map::Inst()->Width() / 2);
+					if (tmp > std::abs((signed int)_y - Map::Inst()->Height() / 2)) {
+						currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(_x, 
+							(_y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
+					} else {
+						currentJob().lock()->tasks[taskIndex] = Task(MOVE, 
+							Coordinate(((unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
+							_y));
+					}
+					currentJob().lock()->tasks.push_back(Task(FLEEMAP));
+					break;
+
 				default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -515,11 +549,12 @@ AiThink NPC::Think() {
 						}
 					}
 			    }
-			} else if (!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
+			} else if (!GetSquadJob(boost::static_pointer_cast<NPC>(shared_from_this())) && 
+				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				//if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
-				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->MeetingPoint() : Position()));
+				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
 				jobs.push_back(idleJob);
 				run = false;
@@ -645,17 +680,13 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 }
 
 bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
-	//Either create an internal job if this npc is part of a squad, or get one from the JobManager
-	if (!GetSquadJob(npc)) {
-   		boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
-		if (newJob)  {
-			npc->jobs.push_back(newJob);
-			npc->run = true;
-			return true;
-		}
-		return false;
+   	boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
+	if (newJob)  {
+		npc->jobs.push_back(newJob);
+		npc->run = true;
+		return true;
 	}
-	return true;
+	return false;
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
@@ -707,14 +738,37 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 bool NPC::HostileAnimalFindJob(boost::shared_ptr<NPC> animal) {
-	
-	if (!GetSquadJob(animal)) {
-		//TODO: Add behaviour for leaderless hostile monsters
-		return false;
+	//For now hostile animals will simply attempt to get inside the settlement
+	if (animal->Position() != Camp::Inst()->Center()) {
+		boost::shared_ptr<Job> attackJob(new Job("Attack settlement"));
+		attackJob->internal = true;
+		attackJob->tasks.push_back(Task(MOVE, Camp::Inst()->Center()));
+		animal->jobs.push_back(attackJob);
+		return true;
 	}
-	return true;
+	return false;
 }
 
+//A hungry animal will attempt to find food in the player's stockpiles and eat it,
+//alternatively it will change into a "normal" hostile animal if no food is available
+bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
+//We could use Task(FIND for this, but it doesn't give us feedback if there's
+//any food available
+	boost::weak_ptr<Item> wfood = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"));
+	if (boost::shared_ptr<Item> food = wfood.lock()) {
+		//Found a food item
+		boost::shared_ptr<Job> stealJob(new Job("Steal food"));
+		stealJob->internal = true;
+		stealJob->tasks.push_back(Task(MOVE, food->Position()));
+		stealJob->tasks.push_back(Task(TAKE, food->Position(), food));
+		stealJob->tasks.push_back(Task(FLEEMAP));
+		animal->jobs.push_back(stealJob);
+		return true;
+	} else {
+		animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+	}
+	return false;
+}
 
 void NPC::AddEffect(StatusEffectType effect) {
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
@@ -775,3 +829,14 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 
 void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {squad = newSquad;}
 boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}
+
+void NPC::Escape() {
+	DestroyAllItems();
+	escaped = true;
+}
+
+void NPC::DestroyAllItems() {
+	if (carried.lock()) Game::Inst()->RemoveItem(carried);
+}
+
+bool NPC::Escaped() { return escaped; }

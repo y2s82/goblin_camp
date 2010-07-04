@@ -6,7 +6,10 @@ class Camp {
 private:
 	Camp();
 	static Camp* instance;
+	Coordinate center;
+	int buildings;
 public:
 	static Camp* Inst();
-	Coordinate MeetingPoint();
+	Coordinate Center();
+	void UpdateCenter(Coordinate);
 };

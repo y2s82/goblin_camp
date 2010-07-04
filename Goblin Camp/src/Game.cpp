@@ -254,9 +254,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		//This creates a pack of wolves intent on your camp
 		case 3:
 			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Wolf leader", 1, 0)));
-			hostileSquadList.back()->Order(GUARD);
-			hostileSquadList.back()->TargetCoordinate(Coordinate(240, 240));
-			npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::HostileAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
+			npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::HungryAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
 			npc->type = 2;
             npc->speed(55 + rand() % 20);
             npc->color(TCODColor::darkGrey);
@@ -268,14 +266,14 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			npc->baseStats[ATTACKPOWER] = 20;
 			npc->baseStats[DEFENCESKILL] = 10;
 			npc->MemberOf(hostileSquadList.back());
-			npc->run = false;
+			npc->run = true;
 			npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Starving wolves", 4, 0)));
-			hostileSquadList.back()->Order(ESCORT);
-			hostileSquadList.back()->TargetEntity(npc);
+//			hostileSquadList.back()->Order(ESCORT);
+	//		hostileSquadList.back()->TargetEntity(npc);
 			for (int i = 0; i < 4; ++i) {
-				npc = boost::shared_ptr<NPC>(new NPC(target+i, boost::bind(NPC::HostileAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
+				npc = boost::shared_ptr<NPC>(new NPC(target+i, boost::bind(NPC::HungryAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
 				npc->type = 2;
 				npc->speed(60 + rand() % 20);
 				npc->color(TCODColor::grey);
@@ -619,7 +617,7 @@ void Game::Update() {
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		npci->second->Update();
 		if (!npci->second->Dead()) npci->second->Think();
-		else npcsWaitingForRemoval.push_back(npci->second);
+		else if (npci->second->Dead() || npci->second->Escaped()) npcsWaitingForRemoval.push_back(npci->second);
 	}
 
 	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {

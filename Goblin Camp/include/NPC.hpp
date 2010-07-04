@@ -93,6 +93,10 @@ class NPC : public Entity {
 		bool dead;
 		boost::weak_ptr<Squad> squad;
 
+		bool escaped;
+		bool Escaped();
+		void Escape();
+		void DestroyAllItems();
 	public:
 		~NPC();
 		SkillSet Skills;
@@ -139,6 +143,7 @@ class NPC : public Entity {
 		static bool PeacefulAnimalFindJob(boost::shared_ptr<NPC>);
 		static void HostileAnimalReact(boost::shared_ptr<NPC>);
 		static bool HostileAnimalFindJob(boost::shared_ptr<NPC>);
+		static bool HungryAnimalFindJob(boost::shared_ptr<NPC>);
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::try_mutex*, bool*, bool*);

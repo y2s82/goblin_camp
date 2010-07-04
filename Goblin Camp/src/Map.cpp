@@ -105,6 +105,6 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 	int y = ay;
 	do {
 		if (BlocksLight(x,y)) return false;
-	} while(!TCODLine::step(&x, &y));
+	} while(!TCODLine::step(&x, &y) && !(x == bx && y == by));
 	return true;
 }

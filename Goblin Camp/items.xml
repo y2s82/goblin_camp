@@ -282,6 +282,7 @@
   <item>
     <name>Bloodberry</name>
     <organic></organic>
+    <category>Food</category>
     <category>Raw Food</category>
     <category>Berry</category>
     <graphic>7</graphic>
