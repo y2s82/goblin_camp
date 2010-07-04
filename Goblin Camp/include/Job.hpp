@@ -74,7 +74,7 @@ class Job {
 		bool waitingForRemoval;
 		std::list<boost::weak_ptr<Item> > reservedItems;
 		std::pair<boost::weak_ptr<Stockpile>, Coordinate> reservedSpot;
-		int attempts;
+		int attempts, attemptMax;
 		boost::weak_ptr<Entity> connectedEntity;
 		boost::weak_ptr<Container> reservedSpace;
 	public:
@@ -114,7 +114,8 @@ class Job {
 
 		bool internal;
 		int Attempts();
-		void Attempt();
+		void Attempts(int);
+		bool Attempt();
 
 		static std::string ActionToString(Action);
 };

@@ -26,6 +26,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	waitingForRemoval(false),
 	reservedSpot(std::pair<boost::weak_ptr<Stockpile>, Coordinate>(boost::weak_ptr<Stockpile>(), Coordinate(0,0))),
 	attempts(0),
+	attemptMax(5),
 	name(value),
 	internal(false)
 {
@@ -60,7 +61,11 @@ void Job::Paused(bool value) {paused = value;}
 void Job::Remove() {waitingForRemoval = true;}
 bool Job::Removable() {return waitingForRemoval;}
 int Job::Attempts() {return attempts;}
-void Job::Attempt() {++attempts;}
+void Job::Attempts(int value) {attemptMax = value;}
+bool Job::Attempt() {
+	if (++attempts > attemptMax) return false;
+	return true;
+}
 
 bool Job::PreReqsCompleted() {
 	for (std::list<boost::weak_ptr<Job> >::iterator preReqIter = preReqs.begin(); preReqIter != preReqs.end(); ++preReqIter) {
@@ -154,8 +159,7 @@ JobManager *JobManager::Inst() {
 }
 
 void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
-	newJob->Attempt();
-	if (newJob->Attempts() > MAXIMUM_JOB_ATTEMPTS) {
+	if (!newJob->Attempt()) {
 		newJob->Fail();
 		return;
 	}
