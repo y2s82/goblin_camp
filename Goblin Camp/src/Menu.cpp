@@ -458,7 +458,7 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 
 	console->setAlignment(TCOD_CENTER);
 
-	for (std::set<ItemType>::iterator itemi = StockManager::Inst()->Producables()->begin();
+	for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
 		itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
 			if (StockManager::Inst()->TypeQuantity(*itemi) > -1) { //Hide unavailable products
 				console->setForegroundColor(Item::Presets[*itemi].color);
@@ -492,7 +492,7 @@ MenuResult StockManagerMenu::Update(int x, int y) {
 			//Draw() to find which index equals which itemtype.
 
 			int itemIndex = 0;
-			for (std::set<ItemType>::iterator itemi = StockManager::Inst()->Producables()->begin();
+			for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
 			itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
 				if (StockManager::Inst()->TypeQuantity(*itemi) > -1) {
 					if (itemIndex++ == choice) {
@@ -501,6 +501,10 @@ MenuResult StockManagerMenu::Update(int x, int y) {
 					}
 				}
 			}
+		} else if (x == topX+48 && y == topY+1) {
+			if (scroll > 0) --scroll;
+		} else if (x == topX+48 && y == topY+48) {
+			if (scroll < (StockManager::Inst()->Producables()->size() / 3)-1) ++scroll;
 		}
 		return MENUHIT;
 	}
