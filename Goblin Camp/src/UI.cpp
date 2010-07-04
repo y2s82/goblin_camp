@@ -322,7 +322,7 @@ void UI::HandleMouse() {
 		currentMenu = Menu::MainMenu();
 		menuHistory.clear();
 		if (!menuOpen) { _state = UINORMAL; a.x(0); a.y(0); }
-		textMode = false;
+		SetTextMode(false);
 	}
 
 	if (mbuttonPressed && menuOpen && !menuHistory.empty()) {
@@ -330,7 +330,7 @@ void UI::HandleMouse() {
 		_state = UINORMAL; a.x(0); a.y(0);
 		currentMenu = menuHistory.back();
 		menuHistory.pop_back();
-		textMode = false;
+		SetTextMode(false);
 	}
 
 	if (tempStatus.lbutton && _state == UINORMAL) {

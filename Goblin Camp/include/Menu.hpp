@@ -108,6 +108,7 @@ class ConstructionMenu : public Menu {
 class StockManagerMenu : public Menu {
     private:
         int scroll;
+		std::string filter;
  	public:
 		StockManagerMenu();
 		void Draw(int, int, TCODConsole*);

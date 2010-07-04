@@ -1,6 +1,7 @@
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/scope_exit.hpp>
+#include <boost/algorithm/string.hpp>
 #include <string>
 
 #include "Menu.hpp"
@@ -440,7 +441,8 @@ void ConstructionMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
 StockManagerMenu* StockManagerMenu::stocksMenu = 0;
 
 StockManagerMenu::StockManagerMenu() : Menu(std::vector<MenuChoice>()),
-    scroll(0)
+    scroll(0),
+	filter("")
 {
     width = 50; height = 50;
     topX = (Game::Inst()->ScreenWidth() - width) / 2;
@@ -452,15 +454,18 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
     console->printFrame(topX, topY, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
 	console->putChar(topX+48, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
 	console->putChar(topX+48, topY+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+	console->printFrame(topX+10, topY+1, 30, 3, true);
+	console->print(topX+11, topY+2, filter.c_str());
 
 	int x = topX + 8;
-	int y = topY + 3;
+	int y = topY + 4;
 
 	console->setAlignment(TCOD_CENTER);
 
 	for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
 		itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
-			if (StockManager::Inst()->TypeQuantity(*itemi) > -1) { //Hide unavailable products
+			if (StockManager::Inst()->TypeQuantity(*itemi) > -1 &&
+				boost::icontains(Item::Presets[*itemi].name, filter)) { //Hide unavailable products
 				console->setForegroundColor(Item::Presets[*itemi].color);
 				console->print(x,y, "%c %s", Item::Presets[*itemi].graphic, Item::Presets[*itemi].name.c_str());
 				console->setForegroundColor(TCODColor::white);
@@ -473,11 +478,15 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 				if (y > topY + (height - 4)) break;
 			}
 	}
-		
+
+
+
 	console->setAlignment(TCOD_LEFT);
 }
 
 MenuResult StockManagerMenu::Update(int x, int y) {
+	UI::Inst()->SetTextMode(true, 28);
+	filter = UI::Inst()->InputString();
 	if (x >= 0 && y >= 0) {
 		int ch = TCODConsole::root->getChar(x,y);
 
@@ -494,7 +503,8 @@ MenuResult StockManagerMenu::Update(int x, int y) {
 			int itemIndex = 0;
 			for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
 			itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
-				if (StockManager::Inst()->TypeQuantity(*itemi) > -1) {
+				if (StockManager::Inst()->TypeQuantity(*itemi) > -1 &&
+					boost::icontains(Item::Presets[*itemi].name, filter)) {
 					if (itemIndex++ == choice) {
 						StockManager::Inst()->AdjustMinimum(*itemi, (ch == '-') ? -1 : 1);
 						break;
