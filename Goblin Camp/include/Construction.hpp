@@ -64,7 +64,7 @@ class Construction : public Entity {
 		boost::shared_ptr<Container> materialsUsed;
 		bool stockpile, farmplot;
 
-		void UpdateWallGraphic(bool recurse = true);
+		void UpdateWallGraphic(bool recurse = true, bool self = true);
 	public:
 		~Construction();
 		static Coordinate Blueprint(ConstructionType);

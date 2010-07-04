@@ -105,6 +105,7 @@ int Construction::Build() {
 		}
 
 		if (Construction::Presets[_type].wall) { UpdateWallGraphic(); }
+		else if (Construction::Presets[_type].door) { UpdateWallGraphic(true, false); }
 		if (producer) {
 			StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), true);
 			for (unsigned int prod = 0; prod < Construction::Presets[_type].products.size(); ++prod) {
@@ -351,7 +352,7 @@ boost::weak_ptr<Container> Construction::Storage() {
     else return materialsUsed;
 }
 
-void Construction::UpdateWallGraphic(bool recurse) {
+void Construction::UpdateWallGraphic(bool recurse, bool self) {
     bool n = false,s = false,e = false,w = false;
 
     if (Map::Inst()->Construction(_x - 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].wall
@@ -367,20 +368,22 @@ void Construction::UpdateWallGraphic(bool recurse) {
 		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].door))
         s = true;
 
-    if (n&&s&&e&&w) graphic[1] = 197;
-    else if (n&&s&&e) graphic[1] = 195;
-    else if (n&&s&&w) graphic[1] = 180;
-    else if (n&&e&&w) graphic[1] = 193;
-    else if (s&&e&&w) graphic[1] = 194;
-    else if (n&&s) graphic[1] = 179;
-    else if (e&&w) graphic[1] = 196;
-    else if (n&&e) graphic[1] = 192;
-    else if (n&&w) graphic[1] = 217;
-    else if (s&&e) graphic[1] = 218;
-    else if (s&&w) graphic[1] = 191;
-	else if (e||w) graphic[1] = 196;
-	else if (n||s) graphic[1] = 179;
-    else graphic[1] = 197;
+	if (self) {
+		if (n&&s&&e&&w) graphic[1] = 197;
+		else if (n&&s&&e) graphic[1] = 195;
+		else if (n&&s&&w) graphic[1] = 180;
+		else if (n&&e&&w) graphic[1] = 193;
+		else if (s&&e&&w) graphic[1] = 194;
+		else if (n&&s) graphic[1] = 179;
+		else if (e&&w) graphic[1] = 196;
+		else if (n&&e) graphic[1] = 192;
+		else if (n&&w) graphic[1] = 217;
+		else if (s&&e) graphic[1] = 218;
+		else if (s&&w) graphic[1] = 191;
+		else if (e||w) graphic[1] = 196;
+		else if (n||s) graphic[1] = 179;
+		else graphic[1] = 197;
+	}
 
     if (recurse) {
         if (w)
