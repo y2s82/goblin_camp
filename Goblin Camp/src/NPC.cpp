@@ -106,6 +106,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
             jobs.front()->Complete();
             jobs.pop_front();
             taskIndex = 0;
+			foundItem = boost::weak_ptr<Item>();
         }
     } else {
         if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
@@ -114,7 +115,8 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
         jobs.pop_front();
         taskIndex = 0;
         DropCarriedItem();
-    }
+		foundItem = boost::weak_ptr<Item>();
+	}
 
 	taskBegun = false;
 }
@@ -269,6 +271,7 @@ AiThink NPC::Think() {
 					}
 					break;
 
+					//FIXME: Causes overlong WAIT times with idling
 				case MOVENEAR:
 					//MOVENEAR first figures out our "real" target, which is a tile near
 					//to our current target. Near means max 5 tiles away, visible and
@@ -286,9 +289,6 @@ AiThink NPC::Think() {
 						}
 					}
 					//If we got here we couldn't find a near coordinate
-#ifdef DEBUG
-					std::cout<<"NO near\n";
-#endif
 					TaskFinished(TASKFAILFATAL);
 					MOVENEARend:
 					break;
@@ -318,9 +318,6 @@ AiThink NPC::Think() {
 					break;
 
 				case WAIT:
-#ifdef DEBUG
-					std::cout<<"Timer: "<<timer;
-#endif
 					if (++timer > currentTarget().x()) { timer = 0; TaskFinished(TASKSUCCESS); }
 					break;
 
@@ -524,7 +521,6 @@ AiThink NPC::Think() {
 				default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
-			//Idly meander while no jobs available
 			if (HasEffect(PANIC)) {
 				bool enemyFound = false;
 			    if (jobs.empty() && !nearNpcs.empty()) {
@@ -551,16 +547,23 @@ AiThink NPC::Think() {
 			    }
 			} else if (!GetSquadJob(boost::static_pointer_cast<NPC>(shared_from_this())) && 
 				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
-				//if (rand() % 100 == 0) Position(Coordinate(_x + rand() % 3 - 1, _y + rand() % 3 - 1));
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
 				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
 				jobs.push_back(idleJob);
-				run = false;
+				if (distance(Camp::Inst()->Center().x(), Camp::Inst()->Center().y(), _x, _y) < 15) run = false;
+				else run = true;
 			}
 		}
 	}
+
+#ifdef DEBUG
+	if (jobs.size() > 0 && currentTask()->action == WAIT && currentTarget().x() > 50) {
+		std::cout<<"Break here\n";
+	}
+#endif
+
 	return AINOTHING;
 }
 
