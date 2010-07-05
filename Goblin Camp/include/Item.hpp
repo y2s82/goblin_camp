@@ -1,5 +1,4 @@
-#ifndef ITEM_HEADER
-#define ITEM_HEADER
+#pragma once
 
 #include <boost/shared_ptr.hpp>
 #include <libtcod.hpp>
@@ -137,5 +136,3 @@ class OrganicItem : public Item {
         ItemType Growth();
         void Growth(ItemType);
 };
-
-#endif

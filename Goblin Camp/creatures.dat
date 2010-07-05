@@ -29,7 +29,7 @@ npc_type "goblin" {
 
 npc_type "giant snail" {
 	name="Giant Snail"
-	speed="1d1"
+	speed="1d3"
 	color="219,199,109"
 	graphic='b'
 	health=50

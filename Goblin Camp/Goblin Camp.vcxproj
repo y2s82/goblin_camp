@@ -30,9 +30,9 @@
     <ClCompile Include="src\Game.cpp" />
     <ClCompile Include="src\Entity.cpp" />
     <ClCompile Include="src\GCamp.cpp" />
-    <ClCompile Include="src\Graphics.cpp" />
     <ClCompile Include="src\Item.cpp" />
     <ClCompile Include="src\Job.cpp" />
+    <ClCompile Include="src\JobManager.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\Menu.cpp" />
@@ -58,9 +58,9 @@
     <ClInclude Include="include\Game.hpp" />
     <ClInclude Include="include\Entity.hpp" />
     <ClInclude Include="include\GCamp.hpp" />
-    <ClInclude Include="include\Graphics.hpp" />
     <ClInclude Include="include\Item.hpp" />
     <ClInclude Include="include\Job.hpp" />
+    <ClInclude Include="include\JobManager.hpp" />
     <ClInclude Include="include\Logger.hpp" />
     <ClInclude Include="include\Map.hpp" />
     <ClInclude Include="include\Menu.hpp" />

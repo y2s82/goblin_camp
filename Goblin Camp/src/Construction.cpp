@@ -9,7 +9,7 @@
 #include "Logger.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
-#include "Job.hpp"
+#include "JobManager.hpp"
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 

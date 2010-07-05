@@ -8,6 +8,7 @@
 #include "UI.hpp"
 #include "Announce.hpp"
 #include "StockManager.hpp"
+#include "JobManager.hpp"
 
 MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
 	label = ntext;

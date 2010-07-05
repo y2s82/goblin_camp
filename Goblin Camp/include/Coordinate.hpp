@@ -1,5 +1,4 @@
-#ifndef COORDINATE_HEADER
-#define COORDINATE_HEADER
+#pragma once
 
 #include <cstdlib>
 
@@ -35,5 +34,3 @@ class PathCoordinate : public Coordinate {
 		bool operator<(const PathCoordinate) const;
 		bool operator==(const PathCoordinate) const;
 };
-
-#endif

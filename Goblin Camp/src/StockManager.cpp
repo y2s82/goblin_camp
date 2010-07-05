@@ -2,7 +2,7 @@
 #include "Item.hpp"
 #include "Construction.hpp"
 #include "NatureObject.hpp"
-#include "Job.hpp"
+#include "JobManager.hpp"
 
 #ifdef DEBUG
 #include <iostream>

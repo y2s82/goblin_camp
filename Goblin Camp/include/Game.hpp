@@ -1,5 +1,4 @@
-#ifndef GAME_HEADER
-#define GAME_HEADER
+#pragma once
 
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
@@ -138,5 +137,3 @@ class Game {
 
 		static int DiceToInt(TCOD_dice_t);
 };
-
-#endif

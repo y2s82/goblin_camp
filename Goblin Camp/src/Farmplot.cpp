@@ -2,6 +2,7 @@
 #include "Game.hpp"
 #include "Map.hpp"
 #include "GCamp.hpp"
+#include "JobManager.hpp"
 
 FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stockpile(FARMPLOT, symbol, target),
     tilled(false),

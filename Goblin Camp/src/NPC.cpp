@@ -11,7 +11,7 @@
 
 #include "npc.hpp"
 #include "coordinate.hpp"
-#include "job.hpp"
+#include "JobManager.hpp"
 #include "gcamp.hpp"
 #include "Game.hpp"
 #include "Announce.hpp"

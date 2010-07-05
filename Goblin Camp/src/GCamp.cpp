@@ -19,7 +19,7 @@
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
-#include "Graphics.hpp"
+#include "JobManager.hpp"
 
 
 int main(std::string cmdLine) {
