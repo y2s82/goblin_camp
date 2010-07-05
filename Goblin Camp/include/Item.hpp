@@ -46,26 +46,25 @@ class ItemCat {
         std::string name;
 };
 
-class ItemPreset {
-    public:
-        ItemPreset();
-        int graphic;
-        TCODColor color;
-        std::string name;
-        std::set<ItemCategory> categories;
-        std::vector<ItemCategory> components;
-        SeasonType season;
-        int nutrition;
-        ItemType growth;
-        std::list<ItemType> fruits;
-        bool organic;
-        int container;
-        int multiplier;
-        ItemCategory fitsin;
-		ItemCategory containIn;
-        bool decays;
-        int decaySpeed;
-        std::vector<ItemType> decayList;
+struct ItemPreset {
+	ItemPreset();
+	int graphic;
+	TCODColor color;
+	std::string name;
+	std::set<ItemCategory> categories;
+	std::vector<ItemCategory> components;
+	SeasonType season;
+	int nutrition;
+	ItemType growth;
+	std::list<ItemType> fruits;
+	bool organic;
+	int container;
+	int multiplier;
+	ItemCategory fitsin;
+	ItemCategory containIn;
+	bool decays;
+	int decaySpeed;
+	std::vector<ItemType> decayList;
 };
 
 class Item : public Entity {

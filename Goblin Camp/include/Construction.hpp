@@ -26,8 +26,7 @@ typedef int ConstructionType;
 
 #define NOTFULL (1 << 0)
 
-class ConstructionPreset {
-    public:
+struct ConstructionPreset {
     ConstructionPreset();
     int maxCondition;
     std::vector<int> graphic;

@@ -2,6 +2,7 @@
 #include <boost/multi_array.hpp>
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 #ifdef DEBUG
 #include <iostream>
@@ -198,99 +199,48 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 	return false;
 }
 
-//This is placeholder right now, creature information is going to be moved into it's own file so that it won't be
-//hardcoded.
 int Game::CreateNPC(Coordinate target, NPCType type) {
-    boost::shared_ptr<NPC> npc;
-    switch (type) {
-        case 0:
-            npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::JobManagerFinder, _1), boost::bind(NPC::PlayerNPCReact, _1)));
-			npc->type = 0;
-            npc->speed(40 + rand() % 20);
-            npc->color(TCODColor::grey);
-            npc->graphic('g');
-            npc->name = TCODNamegen::generate("goblin");
-            npc->faction = 0;
-			npc->needsNutrition = true;
-			npc->health = 50;
-			npc->baseStats[ATTACKSKILL] = 3;
-			npc->baseStats[ATTACKPOWER] = 1;
-			npc->baseStats[DEFENCESKILL] = 5;
-            ++goblinCount;
-            break;
+	boost::function<bool(boost::shared_ptr<NPC>)> findJob;
+	boost::function<void(boost::shared_ptr<NPC>)> react;
+	int faction = 0;
 
-        case 1:
-            npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::JobManagerFinder, _1), boost::bind(NPC::PlayerNPCReact, _1)));
-			npc->type = 1;
-            npc->speed(40 + rand() % 20);
-            npc->color(TCODColor::blue);
-            npc->graphic('o');
-            npc->Expert(true);
-            npc->name = TCODNamegen::generate("orc");
-            npc->faction = 0;
-			npc->needsNutrition = true;
-			npc->aggressive = true;
-			npc->health = 100;
-			npc->baseStats[ATTACKSKILL] = 15;
-			npc->baseStats[ATTACKPOWER] = 10;
-			npc->baseStats[DEFENCESKILL] = 10;
-            ++orcCount;
-            break;
+	if (NPC::Presets[type].ai == "PlayerNPC") {
+		findJob = boost::bind(NPC::JobManagerFinder, _1);
+		react = boost::bind(NPC::PlayerNPCReact, _1);
+	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
+		findJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
+		react = boost::bind(NPC::PeacefulAnimalReact, _1);
+		faction = 1;
+	} else if (NPC::Presets[type].ai == "HungryAnimal") {
+		findJob = boost::bind(NPC::HungryAnimalFindJob, _1);
+		react = boost::bind(NPC::HostileAnimalReact, _1);
+		faction = 2;
+	} else if (NPC::Presets[type].ai == "HostileAnimal") {
+		findJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		react = boost::bind(NPC::HostileAnimalReact, _1);
+		faction = 2;
+	}
 
-        case 2:
-            npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::PeacefulAnimalFindJob, _1), boost::bind(NPC::PeacefulAnimalReact, _1)));
-			npc->type = 2;
-            npc->speed(15 + rand() % 20);
-            npc->color(TCODColor::desaturatedYellow);
-            npc->graphic('b');
-            npc->name = "Giant Snail";
-            npc->faction = 1;
-			npc->health = 50;
-			npc->baseStats[ATTACKSKILL] = 2;
-			npc->baseStats[ATTACKPOWER] = 1;
-			npc->baseStats[DEFENCESKILL] = 7;
-            break;
+	boost::shared_ptr<NPC> npc(new NPC(target, findJob, react));
+	npc->type = type;
+	npc->expert = NPC::Presets[type].expert;
+	npc->speed(DiceToInt(NPC::Presets[type].speed));
+	npc->color(NPC::Presets[type].color);
+	npc->graphic(NPC::Presets[type].graphic);
+	
+	if (NPC::Presets[type].generateName) {
+		npc->name = TCODNamegen::generate(const_cast<char*>(NPC::Presets[type].name.c_str()));
+	} else npc->name = NPC::Presets[type].name;
 
-		//This creates a pack of wolves intent on your camp
-		case 3:
-			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Wolf leader", 1, 0)));
-			npc = boost::shared_ptr<NPC>(new NPC(target, boost::bind(NPC::HungryAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
-			npc->type = 2;
-            npc->speed(55 + rand() % 20);
-            npc->color(TCODColor::darkGrey);
-            npc->graphic('w');
-            npc->name = "Starving Wolf (Alpha Male)";
-            npc->faction = 2;
-			npc->health = 150;
-			npc->baseStats[ATTACKSKILL] = 15;
-			npc->baseStats[ATTACKPOWER] = 20;
-			npc->baseStats[DEFENCESKILL] = 10;
-			npc->MemberOf(hostileSquadList.back());
-			npc->run = true;
-			npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+	npc->faction = faction;
+	npc->needsNutrition = NPC::Presets[type].needsNutrition;
+	npc->health = NPC::Presets[type].health;
+	npc->baseStats[ATTACKSKILL] = DiceToInt(NPC::Presets[type].stats[ATTACKSKILL]);
+	npc->baseStats[ATTACKPOWER] = DiceToInt(NPC::Presets[type].stats[ATTACKPOWER]);
+	npc->baseStats[DEFENCESKILL] = DiceToInt(NPC::Presets[type].stats[DEFENCESKILL]);
 
-			hostileSquadList.push_back(boost::shared_ptr<Squad>(new Squad("Starving wolves", 4, 0)));
-//			hostileSquadList.back()->Order(ESCORT);
-	//		hostileSquadList.back()->TargetEntity(npc);
-			for (int i = 0; i < 4; ++i) {
-				npc = boost::shared_ptr<NPC>(new NPC(target+i, boost::bind(NPC::HungryAnimalFindJob, _1), boost::bind(NPC::HostileAnimalReact, _1)));
-				npc->type = 2;
-				npc->speed(60 + rand() % 20);
-				npc->color(TCODColor::grey);
-				npc->graphic('w');
-				npc->name = "Starving Wolf";
-				npc->faction = 2;
-				npc->health = 50;
-				npc->baseStats[ATTACKSKILL] = 10;
-				npc->baseStats[ATTACKPOWER] = 15;
-				npc->baseStats[DEFENCESKILL] = 6;
-				npc->MemberOf(hostileSquadList.back());
-				npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
-			}
-			return npc->Uid();
-            break;
-
-    }
+	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
+	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 	return npc->Uid();
@@ -395,6 +345,9 @@ void Game::Init(int width, int height, bool fullscreen) {
         Logger::Inst()->output<<"Error loading names.dat";
         exit(0);
     }
+
+	//Creature presets
+	NPC::LoadPresets("creatures.dat");
 
 	GenerateMap();
 	buffer = new TCODConsole(screenWidth, screenHeight);
@@ -982,3 +935,9 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 	}
 }
 
+int Game::DiceToInt(TCOD_dice_t dice) {
+	if (dice.nb_faces == 0) 
+		dice.nb_faces = 1;
+return (int)(((dice.nb_dices * ((rand() % dice.nb_faces) + 1)) *
+	dice.multiplier) + dice.addsub);
+}

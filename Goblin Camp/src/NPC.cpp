@@ -2,6 +2,7 @@
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
 #include <string>
 #ifdef DEBUG
@@ -25,6 +26,9 @@ SkillSet::SkillSet() {
 
 int SkillSet::operator()(Skill skill) {return skills[skill];}
 void SkillSet::operator()(Skill skill, int value) {skills[skill] = value;}
+
+std::map<std::string, NPCType> NPC::NPCTypeNames = std::map<std::string, NPCType>();
+std::vector<NPCPreset> NPC::Presets = std::vector<NPCPreset>();
 
 NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
             boost::function<void(boost::shared_ptr<NPC>)> react) : Entity(),
@@ -271,7 +275,6 @@ AiThink NPC::Think() {
 					}
 					break;
 
-					//FIXME: Causes overlong WAIT times with idling
 				case MOVENEAR:
 					//MOVENEAR first figures out our "real" target, which is a tile near
 					//to our current target. Near means max 5 tiles away, visible and
@@ -558,12 +561,6 @@ AiThink NPC::Think() {
 		}
 	}
 
-#ifdef DEBUG
-	if (jobs.size() > 0 && currentTask()->action == WAIT && currentTarget().x() > 50) {
-		std::cout<<"Break here\n";
-	}
-#endif
-
 	return AINOTHING;
 }
 
@@ -843,3 +840,95 @@ void NPC::DestroyAllItems() {
 }
 
 bool NPC::Escaped() { return escaped; }
+
+class NPCListener : public ITCODParserListener {
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+        std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+#endif
+		NPC::Presets.push_back(NPCPreset(name));
+        return true;
+    }
+    bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+        std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name,"generateName")) { NPC::Presets.back().generateName = true; }
+		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
+		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
+        return true;
+    }
+    bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+        std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
+		else if (boost::iequals(name,"speed")) { NPC::Presets.back().speed = value.dice; }
+		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
+		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
+		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
+		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
+		else if (boost::iequals(name,"attackSkill")) { NPC::Presets.back().stats[ATTACKSKILL] = value.dice; }
+		else if (boost::iequals(name,"attackPower")) { NPC::Presets.back().stats[ATTACKPOWER] = value.dice; }
+		else if (boost::iequals(name,"defenceSkill")) { NPC::Presets.back().stats[DEFENCESKILL] = value.dice; }
+		else if (boost::iequals(name,"spawnAsGroup")) { 
+			NPC::Presets.back().spawnAsGroup = true;
+			NPC::Presets.back().group = value.dice;
+		}
+
+        return true;
+    }
+    bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+        std::cout<<(boost::format("end of %s structure\n") % name).str();
+#endif
+        return true;
+    }
+    void error(const char *msg) {
+		Logger::Inst()->output<<"NPCListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
+};
+
+void NPC::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
+	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
+	npcTypeStruct->addProperty("speed", TCOD_TYPE_DICE, true);
+	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
+	npcTypeStruct->addFlag("expert");
+	npcTypeStruct->addProperty("health", TCOD_TYPE_INT, true);
+	const char* aiTypes[] = { "PlayerNPC", "PeacefulAnimal", "HungryAnimal", "HostileAnimal", NULL }; 
+	npcTypeStruct->addValueList("AI", aiTypes, true);
+	npcTypeStruct->addFlag("needsNutrition");
+	npcTypeStruct->addFlag("generateName");
+	npcTypeStruct->addProperty("attackSkill", TCOD_TYPE_DICE, true);
+	npcTypeStruct->addProperty("attackPower", TCOD_TYPE_DICE, true);
+	npcTypeStruct->addProperty("defenceSkill", TCOD_TYPE_DICE, true);
+	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
+	parser.run(filename.c_str(), new NPCListener());
+}
+
+std::string NPC::NPCTypeToString(NPCType type) {
+	return Presets[type].typeName;
+}
+
+NPCType NPC::StringToNPCType(std::string typeName) {
+	return NPCTypeNames[typeName];
+}
+
+NPCPreset::NPCPreset(std::string typeNameVal) : 
+    typeName(typeNameVal),
+	name("AA Club"),
+	speed(TCOD_dice_t()),
+	color(TCODColor::pink),
+	graphic('?'),
+	expert(false),
+	health(10),
+	ai("PeacefulAnimal"),
+	needsNutrition(false),
+	generateName(false),
+	spawnAsGroup(false),
+	group(TCOD_dice_t())
+	{}

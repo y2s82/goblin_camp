@@ -135,6 +135,8 @@ class Game {
 		TCODConsole* buffer;
 		void FlipBuffer();
 		void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
+
+		static int DiceToInt(TCOD_dice_t);
 };
 
 #endif

@@ -1,0 +1,54 @@
+npc_type "orc" {
+	expert
+	needsNutrition
+	generateName
+	name="orc"
+	speed="1d20+40"
+	color="0,0,255"
+	graphic='o'
+	health=200
+	AI="PlayerNPC"
+	attackSkill="1d10+5"
+	attackPower="5d5+5"
+	defenceSkill="1d5+5"
+}
+
+npc_type "goblin" {
+	needsNutrition
+	generateName
+	name="goblin"
+	speed="1d20+40"
+	color="128,128,128"
+	graphic='g'
+	health=50
+	AI="PlayerNPC"
+	attackSkill="1d3"
+	attackPower="1d1"
+	defenceSkill="1d5"
+}
+
+npc_type "giant snail" {
+	name="Giant Snail"
+	speed="1d1"
+	color="219,199,109"
+	graphic='b'
+	health=50
+	AI="PeacefulAnimal"
+	attackSkill="1d3"
+	attackPower="1d1"
+	defenceSkill="2d4"
+	spawnAsGroup="1d3"
+}
+
+npc_type "starving wolf" {
+	name="Starving Wolf"
+	speed="1d20+55"
+	color="96,96,96"
+	graphic='w'
+	health=150
+	AI="HungryAnimal"
+	attackSkill="4d4"
+	attackPower="5d4"
+	defenceSkill="1d5+5"
+	spawnAsGroup="1d4+3"
+}

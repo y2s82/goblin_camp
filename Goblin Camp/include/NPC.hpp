@@ -45,6 +45,23 @@ class SkillSet {
 		void operator()(Skill, int);
 };
 
+struct NPCPreset {
+	NPCPreset(std::string);
+	std::string typeName;
+	std::string name;
+	TCOD_dice_t speed;
+	TCODColor color;
+	int graphic;
+	bool expert;
+	int health;
+	std::string ai;
+	bool needsNutrition;
+	bool generateName;
+	TCOD_dice_t stats[STAT_COUNT];
+	bool spawnAsGroup;
+	TCOD_dice_t group;
+};
+
 class NPC : public Entity {
     friend class Game;
 
@@ -97,6 +114,8 @@ class NPC : public Entity {
 		bool Escaped();
 		void Escape();
 		void DestroyAllItems();
+
+		static std::map<std::string, NPCType> NPCTypeNames;
 	public:
 		~NPC();
 		SkillSet Skills;
@@ -135,6 +154,11 @@ class NPC : public Entity {
 		void Hit(boost::weak_ptr<Entity>);
 		void MemberOf(boost::weak_ptr<Squad>);
 		boost::weak_ptr<Squad> MemberOf();
+
+		static void LoadPresets(std::string);
+		static std::vector<NPCPreset> Presets;
+		static std::string NPCTypeToString(NPCType);
+		static NPCType StringToNPCType(std::string);
 
 		static bool GetSquadJob(boost::shared_ptr<NPC>);
 		static bool JobManagerFinder(boost::shared_ptr<NPC>);
