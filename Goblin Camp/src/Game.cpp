@@ -368,6 +368,9 @@ void Game::Init(int width, int height, bool fullscreen) {
 	GenerateMap();
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
+	TCODSystem::setFps(UPDATES_PER_SECOND);
+    upleft = Coordinate(180,180);
+
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {

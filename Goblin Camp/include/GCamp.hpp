@@ -23,5 +23,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define UPDATES_PER_SECOND 25
 
+int mainMenu();
 void mainLoop();
 int distance(int,int,int,int);

@@ -77,19 +77,15 @@ int main(std::string cmdLine) {
 	CONTINUEMAIN:
 
 	Game::Inst()->Init(width,height,fullscreen);
-	mainLoop();
-	return 0;
+	return mainMenu();
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
 {
-    main(cmdLine);
-    return 0;
+    return main(cmdLine);
 }
 
 void mainLoop() {
-	std::stringstream sstream;
-
 	for (int npcs = 0; npcs < 10; ++npcs) {
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
 	}
@@ -102,9 +98,8 @@ void mainLoop() {
 		Game::Inst()->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
 	}
 
-    Game::Inst()->upleft = Coordinate(180,180);
 	Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
-	TCODSystem::setFps(UPDATES_PER_SECOND);
+
 	while(true) {
 
 		UI::Inst()->Update();
@@ -117,10 +112,70 @@ void mainLoop() {
 		Game::Inst()->buffer->flush();
         Game::Inst()->Draw();
 		Game::Inst()->FlipBuffer();
-
 	}
 }
 
 int distance(int x0, int y0, int x1, int y1) {
 	return (abs(y1 - y0) + abs(x1 - x0));
+}
+
+int mainMenu() {
+	bool exit = false;
+	int width = 20;
+	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
+	int height = 10;
+	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
+	int selected = -1;
+	TCOD_mouse_t mouseStatus;
+	TCOD_key_t key;
+
+	while (!exit) {
+		TCODConsole::root->clear();
+
+		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_DEFAULT,
+			"Main Menu");
+
+		TCODConsole::root->setAlignment(TCOD_CENTER);
+
+		mouseStatus = TCODMouse::getStatus();
+		key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+
+		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
+			selected = mouseStatus.cy - (edgey+2);
+		} else selected = -1;
+
+		if (mouseStatus.lbutton_pressed) {
+			if (selected == 0) mainLoop();
+			else if (selected == 2) exit = true;
+		}
+		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
+		if (selected == 0) {
+			TCODConsole::root->setForegroundColor(TCODColor::black);
+			TCODConsole::root->setBackgroundColor(TCODColor::white);
+		} else {
+			TCODConsole::root->setForegroundColor(TCODColor::white);
+			TCODConsole::root->setBackgroundColor(TCODColor::black);
+		}
+		TCODConsole::root->print(edgex+width/2, edgey+2, "New game");
+
+		if (selected == 2) {
+			TCODConsole::root->setForegroundColor(TCODColor::black);
+			TCODConsole::root->setBackgroundColor(TCODColor::white);
+		} else {
+			TCODConsole::root->setForegroundColor(TCODColor::white);
+			TCODConsole::root->setBackgroundColor(TCODColor::black);
+		}
+		TCODConsole::root->print(edgex+width/2, edgey+4, "Exit");
+
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+
+		if (key.c == 'q' || key.vk == TCODK_ESCAPE) exit = true;
+		if (key.c == 'n') mainLoop();
+
+		TCODConsole::root->flush();
+
+	}
+	Game::Inst()->Exit();
+	return 0;
 }
