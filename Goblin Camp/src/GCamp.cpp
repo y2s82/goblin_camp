@@ -88,12 +88,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
 }
 
 void mainLoop() {
-	LARGE_INTEGER timeStart, timeNow, freq;
-	int logicTimer = 0, timerAddition;
-
 	std::stringstream sstream;
-
-	QueryPerformanceFrequency(&freq);
 
 	for (int npcs = 0; npcs < 10; ++npcs) {
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
@@ -107,33 +102,22 @@ void mainLoop() {
 		Game::Inst()->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
 	}
 
-	QueryPerformanceCounter(&timeStart);
-
     Game::Inst()->upleft = Coordinate(180,180);
 	Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
+	TCODSystem::setFps(UPDATES_PER_SECOND);
 	while(true) {
-		while (logicTimer >= (1000 / UPDATES_PER_SECOND)) {
-			
-			logicTimer -= (1000 / UPDATES_PER_SECOND);
 
-			UI::Inst()->Update();
-			if (!Game::Inst()->Paused()) {
-				Game::Inst()->Update();
-				Announce::Inst()->Update();
-				JobManager::Inst()->Update();
-			}
+		UI::Inst()->Update();
+		if (!Game::Inst()->Paused()) {
+			Game::Inst()->Update();
+			Announce::Inst()->Update();
+			JobManager::Inst()->Update();
 		}
 
 		Game::Inst()->buffer->flush();
         Game::Inst()->Draw();
 		Game::Inst()->FlipBuffer();
 
-		//This is required because the loop is not guaranteed to take longer than 1ms to execute
-		QueryPerformanceCounter(&timeNow);
-		timerAddition = (int)((timeNow.QuadPart - timeStart.QuadPart) * 1000 / freq.QuadPart);
-		logicTimer += timerAddition;
-		if (timerAddition >= 1)	QueryPerformanceCounter(&timeStart);
-		if (timerAddition < 25) TCODSystem::sleepMilli(25-timerAddition); //Stops gcamp from maxing CPU for no reason
 	}
 }
 
