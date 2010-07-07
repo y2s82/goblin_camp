@@ -43,3 +43,4 @@ Log.txt
 *.dll
 screenshot*.png
 *.filters
+*.sav
