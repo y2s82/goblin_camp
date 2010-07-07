@@ -16,22 +16,31 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/serialization/serialization.hpp>
 #include <libtcod.hpp>
 
 #include "Coordinate.hpp"
 
 class FilthNode : public boost::enable_shared_from_this<FilthNode> {
-    private:
-        int x, y;
-        int depth;
-        int graphic;
-        TCODColor color;
-    public:
-        FilthNode(int x=0, int y=0, int depth=0);
-        ~FilthNode();
-        void Update();
-        void Draw(Coordinate, TCODConsole*);
-        int Depth();
-        void Depth(int);
-        Coordinate Position();
+	friend class boost::serialization::access;
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+	int x, y;
+	int depth;
+	int graphic;
+	TCODColor color;
+public:
+	FilthNode(int x=0, int y=0, int depth=0);
+	~FilthNode();
+
+	void Update();
+	void Draw(Coordinate, TCODConsole*);
+	int Depth();
+	void Depth(int);
+	Coordinate Position();
 };

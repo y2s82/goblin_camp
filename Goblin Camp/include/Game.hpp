@@ -16,6 +16,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/smart_cast.hpp>
+
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -47,7 +55,15 @@ enum Seasons {
 };
 
 class Game {
+	friend class boost::serialization::access;
 	private:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+		BOOST_SERIALIZATION_SHARED_PTR(NPC)
+
 		Game();
 		static Game* instance;
 		int screenWidth, screenHeight;
@@ -58,8 +74,11 @@ class Game {
 		int charWidth, charHeight;
 	public:
 		static Game* Inst();
+		static void LoadGame(std::string);
+		static void SaveGame(std::string);
+		static bool toMainMenu;
+		static void ToMainMenu();
 
-		int Distance(Coordinate,Coordinate);
 
 /*      NPCS        NPCS        NPCS        */
 		std::map<int,boost::shared_ptr<NPC> > npcList;
@@ -82,7 +101,6 @@ class Game {
 		static int PlaceConstruction(Coordinate, ConstructionType);
 		void RemoveConstruction(boost::weak_ptr<Construction>);
 		static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
-		//std::map<int,boost::shared_ptr<Construction> > constructionList;
 		std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
 		std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
 		Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>);

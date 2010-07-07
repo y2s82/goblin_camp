@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/serialization.hpp>
+
 #include <queue>
 #include <string>
 #include <list>
@@ -68,7 +70,13 @@ enum TaskResult {
 };
 
 class Task {
+	friend class boost::serialization::access;
 	private:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
 	public:
 		Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0);
 		Coordinate target;
@@ -78,7 +86,14 @@ class Task {
 };
 
 class Job {
+	friend class boost::serialization::access;
 	private:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 		JobPriority _priority;
 		JobCompletion completion;
 		std::list<boost::weak_ptr<Job> > preReqs;

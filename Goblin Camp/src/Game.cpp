@@ -13,12 +13,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-
-#include <map>
 #include <boost/multi_array.hpp>
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <map>
 
 #ifdef DEBUG
 #include <iostream>
@@ -168,7 +167,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 					if (ix == construct->x()-1 || ix == construct->x() + Construction::Blueprint(construct->type()).x() ||
 						iy == construct->y()-1 || iy == construct->y() + Construction::Blueprint(construct->type()).y()) {
 						if (Map::Inst()->Walkable(ix,iy)) {
-							if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
+							if (Distance(pos.x(), pos.y(), ix, iy) < Distance(pos.x(), pos.y(), closest.x(), closest.y()))
 								closest = Coordinate(ix,iy);
 						}
 					}
@@ -180,7 +179,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 					if (ix == ent.lock()->x()-1 || ix == ent.lock()->x()+1 ||
 						iy == ent.lock()->y()-1 || iy == ent.lock()->y()+1) {
 						if (Map::Inst()->Walkable(ix,iy)) {
-							if (distance(pos.x(), pos.y(), ix, iy) < distance(pos.x(), pos.y(), closest.x(), closest.y()))
+							if (Distance(pos.x(), pos.y(), ix, iy) < Distance(pos.x(), pos.y(), closest.x(), closest.y()))
 								closest = Coordinate(ix,iy);
 						}
 					}
@@ -216,29 +215,9 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 }
 
 int Game::CreateNPC(Coordinate target, NPCType type) {
-	boost::function<bool(boost::shared_ptr<NPC>)> findJob;
-	boost::function<void(boost::shared_ptr<NPC>)> react;
-	int faction = 0;
-
-	if (NPC::Presets[type].ai == "PlayerNPC") {
-		findJob = boost::bind(NPC::JobManagerFinder, _1);
-		react = boost::bind(NPC::PlayerNPCReact, _1);
-	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
-		findJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
-		react = boost::bind(NPC::PeacefulAnimalReact, _1);
-		faction = 1;
-	} else if (NPC::Presets[type].ai == "HungryAnimal") {
-		findJob = boost::bind(NPC::HungryAnimalFindJob, _1);
-		react = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = 2;
-	} else if (NPC::Presets[type].ai == "HostileAnimal") {
-		findJob = boost::bind(NPC::HostileAnimalFindJob, _1);
-		react = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = 2;
-	}
-
-	boost::shared_ptr<NPC> npc(new NPC(target, findJob, react));
+	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
+	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->speed(DiceToInt(NPC::Presets[type].speed));
 	npc->color(NPC::Presets[type].color);
@@ -248,7 +227,6 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->name = TCODNamegen::generate(const_cast<char*>(NPC::Presets[type].name.c_str()));
 	} else npc->name = NPC::Presets[type].name;
 
-	npc->faction = faction;
 	npc->needsNutrition = NPC::Presets[type].needsNutrition;
 	npc->health = NPC::Presets[type].health;
 	npc->baseStats[ATTACKSKILL] = DiceToInt(NPC::Presets[type].stats[ATTACKSKILL]);
@@ -477,11 +455,7 @@ void Game::CreateWater(Coordinate pos, int amount, int time) {
 }
 
 int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
-	return distance(npcList[uid]->x(), npcList[uid]->y(), pos.x(), pos.y());
-}
-
-int Game::Distance(Coordinate a, Coordinate b) {
-	return distance(a.x(), a.y(), b.x(), b.y());
+	return Distance(npcList[uid]->x(), npcList[uid]->y(), pos.x(), pos.y());
 }
 
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category) {
@@ -959,4 +933,9 @@ int Game::DiceToInt(TCOD_dice_t dice) {
 		dice.nb_faces = 1;
 return (int)(((dice.nb_dices * ((rand() % dice.nb_faces) + 1)) *
 	dice.multiplier) + dice.addsub);
+}
+
+bool Game::toMainMenu = false;
+void Game::ToMainMenu() {
+	toMainMenu = true;
 }

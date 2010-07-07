@@ -165,4 +165,3 @@ void Job::ReserveSpace(boost::weak_ptr<Container> cont) {
     cont.lock()->ReserveSpace(true);
     reservedSpace = cont;
 }
-

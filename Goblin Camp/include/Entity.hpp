@@ -18,11 +18,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 #include <string>
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/serialization/set.hpp>
 
 #include "Coordinate.hpp"
 
 class Entity: public boost::enable_shared_from_this<Entity>
 {
+	friend class boost::serialization::access;
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 	protected:
 		unsigned int _x, _y;
 		int uid;

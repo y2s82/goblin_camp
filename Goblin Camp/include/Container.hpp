@@ -16,17 +16,27 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/weak_ptr.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/base_object.hpp>
 #include <set>
 
 #include "Item.hpp"
 
 class Container : public Item {
+	friend class boost::serialization::access;
     private:
-        std::set<boost::weak_ptr<Item> > items;
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+		std::set<boost::weak_ptr<Item> > items;
         int capacity;
         int reservedSpace;
 	public:
-        Container(Coordinate, int type, int cap=1000, int faction = 0);
+        Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0);
 		virtual ~Container();
 		virtual bool AddItem(boost::weak_ptr<Item>);
 		virtual void RemoveItem(boost::weak_ptr<Item>);

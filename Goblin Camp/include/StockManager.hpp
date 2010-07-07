@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <map>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/serialization/serialization.hpp>
 
 #include "Item.hpp"
 #include "Construction.hpp"
@@ -26,7 +27,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class StockManager
 {
+	friend class boost::serialization::access;
 private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 	StockManager(void);
 	static StockManager* instance;
 
@@ -43,6 +51,7 @@ private:
 public:
 	static StockManager* Inst();
 	~StockManager(void);
+
 	void Update();
 	void UpdateQuantity(ItemType, int);
 	int CategoryQuantity(ItemCategory);

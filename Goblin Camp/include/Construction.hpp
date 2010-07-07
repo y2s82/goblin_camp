@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <ticpp.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-
+#include <boost/serialization/serialization.hpp>
 
 #include "Entity.hpp"
 #include "Item.hpp"
@@ -58,49 +58,57 @@ struct ConstructionPreset {
 };
 
 class Construction : public Entity {
-    friend class Game;
+	friend class boost::serialization::access;
+	friend class Game;
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-	protected:
-		Construction(ConstructionType = 0, Coordinate = Coordinate(0,0));
+protected:
+	Construction(ConstructionType = 0, Coordinate = Coordinate(0,0));
 
-		int _condition, maxCondition;
-		std::vector<int> graphic;
-		TCODColor color;
-		ConstructionType _type;
-		bool walkable;
-		std::list<ItemCategory> materials;
-		bool producer;
-		std::vector<ItemType> products;
-		std::deque<ItemType> jobList;
-		int progress;
-		void SpawnProductionJob();
-		boost::shared_ptr<Container> container;
-		boost::shared_ptr<Container> materialsUsed;
-		bool stockpile, farmplot;
+	int _condition, maxCondition;
+	std::vector<int> graphic;
+	TCODColor color;
+	ConstructionType _type;
+	bool walkable;
+	std::list<ItemCategory> materials;
+	bool producer;
+	std::vector<ItemType> products;
+	std::deque<ItemType> jobList;
+	int progress;
+	void SpawnProductionJob();
+	boost::shared_ptr<Container> container;
+	boost::shared_ptr<Container> materialsUsed;
+	bool stockpile, farmplot;
 
-		void UpdateWallGraphic(bool recurse = true, bool self = true);
-	public:
-		~Construction();
-		static Coordinate Blueprint(ConstructionType);
-		static Coordinate ProductionSpot(ConstructionType);
-		void condition(int);
-		int condition();
-		virtual void Draw(Coordinate, TCODConsole*);
-		int Build();
-		ConstructionType type();
-		std::list<ItemCategory>* MaterialList();
-		bool Producer();
-		std::vector<ItemType>* Products();
-		ItemType Products(int);
-		void AddJob(ItemType);
-		virtual void CancelJob(int=0);
-		std::deque<ItemType>* JobList();
-		ItemType JobList(int);
-		virtual int Use();
-		static std::vector<ConstructionPreset> Presets;
-		static void LoadPresets(ticpp::Document);
-        virtual boost::weak_ptr<Container> Storage();
-		bool IsStockpile();
-		bool IsFarmplot();
-		virtual void Update();
+	void UpdateWallGraphic(bool recurse = true, bool self = true);
+public:
+	~Construction();
+
+	static Coordinate Blueprint(ConstructionType);
+	static Coordinate ProductionSpot(ConstructionType);
+	void condition(int);
+	int condition();
+	virtual void Draw(Coordinate, TCODConsole*);
+	int Build();
+	ConstructionType type();
+	std::list<ItemCategory>* MaterialList();
+	bool Producer();
+	std::vector<ItemType>* Products();
+	ItemType Products(int);
+	void AddJob(ItemType);
+	virtual void CancelJob(int=0);
+	std::deque<ItemType>* JobList();
+	ItemType JobList(int);
+	virtual int Use();
+	static std::vector<ConstructionPreset> Presets;
+	static void LoadPresets(ticpp::Document);
+	virtual boost::weak_ptr<Container> Storage();
+	bool IsStockpile();
+	bool IsFarmplot();
+	virtual void Update();
 };

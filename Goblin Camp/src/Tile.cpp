@@ -147,3 +147,4 @@ int Tile::NatureObject() const { return natureObject; }
 
 boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
 void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
+

@@ -15,9 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/split_member.hpp>
+#include <boost/serialization/map.hpp>
+
 #include "Stockpile.hpp"
 
 class FarmPlot : public Stockpile {
+	friend class boost::serialization::access;
     friend class Game;
 
     private:
@@ -27,6 +31,12 @@ class FarmPlot : public Stockpile {
 		std::map<Coordinate, int> growth;
 
     public:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
         void Update();
         virtual void Draw(Coordinate, TCODConsole*);
         virtual int Use();

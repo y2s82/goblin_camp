@@ -18,7 +18,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Construction.hpp"
 
 class Door : public Construction {
+	friend class boost::serialization::access;
 private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 	int closedGraphic;
 	int timer;
 public:

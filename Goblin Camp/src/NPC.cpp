@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <cstdlib>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/assume_abstract.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/format.hpp>
@@ -571,7 +574,7 @@ AiThink NPC::Think() {
 				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
 				jobs.push_back(idleJob);
-				if (distance(Camp::Inst()->Center().x(), Camp::Inst()->Center().y(), _x, _y) < 15) run = false;
+				if (Distance(Camp::Inst()->Center().x(), Camp::Inst()->Center().y(), _x, _y) < 15) run = false;
 				else run = true;
 			}
 		}
@@ -932,6 +935,25 @@ std::string NPC::NPCTypeToString(NPCType type) {
 
 NPCType NPC::StringToNPCType(std::string typeName) {
 	return NPCTypeNames[typeName];
+}
+
+void NPC::InitializeAIFunctions() {
+	if (NPC::Presets[type].ai == "PlayerNPC") {
+		FindJob = boost::bind(NPC::JobManagerFinder, _1);
+		React = boost::bind(NPC::PlayerNPCReact, _1);
+	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
+		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
+		React = boost::bind(NPC::PeacefulAnimalReact, _1);
+		faction = 1;
+	} else if (NPC::Presets[type].ai == "HungryAnimal") {
+		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
+		React = boost::bind(NPC::HostileAnimalReact, _1);
+		faction = 2;
+	} else if (NPC::Presets[type].ai == "HostileAnimal") {
+		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		React = boost::bind(NPC::HostileAnimalReact, _1);
+		faction = 2;
+	}
 }
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 

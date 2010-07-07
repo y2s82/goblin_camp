@@ -89,3 +89,4 @@ void Squad::RemoveAllMembers() {
 	}
 	members.clear();
 }
+

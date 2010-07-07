@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/serialization.hpp>
+
 #include <string>
 #include <vector>
 #include <ticpp.h>
@@ -40,9 +42,16 @@ class NatureObjectPreset {
 
 class NatureObject : public Entity
 {
+	friend class boost::serialization::access;
     friend class Game;
     private:
-        NatureObject(Coordinate, NatureObjectType);
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+		NatureObject(Coordinate = Coordinate(0,0), NatureObjectType = 0);
         NatureObjectType type;
         int graphic;
         TCODColor color;
@@ -51,7 +60,7 @@ class NatureObject : public Entity
         bool tree, harvestable;
     public:
 		~NatureObject();
-        static std::vector<NatureObjectPreset> Presets;
+		static std::vector<NatureObjectPreset> Presets;
         static void LoadPresets(ticpp::Document);
 
         int Type();

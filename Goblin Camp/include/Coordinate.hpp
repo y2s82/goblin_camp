@@ -15,13 +15,25 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/split_member.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/export.hpp>
+
 #include <cstdlib>
 
 class Coordinate {
+	friend class boost::serialization::access;
 	private:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 		int _x, _y;
 	public:
 		Coordinate(int valuex = 0,int = 0);
+
 		int x() const;
 		int x(int);
 		int y() const;
@@ -32,20 +44,4 @@ class Coordinate {
 		Coordinate operator+(int);
 		Coordinate operator-(int);
 		Coordinate operator+(Coordinate);
-};
-
-class PathCoordinate : public Coordinate {
-	private:
-		int _moveCost, _distance;
-		Coordinate _parent;
-	public:
-		PathCoordinate(int = 0,int = 0,int = 0,int = 0, Coordinate = Coordinate(0,0));
-		int moveCost() const;
-		void moveCost(int);
-		int distance() const;
-		void distance(int);
-		Coordinate parent() const;
-		void parent(Coordinate);
-		bool operator<(const PathCoordinate) const;
-		bool operator==(const PathCoordinate) const;
 };

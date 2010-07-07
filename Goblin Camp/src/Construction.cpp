@@ -434,4 +434,3 @@ ConstructionPreset::ConstructionPreset() :
     productionSpot(Coordinate(0,0)),
 	dynamic(false)
 {}
-

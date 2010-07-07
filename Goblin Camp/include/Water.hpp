@@ -15,31 +15,40 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <libtcod.hpp>
 #include <boost/enable_shared_from_this.hpp>
+
+#include <libtcod.hpp>
 
 #include "Coordinate.hpp"
 
 #define RIVERDEPTH 5000
 
 class WaterNode : public boost::enable_shared_from_this<WaterNode> {
-	private:
-		int x, y;
-		int depth;
-		int graphic;
-		TCODColor color;
-		int inertCounter;
-		bool inert;
-        int timeFromRiverBed;
-	public:
-		WaterNode(int x=0,int y=0,int depth=0,int time=0);
-		~WaterNode();
-		void Update();
-		void Draw(Coordinate, TCODConsole*);
-		void MakeInert();
-		void DeInert();
-		int Depth();
-		void Depth(int);
-		void UpdateGraphic();
-		Coordinate Position();
+	friend class boost::serialization::access;
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+	int x, y;
+	int depth;
+	int graphic;
+	TCODColor color;
+	int inertCounter;
+	bool inert;
+	int timeFromRiverBed;
+public:
+	WaterNode(int x=0,int y=0,int depth=0,int time=0);
+	~WaterNode();
+
+	void Update();
+	void Draw(Coordinate, TCODConsole*);
+	void MakeInert();
+	void DeInert();
+	int Depth();
+	void Depth(int);
+	void UpdateGraphic();
+	Coordinate Position();
 };

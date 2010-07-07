@@ -15,14 +15,22 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <libtcod.hpp>
 #include <boost/multi_array.hpp>
+#include <boost/serialization/serialization.hpp>
+#include <libtcod.hpp>
 
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 
 class Map : public ITCODPathCallback {
+	friend class boost::serialization::access;
 	private:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 		Map();
 		static Map* instance;
 		boost::multi_array<Tile, 2> tileMap;

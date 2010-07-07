@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/weak_ptr.hpp>
+#include <boost/serialization/serialization.hpp>
 #include <string>
 #include <list>
 
@@ -30,7 +31,14 @@ enum Orders {
 };
 
 class Squad : public boost::enable_shared_from_this<Squad> {
+	friend class boost::serialization::access;
 private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 	std::string name;
 	int memberReq;
 	//List of NPC uid's

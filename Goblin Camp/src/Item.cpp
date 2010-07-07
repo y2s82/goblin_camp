@@ -34,6 +34,7 @@ std::map<std::string, ItemType> Item::itemCategoryNames = std::map<std::string, 
 
 Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
 	type(typeval),
+	flammable(false),
 	attemptedStore(false),
 	decayCounter(-1),
 	ownerFaction(owner),

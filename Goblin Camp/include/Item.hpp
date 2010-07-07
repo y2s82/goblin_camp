@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/export.hpp>
 #include <boost/shared_ptr.hpp>
 #include <libtcod.hpp>
 #include <string>
@@ -82,9 +86,16 @@ struct ItemPreset {
 };
 
 class Item : public Entity {
-    friend class Game;
+	friend class boost::serialization::access;
+	friend class Game;
 
 	private:
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 		int graphic;
 		ItemType type;
 		TCODColor color;
@@ -98,12 +109,11 @@ class Item : public Entity {
 
     protected:
 		int ownerFaction;
-		Item(Coordinate, ItemType, int owner = 0,
+		Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
 			std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
         boost::weak_ptr<Item> container;
 
 	public:
-
 		static std::string ItemTypeToString(ItemType);
 		static ItemType StringToItemType(std::string);
 		static std::string ItemCategoryToString(ItemCategory);
@@ -135,16 +145,23 @@ class Item : public Entity {
 };
 
 class OrganicItem : public Item {
-    friend class game;
+	friend class boost::serialization::access;
+	friend class game;
 
     private:
-        SeasonType season;
+ 		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+		SeasonType season;
         int nutrition;
         ItemType growth;
 
     public:
-        OrganicItem(Coordinate, ItemType);
-        SeasonType Season();
+        OrganicItem(Coordinate=Coordinate(0,0), ItemType=0);
+		SeasonType Season();
         void Season(SeasonType);
         int Nutrition();
         void Nutrition(int);

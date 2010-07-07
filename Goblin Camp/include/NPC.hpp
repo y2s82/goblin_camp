@@ -15,13 +15,19 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <queue>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/base_object.hpp>
+#include <boost/serialization/export.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/function.hpp>
 
 #include <libtcod.hpp>
+
+#include <queue>
+#include <list>
 
 #include "Coordinate.hpp"
 #include "Job.hpp"
@@ -78,12 +84,19 @@ struct NPCPreset {
 };
 
 class NPC : public Entity {
-    friend class Game;
+	friend class boost::serialization::access;
+	friend class Game;
 
 	private:
-		NPC(Coordinate,
-            boost::function<bool(boost::shared_ptr<NPC>)> findJob,
-            boost::function<void(boost::shared_ptr<NPC>)> react);
+		template<class Archive>
+		void save(Archive & ar, const unsigned int version) const;
+		template<class Archive>
+		void load(Archive & ar, const unsigned int version);
+		BOOST_SERIALIZATION_SPLIT_MEMBER()
+
+		NPC(Coordinate = Coordinate(0,0),
+		boost::function<bool(boost::shared_ptr<NPC>)> findJob = boost::function<bool(boost::shared_ptr<NPC>)>(),
+            boost::function<void(boost::shared_ptr<NPC>)> react = boost::function<void(boost::shared_ptr<NPC>)>());
 		NPCType type;
 		bool _visArray[LOS_DISTANCE*2 * LOS_DISTANCE*2];
 		int timeCount;
@@ -174,6 +187,8 @@ class NPC : public Entity {
 		static std::vector<NPCPreset> Presets;
 		static std::string NPCTypeToString(NPCType);
 		static NPCType StringToNPCType(std::string);
+
+		void InitializeAIFunctions();
 
 		static bool GetSquadJob(boost::shared_ptr<NPC>);
 		static bool JobManagerFinder(boost::shared_ptr<NPC>);

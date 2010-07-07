@@ -133,3 +133,18 @@ int FarmPlot::Use() {
     return progress;
 }
 
+template<class Archive>
+void FarmPlot::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeeds;
+	ar & growth;
+}
+
+template<class Archive>
+void FarmPlot::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeeds;
+	ar & growth;
+}
