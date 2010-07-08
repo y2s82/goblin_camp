@@ -498,42 +498,51 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 				if (y > topY + (height - 4)) break;
 			}
 	}
-
-
-
 	console->setAlignment(TCOD_LEFT);
 }
 
 MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
 	UI::Inst()->SetTextMode(true, 28);
 	filter = UI::Inst()->InputString();
-	if (x >= 0 && y >= 0 && clicked) {
+	if (x >= 0 && y >= 0) {
 		int ch = TCODConsole::root->getChar(x,y);
 
-		if (ch == '-' || ch == '+') {
-			x -= (topX + 4); //If it's the first choice, x is now ~0
-			x /= 16; //Now x = the column
-			y -= (topY + 3 + 2); //+2 because +/- are under the text
-			y /= 5;
-			int choice = x + (y*3);
-			//Because choice = index based on the visible items, we need to translate that into
-			//an actual ItemType, which might be anything. So just go through the items as in
-			//Draw() to find which index equals which itemtype.
+		x -= (topX + 4); //If it's the first choice, x is now ~0
+		x /= 16; //Now x = the column
+		y -= (topY + 3 + 2); //+2 because +/- are under the text
+		y /= 5;
+		int choice = x + (y*3);
+		//Because choice = index based on the visible items, we need to translate that into
+		//an actual ItemType, which might be anything. So just go through the items as in
+		//Draw() to find which index equals which itemtype.
 
-			int itemIndex = 0;
-			for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
+		int itemIndex = 0;
+		for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
 			itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
 				if (StockManager::Inst()->TypeQuantity(*itemi) > -1 &&
 					boost::icontains(Item::Presets[*itemi].name, filter)) {
-					if (itemIndex++ == choice) {
-						StockManager::Inst()->AdjustMinimum(*itemi, (ch == '-') ? -1 : 1);
-						break;
-					}
+
+						int adjustAmount = UI::Inst()->ShiftPressed() ? 10 : 1;
+
+						if (itemIndex == 0) { //TODO: You can only in/decrement the first item with the keyboard, for now.
+							TCOD_key_t key = UI::Inst()->getKey();
+							if (key.c == '+') {
+								StockManager::Inst()->AdjustMinimum(*itemi, adjustAmount);
+							} else if (key.c == '-') {
+								StockManager::Inst()->AdjustMinimum(*itemi, -adjustAmount);
+							}
+						}
+
+						if (clicked && (ch == '-' || ch == '+') && itemIndex == choice) {
+							StockManager::Inst()->AdjustMinimum(*itemi, (ch == '-') ? -adjustAmount : adjustAmount);
+							break;
+						}
+						++itemIndex;
 				}
-			}
-		} else if (x == topX+48 && y == topY+1) {
+		}
+		if (clicked && x == topX+48 && y == topY+1) {
 			if (scroll > 0) --scroll;
-		} else if (x == topX+48 && y == topY+48) {
+		} else if (clicked && x == topX+48 && y == topY+48) {
 			if (scroll < (signed int)(StockManager::Inst()->Producables()->size() / 3)-1) ++scroll;
 		}
 		return MENUHIT;

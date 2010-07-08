@@ -50,6 +50,7 @@ private:
 	bool menuOpen;
 	int menuX, menuY;
 	TCOD_mouse_t mouseInput;
+	TCOD_key_t key;
 	Menu* currentMenu;
 	UIState _state;
 	boost::function<void(Coordinate)> callback;
@@ -103,4 +104,6 @@ public:
 	void HideMenu();
 	void CloseMenu();
 	void SetCursor(int);
+	bool ShiftPressed();
+	TCOD_key_t getKey();
 };

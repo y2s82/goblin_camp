@@ -70,7 +70,7 @@ void UI::Update() {
 
 void UI::HandleKeyboard() {
 	//TODO: This isn't pretty, but it works.
-	TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!textMode) {
 		if (key.c == 'q') Game::Exit();
 		else if (key.c == 'b') {
@@ -120,7 +120,7 @@ void UI::HandleKeyboard() {
 		}
 
 		int addition = 1;
-		if (key.shift) addition *= 10;
+		if (ShiftPressed()) addition *= 10;
 		if (key.vk == TCODK_UP) {
 			if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
 		} else if (key.vk == TCODK_DOWN) {
@@ -179,18 +179,21 @@ void UI::HandleKeyboard() {
 			mouseInput.cy -= addition;
 		} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
 			lbuttonPressed = true;
-		} else if (key.vk == TCODK_CONTROL || key.vk == TCODK_KP0) {
-			rbuttonPressed = true;
+/*		} else if (key.vk == TCODK_CONTROL || key.vk == TCODK_KP0) {
+			rbuttonPressed = true;*/
 		} else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
 		} else if (key.vk == TCODK_PRINTSCREEN) { 
 			TCODSystem::saveScreenshot(0);
 		}
 	} else {
-		if (key.c >= ' ' && key.c <= '}' && (signed int)inputString.size() < inputStringLimit) {
+		if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
 			inputString += key.c;
 		} else if (key.vk == TCODK_BACKSPACE) {
 			if (inputString.size() > 0) inputString.pop_back();
 		}
+	}
+	if (key.vk == TCODK_ESCAPE && menuOpen) {
+		rbuttonPressed = true;
 	}
 
 	if (mouseInput.x < 0) {
@@ -756,5 +759,7 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 			height = 30;
 			construction = true;
 		}
-
 }
+
+bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
+TCOD_key_t UI::getKey() { return key; }
