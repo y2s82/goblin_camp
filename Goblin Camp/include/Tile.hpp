@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Water.hpp"
 #include "Filth.hpp"
+#include "Blood.hpp"
 
 enum TileType {
 	TILENONE,
@@ -54,11 +55,13 @@ class Tile {
 		bool low, blocksWater;
         boost::shared_ptr<WaterNode> water;
         int graphic;
-        TCODColor color;
+        TCODColor foreColor;
+        TCODColor backColor;
         int natureObject;
 		std::set<int> npcList; //Set of NPC uid's
 		std::set<int> itemList; //Set of Item uid's
 		boost::shared_ptr<FilthNode> filth;
+		boost::shared_ptr<BloodNode> blood;
 
 	public:
 		Tile(TileType = TILEGRASS, int = 1);
@@ -83,9 +86,12 @@ class Tile {
 		bool BlocksWater() const;
 		void BlocksWater(bool);
         int Graphic() const;
-        TCODColor Color() const;
+        TCODColor ForeColor() const;
+        TCODColor BackColor() const;
         void NatureObject(int);
         int NatureObject() const;
 		boost::weak_ptr<FilthNode> GetFilth() const;
 		void SetFilth(boost::shared_ptr<FilthNode>);
+		boost::weak_ptr<BloodNode> GetBlood() const;
+		void SetBlood(boost::shared_ptr<BloodNode>);
 };

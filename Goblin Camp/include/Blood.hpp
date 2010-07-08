@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Coordinate.hpp"
 
-class FilthNode : public boost::enable_shared_from_this<FilthNode> {
+class BloodNode : public boost::enable_shared_from_this<BloodNode> {
 	friend class boost::serialization::access;
 private:
 	template<class Archive>
@@ -34,8 +34,8 @@ private:
 	int graphic;
 	TCODColor color;
 public:
-	FilthNode(int x=0, int y=0, int depth=0);
-	~FilthNode();
+	BloodNode(int x=0, int y=0, int depth=0);
+	~BloodNode();
 
 	void Update();
 	void Draw(Coordinate, TCODConsole*);

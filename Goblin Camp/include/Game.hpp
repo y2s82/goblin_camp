@@ -62,7 +62,6 @@ class Game {
 		template<class Archive>
 		void load(Archive & ar, const unsigned int version);
 		BOOST_SERIALIZATION_SPLIT_MEMBER()
-		BOOST_SERIALIZATION_SHARED_PTR(NPC)
 
 		Game();
 		static Game* instance;
@@ -162,6 +161,10 @@ class Game {
 		std::list<boost::weak_ptr<FilthNode> > filthList;
 		void CreateFilth(Coordinate);
 		void CreateFilth(Coordinate,int);
+
+		std::list<boost::weak_ptr<BloodNode> > bloodList;
+		void CreateBlood(Coordinate);
+		void CreateBlood(Coordinate,int);
 
 		void Pause();
 		bool Paused();

@@ -505,7 +505,11 @@ AiThink NPC::Think() {
 					}
 
 					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
-						findPath(currentEntity().lock()->Position());
+//						findPath(currentEntity().lock()->Position());
+						tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+						if (tmpCoord.x() >= 0) {
+							findPath(tmpCoord);
+						}
 						taskBegun = true;
 						result = TASKCONTINUE;
 					}
@@ -671,6 +675,7 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex 
 
 bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 	if (npc->MemberOf().lock()) {
+		npc->aggressive = true;
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
 		newJob->internal = true;
 		switch (npc->MemberOf().lock()->Order()) {
@@ -680,7 +685,8 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
-				npc->run = false;
+				if (Distance(npc->Position(), npc->MemberOf().lock()->TargetCoordinate()) < 10) npc->run = false;
+				else npc->run = true;
 				return true;
 			}
 			break;
@@ -837,6 +843,8 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 				npc->health -= dif;
 				if (dif > 10 && rand() % 5 == 0) npc->AddEffect(CONCUSSION);
 				if (npc->health <= 0) npc->Kill();
+				Game::Inst()->CreateBlood(Coordinate(npc->Position().x() + ((rand() % 3) - 1),
+					npc->Position().y() + ((rand() % 3) - 1)));
 			} else {
 #ifdef DEBUG
 				std::cout<<"Hit missed\n";

@@ -36,9 +36,11 @@ Tile::Tile(TileType newType, int newCost) :
 	blocksWater(false),
 	water(boost::shared_ptr<WaterNode>()),
 	graphic('.'),
-	color(TCODColor::white),
+	foreColor(TCODColor::white),
+	backColor(TCODColor::black),
 	natureObject(-1),
-	filth(boost::shared_ptr<FilthNode>())
+	filth(boost::shared_ptr<FilthNode>()),
+	blood(boost::shared_ptr<BloodNode>())
 {
     type(newType);
 }
@@ -49,7 +51,7 @@ void Tile::type(TileType newType) {
 	_type = newType;
 	if (_type == TILEGRASS) {
 	    vis = true; walkable = true; buildable = true;
-	    color = TCODColor(rand() % 190, 127, 0);
+	    foreColor = TCODColor(rand() % 190, 127, 0);
 	    switch ((rand() % 10)) {
 	        case 0:
 	        case 1:
@@ -66,7 +68,7 @@ void Tile::type(TileType newType) {
 	else if (_type == TILEDITCH || _type == TILERIVERBED) {
 	    vis = true; walkable = true; buildable = false; low = true;
 	    graphic = '_';
-	    color = TCODColor(125,50,0);
+	    foreColor = TCODColor(125,50,0);
     }
 	else { vis = false; walkable = false; buildable = false; }
 }
@@ -140,11 +142,22 @@ bool Tile::Low() const {return low;}
 void Tile::Low(bool value) {low = value;}
 
 int Tile::Graphic() const { return graphic; }
-TCODColor Tile::Color() const { return color; }
+TCODColor Tile::ForeColor() const { 
+	return foreColor;
+}
+TCODColor Tile::BackColor() const {
+	if (!blood) return backColor;
+	TCODColor result = backColor;
+	result.r = std::min(255, backColor.r + blood->Depth());
+	return result; 
+}
 
 void Tile::NatureObject(int val) { natureObject = val; }
 int Tile::NatureObject() const { return natureObject; }
 
 boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
 void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
+
+boost::weak_ptr<BloodNode> Tile::GetBlood() const {return boost::weak_ptr<BloodNode>(blood);}
+void Tile::SetBlood(boost::shared_ptr<BloodNode> value) {blood = value;}
 

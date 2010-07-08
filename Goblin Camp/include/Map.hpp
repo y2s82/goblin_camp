@@ -60,12 +60,15 @@ class Map : public ITCODPathCallback {
 		void BlocksWater(int,int,bool);
 		std::set<int>* NPCList(int,int);
 		int Graphic(int,int) const;
-		TCODColor Color(int,int) const;
+		TCODColor ForeColor(int,int) const;
+		TCODColor BackColor(int,int) const;
 		void NatureObject(int,int,int);
 		int NatureObject(int,int) const;
 		std::set<int>* ItemList(int,int);
 		boost::weak_ptr<FilthNode> GetFilth(int,int);
 		void SetFilth(int,int,boost::shared_ptr<FilthNode>);
+		boost::weak_ptr<BloodNode> GetBlood(int,int);
+		void SetBlood(int,int,boost::shared_ptr<BloodNode>);
 		bool BlocksLight(int, int) const;
 		void BlocksLight(int, int, bool);
 		bool LineOfSight(Coordinate, Coordinate);

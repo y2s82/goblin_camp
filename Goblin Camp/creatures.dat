@@ -3,7 +3,7 @@ npc_type "orc" {
 	needsNutrition
 	generateName
 	name="orc"
-	speed="1d20+40"
+	speed="1d20+80"
 	color="0,0,255"
 	graphic='o'
 	health=200
@@ -17,7 +17,7 @@ npc_type "goblin" {
 	needsNutrition
 	generateName
 	name="goblin"
-	speed="1d20+40"
+	speed="1d20+80"
 	color="128,128,128"
 	graphic='g'
 	health=50
@@ -29,7 +29,7 @@ npc_type "goblin" {
 
 npc_type "giant snail" {
 	name="Giant Snail"
-	speed="1d3"
+	speed="1d10+10"
 	color="219,199,109"
 	graphic='b'
 	health=50
@@ -42,7 +42,7 @@ npc_type "giant snail" {
 
 npc_type "starving wolf" {
 	name="Starving Wolf"
-	speed="1d20+55"
+	speed="1d20+95"
 	color="96,96,96"
 	graphic='w'
 	health=150

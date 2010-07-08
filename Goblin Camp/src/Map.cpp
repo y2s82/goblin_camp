@@ -68,7 +68,7 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 		for (int x = upleft.x(); x < upleft.x() + console->getWidth(); ++x) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
-			    console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), Color(x,y), TCODColor::black);
+			    console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), ForeColor(x,y), BackColor(x,y));
 
 				boost::weak_ptr<WaterNode> water = GetWater(x,y);
 				if (water.lock()) {
@@ -100,13 +100,17 @@ std::set<int>* Map::NPCList(int x, int y) { return &tileMap[x][y].npcList; }
 std::set<int>* Map::ItemList(int x, int y) { return &tileMap[x][y].itemList; }
 
 int Map::Graphic(int x, int y) const { return tileMap[x][y].Graphic(); }
-TCODColor Map::Color(int x, int y) const { return tileMap[x][y].Color(); }
+TCODColor Map::ForeColor(int x, int y) const { return tileMap[x][y].ForeColor(); }
+TCODColor Map::BackColor(int x, int y) const { return tileMap[x][y].BackColor(); }
 
 void Map::NatureObject(int x, int y, int val) { tileMap[x][y].NatureObject(val); }
 int Map::NatureObject(int x, int y) const { return tileMap[x][y].NatureObject(); }
 
 boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) { return tileMap[x][y].GetFilth(); }
 void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { tileMap[x][y].SetFilth(value); }
+
+boost::weak_ptr<BloodNode> Map::GetBlood(int x, int y) { return tileMap[x][y].GetBlood(); }
+void Map::SetBlood(int x, int y, boost::shared_ptr<BloodNode> value) { tileMap[x][y].SetBlood(value); }
 
 bool Map::BlocksLight(int x, int y) const { return tileMap[x][y].BlocksLight(); }
 void Map::BlocksLight(int x, int y, bool val) { tileMap[x][y].BlocksLight(val); }

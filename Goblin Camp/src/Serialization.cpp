@@ -51,6 +51,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Door.hpp"
 #include "Camp.hpp"
 #include "Container.hpp"
+#include "Blood.hpp"
 
 
 template<class Archive>
@@ -84,6 +85,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & waterList;
 	ar & upleft;
 	ar & filthList;
+	ar & bloodList;
 }
 
 template<class Archive>
@@ -105,6 +107,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & waterList;
 	ar & upleft;
 	ar & filthList;
+	ar & bloodList;
 }
 
 template<class Archive>
@@ -532,6 +535,27 @@ void FilthNode::load(Archive & ar, const unsigned int version) {
 	ar & color.b;
 }
 
+template<class Archive>
+void BloodNode::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}
+
+template<class Archive>
+void BloodNode::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}
 
 template<class Archive>
 void NatureObject::save(Archive & ar, const unsigned int version) const {
@@ -649,13 +673,17 @@ void Tile::save(Archive & ar, const unsigned int version) const {
 	ar & blocksWater;
 	ar & water;
 	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
 	ar & natureObject;
 	ar & npcList;
 	ar & itemList;
 	ar & filth;
+	ar & blood;
 }
 
 template<class Archive>
@@ -670,13 +698,17 @@ void Tile::load(Archive & ar, const unsigned int version) {
 	ar & blocksWater;
 	ar & water;
 	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
 	ar & natureObject;
 	ar & npcList;
 	ar & itemList;
 	ar & filth;
+	ar & blood;
 }
 
 void Game::SaveGame(std::string filename) {

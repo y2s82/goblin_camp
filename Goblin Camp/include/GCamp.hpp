@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 
-#define UPDATES_PER_SECOND 25
+#define UPDATES_PER_SECOND 50
 
 int MainMenu();
 void LoadMenu();

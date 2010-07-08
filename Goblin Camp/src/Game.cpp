@@ -585,7 +585,7 @@ void Game::Update() {
 	}
 
 	//Squads needen't update their member rosters ALL THE TIME
-	if (rand() % (UPDATES_PER_SECOND * 5) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 1) == 0) {
 		for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = squadList.begin(); squadi != squadList.end(); ++squadi) {
 			squadi->second->UpdateMembers();
 		}
@@ -858,6 +858,20 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 	} else {filth.lock()->Depth(filth.lock()->Depth()+amount);}
 }
 
+void Game::CreateBlood(Coordinate pos) {
+	CreateBlood(pos, 100);
+}
+
+void Game::CreateBlood(Coordinate pos, int amount) {
+	boost::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos.x(), pos.y()));
+	if (!blood.lock()) {
+		boost::shared_ptr<BloodNode> newBlood(new BloodNode(pos.x(), pos.y(), amount));
+		bloodList.push_back(boost::weak_ptr<BloodNode>(newBlood));
+		Map::Inst()->SetBlood(pos.x(), pos.y(), newBlood);
+	} else {blood.lock()->Depth(blood.lock()->Depth()+amount);}
+}
+
+
 //This function uses straightforward raycasting, and it is somewhat imprecise right now as it only casts a ray to every second
 //tile at the edge of the line of sight distance. This is to conserve cpu cycles, as there may be several hundred creatures
 //active at a time, and given the fact that they'll usually be constantly moving, this function needen't be 100% accurate.
@@ -903,7 +917,7 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> npc) {
 
 int Game::FindMilitaryRecruit() {
 	for (std::map<int, boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
-		if (npci->second->type == 1 && npci->second->faction == 0 && !npci->second->squad.lock()) {
+		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == 0 && !npci->second->squad.lock()) {
 			return npci->second->uid;
 		}
 	}
