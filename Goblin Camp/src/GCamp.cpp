@@ -138,6 +138,8 @@ int MainMenu() {
 	TCOD_mouse_t mouseStatus;
 	TCOD_key_t key;
 	bool endCredits = false;
+
+	bool lButtonDown = false;
 	while (!exit) {
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
@@ -149,13 +151,18 @@ int MainMenu() {
 		TCODConsole::root->setAlignment(TCOD_CENTER);
 
 		mouseStatus = TCODMouse::getStatus();
-		key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+		if (mouseStatus.lbutton) {
+			lButtonDown = true;
+		}
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+
 
 		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
 			selected = mouseStatus.cy - (edgey+2);
 		} else selected = -1;
 
-		if (mouseStatus.lbutton_pressed) {
+		if (!mouseStatus.lbutton && lButtonDown) {
+			lButtonDown = false;
 			if (selected == 0) MainLoop();
 			else if (selected == 2) MainLoop();
 			else if (selected == 4) LoadMenu();
@@ -209,8 +216,8 @@ int MainMenu() {
 		}
 		TCODConsole::root->print(edgex+width/2, edgey+10, "Exit");
 
-		if (key.c == 'q' || key.vk == TCODK_ESCAPE) exit = true;
-		if (key.c == 'n') MainLoop();
+		if (key.c == 'q') exit = true;
+		else if (key.c == 'n') MainLoop();
 
 		if (!endCredits) endCredits = TCODConsole::renderCredits(Game::Inst()->ScreenWidth()-20, 
 			Game::Inst()->ScreenHeight()-3, true);
@@ -230,27 +237,38 @@ void LoadMenu() {
 	TCOD_mouse_t mouseStatus;
 	TCOD_key_t key;
 	TCODList<char*> list = TCODSystem::getDirectoryContent("./saves/", "*.sav");
-	int height = list.size()+4;
+	int height = list.size()+5;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 
-	TCODConsole::root->setAlignment(TCOD_LEFT);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	
+	bool lButtonDown = false;
 
 	while (!exit) {
+
 		TCODConsole::root->clear();
 		mouseStatus = TCODMouse::getStatus();
+		if (mouseStatus.lbutton) {
+			lButtonDown = true;
+		}
+
 		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
 			selected = mouseStatus.cy - (edgey+2);
 		} else selected = -1;
 
-		if (selected < list.size() && selected >= 0 && mouseStatus.lbutton) {
+		if (selected < list.size() && selected >= 0 && !mouseStatus.lbutton && lButtonDown) {
 			Game::Inst()->LoadGame((boost::format("./saves/%s") % (list.get(selected))).str().c_str());
 			MainLoop();
+			lButtonDown = false;
+			return;
+		} else if (selected == list.size()+1 && !mouseStatus.lbutton && lButtonDown) {
+			lButtonDown = false;
 			return;
 		}
 
 		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
 
-		for (int i = 0; i < list.size(); ++i) {
+		for (int i = 0; i <= list.size()+1; ++i) {
 			if (selected == i) {
 				TCODConsole::root->setForegroundColor(TCODColor::black);
 				TCODConsole::root->setBackgroundColor(TCODColor::white);
@@ -258,7 +276,8 @@ void LoadMenu() {
 				TCODConsole::root->setForegroundColor(TCODColor::white);
 				TCODConsole::root->setBackgroundColor(TCODColor::black);
 			}
-			TCODConsole::root->print(edgex+1, edgey+2+i, list.get(i));
+			if (i < list.size()) TCODConsole::root->print(edgex+width/2, edgey+2+i, list.get(i));
+			else if (i == list.size()+1) TCODConsole::root->print(edgex+width/2, edgey+2+i, "Cancel");
 		}
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
@@ -268,9 +287,28 @@ void LoadMenu() {
 }
 
 void SaveMenu() {
-	UI::Inst()->SetTextMode(true);
 	std::string saveName;
-	UI::Inst()->Update();
-	Game::Inst()->SaveGame("./saves/testsave.sav");
+	while (true) {
+		TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
+			saveName.push_back(key.c);
+		} else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
+			saveName.pop_back();
+		}
+
+		if (key.vk == TCODK_ESCAPE) return;
+		else if (key.vk == TCODK_ENTER) {
+			Game::Inst()->SaveGame((boost::format("./saves/%s.sav") % saveName).str());
+			break;
+		}
+
+		TCODConsole::root->clear();
+		TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15, 
+			Game::Inst()->ScreenHeight()/2-3, 30, 3, true, TCOD_BKGND_SET, "Save name");
+		TCODConsole::root->print(Game::Inst()->ScreenWidth()/2, 
+			Game::Inst()->ScreenHeight()/2-2, "%s", saveName.c_str());
+		TCODConsole::root->flush();
+
+	}
 	return;
 }
