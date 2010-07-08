@@ -346,7 +346,7 @@ void Game::Init(int width, int height, bool fullscreen) {
 	GenerateMap();
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
-	TCODSystem::setFps(UPDATES_PER_SECOND);
+	TCODSystem::setFps(UPDATES_PER_SECOND*2);
     upleft = Coordinate(180,180);
 
 }

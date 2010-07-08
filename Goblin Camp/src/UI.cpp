@@ -247,11 +247,12 @@ void UI::HandleMouse() {
 		b.y(mouseInput.cy + Game::Inst()->upleft.y());
 	}
 
+	currentMenu->Update(mouseInput.cx, mouseInput.cy);
 	if (lbuttonPressed && draggingViewport) draggingViewport = false;
 	else if (lbuttonPressed) {
 		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy);
 	    if (menuResult == NOMENUHIT) {
-			if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy); lbuttonPressed = false; }
+			if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true); lbuttonPressed = false; }
 			if (menuResult == NOMENUHIT) {
 				if (_state == UIPLACEMENT && placeable) {
 					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));

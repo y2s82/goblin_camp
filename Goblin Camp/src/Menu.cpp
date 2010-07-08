@@ -73,7 +73,7 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 	console->setBackgroundColor(TCODColor::black);
 }
 
-MenuResult Menu::Update(int x, int y) {
+MenuResult Menu::Update(int x, int y, bool clicked) {
 	if (x > 0 && y > 0) {
 		if (x > topX && x < topX + width) {
 			y -= topY;
@@ -81,7 +81,7 @@ MenuResult Menu::Update(int x, int y) {
 				--y;
 				if (y > 0) y /= 2;
 				_selected = y;
-				choices[y].callback();
+				if (clicked) choices[y].callback();
 				return MENUHIT; //Mouse was inside menu when clicked
 			}
 		}
@@ -208,10 +208,12 @@ void JobMenu::Draw(int x, int y, TCODConsole* console) {
 	}
 }
 
-MenuResult JobMenu::Update(int x, int y) {
+MenuResult JobMenu::Update(int x, int y, bool clicked) {
 	if (x > topX && x < Game::Inst()->ScreenWidth()-10 && y > topY && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == topX+width-2 && y == topY+1) ScrollUp();
-		if (x == topX+width-2 && y == topY+height-2) ScrollDown();
+		if (clicked) {
+			if (x == topX+width-2 && y == topY+1) ScrollUp();
+			if (x == topX+width-2 && y == topY+height-2) ScrollDown();
+		}
 		return MENUHIT;
 	}
 	return NOMENUHIT;
@@ -252,10 +254,10 @@ void AnnounceMenu::Draw(int x, int y, TCODConsole* console) {
 	console->putChar(topX+width-2, scrollBar, 219, TCOD_BKGND_SET);
 }
 
-MenuResult AnnounceMenu::Update(int x, int y) {
+MenuResult AnnounceMenu::Update(int x, int y, bool clicked) {
 	if (x > topX && x < Game::Inst()->ScreenWidth()-10 && y > topY && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == topX+width-2 && y == topY+1) ScrollUp();
-		if (x == topX+width-2 && y == topY+height-2) ScrollDown();
+		if (x == topX+width-2 && y == topY+1 && clicked) ScrollUp();
+		if (x == topX+width-2 && y == topY+height-2 && clicked) ScrollDown();
 		return MENUHIT;
 	}
 	return NOMENUHIT;
@@ -305,10 +307,10 @@ void NPCMenu::Draw(int x, int y, TCODConsole* console) {
 	console->putChar(topX+width-2, scrollBar, 219, TCOD_BKGND_SET);
 }
 
-MenuResult NPCMenu::Update(int x, int y) {
+MenuResult NPCMenu::Update(int x, int y, bool clicked) {
 	if (x > topX && x < Game::Inst()->ScreenWidth()-10 && y > topY && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == topX+width-2 && y == topY+1) ScrollUp();
-		if (x == topX+width-2 && y == topY+height-2) ScrollDown();
+		if (x == topX+width-2 && y == topY+1 && clicked) ScrollUp();
+		if (x == topX+width-2 && y == topY+height-2 && clicked) ScrollDown();
 		return MENUHIT;
 	}
 	return NOMENUHIT;
@@ -405,7 +407,7 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 
 }
 
-MenuResult ConstructionMenu::Update(int x, int y) {
+MenuResult ConstructionMenu::Update(int x, int y, bool clicked) {
     if (x >= topX + 3 && x < topX + 3 + 6 && y == topY + 2) { /*Rename*/ }
     if (x >= topX + 13 && x < topX + 13 + 9 && y == topY + 2) { /*Dismantle*/ }
 
@@ -502,10 +504,10 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 }
 
-MenuResult StockManagerMenu::Update(int x, int y) {
+MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
 	UI::Inst()->SetTextMode(true, 28);
 	filter = UI::Inst()->InputString();
-	if (x >= 0 && y >= 0) {
+	if (x >= 0 && y >= 0 && clicked) {
 		int ch = TCODConsole::root->getChar(x,y);
 
 		if (ch == '-' || ch == '+') {
@@ -629,91 +631,92 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 }
 
-MenuResult SquadsMenu::Update(int x, int y) {
+MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 	UI::Inst()->SetTextMode(true, 21);
 	squadName = UI::Inst()->InputString();
 
-	if (y < topY+19) {
-		if (x > topX + (width/2)) {
-			if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
-				if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) {--squadMembers; return MENUHIT; }
-				else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) {--squadPriority; return MENUHIT; }
-			} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
-				if (y > topY+2+3 && y < topY+2+6) {++squadMembers; return MENUHIT; }
-				else if (y > topY+2+8 && y < topY+2+11) {++squadPriority; return MENUHIT; }
-			} else if (x > topX + (width/2) + 1 && x < topX + (width/2) + 11
-				&& y > topY+2+12 && y < topY+2+15) {
-					if (squadName != "" && !chosenSquad.lock()) { //Create
-						Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
-							(squadName, new Squad(squadName, squadMembers, squadPriority)));
-//						chosenSquad = Game::Inst()->squadList[squadName];
+	if (clicked) {
+		if (y < topY+19) {
+			if (x > topX + (width/2)) {
+				if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
+					if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) {--squadMembers; return MENUHIT; }
+					else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) {--squadPriority; return MENUHIT; }
+				} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
+					if (y > topY+2+3 && y < topY+2+6) {++squadMembers; return MENUHIT; }
+					else if (y > topY+2+8 && y < topY+2+11) {++squadPriority; return MENUHIT; }
+				} else if (x > topX + (width/2) + 1 && x < topX + (width/2) + 11
+					&& y > topY+2+12 && y < topY+2+15) {
+						if (squadName != "" && !chosenSquad.lock()) { //Create
+							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
+								(squadName, new Squad(squadName, squadMembers, squadPriority)));
+	//						chosenSquad = Game::Inst()->squadList[squadName];
+							squadName = "";
+							UI::Inst()->InputString("");
+							return MENUHIT;					
+						} else if (chosenSquad.lock()) { //Modify
+							boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
+							Game::Inst()->squadList.erase(tempSquad->Name());
+							tempSquad->Name(squadName);
+							Game::Inst()->squadList.insert(std::pair<std::string, 
+								boost::shared_ptr<Squad> >(squadName, tempSquad));
+							tempSquad->MemberLimit(squadMembers);
+							tempSquad->Priority(squadPriority);
+							return MENUHIT;
+						}
+				} else if (x > topX + (width/2) + 12 && x < topX + (width/2) + 22
+					&& y > topY+2+12 && y < topY+2+15) {
+						if (chosenSquad.lock()) {
+							chosenSquad.lock()->RemoveAllMembers();
+							Game::Inst()->squadList.erase(chosenSquad.lock()->Name());
+							chosenSquad = boost::weak_ptr<Squad>();
+							return MENUHIT;
+						}
+				}
+
+			} else if (x > topX) {
+				y -= (topY+2);
+				if (y < (signed int)Game::Inst()->squadList.size()) {
+					std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
+					//while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
+					squadi = boost::next(squadi, y);
+					if (squadi != Game::Inst()->squadList.end()) {
+						chosenSquad = squadi->second;
+						squadMembers = squadi->second->MemberLimit();
+						squadPriority = squadi->second->Priority();
+						UI::Inst()->InputString(squadi->first);
+					}
+					else {
+						chosenSquad = boost::weak_ptr<Squad>();
+						squadMembers = 1;
+						squadPriority = 0;
 						squadName = "";
 						UI::Inst()->InputString("");
-						return MENUHIT;					
-					} else if (chosenSquad.lock()) { //Modify
-						boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
-						Game::Inst()->squadList.erase(tempSquad->Name());
-						tempSquad->Name(squadName);
-						Game::Inst()->squadList.insert(std::pair<std::string, 
-							boost::shared_ptr<Squad> >(squadName, tempSquad));
-						tempSquad->MemberLimit(squadMembers);
-						tempSquad->Priority(squadPriority);
-						return MENUHIT;
 					}
-			} else if (x > topX + (width/2) + 12 && x < topX + (width/2) + 22
-				&& y > topY+2+12 && y < topY+2+15) {
-					if (chosenSquad.lock()) {
-						chosenSquad.lock()->RemoveAllMembers();
-						Game::Inst()->squadList.erase(chosenSquad.lock()->Name());
-						chosenSquad = boost::weak_ptr<Squad>();
-						return MENUHIT;
-					}
-			}
-
-		} else if (x > topX) {
-			y -= (topY+2);
-			if (y < (signed int)Game::Inst()->squadList.size()) {
-				std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
-				//while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
-				squadi = boost::next(squadi, y);
-				if (squadi != Game::Inst()->squadList.end()) {
-					chosenSquad = squadi->second;
-					squadMembers = squadi->second->MemberLimit();
-					squadPriority = squadi->second->Priority();
-					UI::Inst()->InputString(squadi->first);
-				}
-				else {
-					chosenSquad = boost::weak_ptr<Squad>();
+					return MENUHIT;
+				} else { 
+					chosenSquad = boost::weak_ptr<Squad>(); 
 					squadMembers = 1;
 					squadPriority = 0;
 					squadName = "";
 					UI::Inst()->InputString("");
+					return MENUHIT;
 				}
-				return MENUHIT;
-			} else { 
-				chosenSquad = boost::weak_ptr<Squad>(); 
-				squadMembers = 1;
-				squadPriority = 0;
-				squadName = "";
-				UI::Inst()->InputString("");
-				return MENUHIT;
 			}
-		}
-	} else {
-		if (y > topY+20 && y < topY+27) {
-			if (x > topX+1 && x < topX+7) { //Guard
-				chosenSquad.lock()->Order(GUARD);
-				UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
-				UI::Inst()->HideMenu();
-				return MENUHIT;
-			} else if (x > topX+11 && x < topX+20) { //Escort
-				chosenSquad.lock()->Order(ESCORT);
-				UI::ChooseOrderTargetEntity(chosenSquad.lock());
-				UI::Inst()->HideMenu();
-				return MENUHIT;
+		} else {
+			if (y > topY+20 && y < topY+27) {
+				if (x > topX+1 && x < topX+7) { //Guard
+					chosenSquad.lock()->Order(GUARD);
+					UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
+					UI::Inst()->HideMenu();
+					return MENUHIT;
+				} else if (x > topX+11 && x < topX+20) { //Escort
+					chosenSquad.lock()->Order(ESCORT);
+					UI::ChooseOrderTargetEntity(chosenSquad.lock());
+					UI::Inst()->HideMenu();
+					return MENUHIT;
+				}
 			}
 		}
 	}
-
 	return NOMENUHIT;
 }

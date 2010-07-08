@@ -100,19 +100,23 @@ void MainLoop() {
 	}
 
 	Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
-
+	bool update = false;
 	while(true) {
 
 		if (Game::toMainMenu) {
 			Game::toMainMenu = false;
 			return;
 		}
+
 		UI::Inst()->Update();
-		if (!Game::Inst()->Paused()) {
-			Game::Inst()->Update();
-			Announce::Inst()->Update();
-			JobManager::Inst()->Update();
+		if (update) {
+			if (!Game::Inst()->Paused()) {
+				Game::Inst()->Update();
+				Announce::Inst()->Update();
+				JobManager::Inst()->Update();
+			}
 		}
+		update = !update;
 
 		Game::Inst()->buffer->flush();
         Game::Inst()->Draw();
@@ -231,11 +235,10 @@ int MainMenu() {
 
 void LoadMenu() {
 	bool exit = false;
-	int width = 20;
+	int width = 30;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
-	TCOD_key_t key;
 	TCODList<char*> list = TCODSystem::getDirectoryContent("./saves/", "*.sav");
 	int height = list.size()+5;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;

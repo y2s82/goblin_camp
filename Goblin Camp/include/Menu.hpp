@@ -46,7 +46,7 @@ class Menu {
 		Menu(std::vector<MenuChoice>);
 		virtual ~Menu();
 		virtual void Draw(int, int, TCODConsole*);
-		virtual MenuResult Update(int = -1, int = -1);
+		virtual MenuResult Update(int = -1, int = -1, bool clicked = false);
 		void selected(int);
 		void AddChoice(MenuChoice);
 		void Callback(unsigned int);
@@ -69,7 +69,7 @@ class JobMenu : public Menu {
 	public:
 		JobMenu();
 		void Draw(int, int, TCODConsole*);
-		MenuResult Update(int = -1, int = -1);
+		MenuResult Update(int = -1, int = -1, bool clicked = false);
 		static JobMenu* jobListingMenu;
 		static JobMenu* JobListingMenu();
 		void ScrollDown();
@@ -82,7 +82,7 @@ class AnnounceMenu : public Menu {
 	public:
 		AnnounceMenu();
 		void Draw(int, int, TCODConsole*);
-		MenuResult Update(int = -1, int = -1);
+		MenuResult Update(int = -1, int = -1, bool clicked = false);
 		static AnnounceMenu* announcementsMenu;
 		static AnnounceMenu* AnnouncementsMenu();
 		void ScrollDown();
@@ -95,7 +95,7 @@ class NPCMenu : public Menu {
 	public:
 		NPCMenu();
 		void Draw(int, int, TCODConsole*);
-		MenuResult Update(int = -1, int = -1);
+		MenuResult Update(int = -1, int = -1, bool clicked = false);
 		static NPCMenu* npcListMenu;
 		static NPCMenu* NPCListMenu();
 		void ScrollDown();
@@ -111,7 +111,7 @@ class ConstructionMenu : public Menu {
  	public:
 		ConstructionMenu();
 		void Draw(int, int, TCODConsole*);
-		MenuResult Update(int = -1, int = -1);
+		MenuResult Update(int = -1, int = -1, bool clicked = false);
 		static ConstructionMenu* constructionInfoMenu;
 		static ConstructionMenu* ConstructionInfoMenu(Construction*);
 		void Construct(Construction*);
@@ -127,7 +127,7 @@ class StockManagerMenu : public Menu {
  	public:
 		StockManagerMenu();
 		void Draw(int, int, TCODConsole*);
-		MenuResult Update(int = -1, int = -1);
+		MenuResult Update(int = -1, int = -1, bool clicked = false);
 		static StockManagerMenu* stocksMenu;
 		static StockManagerMenu* StocksMenu();
 		void ScrollDown();
@@ -143,7 +143,7 @@ private:
 public:
 	SquadsMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1);
+	MenuResult Update(int = -1, int = -1, bool clicked = false);
 	static SquadsMenu* squadMenu;
 	static SquadsMenu* SquadMenu();
 };

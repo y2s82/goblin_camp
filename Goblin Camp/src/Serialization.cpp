@@ -37,22 +37,14 @@ and I couldn't come up with a coherent answer just by googling. */
 #include <boost/serialization/array.hpp>
 #include <boost/multi_array.hpp>
 #include <map>
-
-#ifdef DEBUG
-#include <iostream>
-#endif
+#include <fstream>
 
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 #include "JobManager.hpp"
-#include "Gcamp.hpp"
-#include "Logger.hpp"
 #include "Map.hpp"
-#include "Announce.hpp"
-#include "GCamp.hpp"
 #include "StockManager.hpp"
-#include "UI.hpp"
 #include "StatusEffect.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
