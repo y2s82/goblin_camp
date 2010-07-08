@@ -843,6 +843,18 @@ void Game::DecayItems() {
             CreateFilth(crit->second);
         }
     }
+
+	for (std::list<boost::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end(); ++bli) {
+		if (boost::shared_ptr<BloodNode> blood = bli->lock()) {
+			blood->Depth(blood->Depth()-50);
+			if (blood->Depth() <= 0) {
+				Map::Inst()->SetBlood(blood->Position().x(), blood->Position().y(), boost::shared_ptr<BloodNode>());
+				bli = bloodList.erase(bli);
+			}
+		} else {
+			bli = bloodList.erase(bli);
+		}
+	}
 }
 
 void Game::CreateFilth(Coordinate pos) {

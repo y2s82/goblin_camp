@@ -179,8 +179,6 @@ void UI::HandleKeyboard() {
 			mouseInput.cy -= addition;
 		} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
 			lbuttonPressed = true;
-/*		} else if (key.vk == TCODK_CONTROL || key.vk == TCODK_KP0) {
-			rbuttonPressed = true;*/
 		} else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
 		} else if (key.vk == TCODK_PRINTSCREEN) { 
 			TCODSystem::saveScreenshot(0);
