@@ -87,6 +87,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
 }
 
 void MainLoop() {
+	Game::Inst()->Running(true);
 	for (int npcs = 0; npcs < 10; ++npcs) {
 		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
 	}
@@ -103,8 +104,8 @@ void MainLoop() {
 	bool update = false;
 	while(true) {
 
-		if (Game::toMainMenu) {
-			Game::toMainMenu = false;
+		if (Game::ToMainMenu()) {
+			Game::ToMainMenu(false);
 			return;
 		}
 
@@ -290,6 +291,7 @@ void LoadMenu() {
 }
 
 void SaveMenu() {
+	if (!Game::Inst()->Running()) return;
 	std::string saveName;
 	while (true) {
 		TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
@@ -301,6 +303,9 @@ void SaveMenu() {
 
 		if (key.vk == TCODK_ESCAPE) return;
 		else if (key.vk == TCODK_ENTER) {
+			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
+			Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
+			TCODConsole::root->flush();
 			Game::Inst()->SaveGame((boost::format("./saves/%s.sav") % saveName).str());
 			break;
 		}

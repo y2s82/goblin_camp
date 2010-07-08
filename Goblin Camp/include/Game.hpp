@@ -72,12 +72,16 @@ class Game {
 		int orcCount, goblinCount;
 		bool paused;
 		int charWidth, charHeight;
+		bool toMainMenu, running;
 	public:
 		static Game* Inst();
 		static void LoadGame(std::string);
 		static void SaveGame(std::string);
-		static bool toMainMenu;
-		static void ToMainMenu();
+		static void ToMainMenu(bool);
+		static bool ToMainMenu();
+		void Running(bool);
+		bool Running();
+		
 
 
 /*      NPCS        NPCS        NPCS        */

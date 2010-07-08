@@ -50,6 +50,8 @@ Game::Game() :
     orcCount(0),
     goblinCount(0),
 	paused(false),
+	toMainMenu(false),
+	running(false),
     upleft(Coordinate(0,0))
 {
 }
@@ -935,7 +937,8 @@ return (int)(((dice.nb_dices * ((rand() % dice.nb_faces) + 1)) *
 	dice.multiplier) + dice.addsub);
 }
 
-bool Game::toMainMenu = false;
-void Game::ToMainMenu() {
-	toMainMenu = true;
-}
+void Game::ToMainMenu(bool value) { Game::Inst()->toMainMenu = value; }
+bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
+
+void Game::Running(bool value) { running = value; }
+bool Game::Running() { return running; }
