@@ -384,7 +384,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].door))
         s = true;
 
-	if (self) {
+	if (self && Construction::Presets[_type].wall) {
 		if (n&&s&&e&&w) graphic[1] = 197;
 		else if (n&&s&&e) graphic[1] = 195;
 		else if (n&&s&&w) graphic[1] = 180;
