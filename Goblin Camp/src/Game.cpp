@@ -53,7 +53,7 @@ Game::Game() :
 	toMainMenu(false),
 	running(false),
     upleft(Coordinate(0,0)),
-	events(boost::shared_ptr<Events>(new Events()))
+	events(boost::shared_ptr<Events>())
 {
 }
 
@@ -345,6 +345,7 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	//Creature presets
 	NPC::LoadPresets("creatures.dat");
+	events = boost::shared_ptr<Events>(new Events());
 
 	GenerateMap();
 	buffer = new TCODConsole(screenWidth, screenHeight);

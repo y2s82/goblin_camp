@@ -71,6 +71,7 @@ struct NPCPreset {
 	NPCPreset(std::string);
 	std::string typeName;
 	std::string name;
+	std::string plural;
 	TCODColor color;
 	int graphic;
 	bool expert;
@@ -80,6 +81,7 @@ struct NPCPreset {
 	bool needsSleep;
 	bool generateName;
 	TCOD_dice_t stats[STAT_COUNT];
+	bool spawnRandomly;
 	bool spawnAsGroup;
 	TCOD_dice_t group;
 };

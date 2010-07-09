@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Events {
 private:
+	std::vector<int> hostileSpawningMonsters;
 public:
 	Events();
 	void Update();

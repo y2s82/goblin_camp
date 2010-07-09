@@ -44,6 +44,7 @@ npc_type "giant snail" {
 
 npc_type "starving wolf" {
 	name="Starving Wolf"
+	plural="Starving Wolves"
 	speed="1d20+75"
 	color="96,96,96"
 	graphic='w'

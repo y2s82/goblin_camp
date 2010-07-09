@@ -933,6 +933,7 @@ class NPCListener : public ITCODParserListener {
         std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
+		else if (boost::iequals(name,"plural")) { NPC::Presets.back().plural = value.s; }
 		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.dice; }
 		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
 		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
@@ -942,6 +943,7 @@ class NPCListener : public ITCODParserListener {
 		else if (boost::iequals(name,"attackPower")) { NPC::Presets.back().stats[ATTACKPOWER] = value.dice; }
 		else if (boost::iequals(name,"defenceSkill")) { NPC::Presets.back().stats[DEFENCESKILL] = value.dice; }
 		else if (boost::iequals(name,"spawnAsGroup")) { 
+			NPC::Presets.back().spawnRandomly = true;
 			NPC::Presets.back().spawnAsGroup = true;
 			NPC::Presets.back().group = value.dice;
 		}
@@ -952,6 +954,7 @@ class NPCListener : public ITCODParserListener {
 #ifdef DEBUG
         std::cout<<(boost::format("end of %s structure\n") % name).str();
 #endif
+		if (NPC::Presets.back().plural == "") NPC::Presets.back().plural = NPC::Presets.back().name + "s";
         return true;
     }
     void error(const char *msg) {
@@ -964,6 +967,7 @@ void NPC::LoadPresets(std::string filename) {
 	TCODParser parser = TCODParser();
 	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
 	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
+	npcTypeStruct->addProperty("plural", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("speed", TCOD_TYPE_DICE, true);
 	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
 	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
@@ -1011,6 +1015,7 @@ void NPC::InitializeAIFunctions() {
 NPCPreset::NPCPreset(std::string typeNameVal) : 
     typeName(typeNameVal),
 	name("AA Club"),
+	plural(""),
 	color(TCODColor::pink),
 	graphic('?'),
 	expert(false),

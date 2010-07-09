@@ -14,19 +14,28 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <boost/format.hpp>
+
 #include "Announce.hpp"
 #include "Events.hpp"
 #include "Game.hpp"
 #include "GCamp.hpp"
 
-Events::Events() {}
+Events::Events() : hostileSpawningMonsters(std::vector<int>()) {
+	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
+		if (NPC::Presets[i].spawnRandomly)
+			hostileSpawningMonsters.push_back(i);
+	}
+}
 
 void Events::Update() {
 	if (rand() % (UPDATES_PER_SECOND * 60) == 0) {
-		Announce::Inst()->AddMsg("AAAAHHH WOLF ATTACK", TCODColor::peach);
-		Game::Inst()->CreateNPC(Coordinate(102,100), 3);
-		Game::Inst()->CreateNPC(Coordinate(100,103), 3);
-		Game::Inst()->CreateNPC(Coordinate(101,104), 3);
-		Game::Inst()->CreateNPC(Coordinate(105,99), 3);
+		int monsterType = rand() % hostileSpawningMonsters.size();
+		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
+			% NPC::Presets[monsterType].plural).str();
+		Announce::Inst()->AddMsg(msg, TCODColor::red);
+		for (int i = 0; i < Game::DiceToInt(NPC::Presets[monsterType].group); ++i) {
+			Game::Inst()->CreateNPC(Coordinate(100+rand()%5,100+rand()%5), monsterType);
+		}
 	}
 }
