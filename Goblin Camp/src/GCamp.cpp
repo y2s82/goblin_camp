@@ -87,20 +87,21 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
 }
 
 void MainLoop() {
-	Game::Inst()->Running(true);
+	Game* game = Game::Inst();
+	if (!game->Running()) Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
+	game->Running(true);
 	for (int npcs = 0; npcs < 10; ++npcs) {
-		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
+		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
 	}
 	for (int npcs = 0; npcs < 15; ++npcs) {
-		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
-		Game::Inst()->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
+		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
+		game->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
 	}
 
 	for (int seeds = 0; seeds < 20; ++seeds) {
-		Game::Inst()->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
+		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
 	}
 
-	Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
 	bool update = false;
 	while(true) {
 
@@ -111,17 +112,17 @@ void MainLoop() {
 
 		UI::Inst()->Update();
 		if (update) {
-			if (!Game::Inst()->Paused()) {
-				Game::Inst()->Update();
+			if (!game->Paused()) {
+				game->Update();
 				Announce::Inst()->Update();
 				JobManager::Inst()->Update();
 			}
 		}
 		update = !update;
 
-		Game::Inst()->buffer->flush();
-        Game::Inst()->Draw();
-		Game::Inst()->FlipBuffer();
+		game->buffer->flush();
+        game->Draw();
+		game->FlipBuffer();
 	}
 }
 

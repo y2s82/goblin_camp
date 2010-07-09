@@ -52,7 +52,8 @@ Game::Game() :
 	paused(false),
 	toMainMenu(false),
 	running(false),
-    upleft(Coordinate(0,0))
+    upleft(Coordinate(0,0)),
+	events(boost::shared_ptr<Events>(new Events()))
 {
 }
 
@@ -590,6 +591,8 @@ void Game::Update() {
 		}
 	}
 	StockManager::Inst()->Update();
+
+	events->Update();
 }
 
 void Game::StockpileItem(boost::weak_ptr<Item> item) {

@@ -34,6 +34,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "NPC.hpp"
 #include "NatureObject.hpp"
+#include "Events.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -72,6 +73,8 @@ class Game {
 		bool paused;
 		int charWidth, charHeight;
 		bool toMainMenu, running;
+
+		boost::shared_ptr<Events> events;
 	public:
 		static Game* Inst();
 		static void LoadGame(std::string);
