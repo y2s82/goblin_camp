@@ -472,7 +472,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 void UI::DrawTopBar(TCODConsole* console) {
     console->setAlignment(TCOD_CENTER);
     console->print(console->getWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
-                             Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->Season()).c_str());
+                             Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->CurrentSeason()).c_str());
 
 	if (Game::Inst()->Paused()) {
 		console->setForegroundColor(TCODColor::red);

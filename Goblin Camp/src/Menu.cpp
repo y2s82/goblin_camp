@@ -132,17 +132,17 @@ Menu* Menu::BasicsMenu() {
 	if (!basicsMenu) {
 		basicsMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].stockpile) {
+			if (Construction::Presets[i].tags[STOCKPILE]) {
                 basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
 		    }
 		}
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].farmPlot) {
+		    if (Construction::Presets[i].tags[FARMPLOT]) {
                 basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
 		    }
 		}
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].wall) {
+		    if (Construction::Presets[i].tags[WALL]) {
                 basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIABPLACEMENT)));
 		    }
 		}
@@ -155,7 +155,7 @@ Menu* Menu::WorkshopsMenu() {
 	if (!workshopsMenu) {
 		workshopsMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (!Construction::Presets[i].wall && !Construction::Presets[i].stockpile && !Construction::Presets[i].farmPlot) {
+		    if (!Construction::Presets[i].tags[WALL] && !Construction::Presets[i].tags[STOCKPILE] && !Construction::Presets[i].tags[FARMPLOT]) {
                 workshopsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
 		    }
 		}

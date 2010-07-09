@@ -152,7 +152,7 @@ void NPC::HandleThirst() {
 		if ((*jobIter)->name.find("Drink") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(BEVERAGE);
+		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"));
 		if (!item.lock()) {tmpCoord = Game::Inst()->FindWater(Position());}
 		if (!item.lock() && tmpCoord.x() == -1) { //Nothing to drink!
 			//:ohdear:
@@ -210,6 +210,10 @@ void NPC::HandleHunger() {
 			run = true;
 		}
 	}
+}
+
+void NPC::HandleWeariness() {
+	
 }
 
 void NPC::Update() {

@@ -31,31 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 
 typedef int ItemCategory;
-#define	WOOD 0
-#define STONE 1
-#define	BEVERAGE 3
-#define	FOOD 2
-#define	DOOR 4
-#define SEED 8
-
-//only an example, should come from an XML file really
 typedef int ItemType;
-#define CEDARWOOD 0
-#define PINEWOOD 0
-#define MAPLEWOOD 0
-#define GRANITE 2
-#define CHALK 3
-#define SANDSTONE 4
-#define WINE 5
-#define RATMEAT 6
-#define WOODDOOR 7
-#define BERRYSEED 12
-
-typedef unsigned int SeasonType;
-#define SPRING (1 << 0)
-#define SUMMER (1 << 1)
-#define FALL (1 << 2)
-#define WINTER (1 << 3)
 
 class ItemCat {
     public:
@@ -71,7 +47,6 @@ struct ItemPreset {
 	std::string name;
 	std::set<ItemCategory> categories;
 	std::vector<ItemCategory> components;
-	SeasonType season;
 	int nutrition;
 	ItemType growth;
 	std::list<ItemType> fruits;
@@ -155,14 +130,11 @@ class OrganicItem : public Item {
 		void load(Archive & ar, const unsigned int version);
 		BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		SeasonType season;
         int nutrition;
         ItemType growth;
 
     public:
         OrganicItem(Coordinate=Coordinate(0,0), ItemType=0);
-		SeasonType Season();
-        void Season(SeasonType);
         int Nutrition();
         void Nutrition(int);
         ItemType Growth();

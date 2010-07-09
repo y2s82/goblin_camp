@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 1)
 
-enum Seasons {
+enum Season {
     EarlySpring,
     Spring,
     LateSpring,
@@ -66,7 +66,7 @@ class Game {
 		Game();
 		static Game* instance;
 		int screenWidth, screenHeight;
-		Seasons season;
+		Season season;
 		int time;
 		int orcCount, goblinCount;
 		bool paused;
@@ -109,6 +109,7 @@ class Game {
 		Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>);
 		bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 		boost::weak_ptr<Construction> GetConstruction(int);
+		boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag);
 
 /*      ITEMS       ITEMS       ITEMS       */
 		int CreateItem(Coordinate, ItemType, bool stockpile = false,
@@ -146,8 +147,8 @@ class Game {
 		void Update();
 		Coordinate upleft;
 
-		Seasons Season();
-		std::string SeasonToString(Seasons);
+		Season CurrentSeason();
+		std::string SeasonToString(Season);
 		void SpawnTillageJobs();
 		void DeTillFarmPlots();
 		void DecayItems();

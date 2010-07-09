@@ -33,13 +33,17 @@ enum BuildResult {
 };
 
 typedef int ConstructionType;
-#define	CARPENTERSSHOP 1
-#define BONECARVERSSHOP 2
-#define	WOODENWALL 0
-#define	STOCKPILE 3
-#define	FARMPLOT 4
 
 #define NOTFULL (1 << 0)
+
+enum ConstructionTag {
+	STOCKPILE,
+	FARMPLOT,
+	DOOR,
+	WALL,
+	BED,
+	TAGCOUNT
+};
 
 struct ConstructionPreset {
     ConstructionPreset();
@@ -51,8 +55,7 @@ struct ConstructionPreset {
 	std::vector<ItemType> products;
 	std::string name;
 	Coordinate blueprint;
-	bool wall, stockpile, farmPlot;
-	bool door;
+	bool tags[TAGCOUNT];
 	Coordinate productionSpot;
 	bool dynamic;
 };

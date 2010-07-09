@@ -99,7 +99,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	componentList.clear();
 
 	boost::shared_ptr<Construction> newCons;
-	if (Construction::Presets[construct].door) {
+	if (Construction::Presets[construct].tags[DOOR]) {
 		newCons = boost::shared_ptr<Construction>(new Door(construct, target));
 	} else {
 	newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
@@ -385,7 +385,6 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
     if (Item::Presets[type].organic) {
 		boost::shared_ptr<OrganicItem> orgItem(new OrganicItem(pos, type));
 		newItem = boost::static_pointer_cast<Item>(orgItem);
-        orgItem->Season(Item::Presets[type].season);
         orgItem->Nutrition(Item::Presets[type].nutrition);
         orgItem->Growth(Item::Presets[type].growth);
     } else if (Item::Presets[type].container > 0) {
@@ -501,7 +500,7 @@ void Game::Update() {
     ++time;
 
     if (time == MONTH_LENGTH) {
-        if (season < LateWinter) season = (Seasons)((int)season + 1);
+        if (season < LateWinter) season = (Season)((int)season + 1);
         else season = EarlySpring;
 
         switch (season) {
@@ -667,7 +666,7 @@ void Game::FlipBuffer() {
 	TCODConsole::root->flush();
 }
 
-Seasons Game::Season() { return season; }
+Season Game::CurrentSeason() { return season; }
 
 void Game::SpawnTillageJobs() {
    	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
@@ -800,7 +799,7 @@ void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
     natureList.erase(natObj.lock()->Uid());
 }
 
-std::string Game::SeasonToString(Seasons season) {
+std::string Game::SeasonToString(Season season) {
     switch (season) {
         case EarlySpring: return "Early Spring";
         case Spring: return "Spring";
@@ -968,3 +967,7 @@ bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
 
 void Game::Running(bool value) { running = value; }
 bool Game::Running() { return running; }
+
+boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
+	return boost::weak_ptr<Construction>();
+}

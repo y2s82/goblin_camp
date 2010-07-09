@@ -229,14 +229,12 @@ void Item::load(Archive & ar, const unsigned int version) {
 template<class Archive>
 void OrganicItem::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Item>(*this);
-	ar & season;
 	ar & nutrition;
 	ar & growth;
 }
 template<class Archive>
 void OrganicItem::load(Archive & ar, const unsigned int version) {
 	ar & boost::serialization::base_object<Item>(*this);
-	ar & season;
 	ar & nutrition;
 	ar & growth;
 }

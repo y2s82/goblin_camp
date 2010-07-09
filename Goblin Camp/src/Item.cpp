@@ -206,17 +206,6 @@ void Item::LoadPresets(ticpp::Document doc) {
 							//component so that its brought to the workshop correctly
 							Presets.back().components.push_back(Item::StringToItemCategory(c->ToElement()->GetText()));
 						}
-                    } else if (child->Value() == "seasons") {
-#ifdef DEBUG
-                        std::cout<<"Seasons\n";
-#endif
-                        ticpp::Iterator<ticpp::Node> seasons;
-                        for (seasons = seasons.begin(child->ToElement()); seasons != seasons.end(); ++seasons) {
-                            strVal = seasons->ToElement()->GetText();
-                            if (strVal == "spring") { Presets.back().season |= SPRING; }
-                            else if (strVal == "summer") { Presets.back().season |= SUMMER; }
-                            else if (strVal == "fall") { Presets.back().season |= FALL; }
-                        }
                     } else if (child->Value() == "nutrition") {
                         child->ToElement()->GetText(&intVal);
                         Presets.back().nutrition = intVal;
@@ -291,7 +280,6 @@ ItemPreset::ItemPreset() :
         color(TCODColor::pink),
         name("Preset default"),
         categories(std::set<ItemCategory>()),
-        season(-1),
         nutrition(-1),
         growth(-1),
         fruits(std::list<ItemType>()),
@@ -305,13 +293,9 @@ ItemPreset::ItemPreset() :
 {}
 
 OrganicItem::OrganicItem(Coordinate pos, ItemType typeVal) : Item(pos, typeVal),
-    season(-1),
     nutrition(-1),
     growth(-1)
 {}
-
-SeasonType OrganicItem::Season() { return season; }
-void OrganicItem::Season(SeasonType val) { season = val; }
 
 int OrganicItem::Nutrition() { return nutrition; }
 void OrganicItem::Nutrition(int val) { nutrition = val; }

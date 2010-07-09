@@ -55,8 +55,8 @@ Construction::Construction(ConstructionType type, Coordinate target) : Entity(),
     walkable = Construction::Presets[type].walkable;
     producer = Construction::Presets[type].producer;
     products = Construction::Presets[type].products;
-	stockpile = Construction::Presets[type].stockpile;
-	farmplot = Construction::Presets[type].farmPlot;
+	stockpile = Construction::Presets[type].tags[STOCKPILE];
+	farmplot = Construction::Presets[type].tags[FARMPLOT];
 	_condition = 0-maxCondition;
 }
 
@@ -120,8 +120,8 @@ int Construction::Build() {
 			}
 		}
 
-		if (Construction::Presets[_type].wall) { UpdateWallGraphic(); }
-		else if (Construction::Presets[_type].door) { UpdateWallGraphic(true, false); }
+		if (Construction::Presets[_type].tags[WALL]) { UpdateWallGraphic(); }
+		else if (Construction::Presets[_type].tags[DOOR]) { UpdateWallGraphic(true, false); }
 		if (producer) {
 			StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), true);
 			for (unsigned int prod = 0; prod < Construction::Presets[_type].products.size(); ++prod) {
@@ -254,7 +254,7 @@ void Construction::LoadPresets(ticpp::Document doc) {
                     if (child->Value() == "wall") {
                         Presets.back().graphic.push_back(1);
                         Presets.back().graphic.push_back('W');
-                        Presets.back().wall = true;
+                        Presets.back().tags[WALL] = true;
                     } else if (child->Value() == "name") {
                         Presets.back().name = child->ToElement()->GetText();
                     } else if (child->Value() == "graphic") {
@@ -288,9 +288,9 @@ void Construction::LoadPresets(ticpp::Document doc) {
                         child->ToElement()->GetText(&intVal);
                         Presets.back().maxCondition = intVal;
                     } else if (child->Value() == "stockpile") {
-                        Presets.back().stockpile = true;
+						Presets.back().tags[STOCKPILE] = true;
                     } else if (child->Value() == "farmplot") {
-                        Presets.back().farmPlot = true;
+                        Presets.back().tags[FARMPLOT] = true;
 						Presets.back().dynamic = true;
                     } else if (child->Value() == "productionSpot") {
                         ticpp::Iterator<ticpp::Node> coord;
@@ -302,8 +302,10 @@ void Construction::LoadPresets(ticpp::Document doc) {
                         }
                         Presets.back().productionSpot = Coordinate(x,y);
                     } else if (child->Value() == "door") {
-						Presets.back().door = true;
+						Presets.back().tags[DOOR] = true;
 						Presets.back().dynamic = true;
+					} else if (child->Value() == "bed") {
+						Presets.back().tags[BED] = true;
 					}
                 }
                 Presets.back().blueprint = Coordinate(Presets.back().graphic[0],
@@ -371,20 +373,20 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
     bool n = false,s = false,e = false,w = false;
 
-    if (Map::Inst()->Construction(_x - 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].wall
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].door))
+	if (Map::Inst()->Construction(_x - 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].tags[WALL]
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x - 1, _y)).lock()->type()].tags[DOOR]))
         w = true;
-    if (Map::Inst()->Construction(_x + 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].wall
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].door))
+    if (Map::Inst()->Construction(_x + 1, _y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].tags[WALL]
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x + 1, _y)).lock()->type()].tags[DOOR]))
         e = true;
-    if (Map::Inst()->Construction(_x, _y - 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].wall
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].door))
+    if (Map::Inst()->Construction(_x, _y - 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].tags[WALL]
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y - 1)).lock()->type()].tags[DOOR]))
         n = true;
-    if (Map::Inst()->Construction(_x, _y + 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].wall
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].door))
+    if (Map::Inst()->Construction(_x, _y + 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].tags[WALL]
+		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(_x, _y + 1)).lock()->type()].tags[DOOR]))
         s = true;
 
-	if (self && Construction::Presets[_type].wall) {
+	if (self && Construction::Presets[_type].tags[WALL]) {
 		if (n&&s&&e&&w) graphic[1] = 197;
 		else if (n&&s&&e) graphic[1] = 195;
 		else if (n&&s&&w) graphic[1] = 180;
@@ -427,10 +429,8 @@ ConstructionPreset::ConstructionPreset() :
     products(std::vector<ItemType>()),
     name("???"),
     blueprint(Coordinate(1,1)),
-    wall(false),
-    stockpile(false),
-    farmPlot(false),
-	door(false),
     productionSpot(Coordinate(0,0)),
 	dynamic(false)
-{}
+{
+	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
+}
