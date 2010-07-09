@@ -221,7 +221,6 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->type = type;
 	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
-	npc->speed(DiceToInt(NPC::Presets[type].speed));
 	npc->color(NPC::Presets[type].color);
 	npc->graphic(NPC::Presets[type].graphic);
 	
@@ -230,10 +229,11 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	} else npc->name = NPC::Presets[type].name;
 
 	npc->needsNutrition = NPC::Presets[type].needsNutrition;
+	npc->needsSleep = NPC::Presets[type].needsSleep;
 	npc->health = NPC::Presets[type].health;
-	npc->baseStats[ATTACKSKILL] = DiceToInt(NPC::Presets[type].stats[ATTACKSKILL]);
-	npc->baseStats[ATTACKPOWER] = DiceToInt(NPC::Presets[type].stats[ATTACKPOWER]);
-	npc->baseStats[DEFENCESKILL] = DiceToInt(NPC::Presets[type].stats[DEFENCESKILL]);
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		npc->baseStats[i] = DiceToInt(NPC::Presets[type].stats[i]);
+	}
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
@@ -617,7 +617,7 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
 
                 if (target.x() != -1) {
                     stockJob->ReserveSpot(sp, target);
-                    stockJob->ReserveItem(item);
+                    stockJob->ReserveEntity(item);
                     stockJob->tasks.push_back(Task(MOVE, item.lock()->Entity::Position()));
                     stockJob->tasks.push_back(Task(TAKE, item.lock()->Entity::Position(), item));
                     stockJob->tasks.push_back(Task(MOVE, target));

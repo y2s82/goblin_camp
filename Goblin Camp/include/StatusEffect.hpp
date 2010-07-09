@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 
 enum NPCStat {
+	MOVESPEED,
 	ATTACKSKILL,
 	ATTACKPOWER,
 	ATTACKSPEED,
@@ -31,7 +32,9 @@ enum StatusEffectType {
 	HUNGER = 0,
 	THIRST,
 	PANIC,
-	CONCUSSION
+	CONCUSSION,
+	DROWSY,
+	SLEEPING
 };
 
 struct StatusEffect {

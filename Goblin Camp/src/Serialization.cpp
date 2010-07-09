@@ -123,7 +123,6 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & nopath;
 	ar & findPathWorking;
 	ar & timer;
-	ar & _speed;
 	ar & nextMove;
 	ar & run;
 	ar & _color.r;
@@ -165,7 +164,6 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & nopath;
 	ar & findPathWorking;
 	ar & timer;
-	ar & _speed;
 	ar & nextMove;
 	ar & run;
 	ar & _color.r;
@@ -277,7 +275,7 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & menial;
 	ar & paused;
 	ar & waitingForRemoval;
-	ar & reservedItems;
+	ar & reservedEntities;
 	ar & reservedSpot;
 	ar & attempts;
 	ar & attemptMax;
@@ -302,7 +300,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 	ar & menial;
 	ar & paused;
 	ar & waitingForRemoval;
-	ar & reservedItems;
+	ar & reservedEntities;
 	ar & reservedSpot;
 	ar & attempts;
 	ar & attemptMax;

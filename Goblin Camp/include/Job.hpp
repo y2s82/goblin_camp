@@ -58,6 +58,7 @@ enum Action {
 	HARVESTWILDPLANT,
 	KILL,
 	FLEEMAP,
+	SLEEP
 };
 
 enum TaskResult {
@@ -103,7 +104,7 @@ class Job {
 		bool menial;
 		bool paused;
 		bool waitingForRemoval;
-		std::list<boost::weak_ptr<Item> > reservedItems;
+		std::list<boost::weak_ptr<Entity> > reservedEntities;
 		std::pair<boost::weak_ptr<Stockpile>, Coordinate> reservedSpot;
 		int attempts, attemptMax;
 		boost::weak_ptr<Entity> connectedEntity;
@@ -136,8 +137,8 @@ class Job {
 		void Remove();
 		bool Removable();
 
-		void ReserveItem(boost::weak_ptr<Item>);
-		void UnreserveItems();
+		void ReserveEntity(boost::weak_ptr<Entity>);
+		void UnreserveEntities();
 		void ReserveSpot(boost::weak_ptr<Stockpile>, Coordinate);
 		void UnreserveSpot();
 		void ConnectToEntity(boost::weak_ptr<Entity>);

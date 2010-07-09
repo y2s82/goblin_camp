@@ -52,6 +52,24 @@ type(typeval)
 		cooldown = UPDATES_PER_SECOND * 5;
 		statChanges[ATTACKSKILL] = 0.5;
 		break;
+
+	case DROWSY:
+		name = "Drowsy";
+		graphic = 'z';
+		color = TCODColor::lightGrey;
+		cooldown = -1;
+		statChanges[MOVESPEED] = 0.8;
+		statChanges[ATTACKSKILL] = 0.8;
+		statChanges[ATTACKPOWER] = 0.8;
+		statChanges[DEFENCESKILL] = 0.8;
+		break;
+
+	case SLEEPING:
+		name = "Sleeping";
+		graphic = 'Z';
+		color = TCODColor::lightGrey;
+		cooldown = UPDATES_PER_SECOND;
+		break;
 	}
 	cooldownDefault = cooldown;
 }

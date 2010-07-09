@@ -50,7 +50,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 
 Job::~Job() {
 	preReqs.clear();
-	UnreserveItems();
+	UnreserveEntities();
 	UnreserveSpot();
 	if (connectedEntity.lock()) connectedEntity.lock()->CancelJob();
 	if (reservedSpace.lock()) {
@@ -109,18 +109,18 @@ boost::shared_ptr<Job> Job::BuildJob(boost::weak_ptr<Construction> construct) {
 	return buildJob;
 }
 
-void Job::ReserveItem(boost::weak_ptr<Item> item) {
-	if (item.lock()) {
-        reservedItems.push_back(item);
-        item.lock()->Reserve(true);
+void Job::ReserveEntity(boost::weak_ptr<Entity> entity) {
+	if (entity.lock()) {
+        reservedEntities.push_back(entity);
+        entity.lock()->Reserve(true);
 	}
 }
 
-void Job::UnreserveItems() {
-	for (std::list<boost::weak_ptr<Item> >::iterator itemI = reservedItems.begin(); itemI != reservedItems.end(); ++itemI) {
+void Job::UnreserveEntities() {
+	for (std::list<boost::weak_ptr<Entity> >::iterator itemI = reservedEntities.begin(); itemI != reservedEntities.end(); ++itemI) {
 		if (itemI->lock()) itemI->lock()->Reserve(false);
 	}
-	reservedItems.clear();
+	reservedEntities.clear();
 }
 
 void Job::ReserveSpot(boost::weak_ptr<Stockpile> sp, Coordinate pos) {

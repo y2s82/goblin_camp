@@ -41,6 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 5)
 #define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 8)
+#define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 1)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
 
@@ -70,13 +71,13 @@ struct NPCPreset {
 	NPCPreset(std::string);
 	std::string typeName;
 	std::string name;
-	TCOD_dice_t speed;
 	TCODColor color;
 	int graphic;
 	bool expert;
 	int health;
 	std::string ai;
 	bool needsNutrition;
+	bool needsSleep;
 	bool generateName;
 	TCOD_dice_t stats[STAT_COUNT];
 	bool spawnAsGroup;
@@ -107,7 +108,7 @@ class NPC : public Entity {
 		bool nopath;
 		bool findPathWorking;
 		int timer;
-		unsigned int _speed, nextMove;
+		unsigned int nextMove;
 		bool run;
 		TCODColor _color, _bgcolor;
 		int _graphic;
@@ -128,6 +129,7 @@ class NPC : public Entity {
 
         std::list<boost::weak_ptr<NPC> >nearNpcs;
 		bool needsNutrition;
+		bool needsSleep;
 
 		boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 		boost::function<void(boost::shared_ptr<NPC>)> React;

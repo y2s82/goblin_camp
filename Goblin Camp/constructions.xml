@@ -123,6 +123,7 @@ items.xml is processed before this, so you can refer to items and categories by 
     <materials>
       <mat>Bed</mat>
     </materials>
+    <bed></bed>
   </construction>
 
   <construction>

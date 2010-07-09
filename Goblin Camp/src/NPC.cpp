@@ -57,13 +57,14 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	nopath(false),
 	findPathWorking(false),
 	timer(0),
-	_speed(10), nextMove(0),
+	nextMove(0),
 	run(true),
 	taskBegun(false),
 	expert(false),
 	carried(boost::weak_ptr<Item>()),
 	thirst(0),
 	hunger(0),
+	weariness(0),
 	thinkSpeed(UPDATES_PER_SECOND / 5), //Think 5 times a second
 	statusEffects(std::list<StatusEffect>()),
 	statusEffectIterator(statusEffects.end()),
@@ -72,6 +73,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	foundItem(boost::weak_ptr<Item>()),
 	bag(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
 	needsNutrition(false),
+	needsSleep(false),
 	aggressive(false),
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
@@ -161,7 +163,7 @@ void NPC::HandleThirst() {
 			newJob->internal = true;
 
 			if (item.lock()) {
-				newJob->ReserveItem(item);
+				newJob->ReserveEntity(item);
 				newJob->tasks.push_back(Task(MOVE,item.lock()->Position()));
 				newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 				newJob->tasks.push_back(Task(DRINK));
@@ -202,7 +204,7 @@ void NPC::HandleHunger() {
 			boost::shared_ptr<Job> newJob(new Job("Eat", MED, 0, !expert));
 			newJob->internal = true;
 
-			newJob->ReserveItem(item);
+			newJob->ReserveEntity(item);
 			newJob->tasks.push_back(Task(MOVE,item.lock()->Position()));
 			newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 			newJob->tasks.push_back(Task(EAT));
@@ -213,7 +215,26 @@ void NPC::HandleHunger() {
 }
 
 void NPC::HandleWeariness() {
-	
+	bool found = false;
+	for (std::deque<boost::shared_ptr<Job> >::iterator jobIter = jobs.begin(); jobIter != jobs.end(); ++jobIter) {
+		if ((*jobIter)->name.find("Sleep") != std::string::npos) found = true;
+	}
+	if (!found) {
+		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
+		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
+			boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
+			sleepJob->internal = true;
+			sleepJob->ReserveEntity(bed);
+			sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
+			sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
+			jobs.push_back(sleepJob);
+			return;
+		}
+		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
+		sleepJob->internal = true;
+		sleepJob->tasks.push_back(Task(SLEEP, Position()));
+		jobs.push_back(sleepJob);
+	}
 }
 
 void NPC::Update() {
@@ -261,6 +282,15 @@ void NPC::Update() {
 		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
 			HandleHunger();
 		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
+	}
+
+	if (needsSleep) {
+		++weariness;
+
+		if (weariness >= WEARY_THRESHOLD) AddEffect(DROWSY);
+		else RemoveEffect(DROWSY);
+
+		if (weariness > WEARY_THRESHOLD) HandleWeariness();
 	}
 }
 
@@ -437,7 +467,7 @@ AiThink NPC::Think() {
 						break;
 					}
                     else {
-                        if (faction == 0) currentJob().lock()->ReserveItem(foundItem);
+                        if (faction == 0) currentJob().lock()->ReserveEntity(foundItem);
                         TaskFinished(TASKSUCCESS);
                         break;
                     }
@@ -548,6 +578,14 @@ AiThink NPC::Think() {
 					currentJob().lock()->tasks.push_back(Task(FLEEMAP));
 					break;
 
+				case SLEEP:
+					AddEffect(SLEEPING);
+					weariness -= 10;
+					if (weariness <= 0) {
+						TaskFinished(TASKSUCCESS);
+					}
+					break;
+
 				default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -593,7 +631,7 @@ AiThink NPC::Think() {
 
 TaskResult NPC::Move() {
 	int x,y;
-	nextMove += run ? _speed : _speed/3;
+	nextMove += run ? effectiveStats[MOVESPEED] : effectiveStats[MOVESPEED]/3;
 	while (nextMove > 100) {
 		nextMove -= 100;
 		boost::mutex::scoped_try_lock pathLock(pathMutex);
@@ -613,8 +651,8 @@ void NPC::findPath(Coordinate target) {
 	boost::thread pathThread(boost::bind(tFindPath, path, _x, _y, target.x(), target.y(), &pathMutex, &nopath, &findPathWorking));
 }
 
-void NPC::speed(unsigned int value) {_speed=value;}
-unsigned int NPC::speed() {return _speed;}
+void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
+unsigned int NPC::speed() {return effectiveStats[MOVESPEED];}
 
 void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 	int screenx = _x - upleft.x();
@@ -886,6 +924,7 @@ class NPCListener : public ITCODParserListener {
 #endif
 		if (boost::iequals(name,"generateName")) { NPC::Presets.back().generateName = true; }
 		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
+		else if (boost::iequals(name,"needsSleep")) { NPC::Presets.back().needsSleep = true; }
 		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
         return true;
     }
@@ -894,7 +933,7 @@ class NPCListener : public ITCODParserListener {
         std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
-		else if (boost::iequals(name,"speed")) { NPC::Presets.back().speed = value.dice; }
+		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.dice; }
 		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
 		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
 		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
@@ -933,6 +972,7 @@ void NPC::LoadPresets(std::string filename) {
 	const char* aiTypes[] = { "PlayerNPC", "PeacefulAnimal", "HungryAnimal", "HostileAnimal", NULL }; 
 	npcTypeStruct->addValueList("AI", aiTypes, true);
 	npcTypeStruct->addFlag("needsNutrition");
+	npcTypeStruct->addFlag("needsSleep");
 	npcTypeStruct->addFlag("generateName");
 	npcTypeStruct->addProperty("attackSkill", TCOD_TYPE_DICE, true);
 	npcTypeStruct->addProperty("attackPower", TCOD_TYPE_DICE, true);
@@ -971,14 +1011,23 @@ void NPC::InitializeAIFunctions() {
 NPCPreset::NPCPreset(std::string typeNameVal) : 
     typeName(typeNameVal),
 	name("AA Club"),
-	speed(TCOD_dice_t()),
 	color(TCODColor::pink),
 	graphic('?'),
 	expert(false),
 	health(10),
 	ai("PeacefulAnimal"),
 	needsNutrition(false),
+	needsSleep(false),
 	generateName(false),
 	spawnAsGroup(false),
 	group(TCOD_dice_t())
-	{}
+{
+	TCOD_dice_t defaultDice;
+	defaultDice.addsub = 1;
+	defaultDice.multiplier = 1;
+	defaultDice.nb_dices = 1;
+	defaultDice.nb_faces = 1;
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		stats[i] = defaultDice;
+	}
+}

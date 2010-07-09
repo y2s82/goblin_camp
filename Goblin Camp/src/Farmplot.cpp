@@ -84,7 +84,7 @@ void FarmPlot::Update() {
 						growth[containerIt->first] = 0;
                     } else { //Plant has grown to full maturity, and should be harvested
                         boost::shared_ptr<Job> harvestJob(new Job("Harvest", HIGH, 0, false));
-                        harvestJob->ReserveItem(plant);
+                        harvestJob->ReserveEntity(plant);
                         harvestJob->tasks.push_back(Task(MOVE, plant.lock()->Position()));
                         harvestJob->tasks.push_back(Task(TAKE, plant.lock()->Position(), plant));
                         harvestJob->tasks.push_back(Task(HARVEST, plant.lock()->Position(), plant));
@@ -117,7 +117,7 @@ int FarmPlot::Use() {
                 boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first);
                 if (seed.lock()) {
 					boost::shared_ptr<Job> plantJob(new Job("Plant", MED, 0, false));
-                    plantJob->ReserveItem(seed);
+                    plantJob->ReserveEntity(seed);
                     plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
                     plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
                     plantJob->tasks.push_back(Task(MOVE, containerIt->first));
