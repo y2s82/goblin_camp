@@ -114,13 +114,14 @@ class NPC : public Entity {
 		bool taskBegun;
 		bool expert;
 		boost::weak_ptr<Item> carried;
-		int thirst, hunger;
+		int thirst, hunger, weariness;
 		int thinkSpeed;
 		std::list<StatusEffect> statusEffects;
 		std::list<StatusEffect>::iterator statusEffectIterator;
 		int statusGraphicCounter;
 		void HandleThirst();
 		void HandleHunger();
+		void HandleWeariness();
 		int health;
 		boost::weak_ptr<Item> foundItem;
         boost::shared_ptr<Container> bag;
