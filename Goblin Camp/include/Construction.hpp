@@ -111,7 +111,6 @@ public:
 	static std::vector<ConstructionPreset> Presets;
 	static void LoadPresets(ticpp::Document);
 	virtual boost::weak_ptr<Container> Storage();
-	bool IsStockpile();
-	bool IsFarmplot();
+	bool HasTag(ConstructionTag);
 	virtual void Update();
 };

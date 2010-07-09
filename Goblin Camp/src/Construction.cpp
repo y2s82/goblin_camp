@@ -415,8 +415,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
     }
 }
 
-bool Construction::IsStockpile() { return stockpile; }
-bool Construction::IsFarmplot() { return farmplot; }
+bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[_type].tags[tag]; }
 
 void Construction::Update() {}
 

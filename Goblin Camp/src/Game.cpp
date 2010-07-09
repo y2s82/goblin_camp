@@ -969,5 +969,15 @@ void Game::Running(bool value) { running = value; }
 bool Game::Running() { return running; }
 
 boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator stati = staticConstructionList.begin();
+		stati != staticConstructionList.end(); ++stati) {
+			if (!stati->second->Reserved() && stati->second->HasTag(tag)) return stati->second;
+	}
+
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator dynai = dynamicConstructionList.begin();
+		dynai != dynamicConstructionList.end(); ++dynai) {
+			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) return dynai->second;
+	}
+
 	return boost::weak_ptr<Construction>();
 }

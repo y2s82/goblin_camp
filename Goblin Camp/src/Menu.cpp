@@ -384,9 +384,9 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
         }
 
         firstTimeDraw = false;
-	} else if (construct->IsFarmplot()) { //It's a farmplot
+	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
 
-	} else if (construct->IsStockpile()) { //A stockpile, but not a farmplot
+	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
         Stockpile* sp = static_cast<Stockpile*>(construct);
         console->setForegroundColor(TCODColor::white);
         console->printFrame(topX, topY+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
@@ -431,9 +431,9 @@ MenuResult ConstructionMenu::Update(int x, int y, bool clicked) {
 
         if (x == topX+48 && y == topY+6) { ScrollUp(); return MENUHIT; }
         if (x == topX+48 && y == topY+53) { ScrollDown(); return MENUHIT; }
-	} else if (construct->IsFarmplot()) { //It's a farmplot
+	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
 
-	} else if (construct->IsStockpile()) { //A stockpile, but not a farmplot
+	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
         int i = ((x-topX+2) / 20)*50;
         i += (y - (topY+6));
         if (i >= 0 && i < (signed int)Item::Categories.size()) {
