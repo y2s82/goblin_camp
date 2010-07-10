@@ -146,6 +146,7 @@ Menu* Menu::BasicsMenu() {
                 basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIABPLACEMENT)));
 		    }
 		}
+		basicsMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));
 	}
 	return basicsMenu;
 }

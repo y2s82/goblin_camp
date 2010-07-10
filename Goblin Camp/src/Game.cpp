@@ -372,6 +372,21 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 	}
 }
 
+void Game::DismantleConstruction(Coordinate a, Coordinate b) {
+	for (int x = a.x(); x <= b.x(); ++x) {
+		for (int y = a.y(); y <= b.y(); ++y) {
+			int construction = Map::Inst()->Construction(x,y);
+			if (construction >= 0) {
+				if (instance->GetConstruction(construction).lock()) {
+					instance->GetConstruction(construction).lock()->Dismantle();
+				} else {
+					Map::Inst()->Construction(x,y,-1);
+				}
+			}
+		}
+	}
+}
+
 boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
     if (staticConstructionList.find(uid) != staticConstructionList.end()) 
 		return staticConstructionList[uid];

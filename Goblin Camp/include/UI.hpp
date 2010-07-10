@@ -91,6 +91,7 @@ public:
 	static void ChooseOrderTargetCoordinate(boost::shared_ptr<Squad>);
 	static void ChooseOrderTargetEntity(boost::shared_ptr<Squad>);
 	static void ChooseDesignateTree();
+	static void ChooseDismantle();
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);

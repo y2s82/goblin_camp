@@ -58,7 +58,8 @@ enum Action {
 	HARVESTWILDPLANT,
 	KILL,
 	FLEEMAP,
-	SLEEP
+	SLEEP,
+	DISMANTLE
 };
 
 enum TaskResult {

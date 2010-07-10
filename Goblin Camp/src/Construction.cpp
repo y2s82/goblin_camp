@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <boost/format.hpp>
 #include <libtcod.hpp>
 #include <ticpp.h>
 #ifdef DEBUG
@@ -43,7 +44,8 @@ Construction::Construction(ConstructionType type, Coordinate target) : Entity(),
     producer(false),
     progress(0),
     container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
-    materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1)))
+    materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
+	dismantle(false)
 {
     _x = target.x();
     _y = target.y();
@@ -64,6 +66,7 @@ Construction::~Construction() {
     for (int ix = _x; ix <= (signed int)_x + Construction::Blueprint(_type).x(); ++ix) {
         for (int iy = _y; iy <= (signed int)_y + Construction::Blueprint(_type).y(); ++iy) {
             Map::Inst()->Buildable(ix,iy,true);
+			Map::Inst()->Walkable(ix,iy,true);
             Map::Inst()->Construction(ix,iy,-1);
         }
     }
@@ -75,7 +78,6 @@ Construction::~Construction() {
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
 	if (producer) StockManager::Inst()->UpdateWorkshops(boost::weak_ptr<Construction>(), false);
-
 }
 
 
@@ -145,10 +147,12 @@ std::deque<ItemType>* Construction::JobList() { return &jobList; }
 ItemType Construction::JobList(int index) { return jobList[index]; }
 
 void Construction::AddJob(ItemType item) {
-    jobList.push_back(item);
-    if (jobList.size() == 1) {
-        SpawnProductionJob();
-    }
+	if (!dismantle) {
+		jobList.push_back(item);
+		if (jobList.size() == 1) {
+			SpawnProductionJob();
+		}
+	}
 }
 
 void Construction::CancelJob(int index) {
@@ -157,6 +161,7 @@ void Construction::CancelJob(int index) {
         if (!jobList.empty()) SpawnProductionJob();
     } else if (index > 0 && index < (signed int)jobList.size()) { jobList.erase(jobList.begin() + index); }
     else if (_condition <= 0) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	else if (dismantle) dismantle = false; //Stop trying to dismantle
 }
 
 int Construction::Use() {
@@ -418,6 +423,21 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[_type].tags[tag]; }
 
 void Construction::Update() {}
+
+void Construction::Dismantle() {
+	if (!dismantle) {
+		dismantle = true;
+		if (producer) {
+			jobList.clear();
+		}
+
+		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str()));
+		dismantleJob->ConnectToEntity(shared_from_this());
+		dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
+		JobManager::Inst()->AddJob(dismantleJob);
+	}
+}
 
 ConstructionPreset::ConstructionPreset() :
     maxCondition(0),

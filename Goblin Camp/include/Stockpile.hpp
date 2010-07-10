@@ -41,6 +41,7 @@ protected:
 	std::map<Coordinate, bool> reserved;
 	std::map<Coordinate, boost::shared_ptr<Container> > containers;
 public:
+	~Stockpile();
 	int Build();
 	virtual void Draw(Coordinate, TCODConsole*);
 	boost::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0);

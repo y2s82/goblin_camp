@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "Announce.hpp"
 #include "Events.hpp"
@@ -26,13 +27,14 @@ Events::Events(Map* vmap) :
 	map(vmap)
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (NPC::Presets[i].spawnRandomly)
+		if (NPC::Presets[i].spawnRandomly && (boost::iequals(NPC::Presets[i].ai, "HungryAnimal") 
+			|| boost::iequals(NPC::Presets[i].ai, "HostileAnimal")))
 			hostileSpawningMonsters.push_back(i);
 	}
 }
 
 void Events::Update() {
-	if (rand() % (UPDATES_PER_SECOND * 60) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
 		int monsterType = rand() % hostileSpawningMonsters.size();
 		monsterType = hostileSpawningMonsters[monsterType];
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
@@ -44,10 +46,10 @@ void Events::Update() {
 	}
 
 	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
-		if (rand() % 2 == 0) {
+		if (rand() % 2 == 0 && Game::Inst()->OrcCount() < 50) {
 			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
 			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
-		} else {
+		} else if (Game::Inst()->GoblinCount() < 100) {
 			Announce::Inst()->AddMsg("A goblin has joined your camp", TCODColor::azure);
 			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("goblin"));
 		}

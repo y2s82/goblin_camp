@@ -579,6 +579,14 @@ void UI::ChooseDesignateTree() {
 	UI::Inst()->SetCursor('T');
 }
 
+void UI::ChooseDismantle() {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(Game::DismantleConstruction, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('D');
+}
+
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
     if (pos.x() >= 0 && pos.x() < Map::Inst()->Width() && pos.y() >= 0 && pos.y() < Map::Inst()->Height()) {
         std::set<int> *npcList = Map::Inst()->NPCList(pos.x(), pos.y());

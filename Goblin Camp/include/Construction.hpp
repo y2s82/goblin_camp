@@ -87,7 +87,7 @@ protected:
 	boost::shared_ptr<Container> container;
 	boost::shared_ptr<Container> materialsUsed;
 	bool stockpile, farmplot;
-
+	bool dismantle;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 public:
 	~Construction();
@@ -113,4 +113,5 @@ public:
 	virtual boost::weak_ptr<Container> Storage();
 	bool HasTag(ConstructionTag);
 	virtual void Update();
+	virtual void Dismantle();
 };

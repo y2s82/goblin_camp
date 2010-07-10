@@ -105,6 +105,7 @@ class Game {
 /*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 		static bool CheckPlacement(Coordinate, Coordinate);
 		static int PlaceConstruction(Coordinate, ConstructionType);
+		static void DismantleConstruction(Coordinate, Coordinate);
 		void RemoveConstruction(boost::weak_ptr<Construction>);
 		static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
 		std::map<int, boost::shared_ptr<Construction> > staticConstructionList;

@@ -33,6 +33,18 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
     }
 }
 
+Stockpile::~Stockpile() {
+	for (int x = a.x(); x <= b.x(); ++x) {
+		for (int y = a.y(); y <= b.y(); ++y) {
+			if (Map::Inst()->Construction(x,y) == uid) {
+				Map::Inst()->Buildable(x,y,true);
+				Map::Inst()->Walkable(x,y,true);
+				Map::Inst()->Construction(x,y,-1);
+			}
+		}
+	}
+}
+
 int Stockpile::Build() {return 1;}
 
 boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags) {

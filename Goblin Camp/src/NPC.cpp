@@ -589,6 +589,18 @@ AiThink NPC::Think() {
 					weariness -= 10;
 					if (weariness <= 0) {
 						TaskFinished(TASKSUCCESS);
+						break;
+					}
+					break;
+
+				case DISMANTLE:
+					if (boost::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(currentEntity().lock())) {
+						construct->condition(construct->condition()-10);
+						if (construct->condition() <= 0) {
+							Game::Inst()->RemoveConstruction(construct);
+							TaskFinished(TASKSUCCESS);
+							break;
+						}
 					}
 					break;
 
