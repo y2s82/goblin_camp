@@ -924,9 +924,11 @@ bool Game::Paused() { return paused; }
 int Game::CharHeight() const { return charHeight; }
 int Game::CharWidth() const { return charWidth; }
 
-void Game::RemoveNPC(boost::weak_ptr<NPC> npc) {
-	if (npc.lock()) {
-		npcList.erase(npc.lock()->uid);
+void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
+	if (boost::shared_ptr<NPC> npc = wnpc.lock()) {
+		if (boost::iequals(npc->name, "orc")) --orcCount;
+		else if (boost::iequals(npc->name, "goblin")) --goblinCount;
+		npcList.erase(npc->uid);
 	}
 }
 
