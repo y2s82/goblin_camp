@@ -54,7 +54,7 @@ void Announce::AddMsg(std::string msg, TCODColor color) {
 void Announce::Update() {
 	if (!messageQueue.empty()) {
 		++timer;
-		if (timer > 1.5*UPDATES_PER_SECOND) {
+		if (timer > 0.5*UPDATES_PER_SECOND) {
 			history.push_back(messageQueue.front());
 			if (history.size() > 1000) {
 			    delete(history.front());

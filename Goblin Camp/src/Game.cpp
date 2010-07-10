@@ -660,7 +660,7 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, buffer);
 
-		Announce::Inst()->Draw(5, buffer);
+		Announce::Inst()->Draw(10, buffer);
 	}
 }
 

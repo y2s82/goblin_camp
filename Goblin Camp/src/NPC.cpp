@@ -809,7 +809,7 @@ bool NPC::HostileAnimalFindJob(boost::shared_ptr<NPC> animal) {
 	if (animal->Position() != Camp::Inst()->Center()) {
 		boost::shared_ptr<Job> attackJob(new Job("Attack settlement"));
 		attackJob->internal = true;
-		attackJob->tasks.push_back(Task(MOVE, Camp::Inst()->Center()));
+		attackJob->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
 		animal->jobs.push_back(attackJob);
 		return true;
 	}

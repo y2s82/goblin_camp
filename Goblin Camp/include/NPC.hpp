@@ -41,7 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 5)
 #define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 8)
-#define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 1)
+#define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 9)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
 
