@@ -79,6 +79,7 @@ void Announce::Update() {
 }
 
 void Announce::Draw(TCODConsole* console) {
+	console->setAlignment(TCOD_LEFT);
 	unsigned int height = 0;
 	if (messageQueue.size() > 0)
 		height = std::min((unsigned int)ANNOUNCE_HEIGHT, messageQueue.size());
@@ -89,14 +90,11 @@ void Announce::Draw(TCODConsole* console) {
         console->vline(length, console->getHeight()-height, height);
         console->rect(0, console->getHeight()-height, length, height, true);
 
-
         for (int i = height-1; i >= 0; --i) {
             AnnounceMessage* msg = messageQueue[i];
             console->setForegroundColor(msg->color);
 			console->print(0, console->getHeight()-(height-i), msg->ToString().c_str());
         }
-
-		console->setForegroundColor(TCODColor::white);
 	}
 }
 
@@ -124,7 +122,7 @@ void Announce::EmptyMessageQueue() {
 }
 
 int Announce::AnnounceAmount() {
-    return history.size();
+    return history.size()+messageQueue.size();
 }
 
 Coordinate Announce::CurrentCoordinate() {

@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/weighted_mean.hpp>
 
 #include "Coordinate.hpp"
 
@@ -32,8 +33,9 @@ private:
 	Camp();
 	static Camp* instance;
 	Coordinate center;
-	boost::accumulators::accumulator_set<int, boost::accumulators::features<boost::accumulators::tag::mean> > xAcc;
-	boost::accumulators::accumulator_set<int, boost::accumulators::features<boost::accumulators::tag::mean> > yAcc;
+	unsigned int buildingCount;
+	boost::accumulators::accumulator_set< int, boost::accumulators::features< boost::accumulators::tag::mean>, int > xAcc;
+	boost::accumulators::accumulator_set< int, boost::accumulators::features< boost::accumulators::tag::mean>, int > yAcc;
 
 public:
 	static Camp* Inst();

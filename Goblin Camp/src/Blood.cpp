@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Blood.hpp"
-#include "Game.hpp"
 
 BloodNode::BloodNode(int nx, int ny, int ndep) : x(nx), y(ny), depth(ndep)
 {
@@ -27,15 +26,6 @@ void BloodNode::Update() {
 }
 
 void BloodNode::Draw(Coordinate upleft, TCODConsole* console) {
-/*	int screenX = x - upleft.x();
-	int screenY = y - upleft.y();
-
-	if (depth > 0) {
-		if (screenX >= 0 && screenX < console->getWidth() &&
-			screenY >= 0 && screenY < console->getHeight()) {
-			console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', TCODColor::darkerOrange, TCODColor::black);
-		}
-	}*/
 }
 
 int BloodNode::Depth() {return depth;}

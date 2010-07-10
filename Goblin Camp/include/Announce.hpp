@@ -31,9 +31,9 @@ class AnnounceMessage {
 		std::stringstream result;
 		std::string msg;
 		int counter;
-		std::string ToString();
 		TCODColor color;
 		Coordinate target;
+		std::string ToString();
 };
 
 class Announce {
