@@ -39,15 +39,21 @@ Announce* Announce::Inst() {
 	return instance;
 }
 
-Announce::Announce() : timer(0) {}
+Announce::Announce() : 
+    timer(0),
+	length(0)
+{}
 
 void Announce::AddMsg(std::string msg, TCODColor color) {
-	msg = msg.substr(0,ANNOUNCE_MAX_LENGTH-4);
+	msg = msg.substr(0,ANNOUNCE_MAX_LENGTH);
 	if (!messageQueue.empty() && messageQueue.back()->msg == msg) {
 		messageQueue.back()->counter++;
 		if (messageQueue.size() == 1) timer = 0;
 	} else {
 		messageQueue.push_back(new AnnounceMessage(msg, color));
+		if (messageQueue.size() <= ANNOUNCE_HEIGHT) {
+			if (msg.length() > length) length = msg.length();
+		}
 	}
 }
 
@@ -55,37 +61,39 @@ void Announce::Update() {
 	if (!messageQueue.empty()) {
 		++timer;
 		if (timer > 0.5*UPDATES_PER_SECOND) {
-			history.push_back(messageQueue.front());
-			if (history.size() > 1000) {
-			    delete(history.front());
-			    history.pop_front();
+			if (messageQueue.size() > (unsigned int)ANNOUNCE_HEIGHT) {
+				history.push_back(messageQueue.front());
+				if (history.size() > 1000) {
+					delete(history.front());
+					history.pop_front();
+				}
+				messageQueue.pop_front();
+				length = 0;
+				for (std::deque<AnnounceMessage*>::iterator msgi = messageQueue.begin(); msgi != messageQueue.end(); ++msgi) {
+					if ((*msgi)->msg.length() > length) length = (*msgi)->msg.length();
+				}
 			}
-			messageQueue.pop_front();
 			timer = 0;
 		}
 	} else timer = 0;
 }
 
-void Announce::Draw(unsigned int height, TCODConsole* console) {
-    if (height > history.size()+1) height = history.size()+1;
+void Announce::Draw(TCODConsole* console) {
+	unsigned int height = 0;
+	if (messageQueue.size() > 0)
+		height = std::min((unsigned int)ANNOUNCE_HEIGHT, messageQueue.size());
 
 	if (height > 0 && (signed int)height < console->getHeight() - 1) {
-        console->hline(0, console->getHeight()-1-height, ANNOUNCE_MAX_LENGTH);
-        console->putChar(ANNOUNCE_MAX_LENGTH, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
-        console->vline(ANNOUNCE_MAX_LENGTH, console->getHeight()-height, height);
-        console->rect(0, console->getHeight()-height, ANNOUNCE_MAX_LENGTH, height, true);
+        console->hline(0, console->getHeight()-1-height, length+1);
+        console->putChar(length, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
+        console->vline(length, console->getHeight()-height, height);
+        console->rect(0, console->getHeight()-height, length, height, true);
 
 
-        while (height > 1) {
-            AnnounceMessage* msg = history[history.size()-(height-1)];
+        for (int i = height-1; i >= 0; --i) {
+            AnnounceMessage* msg = messageQueue[i];
             console->setForegroundColor(msg->color);
-			console->print(0, console->getHeight()-height, msg->ToString().c_str());
-			--height;
-        }
-
-        if (!messageQueue.empty()) {
-            console->setForegroundColor(messageQueue.front()->color);
-			console->print(0, console->getHeight()-height, messageQueue.front()->ToString().c_str());
+			console->print(0, console->getHeight()-(height-i), msg->ToString().c_str());
         }
 
 		console->setForegroundColor(TCODColor::white);
@@ -112,6 +120,7 @@ void Announce::EmptyMessageQueue() {
 			}
 			messageQueue.pop_front();
     }
+	length = 0;
 }
 
 int Announce::AnnounceAmount() {

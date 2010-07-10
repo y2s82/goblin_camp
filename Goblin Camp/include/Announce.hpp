@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 
 #define ANNOUNCE_MAX_LENGTH 71
+#define ANNOUNCE_HEIGHT 10
 
 class AnnounceMessage {
 	public:
@@ -42,12 +43,12 @@ class Announce {
 		std::deque<AnnounceMessage*> messageQueue;
 		std::deque<AnnounceMessage*> history;
 		int timer;
-		int length;
+		unsigned int length;
 	public:
 		static Announce* Inst();
 		void AddMsg(std::string, TCODColor = TCODColor::white);
 		void Update();
-		void Draw(unsigned int height, TCODConsole*);
+		void Draw(TCODConsole*);
 		void Draw(Coordinate, int from, int amount, TCODConsole*);
 		int AnnounceAmount();
 		void EmptyMessageQueue();
