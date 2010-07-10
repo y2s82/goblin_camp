@@ -34,6 +34,7 @@ Events::Events(Map* vmap) :
 void Events::Update() {
 	if (rand() % (UPDATES_PER_SECOND * 60) == 0) {
 		int monsterType = rand() % hostileSpawningMonsters.size();
+		monsterType = hostileSpawningMonsters[monsterType];
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
 			% NPC::Presets[monsterType].plural).str();
 		Announce::Inst()->AddMsg(msg, TCODColor::red);

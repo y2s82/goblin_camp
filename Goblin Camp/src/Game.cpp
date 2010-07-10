@@ -145,7 +145,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//Placing a stockpile isn't as straightforward as just building one in each tile
 	//We want to create 1 stockpile, at a, and then expand it from a to b.
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
-	boost::shared_ptr<Stockpile> newSp( (stockpile != FARMPLOT) ? new Stockpile(stockpile, symbol, a) : new FarmPlot(stockpile, symbol, a) );
+	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
 	Map::Inst()->Buildable(a.x(), a.y(), false);
 	Map::Inst()->Construction(a.x(), a.y(), newSp->Uid());
 	newSp->Expand(a,b);
@@ -351,7 +351,6 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
-	TCODSystem::setFps(UPDATES_PER_SECOND*2);
     upleft = Coordinate(180,180);
 
 }
@@ -502,7 +501,7 @@ Coordinate Game::FindWater(Coordinate pos) {
 void Game::Update() {
     ++time;
 
-    if (time == MONTH_LENGTH) {
+	if (time == MONTH_LENGTH) {
         if (season < LateWinter) season = (Season)((int)season + 1);
         else season = EarlySpring;
 
@@ -663,6 +662,8 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 
 		Announce::Inst()->Draw(10, buffer);
 	}
+
+	buffer->print(10,0,"%d",time);
 }
 
 void Game::FlipBuffer() {

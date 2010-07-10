@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "JobManager.hpp"
 
-FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stockpile(FARMPLOT, symbol, target),
+FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stockpile(type, symbol, target),
     tilled(false),
 	growth(std::map<Coordinate, int>())
 {

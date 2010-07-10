@@ -512,7 +512,8 @@ AiThink NPC::Think() {
                             Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->x(), currentEntity().lock()->y()), *iti, true);
                         }
                         Map::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
-                        Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
+                        Map::Inst()->Buildable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
+						Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
                         TaskFinished(TASKSUCCESS);
                     }
                     break;
@@ -524,6 +525,7 @@ AiThink NPC::Think() {
                             Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->x(),currentEntity().lock()->y()), *iti, true);
                         }
                         Map::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
+                        Map::Inst()->Buildable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
                         Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
                         TaskFinished(TASKSUCCESS);
                     }
@@ -1028,6 +1030,7 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	needsNutrition(false),
 	needsSleep(false),
 	generateName(false),
+	spawnRandomly(false),
 	spawnAsGroup(false),
 	group(TCOD_dice_t())
 {
