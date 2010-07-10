@@ -20,8 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 Camp* Camp::instance = 0;
 
 Camp::Camp() :
-center(Coordinate(220,220)),
-	buildings(0)
+center(Coordinate(220,220))
 {}
 
 Camp* Camp::Inst() {
@@ -34,9 +33,7 @@ Coordinate Camp::Center() {
 }
 
 void Camp::UpdateCenter(Coordinate newBuilding) {
-	center.x((center.x() * buildings) + newBuilding.x());
-	center.y((center.y() * buildings) + newBuilding.y());
-	++buildings;
-	center.x(center.x() / buildings);
-	center.y(center.y() / buildings);
+	xAcc(newBuilding.x());
+	yAcc(newBuilding.y());
+	center = Coordinate((int)boost::accumulators::mean(xAcc), (int)boost::accumulators::mean(yAcc));
 }

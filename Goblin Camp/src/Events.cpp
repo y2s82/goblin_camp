@@ -21,7 +21,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "GCamp.hpp"
 
-Events::Events() : hostileSpawningMonsters(std::vector<int>()) {
+Events::Events(Map* vmap) :
+    hostileSpawningMonsters(std::vector<int>()),
+	map(vmap)
+{
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].spawnRandomly)
 			hostileSpawningMonsters.push_back(i);
@@ -35,7 +38,17 @@ void Events::Update() {
 			% NPC::Presets[monsterType].plural).str();
 		Announce::Inst()->AddMsg(msg, TCODColor::red);
 		for (int i = 0; i < Game::DiceToInt(NPC::Presets[monsterType].group); ++i) {
-			Game::Inst()->CreateNPC(Coordinate(100+rand()%5,100+rand()%5), monsterType);
+			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), monsterType);
+		}
+	}
+
+	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
+		if (rand() % 2 == 0) {
+			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
+			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
+		} else {
+			Announce::Inst()->AddMsg("A goblin has joined your camp", TCODColor::azure);
+			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("goblin"));
 		}
 	}
 }

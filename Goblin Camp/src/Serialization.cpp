@@ -596,13 +596,15 @@ void JobManager::load(Archive & ar, const unsigned int version) {
 template<class Archive>
 void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & center;
-	ar & buildings;
+//	ar & xAcc;
+//	ar & yAcc;
 }
 
 template<class Archive>
 void Camp::load(Archive & ar, const unsigned int version) {
 	ar & center;
-	ar & buildings;
+//	ar & xAcc;
+//	ar & yAcc;
 }
 
 template<class Archive>

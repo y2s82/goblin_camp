@@ -345,9 +345,10 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	//Creature presets
 	NPC::LoadPresets("creatures.dat");
-	events = boost::shared_ptr<Events>(new Events());
 
 	GenerateMap();
+	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
+
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
 	TCODSystem::setFps(UPDATES_PER_SECOND*2);

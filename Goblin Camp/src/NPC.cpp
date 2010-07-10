@@ -337,6 +337,10 @@ AiThink NPC::Think() {
 					while (tmp++ < 10) {
 						int tarX = ((rand() % 11) - 5) + currentTarget().x();
 						int tarY = ((rand() % 11) - 5) + currentTarget().y();
+						if (tarX < 0) tarX = 0;
+						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
+						if (tarY < 0) tarY = 0;
+						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
 						if (Map::Inst()->Walkable(tarX, tarY)) {
 							if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().x(), currentTarget().y())) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
