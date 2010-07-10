@@ -33,19 +33,17 @@ Squad::~Squad() {
 }
 
 bool Squad::UpdateMembers() {
-#ifdef DEBUG
-	std::cout<<"members.size(): "<<members.size()<<" memberReq: "<<memberReq<<"\n";
-#endif
 	if ((signed int)members.size() < memberReq) {
-#ifdef DEBUG
-		std::cout<<"Searching for member\n";
-#endif
 		int newMember = Game::Inst()->FindMilitaryRecruit();
 		if (newMember >= 0) { 
 			members.push_back(newMember);
 			Game::Inst()->npcList[newMember]->MemberOf(shared_from_this());
 		}
+	} else if ((signed int)members.size() > memberReq) {
+		Game::Inst()->npcList[members.back()]->MemberOf(boost::weak_ptr<Squad>());
+		members.pop_back();
 	}
+	
 	if ((signed int)members.size() < memberReq) return true;
 	return false;
 }
