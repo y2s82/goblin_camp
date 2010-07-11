@@ -38,16 +38,15 @@ FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stock
 void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
     int screenx, screeny;
 
-	for (int x = a.x(); x <= b.x(); ++x) {
-		for (int y = a.y(); y <= b.y(); ++y) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
-			    screenx = x  - upleft.x();
-			    screeny = y - upleft.y();
+			    screenx = x - upleft.X();
+			    screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
                     console->setFore(screenx, screeny, TCODColor::white);
                     console->setChar(screenx,	screeny, (graphic[1]));
-
 
                     if (!containers[Coordinate(x,y)]->empty()) {
                         boost::weak_ptr<Item> item = containers[Coordinate(x,y)]->GetFirstItem();
@@ -65,7 +64,7 @@ void FarmPlot::Update() {
     if (!tilled) graphic[1] = 176;
     for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin(); containerIt != containers.end(); ++containerIt) {
 		++growth[containerIt->first];
-		//Normal plants grow seed -> young plant -> mature plant -> fruits, which means 3
+		//Normal plants ought to grow seed -> young plant -> mature plant -> fruits, which means 3
 		//growths before giving fruit. 3 * 2 months means 6 months from seed to fruits
 		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && rand() % 5 == 0) {
             boost::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
@@ -83,7 +82,7 @@ void FarmPlot::Update() {
                         Game::Inst()->RemoveItem(plant);
 						growth[containerIt->first] = 0;
                     } else { //Plant has grown to full maturity, and should be harvested
-                        boost::shared_ptr<Job> harvestJob(new Job("Harvest", HIGH, 0, false));
+                        boost::shared_ptr<Job> harvestJob(new Job("Harvest", HIGH, 0, true));
                         harvestJob->ReserveEntity(plant);
                         harvestJob->tasks.push_back(Task(MOVE, plant.lock()->Position()));
                         harvestJob->tasks.push_back(Task(TAKE, plant.lock()->Position(), plant));
@@ -131,20 +130,4 @@ int FarmPlot::Use() {
         return 100;
     }
     return progress;
-}
-
-template<class Archive>
-void FarmPlot::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Stockpile>(*this);
-	ar & tilled;
-	ar & allowedSeeeds;
-	ar & growth;
-}
-
-template<class Archive>
-void FarmPlot::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Stockpile>(*this);
-	ar & tilled;
-	ar & allowedSeeeds;
-	ar & growth;
 }

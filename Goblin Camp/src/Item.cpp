@@ -41,8 +41,8 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	container(boost::weak_ptr<Item>())
 {
 	//Remember that the components are destroyed after this constructor!
-	_x = pos.x();
-	_y = pos.y();
+	x = pos.X();
+	y = pos.Y();
 
     name = Item::Presets[type].name;
 	categories = Item::Presets[type].categories;
@@ -70,10 +70,10 @@ Item::~Item() {
 }
 
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
-    int screenx = _x - upleft.x();
-    int screeny = _y - upleft.y();
+    int screenx = x - upleft.X();
+    int screeny = y - upleft.Y();
 	if (!container.lock() && screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(_x,_y));
+		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
 	}
 }
 
@@ -83,7 +83,7 @@ TCODColor Item::Color() {return color;}
 void Item::Color(TCODColor col) {color = col;}
 
 void Item::Position(Coordinate pos) {
-    _x = pos.x(); _y = pos.y();
+    x = pos.X(); y = pos.Y();
 }
 Coordinate Item::Position() {
 	if (container.lock()) return container.lock()->Position();

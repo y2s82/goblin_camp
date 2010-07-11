@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/enable_shared_from_this.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include <libtcod.hpp>
 

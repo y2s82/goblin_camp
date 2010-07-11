@@ -32,8 +32,8 @@ protected:
 	Stockpile(ConstructionType=0, int symbol=0, Coordinate=Coordinate(0,0));
 
 	int symbol;
-	Coordinate a, b; //Opposite corners so we know which tiles the stockpile
-	//approximately encompasses
+	Coordinate a, b; /*Opposite corners so we know which tiles the stockpile
+					 approximately encompasses*/
 	int capacity;
 	std::map<ItemCategory, int> amount;
 	std::map<ItemCategory, bool> allowed;

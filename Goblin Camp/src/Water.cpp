@@ -14,8 +14,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
-#include <libtcod.hpp>
 #include <cmath>
+
+#include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -37,8 +38,8 @@ WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 WaterNode::~WaterNode() {}
 
 void WaterNode::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenX = x - upleft.x();
-	int screenY = y - upleft.y();
+	int screenX = x - upleft.X();
+	int screenY = y - upleft.Y();
 
 	if (depth > 0) {
 		if (screenX >= 0 && screenX < console->getWidth() &&
@@ -88,7 +89,7 @@ void WaterNode::Update() {
             for (unsigned int i = 0; i < waterList.size(); ++i) {
                 if (waterList[i].lock()) {
                     waterList[i].lock()->depth = (int)divided;
-                    if (Map::Inst()->Low(coordList[i].x(), coordList[i].y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
+                    if (Map::Inst()->Low(coordList[i].X(), coordList[i].Y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
                     waterList[i].lock()->timeFromRiverBed = timeFromRiverBed;
                     waterList[i].lock()->UpdateGraphic();
                 }

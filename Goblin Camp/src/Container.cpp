@@ -21,7 +21,6 @@ Container::Container(Coordinate pos, ItemType type, int capValue, int faction) :
 capacity(capValue),
 reservedSpace(0)
 {
-
 }
 
 Container::~Container() {

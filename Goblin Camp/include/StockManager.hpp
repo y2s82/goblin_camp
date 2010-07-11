@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <map>
 
 #include <boost/weak_ptr.hpp>
-#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include "Item.hpp"
 #include "Construction.hpp"

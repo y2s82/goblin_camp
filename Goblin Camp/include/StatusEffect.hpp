@@ -15,9 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/serialization.hpp>
-#include <libtcod.hpp>
 #include <string>
+
+#include <boost/serialization/split_member.hpp>
+#include <libtcod.hpp>
 
 enum NPCStat {
 	MOVESPEED,

@@ -35,7 +35,7 @@ Coordinate Camp::Center() {
 
 void Camp::UpdateCenter(Coordinate newBuilding) {
 	++buildingCount;
-	xAcc(newBuilding.x(),boost::accumulators::weight = 1);
-	yAcc(newBuilding.y(),boost::accumulators::weight = 1);
+	xAcc(newBuilding.X(),boost::accumulators::weight = 1);
+	yAcc(newBuilding.Y(),boost::accumulators::weight = 1);
 	center = Coordinate((int)boost::accumulators::mean(xAcc), (int)boost::accumulators::mean(yAcc));
 }

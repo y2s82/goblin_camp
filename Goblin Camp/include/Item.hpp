@@ -15,16 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/shared_ptr.hpp>
-#include <libtcod.hpp>
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
+
+#include <boost/serialization/split_member.hpp>
+#include <boost/shared_ptr.hpp>
+#include <libtcod.hpp>
 #include <ticpp.h>
 
 #include "Entity.hpp"

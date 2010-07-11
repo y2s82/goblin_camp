@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/multi_array.hpp>
-#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/split_member.hpp>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"

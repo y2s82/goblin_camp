@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 
 Entity::Entity() : zone(0), reserved(0), name("NONAME"), faction(0) {
-	uid = uids++;
+	uid = uids++; //FIXME: Entity should keep track of freed uids
 }
 
 Entity::~Entity() {
@@ -26,10 +26,10 @@ Entity::~Entity() {
 
 int Entity::uids = 0;
 
-int Entity::x() {return _x;}
-int Entity::y() {return _y;}
-Coordinate Entity::Position() {return Coordinate(_x,_y);}
-void Entity::Position(Coordinate pos) {_x = pos.x(); _y = pos.y();}
+int Entity::X() {return x;}
+int Entity::Y() {return y;}
+Coordinate Entity::Position() {return Coordinate(x,y);}
+void Entity::Position(Coordinate pos) {x = pos.X(); y = pos.Y();}
 int Entity::Uid() {return uid;}
 
 void Entity::Zone(int value) {zone = value;}

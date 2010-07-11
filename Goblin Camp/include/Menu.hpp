@@ -15,12 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <string>
+#include <vector>
+
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
 #include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
-#include <string>
-#include <vector>
 
 #include "Game.hpp"
 
@@ -61,6 +62,8 @@ class Menu {
 		static Menu* WorkshopsMenu();
 		static Menu* ordersMenu;
 		static Menu* OrdersMenu();
+		static Menu* furnitureMenu;
+		static Menu* FurnitureMenu();
 };
 
 class JobMenu : public Menu {

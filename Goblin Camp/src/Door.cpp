@@ -25,7 +25,7 @@ timer(0)
 }
 
 void Door::Update() {
-	if (!Map::Inst()->NPCList(_x, _y)->empty()) {
+	if (!Map::Inst()->NPCList(x, y)->empty()) {
 		graphic[1] = 224;
 		timer = (UPDATES_PER_SECOND / 2);
 	} else {

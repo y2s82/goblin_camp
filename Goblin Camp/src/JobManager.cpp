@@ -14,8 +14,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
-#include <boost/shared_ptr.hpp>
 #include <list>
+
+#include <boost/shared_ptr.hpp>
 #include <libtcod.hpp>
 
 #include "JobManager.hpp"
@@ -46,18 +47,18 @@ void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 }
 
 void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {
-    if (oldJob.lock()) {
-        if (oldJob.lock()->priority() > LOW)
+	if (boost::shared_ptr<Job> job = oldJob.lock()) {
+        if (job->priority() > LOW)
             Announce::Inst()->AddMsg(oldJob.lock()->name+std::string(" canceled: ")+msg, TCODColor::red);
 
-        oldJob.lock()->Assign(-1);
-        oldJob.lock()->Paused(true);
-        waitingList.push_back(oldJob.lock());
+        job->Assign(-1);
+        job->Paused(true);
+        waitingList.push_back(job);
 
-		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[oldJob.lock()->priority()].begin(); 
-			jobi != availableList[oldJob.lock()->priority()].end(); ++jobi) {
-				if ((*jobi) == oldJob.lock()) {
-					availableList[oldJob.lock()->priority()].erase(jobi);
+		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[job->priority()].begin(); 
+			jobi != availableList[job->priority()].end(); ++jobi) {
+				if ((*jobi) == job) {
+					availableList[job->priority()].erase(jobi);
 					break;
 				}
 		}
@@ -69,15 +70,15 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 //Take into account though that right now this is a debug only view
 void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console) {
 	int skip = 0;
-	int y = pos.y();
+	int y = pos.Y();
 
 	console->setForegroundColor(TCODColor::lightCyan);
 	for (std::list<boost::shared_ptr<Job> >::iterator highIter = availableList[HIGH].begin(); highIter != availableList[HIGH].end(); ++highIter) {
 		if (skip < from) ++skip;
 		else {
 
-			console->print(pos.x(), y, "%s", (*highIter)->name.c_str());
-			if (++y - pos.y() >= count) return;
+			console->print(pos.X(), y, "%s", (*highIter)->name.c_str());
+			if (++y - pos.Y() >= count) return;
 		}
 	}
 
@@ -85,8 +86,8 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 	for (std::list<boost::shared_ptr<Job> >::iterator medIter = availableList[MED].begin(); medIter != availableList[MED].end(); ++medIter) {
 		if (skip < from) ++skip;
 		else {
-			console->print(pos.x(), y, "%s", (*medIter)->name.c_str());
-			if (++y - pos.y() >= count) return;
+			console->print(pos.X(), y, "%s", (*medIter)->name.c_str());
+			if (++y - pos.Y() >= count) return;
 		}
 	}
 
@@ -94,8 +95,8 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = availableList[LOW].begin(); lowIter != availableList[LOW].end(); ++lowIter) {
 		if (skip < from) ++skip;
 		else {
-			console->print(pos.x(), y, "%s", (*lowIter)->name.c_str());
-			if (++y - pos.y() >= count) return;
+			console->print(pos.X(), y, "%s", (*lowIter)->name.c_str());
+			if (++y - pos.Y() >= count) return;
 		}
 	}
 
@@ -103,8 +104,8 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 	for (std::list<boost::shared_ptr<Job> >::iterator waitIter = waitingList.begin(); waitIter != waitingList.end(); ++waitIter) {
 		if (skip < from) ++skip;
 		else {
-			console->print(pos.x(), y, "%s", (*waitIter)->name.c_str());
-			if (++y - pos.y() >= count) return;
+			console->print(pos.X(), y, "%s", (*waitIter)->name.c_str());
+			if (++y - pos.Y() >= count) return;
 		}
 	}
 
@@ -142,7 +143,6 @@ void JobManager::Update() {
 		} else {
 
 			if (!(*jobIter)->PreReqs()->empty() && (*jobIter)->PreReqsCompleted()) {
-				//if (rand() % (UPDATES_PER_SECOND*3) == 0) (*jobIter)->Paused(false);
 				(*jobIter)->Paused(false);
 			}
 
@@ -151,17 +151,13 @@ void JobManager::Update() {
 				jobIter = waitingList.erase(jobIter);
 			} else if (!(*jobIter)->Parent().lock() && !(*jobIter)->PreReqs()->empty()) {
 				//Job has unfinished prereqs, itsn't removable and is NOT a prereq itself
-				//if (rand() % (UPDATES_PER_SECOND*3) == 0) {
 					for (std::list<boost::weak_ptr<Job> >::iterator pri = (*jobIter)->PreReqs()->begin(); pri != (*jobIter)->PreReqs()->end(); ++pri) {
 						if (pri->lock()) {
                             pri->lock()->Paused(false);
 						}
 					}
-				//}
 			} else if (!(*jobIter)->Parent().lock()) {
-			    //if (rand() % (UPDATES_PER_SECOND*3) == 0) {
 			        (*jobIter)->Paused(false);
-			    //}
 			}
 		}
 	}

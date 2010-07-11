@@ -15,15 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <cstdlib>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/access.hpp>
-#include <boost/serialization/assume_abstract.hpp>
+#include <string>
+#include <boost/serialization/split_member.hpp>
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
-#include <string>
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -82,9 +80,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	React(react),
 	escaped(false)
 {
-	while (!Map::Inst()->Walkable(pos.x(),pos.y())) {
-		pos.x(pos.x()+1);
-		pos.y(pos.y()+1);
+	while (!Map::Inst()->Walkable(pos.X(),pos.Y())) {
+		pos.X(pos.X()+1);
+		pos.Y(pos.Y()+1);
 	}
 	Position(pos,true);
 
@@ -97,22 +95,22 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 }
 
 NPC::~NPC() {
-	Map::Inst()->NPCList(_x, _y)->erase(uid);
+	Map::Inst()->NPCList(x, y)->erase(uid);
 	if (squad.lock()) squad.lock()->Leave(uid);
 }
 
 void NPC::Position(Coordinate pos, bool firstTime) {
 	if (!firstTime) {
-		if (Map::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
-			Map::Inst()->MoveFrom(_x, _y, uid);
-			_x = pos.x();
-			_y = pos.y();
-			Map::Inst()->MoveTo(_x,_y,uid); //TODO: Figure out why the hell this is required
+		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
+			Map::Inst()->MoveFrom(x, y, uid);
+			x = pos.X();
+			y = pos.Y();
+			//Map::Inst()->MoveTo(x,y,uid); //This appears to be working correctly now
 		}
 	} else {
-		if (Map::Inst()->MoveTo(pos.x(), pos.y(), uid)) {
-			_x = pos.x();
-			_y = pos.y();
+		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
+			x = pos.X();
+			y = pos.Y();
 		}
 	}
 }
@@ -156,7 +154,7 @@ void NPC::HandleThirst() {
 	if (!found) {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"));
 		if (!item.lock()) {tmpCoord = Game::Inst()->FindWater(Position());}
-		if (!item.lock() && tmpCoord.x() == -1) { //Nothing to drink!
+		if (!item.lock() && tmpCoord.X() == -1) { //Nothing to drink!
 			//:ohdear:
 		} else { //Something to drink!
 			boost::shared_ptr<Job> newJob(new Job("Drink", MED, 0, !expert));
@@ -170,8 +168,8 @@ void NPC::HandleThirst() {
 				jobs.push_back(newJob);
 				run = true;
 			} else {
-				for (int ix = tmpCoord.x()-1; ix <= tmpCoord.x()+1; ++ix) {
-					for (int iy = tmpCoord.y()-1; iy <= tmpCoord.y()+1; ++iy) {
+				for (int ix = tmpCoord.X()-1; ix <= tmpCoord.X()+1; ++ix) {
+					for (int iy = tmpCoord.Y()-1; iy <= tmpCoord.Y()+1; ++iy) {
 						if (Map::Inst()->Walkable(ix,iy)) {
 								newJob->tasks.push_back(Task(MOVE, Coordinate(ix,iy)));
 								goto CONTINUEDRINKBLOCK;
@@ -238,7 +236,7 @@ void NPC::HandleWeariness() {
 }
 
 void NPC::Update() {
-	if (Map::Inst()->NPCList(_x,_y)->size() > 1) _bgcolor = TCODColor::darkGrey;
+	if (Map::Inst()->NPCList(x,y)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
 	for (int i = 0; i < STAT_COUNT; ++i) {
@@ -313,7 +311,7 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 				case MOVE:
-					if ((signed int)_x == currentTarget().x() && (signed int)_y == currentTarget().y()) {
+					if ((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y()) {
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
@@ -322,7 +320,7 @@ AiThink NPC::Think() {
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) {
 						TaskFinished(result, std::string("Could not find path to target")); break;
 					} else if (result == PATHEMPTY) {
-					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
+					    if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
 					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
 					    }
 					}
@@ -335,14 +333,14 @@ AiThink NPC::Think() {
 					//to a normal MOVE task
 					tmp = 0;
 					while (tmp++ < 10) {
-						int tarX = ((rand() % 11) - 5) + currentTarget().x();
-						int tarY = ((rand() % 11) - 5) + currentTarget().y();
+						int tarX = ((rand() % 11) - 5) + currentTarget().X();
+						int tarY = ((rand() % 11) - 5) + currentTarget().Y();
 						if (tarX < 0) tarX = 0;
 						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 						if (tarY < 0) tarY = 0;
 						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
 						if (Map::Inst()->Walkable(tarX, tarY)) {
-							if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().x(), currentTarget().y())) {
+							if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y())) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
 								goto MOVENEARend;
 							}
@@ -361,7 +359,7 @@ AiThink NPC::Think() {
 					}
 					if (!taskBegun) {
 						tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
-						if (tmpCoord.x() >= 0) {
+						if (tmpCoord.X() >= 0) {
 							findPath(tmpCoord);
 						} else { TaskFinished(TASKFAILFATAL, std::string("No walkable adjacent tiles")); break; }
 						taskBegun = true;
@@ -370,7 +368,7 @@ AiThink NPC::Think() {
 					//result = Move();
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
 					else if (result == PATHEMPTY) {
-/*					    if (!((signed int)_x == currentTarget().x() &&  (signed int)_y == currentTarget().y())) {
+/*					    if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
 					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
 					    } */
 						TaskFinished(TASKFAILFATAL);
@@ -378,7 +376,7 @@ AiThink NPC::Think() {
 					break;
 
 				case WAIT:
-					if (++timer > currentTarget().x()) { timer = 0; TaskFinished(TASKSUCCESS); }
+					if (++timer > currentTarget().X()) { timer = 0; TaskFinished(TASKSUCCESS); }
 					break;
 
 				case BUILD:
@@ -438,9 +436,9 @@ AiThink NPC::Think() {
                         TaskFinished(TASKSUCCESS);
                         break;
 					} else { //Drink from a water tile
-						if (std::abs((signed int)_x - currentTarget().x()) <= 1 &&
-							std::abs((signed int)_y - currentTarget().y()) <= 1) {
-							if (Map::Inst()->GetWater(currentTarget().x(), currentTarget().y()).lock()->Depth() > DRINKABLE_WATER_DEPTH) {
+						if (std::abs((signed int)x - currentTarget().X()) <= 1 &&
+							std::abs((signed int)y - currentTarget().Y()) <= 1) {
+							if (Map::Inst()->GetWater(currentTarget().X(), currentTarget().Y()).lock()->Depth() > DRINKABLE_WATER_DEPTH) {
 								thirst -= (int)(THIRST_THRESHOLD / 10);
 								if (thirst < 0) { TaskFinished(TASKSUCCESS); break; }
 							} else { TaskFinished(TASKFAILFATAL); break; }
@@ -509,10 +507,10 @@ AiThink NPC::Think() {
                     tmp = boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Fell();
                     if (tmp <= 0) {
                         for (std::list<ItemType>::iterator iti = NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.begin(); iti != NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.end(); ++iti) {
-                            Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->x(), currentEntity().lock()->y()), *iti, true);
+                            Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->X(), currentEntity().lock()->Y()), *iti, true);
                         }
-                        Map::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
-                        Map::Inst()->Buildable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
+                        Map::Inst()->Walkable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
+                        Map::Inst()->Buildable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
 						Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
                         TaskFinished(TASKSUCCESS);
                     }
@@ -522,10 +520,10 @@ AiThink NPC::Think() {
                     tmp = boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Harvest();
                     if (tmp <= 0) {
                         for (std::list<ItemType>::iterator iti = NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.begin(); iti != NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.end(); ++iti) {
-                            Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->x(),currentEntity().lock()->y()), *iti, true);
+                            Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->X(),currentEntity().lock()->Y()), *iti, true);
                         }
-                        Map::Inst()->Walkable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
-                        Map::Inst()->Buildable(currentEntity().lock()->x(), currentEntity().lock()->y(), true);
+                        Map::Inst()->Walkable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
+                        Map::Inst()->Buildable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
                         Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
                         TaskFinished(TASKSUCCESS);
                     }
@@ -547,7 +545,7 @@ AiThink NPC::Think() {
 					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
 //						findPath(currentEntity().lock()->Position());
 						tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
-						if (tmpCoord.x() >= 0) {
+						if (tmpCoord.X() >= 0) {
 							findPath(tmpCoord);
 						}
 						taskBegun = true;
@@ -562,8 +560,8 @@ AiThink NPC::Think() {
 					break;
 
 				case FLEEMAP:
-					if (_x == 0 || _x == Map::Inst()->Width()-1 ||
-						_y == 0 || _y == Map::Inst()->Height()-1) {
+					if (x == 0 || x == Map::Inst()->Width()-1 ||
+						y == 0 || y == Map::Inst()->Height()-1) {
 							//We are the edge, escape!
 							Escape();
 							return AIMOVE;
@@ -572,14 +570,14 @@ AiThink NPC::Think() {
 					//Find the closest edge and change into a MOVE task and a new FLEEMAP task
 					//Unfortunately this assumes that FLEEMAP is the last task in a job,
 					//which might not be.
-					tmp = std::abs((signed int)_x - Map::Inst()->Width() / 2);
-					if (tmp > std::abs((signed int)_y - Map::Inst()->Height() / 2)) {
-						currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(_x, 
-							(_y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
+					tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
+					if (tmp > std::abs((signed int)y - Map::Inst()->Height() / 2)) {
+						currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(x, 
+							(y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
 					} else {
 						currentJob().lock()->tasks[taskIndex] = Task(MOVE, 
 							Coordinate(((unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
-							_y));
+							y));
 					}
 					currentJob().lock()->tasks.push_back(Task(FLEEMAP));
 					break;
@@ -595,8 +593,8 @@ AiThink NPC::Think() {
 
 				case DISMANTLE:
 					if (boost::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(currentEntity().lock())) {
-						construct->condition(construct->condition()-10);
-						if (construct->condition() <= 0) {
+						construct->Condition(construct->Condition()-10);
+						if (construct->Condition() <= 0) {
 							Game::Inst()->RemoveConstruction(construct);
 							TaskFinished(TASKSUCCESS);
 							break;
@@ -614,16 +612,16 @@ AiThink NPC::Think() {
 					fleeJob->internal = true;
 					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
 						if (npci->lock() && npci->lock()->faction != faction) {
-							int dx = _x - npci->lock()->_x;
-							int dy = _y - npci->lock()->_y;
-							if (Map::Inst()->Walkable(_x + dx, _y + dy)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y+dy)));
+							int dx = x - npci->lock()->x;
+							int dy = y - npci->lock()->y;
+							if (Map::Inst()->Walkable(x + dx, y + dy)) {
+								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(_x + dx, _y)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x+dx,_y)));
+							} else if (Map::Inst()->Walkable(x + dx, y)) {
+								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(_x, _y + dy)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(_x,_y+dy)));
+							} else if (Map::Inst()->Walkable(x, y + dy)) {
+								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
 								jobs.push_back(fleeJob);
 							}
 							enemyFound = true;
@@ -638,7 +636,7 @@ AiThink NPC::Think() {
 				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
 				jobs.push_back(idleJob);
-				if (Distance(Camp::Inst()->Center().x(), Camp::Inst()->Center().y(), _x, _y) < 15) run = false;
+				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
 				else run = true;
 			}
 		}
@@ -648,7 +646,7 @@ AiThink NPC::Think() {
 }
 
 TaskResult NPC::Move() {
-	int x,y;
+	int moveX,moveY;
 	nextMove += run ? effectiveStats[MOVESPEED] : effectiveStats[MOVESPEED]/3;
 	while (nextMove > 100) {
 		nextMove -= 100;
@@ -656,8 +654,8 @@ TaskResult NPC::Move() {
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
 			if (!path->isEmpty()) {
-				if (!path->walk(&x, &y, false)) return TASKFAILNONFATAL;
-				Position(Coordinate(x,y));
+				if (!path->walk(&moveX, &moveY, false)) return TASKFAILNONFATAL;
+				Position(Coordinate(moveX,moveY));
 			} else if (!findPathWorking) return PATHEMPTY;
 		}
 	}
@@ -666,15 +664,15 @@ TaskResult NPC::Move() {
 
 void NPC::findPath(Coordinate target) {
     findPathWorking = true;
-	boost::thread pathThread(boost::bind(tFindPath, path, _x, _y, target.x(), target.y(), &pathMutex, &nopath, &findPathWorking));
+	boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking));
 }
 
 void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
 unsigned int NPC::speed() {return effectiveStats[MOVESPEED];}
 
 void NPC::Draw(Coordinate upleft, TCODConsole *console) {
-	int screenx = _x - upleft.x();
-	int screeny = _y - upleft.y();
+	int screenx = x - upleft.X();
+	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		if (statusGraphicCounter < 5 || statusEffectIterator == statusEffects.end()) {
 			console->putCharEx(screenx, screeny, _graphic, _color, _bgcolor);
@@ -690,7 +688,7 @@ void NPC::graphic(int value) { _graphic = value; }
 bool NPC::Expert() {return expert;}
 void NPC::Expert(bool value) {expert = value;}
 
-Coordinate NPC::Position() {return Coordinate(_x,_y);}
+Coordinate NPC::Position() {return Coordinate(x,y);}
 
 bool NPC::Dead() { return dead; }
 void NPC::Kill() {
@@ -740,7 +738,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		newJob->internal = true;
 		switch (npc->MemberOf().lock()->Order()) {
 		case GUARD:
-			if (npc->MemberOf().lock()->TargetCoordinate().x() >= 0) {
+			if (npc->MemberOf().lock()->TargetCoordinate().X() >= 0) {
 				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
@@ -903,8 +901,8 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 				npc->health -= dif;
 				if (dif > 10 && rand() % 5 == 0) npc->AddEffect(CONCUSSION);
 				if (npc->health <= 0) npc->Kill();
-				Game::Inst()->CreateBlood(Coordinate(npc->Position().x() + ((rand() % 3) - 1),
-					npc->Position().y() + ((rand() % 3) - 1)));
+				Game::Inst()->CreateBlood(Coordinate(npc->Position().X() + ((rand() % 3) - 1),
+					npc->Position().Y() + ((rand() % 3) - 1)));
 			} else {
 #ifdef DEBUG
 				std::cout<<"Hit missed\n";
@@ -934,6 +932,7 @@ class NPCListener : public ITCODParserListener {
         std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
 		NPC::Presets.push_back(NPCPreset(name));
+		NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
         return true;
     }
     bool parserFlag(TCODParser *parser,const char *name) {

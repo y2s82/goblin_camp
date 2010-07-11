@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <ticpp.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include "Entity.hpp"
 #include "Item.hpp"
@@ -42,6 +42,8 @@ enum ConstructionTag {
 	DOOR,
 	WALL,
 	BED,
+	WORKSHOP,
+	FURNITURE,
 	TAGCOUNT
 };
 
@@ -73,10 +75,10 @@ private:
 protected:
 	Construction(ConstructionType = 0, Coordinate = Coordinate(0,0));
 
-	int _condition, maxCondition;
+	int condition, maxCondition;
 	std::vector<int> graphic;
 	TCODColor color;
-	ConstructionType _type;
+	ConstructionType type;
 	bool walkable;
 	std::list<ItemCategory> materials;
 	bool producer;
@@ -94,11 +96,11 @@ public:
 
 	static Coordinate Blueprint(ConstructionType);
 	static Coordinate ProductionSpot(ConstructionType);
-	void condition(int);
-	int condition();
+	void Condition(int);
+	int Condition();
 	virtual void Draw(Coordinate, TCODConsole*);
 	int Build();
-	ConstructionType type();
+	ConstructionType Type();
 	std::list<ItemCategory>* MaterialList();
 	bool Producer();
 	std::vector<ItemType>* Products();

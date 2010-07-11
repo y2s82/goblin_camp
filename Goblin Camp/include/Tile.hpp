@@ -15,14 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/split_member.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-
 #include <set>
 #include <vector>
+
+#include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "Water.hpp"

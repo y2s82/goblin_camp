@@ -35,6 +35,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include <boost/serialization/deque.hpp>
 #include <boost/serialization/export.hpp>
 #include <boost/serialization/array.hpp>
+#include <boost/serialization/vector.hpp>
 #include <boost/multi_array.hpp>
 #include <map>
 #include <fstream>
@@ -56,14 +57,14 @@ and I couldn't come up with a coherent answer just by googling. */
 
 template<class Archive>
 void Coordinate::save(Archive & ar, const unsigned int version) const {
-	ar & _x;
-	ar & _y;
+	ar & x;
+	ar & y;
 }
 
 template<class Archive>
 void Coordinate::load(Archive & ar, const unsigned int version) {
-	ar & _x;
-	ar & _y;
+	ar & x;
+	ar & y;
 }
 
 template<class Archive>
@@ -240,8 +241,9 @@ void OrganicItem::load(Archive & ar, const unsigned int version) {
 
 template<class Archive>
 void Entity::save(Archive & ar, const unsigned int version) const {
-	ar & _x;
-	ar & _y;
+	ar & x;
+	ar & y;
+	ar & uids;
 	ar & uid;
 	ar & zone;
 	ar & reserved;
@@ -251,9 +253,10 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Entity::load(Archive & ar, const unsigned int version) {
-	ar & _x;
-	ar & _y;
+	ar & x;
+	ar & y;
 	ar & uid;
+	ar & uids;
 	ar & zone;
 	ar & reserved;
 	ar & name;
@@ -424,13 +427,13 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & _condition;
+	ar & condition;
 	ar & maxCondition;
 	ar & graphic;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & _type;
+	ar & type;
 	ar & walkable;
 	ar & materials;
 	ar & producer;
@@ -446,13 +449,13 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 template<class Archive>
 void Construction::load(Archive & ar, const unsigned int version) {
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & _condition;
+	ar & condition;
 	ar & maxCondition;
 	ar & graphic;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & _type;
+	ar & type;
 	ar & walkable;
 	ar & materials;
 	ar & producer;
@@ -603,8 +606,8 @@ template<class Archive>
 void Camp::load(Archive & ar, const unsigned int version) {
 	ar & center;
 	ar & buildingCount;
-	xAcc(center.x(), boost::accumulators::weight = buildingCount);
-	yAcc(center.y(), boost::accumulators::weight = buildingCount);
+	xAcc(center.X(), boost::accumulators::weight = buildingCount);
+	yAcc(center.Y(), boost::accumulators::weight = buildingCount);
 }
 
 template<class Archive>
@@ -642,7 +645,6 @@ void Map::save(Archive & ar, const unsigned int version) const {
 			ar & tileMap[x][y];
 		}
 	}
-	//ar & tileMap;
 	ar & width;
 	ar & height;
 }
@@ -654,7 +656,6 @@ void Map::load(Archive & ar, const unsigned int version) {
 			ar & tileMap[x][y];
 		}
 	}
-	//ar & tileMap;
 	ar & width;
 	ar & height;
 }
@@ -730,5 +731,20 @@ void Game::LoadGame(std::string filename) {
 	iarch>>*Map::Inst();
 }
 
+template<class Archive>
+void FarmPlot::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeeds;
+	ar & growth;
+}
+
+template<class Archive>
+void FarmPlot::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeeds;
+	ar & growth;
+}
 
 #pragma warning(pop)

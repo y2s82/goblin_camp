@@ -50,7 +50,9 @@ type(typeval)
 		graphic = '?';
 		color = TCODColor::grey;
 		cooldown = UPDATES_PER_SECOND * 5;
+		statChanges[MOVESPEED] = 0.5;
 		statChanges[ATTACKSKILL] = 0.5;
+		statChanges[DEFENCESKILL] = 0.5;
 		break;
 
 	case DROWSY:

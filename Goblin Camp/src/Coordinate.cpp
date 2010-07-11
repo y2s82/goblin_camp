@@ -16,46 +16,46 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Coordinate.hpp"
 
-Coordinate::Coordinate(int valuex, int valuey) { _x = valuex; _y = valuey; }
+Coordinate::Coordinate(int valuex, int valuey) { x = valuex; y = valuey; }
 
-int Coordinate::x() const { return _x;}
-int Coordinate::x(int value) { _x = value; return _x; }
-int Coordinate::y() const { return _y;}
-int Coordinate::y(int value) { _y = value; return _y; }
+int Coordinate::X() const { return x;}
+int Coordinate::X(int value) { x = value; return x; }
+int Coordinate::Y() const { return y;}
+int Coordinate::Y(int value) { y = value; return y; }
 
 bool Coordinate::operator<(Coordinate other) const {
-	if (_x != other.x()) return _x < other.x();
-	else return _y < other.y();
+	if (x != other.X()) return x < other.X();
+	else return y < other.Y();
 }
 
 bool Coordinate::operator==(Coordinate other) const {
-	return (_x == other.x() && _y == other.y());
+	return (x == other.X() && y == other.Y());
 }
 
 bool Coordinate::operator!=(Coordinate other) const {
-	return (_x != other.x() || _y != other.y());
+	return (x != other.X() || y != other.Y());
 }
 
 Coordinate Coordinate::operator+(int other) {
-	return Coordinate(_x + other, _y + other);
+	return Coordinate(x + other, y + other);
 }
 
 Coordinate Coordinate::operator-(int other) {
-	return Coordinate(_x - other, _y - other);
+	return Coordinate(x - other, y - other);
 }
 
 Coordinate Coordinate::operator+(Coordinate other) {
-    return Coordinate(_x + other.x(), _y + other.y());
+    return Coordinate(x + other.X(), y + other.Y());
 }
 
 template<class Archive>
 void Coordinate::save(Archive & ar, unsigned int version) const {
-	ar & _x;
-	ar & _y;
+	ar & x;
+	ar & y;
 }
 
 template<class Archive>
 void Coordinate::load(Archive & ar, unsigned int version) {
-	ar & _x;
-	ar & _y;
+	ar & x;
+	ar & y;
 }

@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <queue>
 #include <string>
 #include <sstream>
+
 #include <libtcod.hpp>
 
 #include "Coordinate.hpp"
@@ -43,7 +44,7 @@ class Announce {
 		std::deque<AnnounceMessage*> messageQueue;
 		std::deque<AnnounceMessage*> history;
 		int timer;
-		unsigned int length;
+		unsigned int length, height;
 	public:
 		static Announce* Inst();
 		void AddMsg(std::string, TCODColor = TCODColor::white);

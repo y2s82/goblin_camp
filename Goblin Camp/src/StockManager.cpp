@@ -186,7 +186,7 @@ std::set<ItemType>* StockManager::Producables() { return &producables; }
 
 void StockManager::UpdateWorkshops(boost::weak_ptr<Construction> cons, bool add) {
 	if (add) {
-		workshops.insert(std::pair<ConstructionType, boost::weak_ptr<Construction> >(cons.lock()->type(), cons));
+		workshops.insert(std::pair<ConstructionType, boost::weak_ptr<Construction> >(cons.lock()->Type(), cons));
 	} else {
 		//Because it is being removed, this has been called from a destructor which means
 		//that the construction no longer exists, and the weak_ptr should give !lock

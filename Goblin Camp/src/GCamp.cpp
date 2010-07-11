@@ -16,20 +16,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #include <windows.h>
-#include <boost/multi_array.hpp>
-#include <boost/thread/thread.hpp>
 #include <boost/format.hpp>
-#include <sstream>
-#include <list>
-#include <set>
-#include <queue>
-#include <iostream>
-#include <cctype>
-#include <cstdlib>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
-#include "Tile.hpp"
 #include "Map.hpp"
 #include "NPC.hpp"
 #include "Logger.hpp"
@@ -38,8 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "JobManager.hpp"
 
-
-int main(std::string cmdLine) {
+int main(std::string cmdline) {
 	int width = -1, height = -1;
     bool fullscreen = false;
 
@@ -82,14 +71,13 @@ int main(std::string cmdLine) {
 }
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
-{
-    return main(cmdLine);
-}
+{ return main(cmdLine); }
 
 void MainLoop() {
 	Game* game = Game::Inst();
 	if (!game->Running()) Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
 	game->Running(true);
+
 	for (int npcs = 0; npcs < 10; ++npcs) {
 		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
 	}
@@ -139,7 +127,7 @@ int Distance(int x0, int y0, int x1, int y1) {
 }
 
 int Distance(Coordinate a, Coordinate b) {
-	return Distance(a.x(), a.y(), b.x(), b.y());
+	return Distance(a.X(), a.Y(), b.X(), b.Y());
 }
 
 int MainMenu() {
@@ -178,9 +166,9 @@ int MainMenu() {
 		if (!mouseStatus.lbutton && lButtonDown) {
 			lButtonDown = false;
 			if (selected == 0) MainLoop();
-			else if (selected == 2) MainLoop();
+			else if (selected == 2 && Game::Inst()->Running()) MainLoop();
 			else if (selected == 4) LoadMenu();
-			else if (selected == 6) SaveMenu();
+			else if (selected == 6 && Game::Inst()->Running()) SaveMenu();
 			else if (selected == 8) exit = true;
 		}
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
@@ -200,6 +188,7 @@ int MainMenu() {
 			TCODConsole::root->setForegroundColor(TCODColor::white);
 			TCODConsole::root->setBackgroundColor(TCODColor::black);
 		}
+		if (!Game::Inst()->Running()) TCODConsole::root->setForegroundColor(TCODColor::grey);
 		TCODConsole::root->print(edgex+width/2, edgey+4, "Continue");
 
 		if (selected == 4) {
@@ -218,7 +207,7 @@ int MainMenu() {
 			TCODConsole::root->setForegroundColor(TCODColor::white);
 			TCODConsole::root->setBackgroundColor(TCODColor::black);
 		}
-
+		if (!Game::Inst()->Running()) TCODConsole::root->setForegroundColor(TCODColor::grey);
 		TCODConsole::root->print(edgex+width/2, edgey+8, "Save");
 
 		if (selected == 8) {
@@ -233,6 +222,8 @@ int MainMenu() {
 		if (key.c == 'q') exit = true;
 		else if (key.c == 'n') MainLoop();
 
+		TCODConsole::root->setForegroundColor(TCODColor::celadon);
+		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp 0.1");
 		if (!endCredits) endCredits = TCODConsole::renderCredits(Game::Inst()->ScreenWidth()-20, 
 			Game::Inst()->ScreenHeight()-3, true);
 

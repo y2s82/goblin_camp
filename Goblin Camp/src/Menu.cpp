@@ -14,11 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
+/*TODO: Create a more general menu system. Libtcod GUI is something
+to look into*/
+
+#include <string>
+
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/scope_exit.hpp>
 #include <boost/algorithm/string.hpp>
-#include <string>
 
 #include "Menu.hpp"
 #include "UI.hpp"
@@ -82,11 +85,11 @@ MenuResult Menu::Update(int x, int y, bool clicked) {
 				if (y > 0) y /= 2;
 				_selected = y;
 				if (clicked) choices[y].callback();
-				return MENUHIT; //Mouse was inside menu when clicked
+				return MENUHIT; //Mouse was inside menu
 			}
 		}
 	}
-	return NOMENUHIT; //Mouse was not inside menu when clicked
+	return NOMENUHIT; //Mouse was not inside menu
 }
 
 void Menu::selected(int newSel) { _selected = newSel; }
@@ -123,6 +126,7 @@ Menu* Menu::ConstructionMenu() {
 		constructionMenu = new Menu(std::vector<MenuChoice>());
 		constructionMenu->AddChoice(MenuChoice(std::string("Basics"), boost::bind(UI::ChangeMenu, Menu::BasicsMenu())));
 		constructionMenu->AddChoice(MenuChoice(std::string("Workshops"), boost::bind(UI::ChangeMenu, Menu::WorkshopsMenu())));
+		constructionMenu->AddChoice(MenuChoice(std::string("Furniture"), boost::bind(UI::ChangeMenu, Menu::FurnitureMenu())));
 	}
 	return constructionMenu;
 }
@@ -156,7 +160,7 @@ Menu* Menu::WorkshopsMenu() {
 	if (!workshopsMenu) {
 		workshopsMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (!Construction::Presets[i].tags[WALL] && !Construction::Presets[i].tags[STOCKPILE] && !Construction::Presets[i].tags[FARMPLOT]) {
+		    if (Construction::Presets[i].tags[WORKSHOP]) {
                 workshopsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
 		    }
 		}
@@ -173,6 +177,19 @@ Menu* Menu::OrdersMenu() {
 		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
     }
     return ordersMenu;
+}
+
+Menu* Menu::furnitureMenu = 0;
+Menu* Menu::FurnitureMenu() {
+	if (!furnitureMenu) {
+		furnitureMenu = new Menu(std::vector<MenuChoice>());
+		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
+		    if (Construction::Presets[i].tags[FURNITURE]) {
+                furnitureMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
+		    }
+		}
+	}
+	return furnitureMenu;
 }
 
 JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
@@ -659,9 +676,9 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 						if (squadName != "" && !chosenSquad.lock()) { //Create
 							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
 								(squadName, new Squad(squadName, squadMembers, squadPriority)));
-	//						chosenSquad = Game::Inst()->squadList[squadName];
-							squadName = "";
-							UI::Inst()->InputString("");
+							chosenSquad = Game::Inst()->squadList[squadName];
+							//squadName = "";
+							//UI::Inst()->InputString("");
 							return MENUHIT;					
 						} else if (chosenSquad.lock()) { //Modify
 							boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
@@ -687,7 +704,6 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 				y -= (topY+2);
 				if (y < (signed int)Game::Inst()->squadList.size()) {
 					std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
-					//while (y-- > 0 && squadi != Game::Inst()->squadList.end()) ++squadi;
 					squadi = boost::next(squadi, y);
 					if (squadi != Game::Inst()->squadList.end()) {
 						chosenSquad = squadi->second;

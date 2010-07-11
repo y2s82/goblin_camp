@@ -24,7 +24,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	a(target),
 	b(target)
 {
-	_condition = maxCondition;
+	condition = maxCondition;
     reserved.insert(std::pair<Coordinate,bool>(target,false));
     containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
     for (int i = 0; i < Game::ItemCatCount; ++i) {
@@ -34,8 +34,8 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 }
 
 Stockpile::~Stockpile() {
-	for (int x = a.x(); x <= b.x(); ++x) {
-		for (int y = a.y(); y <= b.y(); ++y) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
 				Map::Inst()->Buildable(x,y,true);
 				Map::Inst()->Walkable(x,y,true);
@@ -93,15 +93,15 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags) {
 
 void Stockpile::Expand(Coordinate from, Coordinate to) {
 	//We can assume that from < to
-	if (from.x() > b.x() || to.x() < a.x()) return;
-	if (from.y() > b.y() || to.y() < a.y()) return;
+	if (from.X() > b.X() || to.X() < a.X()) return;
+	if (from.Y() > b.Y() || to.Y() < a.Y()) return;
 
 	//The algorithm: Check each tile inbetween from and to, and if a tile is adjacent to this
 	//stockpile, add it. Do this max(width,height) times.
-	int repeats = std::max(to.x() - from.x(), to.y() - from.y());
+	int repeats = std::max(to.X() - from.X(), to.Y() - from.Y());
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
-		for (int ix = from.x(); ix <= to.x(); ++ix) {
-			for (int iy = from.y(); iy <= to.y(); ++iy) {
+		for (int ix = from.X(); ix <= to.X(); ++ix) {
+			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
 				if (Map::Inst()->Construction(ix,iy) == -1 && Map::Inst()->Walkable(ix,iy)) {
 					if (Map::Inst()->Construction(ix-1,iy) == uid ||
 					    Map::Inst()->Construction(ix+1,iy) == uid ||
@@ -111,10 +111,10 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 						Map::Inst()->Construction(ix,iy,uid);
 						Map::Inst()->Buildable(ix,iy,false);
 						//Update corner values
-						if (ix < a.x()) a.x(ix);
-						if (ix > b.x()) b.x(ix);
-						if (iy < a.y()) a.y(iy);
-						if (iy > b.y()) b.y(iy);
+						if (ix < a.X()) a.X(ix);
+						if (ix > b.X()) b.X(ix);
+						if (iy < a.Y()) a.Y(iy);
+						if (iy > b.Y()) b.Y(iy);
                         reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
                         containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), 0, 1, -1))));
 					}
@@ -127,11 +127,11 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
     int screenx, screeny;
 
-	for (int x = a.x(); x <= b.x(); ++x) {
-		for (int y = a.y(); y <= b.y(); ++y) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
-			    screenx = x  - upleft.x();
-			    screeny = y - upleft.y();
+			    screenx = x  - upleft.X();
+			    screeny = y - upleft.Y();
 			    if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
                     console->setFore(screenx, screeny, TCODColor::white);
@@ -162,8 +162,8 @@ bool Stockpile::Allowed(std::set<ItemCategory> cats) {
 
 bool Stockpile::Full()
 {
-    for (int ix = a.x(); ix <= b.x(); ++ix) {
-        for (int iy = a.y(); iy <= b.y(); ++iy) {
+    for (int ix = a.X(); ix <= b.X(); ++ix) {
+        for (int iy = a.Y(); iy <= b.Y(); ++iy) {
             if (Map::Inst()->Construction(ix,iy) == uid) {
                 if (containers[Coordinate(ix,iy)]->empty()) return false;
             }
@@ -173,8 +173,8 @@ bool Stockpile::Full()
 }
 
 Coordinate Stockpile::FreePosition() {
-    for (int ix = a.x(); ix <= b.x(); ++ix) {
-        for (int iy = a.y(); iy <= b.y(); ++iy) {
+    for (int ix = a.X(); ix <= b.X(); ++ix) {
+        for (int iy = a.Y(); iy <= b.Y(); ++iy) {
             if (Map::Inst()->Construction(ix,iy) == uid) {
                 if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
             }

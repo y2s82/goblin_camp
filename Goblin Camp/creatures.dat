@@ -4,7 +4,7 @@ npc_type "orc" {
 	needsSleep
 	generateName
 	name="orc"
-	speed="1d20+60"
+	speed="1d5+15"
 	color="0,0,255"
 	graphic='o'
 	health=200
@@ -19,7 +19,7 @@ npc_type "goblin" {
 	needsSleep
 	generateName
 	name="goblin"
-	speed="1d20+60"
+	speed="1d5+15"
 	color="128,128,128"
 	graphic='g'
 	health=50
@@ -31,7 +31,7 @@ npc_type "goblin" {
 
 npc_type "giant snail" {
 	name="Giant Snail"
-	speed="1d10+5"
+	speed="1d5"
 	color="219,199,109"
 	graphic='b'
 	health=50
@@ -45,7 +45,7 @@ npc_type "giant snail" {
 npc_type "starving wolf" {
 	name="Starving Wolf"
 	plural="Starving Wolves"
-	speed="1d20+75"
+	speed="1d10+20"
 	color="96,96,96"
 	graphic='w'
 	health=150

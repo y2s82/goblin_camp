@@ -51,8 +51,8 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 NatureObject::~NatureObject() {}
 
 void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenx = _x - upleft.x();
-	int screeny = _y - upleft.y();
+	int screenx = x - upleft.X();
+	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
         console->putCharEx(screenx, screeny, graphic, color, marked ? TCODColor::white : TCODColor::black);
 	}

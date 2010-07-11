@@ -117,13 +117,13 @@ void UI::HandleKeyboard() {
 		int addition = 1;
 		if (ShiftPressed()) addition *= 10;
 		if (key.vk == TCODK_UP) {
-			if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
+			if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
 		} else if (key.vk == TCODK_DOWN) {
-			if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+			if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
 		} else if (key.vk == TCODK_LEFT) {
-			if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
+			if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
 		} else if (key.vk == TCODK_RIGHT) {
-			if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+			if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
 		} else if (key.vk == TCODK_KP1) {
 			TCODMouse::showCursor(false);
 			drawCursor = true;
@@ -190,28 +190,28 @@ void UI::HandleKeyboard() {
 	}
 
 	if (mouseInput.x < 0) {
-		Game::Inst()->upleft.x(Game::Inst()->upleft.x() + mouseInput.cx);
+		Game::Inst()->upleft.X(Game::Inst()->upleft.X() + mouseInput.cx);
 		mouseInput.x = 0;
 		mouseInput.cx = 0;
 	} else if (mouseInput.cx >= Game::Inst()->ScreenWidth()) {
-		Game::Inst()->upleft.x(Game::Inst()->upleft.x() + (mouseInput.cx - (Game::Inst()->ScreenWidth()-1)));
+		Game::Inst()->upleft.X(Game::Inst()->upleft.X() + (mouseInput.cx - (Game::Inst()->ScreenWidth()-1)));
 		mouseInput.cx = Game::Inst()->ScreenWidth() - 1;
 		mouseInput.x = (Game::Inst()->ScreenWidth() - 1)* Game::Inst()->CharWidth();
 	}
 	if (mouseInput.y < 0) {
-		Game::Inst()->upleft.y(Game::Inst()->upleft.y() + mouseInput.cy);
+		Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() + mouseInput.cy);
 		mouseInput.y = 0;
 		mouseInput.cy = 0;
 	} else if (mouseInput.cy >= Game::Inst()->ScreenHeight()) {
-		Game::Inst()->upleft.y(Game::Inst()->upleft.y() + (mouseInput.cy - (Game::Inst()->ScreenHeight()-1)));
+		Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() + (mouseInput.cy - (Game::Inst()->ScreenHeight()-1)));
 		mouseInput.cy = Game::Inst()->ScreenHeight() - 1;
 		mouseInput.y = (Game::Inst()->ScreenHeight() - 1) * Game::Inst()->CharHeight();
 	}
 		
-	if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
-	if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
-	if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
-	if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+	if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
+	if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+	if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
+	if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
 }
 
 void UI::HandleMouse() {
@@ -231,16 +231,16 @@ void UI::HandleMouse() {
 	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
 
     if (_state == UINORMAL) {
-        HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
+        HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
     }
 
 	if (_state == UIPLACEMENT || _state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		placeable = placementCallback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()), _blueprint);
+		placeable = placementCallback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()), _blueprint);
 	}
 
 	if (_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		b.x(mouseInput.cx + Game::Inst()->upleft.x());
-		b.y(mouseInput.cy + Game::Inst()->upleft.y());
+		b.X(mouseInput.cx + Game::Inst()->upleft.X());
+		b.Y(mouseInput.cy + Game::Inst()->upleft.Y());
 	}
 
 	currentMenu->Update(mouseInput.cx, mouseInput.cy);
@@ -251,78 +251,72 @@ void UI::HandleMouse() {
 			if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true); lbuttonPressed = false; }
 			if (menuResult == NOMENUHIT) {
 				if (_state == UIPLACEMENT && placeable) {
-					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.x(), mouseInput.cy + Game::Inst()->upleft.y()));
+					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
 				} else if (_state == UIABPLACEMENT && placeable) {
-					if (a.x() == 0) {
-						a.x(mouseInput.cx + Game::Inst()->upleft.x());
-						a.y(mouseInput.cy + Game::Inst()->upleft.y());
+					if (a.X() == 0) {
+						a.X(mouseInput.cx + Game::Inst()->upleft.X());
+						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
 					}
 					else {
 						//Place construction from a->b
-						if (a.x() > b.x()) {
-							tmp = a.x();
-							a.x(b.x());
-							b.x(tmp);
+						if (a.X() > b.X()) {
+							tmp = a.X();
+							a.X(b.X());
+							b.X(tmp);
 							xswap = true;
 						}
-						if (a.y() > b.y()) {
-							tmp = a.y();
-							a.y(b.y());
-							b.y(tmp);
+						if (a.Y() > b.Y()) {
+							tmp = a.Y();
+							a.Y(b.Y());
+							b.Y(tmp);
 							yswap = true;
 						}
-						for (int ix = a.x(); ix <= b.x(); ++ix) {
+						for (int ix = a.X(); ix <= b.X(); ++ix) {
 							if (!yswap) {
-								if (placementCallback(Coordinate(ix, a.y()), _blueprint))
-									callback(Coordinate(ix, a.y()));
+								if (placementCallback(Coordinate(ix, a.Y()), _blueprint))
+									callback(Coordinate(ix, a.Y()));
 							} else {
-								if (placementCallback(Coordinate(ix, b.y()), _blueprint))
-									callback(Coordinate(ix, b.y()));
+								if (placementCallback(Coordinate(ix, b.Y()), _blueprint))
+									callback(Coordinate(ix, b.Y()));
 							}
 						}
-						for (int iy = a.y(); iy <= b.y(); ++iy) {
+						for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 							if (!xswap) {
-								if (placementCallback(Coordinate(b.x(), iy), _blueprint))
-									callback(Coordinate(b.x(), iy));
+								if (placementCallback(Coordinate(b.X(), iy), _blueprint))
+									callback(Coordinate(b.X(), iy));
 							} else {
-								if (placementCallback(Coordinate(a.x(), iy), _blueprint))
-									callback(Coordinate(a.x(), iy));
+								if (placementCallback(Coordinate(a.X(), iy), _blueprint))
+									callback(Coordinate(a.X(), iy));
 							}
 						}
-						a.x(0); a.y(0); b.x(0); b.y(0);
+						a.X(0); a.Y(0); b.X(0); b.Y(0);
 					}
 				} else if (_state == UIRECTPLACEMENT && placeable) {
-					if (a.x() == 0) {
-						a.x(mouseInput.cx + Game::Inst()->upleft.x());
-						a.y(mouseInput.cy + Game::Inst()->upleft.y());
+					if (a.X() == 0) {
+						a.X(mouseInput.cx + Game::Inst()->upleft.X());
+						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
 					}
 					else {
 						//Place construction from a->b
-						if (a.x() > b.x()) {
-							tmp = a.x();
-							a.x(b.x());
-							b.x(tmp);
+						if (a.X() > b.X()) {
+							tmp = a.X();
+							a.X(b.X());
+							b.X(tmp);
 							xswap = true;
 						}
-						if (a.y() > b.y()) {
-							tmp = a.y();
-							a.y(b.y());
-							b.y(tmp);
+						if (a.Y() > b.Y()) {
+							tmp = a.Y();
+							a.Y(b.Y());
+							b.Y(tmp);
 							yswap = true;
 						}
 
-						if (placementCallback(Coordinate(a.x(), a.y()), _blueprint))
+						if (placementCallback(Coordinate(a.X(), a.Y()), _blueprint))
 							rectCallback(a,b);
 
-						a.x(0); a.y(0); b.x(0); b.y(0);
+						a.X(0); a.Y(0); b.X(0); b.Y(0);
 					}
 				} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
-					/*if (!underCursor.empty() && underCursor.begin()->lock()) {
-						if (dynamic_cast<Construction*>(underCursor.begin()->lock().get())) {
-							UI::ChangeMenu(ConstructionMenu::ConstructionInfoMenu(static_cast<Construction*>(underCursor.begin()->lock().get())));
-							menuOpen = true;
-						}
-					}*/
 					if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
 					else sideBar.SetEntity(boost::weak_ptr<Entity>());
 				}
@@ -337,25 +331,25 @@ void UI::HandleMouse() {
 		currentMenu->selected(-1);
 		currentMenu = Menu::MainMenu();
 		menuHistory.clear();
-		if (!menuOpen) { _state = UINORMAL; a.x(0); a.y(0); }
+		if (!menuOpen) { _state = UINORMAL; a.X(0); a.Y(0); }
 		SetTextMode(false);
 	}
 
 	if (mbuttonPressed && menuOpen && !menuHistory.empty()) {
 		currentMenu->selected(-1);
-		_state = UINORMAL; a.x(0); a.y(0);
+		_state = UINORMAL; a.X(0); a.Y(0);
 		currentMenu = menuHistory.back();
 		menuHistory.pop_back();
 		SetTextMode(false);
 	}
 
 	if (tempStatus.lbutton && _state == UINORMAL) {
-	    Game::Inst()->upleft.x(Game::Inst()->upleft.x() - (tempStatus.dx / 3));
-	    Game::Inst()->upleft.y(Game::Inst()->upleft.y() - (tempStatus.dy / 3));
-	    if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()-1) < -1) Game::Inst()->upleft.y(-1);
-        if (Game::Inst()->upleft.y(Game::Inst()->upleft.y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
-		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()-1) < -1) Game::Inst()->upleft.x(-1);
-		if (Game::Inst()->upleft.x(Game::Inst()->upleft.x()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.x(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+	    Game::Inst()->upleft.X(Game::Inst()->upleft.X() - (tempStatus.dx / 3));
+	    Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() - (tempStatus.dy / 3));
+	    if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
+        if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+		if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
+		if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
 		if (tempStatus.dx > 0 || tempStatus.dy > 0) draggingViewport = true;
     }
 
@@ -380,84 +374,84 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	    }
 	}
 
-	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.x() == 0)) {
-		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.x() && x < console->getWidth(); ++x) {
-			for (int y = mouseInput.cy; y < mouseInput.cy + _blueprint.y() && y < console->getHeight(); ++y) {
+	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.X() == 0)) {
+		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.X() && x < console->getWidth(); ++x) {
+			for (int y = mouseInput.cy; y < mouseInput.cy + _blueprint.Y() && y < console->getHeight(); ++y) {
 				if (!placeable) console->putCharEx(x,y, cursorChar, TCODColor::red, TCODColor::black);
 				else console->putCharEx(x,y, cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
-	} else if (_state == UIABPLACEMENT && a.x() > 0) {
-		if (a.x() > b.x()) {
-			tmp = a.x();
-			a.x(b.x());
-			b.x(tmp);
+	} else if (_state == UIABPLACEMENT && a.X() > 0) {
+		if (a.X() > b.X()) {
+			tmp = a.X();
+			a.X(b.X());
+			b.X(tmp);
 			xswap = true;
 		}
-		if (a.y() > b.y()) {
-			tmp = a.y();
-			a.y(b.y());
-			b.y(tmp);
+		if (a.Y() > b.Y()) {
+			tmp = a.Y();
+			a.Y(b.Y());
+			b.Y(tmp);
 			yswap = true;
 		}
-		for (int ix = a.x()-upleft.x(); ix <= b.x()-upleft.x() && ix < console->getWidth(); ++ix) {
+		for (int ix = a.X()-upleft.X(); ix <= b.X()-upleft.X() && ix < console->getWidth(); ++ix) {
 			if (!yswap) {
-				if (!placeable) console->putCharEx(ix,a.y()-upleft.y(), cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,a.y()-upleft.y(), cursorChar, TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,a.Y()-upleft.Y(), cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,a.Y()-upleft.Y(), cursorChar, TCODColor::green, TCODColor::black);
 			}
 			else {
-				if (!placeable) console->putCharEx(ix,b.y()-upleft.y(), cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,b.y()-upleft.y(), cursorChar, TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(ix,b.Y()-upleft.Y(), cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(ix,b.Y()-upleft.Y(), cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
-		for (int iy = a.y()-upleft.y(); iy <= b.y()-upleft.y() && iy < console->getHeight(); ++iy) {
+		for (int iy = a.Y()-upleft.Y(); iy <= b.Y()-upleft.Y() && iy < console->getHeight(); ++iy) {
 			if (!xswap) {
-				if (!placeable) console->putCharEx(b.x()-upleft.x(),iy, cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(b.x()-upleft.x(),iy, cursorChar, TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(b.X()-upleft.X(),iy, cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(b.X()-upleft.X(),iy, cursorChar, TCODColor::green, TCODColor::black);
 			}
 			else {
-				if (!placeable) console->putCharEx(a.x()-upleft.x(),iy, cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(a.x()-upleft.x(),iy, cursorChar, TCODColor::green, TCODColor::black);
+				if (!placeable) console->putCharEx(a.X()-upleft.X(),iy, cursorChar, TCODColor::red, TCODColor::black);
+				else console->putCharEx(a.X()-upleft.X(),iy, cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
 		if (xswap) {
-			tmp = a.x();
-			a.x(b.x());
-			b.x(tmp);
+			tmp = a.X();
+			a.X(b.X());
+			b.X(tmp);
 		}
 		if (yswap) {
-			tmp = a.y();
-			a.y(b.y());
-			b.y(tmp);
+			tmp = a.Y();
+			a.Y(b.Y());
+			b.Y(tmp);
 		}
-	} else if (_state == UIRECTPLACEMENT && a.x() > 0) {
-		if (a.x() > b.x()) {
-			tmp = a.x();
-			a.x(b.x());
-			b.x(tmp);
+	} else if (_state == UIRECTPLACEMENT && a.X() > 0) {
+		if (a.X() > b.X()) {
+			tmp = a.X();
+			a.X(b.X());
+			b.X(tmp);
 			xswap = true;
 		}
-		if (a.y() > b.y()) {
-			tmp = a.y();
-			a.y(b.y());
-			b.y(tmp);
+		if (a.Y() > b.Y()) {
+			tmp = a.Y();
+			a.Y(b.Y());
+			b.Y(tmp);
 			yswap = true;
 		}
-		for (int ix = a.x()-upleft.x(); ix <= b.x()-upleft.x() && ix < console->getWidth(); ++ix) {
-			for (int iy = a.y()-upleft.y(); iy <= b.y()-upleft.y() && iy < console->getHeight(); ++iy) {
+		for (int ix = a.X()-upleft.X(); ix <= b.X()-upleft.X() && ix < console->getWidth(); ++ix) {
+			for (int iy = a.Y()-upleft.Y(); iy <= b.Y()-upleft.Y() && iy < console->getHeight(); ++iy) {
 				if (!placeable) console->putCharEx(ix,iy,cursorChar, TCODColor::red, TCODColor::black);
 				else console->putCharEx(ix,iy,cursorChar, TCODColor::green, TCODColor::black);
 			}
 		}
 		if (xswap) {
-			tmp = a.x();
-			a.x(b.x());
-			b.x(tmp);
+			tmp = a.X();
+			a.X(b.X());
+			b.X(tmp);
 		}
 		if (yswap) {
-			tmp = a.y();
-			a.y(b.y());
-			b.y(tmp);
+			tmp = a.Y();
+			a.Y(b.Y());
+			b.Y(tmp);
 		}
 	}
 
@@ -466,6 +460,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 
 void UI::DrawTopBar(TCODConsole* console) {
     console->setAlignment(TCOD_CENTER);
+	console->setForegroundColor(TCODColor::white);
     console->print(console->getWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
                              Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->CurrentSeason()).c_str());
 
@@ -497,10 +492,6 @@ void UI::DrawTopBar(TCODConsole* console) {
 		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
 		console->print(x, 3, "rders");
 	}
-
-#ifdef DEBUG
-	console->print(0, 0, "%d,%d", mouseInput.x, mouseInput.y);
-#endif
 
 	console->setForegroundColor(TCODColor::white);
 }
@@ -588,11 +579,11 @@ void UI::ChooseDismantle() {
 }
 
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
-    if (pos.x() >= 0 && pos.x() < Map::Inst()->Width() && pos.y() >= 0 && pos.y() < Map::Inst()->Height()) {
-        std::set<int> *npcList = Map::Inst()->NPCList(pos.x(), pos.y());
+    if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+        std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
         if (!npcList->empty()) return Game::Inst()->npcList[(*npcList->begin())];
 
-        std::set<int> *itemList = Map::Inst()->ItemList(pos.x(), pos.y());
+        std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
         if (!itemList->empty()) {
             std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
             if (itemi != Game::Inst()->freeItems.end()) {
@@ -600,10 +591,10 @@ boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
             }
         }
 
-        int entity = Map::Inst()->NatureObject(pos.x(), pos.y());
+        int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
         if (entity > -1) return (Game::Inst()->natureList[entity]);
 
-        entity = Map::Inst()->Construction(pos.x(), pos.y());
+        entity = Map::Inst()->Construction(pos.X(), pos.Y());
         if (entity > -1) return Game::Inst()->GetConstruction(entity);
     }
     return boost::weak_ptr<Entity>();
@@ -612,8 +603,8 @@ boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 void UI::HandleUnderCursor(Coordinate pos) {
     underCursor.clear();
 
-   if (pos.x() >= 0 && pos.x() < Map::Inst()->Width() && pos.y() >= 0 && pos.y() < Map::Inst()->Height()) {
-        std::set<int> *npcList = Map::Inst()->NPCList(pos.x(), pos.y());
+   if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+        std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
         if (!npcList->empty()) {
             for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
                 underCursor.push_back(Game::Inst()->npcList[*npci]);
@@ -621,7 +612,7 @@ void UI::HandleUnderCursor(Coordinate pos) {
             return;
         }
 
-        std::set<int> *itemList = Map::Inst()->ItemList(pos.x(), pos.y());
+        std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
         if (!itemList->empty()) {
             std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
             if (itemi != Game::Inst()->freeItems.end()) {
@@ -630,13 +621,13 @@ void UI::HandleUnderCursor(Coordinate pos) {
             }
         }
 
-        int entity = Map::Inst()->NatureObject(pos.x(), pos.y());
+        int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
         if (entity > -1) {
             underCursor.push_back(Game::Inst()->natureList[entity]);
             return;
         }
 
-        entity = Map::Inst()->Construction(pos.x(), pos.y());
+        entity = Map::Inst()->Construction(pos.X(), pos.Y());
         if (entity > -1) {
             underCursor.push_back(Game::Inst()->GetConstruction(entity));
             return;
@@ -663,7 +654,7 @@ void UI::HideMenu() {
 void UI::CloseMenu() {
 	menuOpen = false;
 	_state = UINORMAL;
-	a.x(0); a.y(0);
+	a.X(0); a.Y(0);
 	textMode = false;
 	currentMenu = Menu::MainMenu();
 }

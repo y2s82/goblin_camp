@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/serialization/split_member.hpp>
-#include <boost/serialization/map.hpp>
 
 #include "Stockpile.hpp"
 

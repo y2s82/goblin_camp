@@ -15,9 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/base_object.hpp>
-#include <boost/serialization/export.hpp>
+#include <queue>
+#include <list>
+
 #include <boost/serialization/split_member.hpp>
 
 #include <boost/thread/thread.hpp>
@@ -25,9 +25,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/function.hpp>
 
 #include <libtcod.hpp>
-
-#include <queue>
-#include <list>
 
 #include "Coordinate.hpp"
 #include "Job.hpp"
@@ -89,6 +86,7 @@ struct NPCPreset {
 class NPC : public Entity {
 	friend class boost::serialization::access;
 	friend class Game;
+	friend class NPCListener;
 
 	private:
 		template<class Archive>

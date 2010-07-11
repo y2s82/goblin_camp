@@ -41,7 +41,8 @@ Announce* Announce::Inst() {
 
 Announce::Announce() : 
     timer(0),
-	length(0)
+	length(0),
+	height(0)
 {}
 
 void Announce::AddMsg(std::string msg, TCODColor color) {
@@ -53,6 +54,7 @@ void Announce::AddMsg(std::string msg, TCODColor color) {
 		messageQueue.push_back(new AnnounceMessage(msg, color));
 		if (messageQueue.size() <= ANNOUNCE_HEIGHT) {
 			if (msg.length() > length) length = msg.length();
+			height = messageQueue.size();
 		}
 	}
 }
@@ -80,15 +82,12 @@ void Announce::Update() {
 
 void Announce::Draw(TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
-	unsigned int height = 0;
-	if (messageQueue.size() > 0)
-		height = std::min((unsigned int)ANNOUNCE_HEIGHT, messageQueue.size());
-
+	
 	if (height > 0 && (signed int)height < console->getHeight() - 1) {
-        console->hline(0, console->getHeight()-1-height, length+1);
-        console->putChar(length, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
-        console->vline(length, console->getHeight()-height, height);
-        console->rect(0, console->getHeight()-height, length, height, true);
+        console->hline(0, console->getHeight()-1-height, length+4);
+        console->putChar(length+3, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
+        console->vline(length+3, console->getHeight()-height, height);
+        console->rect(0, console->getHeight()-height, length+3, height, true);
 
         for (int i = height-1; i >= 0; --i) {
             AnnounceMessage* msg = messageQueue[i];
@@ -103,7 +102,7 @@ void Announce::Draw(Coordinate pos, int from, int amount, TCODConsole* console) 
     int count = 0;
     for (std::deque<AnnounceMessage*>::iterator ani = history.begin(); ani != history.end(); ++ani) {
         if (count++ >= from) {
-            console->print(pos.x(), pos.y()+count-from, (*ani)->ToString().c_str());
+            console->print(pos.X(), pos.Y()+count-from, (*ani)->ToString().c_str());
             if (count-from+1 == amount) return;
         }
     }

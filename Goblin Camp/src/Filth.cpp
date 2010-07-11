@@ -27,8 +27,8 @@ void FilthNode::Update() {
 }
 
 void FilthNode::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenX = x - upleft.x();
-	int screenY = y - upleft.y();
+	int screenX = x - upleft.X();
+	int screenY = y - upleft.Y();
 
 	if (depth > 0) {
 		if (screenX >= 0 && screenX < console->getWidth() &&

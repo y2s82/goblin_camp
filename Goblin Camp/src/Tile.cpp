@@ -84,9 +84,8 @@ void Tile::Walkable(bool value) {
 	std::queue<int> bumpQueue;
 	walkable = value;
 	if (value == false) {
-		//This is a tough one, we need to call BumpNPC for each npc, which will modify
-		//npcList. That's why we temporarily store the uids elsewhere so that we can safely
-		//call them. Iterating through a list while modifying it destructively isn't safe
+		//We temporarily store the uids elsewhere so that we can safely
+		//call them. Iterating through a set while modifying it destructively isn't safe
         for (std::set<int>::iterator npcIter = npcList.begin(); npcIter != npcList.end(); ++npcIter) {
             bumpQueue.push(*npcIter);
         }
@@ -116,7 +115,7 @@ void Tile::MoveFrom(int uid) {
 #ifdef DEBUG
 		std::cout<<"\nNPC "<<uid<<" moved off of empty list";
 		std::cout<<"\nlist.size(): "<<npcList.size();
-		std::cout<<"\nNPC: "<<Game::Inst()->npcList[uid]->Position().x()<<","<<Game::Inst()->npcList[uid]->Position().y()<<'\n';
+		std::cout<<"\nNPC: "<<Game::Inst()->npcList[uid]->Position().X()<<","<<Game::Inst()->npcList[uid]->Position().Y()<<'\n';
 #endif
 		return;
 	}
@@ -125,8 +124,7 @@ void Tile::MoveFrom(int uid) {
 
 bool Tile::MoveTo(int uid) {
 	if (Walkable()) {
-		npcList.insert(uid);
-		if (npcList.find(uid) == npcList.end()) Logger::Inst()->output<<"NPC inserted but disappeared!?\n";
+		npcList.insert(uid);		
 		return true;
 	}
 	return false;

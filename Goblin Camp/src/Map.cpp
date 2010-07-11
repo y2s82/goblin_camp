@@ -62,10 +62,10 @@ void Map::Construction(int x, int y, int uid) { tileMap[x][y].Construction(uid);
 int Map::Construction(int x, int y) { return tileMap[x][y].Construction(); }
 
 void Map::Draw(Coordinate upleft, TCODConsole *console) {
-	int screenDeltaX = upleft.x();
-	int screenDeltaY = upleft.y();
-	for (int y = upleft.y(); y < upleft.y() + console->getHeight(); ++y) {
-		for (int x = upleft.x(); x < upleft.x() + console->getWidth(); ++x) {
+	int screenDeltaX = upleft.X();
+	int screenDeltaY = upleft.Y();
+	for (int y = upleft.Y(); y < upleft.Y() + console->getHeight(); ++y) {
+		for (int x = upleft.X(); x < upleft.X() + console->getWidth(); ++x) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
 			    console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), ForeColor(x,y), BackColor(x,y));
@@ -116,7 +116,7 @@ bool Map::BlocksLight(int x, int y) const { return tileMap[x][y].BlocksLight(); 
 void Map::BlocksLight(int x, int y, bool val) { tileMap[x][y].BlocksLight(val); }
 
 bool Map::LineOfSight(Coordinate a, Coordinate b) {
-	return LineOfSight(a.x(), a.y(), b.x(), b.y());
+	return LineOfSight(a.X(), a.Y(), b.X(), b.Y());
 }
 
 bool Map::LineOfSight(int ax, int ay, int bx, int by) {

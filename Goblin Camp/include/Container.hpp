@@ -15,11 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/weak_ptr.hpp>
-#include <boost/serialization/weak_ptr.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/base_object.hpp>
 #include <set>
+
+#include <boost/weak_ptr.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include "Item.hpp"
 

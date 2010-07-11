@@ -16,10 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/serialization/split_member.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/export.hpp>
-
-#include <cstdlib>
 
 class Coordinate {
 	friend class boost::serialization::access;
@@ -30,14 +26,14 @@ class Coordinate {
 		void load(Archive & ar, const unsigned int version);
 		BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		int _x, _y;
+		int x, y;
 	public:
 		Coordinate(int valuex = 0,int = 0);
 
-		int x() const;
-		int x(int);
-		int y() const;
-		int y(int);
+		int X() const;
+		int X(int);
+		int Y() const;
+		int Y(int);
 		bool operator<(const Coordinate) const;
 		bool operator==(const Coordinate) const;
 		bool operator!=(const Coordinate) const;
