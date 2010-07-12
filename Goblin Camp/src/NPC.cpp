@@ -314,12 +314,16 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 				case MOVE:
+					if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y())) {
+						TaskFinished(TASKFAILFATAL);
+						break;
+					}
 					if ((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y()) {
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
 					if (!taskBegun) { findPath(currentTarget()); taskBegun = true; result = TASKCONTINUE;}
-					//result = Move();
+					
 					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) {
 						TaskFinished(result, std::string("Could not find path to target")); break;
 					} else if (result == PATHEMPTY) {

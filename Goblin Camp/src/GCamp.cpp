@@ -30,7 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 int main(std::string cmdline) {
 	int width = -1, height = -1;
-    bool fullscreen = false;
+	bool fullscreen = false;
 
 	TCODList<char*> list =  TCODSystem::getDirectoryContent("./", "config.ini");
 	if (!list.isEmpty()) {
@@ -64,7 +64,7 @@ int main(std::string cmdline) {
 			width = -1; height = -1; fullscreen = false;
 		}
 	}
-	CONTINUEMAIN:
+CONTINUEMAIN:
 
 	Game::Inst()->Init(width,height,fullscreen);
 	return MainMenu();
@@ -108,13 +108,12 @@ void MainLoop() {
 				Announce::Inst()->Update();
 				JobManager::Inst()->Update();
 			}
+
+			game->buffer->flush();
+			game->Draw();
+			game->FlipBuffer();
 		}
 		update = !update;
-
-
-		game->buffer->flush();
-        game->Draw();
-		game->FlipBuffer();
 
 		elapsedMilli = TCODSystem::getElapsedMilli() - startMilli;
 		startMilli = TCODSystem::getElapsedMilli();
@@ -246,7 +245,7 @@ void LoadMenu() {
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 
 	TCODConsole::root->setAlignment(TCOD_CENTER);
-	
+
 	bool lButtonDown = false;
 
 	while (!exit) {
@@ -305,7 +304,7 @@ void SaveMenu() {
 		if (key.vk == TCODK_ESCAPE) return;
 		else if (key.vk == TCODK_ENTER) {
 			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
-			Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
+				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
 			Game::Inst()->SaveGame((boost::format("./saves/%s.sav") % saveName).str());
 			break;

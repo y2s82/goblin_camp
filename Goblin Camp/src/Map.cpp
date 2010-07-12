@@ -61,6 +61,7 @@ void Map::MoveFrom(int x, int y, int uid) { tileMap[x][y].MoveFrom(uid); }
 void Map::Construction(int x, int y, int uid) { tileMap[x][y].Construction(uid); }
 int Map::Construction(int x, int y) { return tileMap[x][y].Construction(); }
 
+//TODO: Optimize. This causes the biggest performance hit by far right now 
 void Map::Draw(Coordinate upleft, TCODConsole *console) {
 	int screenDeltaX = upleft.X();
 	int screenDeltaY = upleft.Y();

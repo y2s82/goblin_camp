@@ -45,8 +45,8 @@ npc_type "giant snail" {
 npc_type "starving wolf" {
 	name="Starving Wolf"
 	plural="Starving Wolves"
-	speed="1d10+20"
-	color="96,96,96"
+	speed="1d10+17"
+	color="219,219,219"
 	graphic='w'
 	health=150
 	AI="HungryAnimal"
@@ -54,4 +54,17 @@ npc_type "starving wolf" {
 	attackPower="5d4"
 	defenceSkill="1d5+5"
 	spawnAsGroup="1d4+3"
+}
+
+npc_type "rabid albino rat" {
+	name="Rabid Albino Rat"
+	speed="1d10+20"
+	color="255,255,255"
+	graphic='r'
+	health=25
+	AI="HungryAnimal"
+	attackSkill="1d4+1"
+	attackPower="1d2+1"
+	defenceSkill="1d1+1"
+	spawnAsGroup="1d10+5"
 }
