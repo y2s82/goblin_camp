@@ -329,47 +329,51 @@ void Construction::LoadPresets(ticpp::Document doc) {
 }
 
 void Construction::SpawnProductionJob() {
-	//First check that the requisite items actually exist
-	std::list<boost::weak_ptr<Item> > componentList;
-	for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi));
-		if (item.lock()) {
-			componentList.push_back(item);
-			item.lock()->Reserve(true);
-		} else {
-			//Not all items available, cancel job and unreserve the reserved items.
-			for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
-				resi->lock()->Reserve(false);
+	//Only spawn a job is the construction isn't already reserved
+	if (!reserved) {
+		//First check that the requisite items actually exist
+		std::list<boost::weak_ptr<Item> > componentList;
+		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
+			boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi));
+			if (item.lock()) {
+				componentList.push_back(item);
+				item.lock()->Reserve(true);
+			} else {
+				//Not all items available, cancel job and unreserve the reserved items.
+				for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+					resi->lock()->Reserve(false);
+				}
+				jobList.pop_front();
+				return;
 			}
-			jobList.pop_front();
-			return;
 		}
-	}
 
-	//Unreserve the items now, because the individual jobs will reserve them for themselves
-	for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
-		resi->lock()->Reserve(false);
-	}
+		//Unreserve the items now, because the individual jobs will reserve them for themselves
+		for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+			resi->lock()->Reserve(false);
+		}
 
-	boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
-    newProductionJob->ConnectToEntity(shared_from_this());
+		boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
+		newProductionJob->ConnectToEntity(shared_from_this());
+		newProductionJob->ReserveEntity(shared_from_this());
 	
-    for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-        boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
-        newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi)));
-        newPickupJob->tasks.push_back(Task(MOVE));
-        newPickupJob->tasks.push_back(Task(TAKE));
-        newPickupJob->tasks.push_back(Task(MOVE, container->Position(), container));
-        newPickupJob->tasks.push_back(Task(PUTIN, container->Position(), container));
+		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
+			boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
+			newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi)));
+			newPickupJob->tasks.push_back(Task(MOVE));
+			newPickupJob->tasks.push_back(Task(TAKE));
+			newPickupJob->tasks.push_back(Task(MOVE, container->Position(), container));
+			newPickupJob->tasks.push_back(Task(PUTIN, container->Position(), container));
 
-        newProductionJob->PreReqs()->push_back(newPickupJob);
-        newPickupJob->Parent(newProductionJob);
+			newProductionJob->PreReqs()->push_back(newPickupJob);
+			newPickupJob->Parent(newProductionJob);
 
-        JobManager::Inst()->AddJob(newPickupJob);
-    }
-    newProductionJob->tasks.push_back(Task(MOVE, Position()+Construction::ProductionSpot(type)));
-    newProductionJob->tasks.push_back(Task(USE, Position()+Construction::ProductionSpot(type), shared_from_this()));
-    JobManager::Inst()->AddJob(newProductionJob);
+			JobManager::Inst()->AddJob(newPickupJob);
+		}
+		newProductionJob->tasks.push_back(Task(MOVE, Position()+Construction::ProductionSpot(type)));
+		newProductionJob->tasks.push_back(Task(USE, Position()+Construction::ProductionSpot(type), shared_from_this()));
+		JobManager::Inst()->AddJob(newProductionJob);
+	}
 }
 
 boost::weak_ptr<Container> Construction::Storage() {

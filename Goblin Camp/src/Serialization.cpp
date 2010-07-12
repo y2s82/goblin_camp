@@ -295,6 +295,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
 	ar & _priority;
 	ar & completion;
 	ar & preReqs;
