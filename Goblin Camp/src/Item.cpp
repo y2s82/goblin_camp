@@ -155,8 +155,6 @@ void Item::LoadPresets(ticpp::Document doc) {
                 ++Game::ItemCatCount;
                 ticpp::Iterator<ticpp::Node> child;
                 for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-                    Logger::Inst()->output<<"Children\n";
-                    Logger::Inst()->output.flush();
                     if (child->Value() == "name") {
                         Categories.back().name = child->ToElement()->GetText();
                         itemCategoryNames.insert(std::pair<std::string, ItemCategory>(Categories.back().name, Game::ItemCatCount-1));

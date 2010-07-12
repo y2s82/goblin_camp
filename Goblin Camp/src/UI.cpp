@@ -42,6 +42,7 @@ UI::UI() :
 	lbuttonPressed(false),
 	mbuttonPressed(false),
 	rbuttonPressed(false),
+	keyHelpTextColor(0),
 	draggingViewport(false),
 	textMode(false),
 	inputString(std::string("")),

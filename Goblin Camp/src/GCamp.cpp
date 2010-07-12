@@ -223,6 +223,7 @@ int MainMenu() {
 		else if (key.c == 'n') MainLoop();
 
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp 0.1");
 		if (!endCredits) endCredits = TCODConsole::renderCredits(Game::Inst()->ScreenWidth()-20, 
 			Game::Inst()->ScreenHeight()-3, true);

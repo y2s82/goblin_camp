@@ -53,7 +53,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Camp.hpp"
 #include "Container.hpp"
 #include "Blood.hpp"
-
+#include "Entity.hpp"
 
 template<class Archive>
 void Coordinate::save(Archive & ar, const unsigned int version) const {
@@ -243,8 +243,8 @@ template<class Archive>
 void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
-	ar & uids;
 	ar & uid;
+	ar & uids,
 	ar & zone;
 	ar & reserved;
 	ar & name;
@@ -269,6 +269,7 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
 	ar & _priority;
 	ar & completion;
 	ar & preReqs;

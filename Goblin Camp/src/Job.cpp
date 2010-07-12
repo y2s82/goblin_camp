@@ -40,10 +40,14 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	menial(m),
 	paused(false),
 	waitingForRemoval(false),
+	reservedEntities(std::list<boost::weak_ptr<Entity> >()),
 	reservedSpot(std::pair<boost::weak_ptr<Stockpile>, Coordinate>(boost::weak_ptr<Stockpile>(), Coordinate(0,0))),
 	attempts(0),
 	attemptMax(5),
+	connectedEntity(boost::weak_ptr<Entity>()),
+	reservedSpace(boost::weak_ptr<Container>()),
 	name(value),
+	tasks(std::vector<Task>()),
 	internal(false)
 {
 }

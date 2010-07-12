@@ -97,6 +97,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 NPC::~NPC() {
 	Map::Inst()->NPCList(x, y)->erase(uid);
 	if (squad.lock()) squad.lock()->Leave(uid);
+
+	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Game::Inst()->OrcCount(-1);
+	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Game::Inst()->GoblinCount(-1);
 }
 
 void NPC::Position(Coordinate pos, bool firstTime) {
@@ -584,7 +587,7 @@ AiThink NPC::Think() {
 
 				case SLEEP:
 					AddEffect(SLEEPING);
-					weariness -= 10;
+					weariness -= 50;
 					if (weariness <= 0) {
 						TaskFinished(TASKSUCCESS);
 						break;

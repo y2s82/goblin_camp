@@ -244,7 +244,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 }
 
 int Game::OrcCount() { return orcCount; }
+void Game::OrcCount(int add) { orcCount += add; }
 int Game::GoblinCount() { return goblinCount; }
+void Game::GoblinCount(int add) { goblinCount += add; }
+
 
 //Moves the entity to a valid walkable tile
 //TODO: make it find the closest walkable tile instead of going right, that will lead to weirdness and problems

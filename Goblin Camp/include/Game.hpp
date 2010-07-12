@@ -85,6 +85,7 @@ public:
 	void BumpEntity(int);
 	int DistanceNPCToCoordinate(int, Coordinate);
 	int OrcCount(); int GoblinCount();
+	void OrcCount(int); void GoblinCount(int);
 	void FindNearbyNPCs(boost::shared_ptr<NPC>, bool onlyHostiles = false);
 	void RemoveNPC(boost::weak_ptr<NPC>);
 	int FindMilitaryRecruit();
