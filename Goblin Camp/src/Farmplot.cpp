@@ -106,7 +106,7 @@ int FarmPlot::Use() {
         bool seedsLeft = true;
         std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin();
         while (seedsLeft && containerIt != containers.end()) {
-            while (!containerIt->second->empty()) {
+            while (!containerIt->second->empty() && !reserved[containerIt->first]) {
                 ++containerIt;
                 if (containerIt == containers.end()) return 100;
             }
@@ -117,6 +117,7 @@ int FarmPlot::Use() {
                 if (seed.lock()) {
 					boost::shared_ptr<Job> plantJob(new Job("Plant", MED, 0, false));
                     plantJob->ReserveEntity(seed);
+					plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first);
                     plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
                     plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
                     plantJob->tasks.push_back(Task(MOVE, containerIt->first));

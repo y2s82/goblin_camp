@@ -47,8 +47,8 @@ void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 }
 
 void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {
-/*	if (boost::shared_ptr<Job> job = oldJob.lock()) {
-        if (job->priority() > LOW)
+	if (boost::shared_ptr<Job> job = oldJob.lock()) {
+/*        if (job->priority() > LOW)
             Announce::Inst()->AddMsg(oldJob.lock()->name+std::string(" canceled: ")+msg, TCODColor::red);
 */
         job->Assign(-1);
