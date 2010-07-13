@@ -109,6 +109,7 @@ class NPC : public Entity {
 		bool findPathWorking;
 		int timer;
 		unsigned int nextMove;
+		TaskResult lastMoveResult;
 		bool run;
 		TCODColor _color, _bgcolor;
 		int _graphic;
@@ -168,7 +169,7 @@ class NPC : public Entity {
 		Coordinate currentTarget();
 		boost::weak_ptr<Entity> currentEntity();
 		void TaskFinished(TaskResult, std::string = "");
-		TaskResult Move();
+		TaskResult Move(TaskResult);
 		void findPath(Coordinate);
 
 		void AddEffect(StatusEffectType);

@@ -88,6 +88,7 @@ void MainLoop() {
 
 	for (int seeds = 0; seeds < 20; ++seeds) {
 		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
+		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Wood log"), true);
 	}
 
 	bool update = false;

@@ -56,6 +56,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	findPathWorking(false),
 	timer(0),
 	nextMove(0),
+	lastMoveResult(TASKCONTINUE),
 	run(true),
 	taskBegun(false),
 	expert(false),
@@ -298,9 +299,8 @@ void NPC::Update() {
 AiThink NPC::Think() {
 	Coordinate tmpCoord;
 	int tmp;
-	TaskResult result;
 
-	result = Move();
+	lastMoveResult = Move(lastMoveResult);
 
 	timeCount += thinkSpeed;
 	while (timeCount > UPDATES_PER_SECOND) {
@@ -322,11 +322,11 @@ AiThink NPC::Think() {
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
-					if (!taskBegun) { findPath(currentTarget()); taskBegun = true; result = TASKCONTINUE;}
+					if (!taskBegun) { findPath(currentTarget()); taskBegun = true; lastMoveResult = TASKCONTINUE;}
 					
-					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) {
-						TaskFinished(result, std::string("Could not find path to target")); break;
-					} else if (result == PATHEMPTY) {
+					if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) {
+						TaskFinished(lastMoveResult, std::string("Could not find path to target")); break;
+					} else if (lastMoveResult == PATHEMPTY) {
 					    if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
 					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
 					    }
@@ -370,11 +370,11 @@ AiThink NPC::Think() {
 							findPath(tmpCoord);
 						} else { TaskFinished(TASKFAILFATAL, std::string("No walkable adjacent tiles")); break; }
 						taskBegun = true;
-						result = TASKCONTINUE;
+						lastMoveResult = TASKCONTINUE;
 					}
-					//result = Move();
-					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
-					else if (result == PATHEMPTY) {
+					//lastMoveResult = Move();
+					if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
+					else if (lastMoveResult == PATHEMPTY) {
 /*					    if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
 					        TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
 					    } */
@@ -556,12 +556,12 @@ AiThink NPC::Think() {
 							findPath(tmpCoord);
 						}
 						taskBegun = true;
-						result = TASKCONTINUE;
+						lastMoveResult = TASKCONTINUE;
 					}
-					//result = Move();
+					//lastMoveResult = Move();
 
-					if (result == TASKFAILFATAL || result == TASKFAILNONFATAL) { TaskFinished(result, std::string("Could not find path to target")); break; }
-					else if (result == PATHEMPTY) {
+					if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
+					else if (lastMoveResult == PATHEMPTY) {
 						findPath(currentEntity().lock()->Position());
 					}
 					break;
@@ -652,7 +652,7 @@ AiThink NPC::Think() {
 	return AINOTHING;
 }
 
-TaskResult NPC::Move() {
+TaskResult NPC::Move(TaskResult oldResult) {
 	int moveX,moveY;
 	nextMove += run ? effectiveStats[MOVESPEED] : effectiveStats[MOVESPEED]/3;
 	while (nextMove > 100) {
@@ -663,10 +663,12 @@ TaskResult NPC::Move() {
 			if (!path->isEmpty()) {
 				if (!path->walk(&moveX, &moveY, false)) return TASKFAILNONFATAL;
 				Position(Coordinate(moveX,moveY));
+				return TASKCONTINUE;
 			} else if (!findPathWorking) return PATHEMPTY;
 		}
 	}
-	return TASKCONTINUE;
+	//Can't move yet, so the earlier result is still valid
+	return oldResult;
 }
 
 void NPC::findPath(Coordinate target) {
