@@ -137,8 +137,8 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
         }
     } else {
         if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
-        else if (msg.size() > 0 && faction == 0) 
-			Announce::Inst()->AddMsg((boost::format("%s cancelled: %s") % Job::ActionToString(currentTask()->action) % msg).str());
+/*        else if (msg.size() > 0 && faction == 0) 
+			Announce::Inst()->AddMsg((boost::format("%s cancelled: %s") % Job::ActionToString(currentTask()->action) % msg).str());*/
         jobs.pop_front();
         taskIndex = 0;
         DropCarriedItem();
