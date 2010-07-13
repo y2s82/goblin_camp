@@ -85,7 +85,7 @@ protected:
 	std::vector<ItemType> products;
 	std::deque<ItemType> jobList;
 	int progress;
-	void SpawnProductionJob();
+	bool SpawnProductionJob();
 	boost::shared_ptr<Container> container;
 	boost::shared_ptr<Container> materialsUsed;
 	bool stockpile, farmplot;

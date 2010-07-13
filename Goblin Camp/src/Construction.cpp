@@ -158,7 +158,7 @@ void Construction::AddJob(ItemType item) {
 void Construction::CancelJob(int index) {
     if (index == 0 && index < (signed int)jobList.size()) {
         jobList.erase(jobList.begin());
-        if (!jobList.empty()) SpawnProductionJob();
+		while (!jobList.empty() && !reserved && !SpawnProductionJob());
     } else if (index > 0 && index < (signed int)jobList.size()) { jobList.erase(jobList.begin() + index); }
     else if (condition <= 0) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	else if (dismantle) dismantle = false; //Stop trying to dismantle
@@ -328,7 +328,7 @@ void Construction::LoadPresets(ticpp::Document doc) {
     Logger::Inst()->output<<"Finished reading constructions.xml\nConstructions: "<<Presets.size()<<'\n';
 }
 
-void Construction::SpawnProductionJob() {
+bool Construction::SpawnProductionJob() {
 	//Only spawn a job is the construction isn't already reserved
 	if (!reserved) {
 		//First check that the requisite items actually exist
@@ -344,7 +344,7 @@ void Construction::SpawnProductionJob() {
 					resi->lock()->Reserve(false);
 				}
 				jobList.pop_front();
-				return;
+				return false;
 			}
 		}
 
@@ -373,7 +373,9 @@ void Construction::SpawnProductionJob() {
 		newProductionJob->tasks.push_back(Task(MOVE, Position()+Construction::ProductionSpot(type)));
 		newProductionJob->tasks.push_back(Task(USE, Position()+Construction::ProductionSpot(type), shared_from_this()));
 		JobManager::Inst()->AddJob(newProductionJob);
+		return true;
 	}
+	return false;
 }
 
 boost::weak_ptr<Container> Construction::Storage() {
