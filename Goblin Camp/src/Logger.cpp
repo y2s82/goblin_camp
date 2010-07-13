@@ -17,15 +17,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #include <fstream>
 
+#include <boost/date_time/local_time/local_time.hpp>
+
 #include "logger.hpp"
 
 Logger::Logger() {
     output.open("Log.txt");
-    output<<"Logging begun\n";
+    output<<"Logging begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
+	
 }
 
 Logger::~Logger() {
-    output<<"Logging ended.";
+	output<<"Logging ended @ "<<boost::posix_time::second_clock::local_time();
     output.flush();
 }
 

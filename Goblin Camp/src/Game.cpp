@@ -319,8 +319,6 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	TCODConsole::setKeyboardRepeat(500, 10);
 
-    Logger::Inst()->output<<"Opening constructions.xml\n";
-
     ticpp::Document constructionsXml("./constructions.xml");
     ticpp::Document itemsXml("./items.xml");
     ticpp::Document plantsXml("./wildplants.xml");

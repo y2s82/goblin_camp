@@ -180,7 +180,6 @@ void NPC::HandleThirst() {
 						}
 					}
 				}
-				Logger::Inst()->output<<"Couldn't find a walkable tile for water\n";
 				CONTINUEDRINKBLOCK:
 				newJob->tasks.push_back(Task(DRINK, tmpCoord));
 				jobs.push_back(newJob);
@@ -704,7 +703,6 @@ void NPC::Kill() {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
 		health = 0;
-		Logger::Inst()->output<<"Kill npc:"<<name<<uid<<"\n";
 		int corpse = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
 		Game::Inst()->GetItem(corpse).lock()->Color(_color);
 		Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
