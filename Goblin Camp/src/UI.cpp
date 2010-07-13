@@ -219,6 +219,9 @@ void UI::HandleMouse() {
 	int tmp;
 	MenuResult menuResult = NOMENUHIT;
 	bool xswap = false, yswap = false;
+
+	if (TCODConsole::isWindowClosed()) Game::Inst()->Exit();
+
 	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
 	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
 		mouseInput = tempStatus;
