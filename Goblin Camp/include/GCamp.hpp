@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define UPDATES_PER_SECOND 50
 
+void StartNewGame();
 int MainMenu();
 void LoadMenu();
 void SaveMenu();

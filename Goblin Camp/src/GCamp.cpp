@@ -78,19 +78,6 @@ void MainLoop() {
 	if (!game->Running()) Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
 	game->Running(true);
 
-	for (int npcs = 0; npcs < 10; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
-	}
-	for (int npcs = 0; npcs < 15; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
-		game->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
-	}
-
-	for (int seeds = 0; seeds < 20; ++seeds) {
-		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
-		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Wood log"), true);
-	}
-
 	bool update = false;
 	int elapsedMilli;
 	int targetMilli = 1000 / (UPDATES_PER_SECOND*2);
@@ -119,6 +106,23 @@ void MainLoop() {
 		elapsedMilli = TCODSystem::getElapsedMilli() - startMilli;
 		startMilli = TCODSystem::getElapsedMilli();
 		if (elapsedMilli < targetMilli) TCODSystem::sleepMilli(targetMilli - elapsedMilli);
+	}
+}
+
+void StartNewGame() {
+	Game* game = Game::Inst();
+
+	for (int npcs = 0; npcs < 10; ++npcs) {
+		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
+	}
+	for (int npcs = 0; npcs < 15; ++npcs) {
+		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
+		game->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
+	}
+
+	for (int seeds = 0; seeds < 20; ++seeds) {
+		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
+		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Wood log"), true);
 	}
 }
 
@@ -165,7 +169,7 @@ int MainMenu() {
 
 		if (!mouseStatus.lbutton && lButtonDown) {
 			lButtonDown = false;
-			if (selected == 0) MainLoop();
+			if (selected == 0) StartNewGame();
 			else if (selected == 2 && Game::Inst()->Running()) MainLoop();
 			else if (selected == 4) LoadMenu();
 			else if (selected == 6 && Game::Inst()->Running()) SaveMenu();
@@ -220,7 +224,7 @@ int MainMenu() {
 		TCODConsole::root->print(edgex+width/2, edgey+10, "Exit");
 
 		if (key.c == 'q') exit = true;
-		else if (key.c == 'n') MainLoop();
+		else if (key.c == 'n') StartNewGame();
 
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);

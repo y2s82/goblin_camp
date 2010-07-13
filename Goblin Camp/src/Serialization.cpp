@@ -78,6 +78,8 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & orcCount;
 	ar & goblinCount;
 	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
 	ar & staticConstructionList;
 	ar & dynamicConstructionList;
 	ar & itemList;
@@ -100,6 +102,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & orcCount;
 	ar & goblinCount;
 	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
 	ar & staticConstructionList;
 	ar & dynamicConstructionList;
 	ar & itemList;
