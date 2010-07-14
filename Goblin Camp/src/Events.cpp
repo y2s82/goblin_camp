@@ -33,8 +33,10 @@ Events::Events(Map* vmap) :
 	}
 }
 
+	//Pretty much just placeholder stuff until I get a proper events system in place
+
 void Events::Update() {
-	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0) {
 		int monsterType = rand() % hostileSpawningMonsters.size();
 		monsterType = hostileSpawningMonsters[monsterType];
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
@@ -45,7 +47,7 @@ void Events::Update() {
 		}
 	}
 
-	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 60 * 7) == 0) {
 		if (rand() % 2 == 0 && Game::Inst()->OrcCount() < 50) {
 			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
 			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));

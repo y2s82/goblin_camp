@@ -88,7 +88,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 						compi->lock()->Reserve(false);
 				}
 				componentList.clear();
-				Announce::Inst()->AddMsg((boost::format("Cancelled %s: missing %s") % Construction::Presets[construct].name % Item::ItemCategoryToString(*mati)).str(), TCODColor::red);
+				Announce::Inst()->AddMsg((boost::format("Cancelled build %s: missing %s") % Construction::Presets[construct].name % Item::ItemCategoryToString(*mati)).str(), TCODColor::red);
 				return -1;
 			}
 	}

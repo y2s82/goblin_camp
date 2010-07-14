@@ -427,8 +427,13 @@ AiThink NPC::Think() {
 					if (carried.lock()) {
 						bag->RemoveItem(carried);
 						carried.lock()->Position(Position());
-						if (currentEntity().lock()) {
-							if (!boost::static_pointer_cast<Container>(currentEntity().lock())->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+						if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
+							boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
+							if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+						} else {
+							DropCarriedItem();
+							TaskFinished(TASKFAILFATAL);
+							break;
 						}
 					}
                     carried.reset();
@@ -745,7 +750,8 @@ Coordinate NPC::currentTarget() {
 
 boost::weak_ptr<Entity> NPC::currentEntity() {
     if (currentTask()->entity.lock()) return currentTask()->entity;
-    else return boost::weak_ptr<Entity>(foundItem.lock());
+	else if (foundItem.lock()) return boost::weak_ptr<Entity>(foundItem.lock());
+    return boost::weak_ptr<Entity>();
 }
 
 
