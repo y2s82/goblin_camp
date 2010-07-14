@@ -739,7 +739,9 @@ void SideBar::Draw(TCODConsole* console) {
 			}
 			console->setForegroundColor(TCODColor::white);
 			if (npc->MemberOf().lock()) { //Member of a squad
-				console->print(edgeX - width + 1, topY+28, npc->MemberOf().lock()->Name().c_str());
+				console->setAlignment(TCOD_CENTER);
+				console->print(edgeX - (width / 2), topY+28, npc->MemberOf().lock()->Name().c_str());
+				console->setAlignment(TCOD_LEFT);
 			}
 		} else if (construction) {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);

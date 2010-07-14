@@ -20,6 +20,7 @@
     <None Include="items.xml">
       <SubType>Designer</SubType>
     </None>
+    <None Include="LIBTCOD-LICENSE.txt" />
     <None Include="names.dat" />
     <None Include="Readme.txt" />
     <None Include="wildplants.xml" />
