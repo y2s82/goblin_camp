@@ -424,10 +424,12 @@ AiThink NPC::Think() {
 					break;
 
 				case PUTIN:
-                    bag->RemoveItem(carried);
-                    carried.lock()->Position(Position());
-					if (currentEntity().lock()) {
-						if (!boost::static_pointer_cast<Container>(currentEntity().lock())->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+					if (carried.lock()) {
+						bag->RemoveItem(carried);
+						carried.lock()->Position(Position());
+						if (currentEntity().lock()) {
+							if (!boost::static_pointer_cast<Container>(currentEntity().lock())->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+						}
 					}
                     carried.reset();
                     TaskFinished(TASKSUCCESS);
@@ -435,32 +437,37 @@ AiThink NPC::Think() {
 
 				case DRINK: //Either we have an item target to drink, or a water tile
 					if (carried.lock()) { //Drink from an item
-                        thirst -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
-                        bag->RemoveItem(carried);
-                        Game::Inst()->RemoveItem(carried);
-                        carried = boost::weak_ptr<Item>();
-                        TaskFinished(TASKSUCCESS);
-                        break;
+						thirst -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+						bag->RemoveItem(carried);
+						Game::Inst()->RemoveItem(carried);
+						carried = boost::weak_ptr<Item>();
+						TaskFinished(TASKSUCCESS);
+						break;
 					} else { //Drink from a water tile
 						if (std::abs((signed int)x - currentTarget().X()) <= 1 &&
 							std::abs((signed int)y - currentTarget().Y()) <= 1) {
-							if (Map::Inst()->GetWater(currentTarget().X(), currentTarget().Y()).lock()->Depth() > DRINKABLE_WATER_DEPTH) {
-								thirst -= (int)(THIRST_THRESHOLD / 10);
-								if (thirst < 0) { TaskFinished(TASKSUCCESS); break; }
-							} else { TaskFinished(TASKFAILFATAL); break; }
-						} else { TaskFinished(TASKFAILFATAL); break; }
+								if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(currentTarget().X(), currentTarget().Y()).lock()) {
+									if (water->Depth() > DRINKABLE_WATER_DEPTH) {
+										thirst -= (int)(THIRST_THRESHOLD / 10);
+										if (thirst < 0) { TaskFinished(TASKSUCCESS); break; }
+									}
+								}
+						}
+						TaskFinished(TASKFAILFATAL);
 					}
 					break;
 
 				case EAT:
-					hunger -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
-					bag->RemoveItem(carried);
+					if (carried.lock()) {
+						hunger -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+						bag->RemoveItem(carried);
 
-					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
-					    Game::Inst()->CreateItem(Position(), *fruiti, true);
+						for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
+							Game::Inst()->CreateItem(Position(), *fruiti, true);
+						}
+
+						Game::Inst()->RemoveItem(carried);
 					}
-
-					Game::Inst()->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKSUCCESS);
 					break;
@@ -510,29 +517,41 @@ AiThink NPC::Think() {
                     }
 
                 case FELL:
-                    tmp = boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Fell();
-                    if (tmp <= 0) {
-                        for (std::list<ItemType>::iterator iti = NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.begin(); iti != NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.end(); ++iti) {
-                            Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->X(), currentEntity().lock()->Y()), *iti, true);
-                        }
-                        Map::Inst()->Walkable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
-                        Map::Inst()->Buildable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
-						Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
-                        TaskFinished(TASKSUCCESS);
-                    }
+					if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
+						tmp = tree->Fell();
+						if (tmp <= 0) {
+							for (std::list<ItemType>::iterator iti = NatureObject::Presets[tree->Type()].components.begin(); iti != NatureObject::Presets[tree->Type()].components.end(); ++iti) {
+								Game::Inst()->CreateItem(tree->Position(), *iti, true);
+							}
+							Map::Inst()->Walkable(tree->X(), tree->Y(), true);
+							Map::Inst()->Buildable(tree->X(), tree->Y(), true);
+							Game::Inst()->RemoveNatureObject(tree);
+							TaskFinished(TASKSUCCESS);
+							break;
+						}
+						//Job underway
+						break;
+					}
+					TaskFinished(TASKFAILFATAL);
                     break;
 
                 case HARVESTWILDPLANT:
-                    tmp = boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Harvest();
-                    if (tmp <= 0) {
-                        for (std::list<ItemType>::iterator iti = NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.begin(); iti != NatureObject::Presets[boost::static_pointer_cast<NatureObject>(currentEntity().lock())->Type()].components.end(); ++iti) {
-                            Game::Inst()->CreateItem(Coordinate(currentEntity().lock()->X(),currentEntity().lock()->Y()), *iti, true);
-                        }
-                        Map::Inst()->Walkable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
-                        Map::Inst()->Buildable(currentEntity().lock()->X(), currentEntity().lock()->Y(), true);
-                        Game::Inst()->RemoveNatureObject(boost::static_pointer_cast<NatureObject>(currentEntity().lock()));
-                        TaskFinished(TASKSUCCESS);
-                    }
+					if (boost::shared_ptr<NatureObject> plant = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
+						tmp = plant->Harvest();
+						if (tmp <= 0) {
+							for (std::list<ItemType>::iterator iti = NatureObject::Presets[plant->Type()].components.begin(); iti != NatureObject::Presets[plant->Type()].components.end(); ++iti) {
+								Game::Inst()->CreateItem(plant->Position(), *iti, true);
+							}
+							Map::Inst()->Walkable(plant->X(), plant->Y(), true);
+							Map::Inst()->Buildable(plant->X(), plant->Y(), true);
+							Game::Inst()->RemoveNatureObject(plant);
+							TaskFinished(TASKSUCCESS);
+							break;
+						}
+						//Job underway
+						break;
+					}
+					TaskFinished(TASKFAILFATAL);
                     break;
 
 				case KILL:
@@ -549,7 +568,6 @@ AiThink NPC::Think() {
 					}
 
 					if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
-//						findPath(currentEntity().lock()->Position());
 						tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
 						if (tmpCoord.X() >= 0) {
 							findPath(tmpCoord);
@@ -557,7 +575,6 @@ AiThink NPC::Think() {
 						taskBegun = true;
 						lastMoveResult = TASKCONTINUE;
 					}
-					//lastMoveResult = Move();
 
 					if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
 					else if (lastMoveResult == PATHEMPTY) {
@@ -721,7 +738,7 @@ void NPC::DropCarriedItem() {
 
 Coordinate NPC::currentTarget() {
     if (currentTask()->target == Coordinate(0,0) && foundItem.lock()) {
-        return foundItem.lock()->Entity::Position();
+        return foundItem.lock()->Position();
     }
     return currentTask()->target;
 }
@@ -739,26 +756,26 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex 
 }
 
 bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
-	if (npc->MemberOf().lock()) {
+	if (boost::shared_ptr<Squad> squad = npc->MemberOf().lock()) {
 		npc->aggressive = true;
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
 		newJob->internal = true;
-		switch (npc->MemberOf().lock()->Order()) {
+		switch (squad->Order()) {
 		case GUARD:
-			if (npc->MemberOf().lock()->TargetCoordinate().X() >= 0) {
-				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetCoordinate()));
+			if (squad->TargetCoordinate().X() >= 0) {
+				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate()));
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
-				if (Distance(npc->Position(), npc->MemberOf().lock()->TargetCoordinate()) < 10) npc->run = false;
+				if (Distance(npc->Position(), squad->TargetCoordinate()) < 10) npc->run = false;
 				else npc->run = true;
 				return true;
 			}
 			break;
 		
 		case ESCORT:
-			if (npc->MemberOf().lock()->TargetEntity().lock()) {
-				newJob->tasks.push_back(Task(MOVENEAR, npc->MemberOf().lock()->TargetEntity().lock()->Position(), npc->MemberOf().lock()->TargetEntity()));
+			if (squad->TargetEntity().lock()) {
+				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity().lock()->Position(), squad->TargetEntity()));
 				npc->jobs.push_back(newJob);
 				npc->run = true;
 				return true;

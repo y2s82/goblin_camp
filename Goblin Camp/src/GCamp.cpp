@@ -112,18 +112,17 @@ void MainLoop() {
 void StartNewGame() {
 	Game* game = Game::Inst();
 
-	for (int npcs = 0; npcs < 10; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 1);
-	}
 	for (int npcs = 0; npcs < 15; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), 0);
-		game->CreateNPC(Coordinate(rand() % 20 + 250, rand() % 20 + 200), 2);
+		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("goblin"));
+	}
+	for (int npcs = 0; npcs < 6; ++npcs) {
+		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("orc"));
 	}
 
 	for (int seeds = 0; seeds < 20; ++seeds) {
-		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Bloodberry seed"), true);
-		game->CreateItem(Coordinate(220, 220), Item::StringToItemType("Wood log"), true);
+		game->CreateItem(Coordinate(220+rand()%10, 220+rand()%10), Item::StringToItemType("Bloodberry seed"), true);
 	}
+	MainLoop();
 }
 
 int Distance(int x0, int y0, int x1, int y1) {
@@ -229,8 +228,8 @@ int MainMenu() {
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp 0.1");
-		if (!endCredits) endCredits = TCODConsole::renderCredits(Game::Inst()->ScreenWidth()-20, 
-			Game::Inst()->ScreenHeight()-3, true);
+		if (!endCredits) endCredits = TCODConsole::renderCredits(edgex+5, 
+			edgey+25, true);
 
 		TCODConsole::root->flush();
 

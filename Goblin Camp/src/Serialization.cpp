@@ -73,6 +73,8 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -97,6 +99,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -274,6 +278,9 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
 	ar & _priority;
 	ar & completion;
 	ar & preReqs;
@@ -300,6 +307,9 @@ void Job::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
 	ar & _priority;
 	ar & completion;
 	ar & preReqs;
@@ -741,7 +751,7 @@ template<class Archive>
 void FarmPlot::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Stockpile>(*this);
 	ar & tilled;
-	ar & allowedSeeeds;
+	ar & allowedSeeds;
 	ar & growth;
 }
 
@@ -749,7 +759,7 @@ template<class Archive>
 void FarmPlot::load(Archive & ar, const unsigned int version) {
 	ar & boost::serialization::base_object<Stockpile>(*this);
 	ar & tilled;
-	ar & allowedSeeeds;
+	ar & allowedSeeds;
 	ar & growth;
 }
 

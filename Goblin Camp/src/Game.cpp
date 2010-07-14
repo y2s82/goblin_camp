@@ -743,6 +743,17 @@ void Game::GenerateMap() {
             }
         }
     }
+
+	std::vector<NPCType> peacefulAnimals;
+	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
+		if (boost::icontains(NPC::Presets[i].ai, "peaceful"))
+			peacefulAnimals.push_back(i);
+	}
+
+	for (int i = 0; i < 10; ++i) {
+		int type = rand() % peacefulAnimals.size();
+		Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
+	}
 }
 
 //This is intentional, otherwise designating where to cut down trees would always show red unless you were over a tree

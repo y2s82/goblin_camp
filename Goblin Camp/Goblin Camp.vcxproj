@@ -11,7 +11,9 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.ini" />
+    <None Include="config.ini">
+      <FileType>Document</FileType>
+    </None>
     <None Include="constructions.xml" />
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
@@ -19,6 +21,7 @@
       <SubType>Designer</SubType>
     </None>
     <None Include="names.dat" />
+    <None Include="Readme.txt" />
     <None Include="wildplants.xml" />
   </ItemGroup>
   <ItemGroup>
@@ -147,6 +150,19 @@
       <EntryPointSymbol>
       </EntryPointSymbol>
     </Link>
+    <PostBuildEvent>
+      <Command>xcopy readme.txt ..\Release\
+xcopy copying.txt ..\Release\
+xcopy config.ini ..\Release\
+xcopy constructions.xml ..\Release\
+xcopy creatures.dat ..\Release\
+xcopy items.xml ..\Release\
+xcopy names.dat ..\Release\
+xcopy wildplants.xml ..\Release\</Command>
+    </PostBuildEvent>
+    <PostBuildEvent>
+      <Message>Copy data files to output directory</Message>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

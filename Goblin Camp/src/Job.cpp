@@ -166,6 +166,8 @@ void Job::ConnectToEntity(boost::weak_ptr<Entity> ent) {
 }
 
 void Job::ReserveSpace(boost::weak_ptr<Container> cont) {
-    cont.lock()->ReserveSpace(true);
-    reservedSpace = cont;
+	if (cont.lock()) {
+		cont.lock()->ReserveSpace(true);
+		reservedSpace = cont;
+	}
 }

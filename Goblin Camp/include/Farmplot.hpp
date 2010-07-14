@@ -24,7 +24,7 @@ class FarmPlot : public Stockpile {
     friend class Game;
 
     private:
-        FarmPlot(ConstructionType, int symbol, Coordinate);
+        FarmPlot(ConstructionType=0, int symbol='?', Coordinate=Coordinate(0,0));
         bool tilled;
         std::map<ItemType, bool> allowedSeeds;
 		std::map<Coordinate, int> growth;

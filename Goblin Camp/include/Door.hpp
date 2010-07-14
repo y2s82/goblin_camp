@@ -28,6 +28,6 @@ private:
 	int closedGraphic;
 	int timer;
 public:
-	Door(ConstructionType, Coordinate);
+	Door(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	virtual void Update();
 };

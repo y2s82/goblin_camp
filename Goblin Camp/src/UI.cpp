@@ -106,6 +106,22 @@ void UI::HandleKeyboard() {
 			currentMenu = StockManagerMenu::StocksMenu();
 			menuHistory.clear();
 			textMode = false;
+		} else if (key.c == 'f') {
+			menuX = mouseInput.cx;
+			menuY = mouseInput.cy;
+			menuOpen = true;
+			currentMenu->selected(-1);
+			currentMenu = Menu::FurnitureMenu();
+			menuHistory.clear();
+			textMode = false;
+		} else if (key.c == 'm') {
+			menuX = mouseInput.cx;
+			menuY = mouseInput.cy;
+			menuOpen = true;
+			currentMenu->selected(-1);
+			currentMenu = SquadsMenu::SquadMenu();
+			menuHistory.clear();
+			textMode = false;
 		} else if (key.c >= '0' && key.c <= '9') {
 			if (menuOpen) {
 				currentMenu->selected(boost::lexical_cast<int>((char)key.c)-1);
@@ -475,11 +491,12 @@ void UI::DrawTopBar(TCODConsole* console) {
     console->setAlignment(TCOD_LEFT);
 
 	if (keyHelpTextColor > 0) {
-		int x = console->getWidth() / 2 - 15;
+		int x = 10;
 		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
 		console->print(x++, 3, "Q");
 		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
 		console->print(x, 3, "uit");
+		console->print(x, 4, "Space to pause");
 		x += 3 + 2;
 		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
 		console->print(x++, 3, "B");
@@ -495,6 +512,21 @@ void UI::DrawTopBar(TCODConsole* console) {
 		console->print(x++, 3, "O");
 		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
 		console->print(x, 3, "rders");
+		x += 5 + 2;
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "F");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "urniture");
+		x += 8 + 2;
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "S");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "tockmanager");
+		x += 11 + 2;
+		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
+		console->print(x++, 3, "M");
+		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
+		console->print(x, 3, "ilitary");
 	}
 
 	console->setForegroundColor(TCODColor::white);
@@ -504,6 +536,7 @@ void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
 void UI::state(UIState newState) { _state = newState; }
 
 void UI::ChangeMenu(Menu* menu) {
+	UI::Inst()->SetTextMode(false);
 	UI::Inst()->CurrentMenu()->selected(-1);
 	UI::Inst()->AddToHistory(UI::Inst()->CurrentMenu());
 	UI::Inst()->CurrentMenu(menu);
