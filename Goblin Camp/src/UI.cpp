@@ -763,8 +763,10 @@ void SideBar::Draw(TCODConsole* console) {
 			console->setForegroundColor(TCODColor::white);
 		} else if (farmplot) {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+		} else {
+			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 		}
-		
+
 		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
 		console->setForegroundColor(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
