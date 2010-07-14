@@ -27,9 +27,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 
 enum JobPriority {
-	LOW,
-	MED,
 	HIGH,
+	MED,
+	LOW,
 	PRIORITY_COUNT
 };
 
