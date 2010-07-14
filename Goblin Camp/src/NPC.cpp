@@ -730,8 +730,8 @@ void NPC::Kill() {
 void NPC::DropCarriedItem() {
     if (carried.lock()) {
         bag->RemoveItem(carried);
-		carried.lock()->PutInContainer(boost::weak_ptr<Item>());
         carried.lock()->Position(Position());
+		carried.lock()->PutInContainer(boost::weak_ptr<Item>());
         carried.reset();
     }
 }
