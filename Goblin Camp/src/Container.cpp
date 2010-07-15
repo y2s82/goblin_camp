@@ -18,36 +18,36 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 
 Container::Container(Coordinate pos, ItemType type, int capValue, int faction) : Item(pos, type, faction),
-capacity(capValue),
-reservedSpace(0)
+	capacity(capValue),
+	reservedSpace(0)
 {
 }
 
 Container::~Container() {
-    for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-        if (itemi->lock()) {
-            itemi->lock()->PutInContainer(container);
-        }
-    }
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+		if (itemi->lock()) {
+			itemi->lock()->PutInContainer(container);
+		}
+	}
 }
 
 bool Container::AddItem(boost::weak_ptr<Item> item) {
-    if (capacity > 0 && item.lock()) {
-        item.lock()->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
-        items.insert(item);
-        --capacity;
-        return true;
-    }
-    return false;
+	if (capacity > 0 && item.lock()) {
+		item.lock()->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
+		items.insert(item);
+		--capacity;
+		return true;
+	}
+	return false;
 }
 
 void Container::RemoveItem(boost::weak_ptr<Item> item) {
-    items.erase(item);
-    ++capacity;
+	items.erase(item);
+	++capacity;
 }
 
 boost::weak_ptr<Item> Container::GetItem(boost::weak_ptr<Item> item) {
-    return *items.find(item);
+	return *items.find(item);
 }
 
 std::set<boost::weak_ptr<Item> >* Container::GetItems() { return &items; }
@@ -62,10 +62,10 @@ boost::weak_ptr<Item> Container::GetFirstItem() { return *items.begin(); }
 std::set<boost::weak_ptr<Item> >::iterator Container::begin() { return items.begin(); }
 std::set<boost::weak_ptr<Item> >::iterator Container::end() { return items.end(); }
 bool Container::Full() {
-    return (capacity-reservedSpace <= 0);
+	return (capacity-reservedSpace <= 0);
 }
 
 void Container::ReserveSpace(bool res) {
-    if (res) ++reservedSpace;
-    else --reservedSpace;
+	if (res) ++reservedSpace;
+	else --reservedSpace;
 }

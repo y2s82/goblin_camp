@@ -18,13 +18,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <fstream>
 
 class Logger {
-	private:
-		Logger();
-		~Logger();
-		static Logger* instance;
-	public:
-		static Logger* Inst();
-		std::ofstream output;
-		static void End();
+private:
+	Logger();
+	~Logger();
+	static Logger* instance;
+public:
+	static Logger* Inst();
+	std::ofstream output;
+	static void End();
 };
 

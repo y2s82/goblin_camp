@@ -253,7 +253,7 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & y;
 	ar & uid;
 	ar & uids,
-	ar & zone;
+		ar & zone;
 	ar & reserved;
 	ar & name;
 	ar & faction;

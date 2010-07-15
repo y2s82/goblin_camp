@@ -33,7 +33,7 @@ void FilthNode::Draw(Coordinate upleft, TCODConsole* console) {
 	if (depth > 0) {
 		if (screenX >= 0 && screenX < console->getWidth() &&
 			screenY >= 0 && screenY < console->getHeight()) {
-			console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', TCODColor::darkerOrange, TCODColor::black);
+				console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', TCODColor::darkerOrange, TCODColor::black);
 		}
 	}
 }

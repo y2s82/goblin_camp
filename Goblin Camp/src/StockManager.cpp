@@ -71,13 +71,13 @@ StockManager::StockManager(void){
 						for (std::list<ItemType>::iterator compi = NatureObject::Presets[natObj].components.begin(); 
 							compi != NatureObject::Presets[natObj].components.end(); ++compi) {
 #ifdef DEBUG
-				std::cout<<"Is "<<Item::ItemTypeToString(*compi)<<" = "<<Item::Presets[item].name<<"\n";
+								std::cout<<"Is "<<Item::ItemTypeToString(*compi)<<" = "<<Item::Presets[item].name<<"\n";
 #endif
-							if (*compi == item) {
-								producables.insert(item);
-								fromTrees.insert(item);
-								UpdateQuantity(item, 0);
-							}
+								if (*compi == item) {
+									producables.insert(item);
+									fromTrees.insert(item);
+									UpdateQuantity(item, 0);
+								}
 						}
 					}
 				}

@@ -45,7 +45,7 @@ Coordinate Coordinate::operator-(int other) {
 }
 
 Coordinate Coordinate::operator+(Coordinate other) {
-    return Coordinate(x + other.X(), y + other.Y());
+	return Coordinate(x + other.X(), y + other.Y());
 }
 
 template<class Archive>

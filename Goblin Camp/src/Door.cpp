@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 
 Door::Door(ConstructionType type, Coordinate target) : Construction(type, target),
-timer(0)
+	timer(0)
 {
 	closedGraphic = graphic[1];
 }

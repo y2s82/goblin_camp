@@ -20,8 +20,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 Camp* Camp::instance = 0;
 
 Camp::Camp() :
-    center(Coordinate(220,220)),
-    buildingCount(0)
+center(Coordinate(220,220)),
+	buildingCount(0)
 {}
 
 Camp* Camp::Inst() {

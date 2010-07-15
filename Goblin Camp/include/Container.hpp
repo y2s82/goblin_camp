@@ -24,30 +24,30 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Container : public Item {
 	friend class boost::serialization::access;
-    private:
-		template<class Archive>
-		void save(Archive & ar, const unsigned int version) const;
-		template<class Archive>
-		void load(Archive & ar, const unsigned int version);
-		BOOST_SERIALIZATION_SPLIT_MEMBER()
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		std::set<boost::weak_ptr<Item> > items;
-        int capacity;
-        int reservedSpace;
-	public:
-        Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0);
-		virtual ~Container();
-		virtual bool AddItem(boost::weak_ptr<Item>);
-		virtual void RemoveItem(boost::weak_ptr<Item>);
-		void ReserveSpace(bool);
-		boost::weak_ptr<Item> GetItem(boost::weak_ptr<Item>);
-		std::set<boost::weak_ptr<Item> >* GetItems();
-		boost::weak_ptr<Item> GetFirstItem();
-        bool empty();
-        int size();
-        int Capacity();
-        bool Full();
-        std::set<boost::weak_ptr<Item> >::iterator begin();
-        std::set<boost::weak_ptr<Item> >::iterator end();
+	std::set<boost::weak_ptr<Item> > items;
+	int capacity;
+	int reservedSpace;
+public:
+	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0);
+	virtual ~Container();
+	virtual bool AddItem(boost::weak_ptr<Item>);
+	virtual void RemoveItem(boost::weak_ptr<Item>);
+	void ReserveSpace(bool);
+	boost::weak_ptr<Item> GetItem(boost::weak_ptr<Item>);
+	std::set<boost::weak_ptr<Item> >* GetItems();
+	boost::weak_ptr<Item> GetFirstItem();
+	bool empty();
+	int size();
+	int Capacity();
+	bool Full();
+	std::set<boost::weak_ptr<Item> >::iterator begin();
+	std::set<boost::weak_ptr<Item> >::iterator end();
 };
 

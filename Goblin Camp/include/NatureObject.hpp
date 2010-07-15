@@ -28,50 +28,50 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 typedef int NatureObjectType;
 
 class NatureObjectPreset {
-    public:
-        NatureObjectPreset();
-        std::string name;
-        int graphic;
-        TCODColor color;
-        std::list<ItemType> components;
-        int rarity;
-        int cluster;
-        int condition;
-        bool tree, harvestable, walkable;
+public:
+	NatureObjectPreset();
+	std::string name;
+	int graphic;
+	TCODColor color;
+	std::list<ItemType> components;
+	int rarity;
+	int cluster;
+	int condition;
+	bool tree, harvestable, walkable;
 };
 
 class NatureObject : public Entity
 {
 	friend class boost::serialization::access;
-    friend class Game;
-    private:
-		template<class Archive>
-		void save(Archive & ar, const unsigned int version) const;
-		template<class Archive>
-		void load(Archive & ar, const unsigned int version);
-		BOOST_SERIALIZATION_SPLIT_MEMBER()
+	friend class Game;
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		NatureObject(Coordinate = Coordinate(0,0), NatureObjectType = 0);
-        NatureObjectType type;
-        int graphic;
-        TCODColor color;
-        bool marked;
-        int condition;
-        bool tree, harvestable;
-    public:
-		~NatureObject();
-		static std::vector<NatureObjectPreset> Presets;
-        static void LoadPresets(ticpp::Document);
+	NatureObject(Coordinate = Coordinate(0,0), NatureObjectType = 0);
+	NatureObjectType type;
+	int graphic;
+	TCODColor color;
+	bool marked;
+	int condition;
+	bool tree, harvestable;
+public:
+	~NatureObject();
+	static std::vector<NatureObjectPreset> Presets;
+	static void LoadPresets(ticpp::Document);
 
-        int Type();
+	int Type();
 
-        void Draw(Coordinate, TCODConsole*);
-        void Update();
-        virtual void CancelJob(int=0);
-        void Mark();
-        bool Marked();
-        int Fell();
-        int Harvest();
-        bool Tree();
-        bool Harvestable();
+	void Draw(Coordinate, TCODConsole*);
+	void Update();
+	virtual void CancelJob(int=0);
+	void Mark();
+	bool Marked();
+	int Fell();
+	int Harvest();
+	bool Tree();
+	bool Harvestable();
 };

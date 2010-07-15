@@ -33,7 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 UI* UI::instance = 0;
 
 UI::UI() :
-	menuOpen(false),
+menuOpen(false),
 	_state(UINORMAL),
 	_blueprint(1,1),
 	placeable(false),
@@ -224,7 +224,7 @@ void UI::HandleKeyboard() {
 		mouseInput.cy = Game::Inst()->ScreenHeight() - 1;
 		mouseInput.y = (Game::Inst()->ScreenHeight() - 1) * Game::Inst()->CharHeight();
 	}
-		
+
 	if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
 	if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
 	if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
@@ -250,9 +250,9 @@ void UI::HandleMouse() {
 	if (tempStatus.mbutton_pressed) mbuttonPressed = true;
 	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
 
-    if (_state == UINORMAL) {
-        HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
-    }
+	if (_state == UINORMAL) {
+		HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
+	}
 
 	if (_state == UIPLACEMENT || _state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
 		placeable = placementCallback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()), _blueprint);
@@ -267,7 +267,7 @@ void UI::HandleMouse() {
 	if (lbuttonPressed && draggingViewport) draggingViewport = false;
 	else if (lbuttonPressed) {
 		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy);
-	    if (menuResult == NOMENUHIT) {
+		if (menuResult == NOMENUHIT) {
 			if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true); lbuttonPressed = false; }
 			if (menuResult == NOMENUHIT) {
 				if (_state == UIPLACEMENT && placeable) {
@@ -364,14 +364,14 @@ void UI::HandleMouse() {
 	}
 
 	if (tempStatus.lbutton && _state == UINORMAL) {
-	    Game::Inst()->upleft.X(Game::Inst()->upleft.X() - (tempStatus.dx / 3));
-	    Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() - (tempStatus.dy / 3));
-	    if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
-        if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+		Game::Inst()->upleft.X(Game::Inst()->upleft.X() - (tempStatus.dx / 3));
+		Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() - (tempStatus.dy / 3));
+		if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
+		if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
 		if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
 		if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
 		if (tempStatus.dx > 0 || tempStatus.dy > 0) draggingViewport = true;
-    }
+	}
 
 	lbuttonPressed = false;
 	mbuttonPressed = false;
@@ -381,17 +381,17 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	int tmp;
 	bool xswap = false, yswap = false;
 
-    DrawTopBar(console);
+	DrawTopBar(console);
 	sideBar.Draw(console);
 
 	if (menuOpen) {
 		currentMenu->Draw(menuX, menuY, console);
 	} else if (_state == UINORMAL && !underCursor.empty() && underCursor.begin()->lock()) {
-	    int y = 0;
-	    for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-            console->print(std::min(console->getWidth()-1, mouseInput.cx+1), std::max(0, mouseInput.cy-1-y), ucit->lock()->Name().c_str());
-            ++y;
-	    }
+		int y = 0;
+		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
+			console->print(std::min(console->getWidth()-1, mouseInput.cx+1), std::max(0, mouseInput.cy-1-y), ucit->lock()->Name().c_str());
+			++y;
+		}
 	}
 
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.X() == 0)) {
@@ -479,16 +479,16 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 }
 
 void UI::DrawTopBar(TCODConsole* console) {
-    console->setAlignment(TCOD_CENTER);
+	console->setAlignment(TCOD_CENTER);
 	console->setForegroundColor(TCODColor::white);
-    console->print(console->getWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
-                             Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->CurrentSeason()).c_str());
+	console->print(console->getWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
+		Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->CurrentSeason()).c_str());
 
 	if (Game::Inst()->Paused()) {
 		console->setForegroundColor(TCODColor::red);
 		console->print(Game::Inst()->ScreenWidth() / 2, 1, "- - - - PAUSED - - - -");
 	}
-    console->setAlignment(TCOD_LEFT);
+	console->setAlignment(TCOD_LEFT);
 
 	if (keyHelpTextColor > 0) {
 		int x = 10;
@@ -568,18 +568,18 @@ void UI::ChooseStockpile(ConstructionType stockpile) {
 }
 
 void UI::ChooseTreeFelling() {
-    UI::Inst()->state(UIRECTPLACEMENT);
-    UI::Inst()->SetRectCallback(boost::bind(Game::FellTree, _1, _2));
-    UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
-    UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(Game::FellTree, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('X');
 }
 
 void UI::ChoosePlantHarvest() {
-    UI::Inst()->state(UIRECTPLACEMENT);
-    UI::Inst()->SetRectCallback(boost::bind(Game::HarvestWildPlant, _1, _2));
-    UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
-    UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(Game::HarvestWildPlant, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('X');
 }
 
@@ -616,61 +616,61 @@ void UI::ChooseDismantle() {
 }
 
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
-    if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-        std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
-        if (!npcList->empty()) return Game::Inst()->npcList[(*npcList->begin())];
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
+		if (!npcList->empty()) return Game::Inst()->npcList[(*npcList->begin())];
 
-        std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
-        if (!itemList->empty()) {
-            std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
-            if (itemi != Game::Inst()->freeItems.end()) {
-                return *itemi;
-            }
-        }
+		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
+		if (!itemList->empty()) {
+			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
+			if (itemi != Game::Inst()->freeItems.end()) {
+				return *itemi;
+			}
+		}
 
-        int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
-        if (entity > -1) return (Game::Inst()->natureList[entity]);
+		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
+		if (entity > -1) return (Game::Inst()->natureList[entity]);
 
-        entity = Map::Inst()->Construction(pos.X(), pos.Y());
-        if (entity > -1) return Game::Inst()->GetConstruction(entity);
-    }
-    return boost::weak_ptr<Entity>();
+		entity = Map::Inst()->Construction(pos.X(), pos.Y());
+		if (entity > -1) return Game::Inst()->GetConstruction(entity);
+	}
+	return boost::weak_ptr<Entity>();
 }
 
 void UI::HandleUnderCursor(Coordinate pos) {
-    underCursor.clear();
+	underCursor.clear();
 
-   if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-        std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
-        if (!npcList->empty()) {
-            for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
-                underCursor.push_back(Game::Inst()->npcList[*npci]);
-            }
-            return;
-        }
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
+		if (!npcList->empty()) {
+			for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
+				underCursor.push_back(Game::Inst()->npcList[*npci]);
+			}
+			return;
+		}
 
-        std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
-        if (!itemList->empty()) {
-            std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
-            if (itemi != Game::Inst()->freeItems.end()) {
-                underCursor.push_back(*itemi);
-                return;
-            }
-        }
+		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
+		if (!itemList->empty()) {
+			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
+			if (itemi != Game::Inst()->freeItems.end()) {
+				underCursor.push_back(*itemi);
+				return;
+			}
+		}
 
-        int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
-        if (entity > -1) {
-            underCursor.push_back(Game::Inst()->natureList[entity]);
-            return;
-        }
+		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
+		if (entity > -1) {
+			underCursor.push_back(Game::Inst()->natureList[entity]);
+			return;
+		}
 
-        entity = Map::Inst()->Construction(pos.X(), pos.Y());
-        if (entity > -1) {
-            underCursor.push_back(Game::Inst()->GetConstruction(entity));
-            return;
-        }
-    }
- }
+		entity = Map::Inst()->Construction(pos.X(), pos.Y());
+		if (entity > -1) {
+			underCursor.push_back(Game::Inst()->GetConstruction(entity));
+			return;
+		}
+	}
+}
 
 int UI::KeyHelpTextColor() const { return keyHelpTextColor; }
 
@@ -699,7 +699,7 @@ void UI::CloseMenu() {
 void UI::SetCursor(int value) { cursorChar = value; }
 
 SideBar::SideBar() :
-    width(19),
+width(19),
 	height(30),
 	topY(0),
 	npc(false),
@@ -763,8 +763,10 @@ void SideBar::Draw(TCODConsole* console) {
 			console->setForegroundColor(TCODColor::white);
 		} else if (farmplot) {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+		} else {
+			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 		}
-		
+
 		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
 		console->setForegroundColor(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
@@ -778,18 +780,18 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 	entity = ent;
 	npc = construction = stockpile = farmplot = false;
 	if (boost::dynamic_pointer_cast<NPC>(entity.lock())) {
-			height = 30;
-			npc = true;
-		} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
-			height = 50;
-			farmplot = true;
-		} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
-			height = 50;
-			stockpile = true;
-		} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
-			height = 30;
-			construction = true;
-		}
+		height = 30;
+		npc = true;
+	} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
+		height = 50;
+		farmplot = true;
+	} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
+		height = 50;
+		stockpile = true;
+	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
+		height = 30;
+		construction = true;
+	}
 }
 
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }

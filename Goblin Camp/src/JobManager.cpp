@@ -48,12 +48,12 @@ void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 
 void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {
 	if (boost::shared_ptr<Job> job = oldJob.lock()) {
-/*        if (job->priority() > LOW)
-            Announce::Inst()->AddMsg(oldJob.lock()->name+std::string(" canceled: ")+msg, TCODColor::red);
-*/
-        job->Assign(-1);
-        job->Paused(true);
-        waitingList.push_back(job);
+		/*        if (job->priority() > LOW)
+		Announce::Inst()->AddMsg(oldJob.lock()->name+std::string(" canceled: ")+msg, TCODColor::red);
+		*/
+		job->Assign(-1);
+		job->Paused(true);
+		waitingList.push_back(job);
 
 		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[job->priority()].begin(); 
 			jobi != availableList[job->priority()].end(); ++jobi) {
@@ -62,7 +62,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 					break;
 				}
 		}
-    }
+	}
 }
 
 //Draw() doesn't conform to the design, it'll only draw jobs from the 4 hardcoded lists
@@ -126,7 +126,7 @@ boost::weak_ptr<Job> JobManager::GetJob(int uid) {
 				}
 		}
 	}
-	FoundJob:
+FoundJob:
 	if (job.lock()) job.lock()->Assign(uid);
 
 	return job;
@@ -151,13 +151,13 @@ void JobManager::Update() {
 				jobIter = waitingList.erase(jobIter);
 			} else if (!(*jobIter)->Parent().lock() && !(*jobIter)->PreReqs()->empty()) {
 				//Job has unfinished prereqs, itsn't removable and is NOT a prereq itself
-					for (std::list<boost::weak_ptr<Job> >::iterator pri = (*jobIter)->PreReqs()->begin(); pri != (*jobIter)->PreReqs()->end(); ++pri) {
-						if (pri->lock()) {
-                            pri->lock()->Paused(false);
-						}
+				for (std::list<boost::weak_ptr<Job> >::iterator pri = (*jobIter)->PreReqs()->begin(); pri != (*jobIter)->PreReqs()->end(); ++pri) {
+					if (pri->lock()) {
+						pri->lock()->Paused(false);
 					}
+				}
 			} else if (!(*jobIter)->Parent().lock()) {
-			        (*jobIter)->Paused(false);
+				(*jobIter)->Paused(false);
 			}
 		}
 	}

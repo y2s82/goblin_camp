@@ -35,41 +35,41 @@ Coordinate Construction::Blueprint(ConstructionType construct) {
 }
 
 Coordinate Construction::ProductionSpot(ConstructionType construct) {
-    return Construction::Presets[construct].productionSpot;
+	return Construction::Presets[construct].productionSpot;
 }
 
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
-    color(TCODColor::white),
-    type(vtype),
-    producer(false),
-    progress(0),
-    container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
-    materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
+	color(TCODColor::white),
+	type(vtype),
+	producer(false),
+	progress(0),
+	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
+	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
 	dismantle(false)
 {
-    x = target.X();
-    y = target.Y();
+	x = target.X();
+	y = target.Y();
 
-    graphic = Construction::Presets[type].graphic;
-    maxCondition = Construction::Presets[type].maxCondition;
-    materials = Construction::Presets[type].materials;
-    name = Construction::Presets[type].name;
-    walkable = Construction::Presets[type].walkable;
-    producer = Construction::Presets[type].producer;
-    products = Construction::Presets[type].products;
+	graphic = Construction::Presets[type].graphic;
+	maxCondition = Construction::Presets[type].maxCondition;
+	materials = Construction::Presets[type].materials;
+	name = Construction::Presets[type].name;
+	walkable = Construction::Presets[type].walkable;
+	producer = Construction::Presets[type].producer;
+	products = Construction::Presets[type].products;
 	stockpile = Construction::Presets[type].tags[STOCKPILE];
 	farmplot = Construction::Presets[type].tags[FARMPLOT];
 	condition = 0-maxCondition;
 }
 
 Construction::~Construction() {
-    for (int ix = x; ix <= (signed int)x + Construction::Blueprint(type).X(); ++ix) {
-        for (int iy = y; iy <= (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
-            Map::Inst()->Buildable(ix,iy,true);
+	for (int ix = x; ix <= (signed int)x + Construction::Blueprint(type).X(); ++ix) {
+		for (int iy = y; iy <= (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
+			Map::Inst()->Buildable(ix,iy,true);
 			Map::Inst()->Walkable(ix,iy,true);
-            Map::Inst()->Construction(ix,iy,-1);
-        }
-    }
+			Map::Inst()->Construction(ix,iy,-1);
+		}
+	}
 
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		itemi->lock()->Faction(0); //Return item to player faction
@@ -108,7 +108,7 @@ int Construction::Build() {
 		//be impossible in practice.
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
-		    color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
+			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->Faction(-1); //Remove from player faction so it doesn't show up in stocks
 		}
 
@@ -156,38 +156,38 @@ void Construction::AddJob(ItemType item) {
 }
 
 void Construction::CancelJob(int index) {
-    if (index == 0 && index < (signed int)jobList.size()) {
-        jobList.erase(jobList.begin());
+	if (index == 0 && index < (signed int)jobList.size()) {
+		jobList.erase(jobList.begin());
 		while (!jobList.empty() && !reserved && !SpawnProductionJob());
-    } else if (index > 0 && index < (signed int)jobList.size()) { jobList.erase(jobList.begin() + index); }
-    else if (condition <= 0) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	} else if (index > 0 && index < (signed int)jobList.size()) { jobList.erase(jobList.begin() + index); }
+	else if (condition <= 0) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	else if (dismantle) dismantle = false; //Stop trying to dismantle
 }
 
 int Construction::Use() {
-    if (jobList.size() > 0) {
-        ++progress;
-        if (progress >= 100) {
+	if (jobList.size() > 0) {
+		++progress;
+		if (progress >= 100) {
 
-            bool allComponentsFound = true;
+			bool allComponentsFound = true;
 
-            for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
-                allComponentsFound = false;
-                for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
-                    if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
-                        allComponentsFound = true;
-                        break;
-                    }
-                }
-            }
-            if (!allComponentsFound) return -1;
+			for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
+				allComponentsFound = false;
+				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
+						allComponentsFound = true;
+						break;
+					}
+				}
+			}
+			if (!allComponentsFound) return -1;
 
-            std::vector<boost::weak_ptr<Item> > components;
+			std::vector<boost::weak_ptr<Item> > components;
 			boost::shared_ptr<Container> itemContainer;
 
-            for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
-                for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
-                    if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
+			for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
+				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
 						if (itemi->lock()->IsCategory(Item::Presets[jobList[0]].containIn)) {
 							//This component is the container our product should be placed in
 							itemContainer = boost::static_pointer_cast<Container>(itemi->lock());
@@ -195,11 +195,11 @@ int Construction::Use() {
 							//Just a component of the product
 							components.push_back(*itemi);
 						}
-                        container->RemoveItem(*itemi);
-                        break;
-                    }
-                }
-            }
+						container->RemoveItem(*itemi);
+						break;
+					}
+				}
+			}
 
 			//Create the "fruit" of the components. Basically fruits have their seeds as their fruits,
 			//this makes berries give their seeds when made into wine, for example.
@@ -210,13 +210,13 @@ int Construction::Use() {
 					}
 				}
 			}
-			
+
 			//Create the items
 			if (itemContainer) itemContainer->PutInContainer(); 
-            for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
-                if (itemContainer) Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], false, 0, components, itemContainer);
+			for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
+				if (itemContainer) Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], false, 0, components, itemContainer);
 				else Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], true, 0, components);
-            }
+			}
 
 			//Destroy the components
 			for (unsigned int i = 0; i < components.size(); ++i) {
@@ -225,88 +225,88 @@ int Construction::Use() {
 				}
 			}
 
-            progress = 0;
-            //~Job removes the job from the jobList
-            return 100;
-        }
-        return progress;
-    }
-    return -1;
+			progress = 0;
+			//~Job removes the job from the jobList
+			return 100;
+		}
+		return progress;
+	}
+	return -1;
 }
 
 std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
 
 void Construction::LoadPresets(ticpp::Document doc) {
-    std::string strVal;
-    int intVal = 0;
-    ticpp::Element* parent = doc.FirstChildElement();
+	std::string strVal;
+	int intVal = 0;
+	ticpp::Element* parent = doc.FirstChildElement();
 
-    Logger::Inst()->output<<"Reading constructions.xml\n";
-    try {
-        ticpp::Iterator<ticpp::Node> node;
-        for (node = node.begin(parent); node != node.end(); ++node) {
-            if (node->Value() == "construction") {
+	Logger::Inst()->output<<"Reading constructions.xml\n";
+	try {
+		ticpp::Iterator<ticpp::Node> node;
+		for (node = node.begin(parent); node != node.end(); ++node) {
+			if (node->Value() == "construction") {
 #ifdef DEBUG
 				std::cout<<"Construction\n";
 #endif
-                Presets.push_back(ConstructionPreset());
-                ticpp::Iterator<ticpp::Node> child;
-                for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
+				Presets.push_back(ConstructionPreset());
+				ticpp::Iterator<ticpp::Node> child;
+				for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
 #ifdef DEBUG
 					std::cout<<"Children\n";
 #endif
-                    if (child->Value() == "wall") {
-                        Presets.back().graphic.push_back(1);
-                        Presets.back().graphic.push_back('W');
-                        Presets.back().tags[WALL] = true;
-                    } else if (child->Value() == "name") {
-                        Presets.back().name = child->ToElement()->GetText();
-                    } else if (child->Value() == "graphic") {
-                        ticpp::Iterator<ticpp::Node> g;
-                        for (g = g.begin(child->ToElement()); g != g.end(); ++g) {
-                            g->ToElement()->GetTextOrDefault(&intVal, 1);
-                            Presets.back().graphic.push_back(intVal);
-                        }
-                    } else if (child->Value() == "producer") {
-                        Presets.back().producer = (child->ToElement()->GetText() == "true") ? true : false;
+					if (child->Value() == "wall") {
+						Presets.back().graphic.push_back(1);
+						Presets.back().graphic.push_back('W');
+						Presets.back().tags[WALL] = true;
+					} else if (child->Value() == "name") {
+						Presets.back().name = child->ToElement()->GetText();
+					} else if (child->Value() == "graphic") {
+						ticpp::Iterator<ticpp::Node> g;
+						for (g = g.begin(child->ToElement()); g != g.end(); ++g) {
+							g->ToElement()->GetTextOrDefault(&intVal, 1);
+							Presets.back().graphic.push_back(intVal);
+						}
+					} else if (child->Value() == "producer") {
+						Presets.back().producer = (child->ToElement()->GetText() == "true") ? true : false;
 						Presets.back().tags[WORKSHOP] = Presets.back().producer;
-                    } else if (child->Value() == "products") {
+					} else if (child->Value() == "products") {
 #ifdef DEBUG
-                        std::cout<<"Products\n";
+						std::cout<<"Products\n";
 #endif
-                        ticpp::Iterator<ticpp::Node> prods;
-                        for (prods = prods.begin(child->ToElement());
-                            prods != prods.end(); ++prods) {
-                                Presets.back().products.push_back(Item::StringToItemType(prods->ToElement()->GetText()));
-                        }
-                    } else if (child->Value() == "walkable") {
-                        Presets.back().walkable = (child->ToElement()->GetText() == "true") ? true : false;
-                    } else if (child->Value() == "materials") {
+						ticpp::Iterator<ticpp::Node> prods;
+						for (prods = prods.begin(child->ToElement());
+							prods != prods.end(); ++prods) {
+								Presets.back().products.push_back(Item::StringToItemType(prods->ToElement()->GetText()));
+						}
+					} else if (child->Value() == "walkable") {
+						Presets.back().walkable = (child->ToElement()->GetText() == "true") ? true : false;
+					} else if (child->Value() == "materials") {
 #ifdef DEBUG
-                        std::cout<<"Materials\n";
+						std::cout<<"Materials\n";
 #endif
-                        ticpp::Iterator<ticpp::Node> mats;
-                        for (mats = mats.begin(child->ToElement()); mats != mats.end(); ++mats) {
-                                Presets.back().materials.push_back(Item::StringToItemCategory(mats->ToElement()->GetText()));
-                        }
-                    } else if (child->Value() == "maxCondition") {
-                        child->ToElement()->GetText(&intVal);
-                        Presets.back().maxCondition = intVal;
-                    } else if (child->Value() == "stockpile") {
+						ticpp::Iterator<ticpp::Node> mats;
+						for (mats = mats.begin(child->ToElement()); mats != mats.end(); ++mats) {
+							Presets.back().materials.push_back(Item::StringToItemCategory(mats->ToElement()->GetText()));
+						}
+					} else if (child->Value() == "maxCondition") {
+						child->ToElement()->GetText(&intVal);
+						Presets.back().maxCondition = intVal;
+					} else if (child->Value() == "stockpile") {
 						Presets.back().tags[STOCKPILE] = true;
-                    } else if (child->Value() == "farmplot") {
-                        Presets.back().tags[FARMPLOT] = true;
+					} else if (child->Value() == "farmplot") {
+						Presets.back().tags[FARMPLOT] = true;
 						Presets.back().dynamic = true;
-                    } else if (child->Value() == "productionSpot") {
-                        ticpp::Iterator<ticpp::Node> coord;
-                        int x = -1, y;
-                        for (coord = coord.begin(child->ToElement()); coord != coord.end(); ++coord) {
-                                coord->ToElement()->GetTextOrDefault(&intVal, 1);
-                                if (x == -1) x = intVal;
-                                else y = intVal;
-                        }
-                        Presets.back().productionSpot = Coordinate(x,y);
-                    } else if (child->Value() == "door") {
+					} else if (child->Value() == "productionSpot") {
+						ticpp::Iterator<ticpp::Node> coord;
+						int x = -1, y;
+						for (coord = coord.begin(child->ToElement()); coord != coord.end(); ++coord) {
+							coord->ToElement()->GetTextOrDefault(&intVal, 1);
+							if (x == -1) x = intVal;
+							else y = intVal;
+						}
+						Presets.back().productionSpot = Coordinate(x,y);
+					} else if (child->Value() == "door") {
 						Presets.back().tags[DOOR] = true;
 						Presets.back().tags[FURNITURE] = true;
 						Presets.back().dynamic = true;
@@ -314,18 +314,18 @@ void Construction::LoadPresets(ticpp::Document doc) {
 						Presets.back().tags[BED] = true;
 						Presets.back().tags[FURNITURE] = true;
 					}
-                }
-                Presets.back().blueprint = Coordinate(Presets.back().graphic[0],
-                    (Presets.back().graphic.size()-1)/Presets.back().graphic[0]);
-            }
-        }
-    } catch (ticpp::Exception& ex) {
-        Logger::Inst()->output<<"Failed reading constructions.xml!\n";
-        Logger::Inst()->output<<ex.what()<<'\n';
-        Game::Inst()->Exit();
-    }
+				}
+				Presets.back().blueprint = Coordinate(Presets.back().graphic[0],
+					(Presets.back().graphic.size()-1)/Presets.back().graphic[0]);
+			}
+		}
+	} catch (ticpp::Exception& ex) {
+		Logger::Inst()->output<<"Failed reading constructions.xml!\n";
+		Logger::Inst()->output<<ex.what()<<'\n';
+		Game::Inst()->Exit();
+	}
 
-    Logger::Inst()->output<<"Finished reading constructions.xml\nConstructions: "<<Presets.size()<<'\n';
+	Logger::Inst()->output<<"Finished reading constructions.xml\nConstructions: "<<Presets.size()<<'\n';
 }
 
 bool Construction::SpawnProductionJob() {
@@ -356,7 +356,7 @@ bool Construction::SpawnProductionJob() {
 		boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
 		newProductionJob->ConnectToEntity(shared_from_this());
 		newProductionJob->ReserveEntity(shared_from_this());
-	
+
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
 			boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
 			newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi)));
@@ -379,25 +379,25 @@ bool Construction::SpawnProductionJob() {
 }
 
 boost::weak_ptr<Container> Construction::Storage() {
-    if (condition > 0) return container;
-    else return materialsUsed;
+	if (condition > 0) return container;
+	else return materialsUsed;
 }
 
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
-    bool n = false,s = false,e = false,w = false;
+	bool n = false,s = false,e = false,w = false;
 
 	if (Map::Inst()->Construction(x - 1, y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->Type()].tags[WALL]
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->Type()].tags[DOOR]))
-        w = true;
-    if (Map::Inst()->Construction(x + 1, y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->Type()].tags[WALL]
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->Type()].tags[DOOR]))
-        e = true;
-    if (Map::Inst()->Construction(x, y - 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->Type()].tags[WALL]
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->Type()].tags[DOOR]))
-        n = true;
-    if (Map::Inst()->Construction(x, y + 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->Type()].tags[WALL]
-		|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->Type()].tags[DOOR]))
-        s = true;
+	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->Type()].tags[DOOR]))
+		w = true;
+	if (Map::Inst()->Construction(x + 1, y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->Type()].tags[WALL]
+	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->Type()].tags[DOOR]))
+		e = true;
+	if (Map::Inst()->Construction(x, y - 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->Type()].tags[WALL]
+	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->Type()].tags[DOOR]))
+		n = true;
+	if (Map::Inst()->Construction(x, y + 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->Type()].tags[WALL]
+	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->Type()].tags[DOOR]))
+		s = true;
 
 	if (self && Construction::Presets[type].tags[WALL]) {
 		if (n&&s&&e&&w) graphic[1] = 197;
@@ -416,16 +416,16 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 		else graphic[1] = 197;
 	}
 
-    if (recurse) {
-        if (w)
-            Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->UpdateWallGraphic(false);
-        if (e)
-            Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->UpdateWallGraphic(false);
-        if (n)
-            Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->UpdateWallGraphic(false);
-        if (s)
-            Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->UpdateWallGraphic(false);
-    }
+	if (recurse) {
+		if (w)
+			Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->UpdateWallGraphic(false);
+		if (e)
+			Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->UpdateWallGraphic(false);
+		if (n)
+			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->UpdateWallGraphic(false);
+		if (s)
+			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->UpdateWallGraphic(false);
+	}
 }
 
 bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[type].tags[tag]; }
@@ -448,15 +448,15 @@ void Construction::Dismantle() {
 }
 
 ConstructionPreset::ConstructionPreset() :
-    maxCondition(0),
-    graphic(std::vector<int>()),
-    walkable(true),
-    materials(std::list<ItemCategory>()),
-    producer(false),
-    products(std::vector<ItemType>()),
-    name("???"),
-    blueprint(Coordinate(1,1)),
-    productionSpot(Coordinate(0,0)),
+maxCondition(0),
+	graphic(std::vector<int>()),
+	walkable(true),
+	materials(std::list<ItemCategory>()),
+	producer(false),
+	products(std::vector<ItemType>()),
+	name("???"),
+	blueprint(Coordinate(1,1)),
+	productionSpot(Coordinate(0,0)),
 	dynamic(false)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
