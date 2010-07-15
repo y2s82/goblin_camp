@@ -2,12 +2,12 @@ project "Goblin Camp"
     : default-build debug
     : source-location "Goblin Camp/src"
     : build-dir build
-    ;
+;
 
 variant release-pdb
     : <optimization>speed <debug-symbols>on
       <inlining>full <runtime-debugging>off
-    ;
+;
 
 lib tcod  : : <toolset>msvc <variant>debug <name>libtcod-VS-debug ;
 lib tcod  : : <toolset>msvc <variant>release <name>libtcod-VS ;
@@ -22,7 +22,7 @@ exe "Goblin Camp"
     : <include>"Goblin Camp/include" <warnings>on
       <define>TIXML_USE_TICPP
       <conditional>@gc-feats
-    ;
+;
 
 rule gc-feats ( properties * ) {
     local feats ;
