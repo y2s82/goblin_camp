@@ -675,7 +675,7 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 					&& y > topY+2+12 && y < topY+2+15) {
 						if (squadName != "" && !chosenSquad.lock()) { //Create
 							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
-								(squadName, new Squad(squadName, squadMembers, squadPriority)));
+								(squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
 							chosenSquad = Game::Inst()->squadList[squadName];
 							//squadName = "";
 							//UI::Inst()->InputString("");

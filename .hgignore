@@ -45,3 +45,5 @@ screenshot*.png
 *.filters
 *.sav
 ccccReport\
+build\
+dist\

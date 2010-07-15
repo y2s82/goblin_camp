@@ -28,7 +28,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 #include "JobManager.hpp"
-#include "Gcamp.hpp"
 #include "Logger.hpp"
 #include "Map.hpp"
 #include "Announce.hpp"
@@ -960,7 +959,7 @@ int Game::FindMilitaryRecruit() {
 }
 
 void Game::CreateSquad(std::string name) {
-	squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >(name, new Squad(name)));
+	squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >(name, boost::shared_ptr<Squad>(new Squad(name))));
 }
 
 void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
