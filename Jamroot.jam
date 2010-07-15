@@ -1,0 +1,50 @@
+project "Goblin Camp"
+    : default-build debug
+    : source-location "Goblin Camp/src"
+    : build-dir build
+    ;
+
+variant release-pdb
+    : <optimization>speed <debug-symbols>on
+      <inlining>full <runtime-debugging>off
+    ;
+
+lib tcod  : : <toolset>msvc <variant>debug <name>libtcod-VS-debug ;
+lib tcod  : : <toolset>msvc <variant>release <name>libtcod-VS ;
+lib tcod  : : <variant>debug <name>tcod_debug ;
+lib tcod  : : <variant>release <name>tcod ;
+lib ticpp : : <variant>debug <name>ticppd ;
+lib ticpp : : <variant>release <name>ticpp ;
+
+exe "Goblin Camp"
+    : [ glob *.cpp ]
+      tcod ticpp
+    : <include>"Goblin Camp/include" <warnings>on
+      <define>TIXML_USE_TICPP
+      <conditional>@gc-feats
+    ;
+
+rule gc-feats ( properties * ) {
+    local feats ;
+    
+    if <toolset>msvc in $(properties) {
+        feats += <define>_SECURE_SCL=0 ;
+        feats += <define>_SCL_SECURE_NO_DEPRECATE ;
+        feats += <define>_CRT_SECURE_NO_WARNINGS ;
+        feats += <define>_HAS_ITERATOR_DEBUGGING=1 ;
+        feats += <define>_CRT_SECURE_NO_DEPRECATE ;
+        feats += <define>_CRT_NONSTDC_NO_DEPRECATE ;
+        feats += <define>WINDOWS ;
+        feats += <user-interface>gui ;
+        
+        if <variant>debug in $(properties) {
+            feats += <debug-store>database ;
+        }
+    }
+    
+    if <variant>debug in $(properties) {
+        feats += <define>DEBUG ;
+    }
+    
+    return $(feats) ;
+}
