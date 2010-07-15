@@ -1,0 +1,40 @@
+<!-- wildplants.xml defines all the plantlife that can grow in the wilderness.
+NOTE: plants that can be farmed are defined in items.xml
+items.xml is read before wildplants.xml, so you can reference names from there. -->
+
+<WildPlants>
+    <plant>
+        <name>Pine tree</name>
+        <graphic>6</graphic>
+        <color><r>0</r><g>200</g><b>14</b></color>
+        <components>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+            <comp>Wood log</comp>
+        </components>
+        <rarity>100</rarity>
+        <condition>150</condition>
+        <tree></tree>
+    </plant>
+
+    <plant>
+        <name>Wild Bloodberry bush</name>
+        <graphic>35</graphic>
+        <color><r>140</r><g>0</g><b>0</b></color>
+        <components>
+            <comp>Bloodberry</comp>
+        </components>
+        <cluster>5</cluster>
+        <rarity>10</rarity>
+        <condition>10</condition>
+        <harvestable></harvestable>
+        <walkable></walkable>
+    </plant>
+</WildPlants>
