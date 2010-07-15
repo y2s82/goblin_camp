@@ -15,7 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
+#ifdef WINDOWS
 #include <windows.h>
+#endif
 #include <boost/format.hpp>
 
 #include "GCamp.hpp"
@@ -28,7 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "JobManager.hpp"
 
-int main(std::string cmdline) {
+int main() {
 	int width = -1, height = -1;
 	bool fullscreen = false;
 
@@ -70,8 +72,10 @@ CONTINUEMAIN:
 	return MainMenu();
 }
 
+#ifdef WINDOWS
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
-{ return main(cmdLine); }
+{ return main(); }
+#endif
 
 void MainLoop() {
 	Game* game = Game::Inst();
@@ -302,7 +306,7 @@ void SaveMenu() {
 		if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
 			saveName.push_back(key.c);
 		} else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
-			saveName.pop_back();
+			saveName.erase(saveName.end() - 1);
 		}
 
 		if (key.vk == TCODK_ESCAPE) return;

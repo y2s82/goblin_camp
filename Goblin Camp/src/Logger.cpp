@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/date_time/local_time/local_time.hpp>
 
-#include "logger.hpp"
+#include "Logger.hpp"
 
 Logger::Logger() {
     output.open("Log.txt");

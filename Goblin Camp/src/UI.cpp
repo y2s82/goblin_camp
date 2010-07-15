@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "Announce.hpp"
 #include "Game.hpp"
-#include "Gcamp.hpp"
+#include "GCamp.hpp"
 #include "Logger.hpp"
 #include "Map.hpp"
 #include "Job.hpp"
@@ -199,7 +199,7 @@ void UI::HandleKeyboard() {
 		if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
 			inputString += key.c;
 		} else if (key.vk == TCODK_BACKSPACE) {
-			if (inputString.size() > 0) inputString.pop_back();
+			if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
 		}
 	}
 	if (key.vk == TCODK_ESCAPE && menuOpen) {
