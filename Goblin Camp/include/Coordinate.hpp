@@ -19,25 +19,25 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Coordinate {
 	friend class boost::serialization::access;
-	private:
-		template<class Archive>
-		void save(Archive & ar, const unsigned int version) const;
-		template<class Archive>
-		void load(Archive & ar, const unsigned int version);
-		BOOST_SERIALIZATION_SPLIT_MEMBER()
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		int x, y;
-	public:
-		Coordinate(int valuex = 0,int = 0);
+	int x, y;
+public:
+	Coordinate(int valuex = 0,int = 0);
 
-		int X() const;
-		int X(int);
-		int Y() const;
-		int Y(int);
-		bool operator<(const Coordinate) const;
-		bool operator==(const Coordinate) const;
-		bool operator!=(const Coordinate) const;
-		Coordinate operator+(int);
-		Coordinate operator-(int);
-		Coordinate operator+(Coordinate);
+	int X() const;
+	int X(int);
+	int Y() const;
+	int Y(int);
+	bool operator<(const Coordinate) const;
+	bool operator==(const Coordinate) const;
+	bool operator!=(const Coordinate) const;
+	Coordinate operator+(int);
+	Coordinate operator-(int);
+	Coordinate operator+(Coordinate);
 };

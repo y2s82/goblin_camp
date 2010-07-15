@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 AnnounceMessage::AnnounceMessage(std::string nmsg, TCODColor col, Coordinate pos) :
-	msg(nmsg),
+msg(nmsg),
 	counter(1),
 	color(col),
 	target(pos) {}
@@ -40,7 +40,7 @@ Announce* Announce::Inst() {
 }
 
 Announce::Announce() : 
-    timer(0),
+timer(0),
 	length(0),
 	height(0)
 {}
@@ -82,48 +82,48 @@ void Announce::Update() {
 
 void Announce::Draw(TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
-	
-	if (height > 0 && (signed int)height < console->getHeight() - 1) {
-        console->hline(0, console->getHeight()-1-height, length+4);
-        console->putChar(length+3, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
-        console->vline(length+3, console->getHeight()-height, height);
-        console->rect(0, console->getHeight()-height, length+3, height, true);
 
-        for (int i = height-1; i >= 0; --i) {
-            AnnounceMessage* msg = messageQueue[i];
-            console->setForegroundColor(msg->color);
+	if (height > 0 && (signed int)height < console->getHeight() - 1) {
+		console->hline(0, console->getHeight()-1-height, length+4);
+		console->putChar(length+3, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
+		console->vline(length+3, console->getHeight()-height, height);
+		console->rect(0, console->getHeight()-height, length+3, height, true);
+
+		for (int i = height-1; i >= 0; --i) {
+			AnnounceMessage* msg = messageQueue[i];
+			console->setForegroundColor(msg->color);
 			console->print(0, console->getHeight()-(height-i), msg->ToString().c_str());
-        }
+		}
 	}
 }
 
 void Announce::Draw(Coordinate pos, int from, int amount, TCODConsole* console) {
-    EmptyMessageQueue();
-    int count = 0;
-    for (std::deque<AnnounceMessage*>::iterator ani = history.begin(); ani != history.end(); ++ani) {
-        if (count++ >= from) {
-            console->print(pos.X(), pos.Y()+count-from, (*ani)->ToString().c_str());
-            if (count-from+1 == amount) return;
-        }
-    }
+	EmptyMessageQueue();
+	int count = 0;
+	for (std::deque<AnnounceMessage*>::iterator ani = history.begin(); ani != history.end(); ++ani) {
+		if (count++ >= from) {
+			console->print(pos.X(), pos.Y()+count-from, (*ani)->ToString().c_str());
+			if (count-from+1 == amount) return;
+		}
+	}
 }
 
 void Announce::EmptyMessageQueue() {
-    while (!messageQueue.empty()) {
-			history.push_front(messageQueue.front());
-			if (history.size() > 1000) {
-			    delete(history.back());
-			    history.pop_back();
-			}
-			messageQueue.pop_front();
-    }
+	while (!messageQueue.empty()) {
+		history.push_front(messageQueue.front());
+		if (history.size() > 1000) {
+			delete(history.back());
+			history.pop_back();
+		}
+		messageQueue.pop_front();
+	}
 	length = 0;
 }
 
 int Announce::AnnounceAmount() {
-    return history.size()+messageQueue.size();
+	return history.size()+messageQueue.size();
 }
 
 Coordinate Announce::CurrentCoordinate() {
-    return messageQueue.front()->target;
+	return messageQueue.front()->target;
 }

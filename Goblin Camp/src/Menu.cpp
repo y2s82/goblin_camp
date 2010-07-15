@@ -57,7 +57,7 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 	if (y + height >= console->getHeight()) y = console->getHeight() - height - 1;
 	topX = x; topY = y; //Save coordinates of menu top-left corner
 	console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, 0);
-    console->setBackgroundFlag(TCOD_BKGND_SET);
+	console->setBackgroundFlag(TCOD_BKGND_SET);
 	//Draw the menu entries
 	for (int i = 0; i < (signed int)choices.size(); ++i) {
 		console->setBackgroundColor(TCODColor::black);
@@ -137,18 +137,18 @@ Menu* Menu::BasicsMenu() {
 		basicsMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
 			if (Construction::Presets[i].tags[STOCKPILE]) {
-                basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
-		    }
+				basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
+			}
 		}
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].tags[FARMPLOT]) {
-                basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
-		    }
+			if (Construction::Presets[i].tags[FARMPLOT]) {
+				basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
+			}
 		}
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].tags[WALL]) {
-                basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIABPLACEMENT)));
-		    }
+			if (Construction::Presets[i].tags[WALL]) {
+				basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIABPLACEMENT)));
+			}
 		}
 		basicsMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));
 	}
@@ -160,9 +160,9 @@ Menu* Menu::WorkshopsMenu() {
 	if (!workshopsMenu) {
 		workshopsMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].tags[WORKSHOP]) {
-                workshopsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
-		    }
+			if (Construction::Presets[i].tags[WORKSHOP]) {
+				workshopsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
+			}
 		}
 	}
 	return workshopsMenu;
@@ -170,13 +170,13 @@ Menu* Menu::WorkshopsMenu() {
 
 Menu* Menu::ordersMenu = 0;
 Menu* Menu::OrdersMenu() {
-    if (!ordersMenu) {
-        ordersMenu = new Menu(std::vector<MenuChoice>());
-        ordersMenu->AddChoice(MenuChoice("Fell trees", boost::bind(UI::ChooseTreeFelling)));
-        ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
+	if (!ordersMenu) {
+		ordersMenu = new Menu(std::vector<MenuChoice>());
+		ordersMenu->AddChoice(MenuChoice("Fell trees", boost::bind(UI::ChooseTreeFelling)));
+		ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
 		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
-    }
-    return ordersMenu;
+	}
+	return ordersMenu;
 }
 
 Menu* Menu::furnitureMenu = 0;
@@ -184,9 +184,9 @@ Menu* Menu::FurnitureMenu() {
 	if (!furnitureMenu) {
 		furnitureMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-		    if (Construction::Presets[i].tags[FURNITURE]) {
-                furnitureMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
-		    }
+			if (Construction::Presets[i].tags[FURNITURE]) {
+				furnitureMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
+			}
 		}
 	}
 	return furnitureMenu;
@@ -218,10 +218,10 @@ void JobMenu::Draw(int x, int y, TCODConsole* console) {
 	for (int y = topY+1; y <= topY+height-2; ++y) {
 		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - (topY+1 + scroll)));
 		if (job.lock()) {
-            if (job.lock()->Paused()) {
-                console->print(topX+width-15, y, "P");
-            }
-                console->print(topX+width-18, y, "A-> %d", job.lock()->Assigned());
+			if (job.lock()->Paused()) {
+				console->print(topX+width-15, y, "P");
+			}
+			console->print(topX+width-18, y, "A-> %d", job.lock()->Assigned());
 		}
 	}
 }
@@ -310,14 +310,14 @@ void NPCMenu::Draw(int x, int y, TCODConsole* console) {
 
 	console->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "NPC List");
 
-    int count = 0;
+	int count = 0;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
-	    if (count++ >= scroll) {
-	        console->print(topX+1, topY+1+(count-scroll), "NPC: %d", npci->second->Uid());
-	        console->print(topX+10, topY+1+(count-scroll), "%s: %s",
-                npci->second->currentJob().lock() ? npci->second->currentJob().lock()->name.c_str() : "No job",
-                npci->second->currentTask() ? Job::ActionToString(npci->second->currentTask()->action).c_str() : "No task");
-	    }
+		if (count++ >= scroll) {
+			console->print(topX+1, topY+1+(count-scroll), "NPC: %d", npci->second->Uid());
+			console->print(topX+10, topY+1+(count-scroll), "%s: %s",
+				npci->second->currentJob().lock() ? npci->second->currentJob().lock()->name.c_str() : "No job",
+				npci->second->currentTask() ? Job::ActionToString(npci->second->currentTask()->action).c_str() : "No task");
+		}
 	}
 
 	console->putChar(topX+width-2, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
@@ -348,125 +348,125 @@ void NPCMenu::ScrollDown() { ++scroll; }
 ConstructionMenu* ConstructionMenu::constructionInfoMenu = 0;
 
 ConstructionMenu::ConstructionMenu() : Menu(std::vector<MenuChoice>()),
-    construct(0),
-    scroll(0),
-    firstTimeDraw(true)
+	construct(0),
+	scroll(0),
+	firstTimeDraw(true)
 {
-    width = 50; height = 50;
-    topX = (Game::Inst()->ScreenWidth() - width) / 2;
-    topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	width = 50; height = 50;
+	topX = (Game::Inst()->ScreenWidth() - width) / 2;
+	topY = (Game::Inst()->ScreenHeight() - height) / 2;
 }
 
 void ConstructionMenu::Draw(int, int, TCODConsole* console) {
-    console->setForegroundColor(TCODColor::white);
-    console->printFrame(topX, topY, 50, 5, true, TCOD_BKGND_SET, construct->Name().c_str());
-    console->setForegroundColor(TCODColor::green);
-    console->print(topX + 3, topY + 2, "Rename");
-    console->setForegroundColor(TCODColor::red);
-    console->print(topX + 13, topY + 2, "Dismantle");
-    console->setForegroundColor(TCODColor::white);
+	console->setForegroundColor(TCODColor::white);
+	console->printFrame(topX, topY, 50, 5, true, TCOD_BKGND_SET, construct->Name().c_str());
+	console->setForegroundColor(TCODColor::green);
+	console->print(topX + 3, topY + 2, "Rename");
+	console->setForegroundColor(TCODColor::red);
+	console->print(topX + 13, topY + 2, "Dismantle");
+	console->setForegroundColor(TCODColor::white);
 
-    //Only draw the production queue and product list if construction is a producer
-    if (construct->Producer()) {
-        console->printFrame(topX+25, topY+5, 25, 50, true, TCOD_BKGND_SET, "Product list");
-        console->printFrame(topX, topY+5, 25, 50, true, TCOD_BKGND_SET, "Production queue");
-        console->putChar(topX+25, topY+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-        console->putChar(topX+25, topY+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-        console->putChar(topX+25, topY+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-        console->putChar(topX+24, topY+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-        console->putChar(topX+24, topY+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-        console->putChar(topX+24, topY+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+	//Only draw the production queue and product list if construction is a producer
+	if (construct->Producer()) {
+		console->printFrame(topX+25, topY+5, 25, 50, true, TCOD_BKGND_SET, "Product list");
+		console->printFrame(topX, topY+5, 25, 50, true, TCOD_BKGND_SET, "Production queue");
+		console->putChar(topX+25, topY+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(topX+25, topY+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(topX+25, topY+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(topX+24, topY+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(topX+24, topY+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(topX+24, topY+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
 
-        console->putChar(topX+48, topY+6, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-        console->putChar(topX+48, topY+53, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+		console->putChar(topX+48, topY+6, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+		console->putChar(topX+48, topY+53, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
 
-        int y = 0;
-        for (int prodi = scroll; prodi < (signed int)construct->Products()->size() && y < topY+50; ++prodi) {
-            console->setForegroundColor(TCODColor::white);
-            console->print(topX+26, topY+6+y, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
-            if (firstTimeDraw) productPlacement.push_back(topY+6+y);
-            ++y;
-            for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < topY+50; ++compi) {
-                console->setForegroundColor(TCODColor::white);
-                console->putChar(topX+27, topY+6+y, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
-                console->setForegroundColor(TCODColor::grey);
-                console->print(topX+28, topY+6+y, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
-                ++y;
-            }
-            ++y;
-        }
+		int y = 0;
+		for (int prodi = scroll; prodi < (signed int)construct->Products()->size() && y < topY+50; ++prodi) {
+			console->setForegroundColor(TCODColor::white);
+			console->print(topX+26, topY+6+y, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
+			if (firstTimeDraw) productPlacement.push_back(topY+6+y);
+			++y;
+			for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < topY+50; ++compi) {
+				console->setForegroundColor(TCODColor::white);
+				console->putChar(topX+27, topY+6+y, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
+				console->setForegroundColor(TCODColor::grey);
+				console->print(topX+28, topY+6+y, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
+				++y;
+			}
+			++y;
+		}
 
-        for (int jobi = 0; jobi < (signed int)construct->JobList()->size(); ++jobi) {
-            console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
-            console->print(topX+2, topY+6+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
-        }
+		for (int jobi = 0; jobi < (signed int)construct->JobList()->size(); ++jobi) {
+			console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
+			console->print(topX+2, topY+6+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
+		}
 
-        firstTimeDraw = false;
+		firstTimeDraw = false;
 	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
 
 	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
-        Stockpile* sp = static_cast<Stockpile*>(construct);
-        console->setForegroundColor(TCODColor::white);
-        console->printFrame(topX, topY+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
-        int x = topX+2;
-        int y = topY+6;
-        for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-            console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-            console->print(x,y, Item::Categories[i].name.c_str());
-            ++y;
-            if (i != 0 && i % 49 == 0) {
-                x += 20;
-                y = topY+6;
-            }
-        }
-    }
+		Stockpile* sp = static_cast<Stockpile*>(construct);
+		console->setForegroundColor(TCODColor::white);
+		console->printFrame(topX, topY+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
+		int x = topX+2;
+		int y = topY+6;
+		for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+			console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
+			console->print(x,y, Item::Categories[i].name.c_str());
+			++y;
+			if (i != 0 && i % 49 == 0) {
+				x += 20;
+				y = topY+6;
+			}
+		}
+	}
 
-    console->setForegroundColor(TCODColor::white);
+	console->setForegroundColor(TCODColor::white);
 
 }
 
 MenuResult ConstructionMenu::Update(int x, int y, bool clicked) {
-    if (x >= topX + 3 && x < topX + 3 + 6 && y == topY + 2) { /*Rename*/ }
-    if (x >= topX + 13 && x < topX + 13 + 9 && y == topY + 2) { /*Dismantle*/ }
+	if (x >= topX + 3 && x < topX + 3 + 6 && y == topY + 2) { /*Rename*/ }
+	if (x >= topX + 13 && x < topX + 13 + 9 && y == topY + 2) { /*Dismantle*/ }
 
-    if (construct->Producer()) {
-        if (x > topX+2 && x < topX+25) {
-            //Cancel production jobs
-            if (y > topY+5 && y < topY+17) {
-                construct->CancelJob(y-(topY+6));
-                return MENUHIT;
-            }
-        }
-        if (x > topX+25 && x < topX+48) {
-            //Add production jobs
-            for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
-                if (y == productPlacement[i]) {
-                    construct->AddJob(construct->Products(i+scroll));
-                    return MENUHIT;
-                }
-            }
-        }
+	if (construct->Producer()) {
+		if (x > topX+2 && x < topX+25) {
+			//Cancel production jobs
+			if (y > topY+5 && y < topY+17) {
+				construct->CancelJob(y-(topY+6));
+				return MENUHIT;
+			}
+		}
+		if (x > topX+25 && x < topX+48) {
+			//Add production jobs
+			for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
+				if (y == productPlacement[i]) {
+					construct->AddJob(construct->Products(i+scroll));
+					return MENUHIT;
+				}
+			}
+		}
 
-        if (x == topX+48 && y == topY+6) { ScrollUp(); return MENUHIT; }
-        if (x == topX+48 && y == topY+53) { ScrollDown(); return MENUHIT; }
+		if (x == topX+48 && y == topY+6) { ScrollUp(); return MENUHIT; }
+		if (x == topX+48 && y == topY+53) { ScrollDown(); return MENUHIT; }
 	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
 
 	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
-        int i = ((x-topX+2) / 20)*50;
-        i += (y - (topY+6));
-        if (i >= 0 && i < (signed int)Item::Categories.size()) {
-            static_cast<Stockpile*>(construct)->SwitchAllowed(i);
-        }
-        return MENUHIT;
-    }
-    return NOMENUHIT;
+		int i = ((x-topX+2) / 20)*50;
+		i += (y - (topY+6));
+		if (i >= 0 && i < (signed int)Item::Categories.size()) {
+			static_cast<Stockpile*>(construct)->SwitchAllowed(i);
+		}
+		return MENUHIT;
+	}
+	return NOMENUHIT;
 }
 
 ConstructionMenu* ConstructionMenu::ConstructionInfoMenu(Construction* cons) {
-    if (!constructionInfoMenu) constructionInfoMenu = new ConstructionMenu();
-    constructionInfoMenu->Construct(cons);
-    constructionInfoMenu->ClearProductPlacement();
-    return constructionInfoMenu;
+	if (!constructionInfoMenu) constructionInfoMenu = new ConstructionMenu();
+	constructionInfoMenu->Construct(cons);
+	constructionInfoMenu->ClearProductPlacement();
+	return constructionInfoMenu;
 }
 
 void ConstructionMenu::Construct(Construction* cons) { construct = cons; }
@@ -479,17 +479,17 @@ void ConstructionMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
 StockManagerMenu* StockManagerMenu::stocksMenu = 0;
 
 StockManagerMenu::StockManagerMenu() : Menu(std::vector<MenuChoice>()),
-    scroll(0),
+	scroll(0),
 	filter("")
 {
-    width = 50; height = 50;
-    topX = (Game::Inst()->ScreenWidth() - width) / 2;
-    topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	width = 50; height = 50;
+	topX = (Game::Inst()->ScreenWidth() - width) / 2;
+	topY = (Game::Inst()->ScreenHeight() - height) / 2;
 }
 
 void StockManagerMenu::Draw(int, int, TCODConsole* console) {
-    console->setForegroundColor(TCODColor::white);
-    console->printFrame(topX, topY, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
+	console->setForegroundColor(TCODColor::white);
+	console->printFrame(topX, topY, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
 	console->putChar(topX+48, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
 	console->putChar(topX+48, topY+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
 	console->printFrame(topX+10, topY+1, 30, 3, true);
@@ -504,16 +504,16 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 		itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
 			if (StockManager::Inst()->TypeQuantity(*itemi) > -1 &&
 				boost::icontains(Item::Presets[*itemi].name, filter)) { //Hide unavailable products
-				console->setForegroundColor(Item::Presets[*itemi].color);
-				console->print(x,y, "%c %s", Item::Presets[*itemi].graphic, Item::Presets[*itemi].name.c_str());
-				console->setForegroundColor(TCODColor::white);
-				console->print(x,y+1, "%d", StockManager::Inst()->TypeQuantity(*itemi));
+					console->setForegroundColor(Item::Presets[*itemi].color);
+					console->print(x,y, "%c %s", Item::Presets[*itemi].graphic, Item::Presets[*itemi].name.c_str());
+					console->setForegroundColor(TCODColor::white);
+					console->print(x,y+1, "%d", StockManager::Inst()->TypeQuantity(*itemi));
 
-				console->print(x,y+2, "- %d +", StockManager::Inst()->Minimum(*itemi));
+					console->print(x,y+2, "- %d +", StockManager::Inst()->Minimum(*itemi));
 
-				x += 16;
-				if (x > topX + (width - 10)) {x = topX + 8; y += 5;}
-				if (y > topY + (height - 4)) break;
+					x += 16;
+					if (x > topX + (width - 10)) {x = topX + 8; y += 5;}
+					if (y > topY + (height - 4)) break;
 			}
 	}
 	console->setAlignment(TCOD_LEFT);
@@ -565,12 +565,12 @@ MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
 		}
 		return MENUHIT;
 	}
-    return NOMENUHIT;
+	return NOMENUHIT;
 }
 
 StockManagerMenu* StockManagerMenu::StocksMenu() {
-    if (!stocksMenu) stocksMenu = new StockManagerMenu();
-    return stocksMenu;
+	if (!stocksMenu) stocksMenu = new StockManagerMenu();
+	return stocksMenu;
 }
 
 void StockManagerMenu::ScrollDown() { ++scroll; }

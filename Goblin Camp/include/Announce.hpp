@@ -27,31 +27,31 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define ANNOUNCE_HEIGHT 10
 
 class AnnounceMessage {
-	public:
-		AnnounceMessage(std::string, TCODColor = TCODColor::white, Coordinate = Coordinate(-1,-1));
-		std::stringstream result;
-		std::string msg;
-		int counter;
-		TCODColor color;
-		Coordinate target;
-		std::string ToString();
+public:
+	AnnounceMessage(std::string, TCODColor = TCODColor::white, Coordinate = Coordinate(-1,-1));
+	std::stringstream result;
+	std::string msg;
+	int counter;
+	TCODColor color;
+	Coordinate target;
+	std::string ToString();
 };
 
 class Announce {
-	private:
-		Announce();
-		static Announce* instance;
-		std::deque<AnnounceMessage*> messageQueue;
-		std::deque<AnnounceMessage*> history;
-		int timer;
-		unsigned int length, height;
-	public:
-		static Announce* Inst();
-		void AddMsg(std::string, TCODColor = TCODColor::white);
-		void Update();
-		void Draw(TCODConsole*);
-		void Draw(Coordinate, int from, int amount, TCODConsole*);
-		int AnnounceAmount();
-		void EmptyMessageQueue();
-		Coordinate CurrentCoordinate();
+private:
+	Announce();
+	static Announce* instance;
+	std::deque<AnnounceMessage*> messageQueue;
+	std::deque<AnnounceMessage*> history;
+	int timer;
+	unsigned int length, height;
+public:
+	static Announce* Inst();
+	void AddMsg(std::string, TCODColor = TCODColor::white);
+	void Update();
+	void Draw(TCODConsole*);
+	void Draw(Coordinate, int from, int amount, TCODConsole*);
+	int AnnounceAmount();
+	void EmptyMessageQueue();
+	Coordinate CurrentCoordinate();
 };

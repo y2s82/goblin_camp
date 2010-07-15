@@ -24,7 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 
 Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt) :
-	target(tar),
+target(tar),
 	entity(ent),
 	action(act),
 	item(itt)
@@ -32,7 +32,7 @@ Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory
 }
 
 Job::Job(std::string value, JobPriority pri, int z, bool m) :
-	_priority(pri),
+_priority(pri),
 	completion(ONGOING),
 	parent(boost::weak_ptr<Job>()),
 	npcUid(-1),
@@ -58,8 +58,8 @@ Job::~Job() {
 	UnreserveSpot();
 	if (connectedEntity.lock()) connectedEntity.lock()->CancelJob();
 	if (reservedSpace.lock()) {
-	    reservedSpace.lock()->ReserveSpace(false);
-	    reservedSpace = boost::weak_ptr<Container>();
+		reservedSpace.lock()->ReserveSpace(false);
+		reservedSpace = boost::weak_ptr<Container>();
 	}
 }
 
@@ -115,8 +115,8 @@ boost::shared_ptr<Job> Job::BuildJob(boost::weak_ptr<Construction> construct) {
 
 void Job::ReserveEntity(boost::weak_ptr<Entity> entity) {
 	if (entity.lock()) {
-        reservedEntities.push_back(entity);
-        entity.lock()->Reserve(true);
+		reservedEntities.push_back(entity);
+		entity.lock()->Reserve(true);
 	}
 }
 
@@ -128,41 +128,41 @@ void Job::UnreserveEntities() {
 }
 
 void Job::ReserveSpot(boost::weak_ptr<Stockpile> sp, Coordinate pos) {
-    if (sp.lock()) {
-        sp.lock()->ReserveSpot(pos, true);
-        reservedSpot = std::pair<boost::weak_ptr<Stockpile>, Coordinate>(sp, pos);
-    }
+	if (sp.lock()) {
+		sp.lock()->ReserveSpot(pos, true);
+		reservedSpot = std::pair<boost::weak_ptr<Stockpile>, Coordinate>(sp, pos);
+	}
 }
 
 void Job::UnreserveSpot() {
-    if (reservedSpot.first.lock()) {
-        reservedSpot.first.lock()->ReserveSpot(reservedSpot.second, false);
-        reservedSpot.first.reset();
-    }
+	if (reservedSpot.first.lock()) {
+		reservedSpot.first.lock()->ReserveSpot(reservedSpot.second, false);
+		reservedSpot.first.reset();
+	}
 }
 
 void Job::Fail() {
-    completion = FAILURE;
+	completion = FAILURE;
 	if (parent.lock()) parent.lock()->Fail();
-    preReqs.clear();
+	preReqs.clear();
 	Remove();
 }
 
 std::string Job::ActionToString(Action action) {
-    switch (action) {
-        case MOVE: return std::string("Move");
-        case MOVEADJACENT: return std::string("Move adjacent");
-        case BUILD: return std::string("Build");
-        case TAKE: return std::string("Pick up");
-        case DROP: return std::string("Drop");
-        case PUTIN: return std::string("Put in");
-        case USE: return std::string("Use");
-        default: return std::string("???");
-    }
+	switch (action) {
+	case MOVE: return std::string("Move");
+	case MOVEADJACENT: return std::string("Move adjacent");
+	case BUILD: return std::string("Build");
+	case TAKE: return std::string("Pick up");
+	case DROP: return std::string("Drop");
+	case PUTIN: return std::string("Put in");
+	case USE: return std::string("Use");
+	default: return std::string("???");
+	}
 }
 
 void Job::ConnectToEntity(boost::weak_ptr<Entity> ent) {
-    connectedEntity = ent;
+	connectedEntity = ent;
 }
 
 void Job::ReserveSpace(boost::weak_ptr<Container> cont) {

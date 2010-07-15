@@ -30,31 +30,31 @@ class Entity: public boost::enable_shared_from_this<Entity>
 	template<class Archive>
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
-	protected:
-		unsigned int x, y;
-		int uid;
-		int zone;
-		bool reserved;
-		std::string name;
-		int faction;
-	public:
-		Entity();
-		virtual ~Entity();
-		virtual int X();
-		virtual int Y();
-		int Uid();
-		static int uids;
-		virtual Coordinate Position();
-		virtual void Position(Coordinate);
-		void Zone(int);
-		int Zone();
-		virtual void Reserve(bool);
-		bool Reserved();
-		std::string Name();
-		void Name(std::string);
-		virtual void CancelJob(int=0);
+protected:
+	unsigned int x, y;
+	int uid;
+	int zone;
+	bool reserved;
+	std::string name;
+	int faction;
+public:
+	Entity();
+	virtual ~Entity();
+	virtual int X();
+	virtual int Y();
+	int Uid();
+	static int uids;
+	virtual Coordinate Position();
+	virtual void Position(Coordinate);
+	void Zone(int);
+	int Zone();
+	virtual void Reserve(bool);
+	bool Reserved();
+	std::string Name();
+	void Name(std::string);
+	virtual void CancelJob(int=0);
 
-		virtual void Faction(int);
-		virtual int Faction() const;
+	virtual void Faction(int);
+	virtual int Faction() const;
 };
 

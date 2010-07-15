@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 Squad::Squad(std::string nameValue, int memberValue, int pri) :
-	name(nameValue),
+name(nameValue),
 	memberReq(memberValue),
 	order(NOORDER),
 	targetCoordinate(Coordinate(-1,-1)),
@@ -43,7 +43,7 @@ bool Squad::UpdateMembers() {
 		Game::Inst()->npcList[members.back()]->MemberOf(boost::weak_ptr<Squad>());
 		members.pop_back();
 	}
-	
+
 	if ((signed int)members.size() < memberReq) return true;
 	return false;
 }

@@ -20,9 +20,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 Map::Map() {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
-	    for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
-	        tileMap[i][e].type(tileMap[i][e].type());
-	    }
+		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
+			tileMap[i][e].type(tileMap[i][e].type());
+		}
 	}
 	width = tileMap.size();
 	height = tileMap[0].size();
@@ -52,9 +52,9 @@ void Map::Buildable(int x, int y, bool value) { tileMap[x][y].Buildable(value); 
 TileType Map::Type(int x, int y) { return tileMap[x][y].type(); }
 void Map::Type(int x, int y, TileType ntype) { tileMap[x][y].type(ntype); }
 bool Map::MoveTo(int x, int y, int uid) {
-    if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
-        return tileMap[x][y].MoveTo(uid);
-    } else return false;
+	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
+		return tileMap[x][y].MoveTo(uid);
+	} else return false;
 }
 void Map::MoveFrom(int x, int y, int uid) { tileMap[x][y].MoveFrom(uid); }
 
@@ -69,7 +69,7 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 		for (int x = upleft.X(); x < upleft.X() + console->getWidth(); ++x) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
-			    console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), ForeColor(x,y), BackColor(x,y));
+				console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), ForeColor(x,y), BackColor(x,y));
 
 				boost::weak_ptr<WaterNode> water = GetWater(x,y);
 				if (water.lock()) {

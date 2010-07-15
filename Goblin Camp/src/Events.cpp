@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 
 Events::Events(Map* vmap) :
-    hostileSpawningMonsters(std::vector<int>()),
+hostileSpawningMonsters(std::vector<int>()),
 	map(vmap)
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
@@ -33,7 +33,7 @@ Events::Events(Map* vmap) :
 	}
 }
 
-	//Pretty much just placeholder stuff until I get a proper events system in place
+//Pretty much just placeholder stuff until I get a proper events system in place
 
 void Events::Update() {
 	if (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0) {

@@ -19,24 +19,24 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class JobManager {
 	friend class boost::serialization::access;
-	private:
-		template<class Archive>
-		void save(Archive & ar, const unsigned int version) const;
-		template<class Archive>
-		void load(Archive & ar, const unsigned int version);
-		BOOST_SERIALIZATION_SPLIT_MEMBER()
-		JobManager();
-		static JobManager *instance;
-		std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
-		std::list<boost::shared_ptr<Job> > waitingList;
-	public:
-		static JobManager* Inst();
-		void AddJob(boost::shared_ptr<Job>);
-		void Draw(Coordinate, int from = 0, int count = 20, TCODConsole* = TCODConsole::root);
-		void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
-		boost::weak_ptr<Job> GetJob(int);
-		boost::weak_ptr<Job> GetJobByListIndex(int);
-		void Update();
-		int JobAmount();
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+	JobManager();
+	static JobManager *instance;
+	std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
+	std::list<boost::shared_ptr<Job> > waitingList;
+public:
+	static JobManager* Inst();
+	void AddJob(boost::shared_ptr<Job>);
+	void Draw(Coordinate, int from = 0, int count = 20, TCODConsole* = TCODConsole::root);
+	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
+	boost::weak_ptr<Job> GetJob(int);
+	boost::weak_ptr<Job> GetJobByListIndex(int);
+	void Update();
+	int JobAmount();
 
 };

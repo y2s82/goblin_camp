@@ -32,10 +32,10 @@ typedef int ItemCategory;
 typedef int ItemType;
 
 class ItemCat {
-    public:
-        ItemCat();
-        bool flammable;
-        std::string name;
+public:
+	ItemCat();
+	bool flammable;
+	std::string name;
 };
 
 struct ItemPreset {
@@ -62,79 +62,79 @@ class Item : public Entity {
 	friend class boost::serialization::access;
 	friend class Game;
 
-	private:
-		template<class Archive>
-		void save(Archive & ar, const unsigned int version) const;
-		template<class Archive>
-		void load(Archive & ar, const unsigned int version);
-		BOOST_SERIALIZATION_SPLIT_MEMBER()
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		int graphic;
-		ItemType type;
-		TCODColor color;
-        std::set<ItemCategory> categories;
-        bool flammable;
-        bool attemptedStore;
-        int decayCounter;
+	int graphic;
+	ItemType type;
+	TCODColor color;
+	std::set<ItemCategory> categories;
+	bool flammable;
+	bool attemptedStore;
+	int decayCounter;
 
-        static std::map<std::string, ItemType> itemTypeNames;
-        static std::map<std::string, ItemCategory> itemCategoryNames;
+	static std::map<std::string, ItemType> itemTypeNames;
+	static std::map<std::string, ItemCategory> itemCategoryNames;
 
-    protected:
-		int ownerFaction;
-		Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
-			std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
-        boost::weak_ptr<Item> container;
+protected:
+	int ownerFaction;
+	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
+		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
+	boost::weak_ptr<Item> container;
 
-	public:
-		static std::string ItemTypeToString(ItemType);
-		static ItemType StringToItemType(std::string);
-		static std::string ItemCategoryToString(ItemCategory);
-		static ItemCategory StringToItemCategory(std::string);
+public:
+	static std::string ItemTypeToString(ItemType);
+	static ItemType StringToItemType(std::string);
+	static std::string ItemCategoryToString(ItemCategory);
+	static ItemCategory StringToItemCategory(std::string);
 
-		static std::vector<ItemCategory> Components(ItemType);
-		static ItemCategory Components(ItemType, int);
+	static std::vector<ItemCategory> Components(ItemType);
+	static ItemCategory Components(ItemType, int);
 
-		static void LoadPresets(ticpp::Document);
+	static void LoadPresets(ticpp::Document);
 
-		static std::vector<ItemCat> Categories;
-		static std::vector<ItemPreset> Presets;
+	static std::vector<ItemCat> Categories;
+	static std::vector<ItemPreset> Presets;
 
-        virtual ~Item();
+	virtual ~Item();
 
-		void Draw(Coordinate, TCODConsole*);
-        void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
-        boost::weak_ptr<Item> ContainedIn();
-		virtual void Position(Coordinate);
-		virtual Coordinate Position();
-		ItemType Type();
-		int Graphic();
-		TCODColor Color();
-		void Color(TCODColor);
-		bool IsCategory(ItemCategory);
-		virtual void Reserve(bool);
-		virtual void Faction(int);
-		virtual int Faction() const;
+	void Draw(Coordinate, TCODConsole*);
+	void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
+	boost::weak_ptr<Item> ContainedIn();
+	virtual void Position(Coordinate);
+	virtual Coordinate Position();
+	ItemType Type();
+	int Graphic();
+	TCODColor Color();
+	void Color(TCODColor);
+	bool IsCategory(ItemCategory);
+	virtual void Reserve(bool);
+	virtual void Faction(int);
+	virtual int Faction() const;
 };
 
 class OrganicItem : public Item {
 	friend class boost::serialization::access;
 	friend class game;
 
-    private:
- 		template<class Archive>
-		void save(Archive & ar, const unsigned int version) const;
-		template<class Archive>
-		void load(Archive & ar, const unsigned int version);
-		BOOST_SERIALIZATION_SPLIT_MEMBER()
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-        int nutrition;
-        ItemType growth;
+		int nutrition;
+	ItemType growth;
 
-    public:
-        OrganicItem(Coordinate=Coordinate(0,0), ItemType=0);
-        int Nutrition();
-        void Nutrition(int);
-        ItemType Growth();
-        void Growth(ItemType);
+public:
+	OrganicItem(Coordinate=Coordinate(0,0), ItemType=0);
+	int Nutrition();
+	void Nutrition(int);
+	ItemType Growth();
+	void Growth(ItemType);
 };

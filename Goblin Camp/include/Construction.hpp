@@ -48,10 +48,10 @@ enum ConstructionTag {
 };
 
 struct ConstructionPreset {
-    ConstructionPreset();
-    int maxCondition;
-    std::vector<int> graphic;
-    bool walkable;
+	ConstructionPreset();
+	int maxCondition;
+	std::vector<int> graphic;
+	bool walkable;
 	std::list<ItemCategory> materials;
 	bool producer;
 	std::vector<ItemType> products;

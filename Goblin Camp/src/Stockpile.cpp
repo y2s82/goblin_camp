@@ -19,18 +19,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
-	Construction(type, target),
+Construction(type, target),
 	symbol(newSymbol),
 	a(target),
 	b(target)
 {
 	condition = maxCondition;
-    reserved.insert(std::pair<Coordinate,bool>(target,false));
-    containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
-    for (int i = 0; i < Game::ItemCatCount; ++i) {
-        amount.insert(std::pair<ItemCategory, int>(i,0));
-        allowed.insert(std::pair<ItemCategory, bool>(i,true));
-    }
+	reserved.insert(std::pair<Coordinate,bool>(target,false));
+	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
+	for (int i = 0; i < Game::ItemCatCount; ++i) {
+		amount.insert(std::pair<ItemCategory, int>(i,0));
+		allowed.insert(std::pair<ItemCategory, bool>(i,true));
+	}
 }
 
 Stockpile::~Stockpile() {
@@ -48,9 +48,9 @@ Stockpile::~Stockpile() {
 int Stockpile::Build() {return 1;}
 
 boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags) {
-    for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
-        if (!conti->second->empty()) {
-            boost::weak_ptr<Item> item = *conti->second->begin();
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
+		if (!conti->second->empty()) {
+			boost::weak_ptr<Item> item = *conti->second->begin();
 			if (item.lock()) {
 				if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
@@ -65,28 +65,28 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags)
 					}
 				}
 			}
-        }
+		}
 	}
 	return boost::weak_ptr<Item>();
 }
 
 boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags) {
-    for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
-        if (!conti->second->empty()) {
-            boost::weak_ptr<Item> item = *conti->second->begin();
-            if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
-                if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-                    if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
-                } else return item;
-            }
-            if (boost::dynamic_pointer_cast<Container>(item.lock())) {
-                boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
-                for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
-                    if (itemi->lock() && itemi->lock()->Type() == typeValue && !itemi->lock()->Reserved())
-                        return *itemi;
-                }
-            }
-        }
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
+		if (!conti->second->empty()) {
+			boost::weak_ptr<Item> item = *conti->second->begin();
+			if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
+				if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
+					if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
+				} else return item;
+			}
+			if (boost::dynamic_pointer_cast<Container>(item.lock())) {
+				boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
+				for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
+					if (itemi->lock() && itemi->lock()->Type() == typeValue && !itemi->lock()->Reserved())
+						return *itemi;
+				}
+			}
+		}
 	}
 	return boost::weak_ptr<Item>();
 }
@@ -104,19 +104,19 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
 				if (Map::Inst()->Construction(ix,iy) == -1 && Map::Inst()->Walkable(ix,iy)) {
 					if (Map::Inst()->Construction(ix-1,iy) == uid ||
-					    Map::Inst()->Construction(ix+1,iy) == uid ||
-					    Map::Inst()->Construction(ix,iy-1) == uid ||
-					    Map::Inst()->Construction(ix,iy+1) == uid) {
-						//Current tile is walkable, buildable, and adjacent to the current stockpile
-						Map::Inst()->Construction(ix,iy,uid);
-						Map::Inst()->Buildable(ix,iy,false);
-						//Update corner values
-						if (ix < a.X()) a.X(ix);
-						if (ix > b.X()) b.X(ix);
-						if (iy < a.Y()) a.Y(iy);
-						if (iy > b.Y()) b.Y(iy);
-                        reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-                        containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), 0, 1, -1))));
+						Map::Inst()->Construction(ix+1,iy) == uid ||
+						Map::Inst()->Construction(ix,iy-1) == uid ||
+						Map::Inst()->Construction(ix,iy+1) == uid) {
+							//Current tile is walkable, buildable, and adjacent to the current stockpile
+							Map::Inst()->Construction(ix,iy,uid);
+							Map::Inst()->Buildable(ix,iy,false);
+							//Update corner values
+							if (ix < a.X()) a.X(ix);
+							if (ix > b.X()) b.X(ix);
+							if (iy < a.Y()) a.Y(iy);
+							if (iy > b.Y()) b.Y(iy);
+							reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
+							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), 0, 1, -1))));
 					}
 				}
 			}
@@ -125,70 +125,70 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 }
 
 void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
-    int screenx, screeny;
+	int screenx, screeny;
 
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
-			    screenx = x  - upleft.X();
-			    screeny = y - upleft.Y();
-			    if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
+				screenx = x  - upleft.X();
+				screeny = y - upleft.Y();
+				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
-                    console->setFore(screenx, screeny, TCODColor::white);
-                    console->setChar(screenx,	screeny, (graphic[1]));
+						console->setFore(screenx, screeny, TCODColor::white);
+						console->setChar(screenx,	screeny, (graphic[1]));
 
-                    if (!containers[Coordinate(x,y)]->empty()) {
-                        boost::weak_ptr<Item> item = *containers[Coordinate(x,y)]->begin();
-                        if (item.lock()) {
-                            console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
-                        }
-                    }
-                }
+						if (!containers[Coordinate(x,y)]->empty()) {
+							boost::weak_ptr<Item> item = *containers[Coordinate(x,y)]->begin();
+							if (item.lock()) {
+								console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
+							}
+						}
+				}
 			}
 		}
 	}
 }
 
 bool Stockpile::Allowed(ItemCategory cat) {
-    return allowed[cat];
+	return allowed[cat];
 }
 
 bool Stockpile::Allowed(std::set<ItemCategory> cats) {
-    for (std::set<ItemCategory>::iterator cati = cats.begin(); cati != cats.end(); ++cati) {
-        if (Allowed(*cati)) return true;
-    }
-    return false;
+	for (std::set<ItemCategory>::iterator cati = cats.begin(); cati != cats.end(); ++cati) {
+		if (Allowed(*cati)) return true;
+	}
+	return false;
 }
 
 bool Stockpile::Full()
 {
-    for (int ix = a.X(); ix <= b.X(); ++ix) {
-        for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-            if (Map::Inst()->Construction(ix,iy) == uid) {
-                if (containers[Coordinate(ix,iy)]->empty()) return false;
-            }
-        }
-    }
-    return true;
+	for (int ix = a.X(); ix <= b.X(); ++ix) {
+		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+			if (Map::Inst()->Construction(ix,iy) == uid) {
+				if (containers[Coordinate(ix,iy)]->empty()) return false;
+			}
+		}
+	}
+	return true;
 }
 
 Coordinate Stockpile::FreePosition() {
-    for (int ix = a.X(); ix <= b.X(); ++ix) {
-        for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-            if (Map::Inst()->Construction(ix,iy) == uid) {
-                if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
-            }
-        }
-    }
-    return Coordinate(-1,-1);
+	for (int ix = a.X(); ix <= b.X(); ++ix) {
+		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+			if (Map::Inst()->Construction(ix,iy) == uid) {
+				if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+			}
+		}
+	}
+	return Coordinate(-1,-1);
 }
 
 void Stockpile::ReserveSpot(Coordinate pos, bool val) { reserved[pos] = val; }
 
 boost::weak_ptr<Container> Stockpile::Storage(Coordinate pos) {
-    return containers[pos];
+	return containers[pos];
 }
 
 void Stockpile::SwitchAllowed(ItemCategory cat) {
-    allowed[cat] = !allowed[cat];
+	allowed[cat] = !allowed[cat];
 }

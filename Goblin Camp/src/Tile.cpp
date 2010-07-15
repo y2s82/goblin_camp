@@ -27,7 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 Tile::Tile(TileType newType, int newCost) :
-	vis(true),
+vis(true),
 	walkable(true),
 	buildable(true),
 	_moveCost(newCost),
@@ -42,7 +42,7 @@ Tile::Tile(TileType newType, int newCost) :
 	filth(boost::shared_ptr<FilthNode>()),
 	blood(boost::shared_ptr<BloodNode>())
 {
-    type(newType);
+	type(newType);
 }
 
 TileType Tile::type() { return _type; }
@@ -50,26 +50,26 @@ TileType Tile::type() { return _type; }
 void Tile::type(TileType newType) {
 	_type = newType;
 	if (_type == TILEGRASS) {
-	    vis = true; walkable = true; buildable = true;
-	    foreColor = TCODColor(rand() % 190, 127, 0);
-	    switch ((rand() % 10)) {
-	        case 0:
-	        case 1:
-	        case 2:
-	        case 3: graphic = '.'; break;
-	        case 4:
-	        case 5:
-            case 6:
-            case 7: graphic = ','; break;
-            case 8: graphic = ':'; break;
-            case 9: graphic = '\''; break;
-	    }
-    }
+		vis = true; walkable = true; buildable = true;
+		foreColor = TCODColor(rand() % 190, 127, 0);
+		switch ((rand() % 10)) {
+		case 0:
+		case 1:
+		case 2:
+		case 3: graphic = '.'; break;
+		case 4:
+		case 5:
+		case 6:
+		case 7: graphic = ','; break;
+		case 8: graphic = ':'; break;
+		case 9: graphic = '\''; break;
+		}
+	}
 	else if (_type == TILEDITCH || _type == TILERIVERBED) {
-	    vis = true; walkable = true; buildable = false; low = true;
-	    graphic = '_';
-	    foreColor = TCODColor(125,50,0);
-    }
+		vis = true; walkable = true; buildable = false; low = true;
+		graphic = '_';
+		foreColor = TCODColor(125,50,0);
+	}
 	else { vis = false; walkable = false; buildable = false; }
 }
 
@@ -86,24 +86,24 @@ void Tile::Walkable(bool value) {
 	if (value == false) {
 		//We temporarily store the uids elsewhere so that we can safely
 		//call them. Iterating through a set while modifying it destructively isn't safe
-        for (std::set<int>::iterator npcIter = npcList.begin(); npcIter != npcList.end(); ++npcIter) {
-            bumpQueue.push(*npcIter);
-        }
-        for (std::set<int>::iterator itemIter = itemList.begin(); itemIter != itemList.end(); ++itemIter) {
-            bumpQueue.push(*itemIter);
-        }
-        while (!bumpQueue.empty()) { Game::Inst()->BumpEntity(bumpQueue.front()); bumpQueue.pop(); }
-    }
+		for (std::set<int>::iterator npcIter = npcList.begin(); npcIter != npcList.end(); ++npcIter) {
+			bumpQueue.push(*npcIter);
+		}
+		for (std::set<int>::iterator itemIter = itemList.begin(); itemIter != itemList.end(); ++itemIter) {
+			bumpQueue.push(*itemIter);
+		}
+		while (!bumpQueue.empty()) { Game::Inst()->BumpEntity(bumpQueue.front()); bumpQueue.pop(); }
+	}
 }
 
 bool Tile::BlocksWater() const { return blocksWater; }
 void Tile::BlocksWater(bool value) { blocksWater = value; }
 
 int Tile::moveCost() const {
-    int cost = _moveCost;
+	int cost = _moveCost;
 	if (water) cost += water->Depth();
-    if (construction >= 0) cost += 1;
-    return cost;
+	if (construction >= 0) cost += 1;
+	return cost;
 }
 void Tile::moveCost(int value) { _moveCost = value; }
 
