@@ -334,6 +334,7 @@ void SaveMenu() {
 
 		if (key.vk == TCODK_ESCAPE) return;
 		else if (key.vk == TCODK_ENTER) {
+			TCODConsole::root->clear();
 			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
 				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
