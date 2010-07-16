@@ -1,1 +1,1 @@
-boost-build boost-build ;
+boost-build build/boost-build ;
