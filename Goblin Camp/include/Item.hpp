@@ -61,6 +61,7 @@ struct ItemPreset {
 class Item : public Entity {
 	friend class boost::serialization::access;
 	friend class Game;
+	friend class ItemListener;
 
 private:
 	template<class Archive>
@@ -95,7 +96,7 @@ public:
 	static std::vector<ItemCategory> Components(ItemType);
 	static ItemCategory Components(ItemType, int);
 
-	static void LoadPresets(ticpp::Document);
+	static void LoadPresets(std::string);
 
 	static std::vector<ItemCat> Categories;
 	static std::vector<ItemPreset> Presets;

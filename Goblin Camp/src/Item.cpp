@@ -17,8 +17,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <ticpp.h>
 #include <boost/shared_ptr.hpp>
+#include <boost/algorithm/string.hpp>
 #ifdef DEBUG
 #include <iostream>
+#include <boost/format.hpp>
 #endif
 
 #include "Item.hpp"
@@ -138,127 +140,150 @@ ItemCategory Item::Components(ItemType type, int index) {
 	return Item::Presets[type].components[index];
 }
 
-void Item::LoadPresets(ticpp::Document doc) {
-	std::string strVal;
-	int intVal = 0;
-	ticpp::Element* parent = doc.FirstChildElement();
+enum ItemListenerMode {
+	ITEMMODE,
+	CATEGORYMODE,
+	COMPONENTMODE
+};
 
-	Logger::Inst()->output<<"Reading items.xml\n";
-	try {
-		ticpp::Iterator<ticpp::Node> node;
-		for (node = node.begin(parent); node != node.end(); ++node) {
-			if (node->Value() == "category") {
-#ifdef DEBUG
-				std::cout<<"Category\n";
-#endif
-				Categories.push_back(ItemCat());
-				++Game::ItemCatCount;
-				ticpp::Iterator<ticpp::Node> child;
-				for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-					if (child->Value() == "name") {
-						Categories.back().name = child->ToElement()->GetText();
-						itemCategoryNames.insert(std::pair<std::string, ItemCategory>(Categories.back().name, Game::ItemCatCount-1));
-					} else if (child->Value() == "flammable") {
-						Categories.back().flammable = (child->ToElement()->GetText() == "true") ? true : false;
-					}
-				}
-			} else if (node->Value() == "item") {
-#ifdef DEBUG
-				std::cout<<"Item\n";
-#endif
-				Presets.push_back(ItemPreset());
-				++Game::ItemTypeCount;
-				ticpp::Iterator<ticpp::Node> child;
-				for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-					if (child->Value() == "name") {
-						Presets.back().name = child->ToElement()->GetText();
-#ifdef DEBUG
-						std::cout<<"Name: "<<Presets.back().name<<"\n";
-#endif
-						itemTypeNames.insert(std::pair<std::string, ItemType>(Presets.back().name, Game::ItemTypeCount-1));
-					} else if (child->Value() == "category") {
-						Presets.back().categories.insert(Item::StringToItemCategory(child->ToElement()->GetText()));
-					} else if (child->Value() == "graphic") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().graphic = intVal;
-					} else if (child->Value() == "color") {
-						int r = -1,g = -1,b = -1;
-						ticpp::Iterator<ticpp::Node> c;
-						for (c = c.begin(child->ToElement()); c != c.end(); ++c) {
-							c->ToElement()->GetTextOrDefault(&intVal, 0);
-							if (r == -1) r = intVal;
-							else if (g == -1) g = intVal;
-							else b = intVal;
-						}
-						Presets.back().color = TCODColor(r,g,b);
-					} else if (child->Value() == "components") {
-						ticpp::Iterator<ticpp::Node> c;
-						for (c = c.begin(child->ToElement()); c != c.end(); ++c) {
-							if (c->ToElement()->GetAttribute("containin") == "true") {
-								Presets.back().containIn = Item::StringToItemCategory(c->ToElement()->GetText());
-#ifdef DEBUG
-								std::cout<<"Contained in "<<Item::ItemCategoryToString(Presets.back().containIn)<<"\n";
-#endif
-							} 
-							//Even if it's a container for the product we still count it as a
-							//component so that its brought to the workshop correctly
-							Presets.back().components.push_back(Item::StringToItemCategory(c->ToElement()->GetText()));
-						}
-					} else if (child->Value() == "nutrition") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().nutrition = intVal;
-						Presets.back().organic = true;
-					} else if (child->Value() == "growth") {
-						Presets.back().growth = Item::StringToItemType(child->ToElement()->GetText());
-						Presets.back().organic = true;
-					} else if (child->Value() == "fruits") {
-#ifdef DEBUG
-						std::cout<<"Fruits\n";
-#endif
-						ticpp::Iterator<ticpp::Node> fruits;
-						for (fruits = fruits.begin(child->ToElement()); fruits != fruits.end(); ++fruits) {
-							fruits->ToElement()->GetText(&intVal);
-							Presets.back().fruits.push_back(intVal);
-						}
-					} else if (child->Value() == "organic") {
-						Presets.back().organic = true;
-					} else if (child->Value() == "multiplier") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().multiplier = intVal;
-					} else if (child->Value() == "container") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().container = intVal;
-					} else if (child->Value() == "fitsin") {
-						Presets.back().fitsin = Item::StringToItemCategory(child->ToElement()->GetText());
-					} else if (child->Value() == "decay") {
-						Presets.back().decays = true;
-						ticpp::Iterator<ticpp::Node> decit;
-						for (decit = decit.begin(child->ToElement()); decit != decit.end(); ++decit) {
-							if (decit->Value() == "speed") {
-								decit->ToElement()->GetText(&intVal);
-								Presets.back().decaySpeed = intVal;
-							} else if (decit->Value() == "item") {
-								strVal = decit->ToElement()->GetText();
-								if (strVal != "Filth") {
-									Presets.back().decayList.push_back(Item::StringToItemType(strVal));
-								} else {
-									Presets.back().decayList.push_back(-1);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
-	} catch (ticpp::Exception& ex) {
-		Logger::Inst()->output<<"Failed reading items.xml!\n";
-		Logger::Inst()->output<<ex.what()<<'\n';
-		Game::Inst()->Exit();
+class ItemListener : public ITCODParserListener {
+	ItemListenerMode mode;
+	/*preset[x] holds item names as strings untill all items have been
+	read, and then they are converted into ItemTypes */
+	std::vector<std::string> presetGrowth;
+	std::vector<std::vector<std::string> > presetFruits;
+	std::vector<std::vector<std::string> > presetDecay;
+
+public:
+	ItemListener() : ITCODParserListener(),
+		mode(CATEGORYMODE) {
 	}
 
-	Logger::Inst()->output<<"Finished reading items.xml\nItems: "<<Presets.size()<<'\n';
-}
+	void translateNames() {
+		for (unsigned int i = 0; i < Item::Presets.size(); ++i) {
+			if (presetGrowth[i] != "") Item::Presets[i].growth = Item::StringToItemType(presetGrowth[i]);
+			for (unsigned int fruit = 0; fruit < presetFruits[i].size(); ++fruit) {
+				Item::Presets[i].fruits.push_back(Item::StringToItemType(presetFruits[i][fruit]));
+			}
+			for (unsigned int decay = 0; decay < presetDecay[i].size(); ++decay) {
+				if (boost::iequals(presetDecay[i][decay], "Filth"))
+					Item::Presets[i].decayList.push_back(-1);
+				else
+					Item::Presets[i].decayList.push_back(Item::StringToItemType(presetDecay[i][decay]));
+			}
+		}
+	}
 
+private:
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+#endif
+		if (boost::iequals(str->getName(), "category_type")) {
+			mode = CATEGORYMODE;
+			Item::Categories.push_back(ItemCat());
+			++Game::ItemCatCount;
+			Item::Categories.back().name = name;
+			Item::itemCategoryNames.insert(std::pair<std::string, ItemCategory>(name, Game::ItemCatCount-1));
+		} else if (boost::iequals(str->getName(), "item_type")) {
+			mode = ITEMMODE;
+			Item::Presets.push_back(ItemPreset());
+			presetGrowth.push_back("");
+			presetFruits.push_back(std::vector<std::string>());
+			presetDecay.push_back(std::vector<std::string>());
+			++Game::ItemTypeCount;
+			Item::Presets.back().name = name;
+			Item::itemTypeNames.insert(std::pair<std::string, ItemType>(name, Game::ItemTypeCount-1));
+		} 
+
+		return true;
+	}
+
+	bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		return true;
+	}
+
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "category")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().categories.insert(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
+			}
+		} else if (boost::iequals(name, "graphic")) {
+			Item::Presets.back().graphic = value.i;
+		} else if (boost::iequals(name, "color")) {
+			Item::Presets.back().color = value.col;
+		} else if (boost::iequals(name, "components")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
+			}
+		} else if (boost::iequals(name, "containin")) {
+			Item::Presets.back().containIn = Item::StringToItemCategory(value.s);
+		} else if (boost::iequals(name, "nutrition")) {
+			Item::Presets.back().nutrition = value.i;
+			Item::Presets.back().organic = true;
+		} else if (boost::iequals(name, "growth")) {
+			presetGrowth.back() = value.s;
+			Item::Presets.back().organic = true;
+		} else if (boost::iequals(name, "fruits")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				presetFruits.back().push_back((char*)TCOD_list_get(value.list,i));
+			}
+		} else if (boost::iequals(name, "multiplier")) {
+			Item::Presets.back().multiplier = value.i;
+		} else if (boost::iequals(name, "containerSize")) {
+			Item::Presets.back().container = value.i;
+		} else if (boost::iequals(name, "fitsin")) {
+			Item::Presets.back().fitsin = Item::StringToItemCategory(value.s);
+		} else if (boost::iequals(name, "decay")) {
+			Item::Presets.back().decays = true;
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				presetDecay.back().push_back((char*)TCOD_list_get(value.list,i));
+			}
+		} else if (boost::iequals(name, "decaySpeed")) {
+			Item::Presets.back().decaySpeed = value.i;
+		}		
+		return true;
+	}
+
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("end of %s structure\n") % name).str();
+#endif
+		return true;
+	}
+	void error(const char *msg) {
+		Logger::Inst()->output<<"ItemListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
+};
+
+void Item::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* categoryTypeStruct = parser.newStructure("category_type");
+	TCODParserStruct* itemTypeStruct = parser.newStructure("item_type");
+	itemTypeStruct->addListProperty("category", TCOD_TYPE_STRING, true);
+	itemTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
+	itemTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	itemTypeStruct->addListProperty("components", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addProperty("containIn", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addProperty("nutrition", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("growth", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addListProperty("fruits", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addProperty("multiplier", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("containerSize", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("fitsin", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addListProperty("decay", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addProperty("decaySpeed", TCOD_TYPE_INT, false);
+	ItemListener* itemListener = new ItemListener();
+	parser.run(filename.c_str(), itemListener);
+	itemListener->translateNames();
+}
 
 void Item::Faction(int val) {
 	if (val == 0 && ownerFaction != 0) { //Transferred to player
@@ -285,6 +310,7 @@ graphic('?'),
 	container(0),
 	multiplier(1),
 	fitsin(-1),
+	containIn(-1),
 	decays(false),
 	decaySpeed(0),
 	decayList(std::vector<ItemType>())

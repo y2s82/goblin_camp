@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/format.hpp>
+#include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
 #include <ticpp.h>
 #ifdef DEBUG
@@ -236,96 +237,111 @@ int Construction::Use() {
 
 std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
 
-void Construction::LoadPresets(ticpp::Document doc) {
-	std::string strVal;
-	int intVal = 0;
-	ticpp::Element* parent = doc.FirstChildElement();
+class ConstructionListener : public ITCODParserListener {
 
-	Logger::Inst()->output<<"Reading constructions.xml\n";
-	try {
-		ticpp::Iterator<ticpp::Node> node;
-		for (node = node.begin(parent); node != node.end(); ++node) {
-			if (node->Value() == "construction") {
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-				std::cout<<"Construction\n";
+		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
-				Presets.push_back(ConstructionPreset());
-				ticpp::Iterator<ticpp::Node> child;
-				for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-#ifdef DEBUG
-					std::cout<<"Children\n";
-#endif
-					if (child->Value() == "wall") {
-						Presets.back().graphic.push_back(1);
-						Presets.back().graphic.push_back('W');
-						Presets.back().tags[WALL] = true;
-					} else if (child->Value() == "name") {
-						Presets.back().name = child->ToElement()->GetText();
-					} else if (child->Value() == "graphic") {
-						ticpp::Iterator<ticpp::Node> g;
-						for (g = g.begin(child->ToElement()); g != g.end(); ++g) {
-							g->ToElement()->GetTextOrDefault(&intVal, 1);
-							Presets.back().graphic.push_back(intVal);
-						}
-					} else if (child->Value() == "producer") {
-						Presets.back().producer = (child->ToElement()->GetText() == "true") ? true : false;
-						Presets.back().tags[WORKSHOP] = Presets.back().producer;
-					} else if (child->Value() == "products") {
-#ifdef DEBUG
-						std::cout<<"Products\n";
-#endif
-						ticpp::Iterator<ticpp::Node> prods;
-						for (prods = prods.begin(child->ToElement());
-							prods != prods.end(); ++prods) {
-								Presets.back().products.push_back(Item::StringToItemType(prods->ToElement()->GetText()));
-						}
-					} else if (child->Value() == "walkable") {
-						Presets.back().walkable = (child->ToElement()->GetText() == "true") ? true : false;
-					} else if (child->Value() == "materials") {
-#ifdef DEBUG
-						std::cout<<"Materials\n";
-#endif
-						ticpp::Iterator<ticpp::Node> mats;
-						for (mats = mats.begin(child->ToElement()); mats != mats.end(); ++mats) {
-							Presets.back().materials.push_back(Item::StringToItemCategory(mats->ToElement()->GetText()));
-						}
-					} else if (child->Value() == "maxCondition") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().maxCondition = intVal;
-					} else if (child->Value() == "stockpile") {
-						Presets.back().tags[STOCKPILE] = true;
-					} else if (child->Value() == "farmplot") {
-						Presets.back().tags[FARMPLOT] = true;
-						Presets.back().dynamic = true;
-					} else if (child->Value() == "productionSpot") {
-						ticpp::Iterator<ticpp::Node> coord;
-						int x = -1, y;
-						for (coord = coord.begin(child->ToElement()); coord != coord.end(); ++coord) {
-							coord->ToElement()->GetTextOrDefault(&intVal, 1);
-							if (x == -1) x = intVal;
-							else y = intVal;
-						}
-						Presets.back().productionSpot = Coordinate(x,y);
-					} else if (child->Value() == "door") {
-						Presets.back().tags[DOOR] = true;
-						Presets.back().tags[FURNITURE] = true;
-						Presets.back().dynamic = true;
-					} else if (child->Value() == "bed") {
-						Presets.back().tags[BED] = true;
-						Presets.back().tags[FURNITURE] = true;
-					}
-				}
-				Presets.back().blueprint = Coordinate(Presets.back().graphic[0],
-					(Presets.back().graphic.size()-1)/Presets.back().graphic[0]);
-			}
-		}
-	} catch (ticpp::Exception& ex) {
-		Logger::Inst()->output<<"Failed reading constructions.xml!\n";
-		Logger::Inst()->output<<ex.what()<<'\n';
-		Game::Inst()->Exit();
+		Construction::Presets.push_back(ConstructionPreset());
+		Construction::Presets.back().name = name;
+		return true;
 	}
 
-	Logger::Inst()->output<<"Finished reading constructions.xml\nConstructions: "<<Presets.size()<<'\n';
+	bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "walkable")) {
+			Construction::Presets.back().walkable = true;
+		} else if (boost::iequals(name, "wall")) {
+			Construction::Presets.back().graphic.push_back(1);
+			Construction::Presets.back().graphic.push_back('W');
+			Construction::Presets.back().tags[WALL] = true;
+		} else if (boost::iequals(name, "stockpile")) {
+			Construction::Presets.back().tags[STOCKPILE] = true;
+		} else if (boost::iequals(name, "farmplot")) {
+			Construction::Presets.back().tags[FARMPLOT] = true;
+			Construction::Presets.back().dynamic = true;
+		} else if (boost::iequals(name, "door")) {
+			Construction::Presets.back().tags[DOOR] = true;
+			Construction::Presets.back().tags[FURNITURE] = true;
+			Construction::Presets.back().dynamic = true;
+		} else if (boost::iequals(name, "bed")) {
+			Construction::Presets.back().tags[BED] = true;
+			Construction::Presets.back().tags[FURNITURE] = true;
+		}
+		return true;
+	}
+
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "graphicLength")) {
+			if (Construction::Presets.back().graphic.size() == 0)
+				Construction::Presets.back().graphic.push_back(value.i);
+			else
+				Construction::Presets.back().graphic[0] = value.i;
+		} else if (boost::iequals(name, "graphic")) {
+			if (Construction::Presets.back().graphic.size() == 0) //In case graphicLength hasn't been parsed yet
+				Construction::Presets.back().graphic.push_back(1);
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets.back().graphic.push_back((int)TCOD_list_get(value.list,i));
+			}
+		} else if (boost::iequals(name, "products")) {
+			Construction::Presets.back().producer = true;
+			Construction::Presets.back().tags[WORKSHOP] = true;
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets.back().products.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
+			}
+		} else if (boost::iequals(name, "materials")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets.back().materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
+			}
+		} else if (boost::iequals(name, "maxCondition")) {
+			Construction::Presets.back().maxCondition = value.i;
+		} else if (boost::iequals(name, "productionx")) {
+			Construction::Presets.back().productionSpot.X(value.i);
+		} else if (boost::iequals(name, "productiony")) {
+			Construction::Presets.back().productionSpot.Y(value.i);
+		}
+
+		return true;
+	}
+
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("end of %s structure\n") % name).str();
+#endif
+		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
+			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
+		return true;
+	}
+	void error(const char *msg) {
+		Logger::Inst()->output<<"ItemListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
+};
+
+void Construction::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* constructionTypeStruct = parser.newStructure("construction_type");
+	constructionTypeStruct->addProperty("graphicLength", TCOD_TYPE_INT, true);
+	constructionTypeStruct->addListProperty("graphic", TCOD_TYPE_INT, true);
+	constructionTypeStruct->addListProperty("products", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addFlag("walkable");
+	constructionTypeStruct->addListProperty("materials", TCOD_TYPE_STRING, true);
+	constructionTypeStruct->addProperty("productionx", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("productiony", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("maxCondition", TCOD_TYPE_INT, true);
+	constructionTypeStruct->addFlag("stockpile");
+	constructionTypeStruct->addFlag("farmplot");
+	constructionTypeStruct->addFlag("wall");
+	constructionTypeStruct->addFlag("door");
+	constructionTypeStruct->addFlag("bed");
+
+	parser.run(filename.c_str(), new ConstructionListener());
 }
 
 bool Construction::SpawnProductionJob() {
@@ -450,7 +466,7 @@ void Construction::Dismantle() {
 ConstructionPreset::ConstructionPreset() :
 maxCondition(0),
 	graphic(std::vector<int>()),
-	walkable(true),
+	walkable(false),
 	materials(std::list<ItemCategory>()),
 	producer(false),
 	products(std::vector<ItemType>()),
