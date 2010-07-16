@@ -18,9 +18,6 @@
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
     <None Include="items.dat" />
-    <None Include="items.xml">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="LIBTCOD-LICENSE.txt" />
     <None Include="names.dat" />
     <None Include="Readme.txt" />

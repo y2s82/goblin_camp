@@ -40,8 +40,8 @@ protected:
 public:
 	Entity();
 	virtual ~Entity();
-	virtual int X();
-	virtual int Y();
+	int X();
+	int Y();
 	int Uid();
 	static int uids;
 	virtual Coordinate Position();
