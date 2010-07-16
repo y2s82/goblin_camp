@@ -14,7 +14,10 @@
     <None Include="config.ini">
       <FileType>Document</FileType>
     </None>
-    <None Include="constructions.xml" />
+    <None Include="constructions.dat" />
+    <None Include="constructions.xml">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
     <None Include="items.dat" />

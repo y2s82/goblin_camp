@@ -65,6 +65,7 @@ struct ConstructionPreset {
 class Construction : public Entity {
 	friend class boost::serialization::access;
 	friend class Game;
+	friend class ConstructionListener;
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
@@ -111,7 +112,7 @@ public:
 	ItemType JobList(int);
 	virtual int Use();
 	static std::vector<ConstructionPreset> Presets;
-	static void LoadPresets(ticpp::Document);
+	static void LoadPresets(std::string);
 	virtual boost::weak_ptr<Container> Storage();
 	bool HasTag(ConstructionTag);
 	virtual void Update();

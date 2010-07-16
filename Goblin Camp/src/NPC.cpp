@@ -26,10 +26,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
-#include "npc.hpp"
-#include "coordinate.hpp"
+#include "NPC.hpp"
+#include "Coordinate.hpp"
 #include "JobManager.hpp"
-#include "gcamp.hpp"
+#include "GCamp.hpp"
 #include "Game.hpp"
 #include "Announce.hpp"
 #include "Logger.hpp"
