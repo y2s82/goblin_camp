@@ -45,5 +45,6 @@ screenshot*.png
 *.filters
 *.sav
 ccccReport\
-build\
-dist\
+build\tmp
+build\dist
+build\deps\Jamfile.jam
