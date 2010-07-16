@@ -30,6 +30,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "JobManager.hpp"
 
+#ifndef GC_VERSION
+#	define GC_VERSION "<version undefined>"
+#endif
+
 int main() {
 	int width = -1, height = -1;
 	bool fullscreen = false;
@@ -231,7 +235,7 @@ int MainMenu() {
 
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
-		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp 0.1");
+		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp " GC_VERSION);
 		if (!endCredits) endCredits = TCODConsole::renderCredits(edgex+5, 
 			edgey+25, true);
 
