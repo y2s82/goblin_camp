@@ -1,5 +1,7 @@
 # See build/README.
 
+constant GC_VERSION : 0.1 ;
+
 project goblin-camp
     : default-build debug
     : source-location "Goblin Camp"
@@ -15,7 +17,7 @@ exe goblin-camp
     : [ glob src/*.cpp ]
       build/deps//gc-deps
     : <include>"Goblin Camp/include" <warnings>on
-      <define>TIXML_USE_TICPP
+      <define>TIXML_USE_TICPP <define>GC_VERSION=\\\"$(GC_VERSION)\\\"
       <conditional>@gc-feats
 ;
 
