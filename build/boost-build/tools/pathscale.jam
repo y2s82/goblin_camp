@@ -13,7 +13,7 @@ import fortran ;
 
 feature.extend toolset : pathscale ;
 toolset.inherit  pathscale : unix ;
-generators.override pathscale.prebuilt : builtin.lib-generator ;
+generators.override pathscale.prebuilt : builtin.prebuilt ;
 generators.override pathscale.searched-lib-generator : searched-lib-generator ;
 
 # Documentation and toolchain description located
@@ -23,24 +23,27 @@ rule init ( version ? : command * : options * )
 {
   local condition = [ common.check-init-parameters pathscale : version $(version) ] ;
 
-  command = [ common.get-invocation-command pathscale : mpicxx : $(command) ] ;
+  command = [ common.get-invocation-command pathscale : pathCC : $(command) ] ;
 
   common.handle-options pathscale : $(condition) : $(command) : $(options) ;
     
   toolset.flags pathscale.compile.fortran90 OPTIONS $(condition) :
     [ feature.get-values <fflags> : $(options) ] : unchecked ;
 
-  command_c = $(command_c[1--2]) $(command[-1]:B=mpicxx) ;
+  command_c = $(command_c[1--2]) $(command[-1]:B=pathcc) ;
 
   toolset.flags pathscale CONFIG_C_COMMAND $(condition) : $(command_c) ;
 
   # fortran support
-  local f-command = [ common.get-invocation-command pathscale : mpif77 : $(command) ] ;
-  local command_f = $(command_f[1--2]) $(f-command[-1]:B=pathf77) ;
+  local f-command = [ common.get-invocation-command pathscale : pathf90 : $(command) ] ;
+  local command_f = $(command_f[1--2]) $(f-command[-1]:B=pathf90) ;
   local command_f90 = $(command_f[1--2]) $(f-command[-1]:B=pathf90) ;
 
   toolset.flags pathscale CONFIG_F_COMMAND $(condition) : $(command_f) ;
   toolset.flags pathscale CONFIG_F90_COMMAND $(condition) : $(command_f90) ;
+
+  # always link lib rt to resolve clock_gettime()
+  flags pathscale.link FINDLIBS-SA : rt : unchecked ;
 }
 
 # Declare generators
@@ -128,7 +131,7 @@ rule link ( targets * : sources * : properties * )
 
 actions link bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" $(OPTIONS) -L"$(LINKPATH)" -Wl,-rpath"$(RPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST)
+    "$(CONFIG_COMMAND)" $(OPTIONS) -L"$(LINKPATH)" -Wl,$(RPATH_OPTION:E=-R)$(SPACE)-Wl,"$(RPATH)" -o "$(<)" "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST)
 }
 
 # Slight mods for dlls
@@ -139,7 +142,7 @@ rule link.dll ( targets * : sources * : properties * )
 
 actions link.dll bind LIBRARIES
 {
-    "$(CONFIG_COMMAND)" $(OPTIONS) -L"$(LINKPATH)" -Wl,-rpath"$(RPATH)" -o "$(<)" -Wl,-soname$(SPACE)-Wl,$(<[1]:D=) -shared "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST)
+    "$(CONFIG_COMMAND)" $(OPTIONS) -L"$(LINKPATH)" -Wl,$(RPATH_OPTION:E=-R)$(SPACE)-Wl,"$(RPATH)" -o "$(<)" -Wl,-soname$(SPACE)-Wl,$(<[1]:D=) -shared "$(>)" "$(LIBRARIES)" -l$(FINDLIBS-SA) -l$(FINDLIBS-ST)
 }
 
 # Declare action for creating static libraries
