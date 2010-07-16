@@ -8,7 +8,7 @@ Before you build GC:
    your environment.
 2. If you don't have bjam, run boost-build/jam_src/build.bat (or build.sh).
 
-To build GC, navigate to the root directory (one with Jamroot.jam), and run bjam install — this will
+To build GC, navigate to the root directory (one with Jamroot.jam), and run `bjam install` — this will
 build GC and copy almost everything needed to run it into build/dist/debug.
 
-To build release version, use bjam variant=release install.
+To build release version, use `bjam variant=release-pdb install`.

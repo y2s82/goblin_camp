@@ -1,6 +1,6 @@
 # See build/README.
 
-project "Goblin Camp"
+project goblin-camp
     : default-build debug
     : source-location "Goblin Camp"
     : build-dir build/tmp
@@ -11,7 +11,7 @@ variant release-pdb
       <inlining>full <runtime-debugging>off
 ;
 
-exe "Goblin Camp"
+exe goblin-camp
     : [ glob src/*.cpp ]
       build/deps//gc-deps
     : <include>"Goblin Camp/include" <warnings>on
@@ -20,8 +20,8 @@ exe "Goblin Camp"
 ;
 
 install install-binaries
-    : "Goblin Camp"
-    : <install-dependencies>on <install-type>EXE <install-type>SHARED_LIB
+    : goblin-camp
+    : <install-dependencies>on <install-type>EXE <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB
       <conditional>@install-feats
 ;
 
@@ -43,6 +43,10 @@ rule gc-feats ( properties * ) {
     if <target-os>windows in $(properties) {
         feats += <define>WINDOWS ;
         feats += <user-interface>gui ;
+    } else if <target-os>linux in $(properties) {
+        feats += <define>LINUX ;
+    } else if <target-os>macosx in $(properties) {
+        feats += <define>MACOSX ;
     }
     
     if <toolset>msvc in $(properties) {
