@@ -17,6 +17,7 @@
     <None Include="constructions.xml" />
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
+    <None Include="items.dat" />
     <None Include="items.xml">
       <SubType>Designer</SubType>
     </None>

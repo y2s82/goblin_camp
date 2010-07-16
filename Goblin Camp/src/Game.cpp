@@ -320,11 +320,11 @@ void Game::Init(int width, int height, bool fullscreen) {
 	TCODConsole::setKeyboardRepeat(500, 10);
 
 	ticpp::Document constructionsXml("./constructions.xml");
-	ticpp::Document itemsXml("./items.xml");
+//	ticpp::Document itemsXml("./items.xml");
 	ticpp::Document plantsXml("./wildplants.xml");
 	try {
 		constructionsXml.LoadFile();
-		itemsXml.LoadFile();
+	//	itemsXml.LoadFile();
 		plantsXml.LoadFile();
 	} catch (ticpp::Exception& ex) {
 		Logger::Inst()->output<<"Failed opening xml!\n";
@@ -333,7 +333,8 @@ void Game::Init(int width, int height, bool fullscreen) {
 	}
 
 	//Item presets _must_ be loaded first because constructons.xml refers to items by name
-	Item::LoadPresets(itemsXml);
+	//Item::LoadPresets(itemsXml);
+	Item::LoadPresets("items.dat");
 	Construction::LoadPresets(constructionsXml);
 	NatureObject::LoadPresets(plantsXml);
 	Logger::Inst()->output<<"Finished loading presets.";
