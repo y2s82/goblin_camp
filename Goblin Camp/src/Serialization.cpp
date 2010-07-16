@@ -727,7 +727,7 @@ void Tile::load(Archive & ar, const unsigned int version) {
 }
 
 void Game::SaveGame(std::string filename) {
-	std::ofstream ofs(filename, std::ios::binary);
+	std::ofstream ofs(filename.c_str(), std::ios::binary);
 	boost::archive::binary_oarchive oarch(ofs);
 	oarch<<*instance;
 	oarch<<*JobManager::Inst();
@@ -738,7 +738,7 @@ void Game::SaveGame(std::string filename) {
 
 
 void Game::LoadGame(std::string filename) {
-	std::ifstream ifs(filename, std::ios::binary);
+	std::ifstream ifs(filename.c_str(), std::ios::binary);
 	boost::archive::binary_iarchive iarch(ifs);
 	iarch>>*instance;
 	iarch>>*JobManager::Inst();

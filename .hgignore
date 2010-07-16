@@ -45,3 +45,7 @@ screenshot*.png
 *.filters
 *.sav
 ccccReport\
+build\tmp
+build\dist
+build\deps\Jamfile.jam
+*.py[co]
