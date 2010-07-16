@@ -314,6 +314,7 @@ void SaveMenu() {
 			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
 				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
+			TCODSystem::createDirectory("./saves");
 			Game::Inst()->SaveGame((boost::format("./saves/%s.sav") % saveName).str());
 			break;
 		}
