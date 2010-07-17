@@ -227,19 +227,19 @@ int MainMenu() {
 }
 
 #if defined(WINDOWS)
-#	define SAVE_DIR "./saves/"
+#	define SAVE_DIR  "./saves/"
 #	define SAVE_FILE SAVE_DIR "%s"
 #else
-#	define SAVE_DIR getSaveDir().c_str()
-#	define SAVE_FILE getSaveFile()
-inline std::string getSaveDir() {
+#	define SAVE_DIR  GetSaveDir().c_str()
+#	define SAVE_FILE GetSaveFile()
+inline std::string GetSaveDir() {
 	// superfluous calls, but whatever
 	std::string home = std::string(getenv("HOME"));
 	TCODSystem::createDirectory((home + "/.goblincamp").c_str());
 	TCODSystem::createDirectory((home + "/.goblincamp/saves").c_str());
 	return home + std::string("/.goblincamp/saves/");
 }
-inline std::string getSaveFile() {
+inline std::string GetSaveFile() {
 	return getSaveDir() + std::string("%s");
 }
 #endif
