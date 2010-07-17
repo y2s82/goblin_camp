@@ -1,9 +1,9 @@
 project deps ;
 
 # libtcod
-lib tcodc  : : <variant>debug <name>tcod_debug ;
+lib tcodc  : : <variant>debug <name>tcod-debug ;
 lib tcodc  : : <variant>release-pdb <name>tcod ;
-lib tcodxx : : <variant>debug <name>tcodxx_debug ;
+lib tcodxx : : <variant>debug <name>tcodxx-debug ;
 lib tcodxx : : <variant>release-pdb <name>tcodxx ;
 
 alias tcod : tcodc tcodxx ;
