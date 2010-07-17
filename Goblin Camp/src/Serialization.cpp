@@ -19,6 +19,7 @@ Goblin Camp to compile when each class' serialization function was in
 the class' .cpp file. I assume that there is some magical Boost macro
 that would fix that problem, but I unfortunately have very limited time
 and I couldn't come up with a coherent answer just by googling. */
+#include "stdafx.hpp"
 
 #pragma warning(push, 2) //Boost::serialization generates a few very long warnings
 
@@ -727,7 +728,7 @@ void Tile::load(Archive & ar, const unsigned int version) {
 }
 
 void Game::SaveGame(std::string filename) {
-	std::ofstream ofs(filename, std::ios::binary);
+	std::ofstream ofs(filename.c_str(), std::ios::binary);
 	boost::archive::binary_oarchive oarch(ofs);
 	oarch<<*instance;
 	oarch<<*JobManager::Inst();
@@ -738,7 +739,7 @@ void Game::SaveGame(std::string filename) {
 
 
 void Game::LoadGame(std::string filename) {
-	std::ifstream ifs(filename, std::ios::binary);
+	std::ifstream ifs(filename.c_str(), std::ios::binary);
 	boost::archive::binary_iarchive iarch(ifs);
 	iarch>>*instance;
 	iarch>>*JobManager::Inst();

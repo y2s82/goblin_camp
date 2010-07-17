@@ -13,11 +13,18 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include "stdafx.hpp"
 
 #include <libtcod.hpp>
-#include <windows.h>
+#ifdef WINDOWS
+#	define WIN32_LEAN_AND_MEAN
+#	include <windows.h>
+#endif
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -29,18 +36,30 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "JobManager.hpp"
 
-int main(std::string cmdline) {
-	TCODList<char*> list =  TCODSystem::getDirectoryContent("./", "config.ini");
-	if (!list.isEmpty()) {
-		Game::Inst()->LoadConfig("config.ini");
-	}
+#ifndef GC_VERSION
+#	define GC_VERSION "<version undefined>"
+#endif
 
+int main() {
+#	ifdef WINDOWS
+	std::string config = "./config.ini";
+#	else
+	std::string config = std::string(getenv("HOME")) + "/.goblincamp/config.ini";
+#	endif
+	
+	struct stat buffer;
+	if (stat(config.c_str(), &buffer) == 0) {
+		Game::Inst()->LoadConfig(config);
+	}
+	
 	Game::Inst()->Init();
 	return MainMenu();
 }
 
+#ifdef WINDOWS
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
-{ return main(cmdLine); }
+{ return main(); }
+#endif
 
 void MainLoop() {
 	Game* game = Game::Inst();
@@ -196,7 +215,7 @@ int MainMenu() {
 
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
-		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp 0.1");
+		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp " GC_VERSION);
 		if (!endCredits) endCredits = TCODConsole::renderCredits(edgex+5, 
 			edgey+25, true);
 
@@ -207,13 +226,31 @@ int MainMenu() {
 	return 0;
 }
 
+#if defined(WINDOWS)
+#	define SAVE_DIR "./saves/"
+#	define SAVE_FILE SAVE_DIR "%s"
+#else
+#	define SAVE_DIR getSaveDir().c_str()
+#	define SAVE_FILE getSaveFile()
+inline std::string getSaveDir() {
+	// superfluous calls, but whatever
+	std::string home = std::string(getenv("HOME"));
+	TCODSystem::createDirectory((home + "/.goblincamp").c_str());
+	TCODSystem::createDirectory((home + "/.goblincamp/saves").c_str());
+	return home + std::string("/.goblincamp/saves/");
+}
+inline std::string getSaveFile() {
+	return getSaveDir() + std::string("%s");
+}
+#endif
+
 void LoadMenu() {
 	bool exit = false;
 	int width = 30;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
-	TCODList<char*> list = TCODSystem::getDirectoryContent("./saves/", "*.sav");
+	TCODList<char*> list = TCODSystem::getDirectoryContent(SAVE_DIR, "*.sav");
 	int height = list.size()+5;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 
@@ -234,7 +271,7 @@ void LoadMenu() {
 		} else selected = -1;
 
 		if (selected < list.size() && selected >= 0 && !mouseStatus.lbutton && lButtonDown) {
-			Game::Inst()->LoadGame((boost::format("./saves/%s") % (list.get(selected))).str().c_str());
+			Game::Inst()->LoadGame((boost::format(SAVE_FILE) % (list.get(selected))).str().c_str());
 			MainLoop();
 			lButtonDown = false;
 			return;
@@ -271,15 +308,17 @@ void SaveMenu() {
 		if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
 			saveName.push_back(key.c);
 		} else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
-			saveName.pop_back();
+			saveName.erase(saveName.end() - 1);
 		}
 
 		if (key.vk == TCODK_ESCAPE) return;
-		else if (key.vk == TCODK_ENTER) {
+		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
+			TCODConsole::root->clear();
 			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
 				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
-			Game::Inst()->SaveGame((boost::format("./saves/%s.sav") % saveName).str());
+			TCODSystem::createDirectory(SAVE_DIR);
+			Game::Inst()->SaveGame((boost::format(SAVE_FILE) % saveName).str() + ".sav");
 			break;
 		}
 

@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include "stdafx.hpp"
 
 /*TODO: Create a more general menu system. Libtcod GUI is something
 to look into*/
@@ -675,7 +676,7 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 					&& y > topY+2+12 && y < topY+2+15) {
 						if (squadName != "" && !chosenSquad.lock()) { //Create
 							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
-								(squadName, new Squad(squadName, squadMembers, squadPriority)));
+								(squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
 							chosenSquad = Game::Inst()->squadList[squadName];
 							//squadName = "";
 							//UI::Inst()->InputString("");
