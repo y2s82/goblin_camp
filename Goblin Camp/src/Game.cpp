@@ -296,7 +296,7 @@ class ConfigListener : public ITCODParserListener {
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % (name != NULL ? name : "<none>")).str();
 #endif
 		return true;
 	}
@@ -333,7 +333,7 @@ class ConfigListener : public ITCODParserListener {
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
+		std::cout<<(boost::format("end of %s structure\n") % (name != NULL ? name : "<none>")).str();
 #endif
 		return true;
 	}
