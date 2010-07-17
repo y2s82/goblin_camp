@@ -18,7 +18,7 @@ VC2010_CRT = frozenset(('msvcp100.dll', 'msvcr100.dll'))
 SYSTEM_DLL = frozenset((
     'kernel32.dll', 'user32.dll', 'gdi32.dll', 'opengl32.dll', 'winmm32.dll',
     'advapi32.dll', 'ntdll.dll', 'winmm.dll', 'rpcrt4.dll', 'secur32.dll',
-    'msvcrt.dll',
+    'msvcrt.dll', 'dbghelp.dll'
 ))
 
 def findDLL(fn):
@@ -78,6 +78,11 @@ for fn in DLLs:
         os.path.join('build', 'dist', 'installer', 'src')
     )
 
+print '\tINCLUDE dbghelp.dll'
+shutil.copy(
+    os.path.join('build', 'installer', 'redists', 'dbghelp.dll'),
+    os.path.join('build', 'dist', 'installer', 'src')
+)
 print '\tINCLUDE %s/vcredist_x86.exe' % redist
 shutil.copy(
     os.path.join('build', 'installer', 'redists', 'vc%s' % redist, 'vcredist_x86.exe'),
