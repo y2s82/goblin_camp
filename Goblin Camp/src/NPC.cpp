@@ -454,7 +454,8 @@ MOVENEARend:
 							if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(currentTarget().X(), currentTarget().Y()).lock()) {
 								if (water->Depth() > DRINKABLE_WATER_DEPTH) {
 									thirst -= (int)(THIRST_THRESHOLD / 10);
-									if (thirst < 0) { TaskFinished(TASKSUCCESS); break; }
+									if (thirst < 0) { TaskFinished(TASKSUCCESS); }
+									break;
 								}
 							}
 					}
