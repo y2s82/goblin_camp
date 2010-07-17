@@ -14,6 +14,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
+#ifdef DEBUG
+#include <iostream>
+#endif
+
 #include "Squad.hpp"
 #include "Game.hpp"
 

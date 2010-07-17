@@ -19,7 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 
 #include <boost/serialization/split_member.hpp>
-#include <ticpp.h>
 
 #include "Entity.hpp"
 #include "Coordinate.hpp"
@@ -61,7 +60,7 @@ private:
 public:
 	~NatureObject();
 	static std::vector<NatureObjectPreset> Presets;
-	static void LoadPresets(ticpp::Document);
+	static void LoadPresets(std::string);
 
 	int Type();
 

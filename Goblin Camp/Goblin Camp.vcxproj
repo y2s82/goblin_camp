@@ -11,20 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.ini">
-      <FileType>Document</FileType>
-    </None>
+    <None Include="config.ini" />
     <None Include="constructions.dat" />
-    <None Include="constructions.xml">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
     <None Include="items.dat" />
     <None Include="LIBTCOD-LICENSE.txt" />
     <None Include="names.dat" />
     <None Include="Readme.txt" />
-    <None Include="wildplants.xml" />
+    <None Include="wildplants.dat" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp" />
@@ -132,7 +127,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libboost_serialization-vc100-mt-gd-1_43.lib;libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;ticppd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_serialization-vc100-mt-gd-1_43.lib;libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -148,7 +143,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_serialization-vc100-mt-1_43.lib;libboost_thread-vc100-mt-1_43.lib;libtcod-VS.lib;ticpp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_serialization-vc100-mt-1_43.lib;libboost_thread-vc100-mt-1_43.lib;libtcod-VS.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
