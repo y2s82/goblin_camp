@@ -19,6 +19,7 @@ Goblin Camp to compile when each class' serialization function was in
 the class' .cpp file. I assume that there is some magical Boost macro
 that would fix that problem, but I unfortunately have very limited time
 and I couldn't come up with a coherent answer just by googling. */
+#include "stdafx.hpp"
 
 #pragma warning(push, 2) //Boost::serialization generates a few very long warnings
 

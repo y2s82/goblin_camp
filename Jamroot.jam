@@ -4,6 +4,10 @@ constant GC_VERSION : 0.1 ;
 
 project goblin-camp
     : default-build debug
+    : requirements
+      <include>"Goblin Camp/include" <warnings>on
+      <define>GC_VERSION=\\\"$(GC_VERSION)\\\"
+      <conditional>@gc-feats
     : source-location "Goblin Camp"
     : build-dir build/tmp
 ;
@@ -13,12 +17,14 @@ variant release-pdb
       <inlining>full <runtime-debugging>off
 ;
 
+cpp-pch stdafx.hpp
+    : include/stdafx.hpp
+;
+
 exe goblin-camp
     : [ glob src/*.cpp ]
+      stdafx.hpp
       build/deps//gc-deps
-    : <include>"Goblin Camp/include" <warnings>on
-      <define>GC_VERSION=\\\"$(GC_VERSION)\\\"
-      <conditional>@gc-feats
 ;
 
 install install-binaries
@@ -64,7 +70,6 @@ rule gc-feats ( properties * ) {
         feats += <define>_CRT_NONSTDC_NO_DEPRECATE ;
         
         if <variant>debug in $(properties) {
-            feats += <debug-store>database ;
             feats += <define>_HAS_ITERATOR_DEBUGGING=1 ;
             feats += <define>_SECURE_SCL=1 ;
         }
