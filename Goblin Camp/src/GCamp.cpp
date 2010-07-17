@@ -16,7 +16,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #ifdef WINDOWS
-#include <windows.h>
+#	define WIN32_LEAN_AND_MEAN
+#	include <windows.h>
 #endif
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
