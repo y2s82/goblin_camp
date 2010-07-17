@@ -14,6 +14,8 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <boost/algorithm/string.hpp>
+
 #include "NatureObject.hpp"
 #include "Game.hpp"
 #include "Logger.hpp"
@@ -60,75 +62,83 @@ void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
 
 void NatureObject::Update() {}
 
-void NatureObject::LoadPresets(ticpp::Document doc) {
-	std::string strVal;
-	int intVal = 0;
-	ticpp::Element* parent = doc.FirstChildElement();
+class NatureObjectListener : public ITCODParserListener {
 
-	Logger::Inst()->output<<"Reading wildplants.xml\n";
-	try {
-		ticpp::Iterator<ticpp::Node> node;
-		for (node = node.begin(parent); node != node.end(); ++node) {
-			if (node->Value() == "plant") {
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-				std::cout<<"Plant\n";
+		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
-				Presets.push_back(NatureObjectPreset());
-				ticpp::Iterator<ticpp::Node> child;
-				for (child = child.begin(node->ToElement()); child != child.end(); ++child) {
-#ifdef DEBUG
-					std::cout<<"Children\n";
-#endif
-					if (child->Value() == "name") {
-						Presets.back().name = child->ToElement()->GetText();
-					} else if (child->Value() == "graphic") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().graphic = intVal;
-					} else if (child->Value() == "components") {
-#ifdef DEBUG
-						std::cout<<"Components\n";
-#endif
-						ticpp::Iterator<ticpp::Node> comps;
-						for (comps = comps.begin(child->ToElement()); comps != comps.end(); ++comps) {
-							Presets.back().components.push_back(Item::StringToItemType(comps->ToElement()->GetText()));
-						}
-					} else if (child->Value() == "color") {
-						int r = -1,g = -1,b = -1;
-						ticpp::Iterator<ticpp::Node> c;
-						for (c = c.begin(child->ToElement()); c != c.end(); ++c) {
-							c->ToElement()->GetTextOrDefault(&intVal, 0);
-							if (r == -1) r = intVal;
-							else if (g == -1) g = intVal;
-							else b = intVal;
-						}
-						Presets.back().color = TCODColor(r,g,b);
-					} else if (child->Value() == "rarity") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().rarity = intVal;
-					} else if (child->Value() == "cluster") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().cluster = intVal;
-					} else if (child->Value() == "condition") {
-						child->ToElement()->GetText(&intVal);
-						Presets.back().condition = intVal;
-					} else if (child->Value() == "tree") {
-						Presets.back().tree = true;
-					} else if (child->Value() == "harvestable") {
-						Presets.back().harvestable = true;
-					} else if (child->Value() == "walkable") {
-						Presets.back().walkable = true;
-					}
-				}
-			}
-		}
-	} catch (ticpp::Exception& ex) {
-		Logger::Inst()->output<<"Failed reading wildplants.xml!\n";
-		Logger::Inst()->output<<ex.what()<<'\n';
-		Game::Inst()->Exit();
+		NatureObject::Presets.push_back(NatureObjectPreset());
+		NatureObject::Presets.back().name = name;
+		return true;
 	}
 
-	Logger::Inst()->output<<"Finished reading wildplants.xml\nPlants: "<<Presets.size()<<'\n';
+	bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "walkable")) {
+			NatureObject::Presets.back().walkable = true;
+		} else if (boost::iequals(name, "harvestable")) {
+			NatureObject::Presets.back().harvestable = true;
+		} else if (boost::iequals(name, "tree")) {
+			NatureObject::Presets.back().tree = true;
+		}
+		return true;
+	}
+
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "graphic")) {
+			NatureObject::Presets.back().graphic = value.i;
+		} else if (boost::iequals(name, "components")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				NatureObject::Presets.back().components.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
+			}
+		} else if (boost::iequals(name, "color")) {
+			NatureObject::Presets.back().color = value.col;
+		} else if (boost::iequals(name, "rarity")) {
+			NatureObject::Presets.back().rarity = value.i;
+		} else if (boost::iequals(name, "cluster")) {
+			NatureObject::Presets.back().cluster = value.i;
+		} else if (boost::iequals(name, "condition")) {
+			NatureObject::Presets.back().condition = value.i;
+		}
+		return true;
+	}
+
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("end of %s structure\n") % name).str();
+#endif
+		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
+			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
+		return true;
+	}
+	void error(const char *msg) {
+		Logger::Inst()->output<<"ItemListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
+};
+
+void NatureObject::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* natureObjectTypeStruct = parser.newStructure("plant_type");
+	natureObjectTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
+	natureObjectTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	natureObjectTypeStruct->addListProperty("components", TCOD_TYPE_STRING, false);
+	natureObjectTypeStruct->addProperty("rarity", TCOD_TYPE_INT, false);
+	natureObjectTypeStruct->addProperty("condition", TCOD_TYPE_INT, false);
+	natureObjectTypeStruct->addProperty("cluster", TCOD_TYPE_INT, false);
+	natureObjectTypeStruct->addFlag("tree");
+	natureObjectTypeStruct->addFlag("harvestable");
+	natureObjectTypeStruct->addFlag("walkable");
+
+	parser.run(filename.c_str(), new NatureObjectListener());
 }
+
 
 void NatureObject::Mark() { marked = true; }
 bool NatureObject::Marked() { return marked; }

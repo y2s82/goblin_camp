@@ -319,21 +319,11 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	TCODConsole::setKeyboardRepeat(500, 10);
 
-	ticpp::Document plantsXml("./wildplants.xml");
-	try {
-		plantsXml.LoadFile();
-	} catch (ticpp::Exception& ex) {
-		Logger::Inst()->output<<"Failed opening xml!\n";
-		Logger::Inst()->output<<ex.what();
-		Exit();
-	}
-
 	//Item presets _must_ be loaded first because constructons.xml refers to items by name
 	Item::LoadPresets("items.dat");
 	Construction::LoadPresets("constructions.dat");
-	NatureObject::LoadPresets(plantsXml);
-	Logger::Inst()->output<<"Finished loading presets.";
-	Logger::Inst()->output.flush();
+	NatureObject::LoadPresets("wildplants.dat");
+
 	try {
 		TCODNamegen::parse("names.dat");
 	} catch (...) {
@@ -343,6 +333,7 @@ void Game::Init(int width, int height, bool fullscreen) {
 
 	//Creature presets
 	NPC::LoadPresets("creatures.dat");
+	Logger::Inst()->output<<"Finished loading presets.";
 
 	GenerateMap();
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));

@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <windows.h>
 #include <boost/format.hpp>
+#include <ticpp.h>
 
 #include "GCamp.hpp"
 #include "Game.hpp"

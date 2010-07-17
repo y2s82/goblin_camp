@@ -17,7 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
-#include <ticpp.h>
 #ifdef DEBUG
 #include <iostream>
 #endif

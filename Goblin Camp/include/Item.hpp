@@ -23,7 +23,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
 #include <libtcod.hpp>
-#include <ticpp.h>
 
 #include "Entity.hpp"
 #include "Coordinate.hpp"

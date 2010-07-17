@@ -19,7 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <deque>
 #include <map>
 #include <list>
-#include <ticpp.h>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/serialization/split_member.hpp>

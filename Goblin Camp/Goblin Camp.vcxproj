@@ -15,16 +15,16 @@
       <FileType>Document</FileType>
     </None>
     <None Include="constructions.dat" />
-    <None Include="constructions.xml">
-      <SubType>Designer</SubType>
-    </None>
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
     <None Include="items.dat" />
     <None Include="LIBTCOD-LICENSE.txt" />
     <None Include="names.dat" />
     <None Include="Readme.txt" />
-    <None Include="wildplants.xml" />
+    <None Include="wildplants.dat" />
+    <None Include="wildplants.xml">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp" />
