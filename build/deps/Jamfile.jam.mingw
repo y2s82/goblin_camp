@@ -11,4 +11,7 @@ lib boost_serialization : : <variant>release-pdb <name>boost_serialization-1_43-
 lib boost_thread : : <variant>debug <name>boost_thread-1_43-mt-gd ;
 lib boost_thread : : <variant>release-pdb <name>boost_thread-1_43-mt ;
 
-alias gc-deps : tcod boost_serialization boost_thread ;
+# dbghelp
+lib dbghelp : : <name>dbghelp ;
+
+alias gc-deps : tcod boost_serialization boost_thread dbghelp ;

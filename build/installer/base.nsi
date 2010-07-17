@@ -48,6 +48,8 @@ Section "!Goblin Camp" EXEC_SEC
     SetOutPath "$INSTDIR"
     SectionIn  RO
     
+    File "src\dbghelp.dll"
+    
     %%_GC_EXECUTABLES_MANIFEST_%%
     
     ; Shortcuts
@@ -119,6 +121,7 @@ FunctionEnd
 Section Uninstall
     !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
     
+    Delete "$INSTDIR\dbghelp.dll"
     Delete "$INSTDIR\goblin-camp.pdb"
     Delete "$INSTDIR\Log.txt"
     Delete "$INSTDIR\uninst.exe"

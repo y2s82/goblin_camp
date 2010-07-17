@@ -40,8 +40,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	define GC_VERSION "<version undefined>"
 #endif
 
+#ifdef WINDOWS
+// Win32CrashHandler.cpp
+void InstallExceptionHandler();
+#endif
+
 int main() {
 #	ifdef WINDOWS
+	InstallExceptionHandler();
 	std::string config = "./config.ini";
 #	else
 	std::string config = std::string(getenv("HOME")) + "/.goblincamp/config.ini";

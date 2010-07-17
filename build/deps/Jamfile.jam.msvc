@@ -6,4 +6,7 @@ lib tcod : : <variant>release-pdb <name>libtcod-VS ;
 
 # Boost uses autolinking
 
-alias gc-deps : tcod ;
+# dbghelp
+lib dbghelp : : <name>dbghelp ;
+
+alias gc-deps : tcod dbghelp ;
