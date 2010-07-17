@@ -1,0 +1,13 @@
+project deps ;
+
+# libtcod
+lib tcod : : <variant>debug <name>libtcod-VS-debug ;
+lib tcod : : <variant>release-pdb <name>libtcod-VS ;
+
+# TinyXML++
+lib ticpp : : <variant>debug <name>ticppd ;
+lib ticpp : : <variant>release-pdb <name>ticpp ;
+
+# Boost uses autolinking
+
+alias gc-deps : ticpp tcod ;
