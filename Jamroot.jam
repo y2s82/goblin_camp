@@ -35,8 +35,15 @@ install install-data
     : <conditional>@install-feats
 ;
 
+actions nsis-action {
+    python build/installer/mkinstaller.py $(GC_VERSION)
+}
+
 alias install : install-data install-binaries ;
-explicit install install-data install-binaries ;
+
+make nsis : : @nsis-action ;
+
+explicit install install-data install-binaries nsis ;
 
 rule gc-feats ( properties * ) {
     local feats ;
