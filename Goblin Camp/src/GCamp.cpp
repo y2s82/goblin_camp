@@ -22,6 +22,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <cstdlib>
+#include <sys/types.h>
+#include <sys/stat.h>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -38,14 +41,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 
 int main() {
-	int width = -1, height = -1;
-	bool fullscreen = false;
-
-	TCODList<char*> list =  TCODSystem::getDirectoryContent("./", "config.ini");
-	if (!list.isEmpty()) {
-		Game::Inst()->LoadConfig("config.ini");
+#	ifdef WINDOWS
+	std::string config = "./config.ini";
+#	else
+	std::string config = std::string(getenv("HOME")) + "/.goblincamp/config.ini";
+#	endif
+	
+	struct stat buffer;
+	if (stat(config.c_str(), &buffer) == 0) {
+		Game::Inst()->LoadConfig(config);
 	}
-
+	
 	Game::Inst()->Init();
 	return MainMenu();
 }
@@ -226,7 +232,6 @@ int MainMenu() {
 #else
 #	define SAVE_DIR getSaveDir().c_str()
 #	define SAVE_FILE getSaveFile()
-#	include <cstdlib>
 inline std::string getSaveDir() {
 	// superfluous calls, but whatever
 	std::string home = std::string(getenv("HOME"));

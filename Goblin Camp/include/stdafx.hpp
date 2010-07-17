@@ -36,6 +36,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <iostream>
 #	include <cmath>
 #	include <cstdlib>
+#	include <sys/types.h>
+#	include <sys/stat.h>
 // Boost
 #	pragma warning(push, 2)
 #		include <boost/thread/thread.hpp>
