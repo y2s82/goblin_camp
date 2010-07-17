@@ -17,7 +17,7 @@ exe goblin-camp
     : [ glob src/*.cpp ]
       build/deps//gc-deps
     : <include>"Goblin Camp/include" <warnings>on
-      <define>TIXML_USE_TICPP <define>GC_VERSION=\\\"$(GC_VERSION)\\\"
+      <define>GC_VERSION=\\\"$(GC_VERSION)\\\"
       <conditional>@gc-feats
 ;
 
@@ -29,7 +29,6 @@ install install-binaries
 
 install install-data
     : [ glob *.dat ]
-      [ glob *.xml ]
       [ glob *.png ]
       [ glob *.txt ]
       [ glob *.ini ]
