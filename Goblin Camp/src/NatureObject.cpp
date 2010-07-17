@@ -113,12 +113,10 @@ class NatureObjectListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("end of %s structure\n") % name).str();
 #endif
-		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
-			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
 		return true;
 	}
 	void error(const char *msg) {
-		Logger::Inst()->output<<"ItemListener: "<<msg<<"\n";
+		Logger::Inst()->output<<"NatureObjectListener: "<<msg<<"\n";
 		Game::Inst()->Exit();
 	}
 };

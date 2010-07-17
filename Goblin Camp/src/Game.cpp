@@ -46,7 +46,13 @@ int Game::ItemCatCount = 0;
 Game* Game::instance = 0;
 
 Game::Game() :
-season(EarlySpring),
+screenWidth(0),
+	screenHeight(0),
+	resolutionWidth(0),
+	resolutionHeight(0),
+	fullscreen(false),
+	renderer(TCOD_RENDERER_SDL),
+	season(EarlySpring),
 	time(0),
 	orcCount(0),
 	goblinCount(0),
@@ -287,33 +293,88 @@ void Game::Exit() {
 int Game::ScreenWidth() const {	return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
-void Game::Init(int width, int height, bool fullscreen) {
-	int resWidth, resHeight;
-	TCODSystem::getCurrentResolution(&resWidth, &resHeight);
-	TCODSystem::getCharSize(&charWidth, &charHeight);
-	resWidth /= charWidth;
-	resHeight /= charHeight;
-	width /= charWidth;
-	height /= charHeight;
-	if (width < 1 || resWidth < width) width = resWidth;
-	if (height < 1 || resHeight < height) height = resHeight;
+class ConfigListener : public ITCODParserListener {
 
-	if (!fullscreen) {
-		if (width == -1) 
-			width = std::max(75, width - 100); 
-		if (height == -1)
-			height = std::max(75, height - 75);
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+#endif
+		return true;
 	}
+
+	bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "fullscreen")) {
+			Game::Inst()->fullscreen = true;
+		}
+		return true;
+	}
+
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name, "width")) {
+			Game::Inst()->resolutionWidth = value.i;
+		} else if (boost::iequals(name, "height")) {
+			Game::Inst()->resolutionHeight = value.i;
+		} else if (boost::iequals(name, "renderer")) {
+			if (boost::iequals(value.s, "SDL")) {
+				Game::Inst()->renderer = TCOD_RENDERER_SDL;
+			} else if (boost::iequals(value.s, "OpenGL")) {
+				Game::Inst()->renderer = TCOD_RENDERER_OPENGL;
+			} else if (boost::iequals(value.s, "GLSL")) {
+				Game::Inst()->renderer = TCOD_RENDERER_GLSL;
+			}
+		} 
+		return true;
+	}
+
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("end of %s structure\n") % name).str();
+#endif
+		return true;
+	}
+	void error(const char *msg) {
+		Logger::Inst()->output<<"ConfigListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
+};
+
+void Game::LoadConfig(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* configTypeStruct = parser.newStructure("config");
+	configTypeStruct->addProperty("width", TCOD_TYPE_INT, true);
+	configTypeStruct->addProperty("height", TCOD_TYPE_INT, true);
+	configTypeStruct->addFlag("fullscreen");
+	const char* renderers[] = { "GLSL", "SDL", "OpenGL", NULL }; 
+	configTypeStruct->addValueList("renderer", renderers, true);
+
+	parser.run(filename.c_str(), new ConfigListener());
+}
+
+void Game::Init() {
+	if (resolutionWidth <= 0 || resolutionHeight <= 0) {
+		if (fullscreen) {
+			TCODSystem::getCurrentResolution(&resolutionWidth, &resolutionHeight);
+		} else {
+			resolutionWidth = 640;
+			resolutionHeight = 480;
+		}
+	} 
+
+	TCODSystem::getCharSize(&charWidth, &charHeight);
+	screenWidth = resolutionWidth / charWidth;
+	screenHeight = resolutionHeight / charHeight;
 
 	srand((unsigned int)std::time(0));
 
-	//TODO: Move this into the config file
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	//TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_GLSL);
-	TCODConsole::initRoot(width, height, "Goblin Camp", fullscreen, TCOD_RENDERER_SDL);
+	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer);
 	TCODConsole::root->setAlignment(TCOD_LEFT);
-
-	screenWidth = width; screenHeight = height;
 
 	TCODMouse::showCursor(true);
 

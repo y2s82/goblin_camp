@@ -11,9 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.ini">
-      <FileType>Document</FileType>
-    </None>
+    <None Include="config.ini" />
     <None Include="constructions.dat" />
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
@@ -22,9 +20,6 @@
     <None Include="names.dat" />
     <None Include="Readme.txt" />
     <None Include="wildplants.dat" />
-    <None Include="wildplants.xml">
-      <SubType>Designer</SubType>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp" />

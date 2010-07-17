@@ -52,6 +52,7 @@ enum Season {
 
 class Game {
 	friend class boost::serialization::access;
+	friend class ConfigListener;
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
@@ -62,6 +63,9 @@ private:
 	Game();
 	static Game* instance;
 	int screenWidth, screenHeight;
+	int resolutionWidth, resolutionHeight;
+	bool fullscreen;
+	TCOD_renderer_t renderer;
 	Season season;
 	int time;
 	int orcCount, goblinCount;
@@ -142,7 +146,8 @@ public:
 
 	int ScreenWidth() const;
 	int ScreenHeight() const;
-	void Init(int,int,bool=false);
+	void LoadConfig(std::string);
+	void Init();
 	void GenerateMap();
 
 	void Update();

@@ -17,7 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <windows.h>
 #include <boost/format.hpp>
-#include <ticpp.h>
+#include <boost/algorithm/string.hpp>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -30,44 +30,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 
 int main(std::string cmdline) {
-	int width = -1, height = -1;
-	bool fullscreen = false;
-
 	TCODList<char*> list =  TCODSystem::getDirectoryContent("./", "config.ini");
 	if (!list.isEmpty()) {
-		ticpp::Document iniFile("config.ini");
-		try {
-			iniFile.LoadFile();
-		} catch (ticpp::Exception& ex) {
-			Logger::Inst()->output<<"Failed loading config.ini\n"<<ex.what();
-			Logger::Inst()->output<<"Using default values";
-			goto CONTINUEMAIN;
-		}
-
-		try {
-			int intVal;
-			ticpp::Element* parent = iniFile.FirstChildElement();
-			ticpp::Iterator<ticpp::Node> node;
-			for (node = node.begin(parent); node != node.end(); ++node) {
-				if (node->Value() == "fullscreen") {
-					fullscreen = (node->ToElement()->GetText() == "true") ? true : false;
-				} else if (node->Value() == "width") {
-					node->ToElement()->GetText(&intVal);
-					width = intVal;
-				} else if (node->Value() == "height") {
-					node->ToElement()->GetText(&intVal);
-					height = intVal;
-				}
-			}
-		} catch (ticpp::Exception& ex) {
-			Logger::Inst()->output<<"Failed reading config.ini\n"<<ex.what();
-			Logger::Inst()->output<<"Using default values";
-			width = -1; height = -1; fullscreen = false;
-		}
+		Game::Inst()->LoadConfig("config.ini");
 	}
-CONTINUEMAIN:
 
-	Game::Inst()->Init(width,height,fullscreen);
+	Game::Inst()->Init();
 	return MainMenu();
 }
 
