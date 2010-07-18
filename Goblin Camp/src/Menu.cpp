@@ -102,6 +102,11 @@ void Menu::Callback(unsigned int choice) {
 	}
 }
 
+void Menu::Open() {}
+void Menu::Close() {
+	UI::Inst()->SetTextMode(false);
+}
+
 Menu* Menu::mainMenu = 0;
 Menu* Menu::MainMenu() {
 	if (!mainMenu) {
@@ -521,7 +526,6 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 }
 
 MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
-	UI::Inst()->SetTextMode(true, 28);
 	filter = UI::Inst()->InputString();
 	if (x >= 0 && y >= 0) {
 		int ch = TCODConsole::root->getChar(x,y);
@@ -576,6 +580,10 @@ StockManagerMenu* StockManagerMenu::StocksMenu() {
 
 void StockManagerMenu::ScrollDown() { ++scroll; }
 void StockManagerMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
+
+void StockManagerMenu::Open() {
+	UI::Inst()->SetTextMode(true, 28);
+}
 
 SquadsMenu* SquadsMenu::squadMenu = 0;
 SquadsMenu* SquadsMenu::SquadMenu() {
@@ -663,9 +671,7 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 }
 
 MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
-	UI::Inst()->SetTextMode(true, 22);
 	squadName = UI::Inst()->InputString();
-
 	if (clicked) {
 		if (y < topY+19) {
 			if (x > topX + (width/2)) {
@@ -762,4 +768,13 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 		if (x > topX && x < topX+width && y > topY && y < topY+height) return MENUHIT;
 	}
 	return NOMENUHIT;
+}
+
+void SquadsMenu::Open() {
+	UI::Inst()->SetTextMode(true, 22);
+	Announce::Inst()->AddMsg("SquadsMenu::Open()");
+	if (boost::shared_ptr<Squad> squad = chosenSquad.lock()) {
+		squadName = squad->Name();
+		UI::Inst()->InputString(squadName);
+	}
 }
