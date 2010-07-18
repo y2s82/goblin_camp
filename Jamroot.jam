@@ -1,6 +1,6 @@
 # See build/README.
 
-constant GC_VERSION : 0.1 ;
+constant GC_VERSION : 0.11 ;
 
 project goblin-camp
     : default-build debug
