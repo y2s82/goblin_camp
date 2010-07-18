@@ -37,7 +37,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 
 #ifndef GC_VERSION
-#	define GC_VERSION "<version undefined>"
+#	define GC_VERSION "0.11"
 #endif
 
 #ifdef WINDOWS
