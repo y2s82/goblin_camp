@@ -34,6 +34,14 @@ StockManager* StockManager::Inst() {
 }
 
 StockManager::StockManager(void){
+	Init();
+}
+
+
+StockManager::~StockManager(void){
+}
+
+void StockManager::Init() {
 	//Initialize all quantities to -1 (== not visible in stocks screen)
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		categoryQuantities.insert(std::pair<ItemCategory,int>(i,-1));
@@ -85,10 +93,6 @@ StockManager::StockManager(void){
 			}
 		}
 	}
-}
-
-
-StockManager::~StockManager(void){
 }
 
 void StockManager::Update() {
@@ -226,4 +230,18 @@ void StockManager::UpdateDesignations(boost::weak_ptr<NatureObject> nObj, bool a
 		}
 	}
 	return;
+}
+
+void StockManager::Reset() {
+	categoryQuantities.clear();
+	typeQuantities.clear();
+	minimums.clear();
+	producables.clear();
+	producers.clear();
+	workshops.clear();
+	fromTrees.clear();
+	fromEarth.clear();
+	designatedTrees.clear();
+	treeFellingJobs.clear();
+	Init();
 }

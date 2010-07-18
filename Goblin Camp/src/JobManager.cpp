@@ -205,3 +205,10 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 
 	return boost::weak_ptr<Job>();
 }
+
+void JobManager::Reset() {
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
+		availableList[i].clear();
+	}
+	waitingList.clear();
+}

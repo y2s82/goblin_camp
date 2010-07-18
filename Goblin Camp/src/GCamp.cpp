@@ -105,6 +105,7 @@ void MainLoop() {
 
 void StartNewGame() {
 	Game* game = Game::Inst();
+	game->Reset();
 
 	for (int npcs = 0; npcs < 15; ++npcs) {
 		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("goblin"));

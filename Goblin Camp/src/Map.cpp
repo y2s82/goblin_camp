@@ -130,3 +130,18 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 	} while(!TCODLine::step(&x, &y) && !(x == bx && y == by));
 	return true;
 }
+
+void Map::Reset(int x, int y) {
+	tileMap[x][y].Walkable(true);
+	tileMap[x][y].Buildable(true);
+	tileMap[x][y].Construction(-1);
+	tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
+	tileMap[x][y].Low(false);
+	tileMap[x][y].BlocksWater(false);
+	tileMap[x][y].BlocksLight(false);
+	tileMap[x][y].NatureObject(-1);
+	tileMap[x][y].itemList.clear();
+	tileMap[x][y].npcList.clear();
+	tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
+	tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
+}

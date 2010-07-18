@@ -47,6 +47,7 @@ private:
 	unsigned int length, height;
 public:
 	static Announce* Inst();
+	void Reset();
 	void AddMsg(std::string, TCODColor = TCODColor::white);
 	void Update();
 	void Draw(TCODConsole*);
