@@ -611,8 +611,11 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->printFrame(x, topY+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, (chosenSquad.lock()) ? "Modify Squad" : "New Squad");
 	console->setAlignment(TCOD_CENTER);
 	++x;
-	console->print(x+(width/4)-2, y, "Name");
-	console->print(x+(width/4)-2, y+1, squadName.c_str());
+	console->print(x+(width/4)-2, y, "Name (required)");
+	console->setBackgroundColor(TCODColor::grey);
+	console->rect(x,y+1,(width/2)-3,1,true,TCOD_BKGND_SET);
+	console->setBackgroundColor(TCODColor::black);
+	console->print(x+(width/4)-1, y+1, squadName.c_str());
 	y += 3;
 	console->printFrame(x+3, y, 3, 3, false, TCOD_BKGND_SET);
 	console->printFrame(x+17, y++, 3, 3, false, TCOD_BKGND_SET);
@@ -660,18 +663,30 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 }
 
 MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
-	UI::Inst()->SetTextMode(true, 21);
+	UI::Inst()->SetTextMode(true, 22);
 	squadName = UI::Inst()->InputString();
 
 	if (clicked) {
 		if (y < topY+19) {
 			if (x > topX + (width/2)) {
 				if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
-					if (y > topY+2+3 && y < topY+2+6) if (squadMembers > 0) {--squadMembers; return MENUHIT; }
-					else if (y > topY+2+8 && y < topY+2+11) if (squadPriority > 0) {--squadPriority; return MENUHIT; }
+					if (y > topY+2+3 && y < topY+2+6) {
+						if (squadMembers > 0) --squadMembers; 
+						return MENUHIT;
+					}
+					else if (y > topY+2+8 && y < topY+2+11) {
+						if (squadPriority > 0) --squadPriority; 
+						return MENUHIT; 
+					}
 				} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
-					if (y > topY+2+3 && y < topY+2+6) {++squadMembers; return MENUHIT; }
-					else if (y > topY+2+8 && y < topY+2+11) {++squadPriority; return MENUHIT; }
+					if (y > topY+2+3 && y < topY+2+6) {
+						++squadMembers; 
+						return MENUHIT; 
+					}
+					else if (y > topY+2+8 && y < topY+2+11) {
+						++squadPriority; 
+						return MENUHIT; 
+					}
 				} else if (x > topX + (width/2) + 1 && x < topX + (width/2) + 11
 					&& y > topY+2+12 && y < topY+2+15) {
 						if (squadName != "" && !chosenSquad.lock()) { //Create
@@ -731,7 +746,7 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 			}
 		} else {
 			if (y > topY+20 && y < topY+27) {
-				if (x > topX+1 && x < topX+7) { //Guard
+				if (x > topX+1 && x < topX+9) { //Guard
 					chosenSquad.lock()->Order(GUARD);
 					UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
 					UI::Inst()->HideMenu();
@@ -744,6 +759,7 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 				}
 			}
 		}
+		if (x > topX && x < topX+width && y > topY && y < topY+height) return MENUHIT;
 	}
 	return NOMENUHIT;
 }

@@ -64,8 +64,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 }
 
 Construction::~Construction() {
-	for (int ix = x; ix <= (signed int)x + Construction::Blueprint(type).X(); ++ix) {
-		for (int iy = y; iy <= (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
+	for (int ix = x; ix < (signed int)x + Construction::Blueprint(type).X(); ++ix) {
+		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
 			Map::Inst()->Buildable(ix,iy,true);
 			Map::Inst()->Walkable(ix,iy,true);
 			Map::Inst()->Construction(ix,iy,-1);
@@ -79,6 +79,7 @@ Construction::~Construction() {
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
 	if (producer) StockManager::Inst()->UpdateWorkshops(boost::weak_ptr<Construction>(), false);
+
 }
 
 
@@ -160,8 +161,12 @@ void Construction::CancelJob(int index) {
 	if (index == 0 && index < (signed int)jobList.size()) {
 		jobList.erase(jobList.begin());
 		while (!jobList.empty() && !reserved && !SpawnProductionJob());
-	} else if (index > 0 && index < (signed int)jobList.size()) { jobList.erase(jobList.begin() + index); }
-	else if (condition <= 0) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	} else if (index > 0 && index < (signed int)jobList.size()) { 
+		jobList.erase(jobList.begin() + index); 
+	}
+	else if (condition <= 0) {
+		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	}
 	else if (dismantle) dismantle = false; //Stop trying to dismantle
 }
 
