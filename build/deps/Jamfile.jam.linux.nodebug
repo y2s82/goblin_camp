@@ -1,0 +1,13 @@
+project deps ;
+
+# libtcod
+lib tcodc  : : <name>tcod ;
+lib tcodxx : : <name>tcodxx ;
+
+alias tcod : tcodc tcodxx ;
+
+# Boost
+lib boost_serialization : : <name>boost_serialization-mt ;
+lib boost_thread : : <name>boost_thread-mt ;
+
+alias gc-deps : tcod boost_serialization boost_thread ;

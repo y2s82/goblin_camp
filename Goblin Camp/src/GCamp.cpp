@@ -246,7 +246,7 @@ inline std::string GetSaveDir() {
 	return home + std::string("/.goblincamp/saves/");
 }
 inline std::string GetSaveFile() {
-	return getSaveDir() + std::string("%s");
+	return GetSaveDir() + std::string("%s");
 }
 #endif
 
