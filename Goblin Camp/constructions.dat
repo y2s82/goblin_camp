@@ -1,0 +1,78 @@
+construction_type "Wooden Wall" {
+	wall
+	maxCondition=30
+	materials=["Wood"]
+}
+
+construction_type "Stockpile" {
+	stockpile
+	walkable
+	graphicLength=1
+	graphic=[61]
+	maxCondition=10
+}
+
+construction_type "Farm plot" {
+	farmplot
+	walkable
+	graphicLength=1
+	graphic=[126]
+	maxCondition=10
+}
+
+construction_type "Carpenter's workshop" {
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  35, 67, 46,
+			 178, 46,177]
+	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed"]
+	walkable
+	maxCondition=90
+	materials=["Wood","Wood","Wood"]
+	productionx=1
+	productiony=1
+}
+
+construction_type "Brewery" {
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10, 33, 35,231]
+	products=["Wine"]
+	walkable
+	maxCondition=90
+	materials=["Wood","Wood","Wood"]
+	productionx=2
+	productiony=0
+}
+
+construction_type "Bakery" {
+	graphicLength=2
+	graphic=[ 10, 46,
+			  33,231,
+			  10, 46,
+			  35,231]
+	products=["Pie"]
+	walkable
+	maxCondition=90
+	materials=["Wood","Wood","Wood"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Bed" {
+	bed
+	graphicLength=1
+	graphic=[22]
+	walkable
+	maxCondition=10
+	materials=["Bed"]
+}
+
+construction_type "Door" {
+	door
+	graphicLength=1
+	graphic=[43]
+	walkable
+	maxCondition=10
+	materials=["Door"]
+}
