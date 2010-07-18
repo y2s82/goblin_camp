@@ -51,6 +51,7 @@
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\UI.cpp" />
     <ClCompile Include="src\Water.cpp" />
+    <ClCompile Include="src\Win32CrashHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp" />
@@ -122,12 +123,12 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;_SCL_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_NONSTDC_NO_DEPRECATE;_CRT_SECURE_NO_DEPRECATE;_CRT_SECURE_NO_WARNINGS;_SECURE_SCL=0;_SCL_SECURE_NO_DEPRECATE;_HAS_ITERATOR_DEBUGGING=0;DEBUG;WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4996</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libboost_serialization-vc100-mt-gd-1_43.lib;libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_serialization-vc100-mt-gd-1_43.lib;libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -138,12 +139,13 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <PreprocessorDefinitions>WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_serialization-vc100-mt-1_43.lib;libboost_thread-vc100-mt-1_43.lib;libtcod-VS.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_serialization-vc100-mt-1_43.lib;libboost_thread-vc100-mt-1_43.lib;libtcod-VS.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
