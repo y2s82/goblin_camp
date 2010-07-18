@@ -38,6 +38,7 @@ private:
 
 public:
 	static Map* Inst();
+	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
 	bool Walkable(int,int) const;
 	void Walkable(int,int,bool);

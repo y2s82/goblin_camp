@@ -82,6 +82,30 @@ public:
 	static bool ToMainMenu();
 	void Running(bool);
 	bool Running();
+	void Reset();
+	static void DoNothing();
+	static void Exit();
+
+	int ScreenWidth() const;
+	int ScreenHeight() const;
+	void LoadConfig(std::string);
+	void Init();
+	void GenerateMap();
+
+	void Update();
+	Coordinate upleft;
+
+	void Pause();
+	bool Paused();
+
+	int CharHeight() const;
+	int CharWidth() const;
+
+	TCODConsole* buffer;
+	void FlipBuffer();
+	void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
+
+	static int DiceToInt(TCOD_dice_t);
 
 	/*      NPCS        NPCS        NPCS        */
 	std::map<int,boost::shared_ptr<NPC> > npcList;
@@ -141,18 +165,6 @@ public:
 	void RemoveNatureObject(boost::weak_ptr<NatureObject>);
 	static void HarvestWildPlant(Coordinate, Coordinate);
 
-	static void DoNothing();
-	static void Exit();
-
-	int ScreenWidth() const;
-	int ScreenHeight() const;
-	void LoadConfig(std::string);
-	void Init();
-	void GenerateMap();
-
-	void Update();
-	Coordinate upleft;
-
 	Season CurrentSeason();
 	std::string SeasonToString(Season);
 	void SpawnTillageJobs();
@@ -166,16 +178,4 @@ public:
 	std::list<boost::weak_ptr<BloodNode> > bloodList;
 	void CreateBlood(Coordinate);
 	void CreateBlood(Coordinate,int);
-
-	void Pause();
-	bool Paused();
-
-	int CharHeight() const;
-	int CharWidth() const;
-
-	TCODConsole* buffer;
-	void FlipBuffer();
-	void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
-
-	static int DiceToInt(TCOD_dice_t);
 };
