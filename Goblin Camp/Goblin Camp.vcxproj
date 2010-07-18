@@ -82,6 +82,10 @@
     <ClInclude Include="include\Tile.hpp" />
     <ClInclude Include="include\UI.hpp" />
     <ClInclude Include="include\Water.hpp" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Goblin Camp.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{225B1047-10B4-4F9E-9AE7-293BDCF764CE}</ProjectGuid>
