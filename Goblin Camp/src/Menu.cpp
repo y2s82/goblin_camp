@@ -772,7 +772,6 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 
 void SquadsMenu::Open() {
 	UI::Inst()->SetTextMode(true, 22);
-	Announce::Inst()->AddMsg("SquadsMenu::Open()");
 	if (boost::shared_ptr<Squad> squad = chosenSquad.lock()) {
 		squadName = squad->Name();
 		UI::Inst()->InputString(squadName);
