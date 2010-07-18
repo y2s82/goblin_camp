@@ -48,6 +48,8 @@ public:
 	virtual ~Menu();
 	virtual void Draw(int, int, TCODConsole*);
 	virtual MenuResult Update(int = -1, int = -1, bool clicked = false);
+	virtual void Open();
+	virtual void Close();
 	void selected(int);
 	void AddChoice(MenuChoice);
 	void Callback(unsigned int);
@@ -135,6 +137,7 @@ public:
 	static StockManagerMenu* StocksMenu();
 	void ScrollDown();
 	void ScrollUp();
+	void Open();
 };
 
 class SquadsMenu : public Menu {
@@ -149,4 +152,5 @@ public:
 	MenuResult Update(int = -1, int = -1, bool clicked = false);
 	static SquadsMenu* squadMenu;
 	static SquadsMenu* SquadMenu();
+	void Open();
 };
