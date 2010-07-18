@@ -704,20 +704,19 @@ width(19),
 	height(30),
 	topY(0),
 	npc(false),
-	construction(false),
-	stockpile(false),
-	farmplot(false)
+	construction(false)
 {}
 
 MenuResult SideBar::Update(int x, int y) {
 	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
-		if (stockpile) {
+		if (construction && boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
 			int i = y - (topY + 15);			
 			if (i >= 0 && i < (signed int)Item::Categories.size()) {
 				boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i);
 				return MENUHIT;
 			}
 		}
+		if (y > topY && y < topY+height) return MENUHIT;
 	}
 	return NOMENUHIT;
 }
@@ -745,25 +744,30 @@ void SideBar::Draw(TCODConsole* console) {
 				console->setAlignment(TCOD_LEFT);
 			}
 		} else if (construction) {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
+			if (construct->HasTag(WORKSHOP)) {
+				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
-			console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Production");
-			for (int jobi = 0; jobi < std::min(10, (signed int)boost::static_pointer_cast<Construction>(entity.lock())->JobList()->size()); ++jobi) {
-				console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
-				console->print(edgeX - width + 2, topY+15+jobi, Item::ItemTypeToString(boost::static_pointer_cast<Construction>(entity.lock())->JobList(jobi)).c_str());
-			}		
-		} else if (stockpile) {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+				console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Production");
+				for (int jobi = 0; jobi < std::min(10, (signed int)construct->JobList()->size()); ++jobi) {
+					console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
+					console->print(edgeX - width + 2, topY+15+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
+				}		
+			} else if (construct->HasTag(STOCKPILE)) {
+				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
-			console->printFrame(edgeX-(width-1), topY+14, width-2, 30, false, TCOD_BKGND_DEFAULT, "Categories");
-			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(entity.lock()));
-			for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-				console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-				console->print(edgeX-(width-2),topY+15+i, sp->Allowed(i) ? "+ %s" : "- %s", Item::Categories[i].name.c_str());
+				console->printFrame(edgeX-(width-1), topY+14, width-2, 30, false, TCOD_BKGND_DEFAULT, "Categories");
+				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
+				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
+					console->print(edgeX-(width-2),topY+15+i, sp->Allowed(i) ? "+ %s" : "- %s", Item::Categories[i].name.c_str());
+				}
+				console->setForegroundColor(TCODColor::white);
+			} else if (construct->HasTag(FARMPLOT)) {
+				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+			} else { //TODO: Add farmplot seed choices, and other specific options
+				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 			}
-			console->setForegroundColor(TCODColor::white);
-		} else if (farmplot) {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 		} else {
 			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 		}
@@ -779,18 +783,22 @@ void SideBar::Draw(TCODConsole* console) {
 
 void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 	entity = ent;
-	npc = construction = stockpile = farmplot = false;
+	npc = construction = false;
+	height = 15;
 	if (boost::dynamic_pointer_cast<NPC>(entity.lock())) {
 		height = 30;
 		npc = true;
 	} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
 		height = 50;
-		farmplot = true;
+		construction = true;
 	} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
 		height = 50;
-		stockpile = true;
+		construction = true;
 	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
-		height = 30;
+		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
+		if (construct->HasTag(WORKSHOP)) {
+			height = 30;
+		}
 		construction = true;
 	}
 }
