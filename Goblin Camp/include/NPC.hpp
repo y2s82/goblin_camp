@@ -32,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Container.hpp"
 #include "StatusEffect.hpp"
 #include "Squad.hpp"
+#include "Attack.hpp"
 
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
@@ -142,6 +143,8 @@ private:
 	boost::weak_ptr<NPC> aggressor;
 	bool dead;
 	boost::weak_ptr<Squad> squad;
+
+	std::list<Attack> attacks;
 
 	bool escaped;
 	bool Escaped();

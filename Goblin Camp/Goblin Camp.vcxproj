@@ -24,6 +24,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp" />
+    <ClCompile Include="src\Attack.cpp" />
     <ClCompile Include="src\Blood.cpp" />
     <ClCompile Include="src\Camp.cpp" />
     <ClCompile Include="src\Construction.cpp" />
@@ -56,6 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp" />
+    <ClInclude Include="include\Attack.hpp" />
     <ClInclude Include="include\Blood.hpp" />
     <ClInclude Include="include\Camp.hpp" />
     <ClInclude Include="include\Construction.hpp" />
