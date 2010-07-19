@@ -121,7 +121,7 @@ item_type "Bloodberry seed" {
 	category = ["Seed"]
 	graphic = 250
 	color = "128,128,128"
-	growth = "Young bloodberry shrub"
+	growth = "Young Bloodberry shrub"
 	fitsin = "Seed Container"
 }
 

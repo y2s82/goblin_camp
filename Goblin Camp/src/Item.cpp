@@ -121,6 +121,7 @@ std::string Item::ItemTypeToString(ItemType type) {
 }
 
 ItemType Item::StringToItemType(std::string str) {
+	boost::to_upper(str);
 	return itemTypeNames[str];
 }
 
@@ -129,6 +130,7 @@ std::string Item::ItemCategoryToString(ItemCategory category) {
 }
 
 ItemCategory Item::StringToItemCategory(std::string str) {
+	boost::to_upper(str);
 	return Item::itemCategoryNames[str];
 }
 
@@ -161,7 +163,16 @@ public:
 
 	void translateNames() {
 		for (unsigned int i = 0; i < Item::Presets.size(); ++i) {
+#ifdef DEBUG
+			if (presetGrowth[i] != "") {
+				Item::Presets[i].growth = Item::StringToItemType(presetGrowth[i]);
+				std::cout<<"Translating "<<presetGrowth[i]<<" into growth id "<<Item::StringToItemType(presetGrowth[i])<<"\n";
+			} else {
+				std::cout<<"No growth defined for "<<Item::Presets[i].name<<"\n";
+			}
+#else
 			if (presetGrowth[i] != "") Item::Presets[i].growth = Item::StringToItemType(presetGrowth[i]);
+#endif
 			for (unsigned int fruit = 0; fruit < presetFruits[i].size(); ++fruit) {
 				Item::Presets[i].fruits.push_back(Item::StringToItemType(presetFruits[i][fruit]));
 			}
@@ -184,7 +195,9 @@ private:
 			Item::Categories.push_back(ItemCat());
 			++Game::ItemCatCount;
 			Item::Categories.back().name = name;
-			Item::itemCategoryNames.insert(std::pair<std::string, ItemCategory>(name, Game::ItemCatCount-1));
+			std::string upperName = name;
+			boost::to_upper(upperName);
+			Item::itemCategoryNames.insert(std::pair<std::string, ItemCategory>(upperName, Game::ItemCatCount-1));
 		} else if (boost::iequals(str->getName(), "item_type")) {
 			mode = ITEMMODE;
 			Item::Presets.push_back(ItemPreset());
@@ -193,7 +206,9 @@ private:
 			presetDecay.push_back(std::vector<std::string>());
 			++Game::ItemTypeCount;
 			Item::Presets.back().name = name;
-			Item::itemTypeNames.insert(std::pair<std::string, ItemType>(name, Game::ItemTypeCount-1));
+			std::string upperName = name;
+			boost::to_upper(upperName);
+			Item::itemTypeNames.insert(std::pair<std::string, ItemType>(upperName, Game::ItemTypeCount-1));
 		} 
 
 		return true;
