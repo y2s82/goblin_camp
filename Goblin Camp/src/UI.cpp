@@ -79,51 +79,27 @@ void UI::HandleKeyboard() {
 		else if (key.c == 'b') {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
-			menuOpen = true;
-			currentMenu->selected(-1);
-			currentMenu = Menu::BasicsMenu();
-			menuHistory.clear();
-			textMode = false;
+			ChangeMenu(Menu::BasicsMenu());
 		} else if (key.c == 'w') {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
-			menuOpen = true;
-			currentMenu->selected(-1);
-			currentMenu = Menu::WorkshopsMenu();
-			menuHistory.clear();
-			textMode = false;
+			ChangeMenu(Menu::WorkshopsMenu());
 		} else if (key.c == 'o') {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
-			menuOpen = true;
-			currentMenu->selected(-1);
-			currentMenu = Menu::OrdersMenu();
-			menuHistory.clear();
-			textMode = false;
+			ChangeMenu(Menu::OrdersMenu());
 		} else if (key.c == 's') {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
-			menuOpen = true;
-			currentMenu->selected(-1);
-			currentMenu = StockManagerMenu::StocksMenu();
-			menuHistory.clear();
-			textMode = false;
+			ChangeMenu(StockManagerMenu::StocksMenu());
 		} else if (key.c == 'f') {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
-			menuOpen = true;
-			currentMenu->selected(-1);
-			currentMenu = Menu::FurnitureMenu();
-			menuHistory.clear();
-			textMode = false;
+			ChangeMenu(Menu::FurnitureMenu());
 		} else if (key.c == 'm') {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
-			menuOpen = true;
-			currentMenu->selected(-1);
-			currentMenu = SquadsMenu::SquadMenu();
-			menuHistory.clear();
-			textMode = false;
+			ChangeMenu(SquadsMenu::SquadMenu());
 		} else if (key.c >= '0' && key.c <= '9') {
 			if (menuOpen) {
 				currentMenu->selected(boost::lexical_cast<int>((char)key.c)-1);
@@ -351,18 +327,24 @@ void UI::HandleMouse() {
 		menuY = mouseInput.cy;
 		menuOpen = !menuOpen;
 		currentMenu->selected(-1);
+		if (!menuOpen) {
+			_state = UINORMAL; 
+			a.X(0); 
+			a.Y(0); 
+			if (currentMenu) currentMenu->Close();
+		}
 		currentMenu = Menu::MainMenu();
+		if (menuOpen) currentMenu->Open();
 		menuHistory.clear();
-		if (!menuOpen) { _state = UINORMAL; a.X(0); a.Y(0); }
-		SetTextMode(false);
 	}
 
 	if (mbuttonPressed && menuOpen && !menuHistory.empty()) {
 		currentMenu->selected(-1);
 		_state = UINORMAL; a.X(0); a.Y(0);
+		currentMenu->Close();
 		currentMenu = menuHistory.back();
+		currentMenu->Open();
 		menuHistory.pop_back();
-		SetTextMode(false);
 	}
 
 	if (tempStatus.lbutton && _state == UINORMAL) {
@@ -538,10 +520,14 @@ void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
 void UI::state(UIState newState) { _state = newState; }
 
 void UI::ChangeMenu(Menu* menu) {
-	UI::Inst()->SetTextMode(false);
+	if (UI::Inst()->CurrentMenu()) {
+		UI::Inst()->CurrentMenu()->Close();
+	}
 	UI::Inst()->CurrentMenu()->selected(-1);
 	UI::Inst()->AddToHistory(UI::Inst()->CurrentMenu());
 	UI::Inst()->CurrentMenu(menu);
+	UI::Inst()->menuOpen = true;
+	menu->Open();
 }
 
 void UI::AddToHistory(Menu* menu) {menuHistory.push_back(menu);}
@@ -695,6 +681,7 @@ void UI::CloseMenu() {
 	_state = UINORMAL;
 	a.X(0); a.Y(0);
 	textMode = false;
+	if (currentMenu) currentMenu->Close();
 	currentMenu = Menu::MainMenu();
 }
 

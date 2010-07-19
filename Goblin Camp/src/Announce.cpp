@@ -128,3 +128,11 @@ int Announce::AnnounceAmount() {
 Coordinate Announce::CurrentCoordinate() {
 	return messageQueue.front()->target;
 }
+
+void Announce::Reset() {
+	messageQueue.clear();
+	history.clear();
+	timer = 0;
+	length = 0;
+	height = 0;
+}
