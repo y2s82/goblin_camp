@@ -390,7 +390,6 @@ void Game::Init() {
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
 	upleft = Coordinate(180,180);
-
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
@@ -736,22 +735,30 @@ void Game::DeTillFarmPlots() {
 
 //Placeholder, awaiting a real map generator
 void Game::GenerateMap() {
-	for (int x = 0; x < Map::Inst()->Width(); ++x) {
+	Map* map = Map::Inst();
+	for (int x = 0; x < map->Width(); ++x) {
+		for (int y = 0; y < map->Height(); ++y) {
+			map->Reset(x,y);
+		}
+	}
+
+
+	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 260; y <= 270; ++y) {
 			if (y >= 264 && y <= 266 && rand() % 5 == 0) {
-				Map::Inst()->Type(x,y,TILERIVERBED);
+				map->Type(x,y,TILERIVERBED);
 				CreateWater(Coordinate(x,y));
 			} else if ((y == 260 || y == 270) && rand() % 3 == 0) {
 			} else {
-				Map::Inst()->Type(x,y,TILEDITCH);
+				map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
 			}
 		}
 	}
 
-	for (int x = 0; x < Map::Inst()->Width(); ++x) {
-		for (int y = 0; y < Map::Inst()->Height(); ++y) {
-			if (Map::Inst()->Walkable(x,y) && Map::Inst()->Type(x,y) == TILEGRASS) {
+	for (int x = 0; x < map->Width(); ++x) {
+		for (int y = 0; y < map->Height(); ++y) {
+			if (map->Walkable(x,y) && map->Type(x,y) == TILEGRASS) {
 				if (rand() % 100 == 0) {
 					int r = rand() % 100;
 					for (int i = 0; i < (signed int)NatureObject::Presets.size(); ++i) {
@@ -760,16 +767,16 @@ void Game::GenerateMap() {
 							for (int clus = 0; clus < NatureObject::Presets[type].cluster; ++clus) {
 								int ax = x + ((rand() % 5) - 2);
 								int ay = y + ((rand() % 5) - 2);
-								if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
-								if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-								if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS
-									&& Map::Inst()->NatureObject(ax,ay) < 0) {
+								if (ax < 0) ax = 0; if (ax >= map->Width()) ax = map->Width()-1;
+								if (ay < 0) ay = 0; if (ay >= map->Height()) ay = map->Height()-1;
+								if (map->Walkable(ax,ay) && map->Type(ax,ay) == TILEGRASS
+									&& map->NatureObject(ax,ay) < 0) {
 										boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), type));
 										natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-										Map::Inst()->NatureObject(ax,ay,natObj->Uid());
-										Map::Inst()->Walkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-										Map::Inst()->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-										Map::Inst()->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->NatureObject(ax,ay,natObj->Uid());
+										map->Walkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 								}
 							}
 							break;
@@ -1040,4 +1047,28 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
 	}
 
 	return boost::weak_ptr<Construction>();
+}
+
+void Game::Reset() {
+	npcList.clear();
+	squadList.clear();
+	hostileSquadList.clear();
+	itemList.clear();
+	staticConstructionList.clear();
+	dynamicConstructionList.clear();
+	natureList.clear();
+	waterList.clear();
+	filthList.clear();
+	bloodList.clear();
+	JobManager::Inst()->Reset();
+	StockManager::Inst()->Reset();
+	time = 0;
+	paused = false;
+	toMainMenu = false;
+	running = false;
+	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
+	season = LateWinter;
+	upleft = Coordinate(180,180);
+	Announce::Inst()->Reset();
+	GenerateMap();
 }

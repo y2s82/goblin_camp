@@ -40,7 +40,7 @@ private:
 
 	std::map<ItemCategory,int> categoryQuantities;
 	std::map<ItemType,int> typeQuantities;
-	std::map<ItemType,int> minimums; //If minimun is -1, the product isn't available yet
+	std::map<ItemType,int> minimums; //If minimum is -1, the product isn't available yet
 	std::set<ItemType> producables;
 	std::map<ItemType, ConstructionType> producers;
 	std::multimap<ConstructionType, boost::weak_ptr<Construction> > workshops;
@@ -52,6 +52,8 @@ public:
 	static StockManager* Inst();
 	~StockManager(void);
 
+	void Init();
+	void Reset();
 	void Update();
 	void UpdateQuantity(ItemType, int);
 	int CategoryQuantity(ItemCategory);

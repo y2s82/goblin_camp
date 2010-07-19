@@ -15,6 +15,7 @@
     <None Include="constructions.dat" />
     <None Include="COPYING.txt" />
     <None Include="creatures.dat" />
+    <None Include="GoblinCamp.ico" />
     <None Include="items.dat" />
     <None Include="LIBTCOD-LICENSE.txt" />
     <None Include="names.dat" />

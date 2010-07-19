@@ -739,6 +739,7 @@ void Game::SaveGame(std::string filename) {
 
 
 void Game::LoadGame(std::string filename) {
+	Game::Inst()->Reset();
 	std::ifstream ifs(filename.c_str(), std::ios::binary);
 	boost::archive::binary_iarchive iarch(ifs);
 	iarch>>*instance;

@@ -73,8 +73,10 @@ Construction::~Construction() {
 	}
 
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
-		itemi->lock()->Faction(0); //Return item to player faction
-		itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
+		if (itemi->lock()) {
+			itemi->lock()->Faction(0); //Return item to player faction
+			itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
+		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
