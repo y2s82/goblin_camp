@@ -18,7 +18,7 @@ VC2010_CRT = frozenset(('msvcp100.dll', 'msvcr100.dll'))
 SYSTEM_DLL = frozenset((
     'kernel32.dll', 'user32.dll', 'gdi32.dll', 'opengl32.dll', 'winmm32.dll',
     'advapi32.dll', 'ntdll.dll', 'winmm.dll', 'rpcrt4.dll', 'secur32.dll',
-    'msvcrt.dll', 'dbghelp.dll'
+    'msvcrt.dll', 'dbghelp.dll', 'shell32.dll', 'shlwapi.dll'
 ))
 
 def findDLL(fn):
@@ -89,21 +89,16 @@ shutil.copy(
     os.path.join('build', 'dist', 'installer', 'src')
 )
 
-DATA_FILES  = ('.dat', '.xml', '.ini', '.png')
-exeManifest = [fn for fn in files if fn[-4:] not in (DATA_FILES + ('.pdb',))]
-datManifest = [fn for fn in files if fn[-4:] in DATA_FILES]
+manifest = [fn for fn in files if fn[-4:] != '.pdb']
 
 with closing(codecs.open(os.path.join('build', 'installer', 'base.nsi'), 'r', 'utf-8')) as fp:
     template = fp.read()
 
 template = template.replace(
-    u'%%_GC_EXECUTABLES_MANIFEST_%%', u'\n    '.join(ur'File "src\%s"' % fn for fn in exeManifest)
+    u'%%_GC_INSTALL_MANIFEST_%%', u'\n    '.join(ur'File "src\%s"' % fn for fn in manifest)
 )
 template = template.replace(
-    u'%%_GC_DATA_FILES_MANIFEST_%%',  u'\n    '.join(ur'File "src\%s"' % fn for fn in datManifest)
-)
-template = template.replace(
-    u'%%_GC_UNINSTALL_MANIFEST_%%', u'\n    '.join(ur'Delete "$INSTDIR\%s"' % fn for fn in (datManifest + exeManifest))
+    u'%%_GC_UNINSTALL_MANIFEST_%%', u'\n    '.join(ur'Delete "$INSTDIR\%s"' % fn for fn in manifest)
 )
 template = template.replace(u'%%_GC_VCREDIST_VERSION_%%', unicode(redist))
 template = template.replace(u'%%_GC_VERSION_%%', unicode(sys.argv[1]))
