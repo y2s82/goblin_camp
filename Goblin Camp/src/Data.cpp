@@ -48,7 +48,7 @@ namespace {
 	namespace globals {
 		fs::path personalDir, exec, execDir, dataDir;
 		fs::path savesDir, screensDir, modsDir;
-		fs::path config, defaultConfig, font, defaultFont;
+		fs::path config, font;
 	}
 	
 	// Finds path to 'personal dir' and subdirs.
@@ -106,8 +106,6 @@ namespace {
 	#else
 		globals::dataDir = fs::path(globals::execDir.parent_path()) / "share/goblin-camp/";
 	#endif
-		globals::defaultConfig = globals::dataDir / "config.ini";
-		globals::defaultFont   = globals::dataDir / "terminal.png";
 	}
 	
 	void LoadGlobalMod() {
@@ -200,9 +198,7 @@ namespace Data {
 			"[Data] --------\n" <<
 			"[Data] Executable: " << globals::exec << "\n" <<
 			"[Data] Config: " << globals::config << "\n" <<
-			"[Data] Font: " << globals::font << "\n" <<
-			"[Data] Default config: " << globals::defaultConfig << "\n" <<
-			"[Data] Default font: " << globals::defaultFont << "\n"
+			"[Data] Font: " << globals::font << "\n"
 		;
 		
 		// try to create personal directory structure
@@ -213,6 +209,7 @@ namespace Data {
 			fs::create_directory(globals::modsDir);
 		} catch (const fs::filesystem_error& e) {
 			Logger::Inst()->output << "[Data] filesystem_error while creating directories: " << e.what() << "\n";
+			Logger::Inst()->output.flush();
 			exit(1);
 		}
 		
@@ -223,25 +220,32 @@ namespace Data {
 		if (!fs::exists(globals::config)) {
 			Logger::Inst()->output << "[Data] User's config.ini does not exist.\n";
 			
+			fs::path defaultConfig = globals::dataDir / "config.ini";
+			if (!fs::exists(defaultConfig)) {
+				defaultConfig = globals::execDir / "config.ini";
+			}
+			
 			if (fs::exists(globals::defaultConfig)) {
 				Logger::Inst()->output << "[Data] Copying default config.ini to user directory.\n";
 				
 				try {
-					fs::copy_file(globals::defaultConfig, globals::config);
+					fs::copy_file(defaultConfig, globals::config);
 				} catch (const fs::filesystem_error& e) {
 					Logger::Inst()->output << "[Data] filesystem_error while copying config: " << e.what() << "\n";
-					exit(1);
+					Logger::Inst()->output.flush();
+					exit(2);
 				}
 			} else {
 				Logger::Inst()->output << "[Data] Creating default config.ini.\n";
 				
 				try {
-					std::ofstream configStream = std::ofstream(globals::config.string().c_str());
+					std::ofstream configStream(globals::config.string().c_str());
 					configStream << "config {\n\twidth = 800\n\theight = 600\n\trenderer = \"SDL\"\n}";
 					configStream.close();
 				} catch (const std::exception &e) {
 					Logger::Inst()->output << "[Data] std::exception while creating config: " << e.what() << "\n";
-					exit(1);
+					Logger::Inst()->output.flush();
+					exit(3);
 				}
 			}
 		}
@@ -251,11 +255,17 @@ namespace Data {
 		if (!fs::exists(globals::font)) {
 			Logger::Inst()->output << "[Data] User's terminal.png does not exist, copying default.\n";
 			
+			fs::path defaultFont = globals::dataDir / "terminal.png";
+			if (!fs::exists(defaultFont)) {
+				defaultFont = globals::execDir / "terminal.png";
+			}
+			
 			try {
-				fs::copy_file(globals::defaultFont, globals::font);
+				fs::copy_file(defaultFont, globals::font);
 			} catch (const fs::filesystem_error& e) {
 				Logger::Inst()->output << "[Data] filesystem_error while copying font: " << e.what() << "\n";
-				exit(1);
+				Logger::Inst()->output.flush();
+				exit(4);
 			}
 		}
 		
