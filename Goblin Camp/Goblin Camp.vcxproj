@@ -78,6 +78,7 @@
     <ClInclude Include="include\NPC.hpp" />
     <ClInclude Include="include\Squad.hpp" />
     <ClInclude Include="include\StatusEffect.hpp" />
+    <ClInclude Include="include\stdafx.hpp" />
     <ClInclude Include="include\StockManager.hpp" />
     <ClInclude Include="include\Stockpile.hpp" />
     <ClInclude Include="include\Tile.hpp" />
