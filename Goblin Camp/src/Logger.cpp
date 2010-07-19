@@ -25,11 +25,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 Logger::Logger(const std::string& logFile) {
 	output.open(logFile.c_str());
-	output<<"Logging begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
+	output<<"Logging to " << logFile << " begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
 }
 
 Logger::~Logger() {
-	output<<"Logging ended @ "<<boost::posix_time::second_clock::local_time();
+	output<<"Logging ended @ "<<boost::posix_time::second_clock::local_time()<<"\n";
 	output.flush();
 }
 
