@@ -121,7 +121,7 @@ Menu* Menu::MainMenu() {
 #endif
 		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsMenu::SquadMenu())));
 		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
-		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit)));
+		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));
 	}
 	return mainMenu;
 }
