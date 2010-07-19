@@ -95,7 +95,8 @@ namespace {
 		exec = cmdLine;
 	#else
 		char buffer[1024];
-		readlink("/proc/self/exe", buffer, 1024);
+		ssize_t pos = readlink("/proc/self/exe", buffer, 1023);
+		buffer[pos] = '\0';
 		exec = buffer;
 	#endif
 		
