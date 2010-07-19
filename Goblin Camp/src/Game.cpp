@@ -286,7 +286,8 @@ void Game::BumpEntity(int uid) {
 
 void Game::DoNothing() {}
 
-void Game::Exit() {
+void Game::Exit(bool confirm) {
+	if (confirm && !Menu::YesNoDialog("Really exit?")) return;
 	Logger::End();
 	exit(0);
 }

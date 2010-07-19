@@ -84,7 +84,7 @@ public:
 	bool Running();
 	void Reset();
 	static void DoNothing();
-	static void Exit();
+	static void Exit(bool confirm=true);
 
 	int ScreenWidth() const;
 	int ScreenHeight() const;
