@@ -40,6 +40,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Door.hpp"
+#include "Data.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -380,23 +381,9 @@ void Game::Init() {
 	TCODMouse::showCursor(true);
 
 	TCODConsole::setKeyboardRepeat(500, 10);
-
-	//Item presets _must_ be loaded first because constructons.xml refers to items by name
-	Item::LoadPresets("items.dat");
-	Construction::LoadPresets("constructions.dat");
-	NatureObject::LoadPresets("wildplants.dat");
-
-	try {
-		TCODNamegen::parse("names.dat");
-	} catch (...) {
-		Logger::Inst()->output<<"Error loading names.dat";
-		exit(0);
-	}
-
-	//Creature presets
-	NPC::LoadPresets("creatures.dat");
-	Logger::Inst()->output<<"Finished loading presets.";
-
+	
+	Data::Load();
+	
 	GenerateMap();
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 
