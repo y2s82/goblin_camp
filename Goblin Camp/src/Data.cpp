@@ -225,7 +225,7 @@ namespace Data {
 				defaultConfig = globals::execDir / "config.ini";
 			}
 			
-			if (fs::exists(globals::defaultConfig)) {
+			if (fs::exists(defaultConfig)) {
 				Logger::Inst()->output << "[Data] Copying default config.ini to user directory.\n";
 				
 				try {
