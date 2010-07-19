@@ -79,6 +79,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
 	squad(boost::weak_ptr<Squad>()),
+	attacks(std::list<Attack>()),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
