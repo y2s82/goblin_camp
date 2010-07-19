@@ -198,6 +198,76 @@ Menu* Menu::FurnitureMenu() {
 	return furnitureMenu;
 }
 
+bool Menu::YesNoDialog(std::string text, std::string leftButton, std::string rightButton) {
+	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
+	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
+		background, 0, 0);
+	int width = 50;
+	int height = 10;
+	int topX = (Game::Inst()->ScreenWidth() - width) / 2;
+	int topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	int selected = -1;
+	TCOD_key_t key;
+	TCOD_mouse_t mouseStatus;
+	while (true) {
+		TCODConsole::root->clear();
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
+			TCODConsole::root, 0, 0);
+
+		TCODConsole::root->printFrame(topX, topY, width, height);
+		TCODConsole::root->setAlignment(TCOD_CENTER);
+		TCODConsole::root->print(topX+(width/2), topY+2, text.c_str());
+
+		if (selected == 0) {
+			TCODConsole::root->setForegroundColor(TCODColor::black);
+			TCODConsole::root->setBackgroundColor(TCODColor::white);
+		} else {
+			TCODConsole::root->setForegroundColor(TCODColor::white);
+			TCODConsole::root->setBackgroundColor(TCODColor::black);
+		}
+		TCODConsole::root->printFrame(topX+10, topY+4, 10, 3);
+		TCODConsole::root->print(topX+15, topY+5, leftButton.c_str());
+
+		if (selected == 1) {
+			TCODConsole::root->setForegroundColor(TCODColor::black);
+			TCODConsole::root->setBackgroundColor(TCODColor::white);
+		} else {
+			TCODConsole::root->setForegroundColor(TCODColor::white);
+			TCODConsole::root->setBackgroundColor(TCODColor::black);
+		}
+		TCODConsole::root->printFrame(topX+30, topY+4, 10, 3);
+		TCODConsole::root->print(topX+35, topY+5, rightButton.c_str());
+		TCODConsole::root->flush();
+
+		key = TCODConsole::checkForKeypress();
+		mouseStatus = TCODMouse::getStatus();
+
+		selected = -1;
+		if (mouseStatus.cy >= topY+4 && mouseStatus.cy <= topY+6) {
+			if (mouseStatus.cx >= topX+10 && mouseStatus.cx <= topX+20) {
+				selected = 0;
+			} else if (mouseStatus.cx >= topX+30 && mouseStatus.cx <= topX+40) {
+				selected = 1;
+			}
+		}
+		
+		if (mouseStatus.lbutton_pressed) {
+			switch (selected) {
+			case 0: return true;
+			case 1: return false;
+			default: break;
+			}
+		}
+
+		if (key.vk == TCODK_ESCAPE || key.c == 'n') return false;
+		else if (key.c == 'y') return true;
+
+	}
+	return false;
+}
+
 JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
 	scroll(0)
 {

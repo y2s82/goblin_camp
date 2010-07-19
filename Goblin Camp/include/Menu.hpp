@@ -66,6 +66,9 @@ public:
 	static Menu* OrdersMenu();
 	static Menu* furnitureMenu;
 	static Menu* FurnitureMenu();
+
+	static bool YesNoDialog(std::string text, std::string leftButton = "Yes",
+		std::string rightButton = "No");
 };
 
 class JobMenu : public Menu {
