@@ -23,6 +23,7 @@ cpp-pch stdafx.hpp
 
 exe goblin-camp
     : [ glob src/*.cpp ]
+      [ obj gc-rc : "Goblin Camp.rc" : <target-os>windows ]
       stdafx.hpp
       build/deps//gc-deps
 ;
