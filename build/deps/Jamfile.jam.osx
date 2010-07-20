@@ -15,4 +15,10 @@ lib boost_serialization : : <variant>release-pdb <name>boost_serialization-mt ;
 lib boost_thread : : <variant>debug <name>boost_thread-mt-gd ;
 lib boost_thread : : <variant>release-pdb <name>boost_thread-mt ;
 
-alias gc-deps : tcod boost_serialization boost_thread ;
+lib boost_filesystem : : <variant>debug <name>boost_filesystem-mt-gd ;
+lib boost_filesystem : : <variant>release-pdb <name>boost_filesystem-mt ;
+
+lib boost_system : : <variant>debug <name>boost_system-mt-gd ;
+lib boost_system : : <variant>release-pdb <name>boost_system-mt ;
+
+alias gc-deps : tcod boost_serialization boost_thread boost_filesystem boost_system ;

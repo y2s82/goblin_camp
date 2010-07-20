@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Job.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
+#include "Data.hpp"
 
 UI* UI::instance = 0;
 
@@ -170,7 +171,7 @@ void UI::HandleKeyboard() {
 			lbuttonPressed = true;
 		} else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
 		} else if (key.vk == TCODK_PRINTSCREEN) { 
-			TCODSystem::saveScreenshot(0);
+			Data::SaveScreenshot();
 		}
 	} else {
 		if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {

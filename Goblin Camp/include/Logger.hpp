@@ -19,10 +19,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Logger {
 private:
-	Logger();
+	Logger(const std::string&);
 	~Logger();
 	static Logger* instance;
 public:
+	static void Create(const std::string&);
 	static Logger* Inst();
 	std::ofstream output;
 	static void End();
