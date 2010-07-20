@@ -32,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Container.hpp"
 #include "StatusEffect.hpp"
 #include "Squad.hpp"
+#include "Attack.hpp"
 
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
@@ -115,7 +116,8 @@ private:
 	int _graphic;
 	bool taskBegun;
 	bool expert;
-	boost::weak_ptr<Item> carried;
+	boost::weak_ptr<Item> mainHand;
+	boost::weak_ptr<Item> offHand;
 	int thirst, hunger, weariness;
 	int thinkSpeed;
 	std::list<StatusEffect> statusEffects;
@@ -126,7 +128,7 @@ private:
 	void HandleWeariness();
 	int health;
 	boost::weak_ptr<Item> foundItem;
-	boost::shared_ptr<Container> bag;
+	boost::shared_ptr<Container> inventory;
 
 	std::list<boost::weak_ptr<NPC> >nearNpcs;
 	bool needsNutrition;
@@ -141,6 +143,8 @@ private:
 	boost::weak_ptr<NPC> aggressor;
 	bool dead;
 	boost::weak_ptr<Squad> squad;
+
+	std::list<Attack> attacks;
 
 	bool escaped;
 	bool Escaped();

@@ -223,7 +223,7 @@ int MainMenu() {
 		TCODConsole::root->flush();
 
 	}
-	Game::Inst()->Exit();
+	Game::Inst()->Exit(false);
 	return 0;
 }
 
