@@ -15,14 +15,19 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost\algorithm\string.hpp>
+
 #include "StatusEffect.hpp"
 #include "GCamp.hpp"
+
+//TODO: All this needs to be put into data files at some point
 
 StatusEffect::StatusEffect(StatusEffectType typeval) : 
 type(typeval)
 {
-	//Initialize stat changes to nothing, ie. 100%
+	//Initialize changes to nothing, ie. 100%
 	for (int i = 0; i < STAT_COUNT; ++i) { statChanges[i] = 1.0; }
+	for (int i = 0; i < RES_COUNT; ++i) { resistanceChanges[i] = 1.0; }
 
 	switch (type) {
 	case HUNGER:
@@ -52,8 +57,7 @@ type(typeval)
 		color = TCODColor::grey;
 		cooldown = UPDATES_PER_SECOND * 5;
 		statChanges[MOVESPEED] = 0.5;
-		statChanges[ATTACKSKILL] = 0.5;
-		statChanges[DEFENCESKILL] = 0.5;
+		statChanges[DODGE] = 0.5;
 		break;
 
 	case DROWSY:
@@ -62,9 +66,7 @@ type(typeval)
 		color = TCODColor::lightGrey;
 		cooldown = -1;
 		statChanges[MOVESPEED] = 0.8;
-		statChanges[ATTACKSKILL] = 0.8;
-		statChanges[ATTACKPOWER] = 0.8;
-		statChanges[DEFENCESKILL] = 0.8;
+		statChanges[DODGE] = 0.8;
 		break;
 
 	case SLEEPING:
@@ -73,6 +75,45 @@ type(typeval)
 		color = TCODColor::lightGrey;
 		cooldown = UPDATES_PER_SECOND;
 		break;
+
+	case POISON:
+		name = "Poisoned";
+		graphic = '#';
+		color = TCODColor::green;
+		cooldown = UPDATES_PER_SECOND * 6;
+		break;
 	}
 	cooldownDefault = cooldown;
+}
+
+StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
+	if (boost::iequals(str, "hunger")) {
+		return HUNGER;
+	} else if (boost::iequals(str, "thirst")) {
+		return THIRST;
+	} else if (boost::iequals(str, "panic")) {
+		return PANIC;
+	} else if (boost::iequals(str, "concussion")) {
+		return CONCUSSION;
+	} else if (boost::iequals(str, "drowsy")) {
+		return DROWSY;
+	} else if (boost::iequals(str, "sleeping")) {
+		return SLEEPING;
+	} else if (boost::iequals(str, "poison")) {
+		return POISON;
+	}
+	return HUNGER;
+}
+
+std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
+	switch (type) {
+	case HUNGER: return "hunger";
+	case THIRST: return "thirst";
+	case PANIC: return "panic";
+	case CONCUSSION: return "concussion";
+	case DROWSY: return "drowsy";
+	case SLEEPING: return "sleeping";
+	case POISON: return "poison";
+	default: return "";
+	}
 }

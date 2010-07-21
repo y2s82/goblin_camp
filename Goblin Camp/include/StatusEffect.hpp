@@ -22,11 +22,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 enum NPCStat {
 	MOVESPEED,
-	ATTACKSKILL,
-	ATTACKPOWER,
-	ATTACKSPEED,
-	DEFENCESKILL,
+	DODGE,
 	STAT_COUNT
+};
+
+enum Resistance {
+	PHYSICAL_RES,
+	MAGIC_RES,
+	POISON_RES,
+	COLD_RES,
+	FIRE_RES,
+	RES_COUNT
 };
 
 enum StatusEffectType {
@@ -35,7 +41,8 @@ enum StatusEffectType {
 	PANIC,
 	CONCUSSION,
 	DROWSY,
-	SLEEPING
+	SLEEPING,
+	POISON
 };
 
 struct StatusEffect {
@@ -48,6 +55,9 @@ struct StatusEffect {
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
+	static StatusEffectType StringToStatusEffectType(std::string);
+	static std::string StatusEffectTypeToString(StatusEffectType);
+
 	int graphic;
 	TCODColor color;
 	std::string name;
@@ -55,4 +65,5 @@ struct StatusEffect {
 	int cooldown;
 	int cooldownDefault;
 	double statChanges[STAT_COUNT]; //These are percentage values of the original value (100% = no change)
+	double resistanceChanges[RES_COUNT]; //These are percentage values of the original value (100% = no change)
 };

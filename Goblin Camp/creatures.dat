@@ -4,14 +4,20 @@ npc_type "orc" {
 	needsSleep
 	generateName
 	name="orc"
-	speed="1d5+15"
+	speed=15
 	color="0,0,255"
 	graphic='o'
 	health=200
 	AI="PlayerNPC"
-	attackSkill="1d10+5"
-	attackPower="5d5+5"
-	defenceSkill="1d5+5"
+	dodge=5
+	resistances {
+		physical=10
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d10+10"
+		cooldown=25
+	}
 }
 
 npc_type "goblin" {
@@ -19,52 +25,95 @@ npc_type "goblin" {
 	needsSleep
 	generateName
 	name="goblin"
-	speed="1d5+15"
+	speed=15
 	color="128,128,128"
 	graphic='g'
 	health=50
 	AI="PlayerNPC"
-	attackSkill="1d3"
-	attackPower="1d1"
-	defenceSkill="1d5"
+	dodge=10
+	resistances {
+		physical=3
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d3"
+		cooldown=25
+	}
 }
 
 npc_type "giant snail" {
 	name="Giant Snail"
-	speed="1d5"
+	speed=5
 	color="219,199,109"
 	graphic='b'
 	health=50
 	AI="PeacefulAnimal"
-	attackSkill="1d3"
-	attackPower="1d1"
-	defenceSkill="2d4"
+	dodge=0
+	resistances {
+		physical=20
+	}
 	spawnAsGroup="1d3"
+	attack "Slime" {
+		type="poison"
+		damage="1d2"
+		cooldown=75
+	}
 }
 
 npc_type "starving wolf" {
 	name="Starving Wolf"
 	plural="Starving Wolves"
-	speed="1d10+17"
+	speed=20
 	color="219,219,219"
 	graphic='w'
 	health=150
 	AI="HungryAnimal"
-	attackSkill="4d4"
-	attackPower="5d4"
-	defenceSkill="1d5+5"
+	dodge=10
+	resistances {
+		physical=5
+	}
 	spawnAsGroup="1d4+3"
+	attack "Bite" {
+		type="slashing"
+		damage="5d4"
+		cooldown=25
+	}
 }
 
 npc_type "rabid albino rat" {
 	name="Rabid Albino Rat"
-	speed="1d10+20"
+	speed=18
 	color="255,255,255"
 	graphic='r'
 	health=25
 	AI="HungryAnimal"
-	attackSkill="1d4+1"
-	attackPower="1d2+1"
-	defenceSkill="1d1+1"
+	dodge=15
+	resistances {
+		physical=3
+	}
 	spawnAsGroup="1d10+5"
+	attack "Bite" {
+		type="slashing"
+		damage="1d2+1"
+		cooldown=15
+	}
+}
+
+npc_type "poisonous snake" {
+	name="Poisonous Snake"
+	speed=10
+	color="0,0,250"
+	graphic='S'
+	health=25
+	AI="HostileAnimal"
+	dodge=7
+	resistances {
+		physical=7
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d2+2"
+		cooldown=50
+		statusEffects=["poison"]
+	}
 }

@@ -241,8 +241,13 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->needsSleep = NPC::Presets[type].needsSleep;
 	npc->health = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = DiceToInt(NPC::Presets[type].stats[i]);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + ((NPC::Presets[type].stats[i] * 0.1) * (rand() % 2) ? 1 : -1);
 	}
+	for (int i = 0; i < RES_COUNT; ++i) {
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + ((NPC::Presets[type].resistances[i] * 0.1) * (rand() % 2) ? 1 : -1);
+	}
+
+	npc->attacks = NPC::Presets[type].attacks;
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
@@ -630,12 +635,15 @@ void Game::Update() {
 	}
 
 	//Squads needen't update their member rosters ALL THE TIME
-	if (rand() % (UPDATES_PER_SECOND * 1) == 0) {
+	if (time % (UPDATES_PER_SECOND * 1) == 0) {
 		for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = squadList.begin(); squadi != squadList.end(); ++squadi) {
 			squadi->second->UpdateMembers();
 		}
 	}
-	StockManager::Inst()->Update();
+
+	if (time % (UPDATES_PER_SECOND * 1) == 0) StockManager::Inst()->Update();
+
+	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
 
 	events->Update();
 }
@@ -794,9 +802,11 @@ void Game::GenerateMap() {
 			peacefulAnimals.push_back(i);
 	}
 
-	for (int i = 0; i < 10; ++i) {
-		int type = rand() % peacefulAnimals.size();
-		Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
+	if (peacefulAnimals.size() > 0) {
+		for (int i = 0; i < 10; ++i) {
+			int type = rand() % peacefulAnimals.size();
+			Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
+		}
 	}
 }
 
