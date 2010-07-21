@@ -49,6 +49,9 @@ category_type "Door" {
 category_type "Bed" {
 }
 
+category_type "Weapon" {
+}
+
 /* Item types begin here */
 
 item_type "Wood log" {
@@ -167,4 +170,16 @@ item_type "Pie" {
 	color = "127,106,0"
 	components = ["Berry", "Berry", "Berry"]
 	nutrition = 12000
+}
+
+item_type "Wooden club" {
+	category = ["Weapon"]
+	graphic = 41
+	color = "127,106,0"
+	components = ["Plank"]
+	attack "Bash" {
+		type="blunt"
+		damage="1d10+10"
+		cooldown=25
+	}
 }

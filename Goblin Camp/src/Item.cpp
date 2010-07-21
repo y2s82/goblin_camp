@@ -28,6 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "Logger.hpp"
 #include "StockManager.hpp"
+#include "Attack.hpp"
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
@@ -60,6 +61,8 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	if (ownerFaction == 0) { //Player owned
 		StockManager::Inst()->UpdateQuantity(type, 1);
 	}
+
+	attack = Item::Presets[type].attack;
 }
 
 Item::~Item() {
@@ -155,6 +158,7 @@ class ItemListener : public ITCODParserListener {
 	std::vector<std::string> presetGrowth;
 	std::vector<std::vector<std::string> > presetFruits;
 	std::vector<std::vector<std::string> > presetDecay;
+	std::vector<std::string> presetProjectile;
 
 public:
 	ItemListener() : ITCODParserListener(),
@@ -182,6 +186,8 @@ public:
 				else
 					Item::Presets[i].decayList.push_back(Item::StringToItemType(presetDecay[i][decay]));
 			}
+
+			if (presetProjectile[i] != "") Item::Presets[i].attack.Projectile(Item::StringToItemType(presetProjectile[i]));
 		}
 	}
 
@@ -209,7 +215,9 @@ private:
 			std::string upperName = name;
 			boost::to_upper(upperName);
 			Item::itemTypeNames.insert(std::pair<std::string, ItemType>(upperName, Game::ItemTypeCount-1));
-		} 
+			presetProjectile.push_back("");
+		} else if (boost::iequals(str->getName(), "attack")) {
+		}
 
 		return true;
 	}
@@ -262,7 +270,23 @@ private:
 			}
 		} else if (boost::iequals(name, "decaySpeed")) {
 			Item::Presets.back().decaySpeed = value.i;
-		}		
+		} else if (boost::iequals(name,"type")) {
+			Item::Presets.back().attack.Type(Attack::StringToDamageType(value.s));
+		} else if (boost::iequals(name,"damage")) {
+			Item::Presets.back().attack.Amount(value.dice);
+		} else if (boost::iequals(name,"cooldown")) {
+			Item::Presets.back().attack.CooldownMax(value.i);
+		} else if (boost::iequals(name,"statusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"effectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().attack.StatusEffects()->at(i).second = (int)TCOD_list_get(value.list,i);
+			}
+		} else if (boost::iequals(name,"projectile")) {
+			presetProjectile.back() = value.s;
+		}
 		return true;
 	}
 
@@ -295,6 +319,19 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("fitsin", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addListProperty("decay", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("decaySpeed", TCOD_TYPE_INT, false);
+
+	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
+	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
+	attackTypeStruct->addValueList("type", damageTypes, true);
+	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
+	attackTypeStruct->addProperty("cooldown", TCOD_TYPE_INT, false);
+	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
+	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);
+	attackTypeStruct->addFlag("ranged");
+	attackTypeStruct->addProperty("projectile", TCOD_TYPE_STRING, false);
+
+	itemTypeStruct->addStructure(attackTypeStruct);
+
 	ItemListener* itemListener = new ItemListener();
 	parser.run(filename.c_str(), itemListener);
 	itemListener->translateNames();
@@ -328,7 +365,8 @@ graphic('?'),
 	containIn(-1),
 	decays(false),
 	decaySpeed(0),
-	decayList(std::vector<ItemType>())
+	decayList(std::vector<ItemType>()),
+	attack(Attack())
 {}
 
 OrganicItem::OrganicItem(Coordinate pos, ItemType typeVal) : Item(pos, typeVal),
