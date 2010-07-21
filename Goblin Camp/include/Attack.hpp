@@ -53,8 +53,10 @@ public:
 	void Type(DamageType);
 	TCOD_dice_t Amount();
 	void Amount(TCOD_dice_t);
+	void AddDamage(TCOD_dice_t);
 	int Cooldown();
 	void CooldownMax(int);
+	int CooldownMax();
 	void Update();
 	void ResetCooldown();
 	std::vector<std::pair<StatusEffectType, int> >* StatusEffects();

@@ -119,6 +119,8 @@ boost::weak_ptr<Item> Item::ContainedIn() {return container;}
 
 int Item::Graphic() {return graphic;}
 
+Attack Item::GetAttack() const {return attack;}
+
 std::string Item::ItemTypeToString(ItemType type) {
 	return Item::Presets[type].name;
 }
