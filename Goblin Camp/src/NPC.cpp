@@ -1028,7 +1028,9 @@ class NPCListener : public ITCODParserListener {
 			std::cout<<name<<"\n";
 #endif
 		} else if (boost::iequals(str->getName(), "resistances")) {
+#ifdef DEBUG
 			std::cout<<"\n";
+#endif
 		}
 		return true;
 	}
