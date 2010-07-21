@@ -37,7 +37,16 @@ namespace {
 			NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL,
 			SHGFP_TYPE_CURRENT, TEXT("My Games\\Goblin Camp"), dumpFilename
 		);
-		PathAppend(dumpFilename, TEXT("crash.dmp"));
+		
+		char date[20]; // DD-MM-YYYY-HH-MM-SS
+		struct tm *timeStruct;
+		__int64 timestamp;
+		
+		_time64(&timestamp);
+		timeStruct = _gmtime64(&timestamp);
+		
+		strftime(date, 20, "%d-%m-%Y-%H-%M-%S", timeStruct);
+		_snprintf(dumpFilename, MAX_PATH, "%s\\crash-%s.dmp", dumpFilename, date);
 		
 		HANDLE dump = CreateFile(
 			dumpFilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
