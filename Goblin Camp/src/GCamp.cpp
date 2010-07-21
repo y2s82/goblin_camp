@@ -41,24 +41,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	define GC_VERSION "0.11"
 #endif
 
-#ifdef WINDOWS
-// Win32CrashHandler.cpp
-void InstallExceptionHandler();
-#endif
-
 int main() {
-#	ifdef WINDOWS
-	InstallExceptionHandler();
-#	endif
-	
 	Data::Init();
 	Game::Inst()->Init();
 	return MainMenu();
 }
 
 #ifdef WINDOWS
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
-{ return main(); }
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int) {
+	// Win32CrashHandler.cpp
+	void InstallExceptionHandler();
+	InstallExceptionHandler();
+	return main();
+}
 #endif
 
 void MainLoop() {
