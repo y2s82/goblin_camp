@@ -648,12 +648,15 @@ void Game::Update() {
 	}
 
 	//Squads needen't update their member rosters ALL THE TIME
-	if (rand() % (UPDATES_PER_SECOND * 1) == 0) {
+	if (time % (UPDATES_PER_SECOND * 1) == 0) {
 		for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = squadList.begin(); squadi != squadList.end(); ++squadi) {
 			squadi->second->UpdateMembers();
 		}
 	}
-	StockManager::Inst()->Update();
+
+	if (time % (UPDATES_PER_SECOND * 1) == 0) StockManager::Inst()->Update();
+
+	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
 
 	events->Update();
 }
