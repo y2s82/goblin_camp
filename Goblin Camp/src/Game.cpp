@@ -240,8 +240,13 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->needsSleep = NPC::Presets[type].needsSleep;
 	npc->health = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = DiceToInt(NPC::Presets[type].stats[i]);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + ((NPC::Presets[type].stats[i] * 0.1) * (rand() % 2) ? 1 : -1);
 	}
+	for (int i = 0; i < RES_COUNT; ++i) {
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + ((NPC::Presets[type].resistances[i] * 0.1) * (rand() % 2) ? 1 : -1);
+	}
+
+	npc->attacks = NPC::Presets[type].attacks;
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
@@ -807,9 +812,11 @@ void Game::GenerateMap() {
 			peacefulAnimals.push_back(i);
 	}
 
-	for (int i = 0; i < 10; ++i) {
-		int type = rand() % peacefulAnimals.size();
-		Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
+	if (peacefulAnimals.size() > 0) {
+		for (int i = 0; i < 10; ++i) {
+			int type = rand() % peacefulAnimals.size();
+			Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
+		}
 	}
 }
 

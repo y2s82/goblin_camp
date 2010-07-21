@@ -96,6 +96,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), 0);
 
 	for (int i = 0; i < STAT_COUNT; ++i) {baseStats[i] = 0; effectiveStats[i] = 0;}
+	for (int i = 0; i < RES_COUNT; ++i) {baseResistances[i] = 0; effectiveResistances[i] = 0;}
 }
 
 NPC::~NPC() {
@@ -248,11 +249,17 @@ void NPC::Update() {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		effectiveStats[i] = baseStats[i];
 	}
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		effectiveResistances[i] = baseResistances[i];
+	}
 	++statusGraphicCounter;
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		//Apply effects to stats
 		for (int i = 0; i < STAT_COUNT; ++i) {
 			effectiveStats[i] = (int)(baseStats[i] * statusEffectI->statChanges[i]);
+		}
+		for (int i = 0; i < STAT_COUNT; ++i) {
+			effectiveResistances[i] = (int)(baseResistances[i] * statusEffectI->resistanceChanges[i]);
 		}
 		//Remove the statuseffect if it's cooldown has run out
 		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
@@ -295,6 +302,10 @@ void NPC::Update() {
 		else RemoveEffect(DROWSY);
 
 		if (weariness > WEARY_THRESHOLD) HandleWeariness();
+	}
+
+	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+		attacki->Update();
 	}
 }
 
@@ -924,23 +935,63 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 	if (target.lock()) {
 		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
 			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(target.lock()));
-			npc->aggressor = boost::static_pointer_cast<NPC>(shared_from_this());
-			int dif = ((rand() % 10) + effectiveStats[ATTACKSKILL]) - ((rand() % 10) + npc->effectiveStats[DEFENCESKILL]);
+
+			for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+				if (attacki->Cooldown() <= 0) {
+					attacki->ResetCooldown();
+					//First check if the target dodges the attack
+					if (rand() % 100 < npc->effectiveStats[DODGE]) {
 #ifdef DEBUG
-			std::cout<<boost::format("%s hits %s for %d dif\n") % name % npc->name % dif;
-			std::cout<<boost::format("Attack skill %d - Defence skill %d\n") % effectiveStats[ATTACKSKILL] % npc->effectiveStats[DEFENCESKILL];
+						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
 #endif
-			if (dif > 0) {
-				dif += effectiveStats[ATTACKPOWER];
-				npc->health -= dif;
-				if (dif > 10 && rand() % 5 == 0) npc->AddEffect(CONCUSSION);
-				if (npc->health <= 0) npc->Kill();
-				Game::Inst()->CreateBlood(Coordinate(npc->Position().X() + ((rand() % 3) - 1),
-					npc->Position().Y() + ((rand() % 3) - 1)));
-			} else {
+						continue;
+					}
+
+					Attack attack = *attacki;
+					if (attack.Type() == DAMAGE_WIELDED) {
+						GetMainHandAttack(attack);
+					}
+
+					Resistance res;
+					switch (attacki->Type()) {
+					case DAMAGE_SLASH:
+					case DAMAGE_PIERCE:
+					case DAMAGE_BLUNT: res = PHYSICAL_RES; break;
+
+					case DAMAGE_MAGIC: res = MAGIC_RES; break;
+
+					case DAMAGE_FIRE: res = FIRE_RES; break;
+
+					case DAMAGE_COLD: res = COLD_RES; break;
+
+					case DAMAGE_POISON: res = POISON_RES; break;
+
+					default: res = PHYSICAL_RES; break;
+					}
+						
+					double resistance = (100.0 - (float)npc->effectiveResistances[res]) / 100.0;
+					int damage = (int)(Game::DiceToInt(attack.Amount()) * resistance);
+					npc->health -= damage;
+
 #ifdef DEBUG
-				std::cout<<"Hit missed\n";
+					std::cout<<"Resistance: "<<resistance<<"\n";
+					std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
 #endif
+
+					for (unsigned int effecti = 0; effecti < attack.StatusEffects()->size(); ++effecti) {
+						if (rand() % 100 < attack.StatusEffects()->at(effecti).second) {
+							npc->AddEffect(attack.StatusEffects()->at(effecti).first);
+						}
+					}
+
+					if (npc->health <= 0) npc->Kill();
+
+					if (damage > 0) {
+						Game::Inst()->CreateBlood(Coordinate(npc->Position().X() + ((rand() % 3) - 1), 
+							npc->Position().Y() + ((rand() % 3) - 1)));
+						npc->aggressor = boost::static_pointer_cast<NPC>(shared_from_this());
+					}
+				}
 			}
 		}
 	}
@@ -963,10 +1014,22 @@ bool NPC::Escaped() { return escaped; }
 class NPCListener : public ITCODParserListener {
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+		std::cout<<boost::format("new %s structure: ") % str->getName();
 #endif
-		NPC::Presets.push_back(NPCPreset(name));
-		NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
+		if (boost::iequals(str->getName(), "npc_type")) {
+			NPC::Presets.push_back(NPCPreset(name));
+			NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
+#ifdef DEBUG
+			std::cout<<name<<"\n";
+#endif
+		} else if (boost::iequals(str->getName(), "attack")) {
+			NPC::Presets.back().attacks.push_back(Attack());
+#ifdef DEBUG
+			std::cout<<name<<"\n";
+#endif
+		} else if (boost::iequals(str->getName(), "resistances")) {
+			std::cout<<"\n";
+		}
 		return true;
 	}
 	bool parserFlag(TCODParser *parser,const char *name) {
@@ -977,6 +1040,7 @@ class NPCListener : public ITCODParserListener {
 		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
 		else if (boost::iequals(name,"needsSleep")) { NPC::Presets.back().needsSleep = true; }
 		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
+		else if (boost::iequals(name,"ranged")) { NPC::Presets.back().attacks.back().Ranged(true); }
 		return true;
 	}
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
@@ -985,32 +1049,56 @@ class NPCListener : public ITCODParserListener {
 #endif
 		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
 		else if (boost::iequals(name,"plural")) { NPC::Presets.back().plural = value.s; }
-		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.dice; }
+		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.i; }
 		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
 		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
 		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
 		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
-		else if (boost::iequals(name,"attackSkill")) { NPC::Presets.back().stats[ATTACKSKILL] = value.dice; }
-		else if (boost::iequals(name,"attackPower")) { NPC::Presets.back().stats[ATTACKPOWER] = value.dice; }
-		else if (boost::iequals(name,"defenceSkill")) { NPC::Presets.back().stats[DEFENCESKILL] = value.dice; }
+		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
 		else if (boost::iequals(name,"spawnAsGroup")) { 
 			NPC::Presets.back().spawnRandomly = true;
 			NPC::Presets.back().spawnAsGroup = true;
 			NPC::Presets.back().group = value.dice;
+		} else if (boost::iequals(name,"type")) {
+			NPC::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
+		} else if (boost::iequals(name,"damage")) {
+			NPC::Presets.back().attacks.back().Amount(value.dice);
+		} else if (boost::iequals(name,"cooldown")) {
+			NPC::Presets.back().attacks.back().CooldownMax(value.i);
+		} else if (boost::iequals(name,"statusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				NPC::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"effectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				NPC::Presets.back().attacks.back().StatusEffects()->at(i).second = (int)TCOD_list_get(value.list,i);
+			}
+		} else if (boost::iequals(name,"projectile")) {
+			NPC::Presets.back().attacks.back().Projectile(Item::StringToItemType(value.s));
+		} else if (boost::iequals(name,"physical")) {
+			NPC::Presets.back().resistances[PHYSICAL_RES] = value.i;
+		} else if (boost::iequals(name,"magic")) {
+			NPC::Presets.back().resistances[MAGIC_RES] = value.i;
+		} else if (boost::iequals(name,"cold")) {
+			NPC::Presets.back().resistances[COLD_RES] = value.i;
+		} else if (boost::iequals(name,"fire")) {
+			NPC::Presets.back().resistances[FIRE_RES] = value.i;
+		} else if (boost::iequals(name,"poison")) {
+			NPC::Presets.back().resistances[POISON_RES] = value.i;
 		}
 
 		return true;
 	}
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
+		std::cout<<boost::format("end of %s\n") % str->getName();
 #endif
 		if (NPC::Presets.back().plural == "") NPC::Presets.back().plural = NPC::Presets.back().name + "s";
 		return true;
 	}
 	void error(const char *msg) {
 		Logger::Inst()->output<<"NPCListener: "<<msg<<"\n";
-		Game::Inst()->Exit();
+		Game::Inst()->Exit(false);
 	}
 };
 
@@ -1019,7 +1107,7 @@ void NPC::LoadPresets(std::string filename) {
 	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
 	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
 	npcTypeStruct->addProperty("plural", TCOD_TYPE_STRING, false);
-	npcTypeStruct->addProperty("speed", TCOD_TYPE_DICE, true);
+	npcTypeStruct->addProperty("speed", TCOD_TYPE_INT, true);
 	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
 	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
 	npcTypeStruct->addFlag("expert");
@@ -1029,10 +1117,29 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addFlag("needsNutrition");
 	npcTypeStruct->addFlag("needsSleep");
 	npcTypeStruct->addFlag("generateName");
-	npcTypeStruct->addProperty("attackSkill", TCOD_TYPE_DICE, true);
-	npcTypeStruct->addProperty("attackPower", TCOD_TYPE_DICE, true);
-	npcTypeStruct->addProperty("defenceSkill", TCOD_TYPE_DICE, true);
+	npcTypeStruct->addProperty("dodge", TCOD_TYPE_INT, true);
 	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
+	
+	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
+	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
+	attackTypeStruct->addValueList("type", damageTypes, true);
+	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
+	attackTypeStruct->addProperty("cooldown", TCOD_TYPE_INT, false);
+	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
+	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);
+	attackTypeStruct->addFlag("ranged");
+	attackTypeStruct->addProperty("projectile", TCOD_TYPE_STRING, false);
+
+	TCODParserStruct *resistancesStruct = parser.newStructure("resistances");
+	resistancesStruct->addProperty("physical", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("magic", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
+
+	npcTypeStruct->addStructure(attackTypeStruct);
+	npcTypeStruct->addStructure(resistancesStruct);
+
 	parser.run(filename.c_str(), new NPCListener());
 }
 
@@ -1063,6 +1170,10 @@ void NPC::InitializeAIFunctions() {
 	}
 }
 
+void NPC::GetMainHandAttack(Attack &attack) {
+	attack.Type(DAMAGE_BLUNT);
+}
+
 NPCPreset::NPCPreset(std::string typeNameVal) : 
 typeName(typeNameVal),
 	name("AA Club"),
@@ -1077,14 +1188,13 @@ typeName(typeNameVal),
 	generateName(false),
 	spawnRandomly(false),
 	spawnAsGroup(false),
-	group(TCOD_dice_t())
+	group(TCOD_dice_t()),
+	attacks(std::list<Attack>())
 {
-	TCOD_dice_t defaultDice;
-	defaultDice.addsub = 1;
-	defaultDice.multiplier = 1;
-	defaultDice.nb_dices = 1;
-	defaultDice.nb_faces = 1;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		stats[i] = defaultDice;
+		stats[i] = 1;
+	}
+	for (int i = 0; i < RES_COUNT; ++i) {
+		resistances[i] = 0;
 	}
 }
