@@ -78,10 +78,12 @@ struct NPCPreset {
 	bool needsNutrition;
 	bool needsSleep;
 	bool generateName;
-	TCOD_dice_t stats[STAT_COUNT];
+	int stats[STAT_COUNT];
+	int resistances[RES_COUNT];
 	bool spawnRandomly;
 	bool spawnAsGroup;
 	TCOD_dice_t group;
+	std::list<Attack> attacks;
 };
 
 class NPC : public Entity {
@@ -139,6 +141,8 @@ private:
 
 	int baseStats[STAT_COUNT];
 	int effectiveStats[STAT_COUNT];
+	int baseResistances[RES_COUNT];
+	int effectiveResistances[RES_COUNT];
 	bool aggressive;
 	boost::weak_ptr<NPC> aggressor;
 	bool dead;
@@ -190,6 +194,7 @@ public:
 	void Hit(boost::weak_ptr<Entity>);
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();
+	void GetMainHandAttack(Attack&);
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;

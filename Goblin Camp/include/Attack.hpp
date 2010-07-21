@@ -16,6 +16,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <vector>
+#include <string>
+
+#include <libtcod.hpp>
 
 #include "Item.hpp"
 #include "StatusEffect.hpp"
@@ -28,29 +31,34 @@ enum DamageType {
 	DAMAGE_FIRE,
 	DAMAGE_COLD,
 	DAMAGE_POISON,
+	DAMAGE_COUNT, //Nothing can deal "wielded" damage
 	DAMAGE_WIELDED
 };
 
 class Attack {
 private:
 	DamageType damageType;
-	int damageAmount;
+	TCOD_dice_t damageAmount;
 	int cooldown;
 	int cooldownMax;
-	std::vector<std::pair<StatusEffect, int> > statusEffects;
+	std::vector<std::pair<StatusEffectType, int> > statusEffects;
 	bool ranged;
 	ItemType projectile;
 public:
 	Attack();
+
+	static DamageType StringToDamageType(std::string);
+	static std::string DamageTypeToString(DamageType);
+
 	DamageType Type();
 	void Type(DamageType);
-	int Amount();
-	void Amount(int);
+	TCOD_dice_t Amount();
+	void Amount(TCOD_dice_t);
 	int Cooldown();
 	void CooldownMax(int);
 	void Update();
 	void ResetCooldown();
-	std::vector<std::pair<StatusEffect, int> >* StatusEffects();
+	std::vector<std::pair<StatusEffectType, int> >* StatusEffects();
 	bool Ranged();
 	void Ranged(bool);
 	ItemType Projectile();

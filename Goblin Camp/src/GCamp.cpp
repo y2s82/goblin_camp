@@ -77,7 +77,6 @@ void MainLoop() {
 			if (!game->Paused()) {
 				game->Update();
 				Announce::Inst()->Update();
-				JobManager::Inst()->Update();
 			}
 
 			game->buffer->flush();

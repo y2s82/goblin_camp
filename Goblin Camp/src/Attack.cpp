@@ -15,24 +15,30 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #include "Attack.hpp"
 #include "GCamp.hpp"
 
 Attack::Attack() : damageType(DAMAGE_BLUNT),
-	damageAmount(1),
+	damageAmount(TCOD_dice_t()),
 	cooldown(0),
 	cooldownMax(UPDATES_PER_SECOND),
-	statusEffects(std::vector<std::pair<StatusEffect, int> >()),
+	statusEffects(std::vector<std::pair<StatusEffectType, int> >()),
 	ranged(false),
 	projectile(0)
 {
+	damageAmount.addsub = 1;
+	damageAmount.multiplier = 1;
+	damageAmount.nb_dices = 1;
+	damageAmount.nb_faces = 1;
 }
 
 DamageType Attack::Type() {return damageType;}
 void Attack::Type(DamageType value) {damageType = value;}
 
-int Attack::Amount() {return damageAmount;}
-void Attack::Amount(int value) {damageAmount = value;}
+TCOD_dice_t Attack::Amount() {return damageAmount;}
+void Attack::Amount(TCOD_dice_t value) {damageAmount = value;}
 
 int Attack::Cooldown() {return cooldown;}
 
@@ -44,9 +50,52 @@ void Attack::Update() {
 
 void Attack::ResetCooldown() {cooldown = cooldownMax;}
 
-std::vector<std::pair<StatusEffect, int> >* Attack::StatusEffects() {return &statusEffects;}
+std::vector<std::pair<StatusEffectType, int> >* Attack::StatusEffects() {return &statusEffects;}
 
 bool Attack::Ranged() {return ranged;}
 void Attack::Ranged(bool value) {ranged = value;}
 
 ItemType Attack::Projectile() {return projectile;}
+void Attack::Projectile(ItemType value) {projectile = value;}
+
+DamageType Attack::StringToDamageType(std::string type) {
+	if (boost::iequals(type, "slashing")) {
+		return DAMAGE_SLASH;
+	} else if (boost::iequals(type, "piercing")) {
+		return DAMAGE_PIERCE;
+	} else if (boost::iequals(type, "blunt")) {
+		return DAMAGE_BLUNT;
+	} else if (boost::iequals(type, "magic")) {
+		return DAMAGE_MAGIC;
+	} else if (boost::iequals(type, "fire")) {
+		return DAMAGE_FIRE;
+	} else if (boost::iequals(type, "cold")) {
+		return DAMAGE_COLD;
+	} else if (boost::iequals(type, "poison")) {
+		return DAMAGE_POISON;
+	} else if (boost::iequals(type, "wielded")) {
+		return DAMAGE_WIELDED;
+	}
+	return DAMAGE_SLASH;
+}
+
+std::string Attack::DamageTypeToString(DamageType type) {
+	if (type == DAMAGE_SLASH) {
+		return "slashing";
+	} else if (type == DAMAGE_PIERCE) {
+		return "piercing";
+	} else if (type == DAMAGE_BLUNT) {
+		return "blunt";
+	} else if (type == DAMAGE_MAGIC) {
+		return "magic";
+	} else if (type == DAMAGE_FIRE) {
+		return "fire";
+	} else if (type == DAMAGE_COLD) {
+		return "cold";
+	} else if (type == DAMAGE_POISON) {
+		return "poison";
+	} else if (type == DAMAGE_WIELDED) {
+		return "wielded";
+	}
+	return "";
+}
