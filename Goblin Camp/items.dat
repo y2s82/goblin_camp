@@ -181,5 +181,7 @@ item_type "Wooden club" {
 		type="blunt"
 		damage="1d10+10"
 		cooldown=25
+		statusEffects=["Concussion"]
+		effectChances=[     20     ]
 	}
 }

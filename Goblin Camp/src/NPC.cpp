@@ -1174,6 +1174,17 @@ void NPC::InitializeAIFunctions() {
 
 void NPC::GetMainHandAttack(Attack &attack) {
 	attack.Type(DAMAGE_BLUNT);
+	if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
+		Attack wAttack = weapon->GetAttack();
+		attack.Type(wAttack.Type());
+		attack.AddDamage(wAttack.Amount());
+		attack.Ranged(wAttack.Ranged());
+		attack.Projectile(wAttack.Projectile());
+		for (std::vector<std::pair<StatusEffectType, int> >::iterator effecti = wAttack.StatusEffects()->begin();
+			effecti != wAttack.StatusEffects()->end(); ++effecti) {
+				attack.StatusEffects()->push_back(*effecti);
+		}
+	}
 }
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 
