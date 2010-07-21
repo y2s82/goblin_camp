@@ -54,8 +54,8 @@ std::vector<std::pair<StatusEffectType, int> >* Attack::StatusEffects() {return 
 bool Attack::Ranged() {return ranged;}
 void Attack::Ranged(bool value) {ranged = value;}
 
-ItemType Attack::Projectile() {return projectile;}
-void Attack::Projectile(ItemType value) {projectile = value;}
+int Attack::Projectile() {return projectile;}
+void Attack::Projectile(int value) {projectile = value;}
 
 DamageType Attack::StringToDamageType(std::string type) {
 	if (boost::iequals(type, "slashing")) {

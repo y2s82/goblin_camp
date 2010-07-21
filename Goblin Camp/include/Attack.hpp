@@ -20,7 +20,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 
-#include "Item.hpp"
 #include "StatusEffect.hpp"
 
 enum DamageType {
@@ -43,7 +42,7 @@ private:
 	int cooldownMax;
 	std::vector<std::pair<StatusEffectType, int> > statusEffects;
 	bool ranged;
-	ItemType projectile;
+	int projectile;
 public:
 	Attack();
 
@@ -61,6 +60,6 @@ public:
 	std::vector<std::pair<StatusEffectType, int> >* StatusEffects();
 	bool Ranged();
 	void Ranged(bool);
-	ItemType Projectile();
-	void Projectile(ItemType);
+	int Projectile();
+	void Projectile(int);
 };
