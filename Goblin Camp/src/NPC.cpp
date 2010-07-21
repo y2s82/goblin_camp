@@ -113,7 +113,6 @@ void NPC::Position(Coordinate pos, bool firstTime) {
 			Map::Inst()->MoveFrom(x, y, uid);
 			x = pos.X();
 			y = pos.Y();
-			//Map::Inst()->MoveTo(x,y,uid); //This appears to be working correctly now
 		}
 	} else {
 		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
@@ -141,8 +140,6 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		}
 	} else {
 		if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
-		/*        else if (msg.size() > 0 && faction == 0) 
-		Announce::Inst()->AddMsg((boost::format("%s cancelled: %s") % Job::ActionToString(currentTask()->action) % msg).str());*/
 		jobs.pop_front();
 		taskIndex = 0;
 		DropCarriedItem();
@@ -385,12 +382,8 @@ MOVENEARend:
 					taskBegun = true;
 					lastMoveResult = TASKCONTINUE;
 				}
-				//lastMoveResult = Move();
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
 				else if (lastMoveResult == PATHEMPTY) {
-					/*					    if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
-					TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
-					} */
 					TaskFinished(TASKFAILFATAL);
 				}
 				break;
