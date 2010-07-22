@@ -774,10 +774,30 @@ void FarmPlot::load(Archive & ar, const unsigned int version) {
 
 template<class Archive>
 void Attack::save(Archive & ar, const unsigned int version) const {
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & ranged;
+	ar & projectile;
 }
 
-	template<class Archive>
+template<class Archive>
 void Attack::load(Archive & ar, const unsigned int version) {
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & ranged;
+	ar & projectile;
 }
 
 
