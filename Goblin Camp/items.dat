@@ -5,21 +5,29 @@ category_type "Wood" {
 }
 
 category_type "Plank" {
+	parent="Wood"
 }
 
 category_type "Stone" {
 }
 
 category_type "Brick" {
+	parent="Stone"
+}
+
+category_type "Sharpened stone" {
+	parent="Stone"
 }
 
 category_type "Raw Food" {
+	parent="Food"
 }
 
 category_type "Food" {
 }
 
 category_type "Berry" {
+	parent="Food"
 }
 
 category_type "Drink" {
@@ -35,21 +43,40 @@ category_type "Container" {
 }
 
 category_type "Liquid Container" {
+	parent="Container"
 }
 
 category_type "Seed Container" {
+	parent="Container"
 }
 
 category_type "Garbage" {
 }
 
+category_type "Furniture" {
+}
+
 category_type "Door" {
+	parent="Furniture"
 }
 
 category_type "Bed" {
+	parent="Furniture"
 }
 
 category_type "Weapon" {
+}
+
+category_type "Blunt weapon" {
+	parent="Weapon"
+}
+
+category_type "Slashing weapon" {
+	parent="Weapon"
+}
+
+category_type "Piercing weapon" {
+	parent="Weapon"
 }
 
 /* Item types begin here */
@@ -71,7 +98,7 @@ item_type "Wood plank" {
 }
 
 item_type "Wooden door" {
-	category = ["Door"]
+	category = ["Door", "Furniture"]
 	graphic = 197
 	color = "255,73,7"
 	components = ["Plank", "Plank"]
@@ -94,7 +121,7 @@ item_type "Crate" {
 }
 
 item_type "Wooden bed" {
-	category = ["Bed"]
+	category = ["Bed", "Furniture"]
 	graphic = 22
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
@@ -173,7 +200,7 @@ item_type "Pie" {
 }
 
 item_type "Wooden club" {
-	category = ["Weapon"]
+	category = ["Weapon", "Blunt weapon"]
 	graphic = 41
 	color = "127,106,0"
 	components = ["Plank"]
@@ -183,5 +210,33 @@ item_type "Wooden club" {
 		cooldown=25
 		statusEffects=["Concussion"]
 		effectChances=[     20     ]
+	}
+}
+
+item_type "Stone axe" {
+	category = ["Weapon", "Slashing weapon"]
+	graphic = 41
+	color = "192,192,192"
+	components = ["Plank", "Sharpened stone"]
+	attack "Hack" {
+		type="slashing"
+		damage="1d15+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
+	}
+}
+
+item_type "Stone spear" {
+	category = ["Weapon", "Piercing weapon"]
+	graphic = 41
+	color = "192,192,192"
+	components = ["Plank", "Sharpened stone"]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d15+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    10    ]
 	}
 }
