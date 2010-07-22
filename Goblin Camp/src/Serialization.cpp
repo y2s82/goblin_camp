@@ -55,6 +55,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Container.hpp"
 #include "Blood.hpp"
 #include "Entity.hpp"
+#include "Attack.hpp"
 
 template<class Archive>
 void Coordinate::save(Archive & ar, const unsigned int version) const {
@@ -144,6 +145,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & _graphic;
 	ar & taskBegun;
 	ar & expert;
+	ar & carried;
 	ar & mainHand;
 	ar & offHand;
 	ar & thirst;
@@ -159,6 +161,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & aggressor;
 	ar & dead;
 	ar & squad;
+	ar & attacks;
 	ar & escaped;
 }
 
@@ -186,6 +189,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & _graphic;
 	ar & taskBegun;
 	ar & expert;
+	ar & carried;
 	ar & mainHand;
 	ar & offHand;
 	ar & thirst;
@@ -201,6 +205,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & aggressor;
 	ar & dead;
 	ar & squad;
+	ar & attacks;
 	ar & escaped;
 	InitializeAIFunctions();
 }
@@ -766,5 +771,14 @@ void FarmPlot::load(Archive & ar, const unsigned int version) {
 	ar & allowedSeeds;
 	ar & growth;
 }
+
+template<class Archive>
+void Attack::save(Archive & ar, const unsigned int version) const {
+}
+
+	template<class Archive>
+void Attack::load(Archive & ar, const unsigned int version) {
+}
+
 
 #pragma warning(pop)
