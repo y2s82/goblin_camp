@@ -735,6 +735,8 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 		console->printFrame(x+12, y+2, 8, 3, false);
 		console->print(x+16, y+3, "Escort");
 		console->setBackgroundColor(TCODColor::black);
+
+		console->printFrame(x, y+7, 22, 5, true, TCOD_BKGND_SET, "Weapons");
 	}
 
 	console->setAlignment(TCOD_LEFT);
