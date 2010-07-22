@@ -21,4 +21,8 @@ lib boost_filesystem : : <variant>release-pdb <name>boost_filesystem-mt ;
 lib boost_system : : <variant>debug <name>boost_system-mt-gd ;
 lib boost_system : : <variant>release-pdb <name>boost_system-mt ;
 
-alias gc-deps : tcod boost_serialization boost_thread boost_filesystem boost_system ;
+# OSX frameworks
+import darwin ;
+alias CoreFoundation : : : : <framework>CoreFoundation ;
+
+alias gc-deps : tcod boost_serialization boost_thread boost_filesystem boost_system CoreFoundation ;
