@@ -59,7 +59,8 @@ enum Action {
 	KILL,
 	FLEEMAP,
 	SLEEP,
-	DISMANTLE
+	DISMANTLE,
+	WIELD
 };
 
 enum TaskResult {
