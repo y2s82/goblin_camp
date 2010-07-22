@@ -161,6 +161,7 @@ class ItemListener : public ITCODParserListener {
 	std::vector<std::vector<std::string> > presetFruits;
 	std::vector<std::vector<std::string> > presetDecay;
 	std::vector<std::string> presetProjectile;
+	std::vector<std::string> presetCategoryParent;
 
 public:
 	ItemListener() : ITCODParserListener(),
@@ -168,6 +169,12 @@ public:
 	}
 
 	void translateNames() {
+		for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+			if (presetCategoryParent[i] != "") {
+				Item::Categories[i].parent = &Item::Categories[Item::StringToItemCategory(presetCategoryParent[i])];
+			}
+		}
+
 		for (unsigned int i = 0; i < Item::Presets.size(); ++i) {
 #ifdef DEBUG
 			if (presetGrowth[i] != "") {
@@ -206,6 +213,7 @@ private:
 			std::string upperName = name;
 			boost::to_upper(upperName);
 			Item::itemCategoryNames.insert(std::pair<std::string, ItemCategory>(upperName, Game::ItemCatCount-1));
+			presetCategoryParent.push_back("");
 		} else if (boost::iequals(str->getName(), "item_type")) {
 			mode = ITEMMODE;
 			Item::Presets.push_back(ItemPreset());
@@ -288,6 +296,8 @@ private:
 			}
 		} else if (boost::iequals(name,"projectile")) {
 			presetProjectile.back() = value.s;
+		} else if (boost::iequals(name,"parent")) {
+			presetCategoryParent.back() = value.s;
 		}
 		return true;
 	}
@@ -307,6 +317,8 @@ private:
 void Item::LoadPresets(std::string filename) {
 	TCODParser parser = TCODParser();
 	TCODParserStruct* categoryTypeStruct = parser.newStructure("category_type");
+	categoryTypeStruct->addProperty("parent", TCOD_TYPE_STRING, false);
+
 	TCODParserStruct* itemTypeStruct = parser.newStructure("item_type");
 	itemTypeStruct->addListProperty("category", TCOD_TYPE_STRING, true);
 	itemTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
@@ -350,7 +362,10 @@ void Item::Faction(int val) {
 
 int Item::Faction() const { return ownerFaction; }
 
-ItemCat::ItemCat() {}
+ItemCat::ItemCat() : flammable(false),
+	name("Category schmategory"),
+	parent(0)
+{}
 
 ItemPreset::ItemPreset() :
 graphic('?'),
