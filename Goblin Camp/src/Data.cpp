@@ -147,40 +147,55 @@ namespace {
 	#endif
 	}
 	
+	void _LoadNames(std::string fn) {
+		TCODNamegen::parse(fn.c_str());
+	}
+	
+	void _TryLoadDataFile(
+		bool global, const fs::path& dir1, const fs::path& dir2,
+		const std::string& filename, void (*load)(std::string)
+	) {
+		std::string fn = filename + ".dat";
+		fs::path dir;
+		
+		Logger::Inst()->output << "[Data] Searching for: " << fn << "\n";
+		
+		if (fs::exists(dir1 / fn)) {
+			dir = dir1;
+		} else if (global) {
+			if (fs::exists(dir2 / fn)) {
+				dir = dir2;
+			} else {
+				Logger::Inst()->output << "[Data] Cannot find global data file -- abort.\n";
+				Logger::Inst()->output.flush();
+				exit(5);
+			}
+		} else {
+			Logger::Inst()->output << "[Data] Not found, skipping.\n";
+			return;
+		}
+		
+		Logger::Inst()->output << "[Data] Loading: " << (dir / fn).string() << "\n";
+		load((dir / fn).string());
+	}
+	
+	inline void TryLoadGlobalDataFile(const std::string& filename, void (*load)(std::string)) {
+		_TryLoadDataFile(true, globals::dataDir, globals::execDir, filename, load);
+	}
+	
+	inline void TryLoadLocalDataFile(const fs::path& dir, const std::string& filename, void (*load)(std::string)) {
+		_TryLoadDataFile(false, dir, dir, filename, load);
+	}
+	
 	void LoadGlobalMod() {
 		Logger::Inst()->output << "[Data] Loading global data files.\n";
 		
-		#define GC_GLOBAL_DATA_FILE(dat) \
-			if (fs::exists(globals::dataDir / #dat ".dat")) { \
-				dat = (globals::dataDir / #dat ".dat").string(); \
-			} else if (fs::exists(globals::execDir / #dat ".dat")) { \
-				dat = (globals::execDir / #dat ".dat").string(); \
-			}
-		
-		std::string items, constructions, wildplants, names, creatures;
-		
-		GC_GLOBAL_DATA_FILE(items)
-		GC_GLOBAL_DATA_FILE(constructions)
-		GC_GLOBAL_DATA_FILE(wildplants)
-		GC_GLOBAL_DATA_FILE(names)
-		GC_GLOBAL_DATA_FILE(creatures)
-		
-		#undef GC_GLOBAL_DATA_FILE
-		
-		Logger::Inst()->output <<
-			"[Data] items.dat: " << items << "\n" <<
-			"[Data] constructions.dat: " << constructions << "\n" <<
-			"[Data] wildplants.dat: " << wildplants << "\n" <<
-			"[Data] names.dat: " << names << "\n" <<
-			"[Data] creatures.dat: " << creatures << "\n"
-		;
-		
 		// Item presets _must_ be loaded first because constructions refer to items by name
-		Item::LoadPresets(items);
-		Construction::LoadPresets(constructions);
-		NatureObject::LoadPresets(wildplants);
-		TCODNamegen::parse(names.c_str());
-		NPC::LoadPresets(creatures);
+		TryLoadGlobalDataFile("items",         Item::LoadPresets);
+		TryLoadGlobalDataFile("constructions", Construction::LoadPresets);
+		TryLoadGlobalDataFile("wildplants",    NatureObject::LoadPresets);
+		TryLoadGlobalDataFile("names",         _LoadNames);
+		TryLoadGlobalDataFile("creatures",     NPC::LoadPresets);
 	}
 	
 	void LoadLocalMods() {
@@ -191,25 +206,11 @@ namespace {
 			fs::path mod = it->path();
 			Logger::Inst()->output << "[Data] Loading mod: " << mod.filename() << "\n";
 			
-			#define GC_MOD_DATA_FILE(dat, cls) \
-				if (fs::exists(mod / #dat ".dat")) { \
-					Logger::Inst()->output << "[Data] Loading: " << (mod / #dat ".dat") << "\n"; \
-					cls::LoadPresets((mod / #dat ".dat").string()); \
-				}
-			
-			GC_MOD_DATA_FILE(items, Item)
-			GC_MOD_DATA_FILE(constructions, Construction)
-			GC_MOD_DATA_FILE(wildplants, NatureObject)
-			
-			// of course, it's a special case
-			if (fs::exists(mod / "names.dat")) {
-				Logger::Inst()->output << "[Data] Loading: " << (mod / "names.dat") << "\n";
-				TCODNamegen::parse((mod / "names.dat").string().c_str());
-			}
-			
-			GC_MOD_DATA_FILE(creatures, NPC)
-			
-			#undef GC_MOD_DATA_FILE
+			TryLoadLocalDataFile(mod, "items",         Item::LoadPresets);
+			TryLoadLocalDataFile(mod, "constructions", Construction::LoadPresets);
+			TryLoadLocalDataFile(mod, "wildplants",    NatureObject::LoadPresets);
+			TryLoadLocalDataFile(mod, "names",         _LoadNames);
+			TryLoadLocalDataFile(mod, "creatures",     NPC::LoadPresets);
 		}
 	}
 }
