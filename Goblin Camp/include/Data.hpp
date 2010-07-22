@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 //   - saves        = ~/.goblincamp/saves
 //   - screenshots  = ~/.goblincamp/screenshots
 //   - config       = ~/.goblincamp/config.ini
+//   - font         = ~/.goblincamp/terminal.png
 //   - local mods   = ~/.goblincamp/mods
 //   - global data  = <bin-dir>/../share/goblin-camp, or <bin-dir>/
 //   - executable   = /usr/bin/goblin-camp (or /usr/local/bin/goblin-camp, or dir structured like build/dist/variant)
@@ -31,14 +32,21 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 //   - saves        = <My Documents>\My Games\Goblin Camp\saves
 //   - screenshots  = <My Documents>\My Games\Goblin Camp\screenshots
 //   - config       = <My Documents>\My Games\Goblin Camp\config.ini
+//   - font         = <My Documents>\My Games\Goblin Camp\terminal.png
 //   - local mods   = <My Documents>\My Games\Goblin Camp\mods
 //   - global data  = <InstallDir> (default is C:\Program Files\Goblin Camp)
 //   - executable   = <InstallDir>\goblin-camp.exe
-//
+// On OSX (I already hate their documentation; if it's wrong, please tell me):
+//   - personal dir = ~/Library/Application Support/Goblin Camp
+//   - saves        = ~/Library/Application Support/Goblin Camp/saves
+//   - screenshots  = ~/Library/Application Support/Goblin Camp/screenshots
+//   - config       = ~/Library/Application Support/Goblin Camp/config.ini
+//   - font         = ~/Library/Application Support/Goblin Camp/terminal.png
+//   - local mods   = ~/Library/Application Support/Goblin Camp/mods
+//   - global data  = /Applications/Goblin Camp.app/Contents/Resources
+//   - executable   = /Applications/Goblin Camp.app/Contents/MacOS/goblin-camp
 // This should allow GC to be installed without any administrative privileges, or
 // installed once system-wide and used comfortably without admin privileges on both systems.
-//
-// XXX: I don't know anything about OSX, but this should be pretty easy to add.
 
 namespace Data {
 	// Checks if required user directories are present, and creates them if not.
