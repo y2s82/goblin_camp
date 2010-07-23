@@ -61,6 +61,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	run(true),
 	taskBegun(false),
 	expert(false),
+	carried(boost::weak_ptr<Item>()),
 	mainHand(boost::weak_ptr<Item>()),
 	offHand(boost::weak_ptr<Item>()),
 	thirst(0),
@@ -113,7 +114,6 @@ void NPC::Position(Coordinate pos, bool firstTime) {
 			Map::Inst()->MoveFrom(x, y, uid);
 			x = pos.X();
 			y = pos.Y();
-			//Map::Inst()->MoveTo(x,y,uid); //This appears to be working correctly now
 		}
 	} else {
 		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
@@ -141,8 +141,6 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		}
 	} else {
 		if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
-		/*        else if (msg.size() > 0 && faction == 0) 
-		Announce::Inst()->AddMsg((boost::format("%s cancelled: %s") % Job::ActionToString(currentTask()->action) % msg).str());*/
 		jobs.pop_front();
 		taskIndex = 0;
 		DropCarriedItem();
@@ -385,12 +383,8 @@ MOVENEARend:
 					taskBegun = true;
 					lastMoveResult = TASKCONTINUE;
 				}
-				//lastMoveResult = Move();
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
 				else if (lastMoveResult == PATHEMPTY) {
-					/*					    if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
-					TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
-					} */
 					TaskFinished(TASKFAILFATAL);
 				}
 				break;
@@ -425,8 +419,8 @@ MOVENEARend:
 						cont.lock()->RemoveItem(
 							boost::static_pointer_cast<Item>(currentEntity().lock()));
 					}
-					mainHand = boost::static_pointer_cast<Item>(currentEntity().lock());
-					if (!inventory->AddItem(mainHand)) Announce::Inst()->AddMsg("No space in inventory");
+					carried = boost::static_pointer_cast<Item>(currentEntity().lock());
+					if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else { TaskFinished(TASKFAILFATAL, "Item not found"); break; }
@@ -438,28 +432,28 @@ MOVENEARend:
 				break;
 
 			case PUTIN:
-				if (mainHand.lock()) {
-					inventory->RemoveItem(mainHand);
-					mainHand.lock()->Position(Position());
+				if (carried.lock()) {
+					inventory->RemoveItem(carried);
+					carried.lock()->Position(Position());
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
-						if (!cont->AddItem(mainHand)) Announce::Inst()->AddMsg("Container full!");
+						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
 					} else {
 						DropCarriedItem();
 						TaskFinished(TASKFAILFATAL);
 						break;
 					}
 				}
-				mainHand.reset();
+				carried.reset();
 				TaskFinished(TASKSUCCESS);
 				break;
 
 			case DRINK: //Either we have an item target to drink, or a water tile
-				if (mainHand.lock()) { //Drink from an item
-					thirst -= boost::static_pointer_cast<OrganicItem>(mainHand.lock())->Nutrition();
-					inventory->RemoveItem(mainHand);
-					Game::Inst()->RemoveItem(mainHand);
-					mainHand = boost::weak_ptr<Item>();
+				if (carried.lock()) { //Drink from an item
+					thirst -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+					inventory->RemoveItem(carried);
+					Game::Inst()->RemoveItem(carried);
+					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else { //Drink from a water tile
@@ -478,17 +472,17 @@ MOVENEARend:
 				break;
 
 			case EAT:
-				if (mainHand.lock()) {
-					hunger -= boost::static_pointer_cast<OrganicItem>(mainHand.lock())->Nutrition();
-					inventory->RemoveItem(mainHand);
+				if (carried.lock()) {
+					hunger -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+					inventory->RemoveItem(carried);
 
-					for (std::list<ItemType>::iterator fruiti = Item::Presets[mainHand.lock()->Type()].fruits.begin(); fruiti != Item::Presets[mainHand.lock()->Type()].fruits.end(); ++fruiti) {
+					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
 						Game::Inst()->CreateItem(Position(), *fruiti, true);
 					}
 
-					Game::Inst()->RemoveItem(mainHand);
+					Game::Inst()->RemoveItem(carried);
 				}
-				mainHand = boost::weak_ptr<Item>();
+				carried = boost::weak_ptr<Item>();
 				TaskFinished(TASKSUCCESS);
 				break;
 
@@ -520,18 +514,18 @@ MOVENEARend:
 				break;
 
 			case HARVEST:
-				if (mainHand.lock()) {
-					for (std::list<ItemType>::iterator fruiti = Item::Presets[mainHand.lock()->Type()].fruits.begin(); fruiti != Item::Presets[mainHand.lock()->Type()].fruits.end(); ++fruiti) {
+				if (carried.lock()) {
+					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
 						Game::Inst()->CreateItem(Position(), *fruiti, true);
 					}
-					inventory->RemoveItem(mainHand);
-					Game::Inst()->RemoveItem(mainHand);
-					mainHand = boost::weak_ptr<Item>();
+					inventory->RemoveItem(carried);
+					Game::Inst()->RemoveItem(carried);
+					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else {
-					inventory->RemoveItem(mainHand);
-					mainHand = boost::weak_ptr<Item>();
+					inventory->RemoveItem(carried);
+					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKFAILFATAL, "Carrying nonexistant item");
 					break;
 				}
@@ -605,7 +599,7 @@ MOVENEARend:
 			case FLEEMAP:
 				if (x == 0 || x == Map::Inst()->Width()-1 ||
 					y == 0 || y == Map::Inst()->Height()-1) {
-						//We are the edge, escape!
+						//We are at the edge, escape!
 						Escape();
 						return AIMOVE;
 				}
@@ -643,6 +637,19 @@ MOVENEARend:
 						break;
 					}
 				}
+				break;
+
+			case WIELD:
+				if (carried.lock()) {
+					mainHand = carried;
+					carried.reset();
+					TaskFinished(TASKSUCCESS);
+#ifdef DEBUG
+					std::cout<<"Wielded "<<mainHand.lock()->Name()<<" successfully\n";
+#endif
+					break;
+				}
+				TaskFinished(TASKFAILFATAL);
 				break;
 
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
@@ -748,11 +755,11 @@ void NPC::Kill() {
 }
 
 void NPC::DropCarriedItem() {
-	if (mainHand.lock()) {
-		inventory->RemoveItem(mainHand);
-		mainHand.lock()->Position(Position());
-		mainHand.lock()->PutInContainer(boost::weak_ptr<Item>());
-		mainHand.reset();
+	if (carried.lock()) {
+		inventory->RemoveItem(carried);
+		carried.lock()->Position(Position());
+		carried.lock()->PutInContainer(boost::weak_ptr<Item>());
+		carried.reset();
 	}
 }
 
@@ -781,6 +788,30 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		npc->aggressive = true;
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
 		newJob->internal = true;
+
+		//Priority #1, if the creature can wield a weapon get one if possible
+		/*TODO: Right now this only makes friendlies take a weapon from a stockpile
+		It should be expanded to allow all npc's to search for nearby weapons lying around. */
+		if (!npc->mainHand.lock() && npc->Faction() == 0) {
+			for (std::list<Attack>::iterator attacki = npc->attacks.begin(); attacki != npc->attacks.end();
+				++attacki) {
+					if (attacki->Type() == DAMAGE_WIELDED) {
+						if (Game::Inst()->FindItemByCategoryFromStockpiles(
+							Item::StringToItemCategory("Weapon")).lock()) {
+								newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
+									Item::StringToItemCategory("Weapon")));
+								newJob->tasks.push_back(Task(MOVE));
+								newJob->tasks.push_back(Task(TAKE));
+								newJob->tasks.push_back(Task(WIELD));
+								npc->jobs.push_back(newJob);
+								npc->run = true;
+								return true;
+						}
+						break;
+					}
+			}
+		}
+
 		switch (squad->Order()) {
 		case GUARD:
 			if (squad->TargetCoordinate().X() >= 0) {
@@ -948,9 +979,19 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 					}
 
 					Attack attack = *attacki;
+#ifdef DEBUG
+					std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
+#endif
+					
 					if (attack.Type() == DAMAGE_WIELDED) {
+#ifdef DEBUG
+						std::cout<<"Wielded attack\n";
+#endif
 						GetMainHandAttack(attack);
 					}
+#ifdef DEBUG
+					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
+#endif
 
 					Resistance res;
 					switch (attacki->Type()) {
@@ -1006,7 +1047,7 @@ void NPC::Escape() {
 }
 
 void NPC::DestroyAllItems() {
-	if (mainHand.lock()) Game::Inst()->RemoveItem(mainHand);
+	if (carried.lock()) Game::Inst()->RemoveItem(carried);
 }
 
 bool NPC::Escaped() { return escaped; }
@@ -1174,6 +1215,17 @@ void NPC::InitializeAIFunctions() {
 
 void NPC::GetMainHandAttack(Attack &attack) {
 	attack.Type(DAMAGE_BLUNT);
+	if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
+		Attack wAttack = weapon->GetAttack();
+		attack.Type(wAttack.Type());
+		attack.AddDamage(wAttack.Amount());
+		attack.Ranged(wAttack.Ranged());
+		attack.Projectile(wAttack.Projectile());
+		for (std::vector<std::pair<StatusEffectType, int> >::iterator effecti = wAttack.StatusEffects()->begin();
+			effecti != wAttack.StatusEffects()->end(); ++effecti) {
+				attack.StatusEffects()->push_back(*effecti);
+		}
+	}
 }
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 

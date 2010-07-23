@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Entity.hpp"
 #include "Coordinate.hpp"
+#include "Attack.hpp"
 
 typedef int ItemCategory;
 typedef int ItemType;
@@ -35,6 +36,7 @@ public:
 	ItemCat();
 	bool flammable;
 	std::string name;
+	ItemCat* parent;
 };
 
 struct ItemPreset {
@@ -55,6 +57,7 @@ struct ItemPreset {
 	bool decays;
 	int decaySpeed;
 	std::vector<ItemType> decayList;
+	Attack attack;
 };
 
 class Item : public Entity {
@@ -79,6 +82,8 @@ private:
 
 	static std::map<std::string, ItemType> itemTypeNames;
 	static std::map<std::string, ItemCategory> itemCategoryNames;
+
+	Attack attack;
 
 protected:
 	int ownerFaction;
@@ -115,6 +120,7 @@ public:
 	virtual void Reserve(bool);
 	virtual void Faction(int);
 	virtual int Faction() const;
+	Attack GetAttack() const;
 };
 
 class OrganicItem : public Item {

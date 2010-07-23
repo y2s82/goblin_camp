@@ -118,6 +118,7 @@ private:
 	int _graphic;
 	bool taskBegun;
 	bool expert;
+	boost::weak_ptr<Item> carried;
 	boost::weak_ptr<Item> mainHand;
 	boost::weak_ptr<Item> offHand;
 	int thirst, hunger, weariness;

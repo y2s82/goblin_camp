@@ -25,7 +25,7 @@ construction_type "Carpenter's workshop" {
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
 			 178, 46,177]
-	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed"]
+	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed", "Wooden club"]
 	walkable
 	maxCondition=90
 	materials=["Wood","Wood","Wood"]

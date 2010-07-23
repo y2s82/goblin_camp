@@ -18,9 +18,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 
+#include <boost\serialization\split_member.hpp>
+
 #include <libtcod.hpp>
 
-#include "Item.hpp"
 #include "StatusEffect.hpp"
 
 enum DamageType {
@@ -36,14 +37,21 @@ enum DamageType {
 };
 
 class Attack {
+	friend class boost::serialization::access;
 private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 	DamageType damageType;
 	TCOD_dice_t damageAmount;
 	int cooldown;
 	int cooldownMax;
 	std::vector<std::pair<StatusEffectType, int> > statusEffects;
 	bool ranged;
-	ItemType projectile;
+	int projectile;
 public:
 	Attack();
 
@@ -54,13 +62,15 @@ public:
 	void Type(DamageType);
 	TCOD_dice_t Amount();
 	void Amount(TCOD_dice_t);
+	void AddDamage(TCOD_dice_t);
 	int Cooldown();
 	void CooldownMax(int);
+	int CooldownMax();
 	void Update();
 	void ResetCooldown();
 	std::vector<std::pair<StatusEffectType, int> >* StatusEffects();
 	bool Ranged();
 	void Ranged(bool);
-	ItemType Projectile();
-	void Projectile(ItemType);
+	int Projectile();
+	void Projectile(int);
 };

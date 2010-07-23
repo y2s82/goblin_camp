@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Attack.hpp"
 #include "GCamp.hpp"
+#include "Game.hpp"
 
 Attack::Attack() : damageType(DAMAGE_BLUNT),
 	damageAmount(TCOD_dice_t()),
@@ -43,6 +44,7 @@ void Attack::Amount(TCOD_dice_t value) {damageAmount = value;}
 int Attack::Cooldown() {return cooldown;}
 
 void Attack::CooldownMax(int value) {cooldownMax = value;}
+int Attack::CooldownMax() {return cooldownMax;}
 
 void Attack::Update() {
 	if (cooldown > 0) --cooldown;
@@ -55,8 +57,8 @@ std::vector<std::pair<StatusEffectType, int> >* Attack::StatusEffects() {return 
 bool Attack::Ranged() {return ranged;}
 void Attack::Ranged(bool value) {ranged = value;}
 
-ItemType Attack::Projectile() {return projectile;}
-void Attack::Projectile(ItemType value) {projectile = value;}
+int Attack::Projectile() {return projectile;}
+void Attack::Projectile(int value) {projectile = value;}
 
 DamageType Attack::StringToDamageType(std::string type) {
 	if (boost::iequals(type, "slashing")) {
@@ -98,4 +100,8 @@ std::string Attack::DamageTypeToString(DamageType type) {
 		return "wielded";
 	}
 	return "";
+}
+
+void Attack::AddDamage(TCOD_dice_t value) {
+	damageAmount.addsub += Game::DiceToInt(value);
 }
