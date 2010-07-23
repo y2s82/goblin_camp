@@ -121,6 +121,7 @@ public:
 	virtual void Faction(int);
 	virtual int Faction() const;
 	Attack GetAttack() const;
+	int RelativeValue();
 };
 
 class OrganicItem : public Item {

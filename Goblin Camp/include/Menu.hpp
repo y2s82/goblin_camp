@@ -69,6 +69,7 @@ public:
 
 	static bool YesNoDialog(std::string text, std::string leftButton = "Yes",
 		std::string rightButton = "No");
+	static ItemCategory WeaponChoiceDialog();
 };
 
 class JobMenu : public Menu {

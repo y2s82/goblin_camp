@@ -268,6 +268,67 @@ bool Menu::YesNoDialog(std::string text, std::string leftButton, std::string rig
 	return false;
 }
 
+ItemCategory Menu::WeaponChoiceDialog() {
+	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
+	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
+		background, 0, 0);
+
+	std::vector<ItemCategory> weaponCategories;
+	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+		if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Weapon")) {
+			weaponCategories.push_back(i);
+		}
+	}
+
+	int width = 30;
+	int height = weaponCategories.size()+4;
+	int topX = (Game::Inst()->ScreenWidth() - width) / 2;
+	int topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	int selected = -1;
+	TCOD_key_t key;
+	TCOD_mouse_t mouseStatus;
+
+	while (true) {
+		TCODConsole::root->clear();
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
+			TCODConsole::root, 0, 0);
+
+		TCODConsole::root->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "Weapons");
+		TCODConsole::root->setAlignment(TCOD_CENTER);
+
+		for (int i = -1; i < (signed int)weaponCategories.size(); ++i) {
+			if (selected == i) {
+				TCODConsole::root->setForegroundColor(TCODColor::black);
+				TCODConsole::root->setBackgroundColor(TCODColor::white);
+			} else {
+				TCODConsole::root->setForegroundColor(TCODColor::white);
+				TCODConsole::root->setBackgroundColor(TCODColor::black);
+			}
+			TCODConsole::root->print(topX+(width/2), topY+3+i, i == -1 ? "None" : Item::Categories[weaponCategories[i]].name.c_str());
+		}
+
+		TCODConsole::root->flush();
+
+		key = TCODConsole::checkForKeypress();
+		mouseStatus = TCODMouse::getStatus();
+
+		if (mouseStatus.cx >= topX && mouseStatus.cx <= topX+width) {
+			selected = mouseStatus.cy - (topY+3);
+		}
+		
+		if (mouseStatus.lbutton_pressed) {
+			if (selected >= -1 && selected < (signed int)weaponCategories.size()) {
+				return selected == -1 ? -1 : weaponCategories[selected];
+			}
+		}
+
+		if (mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) return -2;
+
+	}
+}
+
 JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
 	scroll(0)
 {
@@ -736,7 +797,11 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 		console->print(x+16, y+3, "Escort");
 		console->setBackgroundColor(TCODColor::black);
 
-		console->printFrame(x, y+7, 22, 5, true, TCOD_BKGND_SET, "Weapons");
+		console->printFrame(x, y+7, 23, 5, true, TCOD_BKGND_SET, "Weapons");
+		console->printFrame(x+1, y+8, 21, 3);
+		console->print(x+11, y+9, chosenSquad.lock()->Weapon() >= 0 ? Item::Categories[chosenSquad.lock()->Weapon()].name.c_str() : "None");
+		console->printFrame(x, y+11, 7, 3);
+		console->print(x+3, y+12, "Rearm");
 	}
 
 	console->setAlignment(TCOD_LEFT);
@@ -771,8 +836,6 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
 								(squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
 							chosenSquad = Game::Inst()->squadList[squadName];
-							//squadName = "";
-							//UI::Inst()->InputString("");
 							return MENUHIT;					
 						} else if (chosenSquad.lock()) { //Modify
 							boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
@@ -823,7 +886,7 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 				}
 			}
 		} else {
-			if (y > topY+20 && y < topY+27) {
+			if (y > topY+20 && y < topY+24) {
 				if (x > topX+1 && x < topX+9) { //Guard
 					chosenSquad.lock()->Order(GUARD);
 					UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
@@ -833,6 +896,19 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 					chosenSquad.lock()->Order(ESCORT);
 					UI::ChooseOrderTargetEntity(chosenSquad.lock());
 					UI::Inst()->HideMenu();
+					return MENUHIT;
+				}
+			} else if (y > topY+26 && y < topY+30) {
+				if (x > topX && x < topX+22) {
+					ItemCategory weaponChoice = Menu::WeaponChoiceDialog();
+					if (weaponChoice > -2)
+						chosenSquad.lock()->Weapon(weaponChoice);
+					return MENUHIT;
+				}
+			} else if (y >= topY+30 && y < topY+33) {
+				if (x >= topX && x < topX+7) {
+					chosenSquad.lock()->Rearm();
+					Announce::Inst()->AddMsg(chosenSquad.lock()->Name() + " rearming.");
 					return MENUHIT;
 				}
 			}

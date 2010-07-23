@@ -28,7 +28,8 @@ name(nameValue),
 	order(NOORDER),
 	targetCoordinate(Coordinate(-1,-1)),
 	targetEntity(boost::weak_ptr<Entity>()),
-	priority(pri)
+	priority(pri),
+	weapon(-1)
 {}
 
 Squad::~Squad() {
@@ -93,3 +94,11 @@ void Squad::RemoveAllMembers() {
 	members.clear();
 }
 
+ItemCategory Squad::Weapon() { return weapon; }
+void Squad::Weapon(ItemCategory value) { weapon = value; }
+
+void Squad::Rearm() {
+	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
+		Game::Inst()->npcList[*memberi]->FindNewWeapon();
+	}
+}

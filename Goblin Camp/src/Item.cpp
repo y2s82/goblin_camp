@@ -362,6 +362,13 @@ void Item::Faction(int val) {
 
 int Item::Faction() const { return ownerFaction; }
 
+int Item::RelativeValue() {
+	TCOD_dice_t amount = attack.Amount();
+	int minDamage = (int)(amount.nb_dices + amount.addsub);
+	int maxDamage = (int)((amount.nb_dices * amount.nb_faces) + amount.addsub);
+	return (minDamage + maxDamage) / 2;
+}
+
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
 	parent(0)

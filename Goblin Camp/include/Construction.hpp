@@ -33,8 +33,6 @@ enum BuildResult {
 
 typedef int ConstructionType;
 
-#define NOTFULL (1 << 0)
-
 enum ConstructionTag {
 	STOCKPILE,
 	FARMPLOT,

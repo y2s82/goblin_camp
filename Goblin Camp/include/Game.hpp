@@ -152,6 +152,7 @@ public:
 	void StockpileItem(boost::weak_ptr<Item>);
 	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory);
 	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType);
+	boost::weak_ptr<Item> FindItemBetterThan(int value, ItemCategory);
 
 	/*      NATURE      NATURE      NATURE      */
 	std::map<int, boost::shared_ptr<NatureObject> > natureList;
