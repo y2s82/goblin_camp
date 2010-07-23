@@ -1,0 +1,39 @@
+#include <winres.h>
+#include "resource.h"
+
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
+
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION    %GC_RC_VERSION_INT%
+	PRODUCTVERSION %GC_RC_VERSION_INT%
+	FILEOS         VOS_NT
+	FILETYPE       VFT_APP
+	FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+#ifdef DEBUG
+	FILEFLAGS      (VS_FF_DEBUG | VS_FF_PRERELEASE | VS_FF_PRIVATEBUILD)
+#endif
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
+		BEGIN
+			VALUE "CompanyName",      "Ilkka Halila"
+			VALUE "FileDescription",  "The Goblin Camp executable"
+			VALUE "FileVersion",      "%GC_RC_VERSION%"
+			VALUE "InternalName",     "goblin-camp.exe"
+			VALUE "LegalCopyright",   "Copyright (C) 2010 Ilkka Halila"
+			VALUE "OriginalFilename", "goblin-camp.exe"
+			VALUE "ProductName",      "Goblin Camp"
+			VALUE "ProductVersion",   "%GC_RC_VERSION%"
+		#ifdef DEBUG
+			VALUE "PrivateBuild",     "Built from Mercurial revision %GC_HG_REV%"
+		#endif
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409, 1200
+	END
+END
+
+IDI_ICON1 ICON "GoblinCamp.ico"
