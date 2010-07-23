@@ -196,6 +196,7 @@ public:
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();
 	void GetMainHandAttack(Attack&);
+	void FindNewWeapon();
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;

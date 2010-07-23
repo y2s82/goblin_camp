@@ -19,6 +19,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Construction.hpp"
 
+
+#define NOTFULL (1 << 0)
+#define BETTERTHAN (1 << 1)
+
 class Stockpile : public Construction {
 	friend class boost::serialization::access;
 	friend class Game;
@@ -44,8 +48,8 @@ public:
 	~Stockpile();
 	int Build();
 	virtual void Draw(Coordinate, TCODConsole*);
-	boost::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0);
-	boost::weak_ptr<Item> FindItemByType(ItemType, int flags=0);
+	boost::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0, int value=0);
+	boost::weak_ptr<Item> FindItemByType(ItemType, int flags=0, int value=0);
 	int Symbol();
 	void Symbol(int);
 	void Expand(Coordinate,Coordinate);

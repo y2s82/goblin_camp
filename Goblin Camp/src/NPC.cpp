@@ -641,6 +641,12 @@ MOVENEARend:
 
 			case WIELD:
 				if (carried.lock()) {
+					if (mainHand.lock()) { //Drop currently wielded weapon if such exists
+						inventory->RemoveItem(mainHand);
+						mainHand.lock()->Position(Position());
+						mainHand.lock()->PutInContainer(boost::weak_ptr<Item>());
+						mainHand.reset();
+					}
 					mainHand = carried;
 					carried.reset();
 					TaskFinished(TASKSUCCESS);
@@ -1225,6 +1231,22 @@ void NPC::GetMainHandAttack(Attack &attack) {
 			effecti != wAttack.StatusEffects()->end(); ++effecti) {
 				attack.StatusEffects()->push_back(*effecti);
 		}
+	}
+}
+
+void NPC::FindNewWeapon() {
+	int weaponValue = mainHand.lock() ? mainHand.lock()->RelativeValue() : 0;
+	ItemCategory weaponCategory = squad.lock() ? squad.lock()->Weapon() : Item::StringToItemCategory("Weapon");
+	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemBetterThan(weaponValue, weaponCategory);
+	if (boost::shared_ptr<Item> weapon = newWeapon.lock()) {
+		boost::shared_ptr<Job> weaponJob(new Job("Grab weapon"));
+		weaponJob->internal = true;
+		weaponJob->ReserveEntity(weapon);
+		weaponJob->tasks.push_back(Task(MOVE, weapon->Position()));
+		weaponJob->tasks.push_back(Task(TAKE, weapon->Position(), weapon));
+		weaponJob->tasks.push_back(Task(WIELD));
+		jobs.push_back(weaponJob);
+		run = true;
 	}
 }
 

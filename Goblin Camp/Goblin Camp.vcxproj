@@ -30,6 +30,7 @@
     <ClCompile Include="src\Construction.cpp" />
     <ClCompile Include="src\Container.cpp" />
     <ClCompile Include="src\Coordinate.cpp" />
+    <ClCompile Include="src\Data.cpp" />
     <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Farmplot.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="include\Construction.hpp" />
     <ClInclude Include="include\Container.hpp" />
     <ClInclude Include="include\Coordinate.hpp" />
+    <ClInclude Include="include\Data.hpp" />
     <ClInclude Include="include\Door.hpp" />
     <ClInclude Include="include\Events.hpp" />
     <ClInclude Include="include\Farmplot.hpp" />
@@ -136,7 +138,7 @@
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>libboost_serialization-vc100-mt-gd-1_43.lib;libboost_thread-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_serialization-vc100-mt-gd-1_43.lib;libboost_thread-vc100-mt-gd-1_43.lib;libboost_filesystem-vc100-mt-gd-1_43.lib;libtcod-VS-debug.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Console</SubSystem>
     </Link>
   </ItemDefinitionGroup>
@@ -153,7 +155,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>libboost_serialization-vc100-mt-1_43.lib;libboost_thread-vc100-mt-1_43.lib;libtcod-VS.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libboost_filesystem-vc100-mt-1_43.lib;libboost_serialization-vc100-mt-1_43.lib;libboost_thread-vc100-mt-1_43.lib;libtcod-VS.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <SubSystem>Windows</SubSystem>
       <EntryPointSymbol>
       </EntryPointSymbol>
