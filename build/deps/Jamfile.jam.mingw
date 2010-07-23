@@ -1,0 +1,17 @@
+project deps ;
+
+# libtcod
+lib tcod : : <variant>debug <name>tcod-mingw-debug ;
+lib tcod : : <variant>release-pdb <name>tcod-mingw ;
+
+# Boost
+lib boost_serialization : : <variant>debug <name>boost_serialization-1_43-mt-gd ;
+lib boost_serialization : : <variant>release-pdb <name>boost_serialization-1_43-mt ;
+
+lib boost_thread : : <variant>debug <name>boost_thread-1_43-mt-gd ;
+lib boost_thread : : <variant>release-pdb <name>boost_thread-1_43-mt ;
+
+# dbghelp
+lib dbghelp : : <name>dbghelp ;
+
+alias gc-deps : tcod boost_serialization boost_thread dbghelp ;

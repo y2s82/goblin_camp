@@ -1,0 +1,12 @@
+project deps ;
+
+# libtcod
+lib tcod : : <variant>debug <name>libtcod-VS-debug ;
+lib tcod : : <variant>release-pdb <name>libtcod-VS ;
+
+# Boost uses autolinking
+
+# dbghelp
+lib dbghelp : : <name>dbghelp ;
+
+alias gc-deps : tcod dbghelp ;
