@@ -74,8 +74,8 @@ rule libtcod-tag ( name : type ? : property-set ) {
         suffix = $(suffix)-debug ;
     }
     
-    if $(prefix) && $(suffix) {
-        local name = $(prefix)tcod$(suffix) ;
+    if $(prefix) || $(suffix) {
+        local name = $(prefix:E=)tcod$(suffix:E=) ;
         ECHO ** Using libtcod: $(name) ;
         return $(name) ;
     } else {
