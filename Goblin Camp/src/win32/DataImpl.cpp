@@ -18,11 +18,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <shellapi.h>
 #include <shlobj.h>
 
 #include <boost/filesystem.hpp>
 #include <string>
 #include <cstring>
+#include <cstdlib>
 
 namespace fs = boost::filesystem;
 
@@ -37,19 +39,14 @@ void _ImplFindPersonalDirectory(std::string& dir) {
 }
 
 void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-	char *cmdLine = GetCommandLineA();
-	char *ptr     = strchr(cmdLine, ' ');
+	int argc;
+	wchar_t **argv = CommandLineToArgvW(GetCommandLineW(), &argc);
 	
-	if (ptr != NULL) *ptr = '\0';
+	char exe[MAX_PATH];
+	size_t converted;
+	wcstombs_s(&converted, exe, MAX_PATH, argv[0], MAX_PATH);
 	
-	// strip quotes if they're present
-	if (cmdLine[0] == '"') {
-		char *end = strchr(cmdLine, '\0') - 1;
-		if (end != NULL && *end == '"') *end = '\0';
-		++cmdLine;
-	}
-	
-	exec    = fs::path(std::string(cmdLine));
+	exec    = fs::path(std::string(exe));
 	execDir = exec.parent_path();
 	dataDir = execDir;
 }
