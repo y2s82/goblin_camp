@@ -37,8 +37,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 #include "Data.hpp"
 
-#ifndef GC_VERSION
-#	define GC_VERSION "0.11"
+#if defined(GC_BOOST_BUILD)
+// This variable is defined in buildsystem-generated _version.cpp.
+	extern const char *_GOBLIN_CAMP_VERSION_;
+#	define GC_VERSION _GOBLIN_CAMP_VERSION_
+#elif !defined(GC_VERSION)
+#	define GC_VERSION "Goblin Camp 0.11"
 #endif
 
 int main() {
@@ -210,7 +214,7 @@ int MainMenu() {
 
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
-		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp " GC_VERSION);
+		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
 		if (!endCredits) endCredits = TCODConsole::renderCredits(edgex+5, 
 			edgey+25, true);
 
@@ -220,24 +224,6 @@ int MainMenu() {
 	Game::Inst()->Exit(false);
 	return 0;
 }
-
-#if defined(WINDOWS)
-#	define SAVE_DIR  "./saves/"
-#	define SAVE_FILE SAVE_DIR "%s"
-#else
-#	define SAVE_DIR  GetSaveDir().c_str()
-#	define SAVE_FILE GetSaveFile()
-inline std::string GetSaveDir() {
-	// superfluous calls, but whatever
-	std::string home = std::string(getenv("HOME"));
-	TCODSystem::createDirectory((home + "/.goblincamp").c_str());
-	TCODSystem::createDirectory((home + "/.goblincamp/saves").c_str());
-	return home + std::string("/.goblincamp/saves/");
-}
-inline std::string GetSaveFile() {
-	return GetSaveDir() + std::string("%s");
-}
-#endif
 
 void LoadMenu() {
 	bool exit = false;
