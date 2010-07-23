@@ -33,8 +33,8 @@ project goblin-camp
       <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
       <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1
       <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=1
-      # Linux (they should work on BSD just fine, though) specific defines
-      <os>UNIX:<define>LINUX
+      # Linux specific defines
+      <os>LINUX:<define>LINUX
       # OSX specific defines
       <os>MACOSX:<define>MACOSX
     : source-location $(GC_SOURCE_ROOT)
@@ -97,7 +97,7 @@ if [ os.name ] = NT {
     
     current-sources += $(win32-sources) ;
     explicit-alias platform-deps : win32-deps ;
-} else if [ os.name ] = UNIX {
+} else if [ os.name ] = LINUX {
     ECHO ** Building for Linux ;
     
     binaries-dist-dir  = bin ;
@@ -117,6 +117,10 @@ if [ os.name ] = NT {
     additional-files += Info.plist ;
     
     explicit-alias platform-deps : osx-deps ;
+} else {
+    ECHO !!! Error: Platform not configured: [ os.name ] ;
+    ECHO !!! You either encountered a bug, or trying to build Goblin Camp on unsupported platform ;
+    EXIT ;
 }
 
 # Platform-specific and common dependencies combined
