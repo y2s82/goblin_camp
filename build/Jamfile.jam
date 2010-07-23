@@ -45,6 +45,10 @@ import gc-version ;
 modules.poke gc-version : GC_TEMPLATES : $(GC_TEMPLATES) ;
 modules.poke gc-version : GC_VERSION   : $(GC_VERSION) ;
 
+import gc-sln ;
+modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
+modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
+
 boost.use-project 1.43 ;
 winsdk.use-project ;
 libtcod.use-project ;
@@ -85,8 +89,8 @@ additional-dist-dir = . ;
 additional-files    = ;
 
 # Generated files
-win32-sources   += $(GC_TEMPLATES)/_version.rc_in ;
-current-sources += $(GC_TEMPLATES)/_version.cpp_in ;
+win32-ver-sources += $(GC_TEMPLATES)/_version.rc_in ;
+version-sources   += $(GC_TEMPLATES)/_version.cpp_in ;
 
 # Platform dependencies
 explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
@@ -110,6 +114,7 @@ if [ os.name ] = NT {
     ECHO ** Building for Windows ;
     
     current-sources += $(win32-sources) ;
+    version-sources += $(win32-ver-sources) ;
     explicit-alias platform-deps : win32-deps ;
 } else if [ os.name ] = LINUX {
     ECHO ** Building for Linux ;
@@ -144,6 +149,10 @@ explicit-alias gc-deps : platform-deps common-deps ;
 # Define targets
 ##
 #
+# Version information
+alias gc-version : $(version-sources) ;
+
+#
 # Precompiled header
 cpp-pch stdafx.hpp 
     : $(GC_HEADERS)/stdafx.hpp gc-deps
@@ -154,6 +163,7 @@ cpp-pch stdafx.hpp
 exe goblin-camp
     : $(current-sources)
       gc-deps
+      gc-version
       stdafx.hpp
 ;
 
@@ -171,7 +181,7 @@ install dist-additional
 
 install dist-binaries
     : goblin-camp
-    : <install-dependencies>on <install-type>LIB <toolset>msvc:<install-type>PDB <install-type>EXE
+    : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
       <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
       <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
 ;
@@ -185,5 +195,30 @@ install dist-data
 alias dist : dist-data dist-binaries dist-additional ;
 
 #
+# Solution files
+make goblin-camp-msvc9.sln      : $(GC_TEMPLATES)/goblin-camp-msvc9.sln_in      : @gc-sln.generate-sln ;
+make goblin-camp-msvc9.vcproj   : $(GC_TEMPLATES)/goblin-camp-msvc9.vcproj_in   : @gc-sln.generate-2008 ;
+make goblin-camp-msvc10.sln     : $(GC_TEMPLATES)/goblin-camp-msvc10.sln_in     : @gc-sln.generate-sln ;
+make goblin-camp-msvc10.vcxproj : $(GC_TEMPLATES)/goblin-camp-msvc10.vcxproj_in : @gc-sln.generate-2010 ;
+
+alias make-sln2008 : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj ;
+alias make-sln2010 : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
+
+install sln2008
+    : make-sln2008
+    : <location>$(GC_MSVC_SLN_DIR)
+;
+
+install sln2010
+    : make-sln2010
+    : <location>$(GC_MSVC_SLN_DIR)
+;
+
+#
 # Explicit targets
-explicit nsis dist dist-binaries dist-data dist-additional ;
+explicit nsis dist dist-binaries dist-data dist-additional make-sln2008 make-sln2010 sln2008 sln2010 ;
+explicit make-sln2008-sln make-sln2008-proj make-sln2010-sln make-sln2010-proj ;
+
+#
+# Always build version information
+always gc-version ;

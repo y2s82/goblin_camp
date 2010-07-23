@@ -17,5 +17,5 @@ toolset.flags gc-version.generate APPEND_HG <variant>debug   : yes ;
 toolset.flags gc-version.generate APPEND_HG <variant>release : no ;
 
 actions generate {
-    python $(GC_TEMPLATES)/genversion.py $(GC_VERSION) $(APPEND_HG) $(>) $(<)
+    python "$(GC_TEMPLATES)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
 }
