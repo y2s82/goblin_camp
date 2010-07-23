@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include <string>
 #include <cstring>
 #include <fstream>
@@ -96,7 +97,7 @@ namespace {
 		
 	#if defined(WINDOWS)
 		char *cmdLine = GetCommandLineA();
-		char *ptr     = strchr(cmdLine, ' ');
+		char *ptr     = strchr(cmdLine, '\0');
 		
 		if (ptr != NULL) *ptr = '\0';
 		
