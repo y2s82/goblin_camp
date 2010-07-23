@@ -213,6 +213,20 @@ item_type "Wooden club" {
 	}
 }
 
+item_type "Log club" {
+	category = ["Weapon", "Blunt weapon"]
+	graphic = 41
+	color = "127,106,0"
+	components = ["Wood log"]
+	attack "Bash" {
+		type="blunt"
+		damage="3d10+10"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     50     ]
+	}
+}
+
 item_type "Stone axe" {
 	category = ["Weapon", "Slashing weapon"]
 	graphic = 41

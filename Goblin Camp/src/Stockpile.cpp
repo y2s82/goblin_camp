@@ -48,7 +48,7 @@ Stockpile::~Stockpile() {
 
 int Stockpile::Build() {return 1;}
 
-boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags) {
+boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, int value) {
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
 		if (!conti->second->empty()) {
 			boost::weak_ptr<Item> item = *conti->second->begin();
@@ -56,13 +56,17 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags)
 				if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
 						if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
+					} else if (flags & BETTERTHAN) {
+						if (item.lock()->RelativeValue() > value) return item;
 					} else return item;
 				}
 				if (boost::dynamic_pointer_cast<Container>(item.lock())) {
 					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
 					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 						if (itemi->lock() && itemi->lock()->IsCategory(cat) && !itemi->lock()->Reserved())
-							return *itemi;
+							if (flags & BETTERTHAN) {
+								if (itemi->lock()->RelativeValue() > value) return *itemi;
+							} else return *itemi;
 					}
 				}
 			}
@@ -71,20 +75,24 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags)
 	return boost::weak_ptr<Item>();
 }
 
-boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags) {
+boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, int value) {
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
 		if (!conti->second->empty()) {
 			boost::weak_ptr<Item> item = *conti->second->begin();
 			if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
 				if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
 					if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
+				} else if (flags & BETTERTHAN) {
+					if (item.lock()->RelativeValue() > value) return item;
 				} else return item;
 			}
 			if (boost::dynamic_pointer_cast<Container>(item.lock())) {
 				boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
 				for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 					if (itemi->lock() && itemi->lock()->Type() == typeValue && !itemi->lock()->Reserved())
-						return *itemi;
+						if (flags & BETTERTHAN) {
+							if (itemi->lock()->RelativeValue() > value) return *itemi;
+						} else return *itemi;
 				}
 			}
 		}

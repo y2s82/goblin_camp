@@ -909,6 +909,7 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 				if (x >= topX && x < topX+7) {
 					chosenSquad.lock()->Rearm();
 					Announce::Inst()->AddMsg(chosenSquad.lock()->Name() + " rearming.");
+					return MENUHIT;
 				}
 			}
 		}
