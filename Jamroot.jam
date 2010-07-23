@@ -1,95 +1,39 @@
+# Goblin Camp build system.
 # See build/README.
 
-constant GC_VERSION : 0.1 ;
+path-constant GC_ROOT          : . ;
+path-constant GC_BUILD_ROOT    : "$(GC_ROOT)/build" ;
+path-constant GC_TEMPLATES     : "$(GC_BUILD_ROOT)/templates" ;
+path-constant GC_DIST_ROOT     : "$(GC_BUILD_ROOT)/dist" ;
+path-constant GC_TMP_DIR       : "$(GC_BUILD_ROOT)/tmp" ;
+path-constant GC_SOURCE_ROOT   : "$(GC_ROOT)/Goblin Camp" ;
+path-constant GC_SOURCES       : "$(GC_SOURCE_ROOT)/src" ;
+path-constant GC_HEADERS       : "$(GC_SOURCE_ROOT)/include" ;
+path-constant GC_WIN32_SOURCES : "$(GC_SOURCES)/win32" ;
+path-constant GC_LINUX_SOURCES : "$(GC_SOURCES)/linux" ;
+path-constant GC_OSX_SOURCES   : "$(GC_SOURCES)/osx" ;
 
-project goblin-camp
-    : default-build debug
-    : requirements
-      <include>"Goblin Camp/include" <warnings>on
-      <define>GC_VERSION=\\\"$(GC_VERSION)\\\"
-      <conditional>@gc-feats
-    : source-location "Goblin Camp"
-    : build-dir build/tmp
-;
+constant GC_VERSION : 0.11 ;
 
-variant release-pdb
-    : <optimization>speed <debug-symbols>on
-      <inlining>full <runtime-debugging>off
-;
+import version ;
 
-cpp-pch stdafx.hpp
-    : include/stdafx.hpp
-;
+ECHO ;
+ECHO *** Goblin Camp $(GC_VERSION) build system *** ;
+ECHO ** bjam [ version.jam ] Boost.Build [ version.boost-build ] ;
+ECHO ** ;
+ECHO ** Be sure to read build/README! ;
+ECHO ** ;
+ECHO ** If you still have problems, you can ask on forums: ;
+ECHO "**     http://www.goblincamp.com/forum" ;
+ECHO ** or IRC: ;
+ECHO "**     \#goblincamp on Freenode" ;
+ECHO ** ;
+ECHO ;
 
-exe goblin-camp
-    : [ glob src/*.cpp ]
-      stdafx.hpp
-      build/deps//gc-deps
-;
+use-project goblin-camp : $(GC_BUILD_ROOT) ;
+build-project $(GC_BUILD_ROOT) ;
 
-install install-binaries
-    : goblin-camp
-    : <install-dependencies>on <install-type>EXE <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB
-      <conditional>@install-feats
-;
-
-install install-data
-    : [ glob *.dat ]
-      [ glob *.png ]
-      [ glob *.txt ]
-      [ glob *.ini ]
-    : <conditional>@install-feats
-;
-
-actions nsis-action {
-    python build/installer/mkinstaller.py $(GC_VERSION)
-}
-
-alias install : install-data install-binaries ;
-
-make nsis : : @nsis-action ;
-
-explicit install install-data install-binaries nsis ;
-
-rule gc-feats ( properties * ) {
-    local feats ;
-    
-    if <target-os>windows in $(properties) {
-        feats += <define>WINDOWS ;
-        feats += <user-interface>gui ;
-    } else if <target-os>linux in $(properties) {
-        feats += <define>LINUX ;
-    } else if <target-os>macosx in $(properties) {
-        feats += <define>MACOSX ;
-    }
-    
-    if <toolset>msvc in $(properties) {
-        feats += <define>_SCL_SECURE_NO_DEPRECATE ;
-        feats += <define>_CRT_SECURE_NO_WARNINGS ;
-        feats += <define>_CRT_SECURE_NO_DEPRECATE ;
-        feats += <define>_CRT_NONSTDC_NO_DEPRECATE ;
-        
-        if <variant>debug in $(properties) {
-            feats += <define>_HAS_ITERATOR_DEBUGGING=1 ;
-            feats += <define>_SECURE_SCL=1 ;
-        }
-    }
-    
-    if <variant>debug in $(properties) {
-        feats += <define>DEBUG ;
-    }
-    
-    return $(feats) ;
-}
-
-rule install-feats ( properties * ) {
-    local feats ;
-    
-    if <variant>release-pdb in $(properties) {
-        feats += <location>build/dist/release ;
-    } else {
-        feats += <location>build/dist/debug ;
-    }
-    
-    return $(feats) ;
-}
+# Shortcuts
+alias nsis : /goblin-camp//nsis ;
+alias dist : /goblin-camp//dist ;
+explicit nsis dist ;

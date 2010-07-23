@@ -1,0 +1,85 @@
+# libtcod tool
+#
+# To configure:
+#   using libtcod
+#       : <include>path-to-includes <library>path-to-libraries
+#         <debug-name>name-of-debug-library <release-name>name-of-release-library
+#   ;
+#
+# NOTE: if you specify <debug-name>, you MUST specify <release-name> too!
+
+import property-set ;
+import project ;
+import "class" : new ;
+
+.libtcod-options = ;
+
+rule init ( options * ) {
+    .libtcod-options = [ property-set.create $(options) ] ;
+}
+
+rule use-project ( ) {
+    project.push-current [ project.current ] ;
+    
+    local reqs = ;
+    local usage-reqs = ;
+    local debug-name = ;
+    local release-name = ;
+    
+    if $(.libtcod-options) {
+        local inc    = [ $(.libtcod-options).get <include> ] ;
+        local lib    = [ $(.libtcod-options).get <library> ] ;
+        debug-name   = [ $(.libtcod-options).get <debug-name> ] ;
+        release-name = [ $(.libtcod-options).get <release-name> ] ;
+        
+        reqs = <include>$(inc) <search>$(lib) ;
+        usage-reqs = <include>$(inc) ;
+    }
+    
+    project.initialize $(__name__) ;
+    project libtcod
+        : requirements $(reqs)
+        : usage-requirements $(usage-reqs)
+    ;
+    
+    if $(debug-name) && $(release-name) {
+        lib libtcod : : <variant>release <name>$(release-name) ;
+        lib libtcod : : <variant>debug   <name>$(debug-name) ;
+    } else {
+        lib libtcod : : <tag>@libtcod-tag ;
+    }
+    
+    project.pop-current ;
+}
+
+rule libtcod-tag ( name : type ? : property-set ) {
+    local toolset = [ $(property-set).get <toolset> ] ;
+    local os      = [ $(property-set).get <os> ] ;
+    local variant = [ $(property-set).get <variant> ] ;
+    local prefix  = ;
+    local suffix  = ;
+    
+    if $(os) = NT {
+        if $(toolset) = mingw {
+            suffix = -mingw ;
+        } else if $(toolset) = msvc {
+            suffix = -VS ;
+            prefix = lib ;
+        }
+    } else {
+        suffix = xx ;
+    }
+    
+    if $(variant) = debug {
+        suffix = $(suffix)-debug ;
+    }
+    
+    if $(prefix) || $(suffix) {
+        local name = $(prefix:E=)tcod$(suffix:E=) ;
+        ECHO ** Using libtcod: $(name) ;
+        return $(name) ;
+    } else {
+        ECHO ** Using libtcod ;
+        return ;
+    }
+}
