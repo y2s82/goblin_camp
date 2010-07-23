@@ -122,7 +122,8 @@ public:
 	void CreateSquad(std::string);
 	static void SetSquadTargetCoordinate(Coordinate, boost::shared_ptr<Squad>);
 	static void SetSquadTargetEntity(Coordinate, boost::shared_ptr<Squad>);
-
+	void SpawnNPCs(int,std::string,Coordinate,Coordinate);
+	void SpawnNPCs(int,NPCType,Coordinate,Coordinate);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate);
@@ -152,6 +153,8 @@ public:
 	void StockpileItem(boost::weak_ptr<Item>);
 	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory);
 	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType);
+	void SpawnItems(int,std::string,Coordinate,Coordinate);
+	void SpawnItems(int,ItemType,Coordinate,Coordinate);
 
 	/*      NATURE      NATURE      NATURE      */
 	std::map<int, boost::shared_ptr<NatureObject> > natureList;

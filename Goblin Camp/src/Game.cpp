@@ -41,6 +41,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 
+using namespace std;
+
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
 
@@ -547,6 +549,29 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type) {
 	return boost::weak_ptr<Item>();
 }
 
+// Spawns items distributed randomly within the rectangle defined by corner1 & corner2
+void Game::SpawnItems(int quantity, std::string typeName, Coordinate corner1, Coordinate corner2) {
+	int areaWidth = abs(corner1.X()-corner2.X());
+	int areaLength = abs(corner1.Y()-corner2.Y());
+	
+	for (int items = 0; items < quantity; ++items) {
+		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
+		Game::CreateItem(location, Item::StringToItemType(typeName), true);
+	}
+}
+
+// Spawns items distributed randomly within the rectangle defined by corner1 & corner2
+void Game::SpawnItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
+	int areaWidth = abs(corner1.X()-corner2.X());
+	int areaLength = abs(corner1.Y()-corner2.Y());
+	
+	for (int items = 0; items < quantity; ++items) {
+		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
+		Game::CreateItem(location, type, true);
+	}
+}
+
+
 
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
 Coordinate Game::FindWater(Coordinate pos) {
@@ -808,7 +833,7 @@ void Game::GenerateMap() {
 			}
 		}
 	}
-
+ 
 	std::vector<NPCType> peacefulAnimals;
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (boost::icontains(NPC::Presets[i].ai, "peaceful"))
@@ -816,9 +841,10 @@ void Game::GenerateMap() {
 	}
 
 	if (peacefulAnimals.size() > 0) {
+	//Generate benign fauna
 		for (int i = 0; i < 10; ++i) {
-			int type = rand() % peacefulAnimals.size();
-			Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
+		NPCType type = peacefulAnimals[rand() % peacefulAnimals.size()];
+		Game::Inst()->SpawnNPCs(1,type,Coordinate(300,100),Coordinate(320,120));
 		}
 	}
 }
@@ -1043,6 +1069,30 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 			UI::Inst()->CloseMenu();
 			Announce::Inst()->AddMsg((boost::format("[%1%] escorting %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str());
 		}
+	}
+}
+
+// Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
+void Game::SpawnNPCs(int quantity, std::string typeName, Coordinate corner1, Coordinate corner2) {
+	int areaWidth = abs(corner1.X()-corner2.X());
+	int areaLength = abs(corner1.Y()-corner2.Y());
+	
+	for (int npcs = 0; npcs < quantity; ++npcs) {
+		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
+
+		Game::CreateNPC(location, NPC::StringToNPCType(typeName));
+	}
+}
+
+// Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
+void Game::SpawnNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
+	int areaWidth = abs(corner1.X()-corner2.X());
+	int areaLength = abs(corner1.Y()-corner2.Y());
+	
+	for (int npcs = 0; npcs < quantity; ++npcs) {
+		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
+
+		Game::CreateNPC(location, type);
 	}
 }
 

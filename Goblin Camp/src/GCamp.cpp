@@ -29,12 +29,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
-#include "NPC.hpp"
 #include "Logger.hpp"
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
 #include "JobManager.hpp"
+#include "NPC.hpp"
+#include "Item.hpp"
 
 #ifndef GC_VERSION
 #	define GC_VERSION "0.11"
@@ -42,12 +43,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #ifdef WINDOWS
 // Win32CrashHandler.cpp
-void InstallExceptionHandler();
+//void InstallExceptionHandler();
 #endif
 
 int main() {
 #	ifdef WINDOWS
-	InstallExceptionHandler();
+	//InstallExceptionHandler();
 	std::string config = "./config.ini";
 #	else
 	std::string config = std::string(getenv("HOME")) + "/.goblincamp/config.ini";
@@ -106,16 +107,15 @@ void StartNewGame() {
 	Game* game = Game::Inst();
 	game->Reset();
 
-	for (int npcs = 0; npcs < 15; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("goblin"));
-	}
-	for (int npcs = 0; npcs < 6; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("orc"));
-	}
-
-	for (int seeds = 0; seeds < 20; ++seeds) {
-		game->CreateItem(Coordinate(220+rand()%10, 220+rand()%10), Item::StringToItemType("Bloodberry seed"), true);
-	}
+	Coordinate spawnTopCorner(200,200);
+	Coordinate middleCorner(220,220);
+	Coordinate itemBottomCorner(230,230);
+	
+	game->SpawnNPCs(15, "goblin", spawnTopCorner, middleCorner);
+	game->SpawnNPCs(6, "orc", spawnTopCorner, middleCorner);
+	
+	game->SpawnItems(20, "Bloodberry seed", middleCorner, itemBottomCorner);
+	
 	MainLoop();
 }
 
@@ -246,7 +246,7 @@ inline std::string GetSaveDir() {
 	return home + std::string("/.goblincamp/saves/");
 }
 inline std::string GetSaveFile() {
-	return getSaveDir() + std::string("%s");
+	return GetSaveDir() + std::string("%s");
 }
 #endif
 
