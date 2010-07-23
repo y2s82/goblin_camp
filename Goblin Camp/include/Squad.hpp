@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Coordinate.hpp"
 #include "Entity.hpp"
+#include "Item.hpp"
 
 enum Orders {
 	NOORDER,
@@ -48,6 +49,7 @@ private:
 	Coordinate targetCoordinate;
 	boost::weak_ptr<Entity> targetEntity;
 	int priority;
+	ItemCategory weapon;
 public:
 	Squad(std::string name="Noname nancyboys", int members=0, int priority=0);
 	~Squad();
@@ -68,4 +70,7 @@ public:
 	void Priority(int);
 	int Priority();
 	void RemoveAllMembers();
+	ItemCategory Weapon();
+	void Weapon(ItemCategory);
+	void Rearm();
 };

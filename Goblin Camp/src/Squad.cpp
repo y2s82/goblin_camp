@@ -28,7 +28,8 @@ name(nameValue),
 	order(NOORDER),
 	targetCoordinate(Coordinate(-1,-1)),
 	targetEntity(boost::weak_ptr<Entity>()),
-	priority(pri)
+	priority(pri),
+	weapon(-1)
 {}
 
 Squad::~Squad() {
@@ -93,3 +94,8 @@ void Squad::RemoveAllMembers() {
 	members.clear();
 }
 
+ItemCategory Squad::Weapon() { return weapon; }
+void Squad::Weapon(ItemCategory value) { weapon = value; }
+
+void Squad::Rearm() {
+}
