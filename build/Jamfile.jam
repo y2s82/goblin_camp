@@ -88,9 +88,23 @@ additional-files    = ;
 win32-sources   += $(GC_TEMPLATES)/_version.rc_in ;
 current-sources += $(GC_TEMPLATES)/_version.cpp_in ;
 
+# Platform dependencies
 explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
 explicit-alias linux-deps ;
 explicit-alias osx-deps : : : : <framework>CoreFoundation ;
+
+# Boost dependencies
+boost-libs = serialization thread system filesystem ;
+
+boost-deps = ;
+for local name in $(boost-libs) {
+    boost-deps += /boost//$(name) ;
+}
+
+# All common dependencies
+explicit-alias common-deps
+    : $(boost-deps) /libtcod//libtcod
+;
 
 if [ os.name ] = NT {
     ECHO ** Building for Windows ;
@@ -124,17 +138,16 @@ if [ os.name ] = NT {
 }
 
 # Platform-specific and common dependencies combined
-explicit-alias gc-deps
-    : platform-deps /libtcod//libtcod
-      /boost//serialization /boost//thread /boost//system /boost//filesystem
-;
+explicit-alias gc-deps : platform-deps common-deps ;
 
 ##
 # Define targets
 ##
 #
 # Precompiled header
-cpp-pch stdafx.hpp : $(GC_HEADERS)/stdafx.hpp ;
+cpp-pch stdafx.hpp 
+    : $(GC_HEADERS)/stdafx.hpp gc-deps
+;
 
 #
 # goblin-camp executable
