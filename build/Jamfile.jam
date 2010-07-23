@@ -115,7 +115,7 @@ if [ os.name ] = NT {
     ECHO ** Building for Linux ;
     
     binaries-dist-dir  = bin ;
-    data-dist-dir      = share ;
+    data-dist-dir      = share/goblin-camp ;
     current-sources   += $(linux-sources) ;
     
     explicit-alias platform-deps : linux-deps ;
@@ -165,21 +165,21 @@ make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis ;
 # dist targets
 install dist-additional
     : $(additional-files)
-    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:D)
-      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:D)
+    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)
+      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)
 ;
 
 install dist-binaries
     : goblin-camp
     : <install-dependencies>on <install-type>LIB <toolset>msvc:<install-type>PDB <install-type>EXE
-      <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(binaries-dist-dir:D)
-      <variant>release:<location>$(GC_DIST_ROOT)/release/$(binaries-dist-dir:D)
+      <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
+      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
 ;
 
 install dist-data
     : $(data-files)
-    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(data-dist-dir:D)
-      <variant>release:<location>$(GC_DIST_ROOT)/release/$(data-dist-dir:D)
+    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(data-dist-dir:E=)
+      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(data-dist-dir:E=)
 ;
 
 alias dist : dist-data dist-binaries dist-additional ;
