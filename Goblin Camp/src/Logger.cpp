@@ -17,26 +17,31 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
 #include <boost/date_time/local_time/local_time.hpp>
 
 #include "Logger.hpp"
 
-Logger::Logger() {
-	output.open("Log.txt");
-	output<<"Logging begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
-
+Logger::Logger(const std::string& logFile) {
+	output.open(logFile.c_str());
+	output<<"Logging to " << logFile << " begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
 }
 
 Logger::~Logger() {
-	output<<"Logging ended @ "<<boost::posix_time::second_clock::local_time();
+	output<<"Logging ended @ "<<boost::posix_time::second_clock::local_time()<<"\n";
 	output.flush();
 }
 
 Logger* Logger::instance = NULL;
 
+void Logger::Create(const std::string& logFile) {
+	assert(instance == NULL);
+	instance = new Logger(logFile);
+}
+
 Logger *Logger::Inst() {
-	if (!instance) instance = new Logger();
+	assert(instance != NULL);
 	return instance;
 }
 

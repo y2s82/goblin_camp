@@ -1,5 +1,5 @@
 # Helper tool that:
-#   1. Finds all DLLs imported by dist\release\goblin-camp.e0xe.
+#   1. Finds all DLLs imported by dist\release\goblin-camp.exe.
 #   2. Determines version of Visual C++ Runtime used.
 #   3. Copies third-party DLLs to dist\release directory.
 #   4. Generates installer manifest including all files in dist and VC++ redistributable package.
@@ -18,7 +18,7 @@ VC2010_CRT = frozenset(('msvcp100.dll', 'msvcr100.dll'))
 SYSTEM_DLL = frozenset((
     'kernel32.dll', 'user32.dll', 'gdi32.dll', 'opengl32.dll', 'winmm32.dll',
     'advapi32.dll', 'ntdll.dll', 'winmm.dll', 'rpcrt4.dll', 'secur32.dll',
-    'msvcrt.dll', 'dbghelp.dll'
+    'msvcrt.dll', 'dbghelp.dll', 'shell32.dll', 'shlwapi.dll'
 ))
 
 def findDLL(fn):
@@ -35,19 +35,20 @@ def setRedist(dll, target):
 
 def gatherDLLs(exe):
     for entry in exe.DIRECTORY_ENTRY_IMPORT:
-        name = entry.dll.lower()
-        if name in VC2008_CRT:
+        lname = entry.dll.lower()
+        name  = entry.dll
+        if lname in VC2008_CRT:
             setRedist(name, '2008')
-        elif name in VC2010_CRT:
+        elif lname in VC2010_CRT:
             setRedist(name, '2010')
-        elif name not in SYSTEM_DLL:
+        elif lname not in SYSTEM_DLL:
             name = findDLL(name)
             DLLs.add(name)
             gatherDLLs(pefile.PE(name))
 
 assert len(sys.argv) == 2, 'Usage: mkinstaller <version>'
 assert os.path.exists('build'), 'Run from project root.'
-assert os.path.exists(os.path.join('build', 'dist', 'release', 'goblin-camp.exe')), 'Run "bjam variant=release-pdb install" first.'
+assert os.path.exists(os.path.join('build', 'dist', 'release', 'goblin-camp.exe')), 'Run "bjam variant=release install" first.'
 
 exe  = pefile.PE(os.path.join('build', 'dist', 'release', 'goblin-camp.exe'))
 DLLs = set()
@@ -89,21 +90,16 @@ shutil.copy(
     os.path.join('build', 'dist', 'installer', 'src')
 )
 
-DATA_FILES  = ('.dat', '.xml', '.ini', '.png')
-exeManifest = [fn for fn in files if fn[-4:] not in (DATA_FILES + ('.pdb',))]
-datManifest = [fn for fn in files if fn[-4:] in DATA_FILES]
+manifest = [fn for fn in files if fn[-4:] != '.pdb']
 
 with closing(codecs.open(os.path.join('build', 'installer', 'base.nsi'), 'r', 'utf-8')) as fp:
     template = fp.read()
 
 template = template.replace(
-    u'%%_GC_EXECUTABLES_MANIFEST_%%', u'\n    '.join(ur'File "src\%s"' % fn for fn in exeManifest)
+    u'%%_GC_INSTALL_MANIFEST_%%', u'\n    '.join(ur'File "src\%s"' % fn for fn in manifest)
 )
 template = template.replace(
-    u'%%_GC_DATA_FILES_MANIFEST_%%',  u'\n    '.join(ur'File "src\%s"' % fn for fn in datManifest)
-)
-template = template.replace(
-    u'%%_GC_UNINSTALL_MANIFEST_%%', u'\n    '.join(ur'Delete "$INSTDIR\%s"' % fn for fn in (datManifest + exeManifest))
+    u'%%_GC_UNINSTALL_MANIFEST_%%', u'\n    '.join(ur'Delete "$INSTDIR\%s"' % fn for fn in manifest)
 )
 template = template.replace(u'%%_GC_VCREDIST_VERSION_%%', unicode(redist))
 template = template.replace(u'%%_GC_VERSION_%%', unicode(sys.argv[1]))

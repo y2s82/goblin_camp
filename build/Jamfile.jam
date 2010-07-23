@@ -1,0 +1,189 @@
+# Goblin Camp main project file
+#
+# You shouldn't edit it - see README for information about
+# search paths, etc.
+
+import modules ;
+import os ;
+import path ;
+
+import boost ;
+import libtcod ;
+import winsdk ;
+
+##
+# Project definition
+##
+project goblin-camp
+    : default-build debug
+    : requirements
+      <threading>multi
+      <strip>off
+      <debug-symbols>on
+      <variant>debug:<define>DEBUG
+      <include>$(GC_HEADERS)
+      <include>$(GC_SOURCE_ROOT)
+      <define>GC_BOOST_BUILD
+      # NT specific defines
+      <os>NT:<define>WINDOWS
+      <os>NT:<user-interface>gui
+      <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
+      <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
+      <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+      <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
+      <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1
+      <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=1
+      # Linux specific defines
+      <os>LINUX:<define>LINUX
+      # OSX specific defines
+      <os>MACOSX:<define>MACOSX
+    : source-location $(GC_SOURCE_ROOT)
+    : build-dir $(GC_TMP_DIR)
+;
+
+import gc-version ;
+modules.poke gc-version : GC_TEMPLATES : $(GC_TEMPLATES) ;
+modules.poke gc-version : GC_VERSION   : $(GC_VERSION) ;
+
+boost.use-project 1.43 ;
+winsdk.use-project ;
+libtcod.use-project ;
+
+##
+# Local rules
+##
+local rule explicit-alias ( name : sources * : requirements * : default-build * : usage-requirements * ) {
+    alias $(name) : $(sources) : $(requirements) : $(default-build) : $(usage-requirements) ;
+    explicit $(name) ;
+}
+
+local rule explicit-install ( name : sources + : requirements * ) {
+    install $(name) : $(sources) : $(requirements) ;
+    explicit $(name) ;
+}
+
+local rule get-platform-sources ( tree ) {
+    return [ path.glob-tree $(tree) : *.cc *.cpp *.cxx ] ;
+}
+
+actions make-nsis {
+    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION)
+}
+
+##
+# Collect sources and dependencies
+##
+data-files      = [ path.glob $(GC_SOURCE_ROOT) : *.dat *.ini *.png *.txt ] ;
+current-sources = [ path.glob $(GC_SOURCES) : *.cpp ] ;
+win32-sources   = [ get-platform-sources $(GC_WIN32_SOURCES) ] ;
+linux-sources   = [ get-platform-sources $(GC_LINUX_SOURCES) ] ;
+macosx-sources  = [ get-platform-sources $(GC_OSX_SOURCES) ] ;
+
+binaries-dist-dir   = . ;
+data-dist-dir       = . ;
+additional-dist-dir = . ;
+additional-files    = ;
+
+# Generated files
+win32-sources   += $(GC_TEMPLATES)/_version.rc_in ;
+current-sources += $(GC_TEMPLATES)/_version.cpp_in ;
+
+# Platform dependencies
+explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
+explicit-alias linux-deps ;
+explicit-alias osx-deps : : : : <framework>CoreFoundation ;
+
+# Boost dependencies
+boost-libs = serialization thread system filesystem ;
+
+boost-deps = ;
+for local name in $(boost-libs) {
+    boost-deps += /boost//$(name) ;
+}
+
+# All common dependencies
+explicit-alias common-deps
+    : $(boost-deps) /libtcod//libtcod
+;
+
+if [ os.name ] = NT {
+    ECHO ** Building for Windows ;
+    
+    current-sources += $(win32-sources) ;
+    explicit-alias platform-deps : win32-deps ;
+} else if [ os.name ] = LINUX {
+    ECHO ** Building for Linux ;
+    
+    binaries-dist-dir  = bin ;
+    data-dist-dir      = share/goblin-camp ;
+    current-sources   += $(linux-sources) ;
+    
+    explicit-alias platform-deps : linux-deps ;
+} else if [ os.name ] = MACOSX {
+    ECHO ** Building for OSX ;
+    
+    binaries-dist-dir    = MacOS ;
+    data-dist-dir        = Resources ;
+    additional-dist-dir  = Goblin Camp.app ;
+    current-sources     += $(osx-deps) ;
+    
+    obj Info.plist : $(GC_TEMPLATES)/Info.plist_in ;
+    additional-files += Info.plist ;
+    
+    explicit-alias platform-deps : osx-deps ;
+} else {
+    ECHO !!! Error: Platform not configured: [ os.name ] ;
+    ECHO !!! You either encountered a bug, or trying to build Goblin Camp on unsupported platform ;
+    EXIT ;
+}
+
+# Platform-specific and common dependencies combined
+explicit-alias gc-deps : platform-deps common-deps ;
+
+##
+# Define targets
+##
+#
+# Precompiled header
+cpp-pch stdafx.hpp 
+    : $(GC_HEADERS)/stdafx.hpp gc-deps
+;
+
+#
+# goblin-camp executable
+exe goblin-camp
+    : $(current-sources)
+      gc-deps
+      stdafx.hpp
+;
+
+#
+# NSIS installer
+make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis ;
+
+#
+# dist targets
+install dist-additional
+    : $(additional-files)
+    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)
+      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)
+;
+
+install dist-binaries
+    : goblin-camp
+    : <install-dependencies>on <install-type>LIB <toolset>msvc:<install-type>PDB <install-type>EXE
+      <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
+      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
+;
+
+install dist-data
+    : $(data-files)
+    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(data-dist-dir:E=)
+      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(data-dist-dir:E=)
+;
+
+alias dist : dist-data dist-binaries dist-additional ;
+
+#
+# Explicit targets
+explicit nsis dist dist-binaries dist-data dist-additional ;

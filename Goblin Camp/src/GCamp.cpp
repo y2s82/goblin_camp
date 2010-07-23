@@ -35,36 +35,29 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Announce.hpp"
 #include "UI.hpp"
 #include "JobManager.hpp"
+#include "Data.hpp"
 
-#ifndef GC_VERSION
-#	define GC_VERSION "0.11"
-#endif
-
-#ifdef WINDOWS
-// Win32CrashHandler.cpp
-void InstallExceptionHandler();
+#if defined(GC_BOOST_BUILD)
+// This variable is defined in buildsystem-generated _version.cpp.
+	extern const char *_GOBLIN_CAMP_VERSION_;
+#	define GC_VERSION _GOBLIN_CAMP_VERSION_
+#elif !defined(GC_VERSION)
+#	define GC_VERSION "Goblin Camp 0.11"
 #endif
 
 int main() {
-#	ifdef WINDOWS
-	InstallExceptionHandler();
-	std::string config = "./config.ini";
-#	else
-	std::string config = std::string(getenv("HOME")) + "/.goblincamp/config.ini";
-#	endif
-	
-	struct stat buffer;
-	if (stat(config.c_str(), &buffer) == 0) {
-		Game::Inst()->LoadConfig(config);
-	}
-	
+	Data::Init();
 	Game::Inst()->Init();
 	return MainMenu();
 }
 
 #ifdef WINDOWS
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int)
-{ return main(); }
+int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int) {
+	// Win32CrashHandler.cpp
+	void InstallExceptionHandler();
+	InstallExceptionHandler();
+	return main();
+}
 #endif
 
 void MainLoop() {
@@ -221,7 +214,7 @@ int MainMenu() {
 
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
-		TCODConsole::root->print(edgex+width/2, edgey-3, "Goblin Camp " GC_VERSION);
+		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
 		if (!endCredits) endCredits = TCODConsole::renderCredits(edgex+5, 
 			edgey+25, true);
 
@@ -232,31 +225,16 @@ int MainMenu() {
 	return 0;
 }
 
-#if defined(WINDOWS)
-#	define SAVE_DIR  "./saves/"
-#	define SAVE_FILE SAVE_DIR "%s"
-#else
-#	define SAVE_DIR  GetSaveDir().c_str()
-#	define SAVE_FILE GetSaveFile()
-inline std::string GetSaveDir() {
-	// superfluous calls, but whatever
-	std::string home = std::string(getenv("HOME"));
-	TCODSystem::createDirectory((home + "/.goblincamp").c_str());
-	TCODSystem::createDirectory((home + "/.goblincamp/saves").c_str());
-	return home + std::string("/.goblincamp/saves/");
-}
-inline std::string GetSaveFile() {
-	return getSaveDir() + std::string("%s");
-}
-#endif
-
 void LoadMenu() {
 	bool exit = false;
 	int width = 30;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
-	TCODList<char*> list = TCODSystem::getDirectoryContent(SAVE_DIR, "*.sav");
+	
+	TCODList<std::string> list;
+	Data::GetSavedGames(list);
+	
 	int height = list.size()+5;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 
@@ -277,7 +255,7 @@ void LoadMenu() {
 		} else selected = -1;
 
 		if (selected < list.size() && selected >= 0 && !mouseStatus.lbutton && lButtonDown) {
-			Game::Inst()->LoadGame((boost::format(SAVE_FILE) % (list.get(selected))).str().c_str());
+			Data::LoadGame(list.get(selected));
 			MainLoop();
 			lButtonDown = false;
 			return;
@@ -296,7 +274,7 @@ void LoadMenu() {
 				TCODConsole::root->setForegroundColor(TCODColor::white);
 				TCODConsole::root->setBackgroundColor(TCODColor::black);
 			}
-			if (i < list.size()) TCODConsole::root->print(edgex+width/2, edgey+2+i, list.get(i));
+			if (i < list.size()) TCODConsole::root->print(edgex+width/2, edgey+2+i, list.get(i).c_str());
 			else if (i == list.size()+1) TCODConsole::root->print(edgex+width/2, edgey+2+i, "Cancel");
 		}
 		TCODConsole::root->setForegroundColor(TCODColor::white);
@@ -323,8 +301,8 @@ void SaveMenu() {
 			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
 				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
-			TCODSystem::createDirectory(SAVE_DIR);
-			Game::Inst()->SaveGame((boost::format(SAVE_FILE) % saveName).str() + ".sav");
+			
+			Data::SaveGame(saveName);
 			break;
 		}
 
