@@ -21,6 +21,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <dbghelp.h>
+#include <shlobj.h>
+#include <shlwapi.h>
 #include <cstring>
 
 #include "Logger.hpp"
@@ -30,8 +32,24 @@ namespace {
 	LONG CALLBACK ExceptionHandler(__in PEXCEPTION_POINTERS ExceptionInfo) {
 		OutputDebugString(TEXT("[Goblin Camp] Unhandled exception occured."));
 		
+		TCHAR dumpFilename[MAX_PATH];
+		SHGetFolderPathAndSubDir(
+			NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL,
+			SHGFP_TYPE_CURRENT, TEXT("My Games\\Goblin Camp"), dumpFilename
+		);
+		
+		char date[20]; // DD-MM-YYYY-HH-MM-SS
+		struct tm *timeStruct;
+		__int64 timestamp;
+		
+		_time64(&timestamp);
+		timeStruct = _gmtime64(&timestamp);
+		
+		strftime(date, 20, "%d-%m-%Y-%H-%M-%S", timeStruct);
+		_snprintf(dumpFilename, MAX_PATH, "%s\\crash-%s.dmp", dumpFilename, date);
+		
 		HANDLE dump = CreateFile(
-			TEXT("crash.dmp"), GENERIC_WRITE, FILE_SHARE_READ, NULL,
+			dumpFilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
 			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL
 		);
 		
@@ -67,8 +85,6 @@ namespace {
 }
 
 void InstallExceptionHandler() {
-	Logger::Inst()->output << "Installing SEH handler.\n";
-	Logger::Inst()->output.flush();
 	SetUnhandledExceptionFilter(ExceptionHandler);
 }
 
