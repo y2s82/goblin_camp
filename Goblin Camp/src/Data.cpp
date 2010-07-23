@@ -15,20 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#if defined(WINDOWS)
-#	define NOMINMAX
-#	define WIN32_LEAN_AND_MEAN
-#	include <windows.h>
-#	include <shlobj.h>
-#elif defined(LINUX)
-#	include <sys/types.h>
-#	include <unistd.h>
-#elif defined(MACOSX)
-#	include <CoreFoundation/CoreFoundation.h>
-#else
-#	error WINDOWS, LINUX and MACOSX are the only targets supported, ensure correct macros are defined.
-#endif
-
 #include <libtcod.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
@@ -48,6 +34,10 @@ namespace fs = boost::filesystem;
 #include "NPC.hpp"
 #include "Construction.hpp"
 
+// These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
+void _ImplFindPersonalDirectory(std::string&);
+void _ImplFindExecutableDirectory(fs::path&, fs::path&, fs::path&);
+
 namespace {
 	namespace globals {
 		fs::path personalDir, exec, execDir, dataDir;
@@ -56,31 +46,10 @@ namespace {
 	}
 	
 	// Finds path to 'personal dir' and subdirs.
-	void FindPersonalDirectory() {
+	inline void FindPersonalDirectory() {
 		std::string dir;
-	#if defined(WINDOWS)
-		char myGames[MAX_PATH];
-		// gotta love WinAPI
-		SHGetFolderPathAndSubDirA(
-			NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, "My Games", myGames
-		);
-		dir = myGames;
-		dir += "\\Goblin Camp";
-	#elif defined(LINUX)
-		dir = getenv("HOME");
-		dir += "/.goblincamp";
-	#elif defined(MACOSX)
-		char buffer[1024];
-		CFStringRef username, path;
-		username = CSCopyUserName(true);
-		path     = CFStringCreateWithFormat(NULL, NULL, CFSTR("/Users/%@/Application Support/Goblin Camp"), username);
 		
-		CFStringGetCString(path, buffer, sizeof(buffer), kCFStringEncodingUTF8);
-		dir = buffer;
-		
-		CFRelease(username);
-		CFRelease(path);
-	#endif
+		_ImplFindPersonalDirectory(dir);
 		
 		globals::personalDir = fs::path(dir);
 		globals::savesDir    = globals::personalDir / "saves";
@@ -91,60 +60,8 @@ namespace {
 	}
 	
 	// Finds 'executable', 'bin-dir' and 'global data'.
-	void FindExecutableDirectory() {
-		std::string exec;
-		
-	#if defined(WINDOWS)
-		char *cmdLine = GetCommandLineA();
-		char *ptr     = strchr(cmdLine, ' ');
-		
-		if (ptr != NULL) *ptr = '\0';
-		
-		// strip quotes if they're present
-		if (cmdLine[0] == '"') {
-			char *end = strchr(cmdLine, '\0') - 1;
-			if (end != NULL && *end == '"') *end = '\0';
-			++cmdLine;
-		}
-		
-		exec = cmdLine;
-	#elif defined(LINUX)
-		char buffer[1024];
-		ssize_t pos = readlink("/proc/self/exe", buffer, 1023);
-		buffer[pos] = '\0';
-		exec = buffer;
-	#elif defined(MACOSX)
-		CFBundleRef bundle;
-		CFURLRef    execURL, resURL;
-		CFStringRef execStr, resStr;
-		char execPath[1024], resPath[1024];
-		
-		bundle  = CFBundleGetMainBundle();
-		execURL = CFBundleCopyExecutableURL(bundle);
-		resURL  = CFBundleCopyResourcesDirectoryURL(bundle);
-		execStr = CFURLCopyFileSystemPath(execURL, kCFURLPOSIXPathStyle);
-		resStr  = CFURLCopyFileSystemPath(resURL, kCFURLPOSIXPathStyle);
-		
-		CFStringGetCString(execStr, execPath, sizeof(execPath), kCFStringEncodingUTF8);
-		CFStringGetCString(resStr, resPath, sizeof(resPath), kCFStringEncodingUTF8);
-		exec = execPath;
-		
-		CFRelease(execStr);
-		CFRelease(resStr);
-		CFRelease(execURL);
-		CFRelease(resURL);
-		CFRelease(bundle);
-	#endif
-		
-		globals::exec    = fs::path(exec);
-		globals::execDir = globals::exec.parent_path();
-	#if defined(WINDOWS)
-		globals::dataDir = globals::execDir;
-	#elif defined(LINUX)
-		globals::dataDir = fs::path(globals::execDir.parent_path()) / "share/goblin-camp/";
-	#elif defined(MACOSX)
-		globals::dataDir = fs::path(std::string(resPath) + "/");
-	#endif
+	inline void FindExecutableDirectory() {
+		_ImplFindExecutableDirectory(globals::exec, globals::execDir, globals::dataDir);
 	}
 	
 	void _LoadNames(std::string fn) {

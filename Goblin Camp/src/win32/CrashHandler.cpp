@@ -15,9 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-// Jamroot needs a way to do platform-specific source files
-#ifdef WINDOWS
-
+#define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <dbghelp.h>
@@ -87,5 +85,3 @@ namespace {
 void InstallExceptionHandler() {
 	SetUnhandledExceptionFilter(ExceptionHandler);
 }
-
-#endif // WINDOWS

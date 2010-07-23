@@ -16,10 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
-#ifdef WINDOWS
-#	define WIN32_LEAN_AND_MEAN
-#	include <windows.h>
-#endif
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
@@ -45,20 +41,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	define GC_VERSION "Goblin Camp 0.11"
 #endif
 
-int main() {
+int GCMain() {
 	Data::Init();
 	Game::Inst()->Init();
 	return MainMenu();
 }
-
-#ifdef WINDOWS
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR cmdLine, int) {
-	// Win32CrashHandler.cpp
-	void InstallExceptionHandler();
-	InstallExceptionHandler();
-	return main();
-}
-#endif
 
 void MainLoop() {
 	Game* game = Game::Inst();
