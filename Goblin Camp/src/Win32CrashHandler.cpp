@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <shlobj.h>
 #include <shlwapi.h>
 #include <cstring>
+#include <ctime>
 
 #include "Logger.hpp"
 
