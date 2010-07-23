@@ -98,4 +98,7 @@ ItemCategory Squad::Weapon() { return weapon; }
 void Squad::Weapon(ItemCategory value) { weapon = value; }
 
 void Squad::Rearm() {
+	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
+		Game::Inst()->npcList[*memberi]->FindNewWeapon();
+	}
 }

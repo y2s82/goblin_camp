@@ -547,6 +547,17 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type) {
 	return boost::weak_ptr<Item>();
 }
 
+boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory category) {
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
+		if (consIter->second->stockpile && !consIter->second->farmplot) {
+			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, BETTERTHAN, relativeValue));
+			if (item.lock() && !item.lock()->Reserved()) {
+				return item;
+			}
+		}
+	}
+	return boost::weak_ptr<Item>();
+}
 
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
 Coordinate Game::FindWater(Coordinate pos) {
