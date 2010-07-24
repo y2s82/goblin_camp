@@ -540,29 +540,21 @@ boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory c
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, BETTERTHAN, relativeValue));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
-// Spawns items distributed randomly within the rectangle defined by corner1 & corner2
-void Game::SpawnItems(int quantity, std::string typeName, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = abs(corner1.X()-corner2.X());
-	int areaLength = abs(corner1.Y()-corner2.Y());
-	
-	for (int items = 0; items < quantity; ++items) {
-		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
-		Game::CreateItem(location, Item::StringToItemType(typeName), true);
 			}
 		}
 	}
+	return boost::weak_ptr<Item>();
 }
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
-void Game::SpawnItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
+void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = abs(corner1.X()-corner2.X());
 	int areaLength = abs(corner1.Y()-corner2.Y());
 	
 	for (int items = 0; items < quantity; ++items) {
-		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
-		Game::CreateItem(location, type, true);
+		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
+		Game::Inst()->CreateItem(location, type, true);
 	}
-	return boost::weak_ptr<Item>();
 }
 
 
@@ -1061,26 +1053,14 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 }
 
 // Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
-void Game::SpawnNPCs(int quantity, std::string typeName, Coordinate corner1, Coordinate corner2) {
+void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = abs(corner1.X()-corner2.X());
 	int areaLength = abs(corner1.Y()-corner2.Y());
 	
 	for (int npcs = 0; npcs < quantity; ++npcs) {
-		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
+		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
 
-		Game::CreateNPC(location, NPC::StringToNPCType(typeName));
-	}
-}
-
-// Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
-void Game::SpawnNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = abs(corner1.X()-corner2.X());
-	int areaLength = abs(corner1.Y()-corner2.Y());
-	
-	for (int npcs = 0; npcs < quantity; ++npcs) {
-		Coordinate location(rand() % areaWidth + min(corner1.X(),corner2.X()), rand() % areaLength + min(corner1.Y(),corner2.Y()));
-
-		Game::CreateNPC(location, type);
+		Game::Inst()->CreateNPC(location, type);
 	}
 }
 

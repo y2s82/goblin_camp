@@ -44,16 +44,16 @@ void Events::Update() {
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
 			% NPC::Presets[monsterType].plural).str();
 		Announce::Inst()->AddMsg(msg, TCODColor::red);
-		Game::Inst()->SpawnNPCs(hostileSpawnCount, monsterType, Coordinate(0,0), Coordinate(map->Width(),0));
+		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, Coordinate(0,0), Coordinate(map->Width(),0));
 	}
 
 	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
 		if (rand() % 3 == 0 && Game::Inst()->OrcCount() < 50) {
 			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
-			Game::Inst()->SpawnNPCs(1,"orc",Coordinate(0,0),Coordinate(map->Width(),0));
+			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
 		} else if (Game::Inst()->GoblinCount() < 100) {
 			Announce::Inst()->AddMsg("A goblin has joined your camp", TCODColor::azure);
-			Game::Inst()->SpawnNPCs(1,"goblin",Coordinate(0,0),Coordinate(map->Width(),0));
+			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("goblin"));
 		}
 	}
 }
