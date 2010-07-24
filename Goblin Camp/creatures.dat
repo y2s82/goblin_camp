@@ -128,7 +128,7 @@ npc_type "soldier ant" {
 	name="Soldier Ant"
 	speed=20
 	color="0,0,255"
-	grapihc='a'
+	graphic='a'
 	health=25
 	AI="HostileAnimal"
 	dodge=5
