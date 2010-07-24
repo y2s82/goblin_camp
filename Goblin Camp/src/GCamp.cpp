@@ -105,10 +105,10 @@ void StartNewGame() {
 	Coordinate middleCorner(220,220);
 	Coordinate itemBottomCorner(230,230);
 	
-	game->SpawnNPCs(15, "goblin", spawnTopCorner, middleCorner);
-	game->SpawnNPCs(6, "orc", spawnTopCorner, middleCorner);
+	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, middleCorner);
+	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, middleCorner);
 	
-	game->SpawnItems(20, "Bloodberry seed", middleCorner, itemBottomCorner);
+	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), middleCorner, itemBottomCorner);
 	
 	MainLoop();
 }
