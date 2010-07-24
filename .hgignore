@@ -47,5 +47,6 @@ screenshot*.png
 ccccReport\
 build\tmp
 build\dist
-build\deps\Jamfile.jam
 *.py[co]
+build\msvc
+user-config.jam

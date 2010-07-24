@@ -54,7 +54,9 @@
     <ClCompile Include="src\Tile.cpp" />
     <ClCompile Include="src\UI.cpp" />
     <ClCompile Include="src\Water.cpp" />
-    <ClCompile Include="src\Win32CrashHandler.cpp" />
+    <ClCompile Include="src\win32\CrashHandler.cpp" />
+    <ClCompile Include="src\win32\main.cpp" />
+    <ClCompile Include="src\win32\DataImpl.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp" />
