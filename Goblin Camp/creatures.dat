@@ -140,6 +140,6 @@ npc_type "soldier ant" {
 		damage="1d5+5"
 		cooldown=15
 	}
-	spawnsAsGroup="1d7+3"
+	spawnAsGroup="1d7+3"
 	tags=["underground"]
 }
