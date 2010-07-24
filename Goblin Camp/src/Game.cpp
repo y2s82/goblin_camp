@@ -546,6 +546,19 @@ boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory c
 	return boost::weak_ptr<Item>();
 }
 
+// Spawns items distributed randomly within the rectangle defined by corner1 & corner2
+void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
+	int areaWidth = abs(corner1.X()-corner2.X());
+	int areaLength = abs(corner1.Y()-corner2.Y());
+	
+	for (int items = 0; items < quantity; ++items) {
+		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
+		Game::Inst()->CreateItem(location, type, true);
+	}
+}
+
+
+
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
 Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest(-9999,-9999);
@@ -756,12 +769,6 @@ void Game::DeTillFarmPlots() {
 //Placeholder, awaiting a real map generator
 void Game::GenerateMap() {
 	Map* map = Map::Inst();
-	for (int x = 0; x < map->Width(); ++x) {
-		for (int y = 0; y < map->Height(); ++y) {
-			map->Reset(x,y);
-		}
-	}
-
 
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 260; y <= 270; ++y) {
@@ -806,14 +813,15 @@ void Game::GenerateMap() {
 			}
 		}
 	}
-
+ 
 	std::vector<NPCType> peacefulAnimals;
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (boost::icontains(NPC::Presets[i].ai, "peaceful"))
+		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
 			peacefulAnimals.push_back(i);
 	}
 
 	if (peacefulAnimals.size() > 0) {
+	//Generate benign fauna
 		for (int i = 0; i < 10; ++i) {
 			int type = rand() % peacefulAnimals.size();
 			Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
@@ -1044,6 +1052,18 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 	}
 }
 
+// Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
+void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
+	int areaWidth = abs(corner1.X()-corner2.X());
+	int areaLength = abs(corner1.Y()-corner2.Y());
+	
+	for (int npcs = 0; npcs < quantity; ++npcs) {
+		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
+
+		Game::Inst()->CreateNPC(location, type);
+	}
+}
+
 int Game::DiceToInt(TCOD_dice_t dice) {
 	if (dice.nb_faces == 0) 
 		dice.nb_faces = 1;
@@ -1092,5 +1112,21 @@ void Game::Reset() {
 	season = LateWinter;
 	upleft = Coordinate(180,180);
 	Announce::Inst()->Reset();
-	GenerateMap();
+	for (int x = 0; x < Map::Inst()->Width(); ++x) {
+		for (int y = 0; y < Map::Inst()->Height(); ++y) {
+			Map::Inst()->Reset(x,y);
+		}
+	}
+}
+
+NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
+	std::vector<NPCType> npcList;
+	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
+		if (NPC::Presets[i].tags.find(boost::to_lower_copy(tag)) != NPC::Presets[i].tags.end()) {
+			npcList.push_back(i);
+		}
+	}
+	if (npcList.size() > 0)
+		return npcList[rand() % npcList.size()];
+	return -1;
 }

@@ -26,7 +26,6 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 	int closedGraphic;
-	int timer;
 public:
 	Door(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	virtual void Update();

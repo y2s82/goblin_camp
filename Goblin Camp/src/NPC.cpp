@@ -885,6 +885,10 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
+	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
+		//Turn into a hostile animal if attacked by the player's creatures
+		if (animal->aggressor.lock()->Faction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+	}
 	return false;
 }
 
@@ -1105,7 +1109,6 @@ class NPCListener : public ITCODParserListener {
 		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
 		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
 		else if (boost::iequals(name,"spawnAsGroup")) { 
-			NPC::Presets.back().spawnRandomly = true;
 			NPC::Presets.back().spawnAsGroup = true;
 			NPC::Presets.back().group = value.dice;
 		} else if (boost::iequals(name,"type")) {
@@ -1134,8 +1137,12 @@ class NPCListener : public ITCODParserListener {
 			NPC::Presets.back().resistances[FIRE_RES] = value.i;
 		} else if (boost::iequals(name,"poison")) {
 			NPC::Presets.back().resistances[POISON_RES] = value.i;
+		} else if (boost::iequals(name,"tags")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				std::string tag = (char*)TCOD_list_get(value.list,i);
+				NPC::Presets.back().tags.insert(boost::to_lower_copy(tag));
+			}
 		}
-
 		return true;
 	}
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
@@ -1168,6 +1175,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addFlag("generateName");
 	npcTypeStruct->addProperty("dodge", TCOD_TYPE_INT, true);
 	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
+	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -1262,10 +1270,10 @@ typeName(typeNameVal),
 	needsNutrition(false),
 	needsSleep(false),
 	generateName(false),
-	spawnRandomly(false),
 	spawnAsGroup(false),
 	group(TCOD_dice_t()),
-	attacks(std::list<Attack>())
+	attacks(std::list<Attack>()),
+	tags(std::set<std::string>())
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;

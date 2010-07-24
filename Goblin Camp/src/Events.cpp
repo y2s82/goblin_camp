@@ -28,8 +28,7 @@ hostileSpawningMonsters(std::vector<int>()),
 	map(vmap)
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (NPC::Presets[i].spawnRandomly && (boost::iequals(NPC::Presets[i].ai, "HungryAnimal") 
-			|| boost::iequals(NPC::Presets[i].ai, "HostileAnimal")))
+		if (NPC::Presets[i].tags.find("attackrandomly") != NPC::Presets[i].tags.end())
 			hostileSpawningMonsters.push_back(i);
 	}
 }
@@ -38,18 +37,18 @@ hostileSpawningMonsters(std::vector<int>()),
 
 void Events::Update() {
 	if (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0) {
-		int monsterType = rand() % hostileSpawningMonsters.size();
-		monsterType = hostileSpawningMonsters[monsterType];
+		int hostileID = rand() % hostileSpawningMonsters.size();
+		NPCType monsterType = hostileSpawningMonsters[hostileID];
+		int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
 			% NPC::Presets[monsterType].plural).str();
 		Announce::Inst()->AddMsg(msg, TCODColor::red);
-		for (int i = 0; i < Game::DiceToInt(NPC::Presets[monsterType].group); ++i) {
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), monsterType);
-		}
+		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, Coordinate(0,0), Coordinate(map->Width(),0));
 	}
 
-	if (rand() % (UPDATES_PER_SECOND * 60 * 7) == 0) {
-		if (rand() % 2 == 0 && Game::Inst()->OrcCount() < 50) {
+	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
+		if (rand() % 3 == 0 && Game::Inst()->OrcCount() < 50) {
 			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
 			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
 		} else if (Game::Inst()->GoblinCount() < 100) {
