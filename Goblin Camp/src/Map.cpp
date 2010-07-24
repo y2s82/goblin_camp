@@ -42,25 +42,45 @@ float Map::getWalkCost(int x0, int y0, int x1, int y1, void *data) const {
 }
 
 bool Map::Walkable(int x, int y) const {
-	return tileMap[x][y].Walkable();
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Walkable();
+	return false;
 }
-void Map::Walkable(int x,int y, bool value) { tileMap[x][y].Walkable(value); }
+void Map::Walkable(int x,int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Walkable(value); 
+}
 
 int Map::Width() { return width; }
 int Map::Height() { return height; }
-bool Map::Buildable(int x, int y) const { return tileMap[x][y].Buildable(); }
-void Map::Buildable(int x, int y, bool value) { tileMap[x][y].Buildable(value); }
-TileType Map::Type(int x, int y) { return tileMap[x][y].type(); }
-void Map::Type(int x, int y, TileType ntype) { tileMap[x][y].type(ntype); }
+bool Map::Buildable(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Buildable(); 
+	return false;
+}
+void Map::Buildable(int x, int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Buildable(value); 
+}
+TileType Map::Type(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].type(); 
+	return TILENONE;
+}
+void Map::Type(int x, int y, TileType ntype) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].type(ntype); 
+}
 bool Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
 		return tileMap[x][y].MoveTo(uid);
 	} else return false;
 }
-void Map::MoveFrom(int x, int y, int uid) { tileMap[x][y].MoveFrom(uid); }
+void Map::MoveFrom(int x, int y, int uid) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].MoveFrom(uid); 
+}
 
-void Map::Construction(int x, int y, int uid) { tileMap[x][y].Construction(uid); }
-int Map::Construction(int x, int y) { return tileMap[x][y].Construction(); }
+void Map::Construction(int x, int y, int uid) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Construction(uid); 
+}
+int Map::Construction(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Construction(); 
+	return -1;
+}
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
 void Map::Draw(Coordinate upleft, TCODConsole *console) {
@@ -89,33 +109,83 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 	}
 }
 
-boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) { return tileMap[x][y].GetWater(); }
-void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { tileMap[x][y].SetWater(value); }
+boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetWater();
+	return boost::weak_ptr<WaterNode>();
+}
+void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWater(value); 
+}
 
-bool Map::Low(int x, int y) const { return tileMap[x][y].Low(); }
-void Map::Low(int x, int y, bool value) { tileMap[x][y].Low(value); }
+bool Map::Low(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Low();
+	return false;
+}
+void Map::Low(int x, int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Low(value); 
+}
 
-bool Map::BlocksWater(int x, int y) const { return tileMap[x][y].BlocksWater(); }
-void Map::BlocksWater(int x, int y, bool value) { tileMap[x][y].BlocksWater(value); }
+bool Map::BlocksWater(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksWater(); 
+	return true;
+}
+void Map::BlocksWater(int x, int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].BlocksWater(value); 
+}
 
-std::set<int>* Map::NPCList(int x, int y) { return &tileMap[x][y].npcList; }
-std::set<int>* Map::ItemList(int x, int y) { return &tileMap[x][y].itemList; }
+std::set<int>* Map::NPCList(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].npcList; 
+	return &std::set<int>();
+}
+std::set<int>* Map::ItemList(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].itemList;
+	return &std::set<int>();
+}
 
-int Map::Graphic(int x, int y) const { return tileMap[x][y].Graphic(); }
-TCODColor Map::ForeColor(int x, int y) const { return tileMap[x][y].ForeColor(); }
-TCODColor Map::BackColor(int x, int y) const { return tileMap[x][y].BackColor(); }
+int Map::Graphic(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Graphic(); 
+	return '?';
+}
+TCODColor Map::ForeColor(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor(); 
+	return TCODColor::pink;
+}
+TCODColor Map::BackColor(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BackColor(); 
+	return TCODColor::yellow;
+}
 
-void Map::NatureObject(int x, int y, int val) { tileMap[x][y].NatureObject(val); }
-int Map::NatureObject(int x, int y) const { return tileMap[x][y].NatureObject(); }
+void Map::NatureObject(int x, int y, int val) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].NatureObject(val); 
+}
+int Map::NatureObject(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].NatureObject(); 
+	return -1;
+}
 
-boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) { return tileMap[x][y].GetFilth(); }
-void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { tileMap[x][y].SetFilth(value); }
+boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetFilth(); 
+	return boost::weak_ptr<FilthNode>();
+}
+void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetFilth(value); 
+}
 
-boost::weak_ptr<BloodNode> Map::GetBlood(int x, int y) { return tileMap[x][y].GetBlood(); }
-void Map::SetBlood(int x, int y, boost::shared_ptr<BloodNode> value) { tileMap[x][y].SetBlood(value); }
+boost::weak_ptr<BloodNode> Map::GetBlood(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetBlood(); 
+	return boost::weak_ptr<BloodNode>();
+}
+void Map::SetBlood(int x, int y, boost::shared_ptr<BloodNode> value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlood(value); 
+}
 
-bool Map::BlocksLight(int x, int y) const { return tileMap[x][y].BlocksLight(); }
-void Map::BlocksLight(int x, int y, bool val) { tileMap[x][y].BlocksLight(val); }
+bool Map::BlocksLight(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksLight(); 
+	return true;
+}
+void Map::BlocksLight(int x, int y, bool val) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].BlocksLight(val); 
+}
 
 bool Map::LineOfSight(Coordinate a, Coordinate b) {
 	return LineOfSight(a.X(), a.Y(), b.X(), b.Y());
