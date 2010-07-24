@@ -261,7 +261,7 @@ item_type "Stone spear" {
 
 item_type "Rough stone" {
 	category = ["Stone", "Rough stone"]
-	graphic = 7
+	graphic = 96
 	color = "192,192,192"
 	multiplier = 3
 }
