@@ -11,11 +11,10 @@
 import property-set ;
 import project ;
 import "class" : new ;
-
-.libtcod-options = ;
+import modules ;
 
 rule init ( options * ) {
-    .libtcod-options = [ property-set.create $(options) ] ;
+    modules.poke libtcod : .libtcod-options : [ property-set.create $(options) ] ;
 }
 
 rule use-project ( ) {
