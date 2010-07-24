@@ -22,7 +22,7 @@ Map::Map() {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
-			tileMap[i][e].type(tileMap[i][e].type());
+			tileMap[i][e].type(TILEGRASS);
 		}
 	}
 	width = tileMap.size();
@@ -132,6 +132,7 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 }
 
 void Map::Reset(int x, int y) {
+	tileMap[x][y].type(TILEGRASS);
 	tileMap[x][y].Walkable(true);
 	tileMap[x][y].Buildable(true);
 	tileMap[x][y].Construction(-1);
