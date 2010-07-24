@@ -29,13 +29,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
-#include "NPC.hpp"
 #include "Logger.hpp"
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
 #include "JobManager.hpp"
 #include "Data.hpp"
+#include "NPC.hpp"
+#include "Item.hpp"
 
 #if defined(GC_BOOST_BUILD)
 // This variable is defined in buildsystem-generated _version.cpp.
@@ -100,16 +101,15 @@ void StartNewGame() {
 	game->Reset();
 	game->GenerateMap();
 
-	for (int npcs = 0; npcs < 15; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("goblin"));
-	}
-	for (int npcs = 0; npcs < 6; ++npcs) {
-		game->CreateNPC(Coordinate(rand() % 20 + 200, rand() % 20 + 200), NPC::StringToNPCType("orc"));
-	}
-
-	for (int seeds = 0; seeds < 20; ++seeds) {
-		game->CreateItem(Coordinate(220+rand()%10, 220+rand()%10), Item::StringToItemType("Bloodberry seed"), true);
-	}
+	Coordinate spawnTopCorner(200,200);
+	Coordinate middleCorner(220,220);
+	Coordinate itemBottomCorner(230,230);
+	
+	game->SpawnNPCs(15, "goblin", spawnTopCorner, middleCorner);
+	game->SpawnNPCs(6, "orc", spawnTopCorner, middleCorner);
+	
+	game->SpawnItems(20, "Bloodberry seed", middleCorner, itemBottomCorner);
+	
 	MainLoop();
 }
 
