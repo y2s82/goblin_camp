@@ -37,23 +37,23 @@ hostileSpawningMonsters(std::vector<int>()),
 
 void Events::Update() {
 	if (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0) {
-		int monsterType = rand() % hostileSpawningMonsters.size();
-		monsterType = hostileSpawningMonsters[monsterType];
+		int hostileID = rand() % hostileSpawningMonsters.size();
+		NPCType monsterType = hostileSpawningMonsters[hostileID];
+		int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
 			% NPC::Presets[monsterType].plural).str();
 		Announce::Inst()->AddMsg(msg, TCODColor::red);
-		for (int i = 0; i < Game::DiceToInt(NPC::Presets[monsterType].group); ++i) {
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), monsterType);
-		}
+		Game::Inst()->SpawnNPCs(hostileSpawnCount, monsterType, Coordinate(0,0), Coordinate(map->Width(),0));
 	}
 
-	if (rand() % (UPDATES_PER_SECOND * 60 * 7) == 0) {
-		if (rand() % 2 == 0 && Game::Inst()->OrcCount() < 50) {
+	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
+		if (rand() % 3 == 0 && Game::Inst()->OrcCount() < 50) {
 			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
+			Game::Inst()->SpawnNPCs(1,"orc",Coordinate(0,0),Coordinate(map->Width(),0));
 		} else if (Game::Inst()->GoblinCount() < 100) {
 			Announce::Inst()->AddMsg("A goblin has joined your camp", TCODColor::azure);
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("goblin"));
+			Game::Inst()->SpawnNPCs(1,"goblin",Coordinate(0,0),Coordinate(map->Width(),0));
 		}
 	}
 }
