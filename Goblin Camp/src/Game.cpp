@@ -756,12 +756,6 @@ void Game::DeTillFarmPlots() {
 //Placeholder, awaiting a real map generator
 void Game::GenerateMap() {
 	Map* map = Map::Inst();
-	for (int x = 0; x < map->Width(); ++x) {
-		for (int y = 0; y < map->Height(); ++y) {
-			map->Reset(x,y);
-		}
-	}
-
 
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 260; y <= 270; ++y) {
@@ -1092,7 +1086,11 @@ void Game::Reset() {
 	season = LateWinter;
 	upleft = Coordinate(180,180);
 	Announce::Inst()->Reset();
-	GenerateMap();
+	for (int x = 0; x < Map::Inst()->Width(); ++x) {
+		for (int y = 0; y < Map::Inst()->Height(); ++y) {
+			Map::Inst()->Reset(x,y);
+		}
+	}
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
