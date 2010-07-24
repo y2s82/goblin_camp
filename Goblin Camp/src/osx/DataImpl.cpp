@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <CoreFoundation/CoreFoundation.h>
+#import  <Carbon/Carbon.h>
 
 #include <boost/filesystem.hpp>
 #include <string>
@@ -27,7 +28,7 @@ void _ImplFindPersonalDirectory(std::string& dir) {
 	char buffer[1024];
 	CFStringRef username, path;
 	username = CSCopyUserName(true);
-	path     = CFStringCreateWithFormat(NULL, NULL, CFSTR("/Users/%@/Application Support/Goblin Camp"), username);
+	path     = CFStringCreateWithFormat(NULL, NULL, CFSTR("/Users/%@/Library/Application Support/Goblin Camp"), username);
 	
 	CFStringGetCString(path, buffer, sizeof(buffer), kCFStringEncodingUTF8);
 	dir = buffer;
@@ -56,7 +57,6 @@ void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& d
 	CFRelease(resStr);
 	CFRelease(execURL);
 	CFRelease(resURL);
-	CFRelease(bundle);
 	
 	exec    = fs::path(std::string(cmdLine));
 	execDir = exec.parent_path();

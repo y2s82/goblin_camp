@@ -254,6 +254,12 @@ namespace Data {
 		//   |- ...
 		LoadLocalMods();
 		
+		#ifdef MACOSX
+		// workaround
+		Logger::Inst()->output << "[Data] Loading terminal.png again.\n";
+		TCODConsole::setCustomFont(globals::font.string().c_str());
+		#endif
+		
 		Logger::Inst()->output << "[Data] Data::Load() finished.\n";
 		Logger::Inst()->output.flush();
 	}
