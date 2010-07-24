@@ -467,12 +467,12 @@ void Construction::Update()
 		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
+			if (amount == 1) {
+				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!");
+			} else {
+				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!");
+			}
 			for (int i = 0; i < amount; ++i) {
-				if (amount == 1) {
-					Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!");
-				} else {
-					Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!");
-				}
 				Game::Inst()->CreateNPC(Position() + ProductionSpot(type), monsterType);
 			}
 		}
