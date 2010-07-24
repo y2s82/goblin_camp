@@ -24,7 +24,10 @@ userconfig = os.path.realpath(sys.argv[5]) if len(sys.argv) == 6 else None
 def getFiles(dir, pattern):
     return fnmatch.filter(os.listdir(dir), pattern)
 
-VS2008_FILE_TPL = '<File RelativePath="{0}"/>'
+VS2008_FILE_TPL    = '<File RelativePath="{0}"/>'
+VS2010_SRCFILE_TPL = '<ClCompile Include="{0}"/>'
+VS2010_HDRFILE_TPL = '<ClInclude Include="{0}"/>'
+VS2010_RESFILE_TPL = '<None Include="{0}"/>'
 
 variables = {}
 
@@ -50,7 +53,7 @@ if mode != 'sln':
     
     resources.extend(itertools.imap(
         lambda x: r'..\..\Goblin Camp\{0}'.format(x),
-        getFiles(root, '*.dat')
+        getFiles(root, '*.dat') + getFiles(root, '*.ini')
     ))
     
     sources.sort()
@@ -63,8 +66,12 @@ if mode != 'sln':
         variables['GC_SOURCE_FILES']   = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in sources)
         variables['GC_HEADER_FILES']   = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in headers)
         variables['GC_RESOURCE_FILES'] = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in resources)
+    elif mode == '2010':
+        variables['GC_SOURCE_FILES']   = '\r\n            '.join(VS2010_SRCFILE_TPL.format(fn) for fn in sources)
+        variables['GC_HEADER_FILES']   = '\r\n            '.join(VS2010_HDRFILE_TPL.format(fn) for fn in headers)
+        variables['GC_RESOURCE_FILES'] = '\r\n            '.join(VS2010_RESFILE_TPL.format(fn) for fn in resources)
     else:
-        print 'Not done yet.'
+        print 'Invalid command line.'
         sys.exit(255)
 
 with open(input, 'r') as fp:
