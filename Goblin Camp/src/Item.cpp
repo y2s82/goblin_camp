@@ -188,8 +188,9 @@ public:
 			} else {
 				std::cout<<"No growth defined for "<<Item::Presets[firstItemIndex+i].name<<"\n";
 			}
+			std::cout<<"Growth id = "<<Item::Presets[firstItemIndex+i].growth<<"\n";
 #else
-			if (presetGrowth[i] != "") Item::Presets[i].growth = Item::StringToItemType(presetGrowth[i]);
+			if (presetGrowth[i] != "") Item::Presets[firstItemIndex+i].growth = Item::StringToItemType(presetGrowth[i]);
 #endif
 			for (unsigned int fruit = 0; fruit < presetFruits[i].size(); ++fruit) {
 				Item::Presets[firstItemIndex+i].fruits.push_back(Item::StringToItemType(presetFruits[i][fruit]));
@@ -272,6 +273,7 @@ private:
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				presetFruits.back().push_back((char*)TCOD_list_get(value.list,i));
 			}
+			Item::Presets.back().organic = true;
 		} else if (boost::iequals(name, "multiplier")) {
 			Item::Presets.back().multiplier = value.i;
 		} else if (boost::iequals(name, "containerSize")) {
