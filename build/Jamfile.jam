@@ -38,7 +38,7 @@ project goblin-camp
       # OSX specific defines
       <os>MACOSX:<define>MACOSX
     : source-location $(GC_SOURCE_ROOT)
-    : build-dir $(GC_TMP_DIR)
+    : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
 
 import gc-version ;
@@ -217,7 +217,7 @@ install sln2010
 #
 # Explicit targets
 explicit nsis dist dist-binaries dist-data dist-additional make-sln2008 make-sln2010 sln2008 sln2010 ;
-explicit make-sln2008-sln make-sln2008-proj make-sln2010-sln make-sln2010-proj ;
+explicit goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
 
 #
 # Always build version information
