@@ -110,7 +110,7 @@ npc_type "poisonous snake" {
 	color="0,0,250"
 	graphic='S'
 	health=25
-	AI="HostileAnimal"
+	AI="PeacefulAnimal"
 	dodge=7
 	resistances {
 		physical=7
