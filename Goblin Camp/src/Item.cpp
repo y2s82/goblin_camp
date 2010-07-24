@@ -162,41 +162,46 @@ class ItemListener : public ITCODParserListener {
 	std::vector<std::vector<std::string> > presetDecay;
 	std::vector<std::string> presetProjectile;
 	std::vector<std::string> presetCategoryParent;
+	int firstCategoryIndex;
+	int firstItemIndex;
 
 public:
 	ItemListener() : ITCODParserListener(),
-		mode(CATEGORYMODE) {
+		mode(CATEGORYMODE),
+		firstCategoryIndex(Item::Categories.size()),
+		firstItemIndex(Item::Presets.size())
+	{
 	}
 
 	void translateNames() {
-		for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+		for (unsigned int i = 0; i < presetCategoryParent.size(); ++i) {
 			if (presetCategoryParent[i] != "") {
-				Item::Categories[i].parent = &Item::Categories[Item::StringToItemCategory(presetCategoryParent[i])];
+				Item::Categories[firstCategoryIndex+i].parent = &Item::Categories[Item::StringToItemCategory(presetCategoryParent[i])];
 			}
 		}
 
-		for (unsigned int i = 0; i < Item::Presets.size(); ++i) {
+		for (unsigned int i = 0; i < presetGrowth.size(); ++i) {
 #ifdef DEBUG
 			if (presetGrowth[i] != "") {
-				Item::Presets[i].growth = Item::StringToItemType(presetGrowth[i]);
+				Item::Presets[firstItemIndex+i].growth = Item::StringToItemType(presetGrowth[i]);
 				std::cout<<"Translating "<<presetGrowth[i]<<" into growth id "<<Item::StringToItemType(presetGrowth[i])<<"\n";
 			} else {
-				std::cout<<"No growth defined for "<<Item::Presets[i].name<<"\n";
+				std::cout<<"No growth defined for "<<Item::Presets[firstItemIndex+i].name<<"\n";
 			}
 #else
 			if (presetGrowth[i] != "") Item::Presets[i].growth = Item::StringToItemType(presetGrowth[i]);
 #endif
 			for (unsigned int fruit = 0; fruit < presetFruits[i].size(); ++fruit) {
-				Item::Presets[i].fruits.push_back(Item::StringToItemType(presetFruits[i][fruit]));
+				Item::Presets[firstItemIndex+i].fruits.push_back(Item::StringToItemType(presetFruits[i][fruit]));
 			}
 			for (unsigned int decay = 0; decay < presetDecay[i].size(); ++decay) {
 				if (boost::iequals(presetDecay[i][decay], "Filth"))
-					Item::Presets[i].decayList.push_back(-1);
+					Item::Presets[firstItemIndex+i].decayList.push_back(-1);
 				else
-					Item::Presets[i].decayList.push_back(Item::StringToItemType(presetDecay[i][decay]));
+					Item::Presets[firstItemIndex+i].decayList.push_back(Item::StringToItemType(presetDecay[i][decay]));
 			}
 
-			if (presetProjectile[i] != "") Item::Presets[i].attack.Projectile(Item::StringToItemType(presetProjectile[i]));
+			if (presetProjectile[i] != "") Item::Presets[firstItemIndex+i].attack.Projectile(Item::StringToItemType(presetProjectile[i]));
 		}
 	}
 
