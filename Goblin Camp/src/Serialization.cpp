@@ -468,6 +468,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & materialsUsed;
 	ar & stockpile;
 	ar & farmplot;
+	ar & time;
 }
 
 template<class Archive>
@@ -490,20 +491,19 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & materialsUsed;
 	ar & stockpile;
 	ar & farmplot;
+	ar & time;
 }
 
 template<class Archive>
 void Door::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object <Construction>(*this);
 	ar & closedGraphic;
-	ar & timer;
 }
 
 template<class Archive>
 void Door::load(Archive & ar, const unsigned int version) {
 	ar & boost::serialization::base_object <Construction>(*this);
 	ar & closedGraphic;
-	ar & timer;
 }
 
 

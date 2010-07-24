@@ -122,6 +122,7 @@ public:
 	void CreateSquad(std::string);
 	static void SetSquadTargetCoordinate(Coordinate, boost::shared_ptr<Squad>);
 	static void SetSquadTargetEntity(Coordinate, boost::shared_ptr<Squad>);
+	NPCType GetRandomNPCTypeByTag(std::string tag);
 
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
