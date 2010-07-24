@@ -19,8 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "GCamp.hpp"
 
-Door::Door(ConstructionType type, Coordinate target) : Construction(type, target),
-	timer(0)
+Door::Door(ConstructionType type, Coordinate target) : Construction(type, target)
 {
 	closedGraphic = graphic[1];
 }
@@ -28,9 +27,9 @@ Door::Door(ConstructionType type, Coordinate target) : Construction(type, target
 void Door::Update() {
 	if (!Map::Inst()->NPCList(x, y)->empty()) {
 		graphic[1] = 254;
-		timer = (UPDATES_PER_SECOND / 2);
+		time = (UPDATES_PER_SECOND / 2);
 	} else {
-		if (timer == 0) graphic[1] = closedGraphic;
-		else --timer;
+		if (time == 0) graphic[1] = closedGraphic;
+		else --time;
 	}
 }

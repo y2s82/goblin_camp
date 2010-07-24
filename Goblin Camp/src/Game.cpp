@@ -809,7 +809,7 @@ void Game::GenerateMap() {
 
 	std::vector<NPCType> peacefulAnimals;
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (boost::icontains(NPC::Presets[i].ai, "peaceful"))
+		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
 			peacefulAnimals.push_back(i);
 	}
 
@@ -1093,4 +1093,16 @@ void Game::Reset() {
 	upleft = Coordinate(180,180);
 	Announce::Inst()->Reset();
 	GenerateMap();
+}
+
+NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
+	std::vector<NPCType> npcList;
+	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
+		if (NPC::Presets[i].tags.find(boost::to_lower_copy(tag)) != NPC::Presets[i].tags.end()) {
+			npcList.push_back(i);
+		}
+	}
+	if (npcList.size() > 0)
+		return npcList[rand() % npcList.size()];
+	return -1;
 }

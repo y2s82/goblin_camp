@@ -76,3 +76,39 @@ construction_type "Door" {
 	maxCondition=10
 	materials=["Door"]
 }
+
+construction_type "Stone quarry" {
+	graphicLength=10
+	graphic=[ 44, 46, 46, 44, 44, 44, 46, 44, 46, 46,
+			  44, 46, 46, 44, 44, 44, 46, 44, 46, 44,
+			  46, 46, 46, 44, 44, 44, 46, 44, 46, 44,
+			  44, 46, 46, 44,178,178,177,178, 46, 46,
+			  44, 46,177,178, 32, 32,176,177, 46, 44,
+			  44, 46, 46, 44, 32, 32,177,176, 46, 46,
+			  46, 46, 46,178,177,177,176,178, 46, 46,
+			  44, 46, 46, 44, 44, 44, 46, 44, 46, 44,
+			  46, 46, 46, 44, 44, 44, 46, 44, 46, 46,
+			  46, 46, 46, 44, 44, 44, 46, 44, 46, 46]
+	products=["Rough stone"]
+	walkable
+	maxCondition=500
+	productionx=3
+	productiony=5
+	spawnsCreatures="underground"
+	//Spawn creatures every x seconds
+	spawnFrequency=600
+}
+
+construction_type "Stone mason's shack" {
+	graphicLength=4
+	graphic=[ 44, 44, 44, 44,
+			  44, 44, 44, 44,
+			  44, 44, 44, 44]
+	products=["Sharpened stone", "Stone axe", "Stone spear"]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank",
+			   "Plank","Plank","Plank","Plank","Plank"]
+}

@@ -80,10 +80,10 @@ struct NPCPreset {
 	bool generateName;
 	int stats[STAT_COUNT];
 	int resistances[RES_COUNT];
-	bool spawnRandomly;
 	bool spawnAsGroup;
 	TCOD_dice_t group;
 	std::list<Attack> attacks;
+	std::set<std::string> tags;
 };
 
 class NPC : public Entity {

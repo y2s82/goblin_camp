@@ -11,6 +11,10 @@ category_type "Plank" {
 category_type "Stone" {
 }
 
+category_type "Rough stone" {
+	parent="Stone"
+}
+
 category_type "Brick" {
 	parent="Stone"
 }
@@ -253,4 +257,18 @@ item_type "Stone spear" {
 		statusEffects=["Bleeding"]
 		effectChances=[    10    ]
 	}
+}
+
+item_type "Rough stone" {
+	category = ["Stone", "Rough stone"]
+	graphic = 7
+	color = "192,192,192"
+	multiplier = 3
+}
+
+item_type "Sharpened stone" {
+	category = ["Stone", "Sharpened stone"]
+	graphic = 30
+	color = "192,192,192"
+	components = ["Rough stone"]
 }

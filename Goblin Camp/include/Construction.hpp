@@ -57,6 +57,8 @@ struct ConstructionPreset {
 	bool tags[TAGCOUNT];
 	Coordinate productionSpot;
 	bool dynamic;
+	std::string spawnCreaturesTag;
+	int spawnFrequency;
 };
 
 class Construction : public Entity {
@@ -88,6 +90,7 @@ protected:
 	boost::shared_ptr<Container> materialsUsed;
 	bool stockpile, farmplot;
 	bool dismantle;
+	int time;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 public:
 	~Construction();

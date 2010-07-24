@@ -18,6 +18,7 @@ npc_type "orc" {
 		damage="1d10+10"
 		cooldown=25
 	}
+	tags=["friendly"]
 }
 
 npc_type "goblin" {
@@ -39,6 +40,7 @@ npc_type "goblin" {
 		damage="1d9"
 		cooldown=25
 	}
+	tags=["friendly"]
 }
 
 npc_type "giant snail" {
@@ -58,6 +60,7 @@ npc_type "giant snail" {
 		damage="1d2"
 		cooldown=75
 	}
+	tags=["localWildlife"]
 }
 
 npc_type "starving wolf" {
@@ -78,6 +81,7 @@ npc_type "starving wolf" {
 		damage="5d4"
 		cooldown=25
 	}
+	tags=["attackRandomly"]
 }
 
 npc_type "rabid albino rat" {
@@ -97,6 +101,7 @@ npc_type "rabid albino rat" {
 		damage="1d2+1"
 		cooldown=15
 	}
+	tags=["attackRandomly"]
 }
 
 npc_type "poisonous snake" {
@@ -116,4 +121,25 @@ npc_type "poisonous snake" {
 		cooldown=50
 		statusEffects=["poison"]
 	}
+	tags=["localWildlife", "angers"]
+}
+
+npc_type "soldier ant" {
+	name="Soldier Ant"
+	speed=20
+	color="0,0,255"
+	grapihc='a'
+	health=25
+	AI="HostileAnimal"
+	dodge=5
+	resistances {
+		physical=10
+	}
+	attack "Bite" {
+		type="slashing"
+		damage="1d5+5"
+		cooldown=15
+	}
+	spawnsAsGroup="1d7+3"
+	tags=["underground"]
 }

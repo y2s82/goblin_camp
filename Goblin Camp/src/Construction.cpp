@@ -46,7 +46,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	progress(0),
 	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
 	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
-	dismantle(false)
+	dismantle(false),
+	time(0)
 {
 	x = target.X();
 	y = target.Y();
@@ -312,6 +313,11 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().productionSpot.X(value.i);
 		} else if (boost::iequals(name, "productiony")) {
 			Construction::Presets.back().productionSpot.Y(value.i);
+		} else if (boost::iequals(name, "spawnsCreatures")) {
+			Construction::Presets.back().spawnCreaturesTag = value.s;
+			Construction::Presets.back().dynamic = true;
+		} else if (boost::iequals(name, "spawnFrequency")) {
+			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
 		}
 
 		return true;
@@ -347,6 +353,8 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("wall");
 	constructionTypeStruct->addFlag("door");
 	constructionTypeStruct->addFlag("bed");
+	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -453,7 +461,23 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[type].tags[tag]; }
 
-void Construction::Update() {}
+void Construction::Update() 
+{
+	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
+		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
+			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
+			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
+			for (int i = 0; i < amount; ++i) {
+				if (amount == 1) {
+					Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!");
+				} else {
+					Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!");
+				}
+				Game::Inst()->CreateNPC(Position() + ProductionSpot(type), monsterType);
+			}
+		}
+	}
+}
 
 void Construction::Dismantle() {
 	if (!dismantle) {
@@ -480,7 +504,9 @@ maxCondition(0),
 	name("???"),
 	blueprint(Coordinate(1,1)),
 	productionSpot(Coordinate(0,0)),
-	dynamic(false)
+	dynamic(false),
+	spawnCreaturesTag(""),
+	spawnFrequency(10)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
