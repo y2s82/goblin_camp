@@ -727,9 +727,10 @@ void SideBar::Draw(TCODConsole* console) {
 			}
 			console->setForegroundColor(TCODColor::white);
 			if (npc->MemberOf().lock()) { //Member of a squad
-				console->setAlignment(TCOD_CENTER);
-				console->print(edgeX - (width / 2), topY+28, npc->MemberOf().lock()->Name().c_str());
-				console->setAlignment(TCOD_LEFT);
+				console->print(edgeX-width+1, topY+26, "S: %s", npc->MemberOf().lock()->Name().c_str());
+			}
+			if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
+				console->print(edgeX-width+1, topY+27, "W: %s", weapon->Name().c_str());
 			}
 		} else if (construction) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
