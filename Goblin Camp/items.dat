@@ -15,19 +15,23 @@ category_type "Rough stone" {
 	parent="Stone"
 }
 
+category_type "Sharpened stone" {
+	parent="Stone"
+}
+
 category_type "Brick" {
 	parent="Stone"
 }
 
-category_type "Sharpened stone" {
-	parent="Stone"
+category_type "Food" {
 }
 
 category_type "Raw Food" {
 	parent="Food"
 }
 
-category_type "Food" {
+category_type "Prepared Food" {
+	parent="Food"
 }
 
 category_type "Berry" {
@@ -41,10 +45,6 @@ category_type "Seed" {
 }
 
 category_type "Plant" {
-}
-
-category_type "Flour" {
-	parent="Food"
 }
 
 category_type "Fibre" {
@@ -116,7 +116,7 @@ item_type "Wood plank" {
 }
 
 item_type "Wooden door" {
-	category = ["Door", "Furniture"]
+	category = ["Door"]
 	graphic = 197
 	color = "255,73,7"
 	components = ["Plank", "Plank", "Plank"]
@@ -139,7 +139,7 @@ item_type "Crate" {
 }
 
 item_type "Wooden bed" {
-	category = ["Bed", "Furniture"]
+	category = ["Bed"]
 	graphic = 22
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
@@ -156,7 +156,7 @@ item_type "Wine" {
 }
 
 item_type "Bloodberry" {
-	category = [ "Berry", "Raw Food", "Food" ]
+	category = [ "Berry", "Raw Food"]
 	graphic = 248
 	color = "255,0,0"
 	nutrition = 3000
@@ -210,7 +210,7 @@ item_type "Corpse" {
 }
 
 item_type "Pie" {
-	category = ["Food"]
+	category = ["Prepared Food"]
 	graphic = 37
 	color = "255,0,220"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour"]
@@ -218,7 +218,7 @@ item_type "Pie" {
 }
 
 item_type "Exquisite Pie" {
-	category = ["Food"]
+	category = ["Prepared Food"]
 	graphic = 37
 	color = "178,0,255"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Drink"]
@@ -226,7 +226,7 @@ item_type "Exquisite Pie" {
 }
 
 item_type "Bread" {
-	category = ["Food"]
+	category = ["Prepared Food"]
 	graphic = 37
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
@@ -234,7 +234,7 @@ item_type "Bread" {
 }
 
 item_type "Wooden club" {
-	category = ["Weapon", "Blunt weapon"]
+	category = ["Blunt weapon"]
 	graphic = 41
 	color = "127,106,0"
 	components = ["Plank"]
@@ -248,7 +248,7 @@ item_type "Wooden club" {
 }
 
 item_type "Stone maul" {
-	category = ["Weapon", "Blunt weapon"]
+	category = ["Blunt weapon"]
 	graphic = 41
 	color = "192,192,192"
 	components = ["Plank", "Rough stone"]
@@ -262,7 +262,7 @@ item_type "Stone maul" {
 }
 
 item_type "Stone axe" {
-	category = ["Weapon", "Slashing weapon"]
+	category = ["Slashing weapon"]
 	graphic = 41
 	color = "192,192,192"
 	components = ["Plank", "Sharpened stone"]
@@ -276,7 +276,7 @@ item_type "Stone axe" {
 }
 
 item_type "Stone spear" {
-	category = ["Weapon", "Piercing weapon"]
+	category = ["Piercing weapon"]
 	graphic = 41
 	color = "192,192,192"
 	components = ["Plank", "Sharpened stone"]
@@ -290,14 +290,14 @@ item_type "Stone spear" {
 }
 
 item_type "Rough stone" {
-	category = ["Stone", "Rough stone"]
+	category = ["Rough stone"]
 	graphic = 96
 	color = "192,192,192"
 	multiplier = 3
 }
 
 item_type "Sharpened stone" {
-	category = ["Stone", "Sharpened stone"]
+	category = ["Sharpened stone"]
 	graphic = 30
 	color = "192,192,192"
 	components = ["Rough stone"]

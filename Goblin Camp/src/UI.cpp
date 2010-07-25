@@ -764,7 +764,15 @@ void SideBar::Draw(TCODConsole* console) {
 				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
 				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-					console->print(edgeX-(width-2),topY+15+i, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
+					if (!Item::Categories[i].parent) {
+						console->print(edgeX-(width-2),topY+15+i, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
+					} else {
+						if (i+1 < Item::Categories.size() && Item::Categories[i+1].parent == Item::Categories[i].parent) {
+							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
+						} else {
+							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
+						}
+					}
 				}
 				console->setForegroundColor(TCODColor::white);
 			} else if (construct->HasTag(FARMPLOT)) {
