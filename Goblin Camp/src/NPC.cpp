@@ -37,6 +37,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "StatusEffect.hpp"
 #include "Camp.hpp"
+#include "Stockpile.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -487,7 +488,7 @@ MOVENEARend:
 				break;
 
 			case FIND:
-				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item);
+				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->flags);
 				if (!foundItem.lock()) {
 					TaskFinished(TASKFAILFATAL); 
 #ifdef DEBUG
@@ -1246,7 +1247,7 @@ void NPC::GetMainHandAttack(Attack &attack) {
 void NPC::FindNewWeapon() {
 	int weaponValue = mainHand.lock() ? mainHand.lock()->RelativeValue() : 0;
 	ItemCategory weaponCategory = squad.lock() ? squad.lock()->Weapon() : Item::StringToItemCategory("Weapon");
-	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemBetterThan(weaponValue, weaponCategory);
+	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, BETTERTHAN, weaponValue);
 	if (boost::shared_ptr<Item> weapon = newWeapon.lock()) {
 		boost::shared_ptr<Job> weaponJob(new Job("Grab weapon"));
 		weaponJob->internal = true;

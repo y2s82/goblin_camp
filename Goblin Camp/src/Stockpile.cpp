@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
+#include "StockManager.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 Construction(type, target),
@@ -48,6 +49,7 @@ Stockpile::~Stockpile() {
 
 int Stockpile::Build() {return 1;}
 
+//TODO: Remove repeated code
 boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, int value) {
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
 		if (!conti->second->empty()) {
@@ -58,6 +60,15 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 						if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
 					} else if (flags & BETTERTHAN) {
 						if (item.lock()->RelativeValue() > value) return item;
+					} else if (flags & APPLYMINIMUMS) {
+						/*For now this only affects seeds. With this flag set don't return
+						seeds if at or below the set minimum for them*/
+						if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
+							if (StockManager::Inst()->TypeQuantity(item.lock()->Type()) >
+								StockManager::Inst()->Minimum(item.lock()->Type())) {
+									return item;
+							}
+						} else return item;
 					} else return item;
 				}
 				if (boost::dynamic_pointer_cast<Container>(item.lock())) {
@@ -66,6 +77,15 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 						if (itemi->lock() && itemi->lock()->IsCategory(cat) && !itemi->lock()->Reserved())
 							if (flags & BETTERTHAN) {
 								if (itemi->lock()->RelativeValue() > value) return *itemi;
+							} else if (flags & APPLYMINIMUMS) {
+								/*For now this only affects seeds. With this flag set don't return
+								seeds if at or below the set minimum for them*/
+								if (itemi->lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
+									if (StockManager::Inst()->TypeQuantity(itemi->lock()->Type()) >
+										StockManager::Inst()->Minimum(itemi->lock()->Type())) {
+											return *itemi;
+									}
+								} else return *itemi;
 							} else return *itemi;
 					}
 				}
@@ -84,6 +104,15 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 					if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
 				} else if (flags & BETTERTHAN) {
 					if (item.lock()->RelativeValue() > value) return item;
+				} else if (flags & APPLYMINIMUMS) {
+					/*For now this only affects seeds. With this flag set don't return
+					seeds if at or below the set minimum for them*/
+					if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
+						if (StockManager::Inst()->TypeQuantity(item.lock()->Type()) >
+							StockManager::Inst()->Minimum(item.lock()->Type())) {
+								return item;
+						}
+					} else return item;
 				} else return item;
 			}
 			if (boost::dynamic_pointer_cast<Container>(item.lock())) {
@@ -92,6 +121,15 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 					if (itemi->lock() && itemi->lock()->Type() == typeValue && !itemi->lock()->Reserved())
 						if (flags & BETTERTHAN) {
 							if (itemi->lock()->RelativeValue() > value) return *itemi;
+						} else if (flags & APPLYMINIMUMS) {
+							/*For now this only affects seeds. With this flag set don't return
+							seeds if at or below the set minimum for them*/
+							if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
+								if (StockManager::Inst()->TypeQuantity(itemi->lock()->Type()) >
+									StockManager::Inst()->Minimum(itemi->lock()->Type())) {
+										return *itemi;
+								}
+							} else return *itemi;
 						} else return *itemi;
 				}
 			}

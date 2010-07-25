@@ -109,7 +109,8 @@ void StartNewGame() {
 	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, middleCorner);
 	
 	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), middleCorner, itemBottomCorner);
-	
+	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), middleCorner, itemBottomCorner);
+	game->CreateItems(20, Item::StringToItemType("Flour sack"), middleCorner, itemBottomCorner);
 	MainLoop();
 }
 

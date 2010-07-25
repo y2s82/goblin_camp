@@ -157,7 +157,7 @@ item_type "Wine" {
 
 item_type "Bloodberry" {
 	category = [ "Berry", "Raw Food", "Food" ]
-	graphic = 7
+	graphic = 248
 	color = "255,0,0"
 	nutrition = 3000
 	fruits = [ "Bloodberry seed" ]
@@ -308,7 +308,7 @@ item_type "Flour" {
 	graphic = 44
 	color = "255,233,177"
 	components = ["Seed", "Seed"]
-	containIn = "Flour container"
+	containIn = "Flour Container"
 }
 
 item_type "Blueleaf boll" {

@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define NOTFULL (1 << 0)
 #define BETTERTHAN (1 << 1)
+#define APPLYMINIMUMS (1 << 2)
 
 class Stockpile : public Construction {
 	friend class boost::serialization::access;

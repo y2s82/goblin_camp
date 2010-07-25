@@ -510,10 +510,10 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
 
-boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category) {
+boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, int flags, int value) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category));
+			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
 			}
@@ -522,22 +522,10 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 	return boost::weak_ptr<Item>();
 }
 
-boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type) {
+boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, int flags, int value) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type));
-			if (item.lock() && !item.lock()->Reserved()) {
-				return item;
-			}
-		}
-	}
-	return boost::weak_ptr<Item>();
-}
-
-boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory category) {
-	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
-		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, BETTERTHAN, relativeValue));
+			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
 			}
