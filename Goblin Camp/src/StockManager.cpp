@@ -66,6 +66,9 @@ void StockManager::Init() {
 						producables.insert(item);
 						producers.insert(std::pair<ItemType, ConstructionType>(item, cons));
 						producerFound = true;
+#ifdef DEBUG
+						std::cout<<"Found producer for "<<Item::Presets[item].name<<": "<<Construction::Presets[cons].name<<"\n";
+#endif
 						break;
 					}
 				}
