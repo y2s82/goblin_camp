@@ -764,7 +764,7 @@ void SideBar::Draw(TCODConsole* console) {
 				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
 				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-					console->print(edgeX-(width-2),topY+15+i, sp->Allowed(i) ? "+ %s" : "- %s", Item::Categories[i].name.c_str());
+					console->print(edgeX-(width-2),topY+15+i, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-4).c_str());
 				}
 				console->setForegroundColor(TCODColor::white);
 			} else if (construct->HasTag(FARMPLOT)) {
@@ -776,7 +776,7 @@ void SideBar::Draw(TCODConsole* console) {
 				for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin(); 
 					seedi != fp->AllowedSeeds()->end(); ++seedi) {
 						console->setForegroundColor(seedi->second ? TCODColor::green : TCODColor::red);
-						console->print(edgeX-(width-2),topY+15+i, seedi->second ? "+ %s" : "- %s", Item::Presets[seedi->first].name.c_str());
+						console->print(edgeX-(width-2),topY+15+i, "%c %s", seedi->second ? 225 : 224, Item::Presets[seedi->first].name.c_str());
 					++i;
 				}
 				console->setForegroundColor(TCODColor::white);
