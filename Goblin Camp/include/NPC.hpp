@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/function.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include <libtcod.hpp>
 
@@ -197,6 +198,7 @@ public:
 	boost::weak_ptr<Squad> MemberOf();
 	void GetMainHandAttack(Attack&);
 	void FindNewWeapon();
+	boost::weak_ptr<Item> Wielding();
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;
