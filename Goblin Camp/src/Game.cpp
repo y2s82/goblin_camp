@@ -510,10 +510,10 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
 
-boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category) {
+boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, int flags, int value) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category));
+			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
 			}
@@ -522,22 +522,10 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 	return boost::weak_ptr<Item>();
 }
 
-boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type) {
+boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, int flags, int value) {
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type));
-			if (item.lock() && !item.lock()->Reserved()) {
-				return item;
-			}
-		}
-	}
-	return boost::weak_ptr<Item>();
-}
-
-boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory category) {
-	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
-		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, BETTERTHAN, relativeValue));
+			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				return item;
 			}
@@ -548,8 +536,8 @@ boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory c
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
 void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = abs(corner1.X()-corner2.X());
-	int areaLength = abs(corner1.Y()-corner2.Y());
+	int areaWidth = std::max(abs(corner1.X()-corner2.X()),1);
+	int areaLength = std::max(abs(corner1.Y()-corner2.Y()),1);
 	
 	for (int items = 0; items < quantity; ++items) {
 		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
@@ -1054,8 +1042,8 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 
 // Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
 void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = abs(corner1.X()-corner2.X());
-	int areaLength = abs(corner1.Y()-corner2.Y());
+	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
+	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
 	
 	for (int npcs = 0; npcs < quantity; ++npcs) {
 		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));

@@ -25,7 +25,7 @@ construction_type "Carpenter's workshop" {
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
 			 178, 46,177]
-	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed", "Wooden club", "Log club"]
+	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed", "Wooden club"]
 	walkable
 	maxCondition=90
 	materials=["Wood","Wood","Wood"]
@@ -51,7 +51,7 @@ construction_type "Bakery" {
 			  33,231,
 			  10, 46,
 			  35,231]
-	products=["Pie"]
+	products=["Pie", "Exquisite Pie", "Bread"]
 	walkable
 	maxCondition=90
 	materials=["Wood","Wood","Wood"]
@@ -83,12 +83,12 @@ construction_type "Stone quarry" {
 			  44, 46, 46, 44, 44, 44, 46, 44, 46, 44,
 			  46, 46, 46, 44, 44, 44, 46, 44, 46, 44,
 			  44, 46, 46, 44,178,178,177,178, 46, 46,
-			  44, 46,177,178, 32, 32,176,177, 46, 44,
-			  44, 46, 46, 44, 32, 32,177,176, 46, 46,
-			  46, 46, 46,178,177,177,176,178, 46, 46,
-			  44, 46, 46, 44, 44, 44, 46, 44, 46, 44,
-			  46, 46, 46, 44, 44, 44, 46, 44, 46, 46,
-			  46, 46, 46, 44, 44, 44, 46, 44, 46, 46]
+			 176, 46,177,178, 32, 32,176,177, 46, 44,
+			 176, 46, 46, 44, 32, 32,177,176, 46, 46,
+			 177,176,177,178,177,177,176,178, 46, 46,
+			 178, 46, 46,177,176,178,176, 44, 46, 44,
+			 176, 46,178,176,176,177,176, 44, 46, 46,
+			 178, 46,177,177,178,178,177, 44, 46, 46]
 	products=["Rough stone"]
 	walkable
 	maxCondition=500
@@ -101,14 +101,53 @@ construction_type "Stone quarry" {
 
 construction_type "Stone mason's shack" {
 	graphicLength=4
-	graphic=[ 44, 44, 44, 44,
-			  44, 44, 44, 44,
-			  44, 44, 44, 44]
-	products=["Sharpened stone", "Stone axe", "Stone spear"]
+	graphic=[ 40, 46,157,178,
+			  40, 10, 46,178,
+			 170,157, 46,178]
+	products=["Sharpened stone"]
 	walkable
 	maxCondition=90
 	productionx=2
 	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank",
-			   "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weapon crafter's workshop" {
+	graphicLength=2
+	graphic=[ 91, 92,
+			 124, 46,
+			 124, 46,
+			 123,125]
+	products=["Stone axe", "Stone spear", "Stone maul"]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Mill" {
+	graphicLength=3
+	graphic=[157, 46,157,
+			  46, 46, 46,
+			 157, 46,157]
+	products=["Flour"]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weaver's workshop" {
+	graphicLength=3
+	graphic=[ 21, 30, 30,
+			  46, 46, 46,
+			  30, 30, 21]
+	products=["Cloth", "Seed sack", "Flour sack"]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
 }

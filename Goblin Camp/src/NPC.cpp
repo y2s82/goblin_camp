@@ -37,6 +37,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "StatusEffect.hpp"
 #include "Camp.hpp"
+#include "Stockpile.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -487,7 +488,7 @@ MOVENEARend:
 				break;
 
 			case FIND:
-				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item);
+				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->flags);
 				if (!foundItem.lock()) {
 					TaskFinished(TASKFAILFATAL); 
 #ifdef DEBUG
@@ -798,14 +799,14 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		//Priority #1, if the creature can wield a weapon get one if possible
 		/*TODO: Right now this only makes friendlies take a weapon from a stockpile
 		It should be expanded to allow all npc's to search for nearby weapons lying around. */
-		if (!npc->mainHand.lock() && npc->Faction() == 0) {
+		if (!npc->mainHand.lock() && npc->Faction() == 0 && squad->Weapon() >= 0) {
 			for (std::list<Attack>::iterator attacki = npc->attacks.begin(); attacki != npc->attacks.end();
 				++attacki) {
 					if (attacki->Type() == DAMAGE_WIELDED) {
 						if (Game::Inst()->FindItemByCategoryFromStockpiles(
-							Item::StringToItemCategory("Weapon")).lock()) {
+							squad->Weapon()).lock()) {
 								newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
-									Item::StringToItemCategory("Weapon")));
+									squad->Weapon()));
 								newJob->tasks.push_back(Task(MOVE));
 								newJob->tasks.push_back(Task(TAKE));
 								newJob->tasks.push_back(Task(WIELD));
@@ -1212,6 +1213,7 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
+		faction = 0;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
@@ -1245,7 +1247,7 @@ void NPC::GetMainHandAttack(Attack &attack) {
 void NPC::FindNewWeapon() {
 	int weaponValue = mainHand.lock() ? mainHand.lock()->RelativeValue() : 0;
 	ItemCategory weaponCategory = squad.lock() ? squad.lock()->Weapon() : Item::StringToItemCategory("Weapon");
-	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemBetterThan(weaponValue, weaponCategory);
+	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, BETTERTHAN, weaponValue);
 	if (boost::shared_ptr<Item> weapon = newWeapon.lock()) {
 		boost::shared_ptr<Job> weaponJob(new Job("Grab weapon"));
 		weaponJob->internal = true;
@@ -1256,6 +1258,10 @@ void NPC::FindNewWeapon() {
 		jobs.push_back(weaponJob);
 		run = true;
 	}
+}
+
+boost::weak_ptr<Item> NPC::Wielding() {
+	return mainHand;
 }
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 

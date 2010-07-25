@@ -24,11 +24,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 #include "GCamp.hpp"
 
-Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt) :
+Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
 target(tar),
 	entity(ent),
 	action(act),
-	item(itt)
+	item(itt),
+	flags(fla)
 {
 }
 

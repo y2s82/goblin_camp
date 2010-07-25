@@ -251,7 +251,9 @@ private:
 #endif
 		if (boost::iequals(name, "category")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().categories.insert(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
+				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
+				Item::Presets.back().categories.insert(cat);
+				if (Item::Categories[cat].parent) Item::Presets.back().categories.insert(Item::StringToItemCategory(Item::Categories[cat].parent->name));
 			}
 		} else if (boost::iequals(name, "graphic")) {
 			Item::Presets.back().graphic = value.i;

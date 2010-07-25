@@ -697,10 +697,25 @@ width(19),
 
 MenuResult SideBar::Update(int x, int y) {
 	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
-		if (construction && boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
-			int i = y - (topY + 15);			
-			if (i >= 0 && i < (signed int)Item::Categories.size()) {
-				boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i);
+		if (construction) {
+			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
+				int i = y - (topY + 15);			
+				if (i >= 0 && i < (signed int)Item::Categories.size()) {
+					boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i, UI::Inst()->ShiftPressed());
+					return MENUHIT;
+				}
+			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
+				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(entity.lock()));
+				int i = y - (topY + 15);
+				if (i >= 0) {
+					for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin();
+						seedi != fp->AllowedSeeds()->end(); ++seedi) {
+							if (i-- == 0) {
+								fp->AllowSeed(seedi->first, !fp->SeedAllowed(seedi->first));
+								break;
+							}
+					}
+				}
 				return MENUHIT;
 			}
 		}
@@ -727,9 +742,10 @@ void SideBar::Draw(TCODConsole* console) {
 			}
 			console->setForegroundColor(TCODColor::white);
 			if (npc->MemberOf().lock()) { //Member of a squad
-				console->setAlignment(TCOD_CENTER);
-				console->print(edgeX - (width / 2), topY+28, npc->MemberOf().lock()->Name().c_str());
-				console->setAlignment(TCOD_LEFT);
+				console->print(edgeX-width+1, topY+26, "S: %s", npc->MemberOf().lock()->Name().c_str());
+			}
+			if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
+				console->print(edgeX-width+1, topY+27, "W: %s", weapon->Name().c_str());
 			}
 		} else if (construction) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
@@ -748,12 +764,31 @@ void SideBar::Draw(TCODConsole* console) {
 				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
 				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-					console->print(edgeX-(width-2),topY+15+i, sp->Allowed(i) ? "+ %s" : "- %s", Item::Categories[i].name.c_str());
+					if (!Item::Categories[i].parent) {
+						console->print(edgeX-(width-2),topY+15+i, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
+					} else {
+						if (i+1 < Item::Categories.size() && Item::Categories[i+1].parent == Item::Categories[i].parent) {
+							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
+						} else {
+							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
+						}
+					}
 				}
 				console->setForegroundColor(TCODColor::white);
 			} else if (construct->HasTag(FARMPLOT)) {
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-			} else { //TODO: Add farmplot seed choices, and other specific options
+
+				console->printFrame(edgeX-(width-1), topY+14, width-2, 30, false, TCOD_BKGND_DEFAULT, "Seeds");
+				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(construct));
+				int i = 0;
+				for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin(); 
+					seedi != fp->AllowedSeeds()->end(); ++seedi) {
+						console->setForegroundColor(seedi->second ? TCODColor::green : TCODColor::red);
+						console->print(edgeX-(width-2),topY+15+i, "%c %s", seedi->second ? 225 : 224, Item::Presets[seedi->first].name.substr(0,width-6).c_str());
+					++i;
+				}
+				console->setForegroundColor(TCODColor::white);
+			} else { 
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 			}
 		} else {

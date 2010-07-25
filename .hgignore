@@ -50,3 +50,4 @@ build\dist
 *.py[co]
 build\msvc
 user-config.jam
+*.exp
