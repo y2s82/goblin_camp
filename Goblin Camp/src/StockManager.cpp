@@ -56,13 +56,13 @@ void StockManager::Init() {
 	//Figure out which items are producable, this is so that we won't show _all_ item types in the
 	//stock manager screen. Things such as trash and plant mid-growth types won't show this way
 	for (unsigned int item = 0; item < Item::Presets.size(); ++item) {
-		if (Item::Presets[item].growth < 0) { //Doesn't grow into anything, this excludes seeds and plants
-			//Now figure out if this item is producable either from a workshop, or designations
-			bool producerFound = false;
-			for (unsigned int cons = 0; cons < Construction::Presets.size(); ++cons) { //Look through all constructions
-				for (unsigned int prod = 0; prod < Construction::Presets[cons].products.size(); ++prod) { //Products
-					if (Construction::Presets[cons].products[prod] == item) {
-						//This construction has this itemtype as a product
+
+		//Now figure out if this item is producable either from a workshop, or designations
+		bool producerFound = false;
+		for (unsigned int cons = 0; cons < Construction::Presets.size(); ++cons) { //Look through all constructions
+			for (unsigned int prod = 0; prod < Construction::Presets[cons].products.size(); ++prod) { //Products
+				if (Construction::Presets[cons].products[prod] == item) {
+					//This construction has this itemtype as a product
 						producables.insert(item);
 						producers.insert(std::pair<ItemType, ConstructionType>(item, cons));
 						producerFound = true;
@@ -70,31 +70,43 @@ void StockManager::Init() {
 						std::cout<<"Found producer for "<<Item::Presets[item].name<<": "<<Construction::Presets[cons].name<<"\n";
 #endif
 						break;
-					}
-				}
-			}
-
-			if (!producerFound) {//Haven't found a producer, so check NatureObjects if a tree has this item as a component
-#ifdef DEBUG
-				std::cout<<"Checking trees for production of "<<Item::Presets[item].name<<"\n";
-#endif
-				for (unsigned int natObj = 0; natObj < NatureObject::Presets.size(); ++natObj) {
-					if (NatureObject::Presets[natObj].tree) {
-						for (std::list<ItemType>::iterator compi = NatureObject::Presets[natObj].components.begin(); 
-							compi != NatureObject::Presets[natObj].components.end(); ++compi) {
-#ifdef DEBUG
-								std::cout<<"Is "<<Item::ItemTypeToString(*compi)<<" = "<<Item::Presets[item].name<<"\n";
-#endif
-								if (*compi == item) {
-									producables.insert(item);
-									fromTrees.insert(item);
-									UpdateQuantity(item, 0);
-								}
-						}
-					}
 				}
 			}
 		}
+
+		if (!producerFound) {//Haven't found a producer, so check NatureObjects if a tree has this item as a component
+#ifdef DEBUG
+			std::cout<<"Checking trees for production of "<<Item::Presets[item].name<<"\n";
+#endif
+			for (unsigned int natObj = 0; natObj < NatureObject::Presets.size(); ++natObj) {
+				if (NatureObject::Presets[natObj].tree) {
+					for (std::list<ItemType>::iterator compi = NatureObject::Presets[natObj].components.begin(); 
+						compi != NatureObject::Presets[natObj].components.end(); ++compi) {
+#ifdef DEBUG
+							std::cout<<"Is "<<Item::ItemTypeToString(*compi)<<" = "<<Item::Presets[item].name<<"\n";
+#endif
+							if (*compi == item) {
+								producables.insert(item);
+								fromTrees.insert(item);
+								UpdateQuantity(item, 0);
+							}
+					}
+				}
+			}
+#ifdef DEBUG
+			std::cout<<"No producer found for "<<Item::Presets[item].name<<"\n";
+#endif
+			//Seeds, raw food and fibres are added even though they aren't "produced" so to speak
+			if (Item::Presets[item].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[item].categories.end() ||
+				Item::Presets[item].categories.find(Item::StringToItemCategory("Raw Food")) != Item::Presets[item].categories.end() ||
+				Item::Presets[item].categories.find(Item::StringToItemCategory("Fibre")) != Item::Presets[item].categories.end()) {
+#ifdef DEBUG
+					std::cout<<"Adding "<<Item::Presets[item].name<<" to stocks anyway\n";
+#endif
+					producables.insert(item);
+			}
+		}
+
 	}
 }
 
