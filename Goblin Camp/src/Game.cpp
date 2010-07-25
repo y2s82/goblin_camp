@@ -548,8 +548,8 @@ boost::weak_ptr<Item> Game::FindItemBetterThan(int relativeValue, ItemCategory c
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
 void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = abs(corner1.X()-corner2.X());
-	int areaLength = abs(corner1.Y()-corner2.Y());
+	int areaWidth = std::max(abs(corner1.X()-corner2.X()),1);
+	int areaLength = std::max(abs(corner1.Y()-corner2.Y()),1);
 	
 	for (int items = 0; items < quantity; ++items) {
 		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
