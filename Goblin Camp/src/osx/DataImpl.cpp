@@ -58,7 +58,6 @@ void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& d
 	CFRelease(execURL);
 	CFRelease(resURL);
 	
-	exec    = fs::path(std::string(cmdLine));
 	execDir = exec.parent_path();
 	dataDir = fs::path(std::string(resPath) + "/");
 }
