@@ -4,6 +4,10 @@ include more tags in the future */
 category_type "Wood" {
 }
 
+category_type "Log" {
+	parent="Wood"
+}
+
 category_type "Plank" {
 	parent="Wood"
 }
@@ -41,16 +45,19 @@ category_type "Berry" {
 category_type "Drink" {
 }
 
-category_type "Seed" {
-}
-
 category_type "Plant" {
 }
 
+category_type "Seed" {
+	parent="Plant"
+}
+
 category_type "Fibre" {
+	parent="Plant"
 }
 
 category_type "Cloth" {
+	parent="Plant"
 }
 
 category_type "Container" {
@@ -65,6 +72,10 @@ category_type "Seed Container" {
 }
 
 category_type "Flour Container" {
+	parent="Container"
+}
+
+category_type "Plank Container" {
 	parent="Container"
 }
 
@@ -100,7 +111,7 @@ category_type "Piercing weapon" {
 /* Item types begin here */
 
 item_type "Wood log" {
-	category=["Wood"]
+	category=["Log"]
 	graphic = 22
 	color = "153,87,38"
 	multiplier = 10
@@ -131,7 +142,7 @@ item_type "Wooden barrel" {
 }
 
 item_type "Crate" {
-	category = ["Container"]
+	category = ["Crate Container"]
 	containerSize = 10
 	graphic = 230
 	color = "255,186,0"
@@ -174,14 +185,14 @@ item_type "Bloodberry seed" {
 }
 
 item_type "Young Bloodberry shrub" {
-	category = ["Plant"]
+	category = ["Garbage"]
 	graphic = 42
 	color = "255,106,0"
 	growth = "Bloodberry shrub"
 }
 
 item_type "Bloodberry shrub" {
-	category = ["Plant"]
+	category = ["Garbage"]
 	graphic = 35
 	color = "255,0,0"
 	fruits = [ "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry" ]
