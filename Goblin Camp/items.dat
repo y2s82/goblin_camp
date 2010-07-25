@@ -121,7 +121,7 @@ item_type "Wood plank" {
 	category = ["Plank"]
 	graphic = 124
 	color = "255,73,7"
-	components = ["Wood log"]
+	components = ["Log"]
 	fitsin = "Container"
 	multiplier = 10
 }
@@ -142,7 +142,7 @@ item_type "Wooden barrel" {
 }
 
 item_type "Crate" {
-	category = ["Crate Container"]
+	category = ["Plank Container"]
 	containerSize = 10
 	graphic = 230
 	color = "255,186,0"
