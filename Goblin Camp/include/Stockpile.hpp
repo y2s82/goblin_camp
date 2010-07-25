@@ -60,6 +60,6 @@ public:
 	Coordinate FreePosition();
 	void ReserveSpot(Coordinate, bool);
 	boost::weak_ptr<Container> Storage(Coordinate);
-	void SwitchAllowed(ItemCategory);
+	void SwitchAllowed(ItemCategory, bool childrenAlso = false);
 };
 

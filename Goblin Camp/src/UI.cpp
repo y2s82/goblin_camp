@@ -701,7 +701,7 @@ MenuResult SideBar::Update(int x, int y) {
 			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
 				int i = y - (topY + 15);			
 				if (i >= 0 && i < (signed int)Item::Categories.size()) {
-					boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i);
+					boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i, UI::Inst()->ShiftPressed());
 					return MENUHIT;
 				}
 			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
