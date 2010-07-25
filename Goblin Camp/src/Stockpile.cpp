@@ -31,7 +31,7 @@ Construction(type, target),
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
-		allowed.insert(std::pair<ItemCategory, bool>(i,true));
+		allowed.insert(std::pair<ItemCategory, bool>(i,false));
 	}
 }
 
