@@ -41,4 +41,5 @@ public:
 	virtual int Use();
 	void AllowSeed(ItemType, bool);
 	bool SeedAllowed(ItemType);
+	std::map<ItemType, bool>* AllowedSeeds();
 };
