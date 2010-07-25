@@ -265,6 +265,7 @@ private:
 			}
 		} else if (boost::iequals(name, "containin")) {
 			Item::Presets.back().containIn = Item::StringToItemCategory(value.s);
+			Item::Presets.back().components.push_back(Item::StringToItemCategory(value.s));
 		} else if (boost::iequals(name, "nutrition")) {
 			Item::Presets.back().nutrition = value.i;
 			Item::Presets.back().organic = true;
