@@ -1,0 +1,20 @@
+plant_type "Pine Tree" {
+	tree
+	graphic=6
+	color="0,200,14"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
+				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=100
+	condition=150
+}
+
+plant_type "Wild Bloodberry bush" {
+	graphic=35
+	color="140,0,0"
+	components=["Bloodberry"]
+	rarity=10
+	condition=10
+	cluster=5
+	harvestable
+	walkable
+}
