@@ -697,10 +697,25 @@ width(19),
 
 MenuResult SideBar::Update(int x, int y) {
 	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
-		if (construction && boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
-			int i = y - (topY + 15);			
-			if (i >= 0 && i < (signed int)Item::Categories.size()) {
-				boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i);
+		if (construction) {
+			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
+				int i = y - (topY + 15);			
+				if (i >= 0 && i < (signed int)Item::Categories.size()) {
+					boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i);
+					return MENUHIT;
+				}
+			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
+				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(entity.lock()));
+				int i = y - (topY + 15);
+				if (i >= 0) {
+					for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin();
+						seedi != fp->AllowedSeeds()->end(); ++seedi) {
+							if (i-- == 0) {
+								fp->AllowSeed(seedi->first, !fp->SeedAllowed(seedi->first));
+								break;
+							}
+					}
+				}
 				return MENUHIT;
 			}
 		}
@@ -754,7 +769,18 @@ void SideBar::Draw(TCODConsole* console) {
 				console->setForegroundColor(TCODColor::white);
 			} else if (construct->HasTag(FARMPLOT)) {
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-			} else { //TODO: Add farmplot seed choices, and other specific options
+
+				console->printFrame(edgeX-(width-1), topY+14, width-2, 30, false, TCOD_BKGND_DEFAULT, "Seeds");
+				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(construct));
+				int i = 0;
+				for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin(); 
+					seedi != fp->AllowedSeeds()->end(); ++seedi) {
+						console->setForegroundColor(seedi->second ? TCODColor::green : TCODColor::red);
+						console->print(edgeX-(width-2),topY+15+i, seedi->second ? "+ %s" : "- %s", Item::Presets[seedi->first].name.c_str());
+					++i;
+				}
+				console->setForegroundColor(TCODColor::white);
+			} else { 
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 			}
 		} else {
