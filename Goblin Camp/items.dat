@@ -42,6 +42,10 @@ category_type "Berry" {
 	parent="Food"
 }
 
+category_type "Flour" {
+	parent="Food"
+}
+
 category_type "Drink" {
 }
 
@@ -52,7 +56,7 @@ category_type "Seed" {
 	parent="Plant"
 }
 
-category_type "Fibre" {
+category_type "Fiber" {
 	parent="Plant"
 }
 
@@ -323,7 +327,7 @@ item_type "Flour" {
 }
 
 item_type "Blueleaf boll" {
-	category = [ "Fibre" ]
+	category = [ "Fiber" ]
 	graphic = 10
 	color = "0,0,255"
 	fruits = [ "Blueleaf seed" ]
