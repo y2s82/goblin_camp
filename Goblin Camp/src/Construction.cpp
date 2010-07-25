@@ -466,11 +466,13 @@ void Construction::Update()
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
 		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
+			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
+				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
 			if (amount == 1) {
-				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!");
+				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!", announceColor);
 			} else {
-				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!");
+				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!", announceColor);
 			}
 			for (int i = 0; i < amount; ++i) {
 				Game::Inst()->CreateNPC(Position() + ProductionSpot(type), monsterType);
