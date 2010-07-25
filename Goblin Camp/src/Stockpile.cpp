@@ -200,11 +200,12 @@ bool Stockpile::Allowed(ItemCategory cat) {
 	return allowed[cat];
 }
 
+//Return false if any given category is not allowed
 bool Stockpile::Allowed(std::set<ItemCategory> cats) {
 	for (std::set<ItemCategory>::iterator cati = cats.begin(); cati != cats.end(); ++cati) {
-		if (Allowed(*cati)) return true;
+		if (!Allowed(*cati)) return false;
 	}
-	return false;
+	return true;
 }
 
 bool Stockpile::Full()
@@ -236,6 +237,16 @@ boost::weak_ptr<Container> Stockpile::Storage(Coordinate pos) {
 	return containers[pos];
 }
 
-void Stockpile::SwitchAllowed(ItemCategory cat) {
+void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 	allowed[cat] = !allowed[cat];
+	if (childrenAlso) {
+		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
+			if (Item::Categories[alli->first].parent &&
+				Item::Categories[alli->first].parent->name == Item::Categories[cat].name) {
+				alli->second = allowed[cat];
+			} else {
+				break;
+			}
+		}
+	}
 }
