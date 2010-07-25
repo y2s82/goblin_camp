@@ -114,18 +114,20 @@ int FarmPlot::Use() {
 			growth[containerIt->first] = 0;
 			seedsLeft = false;
 			for (std::map<ItemType, bool>::iterator seedi = allowedSeeds.begin(); seedi != allowedSeeds.end(); ++seedi) {
-				boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first);
-				if (seed.lock()) {
-					boost::shared_ptr<Job> plantJob(new Job("Plant"));
-					plantJob->ReserveEntity(seed);
-					plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first);
-					plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
-					plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
-					plantJob->tasks.push_back(Task(MOVE, containerIt->first));
-					plantJob->tasks.push_back(Task(PUTIN, containerIt->first, containerIt->second));
-					JobManager::Inst()->AddJob(plantJob);
-					++containerIt;
-					seedsLeft = true;
+				if (seedi->second) {
+					boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first);
+					if (seed.lock()) {
+						boost::shared_ptr<Job> plantJob(new Job("Plant"));
+						plantJob->ReserveEntity(seed);
+						plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first);
+						plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
+						plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
+						plantJob->tasks.push_back(Task(MOVE, containerIt->first));
+						plantJob->tasks.push_back(Task(PUTIN, containerIt->first, containerIt->second));
+						JobManager::Inst()->AddJob(plantJob);
+						++containerIt;
+						seedsLeft = true;
+					}
 				}
 			}
 		}
@@ -133,3 +135,7 @@ int FarmPlot::Use() {
 	}
 	return progress;
 }
+
+std::map<ItemType, bool>* FarmPlot::AllowedSeeds() { return &allowedSeeds; }
+void FarmPlot::AllowSeed(ItemType type, bool value) { allowedSeeds[type] = value; }
+bool FarmPlot::SeedAllowed(ItemType type) { return allowedSeeds[type]; }

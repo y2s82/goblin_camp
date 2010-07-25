@@ -15,19 +15,23 @@ category_type "Rough stone" {
 	parent="Stone"
 }
 
+category_type "Sharpened stone" {
+	parent="Stone"
+}
+
 category_type "Brick" {
 	parent="Stone"
 }
 
-category_type "Sharpened stone" {
-	parent="Stone"
+category_type "Food" {
 }
 
 category_type "Raw Food" {
 	parent="Food"
 }
 
-category_type "Food" {
+category_type "Prepared Food" {
+	parent="Food"
 }
 
 category_type "Berry" {
@@ -43,6 +47,12 @@ category_type "Seed" {
 category_type "Plant" {
 }
 
+category_type "Fibre" {
+}
+
+category_type "Cloth" {
+}
+
 category_type "Container" {
 }
 
@@ -51,6 +61,10 @@ category_type "Liquid Container" {
 }
 
 category_type "Seed Container" {
+	parent="Container"
+}
+
+category_type "Flour Container" {
 	parent="Container"
 }
 
@@ -102,10 +116,10 @@ item_type "Wood plank" {
 }
 
 item_type "Wooden door" {
-	category = ["Door", "Furniture"]
+	category = ["Door"]
 	graphic = 197
 	color = "255,73,7"
-	components = ["Plank", "Plank"]
+	components = ["Plank", "Plank", "Plank"]
 }
 
 item_type "Wooden barrel" {
@@ -121,11 +135,11 @@ item_type "Crate" {
 	containerSize = 10
 	graphic = 230
 	color = "255,186,0"
-	components = [ "Plank", "Plank", "Plank", "Plank", "Plank" ]
+	components = [ "Plank", "Plank", "Plank" ]
 }
 
 item_type "Wooden bed" {
-	category = ["Bed", "Furniture"]
+	category = ["Bed"]
 	graphic = 22
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
@@ -137,13 +151,13 @@ item_type "Wine" {
 	color = "127,0,0"
 	components = [ "Berry", "Berry", "Berry" ]
 	containIn = "Liquid Container"
-	nutrition = 20000
+	nutrition = 30000
 	multiplier = 10
 }
 
 item_type "Bloodberry" {
-	category = [ "Berry", "Raw Food", "Food" ]
-	graphic = 7
+	category = [ "Berry", "Raw Food"]
+	graphic = 248
 	color = "255,0,0"
 	nutrition = 3000
 	fruits = [ "Bloodberry seed" ]
@@ -154,7 +168,7 @@ item_type "Bloodberry" {
 item_type "Bloodberry seed" {
 	category = ["Seed"]
 	graphic = 250
-	color = "128,128,128"
+	color = "175,128,128"
 	growth = "Young Bloodberry shrub"
 	fitsin = "Seed Container"
 }
@@ -196,15 +210,31 @@ item_type "Corpse" {
 }
 
 item_type "Pie" {
-	category = ["Food"]
+	category = ["Prepared Food"]
 	graphic = 37
-	color = "127,106,0"
-	components = ["Berry", "Berry", "Berry"]
-	nutrition = 12000
+	color = "255,0,220"
+	components = ["Berry", "Berry", "Berry", "Flour", "Flour"]
+	nutrition = 30000
+}
+
+item_type "Exquisite Pie" {
+	category = ["Prepared Food"]
+	graphic = 37
+	color = "178,0,255"
+	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Drink"]
+	nutrition = 60000
+}
+
+item_type "Bread" {
+	category = ["Prepared Food"]
+	graphic = 37
+	color = "127,89,63"
+	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
+	nutrition = 30000
 }
 
 item_type "Wooden club" {
-	category = ["Weapon", "Blunt weapon"]
+	category = ["Blunt weapon"]
 	graphic = 41
 	color = "127,106,0"
 	components = ["Plank"]
@@ -217,28 +247,28 @@ item_type "Wooden club" {
 	}
 }
 
-item_type "Log club" {
-	category = ["Weapon", "Blunt weapon"]
+item_type "Stone maul" {
+	category = ["Blunt weapon"]
 	graphic = 41
-	color = "127,106,0"
-	components = ["Wood log"]
-	attack "Bash" {
+	color = "192,192,192"
+	components = ["Plank", "Rough stone"]
+	attack "Crush" {
 		type="blunt"
-		damage="3d10+10"
-		cooldown=75
+		damage="1d15+15"
+		cooldown=25
 		statusEffects=["Concussion"]
-		effectChances=[     50     ]
+		effectChances=[    33    ]
 	}
 }
 
 item_type "Stone axe" {
-	category = ["Weapon", "Slashing weapon"]
+	category = ["Slashing weapon"]
 	graphic = 41
 	color = "192,192,192"
 	components = ["Plank", "Sharpened stone"]
 	attack "Hack" {
 		type="slashing"
-		damage="1d15+10"
+		damage="1d15+15"
 		cooldown=25
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
@@ -246,13 +276,13 @@ item_type "Stone axe" {
 }
 
 item_type "Stone spear" {
-	category = ["Weapon", "Piercing weapon"]
+	category = ["Piercing weapon"]
 	graphic = 41
 	color = "192,192,192"
 	components = ["Plank", "Sharpened stone"]
 	attack "Thrust" {
 		type="piercing"
-		damage="1d15+10"
+		damage="1d15+15"
 		cooldown=25
 		statusEffects=["Bleeding"]
 		effectChances=[    10    ]
@@ -260,15 +290,77 @@ item_type "Stone spear" {
 }
 
 item_type "Rough stone" {
-	category = ["Stone", "Rough stone"]
+	category = ["Rough stone"]
 	graphic = 96
 	color = "192,192,192"
 	multiplier = 3
 }
 
 item_type "Sharpened stone" {
-	category = ["Stone", "Sharpened stone"]
+	category = ["Sharpened stone"]
 	graphic = 30
 	color = "192,192,192"
 	components = ["Rough stone"]
+}
+
+item_type "Flour" {
+	category = ["Flour"]
+	graphic = 44
+	color = "255,233,177"
+	components = ["Seed", "Seed"]
+	containIn = "Flour Container"
+}
+
+item_type "Blueleaf boll" {
+	category = [ "Fibre" ]
+	graphic = 10
+	color = "0,0,255"
+	fruits = [ "Blueleaf seed" ]
+	decay = [ "Blueleaf seed", "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Blueleaf seed" {
+	category = ["Seed"]
+	graphic = 250
+	color = "128,128,175"
+	growth = "Blueleaf sapling"
+	fitsin = "Seed Container"
+}
+
+item_type "Blueleaf sapling" {
+	category = ["Plant"]
+	graphic = 222
+	color = "127,146,255"
+	growth = "Blueleaf tree"
+}
+
+item_type "Blueleaf tree" {
+	category = ["Plant"]
+	graphic = 216
+	color = "0,0,255"
+	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
+}
+
+item_type "Cloth" {
+	category = ["Cloth"]
+	graphic = 21
+	color = "255,255,255"
+	components = ["Fiber", "Fiber"]
+}
+
+item_type "Seed sack" {
+	category = ["Seed Container"]
+	containerSize = 50
+	graphic = 208
+	color = "255,73,7"
+	components = [ "Cloth", "Cloth" ]
+}
+
+item_type "Flour sack" {
+	category = ["Flour Container"]
+	containerSize = 50
+	graphic = 208
+	color = "255,73,7"
+	components = [ "Cloth", "Cloth" ]
 }

@@ -81,11 +81,12 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 public:
-	Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0);
+	Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
 	Coordinate target;
 	boost::weak_ptr<Entity> entity;
 	Action action;
 	ItemCategory item;
+	int flags;
 };
 
 class Job {
