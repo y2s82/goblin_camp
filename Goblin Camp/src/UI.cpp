@@ -220,7 +220,6 @@ void UI::HandleMouse() {
 	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
 	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
 		mouseInput = tempStatus;
-		oldMouseInput = mouseInput;
 		drawCursor = false;
 		TCODMouse::showCursor(true);
 	}
@@ -255,6 +254,9 @@ void UI::HandleMouse() {
                 }                    
             }
             if (menuResult == NOMENUHIT) {
+                if (menuOpen && _state == UINORMAL) {
+                    CloseMenu();
+                }
                 if (_state == UIPLACEMENT && placeable) {
                     callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
                 } else if (_state == UIABPLACEMENT && placeable) {
@@ -328,7 +330,7 @@ void UI::HandleMouse() {
             }
         }
         draggingPlacement = false;
-    } else if (tempStatus.lbutton) {
+    } else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
         menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
         if (menuResult == NOMENUHIT) {
             if (menuOpen) {
@@ -390,6 +392,7 @@ void UI::HandleMouse() {
 	lbuttonPressed = false;
 	mbuttonPressed = false;
 	rbuttonPressed = false;
+    oldMouseInput = mouseInput;
 }
 void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	int tmp;
