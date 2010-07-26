@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "Game.hpp"
 #include "NPC.hpp"
+#include "StatusEffect.hpp"
 
 Map::Map() {
 	tileMap.resize(boost::extents[500][500]);
@@ -38,6 +39,7 @@ Map* Map::Inst() {
 }
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
+	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
 	if (Walkable(x1,y1,ptr)) return (float)tileMap[x0][y0].moveCost();
 	return 0.0f;
 }
@@ -49,7 +51,7 @@ bool Map::Walkable(int x, int y) const {
 }
 
 bool Map::Walkable(int x, int y, void* ptr) const {
-
+	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return true;
 	return Walkable(x,y);
 }
 
