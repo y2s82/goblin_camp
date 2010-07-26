@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstring>
 #include <ctime>
 #include <cstdlib>
+#include <cstdio>
 
 namespace {
 	// Generates crash dump filename.
