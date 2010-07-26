@@ -42,10 +42,6 @@ category_type "Berry" {
 	parent="Food"
 }
 
-category_type "Flour" {
-	parent="Food"
-}
-
 category_type "Drink" {
 }
 
@@ -61,6 +57,10 @@ category_type "Fiber" {
 }
 
 category_type "Cloth" {
+	parent="Plant"
+}
+
+category_type "Flour" {
 	parent="Plant"
 }
 
