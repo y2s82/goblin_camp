@@ -143,3 +143,24 @@ npc_type "soldier ant" {
 	spawnAsGroup="1d7+3"
 	tags=["underground"]
 }
+
+npc_type "killer bee" {
+	name="Killer Bee"
+	speed=15
+	color="255,255,0"
+	graphic='a'
+	health=10
+	AI="HostileAnimal"
+	dodge=20
+	resistances {
+		physical=1
+	}
+	attack "Sting" {
+		type="piercing"
+		damage="1d5"
+		cooldown=15
+		statusEffects=["poison"]
+	}
+	spawnAsGroup="1d10+10"
+	tags=["attackRandomly"]
+}
