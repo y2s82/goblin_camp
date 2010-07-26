@@ -126,7 +126,7 @@ item_type "Wood plank" {
 	graphic = 124
 	color = "255,73,7"
 	components = ["Log"]
-	fitsin = "Container"
+	fitsin = "Plank Container"
 	multiplier = 10
 }
 
@@ -164,9 +164,9 @@ item_type "Wine" {
 	category = ["Drink"]
 	graphic = 33
 	color = "127,0,0"
-	components = [ "Berry", "Berry", "Berry" ]
+	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
 	containIn = "Liquid Container"
-	nutrition = 30000
+	nutrition = 72000
 	multiplier = 10
 }
 
@@ -174,7 +174,7 @@ item_type "Bloodberry" {
 	category = [ "Berry", "Raw Food"]
 	graphic = 248
 	color = "255,0,0"
-	nutrition = 3000
+	nutrition = 6000
 	fruits = [ "Bloodberry seed" ]
 	decay = [ "Bloodberry seed", "Filth" ]
 	decaySpeed = 12
@@ -229,7 +229,7 @@ item_type "Pie" {
 	graphic = 37
 	color = "255,0,220"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour"]
-	nutrition = 30000
+	nutrition = 48000
 }
 
 item_type "Exquisite Pie" {
@@ -237,7 +237,7 @@ item_type "Exquisite Pie" {
 	graphic = 37
 	color = "178,0,255"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Drink"]
-	nutrition = 60000
+	nutrition = 100000
 }
 
 item_type "Bread" {
@@ -245,7 +245,7 @@ item_type "Bread" {
 	graphic = 37
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
-	nutrition = 30000
+	nutrition = 86000
 }
 
 item_type "Wooden club" {
