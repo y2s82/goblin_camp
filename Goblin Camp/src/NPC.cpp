@@ -245,38 +245,7 @@ void NPC::Update() {
 	if (Map::Inst()->NPCList(x,y)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
-	for (int i = 0; i < STAT_COUNT; ++i) {
-		effectiveStats[i] = baseStats[i];
-	}
-	for (int i = 0; i < STAT_COUNT; ++i) {
-		effectiveResistances[i] = baseResistances[i];
-	}
-	++statusGraphicCounter;
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
-		//Apply effects to stats
-		for (int i = 0; i < STAT_COUNT; ++i) {
-			effectiveStats[i] = (int)(baseStats[i] * statusEffectI->statChanges[i]);
-		}
-		for (int i = 0; i < STAT_COUNT; ++i) {
-			effectiveResistances[i] = (int)(baseResistances[i] * statusEffectI->resistanceChanges[i]);
-		}
-		//Remove the statuseffect if it's cooldown has run out
-		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
-			if (statusEffectI == statusEffectIterator) {
-				++statusEffectIterator;
-				statusGraphicCounter = 0;
-			}
-			statusEffectI = statusEffects.erase(statusEffectI);
-			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
-		}
-	}
-
-
-	if (statusGraphicCounter > 10) {
-		statusGraphicCounter = 0;
-		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
-		else statusEffectIterator = statusEffects.begin();
-	}
+	UpdateStatusEffects();
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
@@ -306,6 +275,50 @@ void NPC::Update() {
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
 	}
+}
+
+void NPC::UpdateStatusEffects() {
+
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		effectiveStats[i] = baseStats[i];
+	}
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		effectiveResistances[i] = baseResistances[i];
+	}
+	++statusGraphicCounter;
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		//Apply effects to stats
+		for (int i = 0; i < STAT_COUNT; ++i) {
+			effectiveStats[i] = (int)(baseStats[i] * statusEffectI->statChanges[i]);
+		}
+		for (int i = 0; i < STAT_COUNT; ++i) {
+			effectiveResistances[i] = (int)(baseResistances[i] * statusEffectI->resistanceChanges[i]);
+		}
+
+		if (statusEffectI->damage.second > 0 && --statusEffectI->damage.first <= 0) {
+			statusEffectI->damage.first = UPDATES_PER_SECOND;
+			health -= statusEffectI->damage.second;
+			if (statusEffectI->bleed) Game::Inst()->CreateBlood(Position());
+		}
+
+		//Remove the statuseffect if it's cooldown has run out
+		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
+			if (statusEffectI == statusEffectIterator) {
+				++statusEffectIterator;
+				statusGraphicCounter = 0;
+			}
+			statusEffectI = statusEffects.erase(statusEffectI);
+			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+		}
+	}
+
+
+	if (statusGraphicCounter > 10) {
+		statusGraphicCounter = 0;
+		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
+		else statusEffectIterator = statusEffects.begin();
+	}
+
 }
 
 AiThink NPC::Think() {
