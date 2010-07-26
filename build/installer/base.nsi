@@ -1,20 +1,30 @@
 ; Goblin Camp installer
 ; Use mkinstaller.py to build it.
 
-!include "MUI2.nsh"
+SetCompressor /SOLID lzma
 
 ; Macros
 !define GC_VERSION       "%%_GC_VERSION_%%"
 !define GC_UNINST_REGKEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\Goblin Camp"
 
+; Includes
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_KEY       "${GC_UNINST_REGKEY}"
+!define MULTIUSER_INSTALLMODE_DEFAULT_REGISTRY_VALUENAME "InstallLocation"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_KEY       "${GC_UNINST_REGKEY}"
+!define MULTIUSER_INSTALLMODE_INSTDIR_REGISTRY_VALUENAME "InstallLocation"
+!define MULTIUSER_INSTALLMODE_INSTDIR                    "Goblin Camp"
+!define MULTIUSER_EXECUTIONLEVEL                         Highest
+!define MULTIUSER_MUI
+!define MULTIUSER_INSTALLMODE_COMMANDLINE
+!include "MultiUser.nsh"
+!include "MUI2.nsh"
+
 ; Installer settings
-SetCompressor     /SOLID lzma
 Name              "Goblin Camp ${GC_VERSION}"
 OutFile           "GoblinCamp-${GC_VERSION}.exe"
-InstallDir        "$PROGRAMFILES\Goblin Camp"
-InstallDirRegKey  HKLM "$GC_UNINST_REGKEY" "InstallLocation"
 CRCCheck          force
 InstProgressFlags smooth
+XPStyle           on
 ShowInstDetails   show
 ShowUnInstDetails show
 
@@ -31,6 +41,7 @@ var ICONS_GROUP
 
 !insertmacro MUI_PAGE_WELCOME
 !insertmacro MUI_PAGE_LICENSE "src\COPYING.txt"
+!insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_COMPONENTS
 !insertmacro MUI_PAGE_STARTMENU Application $ICONS_GROUP
@@ -38,6 +49,7 @@ var ICONS_GROUP
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
+!insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
 
 ; Languages
@@ -47,8 +59,6 @@ var ICONS_GROUP
 Section "!Goblin Camp" EXEC_SEC
     SetOutPath "$INSTDIR"
     SectionIn  RO
-    
-    File "src\dbghelp.dll"
     
     %%_GC_INSTALL_MANIFEST_%%
     
@@ -88,27 +98,29 @@ SectionEnd
 
 Section -Post
     WriteUninstaller "$INSTDIR\uninst.exe"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "DisplayName"     "$(^Name)"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "UninstallString" "$INSTDIR\uninst.exe"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "DisplayIcon"     "$INSTDIR\goblin-camp.exe"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "DisplayVersion"  "${GC_VERSION}"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "URLInfoAbout"    "http://goblincamp.com"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "URLUpdateAbout"  "http://goblincamp.com"
-    WriteRegStr HKLM "${GC_UNINST_REGKEY}" "InstallLocation" "$INSTDIR"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "DisplayName"     "$(^Name)"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "UninstallString" "$INSTDIR\uninst.exe"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "DisplayIcon"     "$INSTDIR\goblin-camp.exe"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "DisplayVersion"  "${GC_VERSION}"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "URLInfoAbout"    "http://goblincamp.com"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "URLUpdateAbout"  "http://goblincamp.com"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "InstallLocation" "$INSTDIR"
     
-    WriteRegDWORD HKLM "${GC_UNINST_REGKEY}" "NoModify" 1
-    WriteRegDWORD HKLM "${GC_UNINST_REGKEY}" "NoRepair" 1
+    WriteRegDWORD SHCTX "${GC_UNINST_REGKEY}" "NoModify" 1
+    WriteRegDWORD SHCTX "${GC_UNINST_REGKEY}" "NoRepair" 1
 SectionEnd
 
+Function .onInit
+    !insertmacro MULTIUSER_INIT
+FunctionEnd
+
 Function un.onInit
-    MessageBox MB_ICONQUESTION|MB_YESNO|MB_DEFBUTTON2 "Are you sure you want to completely remove $(^Name)?" IDYES +2
-        Abort
+    !insertmacro MULTIUSER_UNINIT
 FunctionEnd
 
 Section Uninstall
     !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
     
-    Delete "$INSTDIR\dbghelp.dll"
     Delete "$INSTDIR\goblin-camp.pdb"
     Delete "$INSTDIR\uninst.exe"
     Delete "$INSTDIR\website.url"
@@ -123,5 +135,5 @@ Section Uninstall
     RMDir "$SMPROGRAMS\$ICONS_GROUP"
     RMDir "$INSTDIR"
     
-    DeleteRegKey HKLM "${GC_UNINST_REGKEY}"
+    DeleteRegKey SHCTX "${GC_UNINST_REGKEY}"
 SectionEnd

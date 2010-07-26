@@ -180,7 +180,22 @@ public:
 			}
 		}
 
+		/*Misleading to iterate through presetGrowth because we're handling everything else here,
+		but presetGrowth.size() = the amount of items read in. Just remember to add firstItemIndex,
+		because this items.dat may not be the first one read in, and we don't want to overwrite
+		existing items*/
 		for (unsigned int i = 0; i < presetGrowth.size(); ++i) {
+
+			for (std::set<ItemCategory>::iterator cati = Item::Presets[firstItemIndex+i].categories.begin();
+				cati != Item::Presets[firstItemIndex+i].categories.end(); ++cati) {
+					if (Item::Categories[*cati].parent) {
+#ifdef DEBUG
+						std::cout<<"Item has a parent ->"<<Item::Categories[*cati].parent->name<<" = ("<<Item::StringToItemCategory(Item::Categories[*cati].parent->name)<<")\n";
+#endif
+						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[*cati].parent->name));
+					}
+			}
+			
 #ifdef DEBUG
 			if (presetGrowth[i] != "") {
 				Item::Presets[firstItemIndex+i].growth = Item::StringToItemType(presetGrowth[i]);
@@ -253,7 +268,6 @@ private:
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
 				Item::Presets.back().categories.insert(cat);
-				if (Item::Categories[cat].parent) Item::Presets.back().categories.insert(Item::StringToItemCategory(Item::Categories[cat].parent->name));
 			}
 		} else if (boost::iequals(name, "graphic")) {
 			Item::Presets.back().graphic = value.i;
@@ -265,6 +279,7 @@ private:
 			}
 		} else if (boost::iequals(name, "containin")) {
 			Item::Presets.back().containIn = Item::StringToItemCategory(value.s);
+			Item::Presets.back().components.push_back(Item::StringToItemCategory(value.s));
 		} else if (boost::iequals(name, "nutrition")) {
 			Item::Presets.back().nutrition = value.i;
 			Item::Presets.back().organic = true;
