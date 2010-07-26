@@ -124,11 +124,11 @@ void Tile::MoveFrom(int uid) {
 }
 
 bool Tile::MoveTo(int uid) {
-	if (Walkable()) {
+//	if (Walkable()) {
 		npcList.insert(uid);		
 		return true;
-	}
-	return false;
+//	}
+//	return false;
 }
 
 void Tile::Construction(int uid) { construction = uid; }

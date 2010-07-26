@@ -162,5 +162,5 @@ npc_type "killer bee" {
 		statusEffects=["poison"]
 	}
 	spawnAsGroup="1d10+10"
-	tags=["attackRandomly"]
+	tags=["attackRandomly", "flying"]
 }

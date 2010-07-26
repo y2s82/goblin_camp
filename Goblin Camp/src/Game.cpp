@@ -252,7 +252,12 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
 
+	if (NPC::Presets[type].tags.find("flying") != NPC::Presets[type].tags.end()) {
+		npc->AddEffect(FLYING);
+	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+
 	return npc->Uid();
 }
 
