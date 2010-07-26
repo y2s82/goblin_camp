@@ -41,7 +41,8 @@ public:
 	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
 	bool Walkable(int,int) const;
-	void Walkable(int,int,bool);
+	bool Walkable(int,int,void*) const;
+	void SetWalkable(int,int,bool);
 	int Width();
 	int Height();
 	bool Buildable(int,int) const;
