@@ -49,7 +49,7 @@ public:
 	void Buildable(int,int,bool);
 	TileType Type(int,int);
 	void Type(int,int,TileType);
-	bool MoveTo(int,int,int);
+	void MoveTo(int,int,int);
 	void MoveFrom(int,int,int);
 	void Construction(int,int,int);
 	int Construction(int,int);

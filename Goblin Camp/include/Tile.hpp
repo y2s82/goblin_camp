@@ -72,7 +72,7 @@ public:
 	int moveCost() const;
 	void moveCost(int);
 	void MoveFrom(int);
-	bool MoveTo(int);
+	void MoveTo(int);
 	void Construction(int);
 	int Construction() const;
 	boost::weak_ptr<WaterNode> GetWater() const;

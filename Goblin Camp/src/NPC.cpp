@@ -111,16 +111,14 @@ NPC::~NPC() {
 
 void NPC::Position(Coordinate pos, bool firstTime) {
 	if (!firstTime) {
-		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
-			Map::Inst()->MoveFrom(x, y, uid);
-			x = pos.X();
-			y = pos.Y();
-		}
+		Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+		Map::Inst()->MoveFrom(x, y, uid);
+		x = pos.X();
+		y = pos.Y();
 	} else {
-		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
-			x = pos.X();
-			y = pos.Y();
-		}
+		Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+		x = pos.X();
+		y = pos.Y();
 	}
 }
 
