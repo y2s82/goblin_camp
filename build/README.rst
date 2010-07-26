@@ -187,6 +187,8 @@ to build ``release`` variant, install it into dist, and then run::
 
     bjam --user-config=gc-config.jam nsis
 
+Installer will be saved into ``build\dist\installer``.
+
 Automatic versioning
 ~~~~~~~~~~~~~~~~~~~~
 
