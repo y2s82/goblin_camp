@@ -123,12 +123,8 @@ void Tile::MoveFrom(int uid) {
 	npcList.erase(npcList.find(uid));
 }
 
-bool Tile::MoveTo(int uid) {
-	if (Walkable()) {
-		npcList.insert(uid);		
-		return true;
-	}
-	return false;
+void Tile::MoveTo(int uid) {
+	npcList.insert(uid);		
 }
 
 void Tile::Construction(int uid) { construction = uid; }

@@ -46,6 +46,7 @@ menuOpen(false),
 	rbuttonPressed(false),
 	keyHelpTextColor(0),
 	draggingViewport(false),
+    draggingPlacement(false),
 	textMode(false),
 	inputString(std::string("")),
 	cursorChar('X')
@@ -219,7 +220,6 @@ void UI::HandleMouse() {
 	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
 	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
 		mouseInput = tempStatus;
-		oldMouseInput = mouseInput;
 		drawCursor = false;
 		TCODMouse::showCursor(true);
 	}
@@ -242,84 +242,116 @@ void UI::HandleMouse() {
 	}
 
 	currentMenu->Update(mouseInput.cx, mouseInput.cy);
-	if (lbuttonPressed && draggingViewport) draggingViewport = false;
-	else if (lbuttonPressed) {
-		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy);
-		if (menuResult == NOMENUHIT) {
-			if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true); lbuttonPressed = false; }
-			if (menuResult == NOMENUHIT) {
-				if (_state == UIPLACEMENT && placeable) {
-					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
-				} else if (_state == UIABPLACEMENT && placeable) {
-					if (a.X() == 0) {
-						a.X(mouseInput.cx + Game::Inst()->upleft.X());
-						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
-					}
-					else {
-						//Place construction from a->b
-						if (a.X() > b.X()) {
-							tmp = a.X();
-							a.X(b.X());
-							b.X(tmp);
-							xswap = true;
-						}
-						if (a.Y() > b.Y()) {
-							tmp = a.Y();
-							a.Y(b.Y());
-							b.Y(tmp);
-							yswap = true;
-						}
-						for (int ix = a.X(); ix <= b.X(); ++ix) {
-							if (!yswap) {
-								if (placementCallback(Coordinate(ix, a.Y()), _blueprint))
-									callback(Coordinate(ix, a.Y()));
-							} else {
-								if (placementCallback(Coordinate(ix, b.Y()), _blueprint))
-									callback(Coordinate(ix, b.Y()));
-							}
-						}
-						for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-							if (!xswap) {
-								if (placementCallback(Coordinate(b.X(), iy), _blueprint))
-									callback(Coordinate(b.X(), iy));
-							} else {
-								if (placementCallback(Coordinate(a.X(), iy), _blueprint))
-									callback(Coordinate(a.X(), iy));
-							}
-						}
-						a.X(0); a.Y(0); b.X(0); b.Y(0);
-					}
-				} else if (_state == UIRECTPLACEMENT && placeable) {
-					if (a.X() == 0) {
-						a.X(mouseInput.cx + Game::Inst()->upleft.X());
-						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
-					}
-					else {
-						//Place construction from a->b
-						if (a.X() > b.X()) {
-							tmp = a.X();
-							a.X(b.X());
-							b.X(tmp);
-							xswap = true;
-						}
-						if (a.Y() > b.Y()) {
-							tmp = a.Y();
-							a.Y(b.Y());
-							b.Y(tmp);
-							yswap = true;
-						}
+	if (lbuttonPressed) {
+        if (draggingViewport) {
+            draggingViewport = false;
+        } else {
+            menuResult = NOMENUHIT;
+            if(!draggingPlacement) {
+                menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
+                if (menuResult == NOMENUHIT) {
+                    if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true); lbuttonPressed = false; }
+                }                    
+            }
+            if (menuResult == NOMENUHIT) {
+                if (menuOpen && _state == UINORMAL) {
+                    CloseMenu();
+                }
+                if (_state == UIPLACEMENT && placeable) {
+                    callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
+                } else if (_state == UIABPLACEMENT && placeable) {
+                    if (a.X() == 0) {
+                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
+                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+                    }
+                    else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
+                        //Place construction from a->b
+                        if (a.X() > b.X()) {
+                            tmp = a.X();
+                            a.X(b.X());
+                            b.X(tmp);
+                            xswap = true;
+                        }
+                        if (a.Y() > b.Y()) {
+                            tmp = a.Y();
+                            a.Y(b.Y());
+                            b.Y(tmp);
+                            yswap = true;
+                        }
+                        for (int ix = a.X(); ix <= b.X(); ++ix) {
+                            if (!yswap) {
+                                if (placementCallback(Coordinate(ix, a.Y()), _blueprint))
+                                    callback(Coordinate(ix, a.Y()));
+                            } else {
+                                if (placementCallback(Coordinate(ix, b.Y()), _blueprint))
+                                    callback(Coordinate(ix, b.Y()));
+                            }
+                        }
+                        for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+                            if (!xswap) {
+                                if (placementCallback(Coordinate(b.X(), iy), _blueprint))
+                                    callback(Coordinate(b.X(), iy));
+                            } else {
+                                if (placementCallback(Coordinate(a.X(), iy), _blueprint))
+                                    callback(Coordinate(a.X(), iy));
+                            }
+                        }
+                        a.X(0); a.Y(0); b.X(0); b.Y(0);
+                    }
+                } else if (_state == UIRECTPLACEMENT && placeable) {
+                    if (a.X() == 0) {
+                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
+                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+                    }
+                    else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
+                        //Place construction from a->b
+                        if (a.X() > b.X()) {
+                            tmp = a.X();
+                            a.X(b.X());
+                            b.X(tmp);
+                            xswap = true;
+                        }
+                        if (a.Y() > b.Y()) {
+                            tmp = a.Y();
+                            a.Y(b.Y());
+                            b.Y(tmp);
+                            yswap = true;
+                        }
 
-						if (placementCallback(Coordinate(a.X(), a.Y()), _blueprint))
-							rectCallback(a,b);
+                        if (placementCallback(Coordinate(a.X(), a.Y()), _blueprint))
+                            rectCallback(a,b);
 
-						a.X(0); a.Y(0); b.X(0); b.Y(0);
-					}
-				} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
-					if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
-					else sideBar.SetEntity(boost::weak_ptr<Entity>());
-				}
-			}
-		}
+                        a.X(0); a.Y(0); b.X(0); b.Y(0);
+                    }
+                } else { //Current state is not any kind of placement, so open construction/npc context menu if over one
+                    if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
+                    else sideBar.SetEntity(boost::weak_ptr<Entity>());
+                }
+            }
+        }
+        draggingPlacement = false;
+    } else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
+        menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
+        if (menuResult == NOMENUHIT) {
+            if (menuOpen) {
+                menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, false);
+            }
+            if (menuResult == NOMENUHIT) {
+                if (_state == UIABPLACEMENT && placeable) {
+                    if (a.X() == 0) {
+                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
+                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+                        draggingPlacement = true;
+                    }
+                } else if (_state == UIRECTPLACEMENT && placeable) {
+                    if (a.X() == 0) {
+                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
+                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+                        draggingPlacement = true;
+                    }
+                }
+            }
+        }
 	} else { currentMenu->Update(); }
 
 	if (rbuttonPressed) {
@@ -360,6 +392,7 @@ void UI::HandleMouse() {
 	lbuttonPressed = false;
 	mbuttonPressed = false;
 	rbuttonPressed = false;
+    oldMouseInput = mouseInput;
 }
 void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	int tmp;
@@ -695,19 +728,21 @@ width(19),
 	construction(false)
 {}
 
-MenuResult SideBar::Update(int x, int y) {
+MenuResult SideBar::Update(int x, int y, bool clicked) {
 	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
 		if (construction) {
 			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
 				int i = y - (topY + 15);			
 				if (i >= 0 && i < (signed int)Item::Categories.size()) {
-					boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i, UI::Inst()->ShiftPressed());
+                    if (clicked) {
+                        boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i, UI::Inst()->ShiftPressed());
+                    }
 					return MENUHIT;
 				}
 			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
 				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(entity.lock()));
 				int i = y - (topY + 15);
-				if (i >= 0) {
+				if (clicked && i >= 0) {
 					for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin();
 						seedi != fp->AllowedSeeds()->end(); ++seedi) {
 							if (i-- == 0) {

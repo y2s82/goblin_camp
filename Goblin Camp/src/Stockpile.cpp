@@ -40,7 +40,7 @@ Stockpile::~Stockpile() {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->Construction(x,y) == uid) {
 				Map::Inst()->Buildable(x,y,true);
-				Map::Inst()->Walkable(x,y,true);
+				Map::Inst()->SetWalkable(x,y,true);
 				Map::Inst()->Construction(x,y,-1);
 			}
 		}

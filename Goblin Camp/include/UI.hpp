@@ -39,7 +39,7 @@ class SideBar {
 public:
 	SideBar();
 	void SetEntity(boost::weak_ptr<Entity>);
-	MenuResult Update(int, int);
+	MenuResult Update(int, int, bool);
 	void Draw(TCODConsole*);
 };
 
@@ -66,6 +66,7 @@ private:
 	TCOD_mouse_t oldMouseInput;
 	int keyHelpTextColor;
 	bool draggingViewport;
+    bool draggingPlacement;
 	SideBar sideBar;
 	bool textMode;
 	std::string inputString;
