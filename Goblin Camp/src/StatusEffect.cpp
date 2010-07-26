@@ -95,6 +95,13 @@ type(typeval),
 		damage.second = 4;
 		bleed = true;
 		break;
+
+	case FLYING:
+		name = "Flying";
+		graphic = '"';
+		color = TCODColor::lightBlue;
+		cooldown = -1;
+		break;
 	}
 	cooldownDefault = cooldown;
 }
