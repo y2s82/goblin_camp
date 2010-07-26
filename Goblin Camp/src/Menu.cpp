@@ -741,9 +741,11 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->printFrame(topX+1, topY+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "Existing");
 	y = topY+2;
 	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin(); squadi != Game::Inst()->squadList.end(); ++squadi) {
+		console->setBackgroundColor((chosenSquad.lock() == squadi->second) ? TCODColor::blue : TCODColor::black);
 		console->print(topX+2, y++, "%s (%d/%d)", squadi->first.c_str(), squadi->second->MemberCount(),
 			squadi->second->MemberLimit());
 	}
+    console->setBackgroundColor(TCODColor::black);
 
 	x = topX+(width/2);
 	y = topY+2;
@@ -857,9 +859,9 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 						}
 				}
 
-			} else if (x > topX) {
+			} else if (x > topX && y >= topY+2 && y < topY + height-2) {
 				y -= (topY+2);
-				if (y < (signed int)Game::Inst()->squadList.size()) {
+				if (y >= 0 && y < (signed int)Game::Inst()->squadList.size()) {
 					std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
 					squadi = boost::next(squadi, y);
 					if (squadi != Game::Inst()->squadList.end()) {
