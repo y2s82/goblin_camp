@@ -6,11 +6,10 @@
 import property-set ;
 import project ;
 import "class" : new ;
-
-.winsdk-options = ;
+import modules ;
 
 rule init ( options * ) {
-    .winsdk-options = [ property-set.create $(options) ] ;
+    modules.poke winsdk : .winsdk-options : [ property-set.create $(options) ] ;
 }
 
 rule use-project ( ) {

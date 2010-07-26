@@ -6,6 +6,7 @@ path-constant GC_BUILD_ROOT    : "$(GC_ROOT)/build" ;
 path-constant GC_TEMPLATES     : "$(GC_BUILD_ROOT)/templates" ;
 path-constant GC_DIST_ROOT     : "$(GC_BUILD_ROOT)/dist" ;
 path-constant GC_TMP_DIR       : "$(GC_BUILD_ROOT)/tmp" ;
+path-constant GC_MSVC_SLN_DIR  : "$(GC_BUILD_ROOT)/msvc" ;
 path-constant GC_SOURCE_ROOT   : "$(GC_ROOT)/Goblin Camp" ;
 path-constant GC_SOURCES       : "$(GC_SOURCE_ROOT)/src" ;
 path-constant GC_HEADERS       : "$(GC_SOURCE_ROOT)/include" ;
@@ -34,6 +35,8 @@ use-project goblin-camp : $(GC_BUILD_ROOT) ;
 build-project $(GC_BUILD_ROOT) ;
 
 # Shortcuts
-alias nsis : /goblin-camp//nsis ;
-alias dist : /goblin-camp//dist ;
-explicit nsis dist ;
+alias nsis    : /goblin-camp//nsis ;
+alias dist    : /goblin-camp//dist ;
+alias sln2008 : /goblin-camp//sln2008 ;
+alias sln2010 : /goblin-camp//sln2010 ;
+explicit nsis dist sln2008 sln2010 ;
