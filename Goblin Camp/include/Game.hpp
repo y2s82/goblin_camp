@@ -33,7 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define BFS_MAX_DISTANCE 20
 
-#define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 1)
+#define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 3)
 
 enum Season {
 	EarlySpring,
