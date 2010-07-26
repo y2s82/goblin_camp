@@ -68,7 +68,7 @@ Construction::~Construction() {
 	for (int ix = x; ix < (signed int)x + Construction::Blueprint(type).X(); ++ix) {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
 			Map::Inst()->Buildable(ix,iy,true);
-			Map::Inst()->Walkable(ix,iy,true);
+			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->Construction(ix,iy,-1);
 		}
 	}
@@ -121,7 +121,7 @@ int Construction::Build() {
 		condition = maxCondition;
 		for (unsigned int ix = x; ix < x + Construction::Blueprint(type).X(); ++ix) {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
-				Map::Inst()->Walkable(ix, iy, walkable);
+				Map::Inst()->SetWalkable(ix, iy, walkable);
 				Map::Inst()->BlocksWater(ix, iy, !walkable);
 				Map::Inst()->BlocksLight(ix, iy, !walkable);
 			}

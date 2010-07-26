@@ -789,7 +789,7 @@ void Game::GenerateMap() {
 										boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), type));
 										natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 										map->NatureObject(ax,ay,natObj->Uid());
-										map->Walkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 								}
