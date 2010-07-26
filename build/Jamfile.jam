@@ -113,8 +113,10 @@ explicit-alias common-deps
 if [ os.name ] = NT {
     ECHO ** Building for Windows ;
     
-    current-sources += $(win32-sources) ;
-    version-sources += $(win32-ver-sources) ;
+    current-sources  += $(win32-sources) ;
+    version-sources  += $(win32-ver-sources) ;
+    additional-files += $(GC_BUILD_ROOT)/installer/redists/dbghelp.dll ;
+    
     explicit-alias platform-deps : win32-deps ;
 } else if [ os.name ] = LINUX {
     ECHO ** Building for Linux ;

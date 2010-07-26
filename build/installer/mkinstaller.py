@@ -79,11 +79,8 @@ for fn in DLLs:
         os.path.join('build', 'dist', 'installer', 'src')
     )
 
-print '\tINCLUDE dbghelp.dll'
-shutil.copy(
-    os.path.join('build', 'installer', 'redists', 'dbghelp.dll'),
-    os.path.join('build', 'dist', 'installer', 'src')
-)
+files = set(os.listdir(os.path.join('build', 'dist', 'installer', 'src')))
+
 print '\tINCLUDE %s/vcredist_x86.exe' % redist
 shutil.copy(
     os.path.join('build', 'installer', 'redists', 'vc%s' % redist, 'vcredist_x86.exe'),
