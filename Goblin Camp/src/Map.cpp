@@ -75,10 +75,10 @@ TileType Map::Type(int x, int y) {
 void Map::Type(int x, int y, TileType ntype) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].type(ntype); 
 }
-bool Map::MoveTo(int x, int y, int uid) {
+void Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
-		return tileMap[x][y].MoveTo(uid);
-	} else return false;
+		tileMap[x][y].MoveTo(uid);
+	} 
 }
 void Map::MoveFrom(int x, int y, int uid) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].MoveFrom(uid); 
