@@ -44,7 +44,8 @@ enum StatusEffectType {
 	SLEEPING,
 	POISON,
 	BLEEDING,
-	FLYING
+	FLYING,
+	BADSLEEP
 };
 
 struct StatusEffect {

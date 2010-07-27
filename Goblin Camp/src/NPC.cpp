@@ -287,10 +287,10 @@ void NPC::UpdateStatusEffects() {
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		//Apply effects to stats
 		for (int i = 0; i < STAT_COUNT; ++i) {
-			effectiveStats[i] = (int)(baseStats[i] * statusEffectI->statChanges[i]);
+			effectiveStats[i] = (int)(effectiveStats[i] * statusEffectI->statChanges[i]);
 		}
 		for (int i = 0; i < STAT_COUNT; ++i) {
-			effectiveResistances[i] = (int)(baseResistances[i] * statusEffectI->resistanceChanges[i]);
+			effectiveResistances[i] = (int)(effectiveResistances[i] * statusEffectI->resistanceChanges[i]);
 		}
 
 		if (statusEffectI->damage.second > 0 && --statusEffectI->damage.first <= 0) {
@@ -633,8 +633,14 @@ MOVENEARend:
 
 			case SLEEP:
 				AddEffect(SLEEPING);
+				AddEffect(BADSLEEP);
 				weariness -= 50;
 				if (weariness <= 0) {
+					if (boost::shared_ptr<Entity> entity = currentEntity().lock()) {
+						if (boost::static_pointer_cast<Construction>(entity)->HasTag(BED)) {
+							RemoveEffect(BADSLEEP);
+						}
+					}
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
