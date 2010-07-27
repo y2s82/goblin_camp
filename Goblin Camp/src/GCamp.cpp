@@ -278,6 +278,8 @@ void LoadMenu() {
 void SaveMenu() {
 	if (!Game::Inst()->Running()) return;
 	std::string saveName;
+	TCODConsole::root->setForegroundColor(TCODColor::white);
+	TCODConsole::root->setBackgroundColor(TCODColor::black);
 	while (true) {
 		TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
 		if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
@@ -300,6 +302,9 @@ void SaveMenu() {
 		TCODConsole::root->clear();
 		TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15, 
 			Game::Inst()->ScreenHeight()/2-3, 30, 3, true, TCOD_BKGND_SET, "Save name");
+		TCODConsole::root->setBackgroundColor(TCODColor::darkGrey);
+		TCODConsole::root->rect(Game::Inst()->ScreenWidth()/2-14, Game::Inst()->ScreenHeight()/2-2, 28, 1, true);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->print(Game::Inst()->ScreenWidth()/2, 
 			Game::Inst()->ScreenHeight()/2-2, "%s", saveName.c_str());
 		TCODConsole::root->flush();
