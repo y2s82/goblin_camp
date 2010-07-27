@@ -140,7 +140,8 @@ void StockManager::Update() {
 						std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator> 
 						workshopRange = workshops.equal_range(producers[*prodi]);
 					//By dividing the difference by the amount of workshops we get how many jobs each one should handle
-					if (int workshopCount = std::distance(workshopRange.first, workshopRange.second) > 0) {
+					int workshopCount = std::distance(workshopRange.first, workshopRange.second);
+					if (workshopCount > 0) {
 						difference = std::max(1, difference / workshopCount);
 						//Now we just check that each workshop has 'difference' amount of jobs for this product
 						for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki =

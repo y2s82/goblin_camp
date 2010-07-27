@@ -1,7 +1,7 @@
 construction_type "Wooden Wall" {
 	wall
 	maxCondition=30
-	materials=["Wood"]
+	materials=["Log"]
 }
 
 construction_type "Stockpile" {
@@ -28,7 +28,7 @@ construction_type "Carpenter's workshop" {
 	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed", "Wooden club"]
 	walkable
 	maxCondition=90
-	materials=["Wood","Wood","Wood"]
+	materials=["Log","Log","Log"]
 	productionx=1
 	productiony=1
 }
@@ -40,7 +40,7 @@ construction_type "Brewery" {
 	products=["Wine"]
 	walkable
 	maxCondition=90
-	materials=["Wood","Wood","Wood"]
+	materials=["Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
 }
@@ -54,7 +54,7 @@ construction_type "Bakery" {
 	products=["Pie", "Exquisite Pie", "Bread"]
 	walkable
 	maxCondition=90
-	materials=["Wood","Wood","Wood"]
+	materials=["Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 }
