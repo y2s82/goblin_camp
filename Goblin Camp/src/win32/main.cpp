@@ -28,6 +28,7 @@ int main() {
 	return GCMain();
 }
 #endif
+
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	InstallExceptionHandler();
 	return GCMain();

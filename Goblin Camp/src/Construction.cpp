@@ -163,6 +163,12 @@ void Construction::AddJob(ItemType item) {
 void Construction::CancelJob(int index) {
 	if (index == 0 && index < (signed int)jobList.size()) {
 		jobList.erase(jobList.begin());
+		//Empty container in case some pickup jobs got done
+		while (!container->empty()) {
+			boost::weak_ptr<Item> item = container->GetFirstItem();
+			container->RemoveItem(item);
+			if (item.lock()) item.lock()->PutInContainer();
+		}
 		while (!jobList.empty() && !reserved && !SpawnProductionJob());
 	} else if (index > 0 && index < (signed int)jobList.size()) { 
 		jobList.erase(jobList.begin() + index); 
@@ -360,7 +366,7 @@ void Construction::LoadPresets(std::string filename) {
 }
 
 bool Construction::SpawnProductionJob() {
-	//Only spawn a job is the construction isn't already reserved
+	//Only spawn a job if the construction isn't already reserved
 	if (!reserved) {
 		//First check that the requisite items actually exist
 		std::list<boost::weak_ptr<Item> > componentList;
