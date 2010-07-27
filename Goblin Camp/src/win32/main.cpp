@@ -22,6 +22,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 int GCMain();
 void InstallExceptionHandler();
 
+#ifdef DEBUG
+int main() {
+	InstallExceptionHandler();
+	return GCMain();
+}
+#endif
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	InstallExceptionHandler();
 	return GCMain();
