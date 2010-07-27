@@ -95,6 +95,7 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	int ychange = 0;
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		for (int i = 1; i < (signed int)graphic.size(); ++i) {
+			if (dismantle) console->setBack(screenx+i-1,screeny, TCODColor::darkGrey);
 			console->setFore(screenx+i-1,screeny, color);
 			if (condition > i*-10) console->setChar(screenx+i-1,screeny, (graphic[i]));
 			else console->setChar(screenx+i-1,screeny, TCOD_CHAR_BLOCK2);
