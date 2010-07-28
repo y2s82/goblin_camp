@@ -1066,7 +1066,17 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 	}
 }
 
-void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {squad = newSquad;}
+void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
+	squad = newSquad;
+	if (!squad.lock()) { //NPC was removed from a squad
+		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
+			inventory->RemoveItem(weapon);
+			weapon->Position(Position());
+			weapon->PutInContainer();
+			mainHand.reset();
+		}
+	}
+}
 boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}
 
 void NPC::Escape() {
