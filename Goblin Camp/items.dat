@@ -368,7 +368,7 @@ item_type "Seed sack" {
 	category = ["Seed Container"]
 	containerSize = 50
 	graphic = 208
-	color = "255,73,7"
+	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
 }
 
@@ -376,6 +376,6 @@ item_type "Flour sack" {
 	category = ["Flour Container"]
 	containerSize = 50
 	graphic = 208
-	color = "255,73,7"
+	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
 }
