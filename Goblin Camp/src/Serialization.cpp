@@ -390,6 +390,7 @@ void Squad::save(Archive & ar, const unsigned int version) const {
 	ar & targetCoordinate;
 	ar & targetEntity;
 	ar & priority;
+	ar & weapon;
 }
 
 template<class Archive>
@@ -401,6 +402,7 @@ void Squad::load(Archive & ar, const unsigned int version) {
 	ar & targetCoordinate;
 	ar & targetEntity;
 	ar & priority;
+	ar & weapon;
 }
 
 template<class Archive>
