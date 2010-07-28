@@ -84,6 +84,8 @@ Construction::~Construction() {
 
 	if (producer) StockManager::Inst()->UpdateWorkshops(boost::weak_ptr<Construction>(), false);
 
+	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
+	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
 }
 
 
@@ -433,18 +435,30 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
 	bool n = false,s = false,e = false,w = false;
 
-	if (Map::Inst()->Construction(x - 1, y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->Type()].tags[WALL]
-	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->Type()].tags[DOOR]))
-		w = true;
-	if (Map::Inst()->Construction(x + 1, y) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->Type()].tags[WALL]
-	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->Type()].tags[DOOR]))
-		e = true;
-	if (Map::Inst()->Construction(x, y - 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->Type()].tags[WALL]
-	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->Type()].tags[DOOR]))
-		n = true;
-	if (Map::Inst()->Construction(x, y + 1) > -1 && (Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->Type()].tags[WALL]
-	|| Construction::Presets[Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->Type()].tags[DOOR]))
-		s = true;
+	if (Map::Inst()->Construction(x - 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock();
+		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+			w = true;
+		}
+	}
+	if (Map::Inst()->Construction(x + 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock();
+		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+			e = true;
+		}
+	}
+	if (Map::Inst()->Construction(x, y-1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y-1)).lock();
+		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+			n = true;
+		}
+	}
+	if (Map::Inst()->Construction(x, y+1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y+1)).lock();
+		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+			s = true;
+		}
+	}
 
 	if (self && Construction::Presets[type].tags[WALL]) {
 		if (n&&s&&e&&w) graphic[1] = 197;

@@ -130,7 +130,7 @@ private:
 	void HandleThirst();
 	void HandleHunger();
 	void HandleWeariness();
-	int health;
+	int health, maxHealth;
 	boost::weak_ptr<Item> foundItem;
 	boost::shared_ptr<Container> inventory;
 
@@ -145,7 +145,7 @@ private:
 	int effectiveStats[STAT_COUNT];
 	int baseResistances[RES_COUNT];
 	int effectiveResistances[RES_COUNT];
-	bool aggressive;
+	bool aggressive, coward;
 	boost::weak_ptr<NPC> aggressor;
 	bool dead;
 	boost::weak_ptr<Squad> squad;
