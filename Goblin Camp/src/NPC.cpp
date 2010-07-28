@@ -226,6 +226,7 @@ void NPC::HandleWeariness() {
 	if (!found) {
 		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
+			run = true;
 			boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
 			sleepJob->internal = true;
 			sleepJob->ReserveEntity(bed);
