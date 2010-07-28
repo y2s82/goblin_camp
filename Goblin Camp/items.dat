@@ -328,7 +328,7 @@ item_type "Flour" {
 
 item_type "Blueleaf boll" {
 	category = [ "Fiber" ]
-	graphic = 10
+	graphic = 249
 	color = "0,0,255"
 	fruits = [ "Blueleaf seed" ]
 	decay = [ "Blueleaf seed", "Filth" ]
