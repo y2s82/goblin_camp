@@ -874,11 +874,13 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 }
 
 bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
-	boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
-	if (newJob)  {
-		npc->jobs.push_back(newJob);
-		npc->run = true;
-		return true;
+	if (!npc->MemberOf().lock()) {
+		boost::shared_ptr<Job> newJob(JobManager::Inst()->GetJob(npc->uid).lock());
+		if (newJob)  {
+			npc->jobs.push_back(newJob);
+			npc->run = true;
+			return true;
+		}
 	}
 	return false;
 }
@@ -1096,6 +1098,7 @@ void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
 			weapon->PutInContainer();
 			mainHand.reset();
 		}
+		aggressive = false;
 	}
 }
 boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}
