@@ -93,8 +93,14 @@ MenuResult Menu::Update(int x, int y, bool clicked) {
 	return NOMENUHIT; //Mouse was not inside menu
 }
 
-void Menu::selected(int newSel) { _selected = newSel; }
-void Menu::AddChoice(MenuChoice newChoice) { choices.push_back(newChoice); CalculateSize(); }
+void Menu::selected(int newSel) {
+    _selected = newSel;
+}
+
+void Menu::AddChoice(MenuChoice newChoice) { 
+    choices.push_back(newChoice); 
+    CalculateSize();
+}
 
 void Menu::Callback(unsigned int choice) {
 	if (choices.size() > choice) {
@@ -131,47 +137,58 @@ Menu* Menu::ConstructionMenu() {
 	if (!constructionMenu) {
 		constructionMenu = new Menu(std::vector<MenuChoice>());
 		constructionMenu->AddChoice(MenuChoice(std::string("Basics"), boost::bind(UI::ChangeMenu, Menu::BasicsMenu())));
-		constructionMenu->AddChoice(MenuChoice(std::string("Workshops"), boost::bind(UI::ChangeMenu, Menu::WorkshopsMenu())));
-		constructionMenu->AddChoice(MenuChoice(std::string("Furniture"), boost::bind(UI::ChangeMenu, Menu::FurnitureMenu())));
+        for(std::set<std::string>::iterator it = Construction::Categories.begin(); it != Construction::Categories.end(); it++) {
+            if(!boost::iequals("Basics", *it)){
+                constructionMenu->AddChoice(MenuChoice(*it, boost::bind(UI::ChangeMenu, Menu::ConstructionCategoryMenu(*it))));
+            }
+        }
 	}
 	return constructionMenu;
+}
+
+std::map<std::string, Menu *> Menu::constructionCategoryMenus = std::map<std::string, Menu *>();
+
+Menu* Menu::ConstructionCategoryMenu(std::string category) {
+    std::map<std::string, Menu *>::iterator found = constructionCategoryMenus.find(category);
+    Menu *menu;
+    if(found == constructionCategoryMenus.end()) {
+        menu = new Menu(std::vector<MenuChoice>());
+        for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
+            ConstructionPreset preset = Construction::Presets[i];
+            if (boost::iequals(preset.category, category)) {
+                if(preset.tags[STOCKPILE] || preset.tags[FARMPLOT]) {
+                    menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i)));
+                } else {
+                    UIState placementType = UIPLACEMENT;
+                    if(preset.placementType > 0 && preset.placementType < UICOUNT) {
+                        placementType = (UIState)preset.placementType;
+                    }
+                    menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseConstruct, i, placementType)));
+                }
+            }
+        }
+        constructionCategoryMenus[category] = menu;
+    } else {
+        menu = found->second;
+    }
+    return menu;
 }
 
 Menu* Menu::basicsMenu = 0;
 Menu* Menu::BasicsMenu() {
 	if (!basicsMenu) {
-		basicsMenu = new Menu(std::vector<MenuChoice>());
-		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-			if (Construction::Presets[i].tags[STOCKPILE]) {
-				basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
-			}
-		}
-		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-			if (Construction::Presets[i].tags[FARMPLOT]) {
-				basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseStockpile, i)));
-			}
-		}
-		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-			if (Construction::Presets[i].tags[WALL]) {
-				basicsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIABPLACEMENT)));
-			}
-		}
+        basicsMenu = ConstructionCategoryMenu("basics");
 		basicsMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));
 	}
 	return basicsMenu;
 }
 
-Menu* Menu::workshopsMenu = 0;
 Menu* Menu::WorkshopsMenu() {
-	if (!workshopsMenu) {
-		workshopsMenu = new Menu(std::vector<MenuChoice>());
-		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-			if (Construction::Presets[i].tags[WORKSHOP]) {
-				workshopsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
-			}
-		}
-	}
-	return workshopsMenu;
+	return ConstructionCategoryMenu("Workshops");
+}
+
+Menu* Menu::FurnitureMenu() {
+	return ConstructionCategoryMenu("Furniture");
 }
 
 Menu* Menu::ordersMenu = 0;
@@ -183,19 +200,6 @@ Menu* Menu::OrdersMenu() {
 		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
 	}
 	return ordersMenu;
-}
-
-Menu* Menu::furnitureMenu = 0;
-Menu* Menu::FurnitureMenu() {
-	if (!furnitureMenu) {
-		furnitureMenu = new Menu(std::vector<MenuChoice>());
-		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-			if (Construction::Presets[i].tags[FURNITURE]) {
-				furnitureMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
-			}
-		}
-	}
-	return furnitureMenu;
 }
 
 bool Menu::YesNoDialog(std::string text, std::string leftButton, std::string rightButton) {
