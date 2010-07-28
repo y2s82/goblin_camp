@@ -95,7 +95,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	thirst += rand() % 10; //Just for some variety
 	hunger += rand() % 10;
 
-	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), 0);
+	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
 	for (int i = 0; i < STAT_COUNT; ++i) {baseStats[i] = 0; effectiveStats[i] = 0;}
 	for (int i = 0; i < RES_COUNT; ++i) {baseResistances[i] = 0; effectiveResistances[i] = 0;}
@@ -111,16 +111,14 @@ NPC::~NPC() {
 
 void NPC::Position(Coordinate pos, bool firstTime) {
 	if (!firstTime) {
-		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
-			Map::Inst()->MoveFrom(x, y, uid);
-			x = pos.X();
-			y = pos.Y();
-		}
+		Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+		Map::Inst()->MoveFrom(x, y, uid);
+		x = pos.X();
+		y = pos.Y();
 	} else {
-		if (Map::Inst()->MoveTo(pos.X(), pos.Y(), uid)) {
-			x = pos.X();
-			y = pos.Y();
-		}
+		Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+		x = pos.X();
+		y = pos.Y();
 	}
 }
 
@@ -177,7 +175,7 @@ void NPC::HandleThirst() {
 			} else {
 				for (int ix = tmpCoord.X()-1; ix <= tmpCoord.X()+1; ++ix) {
 					for (int iy = tmpCoord.Y()-1; iy <= tmpCoord.Y()+1; ++iy) {
-						if (Map::Inst()->Walkable(ix,iy)) {
+						if (Map::Inst()->Walkable(ix,iy,(void*)this)) {
 							newJob->tasks.push_back(Task(MOVE, Coordinate(ix,iy)));
 							goto CONTINUEDRINKBLOCK;
 						}
@@ -245,38 +243,7 @@ void NPC::Update() {
 	if (Map::Inst()->NPCList(x,y)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
-	for (int i = 0; i < STAT_COUNT; ++i) {
-		effectiveStats[i] = baseStats[i];
-	}
-	for (int i = 0; i < STAT_COUNT; ++i) {
-		effectiveResistances[i] = baseResistances[i];
-	}
-	++statusGraphicCounter;
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
-		//Apply effects to stats
-		for (int i = 0; i < STAT_COUNT; ++i) {
-			effectiveStats[i] = (int)(baseStats[i] * statusEffectI->statChanges[i]);
-		}
-		for (int i = 0; i < STAT_COUNT; ++i) {
-			effectiveResistances[i] = (int)(baseResistances[i] * statusEffectI->resistanceChanges[i]);
-		}
-		//Remove the statuseffect if it's cooldown has run out
-		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
-			if (statusEffectI == statusEffectIterator) {
-				++statusEffectIterator;
-				statusGraphicCounter = 0;
-			}
-			statusEffectI = statusEffects.erase(statusEffectI);
-			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
-		}
-	}
-
-
-	if (statusGraphicCounter > 10) {
-		statusGraphicCounter = 0;
-		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
-		else statusEffectIterator = statusEffects.begin();
-	}
+	UpdateStatusEffects();
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
@@ -308,6 +275,50 @@ void NPC::Update() {
 	}
 }
 
+void NPC::UpdateStatusEffects() {
+
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		effectiveStats[i] = baseStats[i];
+	}
+	for (int i = 0; i < STAT_COUNT; ++i) {
+		effectiveResistances[i] = baseResistances[i];
+	}
+	++statusGraphicCounter;
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		//Apply effects to stats
+		for (int i = 0; i < STAT_COUNT; ++i) {
+			effectiveStats[i] = (int)(effectiveStats[i] * statusEffectI->statChanges[i]);
+		}
+		for (int i = 0; i < STAT_COUNT; ++i) {
+			effectiveResistances[i] = (int)(effectiveResistances[i] * statusEffectI->resistanceChanges[i]);
+		}
+
+		if (statusEffectI->damage.second > 0 && --statusEffectI->damage.first <= 0) {
+			statusEffectI->damage.first = UPDATES_PER_SECOND;
+			health -= statusEffectI->damage.second;
+			if (statusEffectI->bleed) Game::Inst()->CreateBlood(Position());
+		}
+
+		//Remove the statuseffect if it's cooldown has run out
+		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
+			if (statusEffectI == statusEffectIterator) {
+				++statusEffectIterator;
+				statusGraphicCounter = 0;
+			}
+			statusEffectI = statusEffects.erase(statusEffectI);
+			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+		}
+	}
+
+
+	if (statusGraphicCounter > 10) {
+		statusGraphicCounter = 0;
+		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
+		else statusEffectIterator = statusEffects.begin();
+	}
+
+}
+
 AiThink NPC::Think() {
 	Coordinate tmpCoord;
 	int tmp;
@@ -326,7 +337,7 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 			case MOVE:
-				if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y())) {
+				if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
 					TaskFinished(TASKFAILFATAL);
 					break;
 				}
@@ -358,7 +369,7 @@ AiThink NPC::Think() {
 					if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 					if (tarY < 0) tarY = 0;
 					if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-					if (Map::Inst()->Walkable(tarX, tarY)) {
+					if (Map::Inst()->Walkable(tarX, tarY, (void *)this)) {
 						if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y())) {
 							currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
 							goto MOVENEARend;
@@ -538,7 +549,7 @@ MOVENEARend:
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[tree->Type()].components.begin(); iti != NatureObject::Presets[tree->Type()].components.end(); ++iti) {
 							Game::Inst()->CreateItem(tree->Position(), *iti, true);
 						}
-						Map::Inst()->Walkable(tree->X(), tree->Y(), true);
+						Map::Inst()->SetWalkable(tree->X(), tree->Y(), true);
 						Map::Inst()->Buildable(tree->X(), tree->Y(), true);
 						Game::Inst()->RemoveNatureObject(tree);
 						TaskFinished(TASKSUCCESS);
@@ -557,7 +568,7 @@ MOVENEARend:
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[plant->Type()].components.begin(); iti != NatureObject::Presets[plant->Type()].components.end(); ++iti) {
 							Game::Inst()->CreateItem(plant->Position(), *iti, true);
 						}
-						Map::Inst()->Walkable(plant->X(), plant->Y(), true);
+						Map::Inst()->SetWalkable(plant->X(), plant->Y(), true);
 						Map::Inst()->Buildable(plant->X(), plant->Y(), true);
 						Game::Inst()->RemoveNatureObject(plant);
 						TaskFinished(TASKSUCCESS);
@@ -622,8 +633,14 @@ MOVENEARend:
 
 			case SLEEP:
 				AddEffect(SLEEPING);
+				AddEffect(BADSLEEP);
 				weariness -= 50;
 				if (weariness <= 0) {
+					if (boost::shared_ptr<Entity> entity = currentEntity().lock()) {
+						if (boost::static_pointer_cast<Construction>(entity)->HasTag(BED)) {
+							RemoveEffect(BADSLEEP);
+						}
+					}
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
@@ -671,13 +688,13 @@ MOVENEARend:
 						if (npci->lock() && npci->lock()->faction != faction) {
 							int dx = x - npci->lock()->x;
 							int dy = y - npci->lock()->y;
-							if (Map::Inst()->Walkable(x + dx, y + dy)) {
+							if (Map::Inst()->Walkable(x + dx, y + dy, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(x + dx, y)) {
+							} else if (Map::Inst()->Walkable(x + dx, y, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(x, y + dy)) {
+							} else if (Map::Inst()->Walkable(x, y + dy, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
 								jobs.push_back(fleeJob);
 							}

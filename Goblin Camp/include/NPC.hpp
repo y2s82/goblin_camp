@@ -38,9 +38,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
 
-#define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 5)
-#define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 8)
-#define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 9)
+#define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 10)
+#define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 13)
+#define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 12)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
 
@@ -156,6 +156,7 @@ private:
 	bool Escaped();
 	void Escape();
 	void DestroyAllItems();
+	void UpdateStatusEffects();
 
 	static std::map<std::string, NPCType> NPCTypeNames;
 public:

@@ -17,6 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Map.hpp"
 #include "Game.hpp"
+#include "NPC.hpp"
+#include "StatusEffect.hpp"
 
 Map::Map() {
 	tileMap.resize(boost::extents[500][500]);
@@ -36,16 +38,24 @@ Map* Map::Inst() {
 	return instance;
 }
 
-float Map::getWalkCost(int x0, int y0, int x1, int y1, void *data) const {
-	if (Walkable(x1,y1)) return (float)tileMap[x0][y0].moveCost();
+float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
+	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
+	if (Walkable(x1,y1,ptr)) return (float)tileMap[x0][y0].moveCost();
 	return 0.0f;
 }
 
+//Simple version that doesn't take npc information into account
 bool Map::Walkable(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Walkable();
 	return false;
 }
-void Map::Walkable(int x,int y, bool value) { 
+
+bool Map::Walkable(int x, int y, void* ptr) const {
+	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return true;
+	return Walkable(x,y);
+}
+
+void Map::SetWalkable(int x,int y, bool value) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Walkable(value); 
 }
 
@@ -65,10 +75,10 @@ TileType Map::Type(int x, int y) {
 void Map::Type(int x, int y, TileType ntype) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].type(ntype); 
 }
-bool Map::MoveTo(int x, int y, int uid) {
+void Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
-		return tileMap[x][y].MoveTo(uid);
-	} else return false;
+		tileMap[x][y].MoveTo(uid);
+	} 
 }
 void Map::MoveFrom(int x, int y, int uid) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].MoveFrom(uid); 

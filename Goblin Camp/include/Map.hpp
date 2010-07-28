@@ -41,14 +41,15 @@ public:
 	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
 	bool Walkable(int,int) const;
-	void Walkable(int,int,bool);
+	bool Walkable(int,int,void*) const;
+	void SetWalkable(int,int,bool);
 	int Width();
 	int Height();
 	bool Buildable(int,int) const;
 	void Buildable(int,int,bool);
 	TileType Type(int,int);
 	void Type(int,int,TileType);
-	bool MoveTo(int,int,int);
+	void MoveTo(int,int,int);
 	void MoveFrom(int,int,int);
 	void Construction(int,int,int);
 	int Construction(int,int);

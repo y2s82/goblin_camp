@@ -81,7 +81,7 @@ bool Job::Menial() {return menial;}
 bool Job::Paused() {return paused;}
 void Job::Paused(bool value) {paused = value;}
 void Job::Remove() {waitingForRemoval = true;}
-bool Job::Removable() {return waitingForRemoval;}
+bool Job::Removable() {return waitingForRemoval && PreReqsCompleted();}
 int Job::Attempts() {return attempts;}
 void Job::Attempts(int value) {attemptMax = value;}
 bool Job::Attempt() {
@@ -146,7 +146,6 @@ void Job::UnreserveSpot() {
 void Job::Fail() {
 	completion = FAILURE;
 	if (parent.lock()) parent.lock()->Fail();
-	preReqs.clear();
 	Remove();
 }
 

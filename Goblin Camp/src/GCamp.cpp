@@ -131,25 +131,6 @@ int MainMenu() {
 
 		TCODConsole::root->setAlignment(TCOD_CENTER);
 
-		mouseStatus = TCODMouse::getStatus();
-		if (mouseStatus.lbutton) {
-			lButtonDown = true;
-		}
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-
-
-		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
-			selected = mouseStatus.cy - (edgey+2);
-		} else selected = -1;
-
-		if (!mouseStatus.lbutton && lButtonDown) {
-			lButtonDown = false;
-			if (selected == 0) StartNewGame();
-			else if (selected == 2 && Game::Inst()->Running()) MainLoop();
-			else if (selected == 4) LoadMenu();
-			else if (selected == 6 && Game::Inst()->Running()) SaveMenu();
-			else if (selected == 8) exit = true;
-		}
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
 		if (selected == 0) {
 			TCODConsole::root->setForegroundColor(TCODColor::black);
@@ -198,9 +179,6 @@ int MainMenu() {
 		}
 		TCODConsole::root->print(edgex+width/2, edgey+10, "Exit");
 
-		if (key.c == 'q') exit = true;
-		else if (key.c == 'n') StartNewGame();
-
 		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
@@ -208,6 +186,28 @@ int MainMenu() {
 			edgey+25, true);
 
 		TCODConsole::root->flush();
+
+		mouseStatus = TCODMouse::getStatus();
+		if (mouseStatus.lbutton) {
+			lButtonDown = true;
+		}
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+
+		if (key.c == 'q') exit = true;
+		else if (key.c == 'n') StartNewGame();
+
+		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
+			selected = mouseStatus.cy - (edgey+2);
+		} else selected = -1;
+
+		if (!mouseStatus.lbutton && lButtonDown) {
+			lButtonDown = false;
+			if (selected == 0) StartNewGame();
+			else if (selected == 2 && Game::Inst()->Running()) MainLoop();
+			else if (selected == 4) LoadMenu();
+			else if (selected == 6 && Game::Inst()->Running()) SaveMenu();
+			else if (selected == 8) exit = true;
+		}
 
 	}
 	Game::Inst()->Exit(false);
@@ -234,6 +234,25 @@ void LoadMenu() {
 	while (!exit) {
 
 		TCODConsole::root->clear();
+
+		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
+
+		for (int i = 0; i <= list.size()+1; ++i) {
+			if (selected == i) {
+				TCODConsole::root->setForegroundColor(TCODColor::black);
+				TCODConsole::root->setBackgroundColor(TCODColor::white);
+			} else {
+				TCODConsole::root->setForegroundColor(TCODColor::white);
+				TCODConsole::root->setBackgroundColor(TCODColor::black);
+			}
+			if (i < list.size()) TCODConsole::root->print(edgex+width/2, edgey+2+i, list.get(i).c_str());
+			else if (i == list.size()+1) TCODConsole::root->print(edgex+width/2, edgey+2+i, "Cancel");
+		}
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+
+		TCODConsole::root->flush();
+
 		mouseStatus = TCODMouse::getStatus();
 		if (mouseStatus.lbutton) {
 			lButtonDown = true;
@@ -253,29 +272,14 @@ void LoadMenu() {
 			return;
 		}
 
-		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
-
-		for (int i = 0; i <= list.size()+1; ++i) {
-			if (selected == i) {
-				TCODConsole::root->setForegroundColor(TCODColor::black);
-				TCODConsole::root->setBackgroundColor(TCODColor::white);
-			} else {
-				TCODConsole::root->setForegroundColor(TCODColor::white);
-				TCODConsole::root->setBackgroundColor(TCODColor::black);
-			}
-			if (i < list.size()) TCODConsole::root->print(edgex+width/2, edgey+2+i, list.get(i).c_str());
-			else if (i == list.size()+1) TCODConsole::root->print(edgex+width/2, edgey+2+i, "Cancel");
-		}
-		TCODConsole::root->setForegroundColor(TCODColor::white);
-		TCODConsole::root->setBackgroundColor(TCODColor::black);
-
-		TCODConsole::root->flush();
 	}
 }
 
 void SaveMenu() {
 	if (!Game::Inst()->Running()) return;
 	std::string saveName;
+	TCODConsole::root->setForegroundColor(TCODColor::white);
+	TCODConsole::root->setBackgroundColor(TCODColor::black);
 	while (true) {
 		TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
 		if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
@@ -298,6 +302,9 @@ void SaveMenu() {
 		TCODConsole::root->clear();
 		TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15, 
 			Game::Inst()->ScreenHeight()/2-3, 30, 3, true, TCOD_BKGND_SET, "Save name");
+		TCODConsole::root->setBackgroundColor(TCODColor::darkGrey);
+		TCODConsole::root->rect(Game::Inst()->ScreenWidth()/2-14, Game::Inst()->ScreenHeight()/2-2, 28, 1, true);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->print(Game::Inst()->ScreenWidth()/2, 
 			Game::Inst()->ScreenHeight()/2-2, "%s", saveName.c_str());
 		TCODConsole::root->flush();

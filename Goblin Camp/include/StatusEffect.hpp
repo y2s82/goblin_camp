@@ -43,7 +43,9 @@ enum StatusEffectType {
 	DROWSY,
 	SLEEPING,
 	POISON,
-	BLEEDING
+	BLEEDING,
+	FLYING,
+	BADSLEEP
 };
 
 struct StatusEffect {
@@ -67,4 +69,6 @@ struct StatusEffect {
 	int cooldownDefault;
 	double statChanges[STAT_COUNT]; //These are percentage values of the original value (100% = no change)
 	double resistanceChanges[RES_COUNT]; //These are percentage values of the original value (100% = no change)
+	std::pair<int,int> damage; //First - counter, second - damage amount
+	bool bleed;
 };
