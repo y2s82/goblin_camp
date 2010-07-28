@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "StatusEffect.hpp"
 #include "GCamp.hpp"
+#include "Game.hpp"
 
 //TODO: All this needs to be put into data files at some point
 
@@ -101,6 +102,16 @@ type(typeval),
 		graphic = '"';
 		color = TCODColor::lightBlue;
 		cooldown = -1;
+		break;
+
+	case BADSLEEP:
+		name = "Sluggish";
+		graphic = '-';
+		color = TCODColor::grey;
+		cooldown = MONTH_LENGTH*3;
+		statChanges[MOVESPEED] = 0.75;
+		statChanges[DODGE] = 0.75;
+		resistanceChanges[POISON_RES] = 0.75;
 		break;
 	}
 	cooldownDefault = cooldown;

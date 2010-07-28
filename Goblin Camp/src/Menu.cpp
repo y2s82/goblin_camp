@@ -630,6 +630,9 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 	console->putChar(topX+48, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
 	console->putChar(topX+48, topY+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
 	console->printFrame(topX+10, topY+1, 30, 3, true);
+	console->setBackgroundColor(TCODColor::darkGrey);
+	console->rect(topX+11, topY+2, width-22, 1, true);
+	console->setBackgroundColor(TCODColor::black);
 	console->print(topX+11, topY+2, filter.c_str());
 
 	int x = topX + 8;
@@ -753,7 +756,7 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->setAlignment(TCOD_CENTER);
 	++x;
 	console->print(x+(width/4)-2, y, "Name (required)");
-	console->setBackgroundColor(TCODColor::grey);
+	console->setBackgroundColor(TCODColor::darkGrey);
 	console->rect(x,y+1,(width/2)-3,1,true,TCOD_BKGND_SET);
 	console->setBackgroundColor(TCODColor::black);
 	console->print(x+(width/4)-1, y+1, squadName.c_str());
