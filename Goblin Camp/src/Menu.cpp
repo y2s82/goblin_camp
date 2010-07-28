@@ -236,11 +236,12 @@ Menu* Menu::constructionMenu = 0;
 Menu* Menu::ConstructionMenu() {
 	if (!constructionMenu) {
 		constructionMenu = new Menu(std::vector<MenuChoice>());
-		constructionMenu->AddChoice(MenuChoice(std::string("Basics"), boost::bind(UI::ChangeMenu, Menu::BasicsMenu())));
         for(std::set<std::string>::iterator it = Construction::Categories.begin(); it != Construction::Categories.end(); it++) {
-            if(!boost::iequals("Basics", *it)){
-                constructionMenu->AddChoice(MenuChoice(*it, boost::bind(UI::ChangeMenu, Menu::ConstructionCategoryMenu(*it))));
-            }
+            constructionMenu->AddChoice(MenuChoice(*it, boost::bind(UI::ChangeMenu, Menu::ConstructionCategoryMenu(*it))));
+        }
+        Menu *basicsMenu = ConstructionCategoryMenu("basics");
+        if(basicsMenu) {
+            basicsMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));
         }
 	}
 	return constructionMenu;
@@ -274,13 +275,8 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
     return menu;
 }
 
-Menu* Menu::basicsMenu = 0;
 Menu* Menu::BasicsMenu() {
-	if (!basicsMenu) {
-        basicsMenu = ConstructionCategoryMenu("basics");
-		basicsMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));
-	}
-	return basicsMenu;
+	return ConstructionCategoryMenu("basics");
 }
 
 Menu* Menu::WorkshopsMenu() {
