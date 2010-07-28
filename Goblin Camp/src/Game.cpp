@@ -240,6 +240,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->needsNutrition = NPC::Presets[type].needsNutrition;
 	npc->needsSleep = NPC::Presets[type].needsSleep;
 	npc->health = NPC::Presets[type].health;
+	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		npc->baseStats[i] = NPC::Presets[type].stats[i] + ((NPC::Presets[type].stats[i] * 0.1) * (rand() % 2) ? 1 : -1);
 	}

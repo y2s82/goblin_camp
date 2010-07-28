@@ -130,7 +130,7 @@ private:
 	void HandleThirst();
 	void HandleHunger();
 	void HandleWeariness();
-	int health;
+	int health, maxHealth;
 	boost::weak_ptr<Item> foundItem;
 	boost::shared_ptr<Container> inventory;
 

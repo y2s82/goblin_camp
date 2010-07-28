@@ -73,6 +73,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	statusEffectIterator(statusEffects.end()),
 	statusGraphicCounter(0),
 	health(100),
+	maxHealth(100),
 	foundItem(boost::weak_ptr<Item>()),
 	inventory(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
 	needsNutrition(false),
@@ -273,6 +274,8 @@ void NPC::Update() {
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
 	}
+
+	if (rand() % UPDATES_PER_SECOND == 0 && health < maxHealth) ++health;
 }
 
 void NPC::UpdateStatusEffects() {
