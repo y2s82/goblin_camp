@@ -1272,7 +1272,10 @@ void NPC::GetMainHandAttack(Attack &attack) {
 }
 
 void NPC::FindNewWeapon() {
-	int weaponValue = mainHand.lock() ? mainHand.lock()->RelativeValue() : 0;
+	int weaponValue = 0;
+	if (mainHand.lock() && mainHand.lock()->IsCategory(squad.lock()->Weapon())) {
+		weaponValue = mainHand.lock()->RelativeValue();
+	}
 	ItemCategory weaponCategory = squad.lock() ? squad.lock()->Weapon() : Item::StringToItemCategory("Weapon");
 	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, BETTERTHAN, weaponValue);
 	if (boost::shared_ptr<Item> weapon = newWeapon.lock()) {
