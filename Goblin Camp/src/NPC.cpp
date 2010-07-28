@@ -79,6 +79,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	needsNutrition(false),
 	needsSleep(false),
 	aggressive(false),
+	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
 	squad(boost::weak_ptr<Squad>()),
@@ -687,6 +688,7 @@ MOVENEARend:
 				if (jobs.empty() && !nearNpcs.empty()) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
+					run = true;
 					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
 						if (npci->lock() && npci->lock()->faction != faction) {
 							int dx = x - npci->lock()->x;
@@ -893,6 +895,14 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 				}
 			}
 		}
+	} else if (npc->coward) { //Aggressiveness trumps cowardice
+		Game::Inst()->FindNearbyNPCs(npc);
+		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
+			if (npci->lock()->Faction() != npc->faction && npci->lock()->aggressive) {
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+				npc->AddEffect(PANIC);
+			}
+		}
 	}
 }
 
@@ -906,6 +916,7 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
+	animal->aggressive = false;
 	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
 		//Turn into a hostile animal if attacked by the player's creatures
 		if (animal->aggressor.lock()->Faction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
@@ -914,6 +925,7 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
+	animal->aggressive = true;
 	Game::Inst()->FindNearbyNPCs(animal);
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 		if (npci->lock()->faction != animal->faction) {

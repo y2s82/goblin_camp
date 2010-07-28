@@ -257,6 +257,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->AddEffect(FLYING);
 	}
 
+	if (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end()) {
+		npc->coward = true;
+	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();
