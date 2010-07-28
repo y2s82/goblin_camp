@@ -796,7 +796,7 @@ void Game::GenerateMap() {
 										map->NatureObject(ax,ay,natObj->Uid());
 										map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-										map->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 								}
 							}
 							break;
