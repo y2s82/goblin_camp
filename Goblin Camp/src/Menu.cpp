@@ -30,13 +30,50 @@ to look into*/
 #include "StockManager.hpp"
 #include "JobManager.hpp"
 
+void Label::Draw(int x, int y, TCODConsole *console) {
+    console->setAlignment(TCOD_CENTER);
+    console->setForegroundColor(TCODColor::white);
+    console->print(x + _x, y + _y, text.c_str());
+}
+
+void Button::Draw(int x, int y, TCODConsole *console) {
+    if(selected) {
+        console->setForegroundColor(TCODColor::black);
+        console->setBackgroundColor(TCODColor::white);
+    } else {
+        console->setForegroundColor(TCODColor::white);
+        console->setBackgroundColor(TCODColor::black);
+    }
+    console->setAlignment(TCOD_CENTER);
+    console->printFrame(x + _x, y + _y, width, 3);
+    console->print(x + _x + width/2, y + _y + 1, text.c_str());
+}
+
+MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    if(key.c == shortcut) {
+        callback();
+        return MENUHIT;
+    }
+    if(x >= _x && x < _x + width && y >= _y && y < _y + 3) {
+        selected = true;
+        if(clicked && callback) {
+            callback();
+        }
+        return MENUHIT;
+    } else {
+        selected = false;
+        return NOMENUHIT;
+    }
+
+}
+
 void Panel::ShowModal() {
 	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
 	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
                        background, 0, 0);
     
-	int topX = (Game::Inst()->ScreenWidth() - width) / 2;
-	int topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	int _x = (Game::Inst()->ScreenWidth() - width) / 2;
+	int _y = (Game::Inst()->ScreenHeight() - height) / 2;
 	TCOD_key_t key;
 	TCOD_mouse_t mouseStatus;
     
@@ -47,13 +84,13 @@ void Panel::ShowModal() {
 		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
                           TCODConsole::root, 0, 0, 0.7, 1.0);
         
-		Draw(topX, topY, TCODConsole::root);
+		Draw(_x, _y, TCODConsole::root);
 		TCODConsole::root->flush();
         
 		key = TCODConsole::checkForKeypress();
 		mouseStatus = TCODMouse::getStatus();
         
-		if((Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed) == MENUHIT && mouseStatus.lbutton_pressed) ||
+		if((Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed, key) == MENUHIT && mouseStatus.lbutton_pressed) ||
            mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) {
             delete this;
             return;
@@ -61,12 +98,42 @@ void Panel::ShowModal() {
 	}    
 }
 
+void Dialog::AddComponent(Drawable *component) {
+    components.push_back(component);
+}
+
+void Dialog::Draw(int x, int y, TCODConsole *console) {
+    _x = x; _y = y;
+    console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
+    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
+        Drawable *component = *it;
+        component->Draw(x, y, console);
+    }
+}
+
+Dialog::~Dialog() {
+    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
+        delete *it;
+    }
+}
+
+MenuResult Dialog::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    MenuResult rtn = NOMENUHIT;
+    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
+        Drawable *component = *it;
+        if(component->Update(x - _x, y - _y, clicked, key) == MENUHIT) {
+            rtn = MENUHIT;
+        }
+    }
+    return rtn;
+}
+
 MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
 	label = ntext;
 	callback = cb;
 }
 
-Menu::Menu(std::vector<MenuChoice> newChoices, std::string ntitle) {
+Menu::Menu(std::vector<MenuChoice> newChoices, std::string ntitle): Panel(0, 0) {
 	_selected = -1;
 	choices = newChoices;
     title = ntitle;
@@ -85,11 +152,11 @@ void Menu::CalculateSize() {
 }
 
 void Menu::Draw(int x, int y, TCODConsole* console) {
-    TCODConsole::root->setAlignment(TCOD_LEFT);
+    console->setAlignment(TCOD_LEFT);
 	//Draw the box
 	if (x + width >= console->getWidth()) x = console->getWidth() - width - 1;
 	if (y + height >= console->getHeight()) y = console->getHeight() - height - 1;
-	topX = x; topY = y; //Save coordinates of menu top-left corner
+	_x = x; _y = y; //Save coordinates of menu top-left corner
 	console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	//Draw the menu entries
@@ -110,10 +177,10 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 	console->setBackgroundColor(TCODColor::black);
 }
 
-MenuResult Menu::Update(int x, int y, bool clicked) {
+MenuResult Menu::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	if (x > 0 && y > 0) {
-		if (x > topX && x < topX + width) {
-			y -= topY;
+		if (x > _x && x < _x + width) {
+			y -= _y;
 			if (y > 0 && y < height) {
 				--y;
 				if (y > 0) y /= 2;
@@ -235,74 +302,12 @@ Menu* Menu::OrdersMenu() {
 	return ordersMenu;
 }
 
-bool Menu::YesNoDialog(std::string text, std::string leftButton, std::string rightButton) {
-	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
-	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
-		background, 0, 0);
-	int width = 50;
-	int height = 10;
-	int topX = (Game::Inst()->ScreenWidth() - width) / 2;
-	int topY = (Game::Inst()->ScreenHeight() - height) / 2;
-	int selected = -1;
-	TCOD_key_t key;
-	TCOD_mouse_t mouseStatus;
-	while (true) {
-		TCODConsole::root->clear();
-		TCODConsole::root->setForegroundColor(TCODColor::white);
-		TCODConsole::root->setBackgroundColor(TCODColor::black);
-		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
-			TCODConsole::root, 0, 0);
-
-		TCODConsole::root->printFrame(topX, topY, width, height);
-		TCODConsole::root->setAlignment(TCOD_CENTER);
-		TCODConsole::root->print(topX+(width/2), topY+2, text.c_str());
-
-		if (selected == 0) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		TCODConsole::root->printFrame(topX+10, topY+4, 10, 3);
-		TCODConsole::root->print(topX+15, topY+5, leftButton.c_str());
-
-		if (selected == 1) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		TCODConsole::root->printFrame(topX+30, topY+4, 10, 3);
-		TCODConsole::root->print(topX+35, topY+5, rightButton.c_str());
-		TCODConsole::root->flush();
-
-		key = TCODConsole::checkForKeypress();
-		mouseStatus = TCODMouse::getStatus();
-
-		selected = -1;
-		if (mouseStatus.cy >= topY+4 && mouseStatus.cy <= topY+6) {
-			if (mouseStatus.cx >= topX+10 && mouseStatus.cx <= topX+20) {
-				selected = 0;
-			} else if (mouseStatus.cx >= topX+30 && mouseStatus.cx <= topX+40) {
-				selected = 1;
-			}
-		}
-		
-		if (mouseStatus.lbutton_pressed) {
-			switch (selected) {
-			case 0: return true;
-			case 1: return false;
-			default: break;
-			}
-		}
-
-		if (key.vk == TCODK_ESCAPE || key.c == 'n') return false;
-		else if (key.c == 'y') return true;
-
-	}
-	return false;
+void Menu::YesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction, std::string leftButton, std::string rightButton) {
+    Dialog *dialog = new Dialog(std::vector<Drawable *>(), "", 50, 10);
+    dialog->AddComponent(new Label(text, 25, 2));
+    dialog->AddComponent(new Button(leftButton, leftAction, 10, 4, 10, 'y'));
+    dialog->AddComponent(new Button(rightButton, rightAction, 30, 4, 10, 'n'));
+    dialog->ShowModal();
 }
 
 JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
@@ -310,7 +315,7 @@ JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
 {
 	width = Game::Inst()->ScreenWidth() - 20;
 	height = Game::Inst()->ScreenHeight() - 20;
-	topX = 10; topY = 10;
+	_x = 10; _y = 10;
 }
 
 void JobMenu::Draw(int x, int y, TCODConsole* console) {
@@ -318,32 +323,32 @@ void JobMenu::Draw(int x, int y, TCODConsole* console) {
 
 	int scrollBar = 0;
 	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, JobManager::Inst()->JobAmount() - height-2)));
-	scrollBar += topY+2;
-	scrollBar = std::min(scrollBar, topY+height-4);
+	scrollBar += _y+2;
+	scrollBar = std::min(scrollBar, _y+height-4);
 
-	console->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "Jobs");
+	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "Jobs");
 
-	JobManager::Inst()->Draw(Coordinate(topX+1,topY+1), scroll, height-2, console);
-	console->putChar(topX+width-2, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(topX+width-2, topY+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->putChar(topX+width-2, scrollBar, 219, TCOD_BKGND_SET);
+	JobManager::Inst()->Draw(Coordinate(_x+1,_y+1), scroll, height-2, console);
+	console->putChar(_x+width-2, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, _y+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, scrollBar, 219, TCOD_BKGND_SET);
 
-	for (int y = topY+1; y <= topY+height-2; ++y) {
-		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - (topY+1 + scroll)));
+	for (int y = _y+1; y <= _y+height-2; ++y) {
+		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - (_y+1 + scroll)));
 		if (job.lock()) {
 			if (job.lock()->Paused()) {
-				console->print(topX+width-15, y, "P");
+				console->print(_x+width-15, y, "P");
 			}
-			console->print(topX+width-18, y, "A-> %d", job.lock()->Assigned());
+			console->print(_x+width-18, y, "A-> %d", job.lock()->Assigned());
 		}
 	}
 }
 
-MenuResult JobMenu::Update(int x, int y, bool clicked) {
-	if (x > topX && x < Game::Inst()->ScreenWidth()-10 && y > topY && y < Game::Inst()->ScreenHeight()-10) {
+MenuResult JobMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
+	if (x > _x && x < Game::Inst()->ScreenWidth()-10 && y > _y && y < Game::Inst()->ScreenHeight()-10) {
 		if (clicked) {
-			if (x == topX+width-2 && y == topY+1) ScrollUp();
-			if (x == topX+width-2 && y == topY+height-2) ScrollDown();
+			if (x == _x+width-2 && y == _y+1) ScrollUp();
+			if (x == _x+width-2 && y == _y+height-2) ScrollDown();
 		}
 		return MENUHIT;
 	}
@@ -366,7 +371,7 @@ AnnounceMenu::AnnounceMenu() : Menu(std::vector<MenuChoice>()),
 {
 	width = Game::Inst()->ScreenWidth() - 20;
 	height = Game::Inst()->ScreenHeight() - 20;
-	topX = 10; topY = 10;
+	_x = 10; _y = 10;
 }
 
 void AnnounceMenu::Draw(int x, int y, TCODConsole* console) {
@@ -374,21 +379,21 @@ void AnnounceMenu::Draw(int x, int y, TCODConsole* console) {
 
 	int scrollBar = 0;
 	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, Announce::Inst()->AnnounceAmount() - height-2)));
-	scrollBar += topY+2;
-	scrollBar = std::min(scrollBar, topY+height-4);
+	scrollBar += _y+2;
+	scrollBar = std::min(scrollBar, _y+height-4);
 
-	console->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "Announcements");
+	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "Announcements");
 
-	Announce::Inst()->Draw(Coordinate(topX+1,topY+1), scroll, height-2, console);
-	console->putChar(topX+width-2, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(topX+width-2, topY+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->putChar(topX+width-2, scrollBar, 219, TCOD_BKGND_SET);
+	Announce::Inst()->Draw(Coordinate(_x+1,_y+1), scroll, height-2, console);
+	console->putChar(_x+width-2, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, _y+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, scrollBar, 219, TCOD_BKGND_SET);
 }
 
-MenuResult AnnounceMenu::Update(int x, int y, bool clicked) {
-	if (x > topX && x < Game::Inst()->ScreenWidth()-10 && y > topY && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == topX+width-2 && y == topY+1 && clicked) ScrollUp();
-		if (x == topX+width-2 && y == topY+height-2 && clicked) ScrollDown();
+MenuResult AnnounceMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
+	if (x > _x && x < Game::Inst()->ScreenWidth()-10 && y > _y && y < Game::Inst()->ScreenHeight()-10) {
+		if (x == _x+width-2 && y == _y+1 && clicked) ScrollUp();
+		if (x == _x+width-2 && y == _y+height-2 && clicked) ScrollDown();
 		return MENUHIT;
 	}
 	return NOMENUHIT;
@@ -410,7 +415,7 @@ NPCMenu::NPCMenu() : Menu(std::vector<MenuChoice>()),
 {
 	width = Game::Inst()->ScreenWidth() - 20;
 	height = Game::Inst()->ScreenHeight() - 20;
-	topX = 10; topY = 10;
+	_x = 10; _y = 10;
 }
 
 void NPCMenu::Draw(int x, int y, TCODConsole* console) {
@@ -418,30 +423,30 @@ void NPCMenu::Draw(int x, int y, TCODConsole* console) {
 
 	int scrollBar = 0;
 	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, (signed int)Game::Inst()->npcList.size() - height-2)));
-	scrollBar += topY+2;
-	scrollBar = std::min(scrollBar, topY+height-4);
+	scrollBar += _y+2;
+	scrollBar = std::min(scrollBar, _y+height-4);
 
-	console->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "NPC List");
+	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "NPC List");
 
 	int count = 0;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
 		if (count++ >= scroll) {
-			console->print(topX+1, topY+1+(count-scroll), "NPC: %d", npci->second->Uid());
-			console->print(topX+10, topY+1+(count-scroll), "%s: %s",
+			console->print(_x+1, _y+1+(count-scroll), "NPC: %d", npci->second->Uid());
+			console->print(_x+10, _y+1+(count-scroll), "%s: %s",
 				npci->second->currentJob().lock() ? npci->second->currentJob().lock()->name.c_str() : "No job",
 				npci->second->currentTask() ? Job::ActionToString(npci->second->currentTask()->action).c_str() : "No task");
 		}
 	}
 
-	console->putChar(topX+width-2, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(topX+width-2, topY+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->putChar(topX+width-2, scrollBar, 219, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, _y+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+	console->putChar(_x+width-2, scrollBar, 219, TCOD_BKGND_SET);
 }
 
-MenuResult NPCMenu::Update(int x, int y, bool clicked) {
-	if (x > topX && x < Game::Inst()->ScreenWidth()-10 && y > topY && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == topX+width-2 && y == topY+1 && clicked) ScrollUp();
-		if (x == topX+width-2 && y == topY+height-2 && clicked) ScrollDown();
+MenuResult NPCMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
+	if (x > _x && x < Game::Inst()->ScreenWidth()-10 && y > _y && y < Game::Inst()->ScreenHeight()-10) {
+		if (x == _x+width-2 && y == _y+1 && clicked) ScrollUp();
+		if (x == _x+width-2 && y == _y+height-2 && clicked) ScrollDown();
 		return MENUHIT;
 	}
 	return NOMENUHIT;
@@ -466,44 +471,44 @@ ConstructionMenu::ConstructionMenu() : Menu(std::vector<MenuChoice>()),
 	firstTimeDraw(true)
 {
 	width = 50; height = 50;
-	topX = (Game::Inst()->ScreenWidth() - width) / 2;
-	topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	_x = (Game::Inst()->ScreenWidth() - width) / 2;
+	_y = (Game::Inst()->ScreenHeight() - height) / 2;
 }
 
 void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 	console->setForegroundColor(TCODColor::white);
-	console->printFrame(topX, topY, 50, 5, true, TCOD_BKGND_SET, construct->Name().c_str());
+	console->printFrame(_x, _y, 50, 5, true, TCOD_BKGND_SET, construct->Name().c_str());
 	console->setForegroundColor(TCODColor::green);
-	console->print(topX + 3, topY + 2, "Rename");
+	console->print(_x + 3, _y + 2, "Rename");
 	console->setForegroundColor(TCODColor::red);
-	console->print(topX + 13, topY + 2, "Dismantle");
+	console->print(_x + 13, _y + 2, "Dismantle");
 	console->setForegroundColor(TCODColor::white);
 
 	//Only draw the production queue and product list if construction is a producer
 	if (construct->Producer()) {
-		console->printFrame(topX+25, topY+5, 25, 50, true, TCOD_BKGND_SET, "Product list");
-		console->printFrame(topX, topY+5, 25, 50, true, TCOD_BKGND_SET, "Production queue");
-		console->putChar(topX+25, topY+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(topX+25, topY+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(topX+25, topY+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(topX+24, topY+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(topX+24, topY+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(topX+24, topY+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->printFrame(_x+25, _y+5, 25, 50, true, TCOD_BKGND_SET, "Product list");
+		console->printFrame(_x, _y+5, 25, 50, true, TCOD_BKGND_SET, "Production queue");
+		console->putChar(_x+25, _y+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(_x+25, _y+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(_x+25, _y+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(_x+24, _y+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(_x+24, _y+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
+		console->putChar(_x+24, _y+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
 
-		console->putChar(topX+48, topY+6, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-		console->putChar(topX+48, topY+53, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+		console->putChar(_x+48, _y+6, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+		console->putChar(_x+48, _y+53, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
 
 		int y = 0;
-		for (int prodi = scroll; prodi < (signed int)construct->Products()->size() && y < topY+50; ++prodi) {
+		for (int prodi = scroll; prodi < (signed int)construct->Products()->size() && y < _y+50; ++prodi) {
 			console->setForegroundColor(TCODColor::white);
-			console->print(topX+26, topY+6+y, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
-			if (firstTimeDraw) productPlacement.push_back(topY+6+y);
+			console->print(_x+26, _y+6+y, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
+			if (firstTimeDraw) productPlacement.push_back(_y+6+y);
 			++y;
-			for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < topY+50; ++compi) {
+			for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < _y+50; ++compi) {
 				console->setForegroundColor(TCODColor::white);
-				console->putChar(topX+27, topY+6+y, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
+				console->putChar(_x+27, _y+6+y, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
 				console->setForegroundColor(TCODColor::grey);
-				console->print(topX+28, topY+6+y, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
+				console->print(_x+28, _y+6+y, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
 				++y;
 			}
 			++y;
@@ -511,7 +516,7 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 
 		for (int jobi = 0; jobi < (signed int)construct->JobList()->size(); ++jobi) {
 			console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
-			console->print(topX+2, topY+6+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
+			console->print(_x+2, _y+6+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
 		}
 
 		firstTimeDraw = false;
@@ -520,16 +525,16 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
 		Stockpile* sp = static_cast<Stockpile*>(construct);
 		console->setForegroundColor(TCODColor::white);
-		console->printFrame(topX, topY+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
-		int x = topX+2;
-		int y = topY+6;
+		console->printFrame(_x, _y+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
+		int x = _x+2;
+		int y = _y+6;
 		for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 			console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
 			console->print(x,y, Item::Categories[i].name.c_str());
 			++y;
 			if (i != 0 && i % 49 == 0) {
 				x += 20;
-				y = topY+6;
+				y = _y+6;
 			}
 		}
 	}
@@ -538,19 +543,19 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 
 }
 
-MenuResult ConstructionMenu::Update(int x, int y, bool clicked) {
-	if (x >= topX + 3 && x < topX + 3 + 6 && y == topY + 2) { /*Rename*/ }
-	if (x >= topX + 13 && x < topX + 13 + 9 && y == topY + 2) { /*Dismantle*/ }
+MenuResult ConstructionMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
+	if (x >= _x + 3 && x < _x + 3 + 6 && y == _y + 2) { /*Rename*/ }
+	if (x >= _x + 13 && x < _x + 13 + 9 && y == _y + 2) { /*Dismantle*/ }
 
 	if (construct->Producer()) {
-		if (x > topX+2 && x < topX+25) {
+		if (x > _x+2 && x < _x+25) {
 			//Cancel production jobs
-			if (y > topY+5 && y < topY+17) {
-				construct->CancelJob(y-(topY+6));
+			if (y > _y+5 && y < _y+17) {
+				construct->CancelJob(y-(_y+6));
 				return MENUHIT;
 			}
 		}
-		if (x > topX+25 && x < topX+48) {
+		if (x > _x+25 && x < _x+48) {
 			//Add production jobs
 			for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
 				if (y == productPlacement[i]) {
@@ -560,13 +565,13 @@ MenuResult ConstructionMenu::Update(int x, int y, bool clicked) {
 			}
 		}
 
-		if (x == topX+48 && y == topY+6) { ScrollUp(); return MENUHIT; }
-		if (x == topX+48 && y == topY+53) { ScrollDown(); return MENUHIT; }
+		if (x == _x+48 && y == _y+6) { ScrollUp(); return MENUHIT; }
+		if (x == _x+48 && y == _y+53) { ScrollDown(); return MENUHIT; }
 	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
 
 	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
-		int i = ((x-topX+2) / 20)*50;
-		i += (y - (topY+6));
+		int i = ((x-_x+2) / 20)*50;
+		i += (y - (_y+6));
 		if (i >= 0 && i < (signed int)Item::Categories.size()) {
 			static_cast<Stockpile*>(construct)->SwitchAllowed(i);
 		}
@@ -596,23 +601,23 @@ StockManagerMenu::StockManagerMenu() : Menu(std::vector<MenuChoice>()),
 	filter("")
 {
 	width = 50; height = 50;
-	topX = (Game::Inst()->ScreenWidth() - width) / 2;
-	topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	_x = (Game::Inst()->ScreenWidth() - width) / 2;
+	_y = (Game::Inst()->ScreenHeight() - height) / 2;
 }
 
 void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 	console->setForegroundColor(TCODColor::white);
-	console->printFrame(topX, topY, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
-	console->putChar(topX+48, topY+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(topX+48, topY+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->printFrame(topX+10, topY+1, 30, 3, true);
+	console->printFrame(_x, _y, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
+	console->putChar(_x+48, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+	console->putChar(_x+48, _y+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+	console->printFrame(_x+10, _y+1, 30, 3, true);
 	console->setBackgroundColor(TCODColor::darkGrey);
-	console->rect(topX+11, topY+2, width-22, 1, true);
+	console->rect(_x+11, _y+2, width-22, 1, true);
 	console->setBackgroundColor(TCODColor::black);
-	console->print(topX+11, topY+2, filter.c_str());
+	console->print(_x+11, _y+2, filter.c_str());
 
-	int x = topX + 8;
-	int y = topY + 4;
+	int x = _x + 8;
+	int y = _y + 4;
 
 	console->setAlignment(TCOD_CENTER);
 
@@ -628,21 +633,21 @@ void StockManagerMenu::Draw(int, int, TCODConsole* console) {
 					console->print(x,y+2, "- %d +", StockManager::Inst()->Minimum(*itemi));
 
 					x += 16;
-					if (x > topX + (width - 10)) {x = topX + 8; y += 5;}
-					if (y > topY + (height - 4)) break;
+					if (x > _x + (width - 10)) {x = _x + 8; y += 5;}
+					if (y > _y + (height - 4)) break;
 			}
 	}
 	console->setAlignment(TCOD_LEFT);
 }
 
-MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
+MenuResult StockManagerMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	filter = UI::Inst()->InputString();
 	if (x >= 0 && y >= 0) {
 		int ch = TCODConsole::root->getChar(x,y);
 
-		x -= (topX + 4); //If it's the first choice, x is now ~0
+		x -= (_x + 4); //If it's the first choice, x is now ~0
 		x /= 16; //Now x = the column
-		y -= (topY + 3 + 2); //+2 because +/- are under the text
+		y -= (_y + 3 + 2); //+2 because +/- are under the text
 		y /= 5;
 		int choice = x + (y*3);
 		//Because choice = index based on the visible items, we need to translate that into
@@ -673,9 +678,9 @@ MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
 						++itemIndex;
 				}
 		}
-		if (clicked && x == topX+48 && y == topY+1) {
+		if (clicked && x == _x+48 && y == _y+1) {
 			if (scroll > 0) --scroll;
-		} else if (clicked && x == topX+48 && y == topY+48) {
+		} else if (clicked && x == _x+48 && y == _y+48) {
 			if (scroll < (signed int)(StockManager::Inst()->Producables()->size() / 3)-1) ++scroll;
 		}
 		return MENUHIT;
@@ -709,26 +714,26 @@ SquadsMenu::SquadsMenu() : Menu(std::vector<MenuChoice>()),
 {
 	width = 50;
 	height = 20;
-	topX = (Game::Inst()->ScreenWidth() - width) / 2;
-	topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	_x = (Game::Inst()->ScreenWidth() - width) / 2;
+	_y = (Game::Inst()->ScreenHeight() - height) / 2;
 
 }
 
 void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
-	console->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "Squads");
+	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "Squads");
 
-	console->printFrame(topX+1, topY+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "Existing");
-	y = topY+2;
+	console->printFrame(_x+1, _y+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "Existing");
+	y = _y+2;
 	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin(); squadi != Game::Inst()->squadList.end(); ++squadi) {
 		console->setBackgroundColor((chosenSquad.lock() == squadi->second) ? TCODColor::blue : TCODColor::black);
-		console->print(topX+2, y++, "%s (%d/%d)", squadi->first.c_str(), squadi->second->MemberCount(),
+		console->print(_x+2, y++, "%s (%d/%d)", squadi->first.c_str(), squadi->second->MemberCount(),
 			squadi->second->MemberLimit());
 	}
     console->setBackgroundColor(TCODColor::black);
 
-	x = topX+(width/2);
-	y = topY+2;
-	console->printFrame(x, topY+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, (chosenSquad.lock()) ? "Modify Squad" : "New Squad");
+	x = _x+(width/2);
+	y = _y+2;
+	console->printFrame(x, _y+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, (chosenSquad.lock()) ? "Modify Squad" : "New Squad");
 	console->setAlignment(TCOD_CENTER);
 	++x;
 	console->print(x+(width/4)-2, y, "Name (required)");
@@ -767,8 +772,8 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	}
 
 	if (chosenSquad.lock()) {
-		x = topX;
-		y = topY+19;
+		x = _x;
+		y = _y+19;
 		console->printFrame(x, y, width, 7, true, TCOD_BKGND_SET, "Orders for %s", chosenSquad.lock()->Name().c_str());
 		console->setBackgroundColor((chosenSquad.lock()->Order() == GUARD) ? TCODColor::blue : TCODColor::black);
 		console->printFrame(x+2, y+2, 7, 3, false);
@@ -788,31 +793,31 @@ void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 }
 
-MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
+MenuResult SquadsMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	squadName = UI::Inst()->InputString();
 	if (clicked) {
-		if (y < topY+19) {
-			if (x > topX + (width/2)) {
-				if (x > topX + (width/2) + 3 && x < topX + (width/2) + 6) {
-					if (y > topY+2+3 && y < topY+2+6) {
+		if (y < _y+19) {
+			if (x > _x + (width/2)) {
+				if (x > _x + (width/2) + 3 && x < _x + (width/2) + 6) {
+					if (y > _y+2+3 && y < _y+2+6) {
 						if (squadMembers > 0) --squadMembers; 
 						return MENUHIT;
 					}
-					else if (y > topY+2+8 && y < topY+2+11) {
+					else if (y > _y+2+8 && y < _y+2+11) {
 						if (squadPriority > 0) --squadPriority; 
 						return MENUHIT; 
 					}
-				} else if (x > topX + (width/2) + 17 && x < topX + (width/2) + 20) {
-					if (y > topY+2+3 && y < topY+2+6) {
+				} else if (x > _x + (width/2) + 17 && x < _x + (width/2) + 20) {
+					if (y > _y+2+3 && y < _y+2+6) {
 						++squadMembers; 
 						return MENUHIT; 
 					}
-					else if (y > topY+2+8 && y < topY+2+11) {
+					else if (y > _y+2+8 && y < _y+2+11) {
 						++squadPriority; 
 						return MENUHIT; 
 					}
-				} else if (x > topX + (width/2) + 1 && x < topX + (width/2) + 11
-					&& y > topY+2+12 && y < topY+2+15) {
+				} else if (x > _x + (width/2) + 1 && x < _x + (width/2) + 11
+					&& y > _y+2+12 && y < _y+2+15) {
 						if (squadName != "" && !chosenSquad.lock()) { //Create
 							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
 								(squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
@@ -828,8 +833,8 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 							tempSquad->Priority(squadPriority);
 							return MENUHIT;
 						}
-				} else if (x > topX + (width/2) + 12 && x < topX + (width/2) + 22
-					&& y > topY+2+12 && y < topY+2+15) {
+				} else if (x > _x + (width/2) + 12 && x < _x + (width/2) + 22
+					&& y > _y+2+12 && y < _y+2+15) {
 						if (chosenSquad.lock()) {
 							chosenSquad.lock()->RemoveAllMembers();
 							Game::Inst()->squadList.erase(chosenSquad.lock()->Name());
@@ -838,8 +843,8 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 						}
 				}
 
-			} else if (x > topX && y >= topY+2 && y < topY + height-2) {
-				y -= (topY+2);
+			} else if (x > _x && y >= _y+2 && y < _y + height-2) {
+				y -= (_y+2);
 				if (y >= 0 && y < (signed int)Game::Inst()->squadList.size()) {
 					std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
 					squadi = boost::next(squadi, y);
@@ -867,20 +872,20 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 				}
 			}
 		} else {
-			if (y > topY+20 && y < topY+24) {
-				if (x > topX+1 && x < topX+9) { //Guard
+			if (y > _y+20 && y < _y+24) {
+				if (x > _x+1 && x < _x+9) { //Guard
 					chosenSquad.lock()->Order(GUARD);
 					UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
 					UI::Inst()->HideMenu();
 					return MENUHIT;
-				} else if (x > topX+11 && x < topX+20) { //Escort
+				} else if (x > _x+11 && x < _x+20) { //Escort
 					chosenSquad.lock()->Order(ESCORT);
 					UI::ChooseOrderTargetEntity(chosenSquad.lock());
 					UI::Inst()->HideMenu();
 					return MENUHIT;
 				}
-			} else if (y > topY+26 && y < topY+30) {
-				if (x > topX && x < topX+22) {
+			} else if (y > _y+26 && y < _y+30) {
+				if (x > _x && x < _x+22) {
 					Menu *weaponChoiceDialog = new Menu(std::vector<MenuChoice>(), "Weapons");
                     weaponChoiceDialog->AddChoice(MenuChoice("None", boost::bind(&Squad::Weapon, chosenSquad.lock(), -1)));
                     for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
@@ -891,15 +896,15 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 					weaponChoiceDialog->ShowModal();
 					return MENUHIT;
 				}
-			} else if (y >= topY+30 && y < topY+33) {
-				if (x >= topX && x < topX+7) {
+			} else if (y >= _y+30 && y < _y+33) {
+				if (x >= _x && x < _x+7) {
 					chosenSquad.lock()->Rearm();
 					Announce::Inst()->AddMsg(chosenSquad.lock()->Name() + " rearming.");
 					return MENUHIT;
 				}
 			}
 		}
-		if (x > topX && x < topX+width && y > topY && y < topY+height) return MENUHIT;
+		if (x > _x && x < _x+width && y > _y && y < _y+height) return MENUHIT;
 	}
 	return NOMENUHIT;
 }

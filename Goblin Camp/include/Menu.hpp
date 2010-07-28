@@ -37,12 +37,42 @@ public:
 	boost::function<void()> callback;
 };
 
-class Panel {
+class Drawable {
 protected:
-	int topX, topY, width, height;    
+	int _x, _y, width, height;    
 public:
+    Drawable(int x, int y, int nwidth, int nheight):
+        _x(x), _y(y), width(nwidth), height(nheight) {}
     virtual void Draw(int, int, TCODConsole *) = 0;
-    virtual MenuResult Update(int = -1, int = -1, bool clicked = false) = 0;
+	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+};
+
+class Label: public Drawable {
+private:
+    std::string text;
+public:
+    Label(std::string ntext, int x, int y) :
+        Drawable(x, y, 0, 0), text(ntext) {}
+    void Draw(int, int, TCODConsole *);
+};
+
+class Button: public Drawable {
+private:
+    std::string text;
+    bool selected;
+    char shortcut;
+    boost::function<void()> callback;
+public:
+    Button(std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
+        text(ntext), callback(ncallback), shortcut(nshortcut), Drawable(x, y, nwidth, 0), selected(false) {}
+    void Draw(int, int, TCODConsole *);
+    MenuResult Update(int, int, bool, TCOD_key_t);
+};
+
+class Panel: public Drawable {
+public:
+    Panel(int nwidth, int nheight):
+        Drawable(0, 0, nwidth, nheight) {}
     void ShowModal();
 };
 
@@ -58,7 +88,7 @@ public:
 	Menu(std::vector<MenuChoice>, std::string="");
 	virtual ~Menu();
 	virtual void Draw(int, int, TCODConsole*);
-	virtual MenuResult Update(int = -1, int = -1, bool clicked = false);
+	virtual MenuResult Update(int, int, bool, TCOD_key_t);
 	virtual void Open();
 	virtual void Close();
 	void selected(int);
@@ -77,9 +107,22 @@ public:
 	static Menu* FurnitureMenu();
     static Menu* ConstructionCategoryMenu(std::string);
 
-	static bool YesNoDialog(std::string text, std::string leftButton = "Yes",
-		std::string rightButton = "No");
+	static void YesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction,
+                            std::string leftButton = "Yes", std::string rightButton = "No");
 	static ItemCategory WeaponChoiceDialog();
+};
+
+class Dialog: public Panel {
+private:
+    std::vector<Drawable *> components;
+    std::string title;
+public:
+    Dialog(std::vector<Drawable *> ncomponents, std::string ntitle, int nwidth, int nheight):
+        components(ncomponents), title(ntitle), Panel(nwidth, nheight) {}
+    ~Dialog();
+    void AddComponent(Drawable *component);
+    void Draw(int, int, TCODConsole *);
+    MenuResult Update(int, int, bool, TCOD_key_t);
 };
 
 class JobMenu : public Menu {
@@ -88,7 +131,7 @@ private:
 public:
 	JobMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1, bool clicked = false);
+	MenuResult Update(int, int, bool, TCOD_key_t);
 	static JobMenu* jobListingMenu;
 	static JobMenu* JobListingMenu();
 	void ScrollDown();
@@ -101,7 +144,7 @@ private:
 public:
 	AnnounceMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1, bool clicked = false);
+    MenuResult Update(int, int, bool, TCOD_key_t);
 	static AnnounceMenu* announcementsMenu;
 	static AnnounceMenu* AnnouncementsMenu();
 	void ScrollDown();
@@ -114,7 +157,7 @@ private:
 public:
 	NPCMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1, bool clicked = false);
+    MenuResult Update(int, int, bool, TCOD_key_t);
 	static NPCMenu* npcListMenu;
 	static NPCMenu* NPCListMenu();
 	void ScrollDown();
@@ -130,7 +173,7 @@ private:
 public:
 	ConstructionMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1, bool clicked = false);
+    MenuResult Update(int, int, bool, TCOD_key_t);
 	static ConstructionMenu* constructionInfoMenu;
 	static ConstructionMenu* ConstructionInfoMenu(Construction*);
 	void Construct(Construction*);
@@ -146,7 +189,7 @@ private:
 public:
 	StockManagerMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1, bool clicked = false);
+    MenuResult Update(int, int, bool, TCOD_key_t);
 	static StockManagerMenu* stocksMenu;
 	static StockManagerMenu* StocksMenu();
 	void ScrollDown();
@@ -163,7 +206,7 @@ private:
 public:
 	SquadsMenu();
 	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int = -1, int = -1, bool clicked = false);
+    MenuResult Update(int, int, bool, TCOD_key_t);
 	static SquadsMenu* squadMenu;
 	static SquadsMenu* SquadMenu();
 	void Open();

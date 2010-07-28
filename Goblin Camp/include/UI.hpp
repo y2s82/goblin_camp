@@ -34,6 +34,10 @@ enum UIState {
     UICOUNT
 };
 
+static TCOD_key_t NO_KEY = {
+    TCODK_NONE, 0, false, false, false, false, false, false
+};
+
 class SideBar {
 	boost::weak_ptr<Entity> entity;
 	int width, height, topY;
