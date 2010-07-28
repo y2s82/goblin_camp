@@ -780,6 +780,11 @@ void NPC::Kill() {
 		Game::Inst()->GetItem(corpse).lock()->Color(_color);
 		Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
+		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
+			weapon->Position(Position());
+			weapon->PutInContainer();
+			mainHand.reset();
+		}
 	}
 }
 
