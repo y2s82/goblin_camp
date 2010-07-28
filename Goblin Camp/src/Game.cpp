@@ -719,11 +719,11 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 		iit->second->Draw(upleft, buffer);
 
 	}
-	for (std::map<int,boost::shared_ptr<NPC> >::iterator it = npcList.begin(); it != npcList.end(); ++it) {
-		it->second->Draw(upleft, buffer);
-	}
 	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator natit = natureList.begin(); natit != natureList.end(); ++natit) {
 		natit->second->Draw(upleft, buffer);
+	}
+	for (std::map<int,boost::shared_ptr<NPC> >::iterator it = npcList.begin(); it != npcList.end(); ++it) {
+		it->second->Draw(upleft, buffer);
 	}
 
 	if (drawUI) {
