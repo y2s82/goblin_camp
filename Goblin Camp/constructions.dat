@@ -1,10 +1,5 @@
-construction_type "Wooden Wall" {
-	wall
-	maxCondition=30
-	materials=["Log"]
-}
-
 construction_type "Stockpile" {
+    category="Basics"
 	stockpile
 	walkable
 	graphicLength=1
@@ -13,6 +8,7 @@ construction_type "Stockpile" {
 }
 
 construction_type "Farm plot" {
+    category="Basics"
 	farmplot
 	walkable
 	graphicLength=1
@@ -20,7 +16,16 @@ construction_type "Farm plot" {
 	maxCondition=10
 }
 
+construction_type "Wooden Wall" {
+    category="Basics"
+	wall
+	maxCondition=30
+	materials=["Log"]
+    placementType=2
+}
+
 construction_type "Carpenter's workshop" {
+    category="Workshops"
 	graphicLength=3
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
@@ -34,6 +39,7 @@ construction_type "Carpenter's workshop" {
 }
 
 construction_type "Brewery" {
+    category="Workshops"
 	graphicLength=4
 	graphic=[ 10, 46, 46,231,
 			  10, 33, 35,231]
@@ -46,6 +52,7 @@ construction_type "Brewery" {
 }
 
 construction_type "Bakery" {
+    category="Workshops"
 	graphicLength=2
 	graphic=[ 10, 46,
 			  33,231,
@@ -60,6 +67,7 @@ construction_type "Bakery" {
 }
 
 construction_type "Bed" {
+    category="Furniture"
 	bed
 	graphicLength=1
 	graphic=[22]
@@ -69,6 +77,7 @@ construction_type "Bed" {
 }
 
 construction_type "Door" {
+    category="Furniture"
 	door
 	graphicLength=1
 	graphic=[43]
@@ -78,6 +87,7 @@ construction_type "Door" {
 }
 
 construction_type "Stone quarry" {
+    category="Workshops"
 	graphicLength=10
 	graphic=[ 44, 46, 46, 44, 44, 44, 46, 44, 46, 46,
 			  44, 46, 46, 44, 44, 44, 46, 44, 46, 44,
@@ -100,6 +110,7 @@ construction_type "Stone quarry" {
 }
 
 construction_type "Stone mason's shack" {
+    category="Workshops"
 	graphicLength=4
 	graphic=[ 40, 46,157,178,
 			  40, 10, 46,178,
@@ -113,6 +124,7 @@ construction_type "Stone mason's shack" {
 }
 
 construction_type "Weapon crafter's workshop" {
+    category="Workshops"
 	graphicLength=2
 	graphic=[ 91, 92,
 			 124, 46,
@@ -127,6 +139,7 @@ construction_type "Weapon crafter's workshop" {
 }
 
 construction_type "Mill" {
+    category="Workshops"
 	graphicLength=3
 	graphic=[157, 46,157,
 			  46, 46, 46,
@@ -140,6 +153,7 @@ construction_type "Mill" {
 }
 
 construction_type "Weaver's workshop" {
+    category="Workshops"
 	graphicLength=3
 	graphic=[ 21, 30, 30,
 			  46, 46, 46,

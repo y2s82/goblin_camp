@@ -38,6 +38,8 @@ public:
 };
 
 class Menu {
+private:
+    static std::map<std::string, Menu *> constructionCategoryMenus;
 protected:
 	std::vector<MenuChoice> choices;
 	int topX, topY, width, height;
@@ -60,12 +62,11 @@ public:
 	static Menu* ConstructionMenu();
 	static Menu* basicsMenu;
 	static Menu* BasicsMenu();
-	static Menu* workshopsMenu;
 	static Menu* WorkshopsMenu();
 	static Menu* ordersMenu;
 	static Menu* OrdersMenu();
-	static Menu* furnitureMenu;
 	static Menu* FurnitureMenu();
+    static Menu* ConstructionCategoryMenu(std::string);
 
 	static bool YesNoDialog(std::string text, std::string leftButton = "Yes",
 		std::string rightButton = "No");

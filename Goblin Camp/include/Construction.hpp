@@ -59,6 +59,8 @@ struct ConstructionPreset {
 	bool dynamic;
 	std::string spawnCreaturesTag;
 	int spawnFrequency;
+    std::string category;
+    int placementType;
 };
 
 class Construction : public Entity {
@@ -112,6 +114,7 @@ public:
 	ItemType JobList(int);
 	virtual int Use();
 	static std::vector<ConstructionPreset> Presets;
+    static std::set<std::string> Categories;
 	static void LoadPresets(std::string);
 	virtual boost::weak_ptr<Container> Storage();
 	bool HasTag(ConstructionTag);
