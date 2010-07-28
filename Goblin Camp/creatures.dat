@@ -40,7 +40,7 @@ npc_type "goblin" {
 		damage="1d9"
 		cooldown=25
 	}
-	tags=["friendly"]
+	tags=["friendly", "coward"]
 }
 
 npc_type "giant snail" {

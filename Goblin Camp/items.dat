@@ -193,6 +193,8 @@ item_type "Young Bloodberry shrub" {
 	graphic = 42
 	color = "255,106,0"
 	growth = "Bloodberry shrub"
+	decay = [ "Filth" ]
+	decaySpeed = 12
 }
 
 item_type "Bloodberry shrub" {
@@ -200,6 +202,8 @@ item_type "Bloodberry shrub" {
 	graphic = 35
 	color = "255,0,0"
 	fruits = [ "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
 }
 
 item_type "Dead plant" {
@@ -214,6 +218,8 @@ item_type "Bones" {
 	category = ["Garbage"]
 	graphic = 47
 	color = "192,192,192"
+	decay = [ "Filth" ]
+	decaySpeed = 18
 }
 
 item_type "Corpse" {
@@ -328,7 +334,7 @@ item_type "Flour" {
 
 item_type "Blueleaf boll" {
 	category = [ "Fiber" ]
-	graphic = 10
+	graphic = 249
 	color = "0,0,255"
 	fruits = [ "Blueleaf seed" ]
 	decay = [ "Blueleaf seed", "Filth" ]
@@ -348,6 +354,8 @@ item_type "Blueleaf sapling" {
 	graphic = 222
 	color = "127,146,255"
 	growth = "Blueleaf tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
 }
 
 item_type "Blueleaf tree" {
@@ -355,6 +363,8 @@ item_type "Blueleaf tree" {
 	graphic = 216
 	color = "0,0,255"
 	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
 }
 
 item_type "Cloth" {
@@ -368,7 +378,7 @@ item_type "Seed sack" {
 	category = ["Seed Container"]
 	containerSize = 50
 	graphic = 208
-	color = "255,73,7"
+	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
 }
 
@@ -376,6 +386,6 @@ item_type "Flour sack" {
 	category = ["Flour Container"]
 	containerSize = 50
 	graphic = 208
-	color = "255,73,7"
+	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
 }

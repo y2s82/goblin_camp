@@ -158,6 +158,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & needsNutrition;
 	ar & baseStats;
 	ar & aggressive;
+	ar & coward;
 	ar & aggressor;
 	ar & dead;
 	ar & squad;
@@ -202,6 +203,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & needsNutrition;
 	ar & baseStats;
 	ar & aggressive;
+	ar & coward;
 	ar & aggressor;
 	ar & dead;
 	ar & squad;
@@ -390,6 +392,7 @@ void Squad::save(Archive & ar, const unsigned int version) const {
 	ar & targetCoordinate;
 	ar & targetEntity;
 	ar & priority;
+	ar & weapon;
 }
 
 template<class Archive>
@@ -401,6 +404,7 @@ void Squad::load(Archive & ar, const unsigned int version) {
 	ar & targetCoordinate;
 	ar & targetEntity;
 	ar & priority;
+	ar & weapon;
 }
 
 template<class Archive>
