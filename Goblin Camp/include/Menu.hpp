@@ -37,16 +37,25 @@ public:
 	boost::function<void()> callback;
 };
 
-class Menu {
+class Panel {
+protected:
+	int topX, topY, width, height;    
+public:
+    virtual void Draw(int, int, TCODConsole *) = 0;
+    virtual MenuResult Update(int = -1, int = -1, bool clicked = false) = 0;
+    void ShowModal();
+};
+
+class Menu: public Panel {
 private:
     static std::map<std::string, Menu *> constructionCategoryMenus;
 protected:
 	std::vector<MenuChoice> choices;
-	int topX, topY, width, height;
 	int _selected;
+    std::string title;
 	void CalculateSize();
 public:
-	Menu(std::vector<MenuChoice>);
+	Menu(std::vector<MenuChoice>, std::string="");
 	virtual ~Menu();
 	virtual void Draw(int, int, TCODConsole*);
 	virtual MenuResult Update(int = -1, int = -1, bool clicked = false);
