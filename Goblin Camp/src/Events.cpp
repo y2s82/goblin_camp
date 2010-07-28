@@ -44,7 +44,9 @@ void Events::Update() {
 		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
 			% NPC::Presets[monsterType].plural).str();
 		Announce::Inst()->AddMsg(msg, TCODColor::red);
-		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, Coordinate(0,0), Coordinate(map->Width(),0));
+		Coordinate a((rand() % map->Width())-20, 0);
+		Coordinate b = a + Coordinate(20, 1);
+		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 	}
 
 	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
