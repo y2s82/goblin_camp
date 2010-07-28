@@ -30,14 +30,46 @@ to look into*/
 #include "StockManager.hpp"
 #include "JobManager.hpp"
 
+void Panel::ShowModal() {
+	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
+	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
+                       background, 0, 0);
+    
+	int topX = (Game::Inst()->ScreenWidth() - width) / 2;
+	int topY = (Game::Inst()->ScreenHeight() - height) / 2;
+	TCOD_key_t key;
+	TCOD_mouse_t mouseStatus;
+    
+	while (true) {
+		TCODConsole::root->clear();
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
+                          TCODConsole::root, 0, 0, 0.7, 1.0);
+        
+		Draw(topX, topY, TCODConsole::root);
+		TCODConsole::root->flush();
+        
+		key = TCODConsole::checkForKeypress();
+		mouseStatus = TCODMouse::getStatus();
+        
+		if((Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed) == MENUHIT && mouseStatus.lbutton_pressed) ||
+           mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) {
+            delete this;
+            return;
+        }
+	}    
+}
+
 MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
 	label = ntext;
 	callback = cb;
 }
 
-Menu::Menu(std::vector<MenuChoice> newChoices) {
+Menu::Menu(std::vector<MenuChoice> newChoices, std::string ntitle) {
 	_selected = -1;
 	choices = newChoices;
+    title = ntitle;
 	CalculateSize();
 }
 
@@ -53,11 +85,12 @@ void Menu::CalculateSize() {
 }
 
 void Menu::Draw(int x, int y, TCODConsole* console) {
+    TCODConsole::root->setAlignment(TCOD_LEFT);
 	//Draw the box
 	if (x + width >= console->getWidth()) x = console->getWidth() - width - 1;
 	if (y + height >= console->getHeight()) y = console->getHeight() - height - 1;
 	topX = x; topY = y; //Save coordinates of menu top-left corner
-	console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, 0);
+	console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	//Draw the menu entries
 	for (int i = 0; i < (signed int)choices.size(); ++i) {
@@ -270,67 +303,6 @@ bool Menu::YesNoDialog(std::string text, std::string leftButton, std::string rig
 
 	}
 	return false;
-}
-
-ItemCategory Menu::WeaponChoiceDialog() {
-	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
-	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
-		background, 0, 0);
-
-	std::vector<ItemCategory> weaponCategories;
-	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-		if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Weapon")) {
-			weaponCategories.push_back(i);
-		}
-	}
-
-	int width = 30;
-	int height = weaponCategories.size()+4;
-	int topX = (Game::Inst()->ScreenWidth() - width) / 2;
-	int topY = (Game::Inst()->ScreenHeight() - height) / 2;
-	int selected = -1;
-	TCOD_key_t key;
-	TCOD_mouse_t mouseStatus;
-
-	while (true) {
-		TCODConsole::root->clear();
-		TCODConsole::root->setForegroundColor(TCODColor::white);
-		TCODConsole::root->setBackgroundColor(TCODColor::black);
-		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
-			TCODConsole::root, 0, 0);
-
-		TCODConsole::root->printFrame(topX, topY, width, height, true, TCOD_BKGND_SET, "Weapons");
-		TCODConsole::root->setAlignment(TCOD_CENTER);
-
-		for (int i = -1; i < (signed int)weaponCategories.size(); ++i) {
-			if (selected == i) {
-				TCODConsole::root->setForegroundColor(TCODColor::black);
-				TCODConsole::root->setBackgroundColor(TCODColor::white);
-			} else {
-				TCODConsole::root->setForegroundColor(TCODColor::white);
-				TCODConsole::root->setBackgroundColor(TCODColor::black);
-			}
-			TCODConsole::root->print(topX+(width/2), topY+3+i, i == -1 ? "None" : Item::Categories[weaponCategories[i]].name.c_str());
-		}
-
-		TCODConsole::root->flush();
-
-		key = TCODConsole::checkForKeypress();
-		mouseStatus = TCODMouse::getStatus();
-
-		if (mouseStatus.cx >= topX && mouseStatus.cx <= topX+width) {
-			selected = mouseStatus.cy - (topY+3);
-		}
-		
-		if (mouseStatus.lbutton_pressed) {
-			if (selected >= -1 && selected < (signed int)weaponCategories.size()) {
-				return selected == -1 ? -1 : weaponCategories[selected];
-			}
-		}
-
-		if (mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) return -2;
-
-	}
 }
 
 JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
@@ -909,9 +881,14 @@ MenuResult SquadsMenu::Update(int x, int y, bool clicked) {
 				}
 			} else if (y > topY+26 && y < topY+30) {
 				if (x > topX && x < topX+22) {
-					ItemCategory weaponChoice = Menu::WeaponChoiceDialog();
-					if (weaponChoice > -2)
-						chosenSquad.lock()->Weapon(weaponChoice);
+					Menu *weaponChoiceDialog = new Menu(std::vector<MenuChoice>(), "Weapons");
+                    weaponChoiceDialog->AddChoice(MenuChoice("None", boost::bind(&Squad::Weapon, chosenSquad.lock(), -1)));
+                    for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+                        if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Weapon")) {
+                            weaponChoiceDialog->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), boost::bind(&Squad::Weapon, chosenSquad.lock(), i)));
+                        }
+                    }
+					weaponChoiceDialog->ShowModal();
 					return MENUHIT;
 				}
 			} else if (y >= topY+30 && y < topY+33) {
