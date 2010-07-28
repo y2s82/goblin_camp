@@ -298,7 +298,14 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
-	if (confirm && !Menu::YesNoDialog("Really exit?")) return;
+    if (confirm) {
+        Menu::YesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+    } else {
+        ExitConfirmed();
+    }
+}
+
+void Game::ExitConfirmed() {
 	Logger::End();
 	exit(0);
 }

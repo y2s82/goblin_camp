@@ -241,7 +241,7 @@ void UI::HandleMouse() {
 		b.Y(mouseInput.cy + Game::Inst()->upleft.Y());
 	}
 
-	currentMenu->Update(mouseInput.cx, mouseInput.cy);
+	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
 	if (lbuttonPressed) {
         if (draggingViewport) {
             draggingViewport = false;
@@ -250,7 +250,7 @@ void UI::HandleMouse() {
             if(!draggingPlacement) {
                 menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
                 if (menuResult == NOMENUHIT) {
-                    if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true); lbuttonPressed = false; }
+                    if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false; }
                 }                    
             }
             if (menuResult == NOMENUHIT) {
@@ -334,7 +334,7 @@ void UI::HandleMouse() {
         menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
         if (menuResult == NOMENUHIT) {
             if (menuOpen) {
-                menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, false);
+                menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
             }
             if (menuResult == NOMENUHIT) {
                 if (_state == UIABPLACEMENT && placeable) {
@@ -352,7 +352,7 @@ void UI::HandleMouse() {
                 }
             }
         }
-	} else { currentMenu->Update(); }
+	} else { currentMenu->Update(-1, -1, false, NO_KEY); }
 
 	if (rbuttonPressed) {
 		menuX = mouseInput.cx;
