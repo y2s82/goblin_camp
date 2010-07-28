@@ -19,15 +19,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "StatusEffect.hpp"
 #include "GCamp.hpp"
+#include "Game.hpp"
 
 //TODO: All this needs to be put into data files at some point
 
 StatusEffect::StatusEffect(StatusEffectType typeval) : 
-type(typeval)
+type(typeval),
+	bleed(false)
 {
 	//Initialize changes to nothing, ie. 100%
 	for (int i = 0; i < STAT_COUNT; ++i) { statChanges[i] = 1.0; }
 	for (int i = 0; i < RES_COUNT; ++i) { resistanceChanges[i] = 1.0; }
+	damage.first = UPDATES_PER_SECOND;
+	damage.second = 0;
 
 	switch (type) {
 	case HUNGER:
@@ -81,6 +85,7 @@ type(typeval)
 		graphic = '#';
 		color = TCODColor::green;
 		cooldown = UPDATES_PER_SECOND * 6;
+		damage.second = 5;
 		break;
 
 	case BLEEDING:
@@ -88,6 +93,25 @@ type(typeval)
 		graphic = '#';
 		color = TCODColor::red;
 		cooldown = UPDATES_PER_SECOND * 4;
+		damage.second = 4;
+		bleed = true;
+		break;
+
+	case FLYING:
+		name = "Flying";
+		graphic = '"';
+		color = TCODColor::lightBlue;
+		cooldown = -1;
+		break;
+
+	case BADSLEEP:
+		name = "Sluggish";
+		graphic = '-';
+		color = TCODColor::grey;
+		cooldown = MONTH_LENGTH*3;
+		statChanges[MOVESPEED] = 0.75;
+		statChanges[DODGE] = 0.75;
+		resistanceChanges[POISON_RES] = 0.75;
 		break;
 	}
 	cooldownDefault = cooldown;

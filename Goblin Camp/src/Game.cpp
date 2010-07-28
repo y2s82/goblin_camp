@@ -96,7 +96,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 						compi->lock()->Reserve(false);
 				}
 				componentList.clear();
-				Announce::Inst()->AddMsg((boost::format("Cancelled build %s: missing %s") % Construction::Presets[construct].name % Item::ItemCategoryToString(*mati)).str(), TCODColor::red);
+				Announce::Inst()->AddMsg((boost::format("Cancelled %s: insufficient [%s] in stockpiles") % Construction::Presets[construct].name % Item::ItemCategoryToString(*mati)).str(), TCODColor::red);
 				return -1;
 			}
 	}
@@ -252,7 +252,12 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
 
+	if (NPC::Presets[type].tags.find("flying") != NPC::Presets[type].tags.end()) {
+		npc->AddEffect(FLYING);
+	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+
 	return npc->Uid();
 }
 
@@ -789,7 +794,7 @@ void Game::GenerateMap() {
 										boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), type));
 										natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 										map->NatureObject(ax,ay,natObj->Uid());
-										map->Walkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 								}
