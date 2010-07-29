@@ -364,6 +364,7 @@ void UI::HandleMouse() {
 			a.Y(0); 
 			if (currentMenu) currentMenu->Close();
 		}
+        currentMenu = 0;
         if(!underCursor.empty()) {
             currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
         }

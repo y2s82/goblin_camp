@@ -360,39 +360,47 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 }
 
 MenuResult ConstructionMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if (x >= _x + 3 && x < _x + 3 + 6 && y == _y + 2) { /*Rename*/ }
-	if (x >= _x + 13 && x < _x + 13 + 9 && y == _y + 2) { /*Dismantle*/ }
-
-	if (construct->Producer()) {
-		if (x > _x+2 && x < _x+25) {
-			//Cancel production jobs
-			if (y > _y+5 && y < _y+17) {
-				construct->CancelJob(y-(_y+6));
-				return MENUHIT;
-			}
-		}
-		if (x > _x+25 && x < _x+48) {
-			//Add production jobs
-			for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
-				if (y == productPlacement[i]) {
-					construct->AddJob(construct->Products(i+scroll));
-					return MENUHIT;
-				}
-			}
-		}
-
-		if (x == _x+48 && y == _y+6) { ScrollUp(); return MENUHIT; }
-		if (x == _x+48 && y == _y+53) { ScrollDown(); return MENUHIT; }
-	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
-
-	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
-		int i = ((x-_x+2) / 20)*50;
-		i += (y - (_y+6));
-		if (i >= 0 && i < (signed int)Item::Categories.size()) {
-			static_cast<Stockpile*>(construct)->SwitchAllowed(i);
-		}
-		return MENUHIT;
-	}
+    if (x >= _x && x < _x + width && y >= _y && y < _y + width) {
+        if (x >= _x + 3 && x < _x + 3 + 6 && y == _y + 2) { /*Rename*/ }
+        if (x >= _x + 13 && x < _x + 13 + 9 && y == _y + 2) { /*Dismantle*/ }
+        
+        if (construct->Producer()) {
+            if (x > _x+2 && x < _x+25) {
+                //Cancel production jobs
+                if (y > _y+5 && y < _y+17) {
+                    if(clicked) {
+                        construct->CancelJob(y-(_y+6));
+                    }
+                    return MENUHIT;
+                }
+            }
+            if (x > _x+25 && x < _x+48) {
+                //Add production jobs
+                for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
+                    if (y == productPlacement[i]) {
+                        if(clicked) {
+                            construct->AddJob(construct->Products(i+scroll));
+                        }
+                        return MENUHIT;
+                    }
+                }
+            }
+            
+            if (x == _x+48 && y == _y+6) { ScrollUp(); return MENUHIT; }
+            if (x == _x+48 && y == _y+53) { ScrollDown(); return MENUHIT; }
+        } else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
+            
+        } else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
+            int i = ((x-_x+2) / 20)*50;
+            i += (y - (_y+6));
+            if (i >= 0 && i < (signed int)Item::Categories.size()) {
+                if(clicked) {
+                    static_cast<Stockpile*>(construct)->SwitchAllowed(i);                
+                }
+            }
+            return MENUHIT;
+        }
+    }
 	return NOMENUHIT;
 }
 
