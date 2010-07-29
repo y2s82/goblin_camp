@@ -1,0 +1,166 @@
+npc_type "orc" {
+	expert
+	needsNutrition
+	needsSleep
+	generateName
+	name="orc"
+	speed=15
+	color="0,0,255"
+	graphic='o'
+	health=200
+	AI="PlayerNPC"
+	dodge=5
+	resistances {
+		physical=10
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d10+10"
+		cooldown=25
+	}
+	tags=["friendly"]
+}
+
+npc_type "goblin" {
+	needsNutrition
+	needsSleep
+	generateName
+	name="goblin"
+	speed=15
+	color="128,128,128"
+	graphic='g'
+	health=50
+	AI="PlayerNPC"
+	dodge=10
+	resistances {
+		physical=3
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d9"
+		cooldown=25
+	}
+	tags=["friendly", "coward"]
+}
+
+npc_type "giant snail" {
+	name="Giant Snail"
+	speed=5
+	color="219,199,109"
+	graphic='b'
+	health=50
+	AI="PeacefulAnimal"
+	dodge=0
+	resistances {
+		physical=20
+	}
+	spawnAsGroup="1d3"
+	attack "Slime" {
+		type="poison"
+		damage="1d2"
+		cooldown=75
+	}
+	tags=["localWildlife"]
+}
+
+npc_type "starving wolf" {
+	name="Starving Wolf"
+	plural="Starving Wolves"
+	speed=20
+	color="219,219,219"
+	graphic='w'
+	health=150
+	AI="HungryAnimal"
+	dodge=10
+	resistances {
+		physical=5
+	}
+	spawnAsGroup="1d4+3"
+	attack "Bite" {
+		type="slashing"
+		damage="5d4"
+		cooldown=25
+	}
+	tags=["attackRandomly"]
+}
+
+npc_type "rabid albino rat" {
+	name="Rabid Albino Rat"
+	speed=18
+	color="255,255,255"
+	graphic='r'
+	health=25
+	AI="HungryAnimal"
+	dodge=15
+	resistances {
+		physical=3
+	}
+	spawnAsGroup="1d10+5"
+	attack "Bite" {
+		type="slashing"
+		damage="1d2+1"
+		cooldown=15
+	}
+	tags=["attackRandomly"]
+}
+
+npc_type "poisonous snake" {
+	name="Poisonous Snake"
+	speed=10
+	color="0,0,250"
+	graphic='S'
+	health=25
+	AI="PeacefulAnimal"
+	dodge=7
+	resistances {
+		physical=7
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d2+2"
+		cooldown=50
+		statusEffects=["poison"]
+	}
+	tags=["localWildlife", "angers"]
+}
+
+npc_type "soldier ant" {
+	name="Soldier Ant"
+	speed=20
+	color="0,0,255"
+	graphic='a'
+	health=25
+	AI="HostileAnimal"
+	dodge=5
+	resistances {
+		physical=10
+	}
+	attack "Bite" {
+		type="slashing"
+		damage="1d5+5"
+		cooldown=15
+	}
+	spawnAsGroup="1d7+3"
+	tags=["underground"]
+}
+
+npc_type "killer bee" {
+	name="Killer Bee"
+	speed=15
+	color="255,255,0"
+	graphic='a'
+	health=10
+	AI="HostileAnimal"
+	dodge=20
+	resistances {
+		physical=1
+	}
+	attack "Sting" {
+		type="piercing"
+		damage="1d5"
+		cooldown=15
+		statusEffects=["poison"]
+	}
+	spawnAsGroup="1d10+10"
+	tags=["attackRandomly", "flying"]
+}
