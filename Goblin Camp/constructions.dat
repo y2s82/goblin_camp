@@ -73,6 +73,7 @@ construction_type "Door" {
 	graphicLength=1
 	graphic=[43]
 	walkable
+	blocksLight
 	maxCondition=10
 	materials=["Door"]
 }

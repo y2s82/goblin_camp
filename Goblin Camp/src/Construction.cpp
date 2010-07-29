@@ -70,6 +70,7 @@ Construction::~Construction() {
 			Map::Inst()->Buildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
+			Map::Inst()->BlocksLight(ix,iy,false);
 		}
 	}
 
@@ -126,7 +127,7 @@ int Construction::Build() {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
 				Map::Inst()->SetWalkable(ix, iy, walkable);
 				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, !walkable);
+				Map::Inst()->BlocksLight(ix, iy, Construction::Presets[type].blocksLight);
 			}
 		}
 
@@ -271,6 +272,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		if (boost::iequals(name, "walkable")) {
 			Construction::Presets.back().walkable = true;
+			Construction::Presets.back().blocksLight = false;
 		} else if (boost::iequals(name, "wall")) {
 			Construction::Presets.back().graphic.push_back(1);
 			Construction::Presets.back().graphic.push_back('W');
@@ -327,6 +329,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
 			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
+		} else if (boost::iequals(name, "blocksLight")) {
+			Construction::Presets.back().blocksLight = true;
 		}
 
 		return true;
@@ -364,6 +368,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("bed");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addFlag("blocksLight");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -529,7 +534,8 @@ maxCondition(0),
 	productionSpot(Coordinate(0,0)),
 	dynamic(false),
 	spawnCreaturesTag(""),
-	spawnFrequency(10)
+	spawnFrequency(10),
+	blocksLight(true)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

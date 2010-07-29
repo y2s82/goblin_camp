@@ -59,6 +59,7 @@ struct ConstructionPreset {
 	bool dynamic;
 	std::string spawnCreaturesTag;
 	int spawnFrequency;
+	bool blocksLight;
 };
 
 class Construction : public Entity {
