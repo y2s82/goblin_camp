@@ -69,7 +69,7 @@ Construction::~Construction() {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
 			Map::Inst()->Buildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
-			Map::Inst()->Construction(ix,iy,-1);
+			Map::Inst()->SetConstruction(ix,iy,-1);
 		}
 	}
 
@@ -426,26 +426,26 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
 	bool n = false,s = false,e = false,w = false;
 
-	if (Map::Inst()->Construction(x - 1, y) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock();
+	if (Map::Inst()->GetConstruction(x - 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			w = true;
 		}
 	}
-	if (Map::Inst()->Construction(x + 1, y) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock();
+	if (Map::Inst()->GetConstruction(x + 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			e = true;
 		}
 	}
-	if (Map::Inst()->Construction(x, y-1) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y-1)).lock();
+	if (Map::Inst()->GetConstruction(x, y-1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y-1)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			n = true;
 		}
 	}
-	if (Map::Inst()->Construction(x, y+1) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y+1)).lock();
+	if (Map::Inst()->GetConstruction(x, y+1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y+1)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			s = true;
 		}
@@ -470,13 +470,13 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 	if (recurse) {
 		if (w)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock()->UpdateWallGraphic(false);
 		if (e)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock()->UpdateWallGraphic(false);
 		if (n)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y - 1)).lock()->UpdateWallGraphic(false);
 		if (s)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y + 1)).lock()->UpdateWallGraphic(false);
 	}
 }
 

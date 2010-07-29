@@ -41,7 +41,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->Construction(x,y) == uid) {
+			if (Map::Inst()->GetConstruction(x,y) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
