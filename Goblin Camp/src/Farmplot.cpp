@@ -31,7 +31,7 @@ FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stock
 
 	for (int i = 0; i < Game::ItemTypeCount; ++i) {
 		if (Item::Presets[i].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[i].categories.end()) {
-			allowedSeeds.insert(std::pair<ItemType,bool>(i, true));
+			allowedSeeds.insert(std::pair<ItemType,bool>(i, false));
 		}
 	}
 }
