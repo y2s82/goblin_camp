@@ -169,17 +169,13 @@ public:
 	static Dialog* JobListingMenu();
 };
 
-class AnnounceMenu : public Menu {
-private:
-	int scroll;
+class AnnounceMenu : public Scrollable {
 public:
-	AnnounceMenu();
-	void Draw(int, int, TCODConsole*);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-	static AnnounceMenu* announcementsMenu;
-	static AnnounceMenu* AnnouncementsMenu();
-	void ScrollDown();
-	void ScrollUp();
+	AnnounceMenu() {}
+	void Draw(int, int, int, int, int, TCODConsole*);
+    int TotalHeight();
+	static Dialog* announcementsMenu;
+	static Dialog* AnnouncementsMenu();
 };
 
 class NPCMenu : public Menu {

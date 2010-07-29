@@ -384,49 +384,24 @@ Dialog* JobMenu::JobListingMenu() {
 	return jobListingMenu;
 }
 
-AnnounceMenu::AnnounceMenu() : Menu(std::vector<MenuChoice>()),
-	scroll(0)
-{
-	width = Game::Inst()->ScreenWidth() - 20;
-	height = Game::Inst()->ScreenHeight() - 20;
-	_x = 10; _y = 10;
+void AnnounceMenu::Draw(int x, int y, int scroll, int width, int height, TCODConsole* console) {
+	Announce::Inst()->Draw(Coordinate(x + 1, y), scroll, height, console);
 }
 
-void AnnounceMenu::Draw(int x, int y, TCODConsole* console) {
-	if (scroll + height - 2 > Announce::Inst()->AnnounceAmount()) scroll = std::max(0, Announce::Inst()->AnnounceAmount() - height - 2);
-
-	int scrollBar = 0;
-	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, Announce::Inst()->AnnounceAmount() - height-2)));
-	scrollBar += _y+2;
-	scrollBar = std::min(scrollBar, _y+height-4);
-
-	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "Announcements");
-
-	Announce::Inst()->Draw(Coordinate(_x+1,_y+1), scroll, height-2, console);
-	console->putChar(_x+width-2, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(_x+width-2, _y+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->putChar(_x+width-2, scrollBar, 219, TCOD_BKGND_SET);
+int AnnounceMenu::TotalHeight() {
+	return Announce::Inst()->AnnounceAmount();
 }
 
-MenuResult AnnounceMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if (x > _x && x < Game::Inst()->ScreenWidth()-10 && y > _y && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == _x+width-2 && y == _y+1 && clicked) ScrollUp();
-		if (x == _x+width-2 && y == _y+height-2 && clicked) ScrollDown();
-		return MENUHIT;
-	}
-	return NOMENUHIT;
-}
-
-AnnounceMenu* AnnounceMenu::announcementsMenu = 0;
-AnnounceMenu* AnnounceMenu::AnnouncementsMenu() {
+Dialog* AnnounceMenu::announcementsMenu = 0;
+Dialog* AnnounceMenu::AnnouncementsMenu() {
 	if (!announcementsMenu) {
-		announcementsMenu = new AnnounceMenu();
+        int width = Game::Inst()->ScreenWidth() - 20;
+        int height = Game::Inst()->ScreenHeight() - 20;
+        announcementsMenu = new Dialog(std::vector<Drawable *>(), "Announcements", width, height);
+        announcementsMenu->AddComponent(new ScrollPanel(0, 0, width, height, new AnnounceMenu()));
 	}
 	return announcementsMenu;
 }
-
-void AnnounceMenu::ScrollUp() { if (scroll > 0) --scroll; }
-void AnnounceMenu::ScrollDown() { ++scroll; }
 
 NPCMenu::NPCMenu() : Menu(std::vector<MenuChoice>()),
 	scroll(0)
