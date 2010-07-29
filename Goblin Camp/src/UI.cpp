@@ -105,11 +105,6 @@ void UI::HandleKeyboard() {
 			menuX = mouseInput.cx;
 			menuY = mouseInput.cy;
 			ChangeMenu(SquadsMenu::SquadMenu());
-		} else if (key.c >= '0' && key.c <= '9') {
-			if (menuOpen) {
-				currentMenu->selected(boost::lexical_cast<int>((char)key.c)-1);
-				currentMenu->Callback(boost::lexical_cast<int>((char)key.c)-1);
-			}
 		} else if (key.c == 'h') {
 			keyHelpTextColor = 255;
 		}
@@ -556,7 +551,7 @@ void UI::DrawTopBar(TCODConsole* console) {
 void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
 void UI::state(UIState newState) { _state = newState; }
 
-void UI::ChangeMenu(Menu* menu) {
+void UI::ChangeMenu(Panel* menu) {
 	if (UI::Inst()->CurrentMenu()) {
 		UI::Inst()->CurrentMenu()->Close();
 	}
@@ -567,9 +562,9 @@ void UI::ChangeMenu(Menu* menu) {
 	menu->Open();
 }
 
-void UI::AddToHistory(Menu* menu) {menuHistory.push_back(menu);}
-Menu* UI::CurrentMenu() {return currentMenu;}
-void UI::CurrentMenu(Menu* menu) {currentMenu = menu;}
+void UI::AddToHistory(Panel* menu) {menuHistory.push_back(menu);}
+Panel* UI::CurrentMenu() {return currentMenu;}
+void UI::CurrentMenu(Panel* menu) {currentMenu = menu;}
 
 void UI::SetCallback(boost::function<void(Coordinate)> newCallback) {callback = newCallback;}
 void UI::SetRectCallback(boost::function<void(Coordinate,Coordinate)> newCallback) {rectCallback = newCallback;}

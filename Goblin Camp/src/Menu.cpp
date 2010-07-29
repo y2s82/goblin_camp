@@ -15,9 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-/*TODO: Create a more general menu system. Libtcod GUI is something
-to look into*/
-
 #include <string>
 
 #include <libtcod.hpp>
@@ -67,6 +64,54 @@ MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
 
 }
 
+void ScrollPanel::Draw(int x, int y, TCODConsole *console) {
+    if (scroll < 0) {
+        scroll = 0;
+    }
+	if (scroll + height - 2 > contents->TotalHeight()) {
+        scroll = std::max(0, contents->TotalHeight() - (height - 2));
+    }
+	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, contents->TotalHeight() - (height-2)))) + 2;
+	scrollBar = std::min(scrollBar, height - 4);
+    
+	console->printFrame(x + _x, y + _y, width, height);
+    
+	contents->Draw(x + _x + 1, y + _y + 1, scroll, width - 2, height - 2, console);
+	console->putChar(x + _x + width - 2, y + _y + 1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+	console->putChar(x + _x + width - 2, y + _y + height - 2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+	console->putChar(x + _x + width - 2, y + _y + scrollBar, 219, TCOD_BKGND_SET);
+}
+
+MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    if (x >= _x && x < _x + width && y >= _y && y < _y + height) {
+        if (clicked) {
+            if (x == _x + width - 2) {
+                if (y == _y + 1) {
+                    scroll--;
+                } else if (y == _y + height - 2) {
+                    scroll++;
+                } else if (y < scrollBar - _y) {
+                    scroll -= height;
+                } else if (y > scrollBar - _y) {
+                    scroll += height; 
+                }
+            } else {
+                contents->Update(x, y, clicked, key);
+            }
+        } else {
+            contents->Update(x, y, clicked, key);
+        }
+        return MENUHIT;
+    }
+    return NOMENUHIT;
+}
+
+void Panel::selected(int newSel) {}
+void Panel::Open() {}
+void Panel::Close() {
+	UI::Inst()->SetTextMode(false);
+}
+
 void Panel::ShowModal() {
 	TCODConsole *background = new TCODConsole(Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight());
 	TCODConsole::blit (TCODConsole::root, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
@@ -98,16 +143,21 @@ void Panel::ShowModal() {
 	}    
 }
 
+Dialog::Dialog(std::vector<Drawable *> ncomponents, std::string ntitle, int nwidth, int nheight):
+    components(ncomponents), title(ntitle), Panel(nwidth, nheight) {
+    _x = (Game::Inst()->ScreenWidth() - width) / 2;
+    _y = (Game::Inst()->ScreenHeight() - height) / 2;
+}
+
 void Dialog::AddComponent(Drawable *component) {
     components.push_back(component);
 }
 
 void Dialog::Draw(int x, int y, TCODConsole *console) {
-    _x = x; _y = y;
-    console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
+    console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
     for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
         Drawable *component = *it;
-        component->Draw(x, y, console);
+        component->Draw(_x, _y, console);
     }
 }
 
@@ -178,7 +228,11 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 }
 
 MenuResult Menu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if (x > 0 && y > 0) {
+    if (key.c >= '0' && key.c <= '9') {
+        selected(boost::lexical_cast<int>((char)key.c)-1);
+        Callback(boost::lexical_cast<int>((char)key.c)-1);
+    }
+    if (x > 0 && y > 0) {
 		if (x > _x && x < _x + width) {
 			y -= _y;
 			if (y > 0 && y < height) {
@@ -206,11 +260,6 @@ void Menu::Callback(unsigned int choice) {
 	if (choices.size() > choice) {
 		choices[choice].callback();
 	}
-}
-
-void Menu::Open() {}
-void Menu::Close() {
-	UI::Inst()->SetTextMode(false);
 }
 
 Menu* Menu::mainMenu = 0;
@@ -306,61 +355,34 @@ void Menu::YesNoDialog(std::string text, boost::function<void()> leftAction, boo
     dialog->ShowModal();
 }
 
-JobMenu::JobMenu() : Menu(std::vector<MenuChoice>()),
-	scroll(0)
-{
-	width = Game::Inst()->ScreenWidth() - 20;
-	height = Game::Inst()->ScreenHeight() - 20;
-	_x = 10; _y = 10;
-}
+void JobMenu::Draw(int _x, int _y, int scroll, int width, int height, TCODConsole* console) {
+	JobManager::Inst()->Draw(Coordinate(_x + 1, _y), scroll, height, console);
 
-void JobMenu::Draw(int x, int y, TCODConsole* console) {
-	if (scroll + height - 2 > JobManager::Inst()->JobAmount()) scroll = std::max(0, JobManager::Inst()->JobAmount() - height - 2);
-
-	int scrollBar = 0;
-	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, JobManager::Inst()->JobAmount() - height-2)));
-	scrollBar += _y+2;
-	scrollBar = std::min(scrollBar, _y+height-4);
-
-	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "Jobs");
-
-	JobManager::Inst()->Draw(Coordinate(_x+1,_y+1), scroll, height-2, console);
-	console->putChar(_x+width-2, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(_x+width-2, _y+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->putChar(_x+width-2, scrollBar, 219, TCOD_BKGND_SET);
-
-	for (int y = _y+1; y <= _y+height-2; ++y) {
-		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - (_y+1 + scroll)));
+	for (int y = _y; y < _y+height; ++y) {
+		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - _y + scroll));
 		if (job.lock()) {
 			if (job.lock()->Paused()) {
-				console->print(_x+width-15, y, "P");
+				console->print(_x+width-13, y, "P");
 			}
-			console->print(_x+width-18, y, "A-> %d", job.lock()->Assigned());
+			console->print(_x+width-16, y, "A-> %d", job.lock()->Assigned());
 		}
 	}
 }
 
-MenuResult JobMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if (x > _x && x < Game::Inst()->ScreenWidth()-10 && y > _y && y < Game::Inst()->ScreenHeight()-10) {
-		if (clicked) {
-			if (x == _x+width-2 && y == _y+1) ScrollUp();
-			if (x == _x+width-2 && y == _y+height-2) ScrollDown();
-		}
-		return MENUHIT;
-	}
-	return NOMENUHIT;
+int JobMenu::TotalHeight() {
+    return JobManager::Inst()->JobAmount();
 }
 
-JobMenu* JobMenu::jobListingMenu = 0;
-JobMenu* JobMenu::JobListingMenu() {
+Dialog* JobMenu::jobListingMenu = 0;
+Dialog* JobMenu::JobListingMenu() {
 	if (!jobListingMenu) {
-		jobListingMenu = new JobMenu();
+        int width = Game::Inst()->ScreenWidth() - 20;
+        int height = Game::Inst()->ScreenHeight() - 20;
+        jobListingMenu = new Dialog(std::vector<Drawable *>(), "Jobs", width, height);
+        jobListingMenu->AddComponent(new ScrollPanel(0, 0, width, height, new JobMenu()));
 	}
 	return jobListingMenu;
 }
-
-void JobMenu::ScrollUp() { if (scroll > 0) --scroll; }
-void JobMenu::ScrollDown() { ++scroll; }
 
 AnnounceMenu::AnnounceMenu() : Menu(std::vector<MenuChoice>()),
 	scroll(0)

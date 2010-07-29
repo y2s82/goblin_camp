@@ -53,7 +53,7 @@ private:
 	int menuX, menuY;
 	TCOD_mouse_t mouseInput;
 	TCOD_key_t key;
-	Menu* currentMenu;
+	Panel* currentMenu;
 	UIState _state;
 	boost::function<void(Coordinate)> callback;
 	boost::function<void(Coordinate,Coordinate)> rectCallback;
@@ -61,7 +61,7 @@ private:
 	Coordinate _blueprint;
 	bool placeable;
 	Coordinate a,b;
-	std::vector<Menu*> menuHistory;
+	std::vector<Panel*> menuHistory;
 	std::list<boost::weak_ptr<Entity> > underCursor;
 	bool drawCursor;
 	bool lbuttonPressed, mbuttonPressed, rbuttonPressed;
@@ -86,7 +86,7 @@ public:
 	void Draw(Coordinate, TCODConsole*);
 	void blueprint(Coordinate);
 	void state(UIState);
-	static void ChangeMenu(Menu*);
+	static void ChangeMenu(Panel*);
 	static void ChooseConstruct(ConstructionType, UIState);
 	static void ChooseStockpile(ConstructionType);
 	static void ChooseTreeFelling();
@@ -98,9 +98,9 @@ public:
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);
-	Menu* CurrentMenu();
-	void CurrentMenu(Menu*);
-	void AddToHistory(Menu*);
+	Panel* CurrentMenu();
+	void CurrentMenu(Panel*);
+	void AddToHistory(Panel*);
 	int KeyHelpTextColor() const;
 	void SetTextMode(bool, int=50);
 	std::string InputString();
