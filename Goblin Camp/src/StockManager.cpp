@@ -96,10 +96,10 @@ void StockManager::Init() {
 #ifdef DEBUG
 			std::cout<<"No producer found for "<<Item::Presets[item].name<<"\n";
 #endif
-			//Seeds, raw food and fibres are added even though they aren't "produced" so to speak
+			//Seeds, raw food and fibers are added even though they aren't "produced" so to speak
 			if (Item::Presets[item].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[item].categories.end() ||
 				Item::Presets[item].categories.find(Item::StringToItemCategory("Raw Food")) != Item::Presets[item].categories.end() ||
-				Item::Presets[item].categories.find(Item::StringToItemCategory("Fibre")) != Item::Presets[item].categories.end()) {
+				Item::Presets[item].categories.find(Item::StringToItemCategory("Fiber")) != Item::Presets[item].categories.end()) {
 #ifdef DEBUG
 					std::cout<<"Adding "<<Item::Presets[item].name<<" to stocks anyway\n";
 #endif
@@ -142,7 +142,8 @@ void StockManager::Update() {
 					//By dividing the difference by the amount of workshops we get how many jobs each one should handle
 					int workshopCount = std::distance(workshopRange.first, workshopRange.second);
 					if (workshopCount > 0) {
-						difference = std::max(1, difference / workshopCount);
+						//We clamp this value to 10, no point in queuing up more at a time
+						difference = std::min(std::max(1, difference / workshopCount), 10);
 						//Now we just check that each workshop has 'difference' amount of jobs for this product
 						for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki =
 							workshopRange.first; worki != workshopRange.second; ++worki) {
