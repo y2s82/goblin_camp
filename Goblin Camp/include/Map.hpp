@@ -51,8 +51,8 @@ public:
 	void Type(int,int,TileType);
 	void MoveTo(int,int,int);
 	void MoveFrom(int,int,int);
-	void Construction(int,int,int);
-	int Construction(int,int);
+	void SetConstruction(int,int,int);
+	int GetConstruction(int,int) const;
 	void Draw(Coordinate, TCODConsole*);
 	boost::weak_ptr<WaterNode> GetWater(int,int);
 	void SetWater(int,int,boost::shared_ptr<WaterNode>);

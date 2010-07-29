@@ -19,6 +19,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "NPC.hpp"
 #include "StatusEffect.hpp"
+#include "Construction.hpp"
+#include "Door.hpp"
 
 Map::Map() {
 	tileMap.resize(boost::extents[500][500]);
@@ -40,8 +42,7 @@ Map* Map::Inst() {
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
-	if (Walkable(x1,y1,ptr)) return (float)tileMap[x0][y0].moveCost();
-	return 0.0f;
+	return (float)tileMap[x0][y0].MoveCost(ptr);
 }
 
 //Simple version that doesn't take npc information into account
@@ -52,6 +53,15 @@ bool Map::Walkable(int x, int y) const {
 
 bool Map::Walkable(int x, int y, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return true;
+	if (!static_cast<NPC*>(ptr)->HasHands()) {
+		if (GetConstruction(x,y) >= 0) {
+			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(GetConstruction(x,y)).lock()) {
+				if (cons->HasTag(DOOR) && !boost::static_pointer_cast<Door>(cons)->Open()) {
+					return false;
+				}
+			}
+		}
+	}
 	return Walkable(x,y);
 }
 
@@ -84,11 +94,11 @@ void Map::MoveFrom(int x, int y, int uid) {
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].MoveFrom(uid); 
 }
 
-void Map::Construction(int x, int y, int uid) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Construction(uid); 
+void Map::SetConstruction(int x, int y, int uid) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetConstruction(uid); 
 }
-int Map::Construction(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Construction(); 
+int Map::GetConstruction(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetConstruction(); 
 	return -1;
 }
 
@@ -215,7 +225,7 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].type(TILEGRASS);
 	tileMap[x][y].Walkable(true);
 	tileMap[x][y].Buildable(true);
-	tileMap[x][y].Construction(-1);
+	tileMap[x][y].SetConstruction(-1);
 	tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
 	tileMap[x][y].Low(false);
 	tileMap[x][y].BlocksWater(false);

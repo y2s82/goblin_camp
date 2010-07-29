@@ -38,10 +38,10 @@ Construction(type, target),
 Stockpile::~Stockpile() {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->Construction(x,y) == uid) {
+			if (Map::Inst()->GetConstruction(x,y) == uid) {
 				Map::Inst()->Buildable(x,y,true);
 				Map::Inst()->SetWalkable(x,y,true);
-				Map::Inst()->Construction(x,y,-1);
+				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
 	}
@@ -149,13 +149,13 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
-				if (Map::Inst()->Construction(ix,iy) == -1 && Map::Inst()->Walkable(ix,iy)) {
-					if (Map::Inst()->Construction(ix-1,iy) == uid ||
-						Map::Inst()->Construction(ix+1,iy) == uid ||
-						Map::Inst()->Construction(ix,iy-1) == uid ||
-						Map::Inst()->Construction(ix,iy+1) == uid) {
+				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->Walkable(ix,iy)) {
+					if (Map::Inst()->GetConstruction(ix-1,iy) == uid ||
+						Map::Inst()->GetConstruction(ix+1,iy) == uid ||
+						Map::Inst()->GetConstruction(ix,iy-1) == uid ||
+						Map::Inst()->GetConstruction(ix,iy+1) == uid) {
 							//Current tile is walkable, buildable, and adjacent to the current stockpile
-							Map::Inst()->Construction(ix,iy,uid);
+							Map::Inst()->SetConstruction(ix,iy,uid);
 							Map::Inst()->Buildable(ix,iy,false);
 							//Update corner values
 							if (ix < a.X()) a.X(ix);
@@ -176,7 +176,7 @@ void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
 
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->Construction(x,y) == uid) {
+			if (Map::Inst()->GetConstruction(x,y) == uid) {
 				screenx = x  - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
@@ -213,7 +213,7 @@ bool Stockpile::Full()
 {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-			if (Map::Inst()->Construction(ix,iy) == uid) {
+			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				if (containers[Coordinate(ix,iy)]->empty()) return false;
 			}
 		}
@@ -224,7 +224,7 @@ bool Stockpile::Full()
 Coordinate Stockpile::FreePosition() {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-			if (Map::Inst()->Construction(ix,iy) == uid) {
+			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
 			}
 		}

@@ -122,7 +122,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
 			Map::Inst()->Buildable(x,y,false);
-			Map::Inst()->Construction(x,y,newCons->Uid());
+			Map::Inst()->SetConstruction(x,y,newCons->Uid());
 		}
 	}
 
@@ -155,7 +155,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
 	Map::Inst()->Buildable(a.X(), a.Y(), false);
-	Map::Inst()->Construction(a.X(), a.Y(), newSp->Uid());
+	Map::Inst()->SetConstruction(a.X(), a.Y(), newSp->Uid());
 	newSp->Expand(a,b);
 	if (Construction::Presets[stockpile].dynamic) {
 		Game::Inst()->dynamicConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
@@ -259,6 +259,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	if (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end()) {
 		npc->coward = true;
+	}
+
+	if (NPC::Presets[type].tags.find("hashands") != NPC::Presets[type].tags.end()) {
+		npc->hasHands = true;
 	}
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
@@ -414,7 +418,7 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 		for (int x = construct->X(); x < construct->X() + blueprint.X(); ++x) {
 			for (int y = construct->Y(); y < construct->Y() + blueprint.Y(); ++y) {
 				Map::Inst()->Buildable(x,y,true);
-				Map::Inst()->Construction(x,y,-1);
+				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
 		if (Construction::Presets[construct->type].dynamic) {
@@ -428,12 +432,12 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int construction = Map::Inst()->Construction(x,y);
+			int construction = Map::Inst()->GetConstruction(x,y);
 			if (construction >= 0) {
 				if (instance->GetConstruction(construction).lock()) {
 					instance->GetConstruction(construction).lock()->Dismantle();
 				} else {
-					Map::Inst()->Construction(x,y,-1);
+					Map::Inst()->SetConstruction(x,y,-1);
 				}
 			}
 		}
