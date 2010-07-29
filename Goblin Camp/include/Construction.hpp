@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Entity.hpp"
 #include "Item.hpp"
 #include "Container.hpp"
+#include "UIComponents.hpp"
 
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
@@ -120,4 +121,5 @@ public:
 	bool HasTag(ConstructionTag);
 	virtual void Update();
 	virtual void Dismantle();
+    virtual Panel *GetContextMenu();
 };
