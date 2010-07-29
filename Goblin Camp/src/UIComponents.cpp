@@ -71,7 +71,9 @@ void ScrollPanel::Draw(int x, int y, TCODConsole *console) {
 	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, contents->TotalHeight() - (height-2)))) + 2;
 	scrollBar = std::min(scrollBar, height - 4);
     
-	console->printFrame(x + _x, y + _y, width, height);
+    if(drawFrame) {
+        console->printFrame(x + _x, y + _y, width, height);
+    }
     
 	contents->Draw(x + _x + 1, y + _y + 1, scroll, width - 2, height - 2, console);
 	console->putChar(x + _x + width - 2, y + _y + 1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);

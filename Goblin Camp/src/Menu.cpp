@@ -228,7 +228,7 @@ Dialog* JobMenu::JobListingMenu() {
         int width = Game::Inst()->ScreenWidth() - 20;
         int height = Game::Inst()->ScreenHeight() - 20;
         jobListingMenu = new Dialog(std::vector<Drawable *>(), "Jobs", width, height);
-        jobListingMenu->AddComponent(new ScrollPanel(0, 0, width, height, new JobMenu()));
+        jobListingMenu->AddComponent(new ScrollPanel(0, 0, width, height, new JobMenu(), false));
 	}
 	return jobListingMenu;
 }
@@ -247,7 +247,7 @@ Dialog* AnnounceMenu::AnnouncementsMenu() {
         int width = Game::Inst()->ScreenWidth() - 20;
         int height = Game::Inst()->ScreenHeight() - 20;
         announcementsMenu = new Dialog(std::vector<Drawable *>(), "Announcements", width, height);
-        announcementsMenu->AddComponent(new ScrollPanel(0, 0, width, height, new AnnounceMenu()));
+        announcementsMenu->AddComponent(new ScrollPanel(0, 0, width, height, new AnnounceMenu(), false));
 	}
 	return announcementsMenu;
 }
@@ -274,7 +274,7 @@ Dialog* NPCMenu::NPCListMenu() {
         int width = Game::Inst()->ScreenWidth() - 20;
         int height = Game::Inst()->ScreenHeight() - 20;
         npcListMenu = new Dialog(std::vector<Drawable *>(), "NPCs", width, height);
-        npcListMenu->AddComponent(new ScrollPanel(0, 0, width, height, new NPCMenu()));
+        npcListMenu->AddComponent(new ScrollPanel(0, 0, width, height, new NPCMenu(), false));
 	}
 	return npcListMenu;
 }
