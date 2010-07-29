@@ -240,7 +240,7 @@ void UI::HandleMouse() {
 		b.Y(mouseInput.cy + Game::Inst()->upleft.Y());
 	}
 
-	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
+	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, key);
 	if (lbuttonPressed) {
         if (draggingViewport) {
             draggingViewport = false;
