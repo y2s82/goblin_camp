@@ -33,3 +33,7 @@ void Door::Update() {
 		else --time;
 	}
 }
+
+bool Door::Open() {
+	return time > 0;
+}
