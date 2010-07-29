@@ -23,8 +23,6 @@
 #include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
 
-#include "Game.hpp"
-
 enum MenuResult {
 	MENUHIT,
 	NOMENUHIT

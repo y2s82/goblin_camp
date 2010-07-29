@@ -31,6 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "UI.hpp"
+#include "Menu.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -524,6 +525,10 @@ void Construction::Dismantle() {
 		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
 		JobManager::Inst()->AddJob(dismantleJob);
 	}
+}
+
+Panel *Construction::GetContextMenu() {
+    return ConstructionMenu::ConstructionInfoMenu(this);
 }
 
 ConstructionPreset::ConstructionPreset() :

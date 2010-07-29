@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/set.hpp>
 
 #include "Coordinate.hpp"
+#include "UIComponents.hpp"
 
 class Entity: public boost::enable_shared_from_this<Entity>
 {
@@ -56,5 +57,7 @@ public:
 
 	virtual void Faction(int);
 	virtual int Faction() const;
+    
+    virtual Panel* GetContextMenu() {return 0;}
 };
 
