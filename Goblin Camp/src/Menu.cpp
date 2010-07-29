@@ -403,58 +403,32 @@ Dialog* AnnounceMenu::AnnouncementsMenu() {
 	return announcementsMenu;
 }
 
-NPCMenu::NPCMenu() : Menu(std::vector<MenuChoice>()),
-	scroll(0)
-{
-	width = Game::Inst()->ScreenWidth() - 20;
-	height = Game::Inst()->ScreenHeight() - 20;
-	_x = 10; _y = 10;
-}
-
-void NPCMenu::Draw(int x, int y, TCODConsole* console) {
-	if (scroll + height - 2 > (signed int)Game::Inst()->npcList.size()) scroll = std::max(0, (signed int)Game::Inst()->npcList.size() - height - 2);
-
-	int scrollBar = 0;
-	scrollBar = (int)((height-3) * ((double)scroll / (double)std::max(1, (signed int)Game::Inst()->npcList.size() - height-2)));
-	scrollBar += _y+2;
-	scrollBar = std::min(scrollBar, _y+height-4);
-
-	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "NPC List");
-
-	int count = 0;
+void NPCMenu::Draw(int x, int y, int scroll, int width, int height, TCODConsole* console) {
+	int count = -1;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
-		if (count++ >= scroll) {
-			console->print(_x+1, _y+1+(count-scroll), "NPC: %d", npci->second->Uid());
-			console->print(_x+10, _y+1+(count-scroll), "%s: %s",
+		if (++count >= scroll && count < scroll + height) {
+			console->print(x+1, y + (count - scroll), "NPC: %d", npci->second->Uid());
+			console->print(x+12, y + (count-scroll), "%s: %s",
 				npci->second->currentJob().lock() ? npci->second->currentJob().lock()->name.c_str() : "No job",
 				npci->second->currentTask() ? Job::ActionToString(npci->second->currentTask()->action).c_str() : "No task");
 		}
 	}
-
-	console->putChar(_x+width-2, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(_x+width-2, _y+height-2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->putChar(_x+width-2, scrollBar, 219, TCOD_BKGND_SET);
 }
 
-MenuResult NPCMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if (x > _x && x < Game::Inst()->ScreenWidth()-10 && y > _y && y < Game::Inst()->ScreenHeight()-10) {
-		if (x == _x+width-2 && y == _y+1 && clicked) ScrollUp();
-		if (x == _x+width-2 && y == _y+height-2 && clicked) ScrollDown();
-		return MENUHIT;
-	}
-	return NOMENUHIT;
+int NPCMenu::TotalHeight() {
+    return Game::Inst()->npcList.size();
 }
 
-NPCMenu* NPCMenu::npcListMenu = 0;
-NPCMenu* NPCMenu::NPCListMenu() {
+Dialog* NPCMenu::npcListMenu = 0;
+Dialog* NPCMenu::NPCListMenu() {
 	if (!npcListMenu) {
-		npcListMenu = new NPCMenu();
+        int width = Game::Inst()->ScreenWidth() - 20;
+        int height = Game::Inst()->ScreenHeight() - 20;
+        npcListMenu = new Dialog(std::vector<Drawable *>(), "NPCs", width, height);
+        npcListMenu->AddComponent(new ScrollPanel(0, 0, width, height, new NPCMenu()));
 	}
 	return npcListMenu;
 }
-
-void NPCMenu::ScrollUp() { if (scroll > 0) --scroll; }
-void NPCMenu::ScrollDown() { ++scroll; }
 
 ConstructionMenu* ConstructionMenu::constructionInfoMenu = 0;
 

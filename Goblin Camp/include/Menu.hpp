@@ -178,17 +178,13 @@ public:
 	static Dialog* AnnouncementsMenu();
 };
 
-class NPCMenu : public Menu {
-private:
-	int scroll;
+class NPCMenu : public Scrollable {
 public:
-	NPCMenu();
-	void Draw(int, int, TCODConsole*);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-	static NPCMenu* npcListMenu;
-	static NPCMenu* NPCListMenu();
-	void ScrollDown();
-	void ScrollUp();
+	NPCMenu() {}
+	void Draw(int, int, int, int, int, TCODConsole*);
+    int TotalHeight();
+	static Dialog* npcListMenu;
+	static Dialog* NPCListMenu();
 };
 
 class ConstructionMenu : public Menu {
