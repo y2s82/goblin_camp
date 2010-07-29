@@ -164,6 +164,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & hasHands;
 }
 
 template<class Archive>
@@ -209,6 +210,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & hasHands;
 	InitializeAIFunctions();
 }
 template<class Archive>

@@ -18,7 +18,7 @@ npc_type "orc" {
 		damage="1d10+10"
 		cooldown=25
 	}
-	tags=["friendly"]
+	tags=["friendly", "hasHands"]
 }
 
 npc_type "goblin" {
@@ -40,7 +40,7 @@ npc_type "goblin" {
 		damage="1d9"
 		cooldown=25
 	}
-	tags=["friendly", "coward"]
+	tags=["friendly", "coward", "hasHands"]
 }
 
 npc_type "giant snail" {
