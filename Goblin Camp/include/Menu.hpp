@@ -47,6 +47,13 @@ public:
 	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
 };
 
+class Scrollable {
+public:
+    virtual void Draw(int x, int y, int scroll, int width, int height, TCODConsole *) = 0;
+    virtual int TotalHeight() = 0;
+	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+};
+
 class Label: public Drawable {
 private:
     std::string text;
@@ -74,6 +81,9 @@ public:
     Panel(int nwidth, int nheight):
         Drawable(0, 0, nwidth, nheight) {}
     void ShowModal();
+	virtual void Open();
+	virtual void Close();
+	virtual void selected(int);
 };
 
 class Menu: public Panel {
@@ -89,8 +99,6 @@ public:
 	virtual ~Menu();
 	virtual void Draw(int, int, TCODConsole*);
 	virtual MenuResult Update(int, int, bool, TCOD_key_t);
-	virtual void Open();
-	virtual void Close();
 	void selected(int);
 	void AddChoice(MenuChoice);
 	void Callback(unsigned int);
@@ -117,25 +125,48 @@ private:
     std::vector<Drawable *> components;
     std::string title;
 public:
-    Dialog(std::vector<Drawable *> ncomponents, std::string ntitle, int nwidth, int nheight):
-        components(ncomponents), title(ntitle), Panel(nwidth, nheight) {}
+    Dialog(std::vector<Drawable *>, std::string, int, int);
     ~Dialog();
     void AddComponent(Drawable *component);
     void Draw(int, int, TCODConsole *);
     MenuResult Update(int, int, bool, TCOD_key_t);
 };
 
-class JobMenu : public Menu {
+class ScrollPanel: public Drawable {
 private:
-	int scroll;
+    int scroll, scrollBar;
+    Scrollable *contents;
 public:
-	JobMenu();
-	void Draw(int, int, TCODConsole*);
-	MenuResult Update(int, int, bool, TCOD_key_t);
-	static JobMenu* jobListingMenu;
-	static JobMenu* JobListingMenu();
-	void ScrollDown();
-	void ScrollUp();
+    ScrollPanel(int x, int y, int nwidth, int nheight, Scrollable *ncontents):
+        contents(ncontents), scroll(0), scrollBar(0), Drawable(x, y, nwidth, nheight) {}
+    void Draw(int, int, TCODConsole *);
+    MenuResult Update(int, int, bool, TCOD_key_t);
+};
+
+/*
+template T
+class List<T>: public Drawable {
+private:
+    std::vector<T> items;
+    bool selectable;
+    int selection;
+    int scroll;
+public:
+    List<T>(std::vector<T> nitems, int x, int y, int nwidth, int nheight, bool nselectable = false):
+        items(nitems), selectable(nselectable), Drawable(x, y, nwidth, nheight) {}
+    void Draw(int, int, TCODConsole *);
+    MenuResult Update(int, int, bool, TCOD_key_t);
+}
+
+ */
+ 
+class JobMenu : public Scrollable {
+public:
+	JobMenu() {}
+	void Draw(int, int, int, int, int, TCODConsole*);
+    int TotalHeight();
+	static Dialog* jobListingMenu;
+	static Dialog* JobListingMenu();
 };
 
 class AnnounceMenu : public Menu {
