@@ -62,7 +62,7 @@ construction_type "Bakery" {
 construction_type "Bed" {
 	bed
 	graphicLength=1
-	graphic=[22]
+	graphic=[220]
 	walkable
 	maxCondition=10
 	materials=["Bed"]
