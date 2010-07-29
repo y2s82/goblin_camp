@@ -240,6 +240,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->needsNutrition = NPC::Presets[type].needsNutrition;
 	npc->needsSleep = NPC::Presets[type].needsSleep;
 	npc->health = NPC::Presets[type].health;
+	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		npc->baseStats[i] = NPC::Presets[type].stats[i] + ((NPC::Presets[type].stats[i] * 0.1) * (rand() % 2) ? 1 : -1);
 	}
@@ -254,6 +255,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	if (NPC::Presets[type].tags.find("flying") != NPC::Presets[type].tags.end()) {
 		npc->AddEffect(FLYING);
+	}
+
+	if (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end()) {
+		npc->coward = true;
 	}
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
@@ -719,11 +724,11 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 		iit->second->Draw(upleft, buffer);
 
 	}
-	for (std::map<int,boost::shared_ptr<NPC> >::iterator it = npcList.begin(); it != npcList.end(); ++it) {
-		it->second->Draw(upleft, buffer);
-	}
 	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator natit = natureList.begin(); natit != natureList.end(); ++natit) {
 		natit->second->Draw(upleft, buffer);
+	}
+	for (std::map<int,boost::shared_ptr<NPC> >::iterator it = npcList.begin(); it != npcList.end(); ++it) {
+		it->second->Draw(upleft, buffer);
 	}
 
 	if (drawUI) {
@@ -796,7 +801,7 @@ void Game::GenerateMap() {
 										map->NatureObject(ax,ay,natObj->Uid());
 										map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-										map->BlocksLight(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+										map->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 								}
 							}
 							break;
