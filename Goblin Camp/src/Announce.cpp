@@ -90,7 +90,7 @@ void Announce::Draw(TCODConsole* console) {
 		console->vline(length+3, console->getHeight()-height, height);
 		console->rect(0, console->getHeight()-height, length+3, height, true);
 
-		for (int i = height-1; i >= 0; --i) {
+		for (int i = std::min((int)messageQueue.size() - 1, (int)height-1); i >= 0; --i) {
 			AnnounceMessage* msg = messageQueue[i];
 			console->setForegroundColor(msg->color);
 			console->print(0, console->getHeight()-(height-i), msg->ToString().c_str());
