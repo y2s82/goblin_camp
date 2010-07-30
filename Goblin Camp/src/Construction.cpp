@@ -376,12 +376,9 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("bed");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
-<<<<<<< local
     constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
     constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
-=======
 	constructionTypeStruct->addFlag("blocksLight");
->>>>>>> other
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
