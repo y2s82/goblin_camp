@@ -20,7 +20,7 @@ construction_type "Farm plot" {
 	maxCondition=10
 }
 
-construction_type "Carpenter's workshop" {
+construction_type "Carpenter" {
 	graphicLength=3
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
@@ -126,12 +126,12 @@ construction_type "Stone quarry" {
 	permanent
 }
 
-construction_type "Stone mason's shack" {
+construction_type "Stone mason" {
 	graphicLength=4
 	graphic=[ 40, 46,157,178,
 			  40, 10, 46,178,
 			 170,157, 46,178]
-	products=["Sharpened stone"]
+	products=["Sharpened stone", "Stone statue"]
 	walkable
 	maxCondition=90
 	productionx=2
@@ -139,7 +139,7 @@ construction_type "Stone mason's shack" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
-construction_type "Weapon crafter's workshop" {
+construction_type "Weapon crafter" {
 	graphicLength=2
 	graphic=[ 91, 92,
 			 124, 46,
@@ -166,7 +166,7 @@ construction_type "Mill" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
-construction_type "Weaver's workshop" {
+construction_type "Weaver" {
 	graphicLength=3
 	graphic=[ 21, 30, 30,
 			  46, 46, 46,
@@ -182,7 +182,7 @@ construction_type "Weaver's workshop" {
 construction_type "Statue" {
 	furniture
 	graphicLength=1
-	graphic=[38]
+	graphic=[190]
 	maxCondition=20
 	materials=["Statue"]
 }

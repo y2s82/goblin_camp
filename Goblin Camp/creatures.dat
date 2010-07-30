@@ -5,7 +5,7 @@ npc_type "orc" {
 	needsSleep
 	generateName
 	name="orc"
-	speed=18
+	speed=17
 	color="0,0,255"
 	graphic='o'
 	health=200
@@ -30,7 +30,7 @@ npc_type "goblin" {
 	needsSleep
 	generateName
 	name="goblin"
-	speed=20
+	speed=18
 	color="128,128,128"
 	graphic='g'
 	health=50

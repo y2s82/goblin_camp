@@ -407,8 +407,15 @@ item_type "Blueleaf boll" {
 
 item_type "Bone statue" {
 	category = ["Statue"]
-	graphic = 38
+	graphic = 190
 	components = ["Bone", "Bone", "Bone", "Bone", "Bone"]
+	color = "255,255,255"
+}
+
+item_type "Stone statue" {
+	category = ["Statue"]
+	graphic = 190
+	components = ["Rough stone", "Rough stone"]
 	color = "255,255,255"
 }
 
