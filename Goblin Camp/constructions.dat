@@ -117,7 +117,7 @@ construction_type "Stone quarry" {
 			 178, 46,177,177,178,178,177, 44, 46, 46]
 	products=["Rough stone"]
 	walkable
-	maxCondition=500
+	maxCondition=1000
 	productionx=3
 	productiony=5
 	spawnsCreatures="underground"
@@ -189,23 +189,24 @@ construction_type "Statue" {
 
 construction_type "Spawning pool" {
 	graphicLength=10
-	graphic=[ 94,126,126, 94,126,126,126,126,126,147,
-		 	 126,126,126,126,126,126,126,126,126,126,
-			 126,126,126,126,126,126,126,126,126,126,
+	graphic=[ 46, 44, 46, 94,126,126,126, 44, 44, 46,
+		 	  46, 46,126,126,126,126,126,126, 46, 44,
+			  44,126,126,126,126,126,126,126,126, 46,
 			 126,126,136,126,176,126,199,126,126,126,
 			 126,126,126,126,126,126,126,126,126,126,
 			 126,126,126,126,126,126,126,126,147,126,
 			  94,126,126,237,126,126,126,126,126,126,
-			 126,126,126,126,126,136,126,126,126,126,
-			 126,126,126,126,126,126,126, 94,126,126,
-			 126,126,126,126,126,126,126,126,126,126]
+			  46,126,126,126,126,136,126,126,126, 44,
+			  44, 46,126,126,126,126,126, 94, 44, 44,
+			  44, 46, 44,126,126,126,126, 46, 46, 44]
 	walkable
-	maxCondition=500
+	maxCondition=1000
 	productionx=5
 	productiony=5
 	spawnsCreatures="friendly"
 	//Spawn creatures every x seconds
-	spawnFrequency=600
+	spawnFrequency=300
 	permanent
 	color="0,255,128"
+	unique
 }
