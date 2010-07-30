@@ -151,7 +151,7 @@ npc_type "soldier ant" {
 
 npc_type "killer bee" {
 	name="Killer Bee"
-	tags=["attackRandomly", "flying"]
+	tags=["attacksRandomly", "flying"]
 	speed=15
 	color="255,255,0"
 	graphic='a'
