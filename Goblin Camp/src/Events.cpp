@@ -48,14 +48,4 @@ void Events::Update() {
 		Coordinate b = a + Coordinate(20, 1);
 		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 	}
-
-	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
-		if (rand() % 3 == 0 && Game::Inst()->OrcCount() < 50) {
-			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
-		} else if (Game::Inst()->GoblinCount() < 100) {
-			Announce::Inst()->AddMsg("A goblin has joined your camp", TCODColor::azure);
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("goblin"));
-		}
-	}
 }
