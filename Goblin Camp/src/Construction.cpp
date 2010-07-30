@@ -87,6 +87,8 @@ Construction::~Construction() {
 
 	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
+
+	++Construction::Presets[type].allowedAmount;
 }
 
 
@@ -296,6 +298,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().permanent = true;
 		} else if (boost::iequals(name, "blocksLight")) {
 			Construction::Presets.back().blocksLight = true;
+		} else if (boost::iequals(name, "unique")) {
+			Construction::Presets.back().allowedAmount = 1;
 		}
 		return true;
 	}
@@ -379,6 +383,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
 	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
+	constructionTypeStruct->addFlag("unique");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -546,7 +551,8 @@ maxCondition(0),
 	spawnFrequency(10),
 	blocksLight(true),
 	permanent(false),
-	color(TCODColor::black)
+	color(TCODColor::black),
+	allowedAmount(-1)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

@@ -61,6 +61,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
+	safeMonths(9),
 	upleft(Coordinate(0,0)),
 	events(boost::shared_ptr<Events>())
 {
@@ -82,6 +83,14 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
+	if (Construction::Presets[construct].allowedAmount >= 0) {
+		if (Construction::Presets[construct].allowedAmount == 0) {
+			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
+			return -1;
+		}
+		--Construction::Presets[construct].allowedAmount;
+	}
+
 	//Check if the required materials exist before creating the build job
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
@@ -577,6 +586,7 @@ void Game::Update() {
 	++time;
 
 	if (time == MONTH_LENGTH) {
+		if (safeMonths > 0) --safeMonths;
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 
@@ -671,7 +681,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
 
-	events->Update();
+	if (safeMonths <= 0) events->Update();
 }
 
 void Game::StockpileItem(boost::weak_ptr<Item> item) {
@@ -1113,6 +1123,7 @@ void Game::Reset() {
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	season = LateWinter;
 	upleft = Coordinate(180,180);
+	safeMonths = 9;
 	Announce::Inst()->Reset();
 	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 0; y < Map::Inst()->Height(); ++y) {

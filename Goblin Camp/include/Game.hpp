@@ -72,6 +72,7 @@ private:
 	bool paused;
 	int charWidth, charHeight;
 	bool toMainMenu, running;
+	int safeMonths;
 
 	boost::shared_ptr<Events> events;
 public:

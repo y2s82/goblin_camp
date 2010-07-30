@@ -62,6 +62,7 @@ struct ConstructionPreset {
 	bool blocksLight;
 	bool permanent;
 	TCODColor color;
+	int allowedAmount;
 };
 
 class Construction : public Entity {
