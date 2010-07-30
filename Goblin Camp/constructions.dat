@@ -186,3 +186,26 @@ construction_type "Statue" {
 	maxCondition=20
 	materials=["Statue"]
 }
+
+construction_type "Spawning pool" {
+	graphicLength=10
+	graphic=[ 94,126,126, 94,126,126,126,126,126,147,
+		 	 126,126,126,126,126,126,126,126,126,126,
+			 126,126,126,126,126,126,126,126,126,126,
+			 126,126,136,126,176,126,199,126,126,126,
+			 126,126,126,126,126,126,126,126,126,126,
+			 126,126,126,126,126,126,126,126,147,126,
+			  94,126,126,237,126,126,126,126,126,126,
+			 126,126,126,126,126,136,126,126,126,126,
+			 126,126,126,126,126,126,126, 94,126,126,
+			 126,126,126,126,126,126,126,126,126,126]
+	walkable
+	maxCondition=500
+	productionx=5
+	productiony=5
+	spawnsCreatures="friendly"
+	//Spawn creatures every x seconds
+	spawnFrequency=600
+	permanent
+	color="0,255,128"
+}
