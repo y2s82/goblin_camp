@@ -62,6 +62,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	stockpile = Construction::Presets[type].tags[STOCKPILE];
 	farmplot = Construction::Presets[type].tags[FARMPLOT];
 	condition = 0-maxCondition;
+	if (Construction::Presets[type].color.b != 0 || Construction::Presets[type].color.g != 0 ||
+		Construction::Presets[type].color.r != 0) color = Construction::Presets[type].color;
 }
 
 Construction::~Construction() {
@@ -293,6 +295,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().tags[FURNITURE] = true;
 		} else if (boost::iequals(name, "permanent")) {
 			Construction::Presets.back().permanent = true;
+		} else if (boost::iequals(name, "blocksLight")) {
+			Construction::Presets.back().blocksLight = true;
 		}
 		return true;
 	}
@@ -333,8 +337,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
 			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
-		} else if (boost::iequals(name, "blocksLight")) {
-			Construction::Presets.back().blocksLight = true;
+		} else if (boost::iequals(name, "color")) {
+			Construction::Presets.back().color = value.col;
 		}
 
 		return true;
@@ -375,6 +379,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
+	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -493,8 +498,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[type].tags[tag]; }
 
-void Construction::Update() 
-{
+void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
 		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
@@ -542,7 +546,8 @@ maxCondition(0),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
 	blocksLight(true),
-	permanent(false)
+	permanent(false),
+	color(TCODColor::black)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

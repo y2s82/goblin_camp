@@ -61,6 +61,7 @@ struct ConstructionPreset {
 	int spawnFrequency;
 	bool blocksLight;
 	bool permanent;
+	TCOD_color_t color;
 };
 
 class Construction : public Entity {
