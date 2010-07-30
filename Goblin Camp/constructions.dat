@@ -25,7 +25,7 @@ construction_type "Carpenter's workshop" {
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
 			 178, 46,177]
-	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed", "Wooden club"]
+	products=["Crate", "Wood plank", "Wooden barrel", "Wooden bed", "Wooden club", "Wooden door"]
 	walkable
 	maxCondition=90
 	materials=["Log","Log","Log"]
@@ -45,16 +45,41 @@ construction_type "Brewery" {
 	productiony=0
 }
 
-construction_type "Bakery" {
-	graphicLength=2
-	graphic=[ 10, 46,
-			  33,231,
-			  10, 46,
-			  35,231]
-	products=["Pie", "Exquisite Pie", "Bread"]
+construction_type "Kitchen" {
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  95, 95, 127]
+	products=["Pie", "Bone stew", "Bread"]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Bone Carver" {
+	graphicLength=4
+	graphic=[  9, 179,179,  9, 
+			  19, 179,179, 19,
+			  41,  42, 42, 40]
+	products=["Bone statue", "Bone door", "Bone dagger", "Bone bed"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Butcher" {
+	graphicLength=4
+	graphic=[ 37,179,179, 37, 
+			  19,179,179, 19,
+			  37, 42, 42, 37]
+	products=["Meat"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 }
@@ -98,6 +123,7 @@ construction_type "Stone quarry" {
 	spawnsCreatures="underground"
 	//Spawn creatures every x seconds
 	spawnFrequency=600
+	permanent
 }
 
 construction_type "Stone mason's shack" {
@@ -151,4 +177,12 @@ construction_type "Weaver's workshop" {
 	productionx=1
 	productiony=1
 	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Statue" {
+	furniture
+	graphicLength=1
+	graphic=[38]
+	maxCondition=20
+	materials=["Statue"]
 }
