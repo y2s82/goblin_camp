@@ -62,6 +62,7 @@ struct ConstructionPreset {
 	int spawnFrequency;
     std::string category;
     int placementType;
+	bool blocksLight;
 };
 
 class Construction : public Entity {

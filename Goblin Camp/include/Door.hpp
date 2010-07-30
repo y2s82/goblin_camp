@@ -29,4 +29,5 @@ private:
 public:
 	Door(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	virtual void Update();
+	bool Open();
 };

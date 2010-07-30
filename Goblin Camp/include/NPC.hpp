@@ -109,6 +109,7 @@ private:
 	int taskIndex;
 	boost::try_mutex pathMutex;
 	TCODPath *path;
+	int pathIndex;
 	bool nopath;
 	bool findPathWorking;
 	int timer;
@@ -137,6 +138,7 @@ private:
 	std::list<boost::weak_ptr<NPC> >nearNpcs;
 	bool needsNutrition;
 	bool needsSleep;
+	bool hasHands;
 
 	boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 	boost::function<void(boost::shared_ptr<NPC>)> React;
@@ -200,6 +202,7 @@ public:
 	void GetMainHandAttack(Attack&);
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
+	bool HasHands();
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;

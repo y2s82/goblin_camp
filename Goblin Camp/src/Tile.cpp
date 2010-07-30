@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Announce.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
+#include "Construction.hpp"
 
 Tile::Tile(TileType newType, int newCost) :
 vis(true),
@@ -100,13 +101,25 @@ void Tile::Walkable(bool value) {
 bool Tile::BlocksWater() const { return blocksWater; }
 void Tile::BlocksWater(bool value) { blocksWater = value; }
 
-int Tile::moveCost() const {
+int Tile::MoveCost(void* ptr) const {
+	if (!static_cast<NPC*>(ptr)->HasHands()) {
+		if (construction >= 0) {
+			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(construction).lock()) {
+				if (cons->HasTag(DOOR)) return MoveCost()+50;
+			}
+		}
+	}
+	return MoveCost();
+}
+
+int Tile::MoveCost() const {
+	if (!Walkable()) return 0;
 	int cost = _moveCost;
 	if (water) cost += water->Depth();
 	if (construction >= 0) cost += 1;
 	return cost;
 }
-void Tile::moveCost(int value) { _moveCost = value; }
+void Tile::SetMoveCost(int value) { _moveCost = value; }
 
 void Tile::Buildable(bool value) { buildable = value; }
 bool Tile::Buildable() const { return buildable; }
@@ -127,8 +140,8 @@ void Tile::MoveTo(int uid) {
 	npcList.insert(uid);		
 }
 
-void Tile::Construction(int uid) { construction = uid; }
-int Tile::Construction() const { return construction; }
+void Tile::SetConstruction(int uid) { construction = uid; }
+int Tile::GetConstruction() const { return construction; }
 
 boost::weak_ptr<WaterNode> Tile::GetWater() const {return boost::weak_ptr<WaterNode>(water);}
 void Tile::SetWater(boost::shared_ptr<WaterNode> value) {water = value;}

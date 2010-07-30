@@ -71,7 +71,8 @@ Construction::~Construction() {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
 			Map::Inst()->Buildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
-			Map::Inst()->Construction(ix,iy,-1);
+			Map::Inst()->SetConstruction(ix,iy,-1);
+			Map::Inst()->BlocksLight(ix,iy,false);
 		}
 	}
 
@@ -128,7 +129,7 @@ int Construction::Build() {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
 				Map::Inst()->SetWalkable(ix, iy, walkable);
 				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, !walkable);
+				Map::Inst()->BlocksLight(ix, iy, Construction::Presets[type].blocksLight);
 			}
 		}
 
@@ -274,6 +275,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		if (boost::iequals(name, "walkable")) {
 			Construction::Presets.back().walkable = true;
+			Construction::Presets.back().blocksLight = false;
 		} else if (boost::iequals(name, "wall")) {
 			Construction::Presets.back().graphic.push_back(1);
 			Construction::Presets.back().graphic.push_back('W');
@@ -335,6 +337,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
 			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
+		} else if (boost::iequals(name, "blocksLight")) {
+			Construction::Presets.back().blocksLight = true;
 		}
 
 		return true;
@@ -372,8 +376,12 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("bed");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
+<<<<<<< local
     constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
     constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
+=======
+	constructionTypeStruct->addFlag("blocksLight");
+>>>>>>> other
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -436,26 +444,26 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
 	bool n = false,s = false,e = false,w = false;
 
-	if (Map::Inst()->Construction(x - 1, y) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock();
+	if (Map::Inst()->GetConstruction(x - 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			w = true;
 		}
 	}
-	if (Map::Inst()->Construction(x + 1, y) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock();
+	if (Map::Inst()->GetConstruction(x + 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			e = true;
 		}
 	}
-	if (Map::Inst()->Construction(x, y-1) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y-1)).lock();
+	if (Map::Inst()->GetConstruction(x, y-1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y-1)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			n = true;
 		}
 	}
-	if (Map::Inst()->Construction(x, y+1) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y+1)).lock();
+	if (Map::Inst()->GetConstruction(x, y+1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y+1)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			s = true;
 		}
@@ -480,13 +488,13 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 	if (recurse) {
 		if (w)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock()->UpdateWallGraphic(false);
 		if (e)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock()->UpdateWallGraphic(false);
 		if (n)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y - 1)).lock()->UpdateWallGraphic(false);
 		if (s)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y + 1)).lock()->UpdateWallGraphic(false);
 	}
 }
 
@@ -545,6 +553,7 @@ maxCondition(0),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
     placementType(UIPLACEMENT)
+	blocksLight(true)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
