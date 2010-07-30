@@ -285,16 +285,23 @@ namespace Data {
 		Logger::Inst()->output.flush();
 	}
 	
+    void DoSave(std::string file) {
+        Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+        Game::Inst()->SaveGame(file);
+		Logger::Inst()->output.flush();        
+    }
+	
 	void SaveGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
-		if ((fs::exists(file) && Menu::YesNoDialog("Save game exists, overwrite?")) || !fs::exists(file)) {
-			Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
-			Game::Inst()->SaveGame(file);
-		}
+        
+        if (!fs::exists(file)) {
+            DoSave(file);
+        } else {
+            Menu::YesNoDialog("Really exit?", boost::bind(DoSave, file), NULL);
+        }
 
-		Logger::Inst()->output.flush();
 	}
-	
+    
 	void SaveScreenshot() {
 		// sadly, libtcod supports autonumbering only when saving to current dir
 		fs::directory_iterator end;

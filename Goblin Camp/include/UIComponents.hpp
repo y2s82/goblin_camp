@@ -101,20 +101,60 @@ public:
     MenuResult Update(int, int, bool, TCOD_key_t);
 };
 
-/*
- template T
- class List<T>: public Drawable {
- private:
- std::vector<T> items;
- bool selectable;
- int selection;
- int scroll;
- public:
- List<T>(std::vector<T> nitems, int x, int y, int nwidth, int nheight, bool nselectable = false):
- items(nitems), selectable(nselectable), Drawable(x, y, nwidth, nheight) {}
- void Draw(int, int, TCODConsole *);
- MenuResult Update(int, int, bool, TCOD_key_t);
- }
- 
- */
 
+template <class T>
+class UIList: public Drawable, public Scrollable {
+private:
+    boost::function<std::vector<T>()> items;
+    bool selectable;
+    int selection;
+    boost::function<void(T, int, int, bool, TCODConsole *)> draw;
+    boost::function<void(int)> onclick;
+public:
+    UIList<T>(boost::function<std::vector<T>()> *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T)> ndraw, boost::function<void(int)> nonclick = 0, bool nselectable = false):
+        items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), Drawable(x, y, nwidth, nheight) {}
+    void Draw(int, int, TCODConsole *);
+    void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+    int TotalHeight();
+    MenuResult Update(int, int, bool, TCOD_key_t);
+};
+
+template <class T>
+void UIList<T>::Draw(int x, int y, TCODConsole *console) {
+    int count = 0;
+    std::vector<T> items = items();
+    for(typename std::vector<T>::iterator it = items->begin(); it != items->end(); it++) {
+        T item = *it;
+        draw(item, x + _x, y + _y + count, selection == count, console);
+        count++;
+    }
+}
+
+template <class T>
+void UIList<T>::Draw(int x, int y, int scroll, int _width, int _height, TCODConsole *console) {
+    int count = 0;
+    std::vector<T> items = items();
+    for(typename std::vector<T>::iterator it = items->begin(); it != items->end(); it++) {
+        T item = *it;
+		if (count >= scroll && count < scroll + _height) {
+			draw(item, x, y + (count - scroll), selection == count, console);
+		}
+        count++;
+    }
+}
+
+template <class T>
+int UIList<T>::TotalHeight() {
+    return items()->size();
+}
+
+template <class T>
+MenuResult UIList<T>::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    if (x >= _x && x < _x + width && y >= _y && y < _y + width) {
+        if (selectable) {
+            selection = y - _y;
+        }
+        return MENUHIT;
+    }
+    return NOMENUHIT;
+}

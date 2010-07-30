@@ -95,10 +95,10 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
                     scroll += height; 
                 }
             } else {
-                contents->Update(x, y, clicked, key);
+                contents->Update(x, y + scroll, clicked, key);
             }
         } else {
-            contents->Update(x, y, clicked, key);
+            contents->Update(x, y + scroll, clicked, key);
         }
         return MENUHIT;
     }
