@@ -289,6 +289,10 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "bed")) {
 			Construction::Presets.back().tags[BED] = true;
 			Construction::Presets.back().tags[FURNITURE] = true;
+		} else if (boost::iequals(name, "furniture")) {
+			Construction::Presets.back().tags[FURNITURE] = true;
+		} else if (boost::iequals(name, "permanent")) {
+			Construction::Presets.back().permanent = true;
 		}
 		return true;
 	}
@@ -366,6 +370,8 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("wall");
 	constructionTypeStruct->addFlag("door");
 	constructionTypeStruct->addFlag("bed");
+	constructionTypeStruct->addFlag("permanent");
+	constructionTypeStruct->addFlag("furniture");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
@@ -508,7 +514,7 @@ void Construction::Update()
 }
 
 void Construction::Dismantle() {
-	if (!dismantle) {
+	if (!Construction::Presets[type].permanent && !dismantle) {
 		dismantle = true;
 		if (producer) {
 			jobList.clear();
@@ -535,7 +541,8 @@ maxCondition(0),
 	dynamic(false),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
-	blocksLight(true)
+	blocksLight(true),
+	permanent(false)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

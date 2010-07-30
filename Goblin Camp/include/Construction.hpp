@@ -60,6 +60,7 @@ struct ConstructionPreset {
 	std::string spawnCreaturesTag;
 	int spawnFrequency;
 	bool blocksLight;
+	bool permanent;
 };
 
 class Construction : public Entity {
