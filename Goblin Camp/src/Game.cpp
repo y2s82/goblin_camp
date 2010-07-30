@@ -462,7 +462,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			orgItem->Nutrition(Item::Presets[type].nutrition);
 			orgItem->Growth(Item::Presets[type].growth);
 		} else if (Item::Presets[type].container > 0) {
-			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container)));
+			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, 0, comps)));
 		} else {
 			newItem.reset(new Item(pos, type, 0, comps));
 		}
