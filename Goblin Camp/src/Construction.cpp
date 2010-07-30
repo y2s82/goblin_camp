@@ -62,8 +62,7 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	stockpile = Construction::Presets[type].tags[STOCKPILE];
 	farmplot = Construction::Presets[type].tags[FARMPLOT];
 	condition = 0-maxCondition;
-	if (Construction::Presets[type].color.b != 0 || Construction::Presets[type].color.g != 0 ||
-		Construction::Presets[type].color.r != 0) color = Construction::Presets[type].color;
+	if (Construction::Presets[type].color != TCODColor::black) color = Construction::Presets[type].color;
 }
 
 Construction::~Construction() {
