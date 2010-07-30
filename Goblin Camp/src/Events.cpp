@@ -28,7 +28,7 @@ hostileSpawningMonsters(std::vector<int>()),
 	map(vmap)
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (NPC::Presets[i].tags.find("attackrandomly") != NPC::Presets[i].tags.end())
+		if (NPC::Presets[i].tags.find("attacksrandomly") != NPC::Presets[i].tags.end())
 			hostileSpawningMonsters.push_back(i);
 	}
 }
