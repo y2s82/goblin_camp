@@ -155,7 +155,7 @@ item_type "Crate" {
 
 item_type "Wooden bed" {
 	category = ["Bed"]
-	graphic = 22
+	graphic = 220
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
 }
