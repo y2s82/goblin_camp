@@ -549,7 +549,7 @@ maxCondition(0),
 	dynamic(false),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
-    placementType(UIPLACEMENT)
+    placementType(UIPLACEMENT),
 	blocksLight(true)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
