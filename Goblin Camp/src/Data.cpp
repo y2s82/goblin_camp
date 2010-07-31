@@ -34,6 +34,7 @@ namespace fs = boost::filesystem;
 #include "NatureObject.hpp"
 #include "NPC.hpp"
 #include "Construction.hpp"
+#include "Menu.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
 void _ImplFindPersonalDirectory(std::string&);
@@ -286,9 +287,11 @@ namespace Data {
 	
 	void SaveGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
-		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
-		Game::Inst()->SaveGame(file);
-		
+		if ((fs::exists(file) && Menu::YesNoDialog("Save game exists, overwrite?")) || !fs::exists(file)) {
+			Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+			Game::Inst()->SaveGame(file);
+		}
+
 		Logger::Inst()->output.flush();
 	}
 	

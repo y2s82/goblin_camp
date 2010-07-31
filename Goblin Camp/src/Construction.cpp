@@ -39,6 +39,8 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 	return Construction::Presets[construct].productionSpot;
 }
 
+std::vector<int> Construction::AllowedAmount = std::vector<int>();
+
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
 	color(TCODColor::white),
 	type(vtype),
@@ -62,6 +64,7 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	stockpile = Construction::Presets[type].tags[STOCKPILE];
 	farmplot = Construction::Presets[type].tags[FARMPLOT];
 	condition = 0-maxCondition;
+	if (Construction::Presets[type].color != TCODColor::black) color = Construction::Presets[type].color;
 }
 
 Construction::~Construction() {
@@ -69,7 +72,8 @@ Construction::~Construction() {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
 			Map::Inst()->Buildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
-			Map::Inst()->Construction(ix,iy,-1);
+			Map::Inst()->SetConstruction(ix,iy,-1);
+			Map::Inst()->BlocksLight(ix,iy,false);
 		}
 	}
 
@@ -85,6 +89,10 @@ Construction::~Construction() {
 
 	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
+
+	if (Construction::AllowedAmount[type] >= 0) {
+		++Construction::AllowedAmount[type];
+	}
 }
 
 
@@ -126,7 +134,7 @@ int Construction::Build() {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
 				Map::Inst()->SetWalkable(ix, iy, walkable);
 				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, !walkable);
+				Map::Inst()->BlocksLight(ix, iy, Construction::Presets[type].blocksLight);
 			}
 		}
 
@@ -262,6 +270,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		Construction::Presets.push_back(ConstructionPreset());
 		Construction::Presets.back().name = name;
+		Construction::AllowedAmount.push_back(-1);
 		return true;
 	}
 
@@ -271,6 +280,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		if (boost::iequals(name, "walkable")) {
 			Construction::Presets.back().walkable = true;
+			Construction::Presets.back().blocksLight = false;
 		} else if (boost::iequals(name, "wall")) {
 			Construction::Presets.back().graphic.push_back(1);
 			Construction::Presets.back().graphic.push_back('W');
@@ -287,6 +297,14 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "bed")) {
 			Construction::Presets.back().tags[BED] = true;
 			Construction::Presets.back().tags[FURNITURE] = true;
+		} else if (boost::iequals(name, "furniture")) {
+			Construction::Presets.back().tags[FURNITURE] = true;
+		} else if (boost::iequals(name, "permanent")) {
+			Construction::Presets.back().permanent = true;
+		} else if (boost::iequals(name, "blocksLight")) {
+			Construction::Presets.back().blocksLight = true;
+		} else if (boost::iequals(name, "unique")) {
+			Construction::AllowedAmount.back() = 1;
 		}
 		return true;
 	}
@@ -327,6 +345,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
 			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
+		} else if (boost::iequals(name, "color")) {
+			Construction::Presets.back().color = value.col;
 		}
 
 		return true;
@@ -362,8 +382,13 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("wall");
 	constructionTypeStruct->addFlag("door");
 	constructionTypeStruct->addFlag("bed");
+	constructionTypeStruct->addFlag("permanent");
+	constructionTypeStruct->addFlag("furniture");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addFlag("blocksLight");
+	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
+	constructionTypeStruct->addFlag("unique");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -426,26 +451,26 @@ boost::weak_ptr<Container> Construction::Storage() {
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
 	bool n = false,s = false,e = false,w = false;
 
-	if (Map::Inst()->Construction(x - 1, y) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock();
+	if (Map::Inst()->GetConstruction(x - 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			w = true;
 		}
 	}
-	if (Map::Inst()->Construction(x + 1, y) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock();
+	if (Map::Inst()->GetConstruction(x + 1, y) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			e = true;
 		}
 	}
-	if (Map::Inst()->Construction(x, y-1) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y-1)).lock();
+	if (Map::Inst()->GetConstruction(x, y-1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y-1)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			n = true;
 		}
 	}
-	if (Map::Inst()->Construction(x, y+1) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y+1)).lock();
+	if (Map::Inst()->GetConstruction(x, y+1) > -1) {
+		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y+1)).lock();
 		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			s = true;
 		}
@@ -470,20 +495,19 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 	if (recurse) {
 		if (w)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x - 1, y)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock()->UpdateWallGraphic(false);
 		if (e)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x + 1, y)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock()->UpdateWallGraphic(false);
 		if (n)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y - 1)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y - 1)).lock()->UpdateWallGraphic(false);
 		if (s)
-			Game::Inst()->GetConstruction(Map::Inst()->Construction(x, y + 1)).lock()->UpdateWallGraphic(false);
+			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y + 1)).lock()->UpdateWallGraphic(false);
 	}
 }
 
 bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[type].tags[tag]; }
 
-void Construction::Update() 
-{
+void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
 		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
@@ -503,7 +527,7 @@ void Construction::Update()
 }
 
 void Construction::Dismantle() {
-	if (!dismantle) {
+	if (!Construction::Presets[type].permanent && !dismantle) {
 		dismantle = true;
 		if (producer) {
 			jobList.clear();
@@ -529,7 +553,10 @@ maxCondition(0),
 	productionSpot(Coordinate(0,0)),
 	dynamic(false),
 	spawnCreaturesTag(""),
-	spawnFrequency(10)
+	spawnFrequency(10),
+	blocksLight(true),
+	permanent(false),
+	color(TCODColor::black)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

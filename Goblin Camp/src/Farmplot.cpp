@@ -31,7 +31,7 @@ FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stock
 
 	for (int i = 0; i < Game::ItemTypeCount; ++i) {
 		if (Item::Presets[i].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[i].categories.end()) {
-			allowedSeeds.insert(std::pair<ItemType,bool>(i, true));
+			allowedSeeds.insert(std::pair<ItemType,bool>(i, false));
 		}
 	}
 }
@@ -41,7 +41,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->Construction(x,y) == uid) {
+			if (Map::Inst()->GetConstruction(x,y) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&

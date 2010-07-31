@@ -133,7 +133,7 @@ Menu* Menu::ConstructionMenu() {
 		constructionMenu->AddChoice(MenuChoice(std::string("Basics"), boost::bind(UI::ChangeMenu, Menu::BasicsMenu())));
 		constructionMenu->AddChoice(MenuChoice(std::string("Workshops"), boost::bind(UI::ChangeMenu, Menu::WorkshopsMenu())));
 		constructionMenu->AddChoice(MenuChoice(std::string("Furniture"), boost::bind(UI::ChangeMenu, Menu::FurnitureMenu())));
-	}
+		constructionMenu->AddChoice(MenuChoice(std::string("Permanent"), boost::bind(UI::ChangeMenu, Menu::PermanentMenu())));	}
 	return constructionMenu;
 }
 
@@ -166,7 +166,7 @@ Menu* Menu::WorkshopsMenu() {
 	if (!workshopsMenu) {
 		workshopsMenu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
-			if (Construction::Presets[i].tags[WORKSHOP]) {
+			if (Construction::Presets[i].tags[WORKSHOP] && !Construction::Presets[i].permanent) {
 				workshopsMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
 			}
 		}
@@ -196,6 +196,19 @@ Menu* Menu::FurnitureMenu() {
 		}
 	}
 	return furnitureMenu;
+}
+
+Menu* Menu::permanentMenu = 0;
+Menu* Menu::PermanentMenu() {
+	if (!permanentMenu) {
+		permanentMenu = new Menu(std::vector<MenuChoice>());
+		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
+			if (Construction::Presets[i].permanent) {
+				permanentMenu->AddChoice(MenuChoice(Construction::Presets[i].name, boost::bind(UI::ChooseConstruct, i, UIPLACEMENT)));
+			}
+		}
+	}
+	return permanentMenu;
 }
 
 bool Menu::YesNoDialog(std::string text, std::string leftButton, std::string rightButton) {

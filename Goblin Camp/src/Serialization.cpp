@@ -93,6 +93,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & upleft;
 	ar & filthList;
 	ar & bloodList;
+	ar & safeMonths;
 }
 
 template<class Archive>
@@ -119,6 +120,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & upleft;
 	ar & filthList;
 	ar & bloodList;
+	ar & safeMonths;
 }
 
 template<class Archive>
@@ -164,6 +166,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & hasHands;
 }
 
 template<class Archive>
@@ -209,6 +212,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & hasHands;
 	InitializeAIFunctions();
 }
 template<class Archive>
@@ -473,6 +477,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & stockpile;
 	ar & farmplot;
 	ar & time;
+	ar & AllowedAmount;
 }
 
 template<class Archive>
@@ -496,6 +501,7 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & stockpile;
 	ar & farmplot;
 	ar & time;
+	ar & AllowedAmount;
 }
 
 template<class Archive>

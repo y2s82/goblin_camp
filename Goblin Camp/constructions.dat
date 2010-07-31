@@ -20,12 +20,12 @@ construction_type "Farm plot" {
 	maxCondition=10
 }
 
-construction_type "Carpenter's workshop" {
+construction_type "Carpenter" {
 	graphicLength=3
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
 			 178, 46,177]
-	products=["Wood plank", "Wooden door", "Wooden barrel", "Crate", "Wooden bed", "Wooden club"]
+	products=["Crate", "Wood plank", "Wooden barrel", "Wooden bed", "Wooden club", "Wooden door"]
 	walkable
 	maxCondition=90
 	materials=["Log","Log","Log"]
@@ -45,16 +45,41 @@ construction_type "Brewery" {
 	productiony=0
 }
 
-construction_type "Bakery" {
-	graphicLength=2
-	graphic=[ 10, 46,
-			  33,231,
-			  10, 46,
-			  35,231]
-	products=["Pie", "Exquisite Pie", "Bread"]
+construction_type "Kitchen" {
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  95, 95, 127]
+	products=["Pie", "Bone Stew", "Bread"]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Bone Carver" {
+	graphicLength=4
+	graphic=[  9, 179,179,  9, 
+			  19, 179,179, 19,
+			  41,  42, 42, 40]
+	products=["Bone statue", "Bone door", "Bone dagger", "Bone bed"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Butcher" {
+	graphicLength=4
+	graphic=[ 37,179,179, 37, 
+			  19,179,179, 19,
+			  37, 42, 42, 37]
+	products=["Meat"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 }
@@ -62,7 +87,7 @@ construction_type "Bakery" {
 construction_type "Bed" {
 	bed
 	graphicLength=1
-	graphic=[22]
+	graphic=[220]
 	walkable
 	maxCondition=10
 	materials=["Bed"]
@@ -73,38 +98,40 @@ construction_type "Door" {
 	graphicLength=1
 	graphic=[43]
 	walkable
+	blocksLight
 	maxCondition=10
 	materials=["Door"]
 }
 
 construction_type "Stone quarry" {
 	graphicLength=10
-	graphic=[ 44, 46, 46, 44, 44, 44, 46, 44, 46, 46,
-			  44, 46, 46, 44, 44, 44, 46, 44, 46, 44,
-			  46, 46, 46, 44, 44, 44, 46, 44, 46, 44,
-			  44, 46, 46, 44,178,178,177,178, 46, 46,
-			 176, 46,177,178, 32, 32,176,177, 46, 44,
-			 176, 46, 46, 44, 32, 32,177,176, 46, 46,
-			 177,176,177,178,177,177,176,178, 46, 46,
-			 178, 46, 46,177,176,178,176, 44, 46, 44,
+	graphic=[176,176,178, 44,177,176,177,178,178,176,
+			 177, 46, 46, 44, 44, 44, 46,177,176,177,
+			  46, 46,178,176,177,176, 46, 46, 44,176,
+			 178, 46, 46,176,178,178,177,178, 44, 46,
+			 176, 46,177,178, 32, 32,176,177, 46,178,
+			 176, 46, 46, 44, 32, 32,177,176, 46,177,
+			 177,176,177,178,177,177,176,178, 46,177,
+			 178, 46, 46,177,176,178,176, 44, 46,178,
 			 176, 46,178,176,176,177,176, 44, 46, 46,
 			 178, 46,177,177,178,178,177, 44, 46, 46]
 	products=["Rough stone"]
 	walkable
-	maxCondition=500
+	maxCondition=1000
 	productionx=3
 	productiony=5
 	spawnsCreatures="underground"
 	//Spawn creatures every x seconds
 	spawnFrequency=600
+	permanent
 }
 
-construction_type "Stone mason's shack" {
+construction_type "Stone mason" {
 	graphicLength=4
 	graphic=[ 40, 46,157,178,
 			  40, 10, 46,178,
 			 170,157, 46,178]
-	products=["Sharpened stone"]
+	products=["Sharpened stone", "Stone statue"]
 	walkable
 	maxCondition=90
 	productionx=2
@@ -112,7 +139,7 @@ construction_type "Stone mason's shack" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
-construction_type "Weapon crafter's workshop" {
+construction_type "Weapon crafter" {
 	graphicLength=2
 	graphic=[ 91, 92,
 			 124, 46,
@@ -139,7 +166,7 @@ construction_type "Mill" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
-construction_type "Weaver's workshop" {
+construction_type "Weaver" {
 	graphicLength=3
 	graphic=[ 21, 30, 30,
 			  46, 46, 46,
@@ -150,4 +177,36 @@ construction_type "Weaver's workshop" {
 	productionx=1
 	productiony=1
 	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Statue" {
+	furniture
+	graphicLength=1
+	graphic=[190]
+	maxCondition=20
+	materials=["Statue"]
+}
+
+construction_type "Spawning pool" {
+	graphicLength=10
+	graphic=[ 46, 44, 46, 94,126,126,126, 44, 44, 46,
+		 	  46, 46,126,126,126,126,126,126, 46, 44,
+			  44,126,126,126,126,126,126,126,126, 46,
+			 126,126,136,126,176,126,199,126,126,126,
+			 126,126,126,126,126,126,126,126,126,126,
+			 126,126,126,126,126,126,126,126,147,126,
+			  94,126,126,237,126,126,126,126,126,126,
+			  46,126,126,126,126,136,126,126,126, 44,
+			  44, 46,126,126,126,126,126, 94, 44, 44,
+			  44, 46, 44,126,126,126,126, 46, 46, 44]
+	walkable
+	maxCondition=1000
+	productionx=5
+	productiony=5
+	spawnsCreatures="friendly"
+	//Spawn creatures every x seconds
+	spawnFrequency=300
+	permanent
+	color="0,255,128"
+	unique
 }

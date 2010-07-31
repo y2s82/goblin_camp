@@ -61,6 +61,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
+	safeMonths(9),
 	upleft(Coordinate(0,0)),
 	events(boost::shared_ptr<Events>())
 {
@@ -82,6 +83,14 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
+	if (Construction::AllowedAmount[construct] >= 0) {
+		if (Construction::AllowedAmount[construct] == 0) {
+			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
+			return -1;
+		}
+		--Construction::AllowedAmount[construct];
+	}
+
 	//Check if the required materials exist before creating the build job
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
@@ -122,7 +131,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
 			Map::Inst()->Buildable(x,y,false);
-			Map::Inst()->Construction(x,y,newCons->Uid());
+			Map::Inst()->SetConstruction(x,y,newCons->Uid());
 		}
 	}
 
@@ -155,7 +164,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
 	Map::Inst()->Buildable(a.X(), a.Y(), false);
-	Map::Inst()->Construction(a.X(), a.Y(), newSp->Uid());
+	Map::Inst()->SetConstruction(a.X(), a.Y(), newSp->Uid());
 	newSp->Expand(a,b);
 	if (Construction::Presets[stockpile].dynamic) {
 		Game::Inst()->dynamicConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
@@ -259,6 +268,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	if (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end()) {
 		npc->coward = true;
+	}
+
+	if (NPC::Presets[type].tags.find("hashands") != NPC::Presets[type].tags.end()) {
+		npc->hasHands = true;
 	}
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
@@ -414,7 +427,7 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 		for (int x = construct->X(); x < construct->X() + blueprint.X(); ++x) {
 			for (int y = construct->Y(); y < construct->Y() + blueprint.Y(); ++y) {
 				Map::Inst()->Buildable(x,y,true);
-				Map::Inst()->Construction(x,y,-1);
+				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
 		if (Construction::Presets[construct->type].dynamic) {
@@ -428,12 +441,12 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int construction = Map::Inst()->Construction(x,y);
+			int construction = Map::Inst()->GetConstruction(x,y);
 			if (construction >= 0) {
 				if (instance->GetConstruction(construction).lock()) {
 					instance->GetConstruction(construction).lock()->Dismantle();
 				} else {
-					Map::Inst()->Construction(x,y,-1);
+					Map::Inst()->SetConstruction(x,y,-1);
 				}
 			}
 		}
@@ -458,7 +471,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			orgItem->Nutrition(Item::Presets[type].nutrition);
 			orgItem->Growth(Item::Presets[type].growth);
 		} else if (Item::Presets[type].container > 0) {
-			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container)));
+			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, 0, comps)));
 		} else {
 			newItem.reset(new Item(pos, type, 0, comps));
 		}
@@ -573,6 +586,7 @@ void Game::Update() {
 	++time;
 
 	if (time == MONTH_LENGTH) {
+		if (safeMonths > 0) --safeMonths;
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 
@@ -667,7 +681,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
 
-	events->Update();
+	if (safeMonths <= 0) events->Update();
 }
 
 void Game::StockpileItem(boost::weak_ptr<Item> item) {
@@ -680,6 +694,7 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
 				//Check if the item can be contained, and if so if any containers are in the stockpile
 
 				boost::shared_ptr<Job> stockJob(new Job("Store item", LOW));
+				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
 
@@ -1109,6 +1124,7 @@ void Game::Reset() {
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	season = LateWinter;
 	upleft = Coordinate(180,180);
+	safeMonths = 9;
 	Announce::Inst()->Reset();
 	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 0; y < Map::Inst()->Height(); ++y) {

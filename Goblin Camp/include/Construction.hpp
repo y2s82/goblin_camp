@@ -59,6 +59,9 @@ struct ConstructionPreset {
 	bool dynamic;
 	std::string spawnCreaturesTag;
 	int spawnFrequency;
+	bool blocksLight;
+	bool permanent;
+	TCODColor color;
 };
 
 class Construction : public Entity {
@@ -97,6 +100,7 @@ public:
 
 	static Coordinate Blueprint(ConstructionType);
 	static Coordinate ProductionSpot(ConstructionType);
+	static std::vector<int> AllowedAmount;
 	void Condition(int);
 	int Condition();
 	virtual void Draw(Coordinate, TCODConsole*);

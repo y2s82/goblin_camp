@@ -1,5 +1,4 @@
-/* Item category definitions. These are only names for now, but will
-include more tags in the future */
+/* Item category definitions. */
 
 category_type "Wood" {
 }
@@ -20,10 +19,6 @@ category_type "Rough stone" {
 }
 
 category_type "Sharpened stone" {
-	parent="Stone"
-}
-
-category_type "Brick" {
 	parent="Stone"
 }
 
@@ -67,7 +62,15 @@ category_type "Flour" {
 category_type "Container" {
 }
 
+category_type "Plank Container" {
+	parent="Container"
+}
+
 category_type "Liquid Container" {
+	parent="Container"
+}
+
+category_type "Bone Container" {
 	parent="Container"
 }
 
@@ -79,12 +82,6 @@ category_type "Flour Container" {
 	parent="Container"
 }
 
-category_type "Plank Container" {
-	parent="Container"
-}
-
-category_type "Garbage" {
-}
 
 category_type "Furniture" {
 }
@@ -94,6 +91,10 @@ category_type "Door" {
 }
 
 category_type "Bed" {
+	parent="Furniture"
+}
+
+category_type "Statue" {
 	parent="Furniture"
 }
 
@@ -110,6 +111,21 @@ category_type "Slashing weapon" {
 
 category_type "Piercing weapon" {
 	parent="Weapon"
+}
+
+category_type "Garbage" {
+}
+
+category_type "Bone" {
+	parent="Garbage"
+}
+
+category_type "Corpse" {
+	parent="Garbage"
+}
+
+category_type "Misc." {
+	parent="Garbage"
 }
 
 /* Item types begin here */
@@ -137,6 +153,13 @@ item_type "Wooden door" {
 	components = ["Plank", "Plank", "Plank"]
 }
 
+item_type "Bone door" {
+	category = ["Door"]
+	graphic = 197
+	color = "255,255,255"
+	components = ["Bone", "Bone", "Bone"]
+}
+
 item_type "Wooden barrel" {
 	category = ["Liquid Container"]
 	containerSize = 20
@@ -155,23 +178,20 @@ item_type "Crate" {
 
 item_type "Wooden bed" {
 	category = ["Bed"]
-	graphic = 22
+	graphic = 220
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
 }
 
-item_type "Wine" {
-	category = ["Drink"]
-	graphic = 33
-	color = "127,0,0"
-	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
-	containIn = "Liquid Container"
-	nutrition = 72000
-	multiplier = 10
+item_type "Bone bed" {
+	category = ["Bed"]
+	graphic = 220
+	color = "225,225,225"
+	components = [ "Bone", "Bone", "Bone" ]
 }
 
 item_type "Bloodberry" {
-	category = [ "Berry", "Raw Food"]
+	category = [ "Berry" ]
 	graphic = 248
 	color = "255,0,0"
 	nutrition = 6000
@@ -189,7 +209,7 @@ item_type "Bloodberry seed" {
 }
 
 item_type "Young Bloodberry shrub" {
-	category = ["Garbage"]
+	category = ["Misc."]
 	graphic = 42
 	color = "255,106,0"
 	growth = "Bloodberry shrub"
@@ -198,7 +218,7 @@ item_type "Young Bloodberry shrub" {
 }
 
 item_type "Bloodberry shrub" {
-	category = ["Garbage"]
+	category = ["Misc."]
 	graphic = 35
 	color = "255,0,0"
 	fruits = [ "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry" ]
@@ -206,8 +226,34 @@ item_type "Bloodberry shrub" {
 	decaySpeed = 12
 }
 
+item_type "Blueleaf seed" {
+	category = ["Seed"]
+	graphic = 250
+	color = "128,128,175"
+	growth = "Blueleaf sapling"
+	fitsin = "Seed Container"
+}
+
+item_type "Blueleaf sapling" {
+	category = ["Plant"]
+	graphic = 222
+	color = "127,146,255"
+	growth = "Blueleaf tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Blueleaf tree" {
+	category = ["Plant"]
+	graphic = 216
+	color = "0,0,255"
+	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
 item_type "Dead plant" {
-	category = ["Garbage"]
+	category = ["Misc."]
 	graphic = 207
 	color = "127,89,63"
 	decay = ["Filth"]
@@ -215,7 +261,7 @@ item_type "Dead plant" {
 }
 
 item_type "Bones" {
-	category = ["Garbage"]
+	category = ["Bone"]
 	graphic = 47
 	color = "192,192,192"
 	decay = [ "Filth" ]
@@ -223,11 +269,22 @@ item_type "Bones" {
 }
 
 item_type "Corpse" {
-	category = ["Garbage"]
+	category = ["Corpse"]
 	graphic = 37
 	color = "127,0,55"
 	decay = [ "Bones", "Filth" ]
 	decaySpeed = 4
+	fruits = [ "Bones" ]
+}
+
+item_type "Wine" {
+	category = ["Drink"]
+	graphic = 33
+	color = "127,0,0"
+	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
+	containIn = "Liquid Container"
+	nutrition = 72000
+	multiplier = 10
 }
 
 item_type "Pie" {
@@ -238,12 +295,22 @@ item_type "Pie" {
 	nutrition = 48000
 }
 
-item_type "Exquisite Pie" {
-	category = ["Prepared Food"]
+item_type "Meat" {
+	category = ["Raw Food"]
 	graphic = 37
-	color = "178,0,255"
-	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Drink"]
-	nutrition = 100000
+	color = "198,0,0"
+	components = ["Corpse"]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+	nutrition = 10000
+}
+
+item_type "Bone Stew" {
+	category = ["Food"]
+	graphic = 37
+	color = "102,204,0"
+	components = ["Bone", "Drink", "Meat"]
+	nutrition = 90000
 }
 
 item_type "Bread" {
@@ -252,6 +319,23 @@ item_type "Bread" {
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
 	nutrition = 86000
+}
+
+item_type "Flour" {
+	category = ["Flour"]
+	graphic = 44
+	color = "255,233,177"
+	components = ["Seed", "Seed"]
+	containIn = "Flour Container"
+}
+
+item_type "Flower" {
+	category = ["Raw Food"]
+	graphic = 12
+	color = "255,255,255"
+	nutrition = 500
+	decay = ["Filth"]
+	decaySpeed = 12
 }
 
 item_type "Wooden club" {
@@ -310,6 +394,20 @@ item_type "Stone spear" {
 	}
 }
 
+item_type "Bone Dagger" {
+	category = ["Piercing weapon"]
+	graphic = 41
+	color = "200,200,200"
+	components = [ "Bone" ]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d10+7"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    10    ]
+	}
+}
+
 item_type "Rough stone" {
 	category = ["Rough stone"]
 	graphic = 96
@@ -324,14 +422,6 @@ item_type "Sharpened stone" {
 	components = ["Rough stone"]
 }
 
-item_type "Flour" {
-	category = ["Flour"]
-	graphic = 44
-	color = "255,233,177"
-	components = ["Seed", "Seed"]
-	containIn = "Flour Container"
-}
-
 item_type "Blueleaf boll" {
 	category = [ "Fiber" ]
 	graphic = 249
@@ -341,37 +431,25 @@ item_type "Blueleaf boll" {
 	decaySpeed = 12
 }
 
-item_type "Blueleaf seed" {
-	category = ["Seed"]
-	graphic = 250
-	color = "128,128,175"
-	growth = "Blueleaf sapling"
-	fitsin = "Seed Container"
-}
-
-item_type "Blueleaf sapling" {
-	category = ["Plant"]
-	graphic = 222
-	color = "127,146,255"
-	growth = "Blueleaf tree"
-	decay = [ "Filth" ]
-	decaySpeed = 12
-}
-
-item_type "Blueleaf tree" {
-	category = ["Plant"]
-	graphic = 216
-	color = "0,0,255"
-	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
-	decay = [ "Filth" ]
-	decaySpeed = 12
-}
-
 item_type "Cloth" {
 	category = ["Cloth"]
 	graphic = 21
 	color = "255,255,255"
 	components = ["Fiber", "Fiber"]
+}
+
+item_type "Bone statue" {
+	category = ["Statue"]
+	graphic = 190
+	components = ["Bone", "Bone", "Bone", "Bone", "Bone"]
+	color = "255,255,255"
+}
+
+item_type "Stone statue" {
+	category = ["Statue"]
+	graphic = 190
+	components = ["Rough stone", "Rough stone"]
+	color = "255,255,255"
 }
 
 item_type "Seed sack" {

@@ -54,6 +54,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	type(0),
 	timeCount(0),
 	taskIndex(0),
+	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
 	timer(0),
@@ -78,6 +79,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	inventory(boost::shared_ptr<Container>(new Container(pos, 0, 10, -1))),
 	needsNutrition(false),
 	needsSleep(false),
+	hasHands(false),
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
@@ -133,6 +135,11 @@ Task* NPC::currentTask() { return jobs.empty() ? 0 : &(jobs.front()->tasks[taskI
 boost::weak_ptr<Job> NPC::currentJob() { return jobs.empty() ? boost::weak_ptr<Job>() : boost::weak_ptr<Job>(jobs.front()); }
 
 void NPC::TaskFinished(TaskResult result, std::string msg) {
+#ifdef DEBUG
+	if (msg.size() > 0) {
+		std::cout<<msg<<"\n";
+	}
+#endif
 	if (result == TASKSUCCESS) {
 		if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
 			jobs.front()->Complete();
@@ -343,7 +350,7 @@ AiThink NPC::Think() {
 			switch(currentTask()->action) {
 			case MOVE:
 				if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
-					TaskFinished(TASKFAILFATAL);
+					TaskFinished(TASKFAILFATAL, "MOVE target unwalkable");
 					break;
 				}
 				if ((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y()) {
@@ -355,32 +362,38 @@ AiThink NPC::Think() {
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) {
 					TaskFinished(lastMoveResult, std::string("Could not find path to target")); break;
 				} else if (lastMoveResult == PATHEMPTY) {
-					if (!((signed int)x == currentTarget().X() &&  (signed int)y == currentTarget().Y())) {
+					if (!((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y())) {
 						TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
 					}
 				}
 				break;
 
 			case MOVENEAR:
-				//MOVENEAR first figures out our "real" target, which is a tile near
-				//to our current target. Near means max 5 tiles away, visible and
-				//walkable. Once we have our target we can actually switch over
-				//to a normal MOVE task
+				/*MOVENEAR first figures out our "real" target, which is a tile near
+				to our current target. Near means max 5 tiles away, visible and
+				walkable. Once we have our target we can actually switch over
+				to a normal MOVE task. In case we can't find a visible tile,
+				we'll allow a non LOS one*/
 				tmp = 0;
-				while (tmp++ < 10) {
-					int tarX = ((rand() % 11) - 5) + currentTarget().X();
-					int tarY = ((rand() % 11) - 5) + currentTarget().Y();
-					if (tarX < 0) tarX = 0;
-					if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
-					if (tarY < 0) tarY = 0;
-					if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-					if (Map::Inst()->Walkable(tarX, tarY, (void *)this)) {
-						if (Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y())) {
-							currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
-							goto MOVENEARend;
+				{bool checkLOS = true;
+				for (int i = 0; i < 2; ++i) {
+					while (tmp++ < 10) {
+						int tarX = ((rand() % 11) - 5) + currentTarget().X();
+						int tarY = ((rand() % 11) - 5) + currentTarget().Y();
+						if (tarX < 0) tarX = 0;
+						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
+						if (tarY < 0) tarY = 0;
+						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
+						if (Map::Inst()->Walkable(tarX, tarY, (void *)this)) {
+							if (!checkLOS || (checkLOS && 
+								Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y()))) {
+								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
+								goto MOVENEARend;
+							}
 						}
 					}
-				}
+					checkLOS = !checkLOS;
+				}}
 				//If we got here we couldn't find a near coordinate
 				TaskFinished(TASKFAILFATAL);
 MOVENEARend:
@@ -429,7 +442,7 @@ MOVENEARend:
 				break;
 
 			case TAKE:
-				if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL); break; }
+				if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL, "No target entity for TAKE"); break; }
 				if (Position() == currentEntity().lock()->Position()) {
 					if (boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()) {
 						boost::weak_ptr<Container> cont(boost::static_pointer_cast<Container>(boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));
@@ -733,9 +746,14 @@ TaskResult NPC::Move(TaskResult oldResult) {
 		boost::mutex::scoped_try_lock pathLock(pathMutex);
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
-			if (!path->isEmpty()) {
-				if (!path->walk(&moveX, &moveY, false)) return TASKFAILNONFATAL;
-				Position(Coordinate(moveX,moveY));
+			if (pathIndex < path->size()) {
+				path->get(pathIndex, &moveX, &moveY);
+				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) {
+					Position(Coordinate(moveX,moveY));
+					++pathIndex;
+				} else {
+					return TASKFAILNONFATAL;
+				}
 				return TASKCONTINUE;
 			} else if (!findPathWorking) return PATHEMPTY;
 		}
@@ -746,6 +764,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 
 void NPC::findPath(Coordinate target) {
 	findPathWorking = true;
+	pathIndex = 0;
 	boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking));
 }
 
@@ -786,6 +805,9 @@ void NPC::Kill() {
 			weapon->PutInContainer();
 			mainHand.reset();
 		}
+
+		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red);
+		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red);
 	}
 }
 
@@ -1317,6 +1339,8 @@ void NPC::FindNewWeapon() {
 boost::weak_ptr<Item> NPC::Wielding() {
 	return mainHand;
 }
+
+bool NPC::HasHands() { return hasHands; }
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 
 typeName(typeNameVal),

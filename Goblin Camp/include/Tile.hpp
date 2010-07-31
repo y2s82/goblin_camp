@@ -69,12 +69,13 @@ public:
 	void Walkable(bool);
 	bool Buildable() const;
 	void Buildable(bool);
-	int moveCost() const;
-	void moveCost(int);
+	int MoveCost() const;
+	int MoveCost(void*) const;
+	void SetMoveCost(int);
 	void MoveFrom(int);
 	void MoveTo(int);
-	void Construction(int);
-	int Construction() const;
+	void SetConstruction(int);
+	int GetConstruction() const;
 	boost::weak_ptr<WaterNode> GetWater() const;
 	void SetWater(boost::shared_ptr<WaterNode>);
 	bool Low() const;
