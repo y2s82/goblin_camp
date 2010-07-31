@@ -283,16 +283,20 @@ void UIContainer::AddComponent(Drawable *component) {
 void UIContainer::Draw(int x, int y, TCODConsole *console) {
     for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
         Drawable *component = *it;
-        component->Draw(x + _x, y + _y, console);
+        if(component->Visible()) {
+            component->Draw(x + _x, y + _y, console);
+        }
     }
 }
 
 MenuResult UIContainer::Update(int x, int y, bool clicked, TCOD_key_t key) {
     for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
         Drawable *component = *it;
-        MenuResult result = component->Update(x - _x, y - _y, clicked, key);
-        if(result != NOMENUHIT) {
-            return result;
+        if(component->Visible()) {
+            MenuResult result = component->Update(x - _x, y - _y, clicked, key);
+            if(result != NOMENUHIT) {
+                return result;
+            }
         }
     }
     return NOMENUHIT;
