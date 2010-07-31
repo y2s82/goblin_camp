@@ -24,17 +24,15 @@
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"
-#include "Game.hpp"
 
-class Dialog: public Panel {
-protected:
-    std::string title;
-    Drawable *contents;
+class Spinner: public Drawable {
+private:
+    boost::function<int()> getter;
+    boost::function<void(int)> setter;
+    int min, max;
 public:
-    Dialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight);
-    ~Dialog() { delete contents; }
+    Spinner(int x, int y, int nwidth, boost::function<int()> ngetter, boost::function<void(int)> nsetter, int nmin = 0, int nmax = INT_MAX):
+        Drawable(x, y, nwidth, 1), getter(ngetter), setter(nsetter), min(nmin), max(nmax) {}
     void Draw(int, int, TCODConsole *);
     MenuResult Update(int, int, bool, TCOD_key_t);
-    void SetTitle(std::string ntitle);
-    void SetHeight(int nheight);
 };

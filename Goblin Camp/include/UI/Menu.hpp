@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Game.hpp"
 #include "UIComponents.hpp"
+#include "Grid.hpp"
 #include "Dialog.hpp"
 
 class MenuChoice {
@@ -86,7 +87,7 @@ public:
 	static Dialog* AnnouncementsMenu();
 };
 
-class NPCMenu : public Dialog {
+class NPCMenu : public UIContainer {
 public:
 	NPCMenu();
 	static void DrawNPC(std::pair<int, boost::shared_ptr<NPC> >, int, int, int, bool, TCODConsole*);
@@ -94,7 +95,7 @@ public:
 	static Dialog* NPCListMenu();
 };
 
-class ConstructionMenu : public Dialog {
+class ConstructionMenu : public UIContainer {
 private:
 	Construction* construct;
     class ProductList : public Scrollable {
@@ -110,10 +111,10 @@ private:
     };
 public:
 	ConstructionMenu(int nwidth, int nheight):
-    Dialog(std::vector<Drawable *>(), "", nwidth, nheight) {}
-	static ConstructionMenu* constructionInfoMenu;
+    UIContainer(std::vector<Drawable *>(), 0, 0, nwidth, nheight) {}
+	static Dialog* constructionInfoMenu;
     static Construction* cachedConstruct;
-	static ConstructionMenu* ConstructionInfoMenu(Construction*);
+	static Dialog* ConstructionInfoMenu(Construction*);
 	void Construct(Construction*);
     void Rename();
     void Dismantle();
@@ -121,19 +122,19 @@ public:
     void DrawJob(ItemType, int, int, int, bool, TCODConsole *);
 };
 
-class StockManagerMenu : public Menu {
+class StockManagerMenu : public Dialog {
 private:
-	int scroll;
 	std::string filter;
+    Grid *grid;
 public:
 	StockManagerMenu();
-	void Draw(int, int, TCODConsole*);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-	static StockManagerMenu* stocksMenu;
-	static StockManagerMenu* StocksMenu();
-	void ScrollDown();
-	void ScrollUp();
-	void Open();
+//	void Draw(int, int, TCODConsole*);
+//    MenuResult Update(int, int, bool, TCOD_key_t);
+	static Dialog* stocksMenu;
+	static Dialog* StocksMenu();
+//	void ScrollDown();
+//	void ScrollUp();
+//	void Open();
 };
 
 class SquadsMenu : public Menu {

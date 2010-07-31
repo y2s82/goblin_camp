@@ -28,7 +28,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Dialog.hpp"
 #include "Button.hpp"
 #include "ScrollPanel.hpp"
+#include "Grid.hpp"
 #include "UIList.hpp"
+#include "Spinner.hpp"
 #include "Announce.hpp"
 #include "StockManager.hpp"
 #include "JobManager.hpp"
@@ -203,10 +205,11 @@ Menu* Menu::OrdersMenu() {
 }
 
 void Menu::YesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction, std::string leftButton, std::string rightButton) {
-    Dialog *dialog = new Dialog(std::vector<Drawable *>(), "", 50, 10);
-    dialog->AddComponent(new Label(text, 25, 2));
-    dialog->AddComponent(new Button(leftButton, leftAction, 10, 4, 10, 'y'));
-    dialog->AddComponent(new Button(rightButton, rightAction, 30, 4, 10, 'n'));
+    UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 10);
+    Dialog *dialog = new Dialog(contents, "", 50, 10);
+    contents->AddComponent(new Label(text, 25, 2));
+    contents->AddComponent(new Button(leftButton, leftAction, 10, 4, 10, 'y'));
+    contents->AddComponent(new Button(rightButton, rightAction, 30, 4, 10, 'n'));
     dialog->ShowModal();
 }
 
@@ -233,8 +236,7 @@ Dialog* JobMenu::JobListingMenu() {
 	if (!jobListingMenu) {
         int width = Game::Inst()->ScreenWidth() - 20;
         int height = Game::Inst()->ScreenHeight() - 20;
-        jobListingMenu = new Dialog(std::vector<Drawable *>(), "Jobs", width, height);
-        jobListingMenu->AddComponent(new ScrollPanel(0, 0, width, height, new JobMenu(), false));
+        jobListingMenu = new Dialog(new ScrollPanel(0, 0, width, height, new JobMenu(), false), "Jobs", width, height);
 	}
 	return jobListingMenu;
 }
@@ -252,8 +254,7 @@ Dialog* AnnounceMenu::AnnouncementsMenu() {
 	if (!announcementsMenu) {
         int width = Game::Inst()->ScreenWidth() - 20;
         int height = Game::Inst()->ScreenHeight() - 20;
-        announcementsMenu = new Dialog(std::vector<Drawable *>(), "Announcements", width, height);
-        announcementsMenu->AddComponent(new ScrollPanel(0, 0, width, height, new AnnounceMenu(), false));
+        announcementsMenu = new Dialog(new ScrollPanel(0, 0, width, height, new AnnounceMenu(), false), "Announcements", width, height);
 	}
 	return announcementsMenu;
 }
@@ -268,54 +269,55 @@ void NPCMenu::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int x
 Dialog* NPCMenu::npcListMenu = 0;
 Dialog* NPCMenu::NPCListMenu() {
 	if (!npcListMenu) {
-        npcListMenu = new NPCMenu();
+        npcListMenu = new Dialog(new NPCMenu(), "NPCs", Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20);
 	}
 	return npcListMenu;
 }
 
-NPCMenu::NPCMenu(): Dialog(std::vector<Drawable*>(), "NPCs", Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20) {
+NPCMenu::NPCMenu(): UIContainer(std::vector<Drawable*>(), 0, 0, Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20) {
     AddComponent(new ScrollPanel(0, 0, width, height, 
                                  new UIList<std::pair<int, boost::shared_ptr<NPC> >, std::map<int, boost::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCMenu::DrawNPC), false));
 }
 
-ConstructionMenu* ConstructionMenu::constructionInfoMenu = 0;
+Dialog* ConstructionMenu::constructionInfoMenu = 0;
 Construction* ConstructionMenu::cachedConstruct = 0;
-ConstructionMenu* ConstructionMenu::ConstructionInfoMenu(Construction* cons) {
+Dialog* ConstructionMenu::ConstructionInfoMenu(Construction* cons) {
     if (constructionInfoMenu && cons != cachedConstruct) {
         delete constructionInfoMenu;
         constructionInfoMenu = 0;
     }
 	if (!constructionInfoMenu) {
         cachedConstruct = cons;
-        constructionInfoMenu = new ConstructionMenu(50, 5);
-        constructionInfoMenu->AddComponent(new Button("Rename", boost::bind(&ConstructionMenu::Rename, constructionInfoMenu), 12, 1, 10));
-        constructionInfoMenu->AddComponent(new Button("Dismantle", boost::bind(&ConstructionMenu::Dismantle, constructionInfoMenu), 28, 1, 13));
+        ConstructionMenu *menu = new ConstructionMenu(50, 5);
+        constructionInfoMenu = new Dialog(menu, "", 50, 5);
+        menu->AddComponent(new Button("Rename", boost::bind(&ConstructionMenu::Rename, menu), 12, 1, 10));
+        menu->AddComponent(new Button("Dismantle", boost::bind(&ConstructionMenu::Dismantle, menu), 28, 1, 13));
         if(cons->HasTag(STOCKPILE)) {
             constructionInfoMenu->SetHeight(40);
-            constructionInfoMenu->AddComponent(new UIList<ItemCat>(&Item::Categories, 2, 5, 46, Item::Categories.size(),
-                                                                   boost::bind(&ConstructionMenu::DrawCategory, constructionInfoMenu, _1, _2, _3, _4, _5, _6),
+            menu->AddComponent(new UIList<ItemCat>(&Item::Categories, 2, 5, 46, Item::Categories.size(),
+                                                                   boost::bind(&ConstructionMenu::DrawCategory, menu, _1, _2, _3, _4, _5, _6),
                                                                    boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))));
         } else if(cons->Producer()) {
             constructionInfoMenu->SetHeight(40);
-            constructionInfoMenu->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
-            constructionInfoMenu->AddComponent(new ScrollPanel(2, 6, 23, 34, 
+            menu->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
+            menu->AddComponent(new ScrollPanel(2, 6, 23, 34, 
                                                                new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
-                                                                                    boost::bind(&ConstructionMenu::DrawJob, constructionInfoMenu, _1, _2, _3, _4, _5, _6),
+                                                                                    boost::bind(&ConstructionMenu::DrawJob, menu, _1, _2, _3, _4, _5, _6),
                                                                                     boost::bind(&Construction::CancelJob, cons, _1)),
                                                                false));
-            constructionInfoMenu->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
+            menu->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
             ProductList *productList = new ProductList(cons);
             for (int prodi = 0; prodi < (signed int)cons->Products()->size(); ++prodi) {
                 productList->productPlacement.push_back(productList->height);
                 productList->height += 2 + Item::Components(cons->Products(prodi)).size();
             }
-            constructionInfoMenu->AddComponent(new ScrollPanel(26, 6, 23, 34, 
+            menu->AddComponent(new ScrollPanel(26, 6, 23, 34, 
                                                                productList,
                                                                false));
         }
+        constructionInfoMenu->SetTitle(cons->Name());
+        menu->Construct(cons);
     }
-    constructionInfoMenu->SetTitle(cons->Name());
-	constructionInfoMenu->Construct(cons);
 	return constructionInfoMenu;
 }
 
@@ -388,110 +390,46 @@ MenuResult ConstructionMenu::ProductList::Update(int x, int y, bool clicked, TCO
     return NOMENUHIT;
 }
 
-StockManagerMenu* StockManagerMenu::stocksMenu = 0;
+Dialog* StockManagerMenu::stocksMenu = 0;
 
-StockManagerMenu::StockManagerMenu() : Menu(std::vector<MenuChoice>()),
-	scroll(0),
-	filter("")
+class StockPanel: public UIContainer {
+private:
+    ItemType itemType;
+    StockManagerMenu *owner;
+public:
+    StockPanel(ItemType nItemType, StockManagerMenu *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
+        AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
+                                 boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
+    }
+    
+    void Draw(int x, int y, TCODConsole *console) {
+        console->setAlignment(TCOD_CENTER);
+        console->setForegroundColor(Item::Presets[itemType].color);
+        console->print(x + 8, y, "%c %s", Item::Presets[itemType].graphic, Item::Presets[itemType].name.c_str());
+        console->setForegroundColor(TCODColor::white);
+        console->print(x + 8, y+1, "%d", StockManager::Inst()->TypeQuantity(itemType));
+        UIContainer::Draw(x, y, console);
+    }
+    
+    bool Visible() {
+        // TODO filter
+        return StockManager::Inst()->TypeQuantity(itemType) > -1;
+    }
+};
+    
+    
+StockManagerMenu::StockManagerMenu(): Dialog(0, "Stock Manager", 50, 50), filter("")
 {
-	width = 50; height = 50;
-	_x = (Game::Inst()->ScreenWidth() - width) / 2;
-	_y = (Game::Inst()->ScreenHeight() - height) / 2;
+    Grid *grid = new Grid(std::vector<Drawable *>(), 3, 0, 0, 48, 48);
+	for (std::set<ItemType>::iterator it = StockManager::Inst()->Producables()->begin(); it != StockManager::Inst()->Producables()->end(); it++) {
+        grid->AddComponent(new StockPanel(*it, this));
+    }
+    contents = new ScrollPanel(0, 1, 50, 20, grid, false, 4);
 }
 
-void StockManagerMenu::Draw(int, int, TCODConsole* console) {
-	console->setForegroundColor(TCODColor::white);
-	console->printFrame(_x, _y, 50, 50, true, TCOD_BKGND_SET, "Stock Manager");
-	console->putChar(_x+48, _y+1, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-	console->putChar(_x+48, _y+48, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-	console->printFrame(_x+10, _y+1, 30, 3, true);
-	console->setBackgroundColor(TCODColor::darkGrey);
-	console->rect(_x+11, _y+2, width-22, 1, true);
-	console->setBackgroundColor(TCODColor::black);
-	console->print(_x+11, _y+2, filter.c_str());
-
-	int x = _x + 8;
-	int y = _y + 4;
-
-	console->setAlignment(TCOD_CENTER);
-
-	for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
-		itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
-			if (StockManager::Inst()->TypeQuantity(*itemi) > -1 &&
-				boost::icontains(Item::Presets[*itemi].name, filter)) { //Hide unavailable products
-					console->setForegroundColor(Item::Presets[*itemi].color);
-					console->print(x,y, "%c %s", Item::Presets[*itemi].graphic, Item::Presets[*itemi].name.c_str());
-					console->setForegroundColor(TCODColor::white);
-					console->print(x,y+1, "%d", StockManager::Inst()->TypeQuantity(*itemi));
-
-					console->print(x,y+2, "- %d +", StockManager::Inst()->Minimum(*itemi));
-
-					x += 16;
-					if (x > _x + (width - 10)) {x = _x + 8; y += 5;}
-					if (y > _y + (height - 4)) break;
-			}
-	}
-	console->setAlignment(TCOD_LEFT);
-}
-
-MenuResult StockManagerMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	filter = UI::Inst()->InputString();
-	if (x >= 0 && y >= 0) {
-		int ch = TCODConsole::root->getChar(x,y);
-
-		x -= (_x + 4); //If it's the first choice, x is now ~0
-		x /= 16; //Now x = the column
-		y -= (_y + 3 + 2); //+2 because +/- are under the text
-		y /= 5;
-		int choice = x + (y*3);
-		//Because choice = index based on the visible items, we need to translate that into
-		//an actual ItemType, which might be anything. So just go through the items as in
-		//Draw() to find which index equals which itemtype.
-
-		int itemIndex = 0;
-		for (std::set<ItemType>::iterator itemi = boost::next(StockManager::Inst()->Producables()->begin(), scroll*3);
-			itemi != StockManager::Inst()->Producables()->end(); ++itemi) {
-				if (StockManager::Inst()->TypeQuantity(*itemi) > -1 &&
-					boost::icontains(Item::Presets[*itemi].name, filter)) {
-
-						int adjustAmount = UI::Inst()->ShiftPressed() ? 10 : 1;
-
-						if (itemIndex == 0) { //TODO: You can only in/decrement the first item with the keyboard, for now.
-							TCOD_key_t key = UI::Inst()->getKey();
-							if (key.c == '+') {
-								StockManager::Inst()->AdjustMinimum(*itemi, adjustAmount);
-							} else if (key.c == '-') {
-								StockManager::Inst()->AdjustMinimum(*itemi, -adjustAmount);
-							}
-						}
-
-						if (clicked && (ch == '-' || ch == '+') && itemIndex == choice) {
-							StockManager::Inst()->AdjustMinimum(*itemi, (ch == '-') ? -adjustAmount : adjustAmount);
-							break;
-						}
-						++itemIndex;
-				}
-		}
-		if (clicked && x == _x+48 && y == _y+1) {
-			if (scroll > 0) --scroll;
-		} else if (clicked && x == _x+48 && y == _y+48) {
-			if (scroll < (signed int)(StockManager::Inst()->Producables()->size() / 3)-1) ++scroll;
-		}
-		return MENUHIT;
-	}
-	return NOMENUHIT;
-}
-
-StockManagerMenu* StockManagerMenu::StocksMenu() {
+Dialog* StockManagerMenu::StocksMenu() {
 	if (!stocksMenu) stocksMenu = new StockManagerMenu();
 	return stocksMenu;
-}
-
-void StockManagerMenu::ScrollDown() { ++scroll; }
-void StockManagerMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
-
-void StockManagerMenu::Open() {
-	UI::Inst()->SetTextMode(true, 28);
 }
 
 SquadsMenu* SquadsMenu::squadMenu = 0;

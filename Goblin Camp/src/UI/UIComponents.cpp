@@ -16,6 +16,7 @@
 #include "stdafx.hpp"
 
 #include <string>
+#include <cmath>
 
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
@@ -27,11 +28,19 @@
 #include "ScrollPanel.hpp"
 #include "Button.hpp"
 #include "UI.hpp"
+#include "Grid.hpp"
+#include "Spinner.hpp"
 
 void Label::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(align);
     console->setForegroundColor(TCODColor::white);
     console->print(x + _x, y + _y, text.c_str());
+}
+
+void LiveLabel::Draw(int x, int y, TCODConsole *console) {
+    console->setAlignment(align);
+    console->setForegroundColor(TCODColor::white);
+    console->print(x + _x, y + _y, text());
 }
 
 void Button::Draw(int x, int y, TCODConsole *console) {
@@ -51,8 +60,10 @@ void Button::Draw(int x, int y, TCODConsole *console) {
 
 MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
     if(shortcut && key.c == shortcut) {
-        callback();
-        return MENUHIT;
+        if (callback) {
+            callback();
+        }
+        return KEYRESPOND;
     }
     if(x >= _x && x < _x + width && y >= _y && y < _y + 3) {
         selected = true;
@@ -65,6 +76,42 @@ MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
         return NOMENUHIT;
     }
     
+}
+
+inline int numDigits(int num) {
+    int tmp = num;
+    int digits = 1;
+    if (tmp < 0) {
+        digits++;
+        tmp = -tmp;
+    }
+    while(num >= 10) {
+        digits++;
+        num /= 10;
+    }
+    return digits;
+}
+
+void Spinner::Draw(int x, int y, TCODConsole *console) {
+    console->setAlignment(TCOD_CENTER);
+    console->print(x + _x + width / 2, y + _y, "- %d +", getter());
+}
+
+MenuResult Spinner::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    if (x >= _x && x < _x + width && y == _y) {
+        if (clicked) {
+            int curr = getter();
+            int adj = UI::Inst()->ShiftPressed() ? 10 : 1;
+            int strWidth = 4 + numDigits(curr);
+            if(x == _x + width / 2 - strWidth / 2) {
+                setter(std::max(min, curr - adj));
+            } else if(x == _x + width / 2 + (strWidth-1) / 2) {
+                setter(std::min(max, curr + adj));
+            }
+        }
+        return MENUHIT;
+    }
+    return NOMENUHIT;
 }
 
 void ScrollPanel::Draw(int x, int y, TCODConsole *console) {
@@ -92,9 +139,9 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
         if (clicked) {
             if (x == _x + width - 2) {
                 if (y == _y + 1) {
-                    scroll--;
+                    scroll -= step;
                 } else if (y == _y + height - 2) {
-                    scroll++;
+                    scroll += step;
                 } else if (y < scrollBar - _y) {
                     scroll -= height;
                 } else if (y > scrollBar - _y) {
@@ -107,6 +154,86 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
             contents->Update(x - _x - 1, y - _y - 1 + scroll, clicked, key);
         }
         return MENUHIT;
+    }
+    return NOMENUHIT;
+}
+
+void Grid::AddComponent(Drawable *component) {
+    contents.push_back(component);
+}
+
+void Grid::RemoveAll() {
+    for(std::vector<Drawable *>::iterator it = contents.begin(); it != contents.end(); it++) {
+        delete *it;
+    }
+    contents.clear();
+}
+
+void Grid::Draw(int x, int y, TCODConsole *console) {
+    Draw(x + _x, y + _y, 0, width, height, console);
+}
+
+void Grid::Draw(int x, int y, int scroll, int _width, int _height, TCODConsole *console) {
+    int col = 0;
+    int top = y;
+    int bottom = y + scroll + _height;
+    int colWidth = _width / cols;
+    int rowHeight = 0;
+    for(std::vector<Drawable *>::iterator it = contents.begin(); it != contents.end() && y < bottom; it++) {
+        Drawable *component = *it;
+        if(component->Visible()) {
+            if(y - scroll >= top && y + component->Height() <= bottom) {
+                component->Draw(x + colWidth * col, y - scroll, console);
+            }
+            rowHeight = std::max(rowHeight, component->Height());
+            col++;
+            if(col >= cols) {
+                col = 0;
+                y += rowHeight;
+                rowHeight = 0;
+            }
+        }
+    }
+}
+
+int Grid::TotalHeight() {
+    int col = 0;
+    int rowHeight = 0;
+    int y = 0;
+    for(std::vector<Drawable *>::iterator it = contents.begin(); it != contents.end(); it++) {
+        Drawable *component = *it;
+        if(component->Visible()) {
+            rowHeight = std::max(rowHeight, component->Height());
+            col++;
+            if(col >= cols) {
+                col = 0;
+                y += rowHeight;
+                rowHeight = 0;
+            }
+        }
+    }
+    return y + rowHeight;
+}
+
+MenuResult Grid::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    int col = 0;
+    int colWidth = width / cols;
+    int rowHeight = 0;
+    for(std::vector<Drawable *>::iterator it = contents.begin(); it != contents.end(); it++) {
+        Drawable *component = *it;
+        if(component->Visible()) {
+            MenuResult result = component->Update(x - _x - col * colWidth, y - _y, clicked, key);
+            if(result != NOMENUHIT) {
+                return result;
+            }
+            rowHeight = std::max(rowHeight, component->Height());
+            col++;
+            if(col >= cols) {
+                col = 0;
+                y += rowHeight;
+                rowHeight = 0;
+            }
+        }
     }
     return NOMENUHIT;
 }
@@ -140,31 +267,49 @@ void Panel::ShowModal() {
 		key = TCODConsole::checkForKeypress();
 		mouseStatus = TCODMouse::getStatus();
         
-		if((Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed, key) == MENUHIT && mouseStatus.lbutton_pressed) ||
-           mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) {
+        MenuResult result = Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed, key);
+		if((result == MENUHIT && mouseStatus.lbutton_pressed) ||
+           result == KEYRESPOND || mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) {
             delete this;
             return;
         }
 	}    
 }
 
-Dialog::Dialog(std::vector<Drawable *> ncomponents, std::string ntitle, int nwidth, int nheight):
-components(ncomponents), title(ntitle), Panel(nwidth, nheight) {
-    _x = (Game::Inst()->ScreenWidth() - width) / 2;
-    _y = (Game::Inst()->ScreenHeight() - height) / 2;
-}
-
-void Dialog::AddComponent(Drawable *component) {
+void UIContainer::AddComponent(Drawable *component) {
     components.push_back(component);
 }
 
-void Dialog::Draw(int x, int y, TCODConsole *console) {
-    console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
+void UIContainer::Draw(int x, int y, TCODConsole *console) {
     for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
         Drawable *component = *it;
-        component->Draw(_x, _y, console);
+        component->Draw(x + _x, y + _y, console);
     }
 }
+
+MenuResult UIContainer::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
+        Drawable *component = *it;
+        MenuResult result = component->Update(x - _x, y - _y, clicked, key);
+        if(result != NOMENUHIT) {
+            return result;
+        }
+    }
+    return NOMENUHIT;
+}
+
+UIContainer::~UIContainer() {
+    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
+        delete *it;
+    }
+}
+
+Dialog::Dialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight):
+    title(ntitle), contents(ncontents), Panel(nwidth, nheight) {
+    _x = (Game::Inst()->ScreenWidth() - nwidth) / 2;
+    _y = (Game::Inst()->ScreenHeight() - nheight) / 2;
+}
+
 
 void Dialog::SetTitle(std::string ntitle) {
     title = ntitle;
@@ -176,20 +321,11 @@ void Dialog::SetHeight(int nheight) {
     _y = (Game::Inst()->ScreenHeight() - height) / 2;
 }
 
-Dialog::~Dialog() {
-    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
-        delete *it;
-    }
+void Dialog::Draw(int x, int y, TCODConsole *console) {
+    console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
+    contents->Draw(_x, _y, console);
 }
 
 MenuResult Dialog::Update(int x, int y, bool clicked, TCOD_key_t key) {
-    MenuResult rtn = NOMENUHIT;
-    for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
-        Drawable *component = *it;
-        if(component->Update(x - _x, y - _y, clicked, key) == MENUHIT) {
-            rtn = MENUHIT;
-        }
-    }
-    return rtn;
+    return contents->Update(x - _x, y - _y, clicked, key);
 }
-
