@@ -424,7 +424,7 @@ StockManagerMenu::StockManagerMenu(): Dialog(0, "Stock Manager", 50, 50), filter
 	for (std::set<ItemType>::iterator it = StockManager::Inst()->Producables()->begin(); it != StockManager::Inst()->Producables()->end(); it++) {
         grid->AddComponent(new StockPanel(*it, this));
     }
-    contents = new ScrollPanel(0, 1, 50, 20, grid, false, 4);
+    contents = new ScrollPanel(0, 1, 50, 50, grid, false, 4);
 }
 
 Dialog* StockManagerMenu::StocksMenu() {
