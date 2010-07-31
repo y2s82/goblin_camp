@@ -192,7 +192,7 @@ npc_type "harpy" {
 		statusEffects=["Bleeding"]
 		effectChances=[    20    ]
 	}
-	spawnAsGroup="1d2+1"
+	spawnAsGroup="1d4+1"
 }
 
 npc_type "kobold" { 
@@ -229,7 +229,7 @@ npc_type "ogre" {
 	}
 	attack "Smash" {
 		type="blunt"
-		damage="1d40+5"
+		damage="1d60+5"
 		cooldown=60
 		statusEffects=["Concussion"]
 		effectChances=[     75     ]
@@ -251,14 +251,14 @@ npc_type "troll" {
 	spawnAsGroup="1d2"
 	attack "Clobber" {
 		type="blunt"
-		damage="1d10+15"
+		damage="1d30+15"
 		cooldown=40
 		statusEffects=["Concussion"]
 		effectChances=[     33     ]
 	}
 	attack "Claw" {
 		type="slashing"
-		damage="1d10+5"
+		damage="1d30+5"
 		cooldown=40
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
@@ -328,7 +328,7 @@ npc_type "jabberwock" {
 	}
 	attack "Bite" {
 		type="piercing"
-		damage="1d50"
+		damage="1d100"
 		cooldown=110
 	}
 }
@@ -348,14 +348,14 @@ npc_type "minotaur" {
 	spawnAsGroup="1d2"
 	attack "Charge" {
 		type="blunt"
-		damage="2d10+15"
+		damage="2d20+15"
 		cooldown=75
 		statusEffects=["Concussion"]
 		effectChances=[     33     ]
 	}
 	attack "Smash" {
 		type="blunt"
-		damage="2d10+10"
+		damage="2d20+10"
 		cooldown=75
 		statusEffects=["Concussion"]
 		effectChances=[     33     ]
@@ -384,7 +384,7 @@ npc_type "cyclops" {
 	}
 	attack "Smash" {
 		type="blunt"
-		damage="1d50+5"
+		damage="1d75+35"
 		cooldown=100
 		statusEffects=["Concussion"]
 	}
@@ -405,7 +405,7 @@ npc_type "giant" {
 	spawnAsGroup="1d2"
 	attack "Smash" {
 		type="blunt"
-		damage="1d40+10"
+		damage="1d100+10"
 		cooldown=80
 		statusEffects=["Concussion"]
 		effectChances=[     80     ]
@@ -427,7 +427,7 @@ npc_type "griffon" {
 	spawnAsGroup="1d3"
 	attack "Claw" {
 		type="slashing"
-		damage="2d6+6"
+		damage="2d20+6"
 		cooldown=30
 	}
 }
@@ -452,7 +452,7 @@ npc_type "unicorn" {
 	}
 	attack "Kick" {
 		type="blunt"
-		damage="1d40"
+		damage="1d40+20"
 		cooldown=75
 		statusEffects=["Concussion"]
 		effectChances=[     50     ]
