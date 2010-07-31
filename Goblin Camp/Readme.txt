@@ -112,6 +112,24 @@ You'll want to place your spawning pool to get more orcs and goblins, you'll be
 losing them as monsters start harassing you. You only get to place one pool,
 and can't move it later, so think before you place it!
 
+-- Configuration --
+
+You can change the resolution and switch between windowed/full screen mode by
+editing config.ini which you'll find in your 
+/Documents/My Games/Goblin camp/ folder (or equivalent).
+
+Fullscreen is toggled by adding/removing 'fullscreen', like so:
+
+config {
+	width = 1920
+	height = 1080
+	renderer = "SDL"
+	fullscreen
+}
+
+The above config.ini would set GC to run fullscreen and use 1920x1080
+as the resolution.
+
 
 Licensing information is in COPYING.txt
 The libtcod license: LIBTCOD-LICENSE.txt
