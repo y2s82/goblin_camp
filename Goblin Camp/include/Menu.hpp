@@ -116,9 +116,6 @@ public:
 	void Construct(Construction*);
     void Rename();
     void Dismantle();
-    void CancelJob(int);
-    void AddJob(int);
-    void SwitchAllowed(int);
     void DrawCategory(ItemCat, int, int, int, bool, TCODConsole *);
     void DrawJob(ItemType, int, int, int, bool, TCODConsole *);
 };
