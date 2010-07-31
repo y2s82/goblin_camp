@@ -28,7 +28,7 @@ hostileSpawningMonsters(std::vector<int>()),
 	map(vmap)
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (NPC::Presets[i].tags.find("attackrandomly") != NPC::Presets[i].tags.end())
+		if (NPC::Presets[i].tags.find("attacksrandomly") != NPC::Presets[i].tags.end())
 			hostileSpawningMonsters.push_back(i);
 	}
 }
@@ -47,15 +47,5 @@ void Events::Update() {
 		Coordinate a((rand() % map->Width())-20, 0);
 		Coordinate b = a + Coordinate(20, 1);
 		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
-	}
-
-	if (rand() % (UPDATES_PER_SECOND * 60 * 5) == 0) {
-		if (rand() % 3 == 0 && Game::Inst()->OrcCount() < 50) {
-			Announce::Inst()->AddMsg("An orc has joined your camp", TCODColor::azure);
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("orc"));
-		} else if (Game::Inst()->GoblinCount() < 100) {
-			Announce::Inst()->AddMsg("A goblin has joined your camp", TCODColor::azure);
-			Game::Inst()->CreateNPC(Coordinate(rand() % map->Width(),0), NPC::StringToNPCType("goblin"));
-		}
 	}
 }

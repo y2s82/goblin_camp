@@ -64,6 +64,7 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	stockpile = Construction::Presets[type].tags[STOCKPILE];
 	farmplot = Construction::Presets[type].tags[FARMPLOT];
 	condition = 0-maxCondition;
+	if (Construction::Presets[type].color != TCODColor::black) color = Construction::Presets[type].color;
 }
 
 Construction::~Construction() {
@@ -88,6 +89,8 @@ Construction::~Construction() {
 
 	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
+
+	++Construction::Presets[type].allowedAmount;
 }
 
 
@@ -292,6 +295,14 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "bed")) {
 			Construction::Presets.back().tags[BED] = true;
 			Construction::Presets.back().tags[FURNITURE] = true;
+		} else if (boost::iequals(name, "furniture")) {
+			Construction::Presets.back().tags[FURNITURE] = true;
+		} else if (boost::iequals(name, "permanent")) {
+			Construction::Presets.back().permanent = true;
+		} else if (boost::iequals(name, "blocksLight")) {
+			Construction::Presets.back().blocksLight = true;
+		} else if (boost::iequals(name, "unique")) {
+			Construction::Presets.back().allowedAmount = 1;
 		}
 		return true;
 	}
@@ -337,8 +348,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
 			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
-		} else if (boost::iequals(name, "blocksLight")) {
-			Construction::Presets.back().blocksLight = true;
+		} else if (boost::iequals(name, "color")) {
+			Construction::Presets.back().color = value.col;
 		}
 
 		return true;
@@ -374,11 +385,15 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("wall");
 	constructionTypeStruct->addFlag("door");
 	constructionTypeStruct->addFlag("bed");
+	constructionTypeStruct->addFlag("permanent");
+	constructionTypeStruct->addFlag("furniture");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
     constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
     constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
+	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
+	constructionTypeStruct->addFlag("unique");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -497,8 +512,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[type].tags[tag]; }
 
-void Construction::Update() 
-{
+void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
 		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
@@ -518,7 +532,7 @@ void Construction::Update()
 }
 
 void Construction::Dismantle() {
-	if (!dismantle) {
+	if (!Construction::Presets[type].permanent && !dismantle) {
 		dismantle = true;
 		if (producer) {
 			jobList.clear();
@@ -550,7 +564,10 @@ maxCondition(0),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
     placementType(UIPLACEMENT),
-	blocksLight(true)
+	blocksLight(true),
+	permanent(false),
+	color(TCODColor::black),
+	allowedAmount(-1)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

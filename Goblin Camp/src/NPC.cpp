@@ -805,6 +805,9 @@ void NPC::Kill() {
 			weapon->PutInContainer();
 			mainHand.reset();
 		}
+
+		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red);
+		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red);
 	}
 }
 
