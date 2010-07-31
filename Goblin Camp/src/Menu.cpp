@@ -338,6 +338,12 @@ void ConstructionMenu::DrawCategory(ItemCat category, int i, int x, int y, bool 
     console->setForegroundColor(TCODColor::white);
 }
 
+void ConstructionMenu::DrawJob(ItemType category, int i, int x, int y, bool selected, TCODConsole *console) {
+    console->setForegroundColor(i == 0 ? TCODColor::white : TCODColor::grey);
+    console->print(x, y, Item::ItemTypeToString(category).c_str());
+    console->setForegroundColor(TCODColor::white);
+}
+
 void ConstructionMenu::ProductList::Draw(int x, int _y, int scroll, int width, int _height, TCODConsole *console) {
     int y = 0;
     for (int prodi = 0; prodi < (signed int)construct->Products()->size() && y < scroll + _height; ++prodi) {
@@ -374,12 +380,6 @@ MenuResult ConstructionMenu::ProductList::Update(int x, int y, bool clicked, TCO
         }
     }
     return NOMENUHIT;
-}
-
-void ConstructionMenu::DrawJob(ItemType category, int i, int x, int y, bool selected, TCODConsole *console) {
-    console->setForegroundColor(i == 0 ? TCODColor::white : TCODColor::grey);
-    console->print(x, y, Item::ItemTypeToString(category).c_str());
-    console->setForegroundColor(TCODColor::white);
 }
 
 StockManagerMenu* StockManagerMenu::stocksMenu = 0;
