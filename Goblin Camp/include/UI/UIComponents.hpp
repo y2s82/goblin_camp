@@ -25,17 +25,20 @@
 
 enum MenuResult {
 	MENUHIT,
-	NOMENUHIT
+	NOMENUHIT,
+    KEYRESPOND
 };
 
 class Drawable {
 protected:
-	int _x, _y, width, height;    
+	int _x, _y, width, height;
 public:
     Drawable(int x, int y, int nwidth, int nheight):
     _x(x), _y(y), width(nwidth), height(nheight) {}
     virtual void Draw(int, int, TCODConsole *) = 0;
 	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+    int Height() { return height; }
+    virtual bool Visible() { return true; }
 };
 
 class Scrollable {
@@ -43,6 +46,18 @@ public:
     virtual void Draw(int x, int y, int scroll, int width, int height, TCODConsole *) = 0;
     virtual int TotalHeight() = 0;
 	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+};
+
+class UIContainer: public Drawable {
+protected:
+    std::vector<Drawable *> components;
+public:
+    UIContainer(std::vector<Drawable *> ncomponents, int nx, int ny, int nwidth, int nheight):
+        Drawable(nx, ny, nwidth, nheight), components(ncomponents) {}
+    ~UIContainer();
+    void AddComponent(Drawable *component);
+    virtual void Draw(int, int, TCODConsole *);
+    virtual MenuResult Update(int, int, bool, TCOD_key_t);
 };
 
 class Panel: public Drawable {

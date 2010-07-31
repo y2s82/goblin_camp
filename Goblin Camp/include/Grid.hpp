@@ -24,17 +24,19 @@
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"
-#include "Game.hpp"
 
-class Dialog: public Panel {
-protected:
-    std::string title;
-    Drawable *contents;
+class Grid: public Drawable, public Scrollable {
+private:
+    int cols;
+    std::vector<Drawable *> contents;
 public:
-    Dialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight);
-    ~Dialog() { delete contents; }
+    Grid(std::vector<Drawable *> ncontents, int ncols, int x, int y, int nwidth, int nheight):
+        contents(ncontents), cols(ncols), Drawable(x, y, nwidth, nheight) {}
+    void AddComponent(Drawable *component);
+    void RemoveAll();
     void Draw(int, int, TCODConsole *);
+    void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+    int TotalHeight();
     MenuResult Update(int, int, bool, TCOD_key_t);
-    void SetTitle(std::string ntitle);
-    void SetHeight(int nheight);
 };
+

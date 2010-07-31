@@ -28,11 +28,12 @@
 class ScrollPanel: public Drawable {
 private:
     int scroll, scrollBar;
+    int step;
     bool drawFrame;
     Scrollable *contents;
 public:
-    ScrollPanel(int x, int y, int nwidth, int nheight, Scrollable *ncontents, bool ndrawFrame = true):
-    contents(ncontents), scroll(0), scrollBar(0), drawFrame(ndrawFrame), Drawable(x, y, nwidth, nheight) {}
+    ScrollPanel(int x, int y, int nwidth, int nheight, Scrollable *ncontents, bool ndrawFrame = true, int nstep = 1):
+    contents(ncontents), scroll(0), scrollBar(0), drawFrame(ndrawFrame), step(nstep), Drawable(x, y, nwidth, nheight) {}
     void Draw(int, int, TCODConsole *);
     MenuResult Update(int, int, bool, TCOD_key_t);
 };

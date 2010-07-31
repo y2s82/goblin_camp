@@ -229,6 +229,10 @@ void StockManager::AdjustMinimum(ItemType item, int value) {
 	if (minimums[item] < 0) minimums[item] = 0;
 }
 
+void StockManager::SetMinimum(ItemType item, int value) {
+	minimums[item] = std::max(0, value);
+}
+
 void StockManager::UpdateDesignations(boost::weak_ptr<NatureObject> nObj, bool add) {
 	if (boost::shared_ptr<NatureObject> natObj = nObj.lock()) {
 		if (add) {
