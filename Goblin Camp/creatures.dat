@@ -12,9 +12,8 @@ npc_type "orc" {
 	AI="PlayerNPC"
 	dodge=5
 	resistances {
-		physical=15
+		physical=10
 		magic=5
-		cold=10
 		poison=10
 	}
 	attack "attack" {
@@ -37,7 +36,7 @@ npc_type "goblin" {
 	AI="PlayerNPC"
 	dodge=15
 	resistances {
-		cold=10
+		physical=5
 		poison=10
 	}
 	attack "attack" {
@@ -78,12 +77,15 @@ npc_type "starving wolf" {
 	AI="HungryAnimal"
 	dodge=10
 	resistances {
+		physical=5
 		cold=15
 	}
 	attack "Bite" {
 		type="slashing"
 		damage="5d4"
 		cooldown=50
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
 	}
 	spawnAsGroup="1d4+3"
 }
@@ -134,7 +136,7 @@ npc_type "soldier ant" {
 	speed=18
 	color="0,0,255"
 	graphic='a'
-	health=25
+	health=45
 	AI="HostileAnimal"
 	dodge=5
 	resistances {
@@ -177,7 +179,7 @@ npc_type "harpy" {
 	speed=12
 	color="128,128,0"
 	graphic='B'
-	health=50
+	health=150
 	AI="HostileAnimal"
 	dodge=3
 	resistances {
@@ -186,7 +188,9 @@ npc_type "harpy" {
 	attack "Claw" {
 		type="slashing"
 		damage="2d3"
-		cooldown=30
+		cooldown=10
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
 	}
 	spawnAsGroup="1d2+1"
 }
@@ -206,7 +210,7 @@ npc_type "kobold" {
 	attack "attack" {
 		type="wielded"
 		damage="1d4+1"
-		cooldown=25
+		cooldown=20
 	}
 	spawnAsGroup="1d3+1"
 }
@@ -217,7 +221,7 @@ npc_type "ogre" {
 	speed=12
 	color="192,192,192"
 	graphic='O'
-	health=225
+	health=425
 	AI="HostileAnimal"
 	dodge=3
 	resistances {
@@ -225,8 +229,10 @@ npc_type "ogre" {
 	}
 	attack "Smash" {
 		type="blunt"
-		damage="1d20+5"
+		damage="1d40+5"
 		cooldown=60
+		statusEffects=["Concussion"]
+		effectChances=[     75     ]
 	}
 }
 
@@ -236,17 +242,26 @@ npc_type "troll" {
 	speed=15
 	color="128,128,128"
 	graphic='T'
-	health=150
+	health=350
 	AI="HostileAnimal"
 	dodge=5
 	resistances {
-		physical=8
+		physical=15
 	}
 	spawnAsGroup="1d2"
 	attack "Clobber" {
 		type="blunt"
+		damage="1d10+15"
+		cooldown=40
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	attack "Claw" {
+		type="slashing"
 		damage="1d10+5"
 		cooldown=40
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
 	}
 }
 
@@ -290,26 +305,6 @@ npc_type "bandersnatch" {
 	}
 }
 
-npc_type "gnome" { 
-	name="Gnome"
-	tags=["attacksRandomly"]
-	speed=17
-	color="170,120,160"
-	graphic='G'
-	health=30
-	AI="HungryAnimal"
-	dodge=10
-	resistances {
-		physical=2
-	}
-	attack "attack" {
-		type="wielded"
-		damage="1d6"
-		cooldown=25
-	}
-	spawnAsGroup="1d4+1"
-}
-
 npc_type "jabberwock" { 
 	name="Jabberwock"
 	plural="Jabberwocky"
@@ -317,16 +312,19 @@ npc_type "jabberwock" {
 	speed=12
 	color="255,0,0"
 	graphic='J'
-	health=275
+	health=375
 	AI="HungryAnimal"
 	dodge=5
 	resistances {
 		physical=10
+		poison=50
 	}
 	attack "Claw" {
 		type="slashing"
 		damage="2d25"
 		cooldown=40
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
 	}
 	attack "Bite" {
 		type="piercing"
@@ -340,18 +338,34 @@ npc_type "minotaur" {
 	tags=["attacksRandomly", "hasHands"]
 	speed=20
 	color="128,128,0"
-	graphic='M'
-	health=150
+	graphic='H'
+	health=350
 	AI="HungryAnimal"
 	dodge=3
 	resistances {
-		physical=12
+		physical=10
 	}
 	spawnAsGroup="1d2"
 	attack "Charge" {
 		type="blunt"
-		damage="2d4+5"
-		cooldown=25
+		damage="2d10+15"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="2d10+10"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	attack "Kick" {
+		type="blunt"
+		damage="3d10"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
 	}
 }
 
@@ -362,16 +376,17 @@ npc_type "cyclops" {
 	speed=15
 	color="230,0,0"
 	graphic='H'
-	health=180
+	health=780
 	AI="HostileAnimal"
 	dodge=0
 	resistances {
-		physical=5
+		physical=15
 	}
 	attack "Smash" {
 		type="blunt"
-		damage="1d15+5"
-		cooldown=50
+		damage="1d50+5"
+		cooldown=100
+		statusEffects=["Concussion"]
 	}
 }
 
@@ -380,8 +395,8 @@ npc_type "giant" {
 	tags=["attacksRandomly", "hasHands"]
 	speed=15
 	color="0,128,128"
-	graphic='G'
-	health=175
+	graphic='H'
+	health=700
 	AI="HostileAnimal"
 	dodge=3
 	resistances {
@@ -390,8 +405,10 @@ npc_type "giant" {
 	spawnAsGroup="1d2"
 	attack "Smash" {
 		type="blunt"
-		damage="1d8+10"
-		cooldown=40
+		damage="1d40+10"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
 	}
 }
 
@@ -415,42 +432,30 @@ npc_type "griffon" {
 	}
 }
 
-npc_type "pixie" { 
-	name="Pixie"
-	tags=["localWildlife", "flying"]
-	speed=16
-	color="0,255,255"
-	graphic='~'
-	health=10
-	AI="PeacefulAnimal"
-	dodge=30
-	resistances {
-		physical=2
-	}
-	attack "attack" {
-		type="wielded"
-		damage="1d1"
-		cooldown=10
-	}
-	spawnAsGroup="1d5"
-}
-
 npc_type "unicorn" { 
 	name="Unicorn"
 	tags=["localWildlife", "angers"]
 	speed=25
 	color="250,250,250"
-	graphic='U'
-	health=80
+	graphic='u'
+	health=200
 	AI="PeacefulAnimal"
 	dodge=5
 	resistances {
 		physical=5
+		magic=75
 	}
 	attack "Charge" {
+		type="piercing"
+		damage="2d40"
+		cooldown=100
+	}
+	attack "Kick" {
 		type="blunt"
-		damage="2d4"
-		cooldown=40
+		damage="1d40"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     50     ]
 	}
 	spawnAsGroup="1d2"
 }
@@ -466,6 +471,7 @@ npc_type "will o wisp" {
 	dodge=0
 	resistances {
 		physical=30
+		magic=30
 	}
 	attack "Blind" {
 		type="magic"
