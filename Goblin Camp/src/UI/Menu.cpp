@@ -294,7 +294,7 @@ ConstructionMenu* ConstructionMenu::ConstructionInfoMenu(Construction* cons) {
             constructionInfoMenu->SetHeight(40);
             constructionInfoMenu->AddComponent(new UIList<ItemCat>(&Item::Categories, 2, 5, 46, Item::Categories.size(),
                                                                    boost::bind(&ConstructionMenu::DrawCategory, constructionInfoMenu, _1, _2, _3, _4, _5, _6),
-                                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, false)));
+                                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))));
         } else if(cons->Producer()) {
             constructionInfoMenu->SetHeight(40);
             constructionInfoMenu->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
