@@ -401,16 +401,30 @@ variables set properly), you will need to provide them in config, in format:</p>
 using boost : 1.43 : properties ;
 </pre>
 <p>In properties field you can put:</p>
-<ul class="simple">
-<li><tt class="docutils literal">&lt;library&gt;path</tt> — path to libraries</li>
-<li><tt class="docutils literal">&lt;include&gt;path</tt> — path to headers</li>
-<li><tt class="docutils literal">&lt;layout&gt;layout</tt> — same value you build Boost with. Either <tt class="docutils literal">&lt;layout&gt;system</tt>
-(common if you've installed Boost via system-provided package manager) or
-<tt class="docutils literal">&lt;layout&gt;versioned</tt> (default).</li>
+<ul>
+<li><p class="first"><tt class="docutils literal">&lt;library&gt;path</tt> — path to libraries</p>
+</li>
+<li><p class="first"><tt class="docutils literal">&lt;include&gt;path</tt> — path to headers</p>
+</li>
+<li><dl class="first docutils">
+<dt><tt class="docutils literal">&lt;layout&gt;layout</tt> — same value you build Boost with:</dt>
+<dd><ul class="first last simple">
+<li><tt class="docutils literal">&lt;layout&gt;system</tt> — if your Boost libraries <strong>don't have any</strong> tags in their name
+(e.g. they all look like <tt class="docutils literal">libboost_thread.lib</tt>, or similar) — they need
+to be built as multithreaded, with static linkage and dynamic runtime linkage!</li>
+<li><tt class="docutils literal">&lt;layout&gt;tagged</tt> — if your Boost libraries <strong>have</strong> tags in their name, but
+without compiler and version information (e.g. <tt class="docutils literal"><span class="pre">libboost_thread-mt-gd.lib</span></tt>).</li>
+<li><tt class="docutils literal">&lt;layout&gt;versioned</tt> — if your Boost libraries have all tags in their names
+(e.g. <tt class="docutils literal"><span class="pre">libboost_thread-vc90-mt-gd-1_43.lib</span></tt>).</li>
 </ul>
+</dd>
+</dl>
+</li>
+</ul>
+<p>See <a class="reference external" href="http://boost.org/doc/libs/1_43_0/more/getting_started/unix-variants.html#library-naming">Boost documentation</a> for more information about tags.</p>
 <p>Example:</p>
 <pre class="literal-block">
-using boost : 1.43 : &lt;layout&gt;system ;
+using boost : 1.43 : &lt;layout&gt;tagged ;
 </pre>
 </div>
 <div class="section" id="id2">
