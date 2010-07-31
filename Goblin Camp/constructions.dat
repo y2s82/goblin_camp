@@ -57,7 +57,7 @@ construction_type "Kitchen" {
 	graphic=[  9, 179,178, 127, 
 			  10, 179,178, 16,
 			 127,  95, 95, 127]
-	products=["Pie", "Bone stew", "Bread"]
+	products=["Pie", "Bone Stew", "Bread"]
 	walkable
 	maxCondition=90
 	materials=["Plank","Plank","Plank","Plank"]

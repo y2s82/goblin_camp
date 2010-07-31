@@ -190,16 +190,6 @@ item_type "Bone bed" {
 	components = [ "Bone", "Bone", "Bone" ]
 }
 
-item_type "Wine" {
-	category = ["Drink"]
-	graphic = 33
-	color = "127,0,0"
-	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
-	containIn = "Liquid Container"
-	nutrition = 72000
-	multiplier = 10
-}
-
 item_type "Bloodberry" {
 	category = [ "Berry" ]
 	graphic = 248
@@ -236,6 +226,32 @@ item_type "Bloodberry shrub" {
 	decaySpeed = 12
 }
 
+item_type "Blueleaf seed" {
+	category = ["Seed"]
+	graphic = 250
+	color = "128,128,175"
+	growth = "Blueleaf sapling"
+	fitsin = "Seed Container"
+}
+
+item_type "Blueleaf sapling" {
+	category = ["Plant"]
+	graphic = 222
+	color = "127,146,255"
+	growth = "Blueleaf tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Blueleaf tree" {
+	category = ["Plant"]
+	graphic = 216
+	color = "0,0,255"
+	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
 item_type "Dead plant" {
 	category = ["Misc."]
 	graphic = 207
@@ -261,6 +277,16 @@ item_type "Corpse" {
 	fruits = [ "Bones" ]
 }
 
+item_type "Wine" {
+	category = ["Drink"]
+	graphic = 33
+	color = "127,0,0"
+	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
+	containIn = "Liquid Container"
+	nutrition = 72000
+	multiplier = 10
+}
+
 item_type "Pie" {
 	category = ["Prepared Food"]
 	graphic = 37
@@ -271,7 +297,7 @@ item_type "Pie" {
 
 item_type "Meat" {
 	category = ["Raw Food"]
-	graphic = 208
+	graphic = 37
 	color = "198,0,0"
 	components = ["Corpse"]
 	decay = [ "Filth" ]
@@ -281,7 +307,7 @@ item_type "Meat" {
 
 item_type "Bone Stew" {
 	category = ["Food"]
-	graphic = 4
+	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat"]
 	nutrition = 90000
@@ -293,6 +319,14 @@ item_type "Bread" {
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
 	nutrition = 86000
+}
+
+item_type "Flour" {
+	category = ["Flour"]
+	graphic = 44
+	color = "255,233,177"
+	components = ["Seed", "Seed"]
+	containIn = "Flour Container"
 }
 
 item_type "Flower" {
@@ -388,14 +422,6 @@ item_type "Sharpened stone" {
 	components = ["Rough stone"]
 }
 
-item_type "Flour" {
-	category = ["Flour"]
-	graphic = 44
-	color = "255,233,177"
-	components = ["Seed", "Seed"]
-	containIn = "Flour Container"
-}
-
 item_type "Blueleaf boll" {
 	category = [ "Fiber" ]
 	graphic = 249
@@ -403,6 +429,13 @@ item_type "Blueleaf boll" {
 	fruits = [ "Blueleaf seed" ]
 	decay = [ "Blueleaf seed", "Filth" ]
 	decaySpeed = 12
+}
+
+item_type "Cloth" {
+	category = ["Cloth"]
+	graphic = 21
+	color = "255,255,255"
+	components = ["Fiber", "Fiber"]
 }
 
 item_type "Bone statue" {
@@ -417,39 +450,6 @@ item_type "Stone statue" {
 	graphic = 190
 	components = ["Rough stone", "Rough stone"]
 	color = "255,255,255"
-}
-
-item_type "Blueleaf seed" {
-	category = ["Seed"]
-	graphic = 250
-	color = "128,128,175"
-	growth = "Blueleaf sapling"
-	fitsin = "Seed Container"
-}
-
-item_type "Blueleaf sapling" {
-	category = ["Plant"]
-	graphic = 222
-	color = "127,146,255"
-	growth = "Blueleaf tree"
-	decay = [ "Filth" ]
-	decaySpeed = 12
-}
-
-item_type "Blueleaf tree" {
-	category = ["Plant"]
-	graphic = 216
-	color = "0,0,255"
-	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
-	decay = [ "Filth" ]
-	decaySpeed = 12
-}
-
-item_type "Cloth" {
-	category = ["Cloth"]
-	graphic = 21
-	color = "255,255,255"
-	components = ["Fiber", "Fiber"]
 }
 
 item_type "Seed sack" {

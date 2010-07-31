@@ -23,6 +23,8 @@ ECHO *** Goblin Camp $(GC_VERSION) build system *** ;
 ECHO ** bjam [ version.jam ] Boost.Build [ version.boost-build ] ;
 ECHO ** ;
 ECHO ** Be sure to read build/README! ;
+ECHO ** Especially if you're getting 'Reference to unconfigured Boost version' error: ;
+ECHO "**   you need to create a config file (and run bjam --user-config=<config file>)!" ;
 ECHO ** ;
 ECHO ** If you still have problems, you can ask on forums: ;
 ECHO "**     http://www.goblincamp.com/forum" ;

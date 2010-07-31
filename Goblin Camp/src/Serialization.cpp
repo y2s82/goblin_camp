@@ -477,6 +477,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & stockpile;
 	ar & farmplot;
 	ar & time;
+	ar & AllowedAmount;
 }
 
 template<class Archive>
@@ -500,6 +501,7 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & stockpile;
 	ar & farmplot;
 	ar & time;
+	ar & AllowedAmount;
 }
 
 template<class Archive>
