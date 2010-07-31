@@ -83,12 +83,12 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
-	if (Construction::Presets[construct].allowedAmount >= 0) {
-		if (Construction::Presets[construct].allowedAmount == 0) {
+	if (Construction::AllowedAmount[construct] >= 0) {
+		if (Construction::AllowedAmount[construct] == 0) {
 			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
 			return -1;
 		}
-		--Construction::Presets[construct].allowedAmount;
+		--Construction::AllowedAmount[construct];
 	}
 
 	//Check if the required materials exist before creating the build job
