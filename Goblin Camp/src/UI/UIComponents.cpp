@@ -22,6 +22,10 @@
 #include <boost/algorithm/string.hpp>
 
 #include "UIComponents.hpp"
+#include "Label.hpp"
+#include "Dialog.hpp"
+#include "ScrollPanel.hpp"
+#include "Button.hpp"
 #include "UI.hpp"
 
 void Label::Draw(int x, int y, TCODConsole *console) {

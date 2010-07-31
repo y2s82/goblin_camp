@@ -23,88 +23,6 @@
 #include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
 
-enum MenuResult {
-	MENUHIT,
-	NOMENUHIT
-};
-
-class Drawable {
-protected:
-	int _x, _y, width, height;    
-public:
-    Drawable(int x, int y, int nwidth, int nheight):
-    _x(x), _y(y), width(nwidth), height(nheight) {}
-    virtual void Draw(int, int, TCODConsole *) = 0;
-	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
-};
-
-class Scrollable {
-public:
-    virtual void Draw(int x, int y, int scroll, int width, int height, TCODConsole *) = 0;
-    virtual int TotalHeight() = 0;
-	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
-};
-
-class Label: public Drawable {
-private:
-    std::string text;
-    TCOD_alignment_t align;
-public:
-    Label(std::string ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
-    Drawable(x, y, 0, 0), text(ntext), align(nalign) {}
-    void Draw(int, int, TCODConsole *);
-};
-
-class Button: public Drawable {
-private:
-    std::string text;
-    bool selected;
-    char shortcut;
-    boost::function<void()> callback;
-public:
-    Button(std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
-    text(ntext), callback(ncallback), shortcut(nshortcut), Drawable(x, y, nwidth, 0), selected(false) {}
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-};
-
-class Panel: public Drawable {
-public:
-    Panel(int nwidth, int nheight):
-    Drawable(0, 0, nwidth, nheight) {}
-    void ShowModal();
-	virtual void Open();
-	virtual void Close();
-	virtual void selected(int);
-};
-
-class Dialog: public Panel {
-private:
-    std::vector<Drawable *> components;
-    std::string title;
-public:
-    Dialog(std::vector<Drawable *>, std::string, int, int);
-    ~Dialog();
-    void AddComponent(Drawable *component);
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-    void SetTitle(std::string ntitle);
-    void SetHeight(int nheight);
-};
-
-class ScrollPanel: public Drawable {
-private:
-    int scroll, scrollBar;
-    bool drawFrame;
-    Scrollable *contents;
-public:
-    ScrollPanel(int x, int y, int nwidth, int nheight, Scrollable *ncontents, bool ndrawFrame = true):
-    contents(ncontents), scroll(0), scrollBar(0), drawFrame(ndrawFrame), Drawable(x, y, nwidth, nheight) {}
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-};
-
-
 template <class T, class C = std::vector<T> >
 class UIList: public Drawable, public Scrollable {
 private:
@@ -115,7 +33,7 @@ private:
     boost::function<void(int)> onclick;
 public:
     UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, bool, TCODConsole *)> ndraw, boost::function<void(int)> nonclick = 0, bool nselectable = false):
-        items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), Drawable(x, y, nwidth, nheight) {}
+    items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), Drawable(x, y, nwidth, nheight) {}
     void Draw(int, int, TCODConsole *);
     void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
     int TotalHeight();

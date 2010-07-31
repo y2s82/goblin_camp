@@ -23,6 +23,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Menu.hpp"
 #include "UI.hpp"
+#include "UIComponents.hpp"
+#include "Label.hpp"
+#include "Dialog.hpp"
+#include "Button.hpp"
+#include "ScrollPanel.hpp"
+#include "UIList.hpp"
 #include "Announce.hpp"
 #include "StockManager.hpp"
 #include "JobManager.hpp"
