@@ -252,149 +252,28 @@ Dialog* AnnounceMenu::AnnouncementsMenu() {
 	return announcementsMenu;
 }
 
-void NPCMenu::Draw(int x, int y, int scroll, int width, int height, TCODConsole* console) {
-	int count = -1;
-	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
-		if (++count >= scroll && count < scroll + height) {
-			console->print(x+1, y + (count - scroll), "NPC: %d", npci->second->Uid());
-			console->print(x+12, y + (count-scroll), "%s: %s",
-				npci->second->currentJob().lock() ? npci->second->currentJob().lock()->name.c_str() : "No job",
-				npci->second->currentTask() ? Job::ActionToString(npci->second->currentTask()->action).c_str() : "No task");
-		}
-	}
-}
-
-int NPCMenu::TotalHeight() {
-    return Game::Inst()->npcList.size();
+void NPCMenu::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int x, int y, bool selected, TCODConsole* console) {
+    console->print(x, y, "NPC: %d", npci.second->Uid());
+    console->print(x+11, y, "%s: %s",
+        npci.second->currentJob().lock() ? npci.second->currentJob().lock()->name.c_str() : "No job",
+        npci.second->currentTask() ? Job::ActionToString(npci.second->currentTask()->action).c_str() : "No task");
 }
 
 Dialog* NPCMenu::npcListMenu = 0;
 Dialog* NPCMenu::NPCListMenu() {
 	if (!npcListMenu) {
-        int width = Game::Inst()->ScreenWidth() - 20;
-        int height = Game::Inst()->ScreenHeight() - 20;
-        npcListMenu = new Dialog(std::vector<Drawable *>(), "NPCs", width, height);
-        npcListMenu->AddComponent(new ScrollPanel(0, 0, width, height, new NPCMenu(), false));
+        npcListMenu = new NPCMenu();
 	}
 	return npcListMenu;
 }
 
+NPCMenu::NPCMenu(): Dialog(std::vector<Drawable*>(), "NPCs", Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20) {
+    AddComponent(new ScrollPanel(0, 0, width, height, 
+                                 new UIList<std::pair<int, boost::shared_ptr<NPC> >, std::map<int, boost::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCMenu::DrawNPC), false));
+}
+
 ConstructionMenu* ConstructionMenu::constructionInfoMenu = 0;
 Construction* ConstructionMenu::cachedConstruct = 0;
-/*
-void ConstructionMenu::Draw(int, int, TCODConsole* console) {
-	console->setForegroundColor(TCODColor::white);
-	console->printFrame(_x, _y, 50, 5, true, TCOD_BKGND_SET, construct->Name().c_str());
-	console->setForegroundColor(TCODColor::green);
-	console->print(_x + 3, _y + 2, "Rename");
-	console->setForegroundColor(TCODColor::red);
-	console->print(_x + 13, _y + 2, "Dismantle");
-	console->setForegroundColor(TCODColor::white);
-
-	//Only draw the production queue and product list if construction is a producer
-	if (construct->Producer()) {
-		console->printFrame(_x+25, _y+5, 25, 50, true, TCOD_BKGND_SET, "Product list");
-		console->printFrame(_x, _y+5, 25, 50, true, TCOD_BKGND_SET, "Production queue");
-		console->putChar(_x+25, _y+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(_x+25, _y+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(_x+25, _y+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(_x+24, _y+10, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(_x+24, _y+25, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-		console->putChar(_x+24, _y+40, TCOD_CHAR_ARROW2_W, TCOD_BKGND_SET);
-
-		console->putChar(_x+48, _y+6, TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
-		console->putChar(_x+48, _y+53, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
-
-		int y = 0;
-		for (int prodi = scroll; prodi < (signed int)construct->Products()->size() && y < _y+50; ++prodi) {
-			console->setForegroundColor(TCODColor::white);
-			console->print(_x+26, _y+6+y, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
-			if (firstTimeDraw) productPlacement.push_back(_y+6+y);
-			++y;
-			for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < _y+50; ++compi) {
-				console->setForegroundColor(TCODColor::white);
-				console->putChar(_x+27, _y+6+y, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
-				console->setForegroundColor(TCODColor::grey);
-				console->print(_x+28, _y+6+y, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
-				++y;
-			}
-			++y;
-		}
-
-		for (int jobi = 0; jobi < (signed int)construct->JobList()->size(); ++jobi) {
-			console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
-			console->print(_x+2, _y+6+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
-		}
-
-		firstTimeDraw = false;
-	} else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
-
-	} else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
-		Stockpile* sp = static_cast<Stockpile*>(construct);
-		console->setForegroundColor(TCODColor::white);
-		console->printFrame(_x, _y+5, 50, 50, true, TCOD_BKGND_SET, "Item categories allowed");
-		int x = _x+2;
-		int y = _y+6;
-		for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-			console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-			console->print(x,y, Item::Categories[i].name.c_str());
-			++y;
-			if (i != 0 && i % 49 == 0) {
-				x += 20;
-				y = _y+6;
-			}
-		}
-	}
-
-	console->setForegroundColor(TCODColor::white);
-
-}
-
-MenuResult ConstructionMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-    if (x >= _x && x < _x + width && y >= _y && y < _y + width) {
-        if (x >= _x + 3 && x < _x + 3 + 6 && y == _y + 2) { /*Rename* }
-        if (x >= _x + 13 && x < _x + 13 + 9 && y == _y + 2) { /*Dismantle* }
-        
-        if (construct->Producer()) {
-            if (x > _x+2 && x < _x+25) {
-                //Cancel production jobs
-                if (y > _y+5 && y < _y+17) {
-                    if(clicked) {
-                        construct->CancelJob(y-(_y+6));
-                    }
-                    return MENUHIT;
-                }
-            }
-            if (x > _x+25 && x < _x+48) {
-                //Add production jobs
-                for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
-                    if (y == productPlacement[i]) {
-                        if(clicked) {
-                            construct->AddJob(construct->Products(i+scroll));
-                        }
-                        return MENUHIT;
-                    }
-                }
-            }
-            
-            if (x == _x+48 && y == _y+6) { ScrollUp(); return MENUHIT; }
-            if (x == _x+48 && y == _y+53) { ScrollDown(); return MENUHIT; }
-        } else if (construct->HasTag(FARMPLOT)) { //It's a farmplot
-            
-        } else if (construct->HasTag(STOCKPILE)) { //A stockpile, but not a farmplot
-            int i = ((x-_x+2) / 20)*50;
-            i += (y - (_y+6));
-            if (i >= 0 && i < (signed int)Item::Categories.size()) {
-                if(clicked) {
-                    static_cast<Stockpile*>(construct)->SwitchAllowed(i);                
-                }
-            }
-            return MENUHIT;
-        }
-    }
-	return NOMENUHIT;
-}
-*/
 ConstructionMenu* ConstructionMenu::ConstructionInfoMenu(Construction* cons) {
     if (constructionInfoMenu && cons != cachedConstruct) {
         delete constructionInfoMenu;
