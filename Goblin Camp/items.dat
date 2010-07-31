@@ -271,7 +271,7 @@ item_type "Pie" {
 
 item_type "Meat" {
 	category = ["Raw Food"]
-	graphic = 208
+	graphic = 37
 	color = "198,0,0"
 	components = ["Corpse"]
 	decay = [ "Filth" ]
@@ -281,7 +281,7 @@ item_type "Meat" {
 
 item_type "Bone Stew" {
 	category = ["Food"]
-	graphic = 4
+	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat"]
 	nutrition = 90000
