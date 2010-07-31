@@ -25,7 +25,7 @@
 #include "UI.hpp"
 
 void Label::Draw(int x, int y, TCODConsole *console) {
-    console->setAlignment(TCOD_CENTER);
+    console->setAlignment(align);
     console->setForegroundColor(TCODColor::white);
     console->print(x + _x, y + _y, text.c_str());
 }
@@ -41,10 +41,12 @@ void Button::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(TCOD_CENTER);
     console->printFrame(x + _x, y + _y, width, 3);
     console->print(x + _x + width/2, y + _y + 1, text.c_str());
+    console->setForegroundColor(TCODColor::white);
+    console->setBackgroundColor(TCODColor::black);
 }
 
 MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
-    if(key.c == shortcut) {
+    if(shortcut && key.c == shortcut) {
         callback();
         return MENUHIT;
     }
@@ -95,10 +97,10 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
                     scroll += height; 
                 }
             } else {
-                contents->Update(x, y + scroll, clicked, key);
+                contents->Update(x - _x - 1, y - _y - 1 + scroll, clicked, key);
             }
         } else {
-            contents->Update(x, y + scroll, clicked, key);
+            contents->Update(x - _x - 1, y - _y - 1 + scroll, clicked, key);
         }
         return MENUHIT;
     }
@@ -158,6 +160,16 @@ void Dialog::Draw(int x, int y, TCODConsole *console) {
         Drawable *component = *it;
         component->Draw(_x, _y, console);
     }
+}
+
+void Dialog::SetTitle(std::string ntitle) {
+    title = ntitle;
+}
+
+void Dialog::SetHeight(int nheight) {
+    height = nheight;
+    _x = (Game::Inst()->ScreenWidth() - width) / 2;
+    _y = (Game::Inst()->ScreenHeight() - height) / 2;
 }
 
 Dialog::~Dialog() {

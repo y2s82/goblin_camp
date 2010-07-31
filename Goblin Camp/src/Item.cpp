@@ -398,6 +398,10 @@ ItemCat::ItemCat() : flammable(false),
 	parent(0)
 {}
 
+std::string ItemCat::GetName() {
+    return name;
+}
+
 ItemPreset::ItemPreset() :
 graphic('?'),
 	color(TCODColor::pink),

@@ -48,9 +48,10 @@ public:
 class Label: public Drawable {
 private:
     std::string text;
+    TCOD_alignment_t align;
 public:
-    Label(std::string ntext, int x, int y) :
-    Drawable(x, y, 0, 0), text(ntext) {}
+    Label(std::string ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
+    Drawable(x, y, 0, 0), text(ntext), align(nalign) {}
     void Draw(int, int, TCODConsole *);
 };
 
@@ -87,6 +88,8 @@ public:
     void AddComponent(Drawable *component);
     void Draw(int, int, TCODConsole *);
     MenuResult Update(int, int, bool, TCOD_key_t);
+    void SetTitle(std::string ntitle);
+    void SetHeight(int nheight);
 };
 
 class ScrollPanel: public Drawable {
@@ -102,16 +105,16 @@ public:
 };
 
 
-template <class T>
+template <class T, class C = std::vector<T> >
 class UIList: public Drawable, public Scrollable {
 private:
-    boost::function<std::vector<T>()> items;
+    C* items;
     bool selectable;
     int selection;
-    boost::function<void(T, int, int, bool, TCODConsole *)> draw;
+    boost::function<void(T, int, int, int, bool, TCODConsole *)> draw;
     boost::function<void(int)> onclick;
 public:
-    UIList<T>(boost::function<std::vector<T>()> *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T)> ndraw, boost::function<void(int)> nonclick = 0, bool nselectable = false):
+    UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, bool, TCODConsole *)> ndraw, boost::function<void(int)> nonclick = 0, bool nselectable = false):
         items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), Drawable(x, y, nwidth, nheight) {}
     void Draw(int, int, TCODConsole *);
     void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
@@ -119,40 +122,45 @@ public:
     MenuResult Update(int, int, bool, TCOD_key_t);
 };
 
-template <class T>
-void UIList<T>::Draw(int x, int y, TCODConsole *console) {
+template <class T, class C>
+void UIList<T, C>::Draw(int x, int y, TCODConsole *console) {
+    console->setAlignment(TCOD_LEFT);
     int count = 0;
-    std::vector<T> items = items();
-    for(typename std::vector<T>::iterator it = items->begin(); it != items->end(); it++) {
+    for(typename C::iterator it = items->begin(); it != items->end(); it++) {
         T item = *it;
-        draw(item, x + _x, y + _y + count, selection == count, console);
+        draw(item, count, x + _x, y + _y + count, selection == count, console);
         count++;
     }
 }
 
-template <class T>
-void UIList<T>::Draw(int x, int y, int scroll, int _width, int _height, TCODConsole *console) {
+template <class T, class C>
+void UIList<T, C>::Draw(int x, int y, int scroll, int _width, int _height, TCODConsole *console) {
+    console->setAlignment(TCOD_LEFT);
     int count = 0;
-    std::vector<T> items = items();
-    for(typename std::vector<T>::iterator it = items->begin(); it != items->end(); it++) {
+    for(typename C::iterator it = items->begin(); it != items->end(); it++) {
         T item = *it;
 		if (count >= scroll && count < scroll + _height) {
-			draw(item, x, y + (count - scroll), selection == count, console);
+			draw(item, count, x, y + (count - scroll), selection == count, console);
 		}
         count++;
     }
 }
 
-template <class T>
-int UIList<T>::TotalHeight() {
-    return items()->size();
+template <class T, class C>
+int UIList<T, C>::TotalHeight() {
+    return items->size();
 }
 
-template <class T>
-MenuResult UIList<T>::Update(int x, int y, bool clicked, TCOD_key_t key) {
+template <class T, class C>
+MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
     if (x >= _x && x < _x + width && y >= _y && y < _y + width) {
-        if (selectable) {
-            selection = y - _y;
+        if (clicked) {
+            if (selectable) {
+                selection = y - _y;
+            }
+            if (onclick) {
+                onclick(y - _y);
+            }
         }
         return MENUHIT;
     }
