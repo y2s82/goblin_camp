@@ -694,6 +694,7 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
 				//Check if the item can be contained, and if so if any containers are in the stockpile
 
 				boost::shared_ptr<Job> stockJob(new Job("Store item", LOW));
+				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
 
