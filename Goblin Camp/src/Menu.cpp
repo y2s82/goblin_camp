@@ -677,11 +677,11 @@ MenuResult StockManagerMenu::Update(int x, int y, bool clicked) {
 	if (x >= 0 && y >= 0) {
 		int ch = TCODConsole::root->getChar(x,y);
 
-		x -= (topX + 4); //If it's the first choice, x is now ~0
-		x /= 16; //Now x = the column
-		y -= (topY + 3 + 2); //+2 because +/- are under the text
-		y /= 5;
-		int choice = x + (y*3);
+		int tx = x - (topX + 4); //If it's the first choice, tx is now ~0
+		tx /= 16; //Now x = the column
+		int ty = y - (topY + 3 + 2); //+2 because +/- are under the text
+		ty /= 5;
+		int choice = tx + (ty*3);
 		//Because choice = index based on the visible items, we need to translate that into
 		//an actual ItemType, which might be anything. So just go through the items as in
 		//Draw() to find which index equals which itemtype.
