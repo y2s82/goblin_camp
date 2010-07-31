@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Game.hpp"
 #include "UIComponents.hpp"
+#include "Dialog.hpp"
 
 class MenuChoice {
 public:
