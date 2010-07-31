@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Container.hpp"
 #include "Logger.hpp"
 
-Container::Container(Coordinate pos, ItemType type, int capValue, int faction) : Item(pos, type, faction),
+Container::Container(Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components) : Item(pos, type, faction, components),
 	capacity(capValue),
 	reservedSpace(0)
 {

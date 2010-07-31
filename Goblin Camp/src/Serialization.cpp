@@ -93,6 +93,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & upleft;
 	ar & filthList;
 	ar & bloodList;
+	ar & safeMonths;
 }
 
 template<class Archive>
@@ -119,6 +120,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & upleft;
 	ar & filthList;
 	ar & bloodList;
+	ar & safeMonths;
 }
 
 template<class Archive>

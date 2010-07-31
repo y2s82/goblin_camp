@@ -97,7 +97,7 @@ void StartNewGame() {
 	
 	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), middleCorner, itemBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), middleCorner, itemBottomCorner);
-	game->CreateItems(20, Item::StringToItemType("Flour sack"), middleCorner, itemBottomCorner);
+	game->CreateItems(20, Item::StringToItemType("Bread"), middleCorner, itemBottomCorner);
 	MainLoop();
 }
 

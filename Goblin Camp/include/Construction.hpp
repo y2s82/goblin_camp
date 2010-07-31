@@ -63,6 +63,9 @@ struct ConstructionPreset {
     std::string category;
     int placementType;
 	bool blocksLight;
+	bool permanent;
+	TCODColor color;
+	int allowedAmount;
 };
 
 class Construction : public Entity {

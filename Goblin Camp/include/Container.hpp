@@ -35,7 +35,8 @@ private:
 	int capacity;
 	int reservedSpace;
 public:
-	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0);
+	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0,
+		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 	virtual ~Container();
 	virtual bool AddItem(boost::weak_ptr<Item>);
 	virtual void RemoveItem(boost::weak_ptr<Item>);
