@@ -800,7 +800,7 @@ void SideBar::Draw(TCODConsole* console) {
 			} else if (construct->HasTag(STOCKPILE)) {
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 31, false, TCOD_BKGND_DEFAULT, "Categories");
+				console->printFrame(edgeX-(width-1), topY+14, width-2, 36, false, TCOD_BKGND_DEFAULT, "Categories");
 				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
 				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
@@ -818,7 +818,7 @@ void SideBar::Draw(TCODConsole* console) {
 			} else if (construct->HasTag(FARMPLOT)) {
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 30, false, TCOD_BKGND_DEFAULT, "Seeds");
+				console->printFrame(edgeX-(width-1), topY+14, width-2, 10, false, TCOD_BKGND_DEFAULT, "Seeds");
 				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(construct));
 				int i = 0;
 				for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin(); 
@@ -852,10 +852,10 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 		height = 30;
 		npc = true;
 	} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
-		height = 50;
+		height = 30;
 		construction = true;
 	} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
-		height = 50;
+		height = 51;
 		construction = true;
 	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
 		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));

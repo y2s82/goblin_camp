@@ -83,13 +83,22 @@ In properties field you can put:
 
 * ``<library>path`` — path to libraries
 * ``<include>path`` — path to headers
-* ``<layout>layout`` — same value you build Boost with. Either ``<layout>system``
-  (common if you've installed Boost via system-provided package manager) or
-  ``<layout>versioned`` (default).
+* ``<layout>layout`` — same value you build Boost with:
+    * ``<layout>system`` — if your Boost libraries **don't have any** tags in their name
+      (e.g. they all look like ``libboost_thread.lib``, or similar) — they need
+      to be built as multithreaded, with static linkage and dynamic runtime linkage!
+    * ``<layout>tagged`` — if your Boost libraries **have** tags in their name, but
+      without compiler and version information (e.g. ``libboost_thread-mt-gd.lib``).
+    * ``<layout>versioned`` — if your Boost libraries have all tags in their names
+      (e.g. ``libboost_thread-vc90-mt-gd-1_43.lib``).
+
+See `Boost documentation`_ for more information about tags.
 
 Example::
 
-    using boost : 1.43 : <layout>system ;
+    using boost : 1.43 : <layout>tagged ;
+
+.. _Boost documentation: http://boost.org/doc/libs/1_43_0/more/getting_started/unix-variants.html#library-naming
 
 libtcod
 +++++++

@@ -41,6 +41,8 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 	return Construction::Presets[construct].productionSpot;
 }
 
+std::vector<int> Construction::AllowedAmount = std::vector<int>();
+
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
 	color(TCODColor::white),
 	type(vtype),
@@ -90,7 +92,9 @@ Construction::~Construction() {
 	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
 
-	++Construction::Presets[type].allowedAmount;
+	if (Construction::AllowedAmount[type] >= 0) {
+		++Construction::AllowedAmount[type];
+	}
 }
 
 
@@ -269,6 +273,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		Construction::Presets.push_back(ConstructionPreset());
 		Construction::Presets.back().name = name;
+		Construction::AllowedAmount.push_back(-1);
 		return true;
 	}
 
@@ -302,7 +307,7 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "blocksLight")) {
 			Construction::Presets.back().blocksLight = true;
 		} else if (boost::iequals(name, "unique")) {
-			Construction::Presets.back().allowedAmount = 1;
+			Construction::AllowedAmount.back() = 1;
 		}
 		return true;
 	}
@@ -566,8 +571,7 @@ maxCondition(0),
     placementType(UIPLACEMENT),
 	blocksLight(true),
 	permanent(false),
-	color(TCODColor::black),
-	allowedAmount(-1)
+	color(TCODColor::black)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
