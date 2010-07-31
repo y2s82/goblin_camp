@@ -351,7 +351,7 @@ void UI::HandleMouse() {
                 }
             }
         }
-	} else { currentMenu->Update(-1, -1, false, NO_KEY); }
+	}
 
 	if (rbuttonPressed) {
 		menuX = mouseInput.cx;

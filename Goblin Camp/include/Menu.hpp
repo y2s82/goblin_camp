@@ -94,22 +94,34 @@ public:
 	static Dialog* NPCListMenu();
 };
 
-class ConstructionMenu : public Menu {
+class ConstructionMenu : public Dialog {
 private:
 	Construction* construct;
-	int scroll;
-	std::vector<int> productPlacement;
-	bool firstTimeDraw;
+    class ProductList : public Scrollable {
+    private:
+        Construction* construct;
+    public:
+        ProductList(Construction* nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
+        int height;
+        std::vector<int> productPlacement;
+        void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+        int TotalHeight();
+        MenuResult Update(int x, int y, bool clicked, TCOD_key_t key);
+    };
 public:
-	ConstructionMenu();
-	void Draw(int, int, TCODConsole*);
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	ConstructionMenu(int nwidth, int nheight):
+    Dialog(std::vector<Drawable *>(), "", nwidth, nheight) {}
 	static ConstructionMenu* constructionInfoMenu;
+    static Construction* cachedConstruct;
 	static ConstructionMenu* ConstructionInfoMenu(Construction*);
 	void Construct(Construction*);
-	void ScrollDown();
-	void ScrollUp();
-	void ClearProductPlacement();
+    void Rename();
+    void Dismantle();
+    void CancelJob(int);
+    void AddJob(int);
+    void SwitchAllowed(int);
+    void DrawCategory(ItemCat, int, int, int, bool, TCODConsole *);
+    void DrawJob(ItemType, int, int, int, bool, TCODConsole *);
 };
 
 class StockManagerMenu : public Menu {

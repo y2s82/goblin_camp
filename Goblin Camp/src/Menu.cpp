@@ -280,17 +280,8 @@ Dialog* NPCMenu::NPCListMenu() {
 }
 
 ConstructionMenu* ConstructionMenu::constructionInfoMenu = 0;
-
-ConstructionMenu::ConstructionMenu() : Menu(std::vector<MenuChoice>()),
-	construct(0),
-	scroll(0),
-	firstTimeDraw(true)
-{
-	width = 50; height = 50;
-	_x = (Game::Inst()->ScreenWidth() - width) / 2;
-	_y = (Game::Inst()->ScreenHeight() - height) / 2;
-}
-
+Construction* ConstructionMenu::cachedConstruct = 0;
+/*
 void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 	console->setForegroundColor(TCODColor::white);
 	console->printFrame(_x, _y, 50, 5, true, TCOD_BKGND_SET, construct->Name().c_str());
@@ -361,8 +352,8 @@ void ConstructionMenu::Draw(int, int, TCODConsole* console) {
 
 MenuResult ConstructionMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
     if (x >= _x && x < _x + width && y >= _y && y < _y + width) {
-        if (x >= _x + 3 && x < _x + 3 + 6 && y == _y + 2) { /*Rename*/ }
-        if (x >= _x + 13 && x < _x + 13 + 9 && y == _y + 2) { /*Dismantle*/ }
+        if (x >= _x + 3 && x < _x + 3 + 6 && y == _y + 2) { /*Rename* }
+        if (x >= _x + 13 && x < _x + 13 + 9 && y == _y + 2) { /*Dismantle* }
         
         if (construct->Producer()) {
             if (x > _x+2 && x < _x+25) {
@@ -403,20 +394,114 @@ MenuResult ConstructionMenu::Update(int x, int y, bool clicked, TCOD_key_t key) 
     }
 	return NOMENUHIT;
 }
-
+*/
 ConstructionMenu* ConstructionMenu::ConstructionInfoMenu(Construction* cons) {
-	if (!constructionInfoMenu) constructionInfoMenu = new ConstructionMenu();
+    if (constructionInfoMenu && cons != cachedConstruct) {
+        delete constructionInfoMenu;
+        constructionInfoMenu = 0;
+    }
+	if (!constructionInfoMenu) {
+        cachedConstruct = cons;
+        constructionInfoMenu = new ConstructionMenu(50, 5);
+        constructionInfoMenu->AddComponent(new Button("Rename", boost::bind(&ConstructionMenu::Rename, constructionInfoMenu), 12, 1, 10));
+        constructionInfoMenu->AddComponent(new Button("Dismantle", boost::bind(&ConstructionMenu::Dismantle, constructionInfoMenu), 28, 1, 13));
+        if(cons->HasTag(STOCKPILE)) {
+            constructionInfoMenu->SetHeight(40);
+            constructionInfoMenu->AddComponent(new UIList<ItemCat>(&Item::Categories, 2, 5, 46, Item::Categories.size(),
+                                                                   boost::bind(&ConstructionMenu::DrawCategory, constructionInfoMenu, _1, _2, _3, _4, _5, _6),
+                                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, false)));
+        } else if(cons->Producer()) {
+            constructionInfoMenu->SetHeight(40);
+            constructionInfoMenu->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
+            constructionInfoMenu->AddComponent(new ScrollPanel(2, 6, 23, 34, 
+                                                               new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
+                                                                                    boost::bind(&ConstructionMenu::DrawJob, constructionInfoMenu, _1, _2, _3, _4, _5, _6),
+                                                                                    boost::bind(&Construction::CancelJob, cons, _1)),
+                                                               false));
+            constructionInfoMenu->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
+            ProductList *productList = new ProductList(cons);
+            for (int prodi = 0; prodi < (signed int)cons->Products()->size(); ++prodi) {
+                productList->productPlacement.push_back(productList->height);
+                productList->height += 2 + Item::Components(cons->Products(prodi)).size();
+            }
+            constructionInfoMenu->AddComponent(new ScrollPanel(26, 6, 23, 34, 
+                                                               productList,
+                                                               false));
+        }
+    }
+    constructionInfoMenu->SetTitle(cons->Name());
 	constructionInfoMenu->Construct(cons);
-	constructionInfoMenu->ClearProductPlacement();
 	return constructionInfoMenu;
 }
 
 void ConstructionMenu::Construct(Construction* cons) { construct = cons; }
 
-void ConstructionMenu::ClearProductPlacement() { productPlacement.clear(); firstTimeDraw = true; }
+void ConstructionMenu::Rename() {
+    
+}
 
-void ConstructionMenu::ScrollDown() { ++scroll; }
-void ConstructionMenu::ScrollUp() { if (--scroll < 0) scroll = 0; }
+void ConstructionMenu::Dismantle() {
+    
+}
+
+void ConstructionMenu::DrawCategory(ItemCat category, int i, int x, int y, bool selected, TCODConsole *console) {
+    Stockpile *sp = static_cast<Stockpile*>(construct);
+    console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
+    if (!category.parent) {
+        console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
+    } else {
+        if (i+1 < Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {
+            console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
+        } else {
+            console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
+        }
+    }
+    console->setForegroundColor(TCODColor::white);
+}
+
+void ConstructionMenu::ProductList::Draw(int x, int _y, int scroll, int width, int _height, TCODConsole *console) {
+    int y = 0;
+    for (int prodi = 0; prodi < (signed int)construct->Products()->size() && y < scroll + _height; ++prodi) {
+        if (y >= scroll) {
+            console->setForegroundColor(TCODColor::white);
+            console->print(x, _y + y - scroll, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
+        }
+        ++y;
+        for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < scroll + _height; ++compi) {
+            if (y >= scroll) {
+                console->setForegroundColor(TCODColor::white);
+                console->putChar(x + 1, _y + y - scroll, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
+                console->setForegroundColor(TCODColor::grey);
+                console->print(x + 2, _y + y - scroll, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
+            }
+            ++y;
+        }
+        ++y;
+    }
+    console->setForegroundColor(TCODColor::white);
+}
+
+int ConstructionMenu::ProductList::TotalHeight() {
+    return height;
+}
+
+MenuResult ConstructionMenu::ProductList::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    for (int i = 0; i < (signed int)productPlacement.size(); ++i) {
+        if (y == productPlacement[i]) {
+            if(clicked) {
+                construct->AddJob(construct->Products(i));
+            }
+            return MENUHIT;
+        }
+    }
+    return NOMENUHIT;
+}
+
+void ConstructionMenu::DrawJob(ItemType category, int i, int x, int y, bool selected, TCODConsole *console) {
+    console->setForegroundColor(i == 0 ? TCODColor::white : TCODColor::grey);
+    console->print(x, y, Item::ItemTypeToString(category).c_str());
+    console->setForegroundColor(TCODColor::white);
+}
 
 StockManagerMenu* StockManagerMenu::stocksMenu = 0;
 
