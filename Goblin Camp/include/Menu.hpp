@@ -85,11 +85,10 @@ public:
 	static Dialog* AnnouncementsMenu();
 };
 
-class NPCMenu : public Scrollable {
+class NPCMenu : public Dialog {
 public:
-	NPCMenu() {}
-	void Draw(int, int, int, int, int, TCODConsole*);
-    int TotalHeight();
+	NPCMenu();
+	static void DrawNPC(std::pair<int, boost::shared_ptr<NPC> >, int, int, int, bool, TCODConsole*);
 	static Dialog* npcListMenu;
 	static Dialog* NPCListMenu();
 };
