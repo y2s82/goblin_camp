@@ -30,6 +30,8 @@
 #include "UI.hpp"
 #include "Grid.hpp"
 #include "Spinner.hpp"
+#include "Frame.hpp"
+#include "TextBox.hpp"
 
 void Label::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(align);
@@ -44,6 +46,7 @@ void LiveLabel::Draw(int x, int y, TCODConsole *console) {
 }
 
 void Button::Draw(int x, int y, TCODConsole *console) {
+	console->setBackgroundFlag(TCOD_BKGND_SET);
     if(selected) {
         console->setForegroundColor(TCODColor::black);
         console->setBackgroundColor(TCODColor::white);
@@ -54,6 +57,20 @@ void Button::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(TCOD_CENTER);
     console->printFrame(x + _x, y + _y, width, 3);
     console->print(x + _x + width/2, y + _y + 1, text.c_str());
+    console->setForegroundColor(TCODColor::white);
+    console->setBackgroundColor(TCODColor::black);
+}
+
+void LiveButton::Draw(int x, int y, TCODConsole *console) {
+    Button::Draw(x, y, console);
+    if(selected) {
+        console->setForegroundColor(TCODColor::black);
+        console->setBackgroundColor(TCODColor::white);
+    } else {
+        console->setForegroundColor(TCODColor::white);
+        console->setBackgroundColor(TCODColor::black);
+    }
+    console->print(x + _x + width/2, y + _y + 1, textFunc().c_str());
     console->setForegroundColor(TCODColor::white);
     console->setBackgroundColor(TCODColor::black);
 }
@@ -78,6 +95,22 @@ MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
     
 }
 
+void ToggleButton::Draw(int x, int y, TCODConsole *console) {
+	console->setBackgroundFlag(TCOD_BKGND_SET);
+    if(selected) {
+        console->setForegroundColor(TCODColor::black);
+        console->setBackgroundColor(TCODColor::white);
+    } else {
+        console->setForegroundColor(TCODColor::white);
+        console->setBackgroundColor(isOn() ? TCODColor::blue : TCODColor::black);
+    }
+    console->setAlignment(TCOD_CENTER);
+    console->printFrame(x + _x, y + _y, width, 3);
+    console->print(x + _x + width/2, y + _y + 1, text.c_str());
+    console->setForegroundColor(TCODColor::white);
+    console->setBackgroundColor(TCODColor::black);
+}
+
 inline int numDigits(int num) {
     int tmp = num;
     int digits = 1;
@@ -94,22 +127,50 @@ inline int numDigits(int num) {
 
 void Spinner::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(TCOD_CENTER);
-    console->print(x + _x + width / 2, y + _y, "- %d +", getter());
+    int val = value ? *value : getter();
+    console->print(x + _x + width / 2, y + _y, "- %d +", val);
 }
 
 MenuResult Spinner::Update(int x, int y, bool clicked, TCOD_key_t key) {
     if (x >= _x && x < _x + width && y == _y) {
         if (clicked) {
-            int curr = getter();
+            int curr = value ? *value : getter();
             int adj = UI::Inst()->ShiftPressed() ? 10 : 1;
             int strWidth = 4 + numDigits(curr);
             if(x == _x + width / 2 - strWidth / 2) {
-                setter(std::max(min, curr - adj));
+                if(value) {
+                    (*value) = std::max(min, curr - adj);
+                } else {
+                    setter(std::max(min, curr - adj));
+                }
             } else if(x == _x + width / 2 + (strWidth-1) / 2) {
-                setter(std::min(max, curr + adj));
+                if(value) {
+                    (*value) = std::max(min, curr + adj);
+                } else {
+                    setter(std::max(min, curr + adj));
+                }
             }
         }
         return MENUHIT;
+    }
+    return NOMENUHIT;
+}
+
+void TextBox::Draw(int x, int y, TCODConsole *console) {
+    console->setAlignment(TCOD_CENTER);
+    console->setBackgroundColor(TCODColor::darkGrey);
+	console->rect(x + _x, y + _y, width, 1, true, TCOD_BKGND_SET);
+	console->setBackgroundColor(TCODColor::black);
+	console->print(x + _x + width / 2, y + _y, value->c_str());    
+}
+
+MenuResult TextBox::Update(int x, int y, bool clicked, TCOD_key_t key) {
+    if(key.vk == TCODK_BACKSPACE && value->size() > 0) {
+        value->erase(value->end() - 1);
+        return KEYRESPOND;
+    } else if(key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-') {
+        (*value) += key.c;
+        return KEYRESPOND;
     }
     return NOMENUHIT;
 }
@@ -156,6 +217,11 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
         return MENUHIT;
     }
     return NOMENUHIT;
+}
+
+void Frame::Draw(int x, int y, TCODConsole *console) {
+    console->printFrame(x + _x, y + _y, width, height, true, TCOD_BKGND_SET, title.c_str());
+    UIContainer::Draw(x, y, console);
 }
 
 void Grid::AddComponent(Drawable *component) {

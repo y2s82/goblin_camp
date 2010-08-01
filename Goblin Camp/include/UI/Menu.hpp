@@ -27,6 +27,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UIComponents.hpp"
 #include "Grid.hpp"
 #include "Dialog.hpp"
+#include "UIList.hpp"
+#include "Frame.hpp"
 
 class MenuChoice {
 public:
@@ -128,26 +130,33 @@ private:
     Grid *grid;
 public:
 	StockManagerMenu();
-//	void Draw(int, int, TCODConsole*);
-//    MenuResult Update(int, int, bool, TCOD_key_t);
 	static Dialog* stocksMenu;
 	static Dialog* StocksMenu();
-//	void ScrollDown();
-//	void ScrollUp();
-//	void Open();
 };
 
-class SquadsMenu : public Menu {
+class SquadsMenu : public Dialog {
 private:
 	std::string squadName;
 	int squadMembers;
 	int squadPriority;
-	boost::weak_ptr<Squad> chosenSquad;
+	boost::shared_ptr<Squad> GetSquad(int);
+    UIList<std::pair<std::string, boost::shared_ptr<Squad> >, std::map<std::string, boost::shared_ptr<Squad> > > *squadList;
+    Frame *rightFrame;
+    Frame *orders;
 public:
-	SquadsMenu();
-	void Draw(int, int, TCODConsole*);
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	SquadsMenu(Drawable *ncontents, std::string ntitle, int nwidth, int nheight):
+        Dialog(ncontents, ntitle, nwidth, nheight), squadName(""), squadMembers(1), squadPriority(0) {}
 	static SquadsMenu* squadMenu;
 	static SquadsMenu* SquadMenu();
-	void Open();
+    static void DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> >, int, int, int, bool, TCODConsole *);
+    void SelectSquad(int i);
+    bool SquadSelected(bool selected);
+    void CreateSquad();
+    void ModifySquad();
+    void DeleteSquad();
+    void SelectOrder(Orders order);
+    bool OrderSelected(Orders order);
+    std::string SelectedSquadWeapon();
+    void SelectWeapon();
+    void Rearm();
 };
