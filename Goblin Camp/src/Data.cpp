@@ -297,7 +297,7 @@ namespace Data {
         if (!fs::exists(file)) {
             DoSave(file);
         } else {
-            YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(DoSave, file), NULL);
+            YesNoDialog::ShowYesNoDialog("Save game exists, overwrite?", boost::bind(DoSave, file), NULL);
         }
 
 	}
