@@ -26,6 +26,8 @@
 #include "UI/ScrollPanel.hpp"
 #include "StockManager.hpp"
 #include "UI/Spinner.hpp"
+#include "UI/Label.hpp"
+#include "UI/TextBox.hpp"
 
 Dialog* StockManagerDialog::stocksDialog = 0;
 
@@ -35,8 +37,10 @@ private:
     StockManagerDialog *owner;
 public:
     bool ShowItem() {
-        // TODO filter
-        return StockManager::Inst()->TypeQuantity(itemType) > -1;
+        if (boost::icontains(Item::Presets[itemType].name, owner->GetFilter()))
+			return StockManager::Inst()->TypeQuantity(itemType) > -1;
+		else
+			return false;
     }    
     
     StockPanel(ItemType nItemType, StockManagerDialog *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
@@ -59,14 +63,21 @@ public:
 
 StockManagerDialog::StockManagerDialog(): Dialog(0, "Stock Manager", 50, 50), filter("")
 {
-    Grid *grid = new Grid(std::vector<Drawable *>(), 3, 0, 0, 48, 48);
+	contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 50);
+
+	static_cast<UIContainer*>(contents)->AddComponent(new Label("Filter", 25, 1));
+	static_cast<UIContainer*>(contents)->AddComponent(new TextBox(1, 2, 48, &filter));
+
+	Grid *grid = new Grid(std::vector<Drawable *>(), 3, 0, 0, 48, 46);
 	for (std::set<ItemType>::iterator it = StockManager::Inst()->Producables()->begin(); it != StockManager::Inst()->Producables()->end(); it++) {
         grid->AddComponent(new StockPanel(*it, this));
     }
-    contents = new ScrollPanel(0, 1, 50, 50, grid, false, 4);
+	static_cast<UIContainer*>(contents)->AddComponent(new ScrollPanel(0, 3, 50, 47, grid, false, 4));
 }
 
 Dialog* StockManagerDialog::StocksDialog() {
 	if (!stocksDialog) stocksDialog = new StockManagerDialog();
 	return stocksDialog;
 }
+
+std::string StockManagerDialog::GetFilter() { return filter; }

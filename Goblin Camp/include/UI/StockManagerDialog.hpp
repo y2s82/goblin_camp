@@ -35,4 +35,5 @@ public:
 	StockManagerDialog();
 	static Dialog* stocksDialog;
 	static Dialog* StocksDialog();
+	std::string GetFilter();
 };
