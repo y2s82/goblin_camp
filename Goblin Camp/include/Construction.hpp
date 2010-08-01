@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Entity.hpp"
 #include "Item.hpp"
 #include "Container.hpp"
+#include "UIComponents.hpp"
 
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
@@ -59,6 +60,8 @@ struct ConstructionPreset {
 	bool dynamic;
 	std::string spawnCreaturesTag;
 	int spawnFrequency;
+    std::string category;
+    int placementType;
 	bool blocksLight;
 	bool permanent;
 	TCODColor color;
@@ -116,9 +119,11 @@ public:
 	ItemType JobList(int);
 	virtual int Use();
 	static std::vector<ConstructionPreset> Presets;
+    static std::set<std::string> Categories;
 	static void LoadPresets(std::string);
 	virtual boost::weak_ptr<Container> Storage();
 	bool HasTag(ConstructionTag);
 	virtual void Update();
 	virtual void Dismantle();
+    virtual Panel *GetContextMenu();
 };

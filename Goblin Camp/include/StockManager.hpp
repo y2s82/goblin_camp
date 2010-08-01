@@ -60,6 +60,7 @@ public:
 	int TypeQuantity(ItemType);
 	int Minimum(ItemType);
 	void AdjustMinimum(ItemType, int);
+    void SetMinimum(ItemType, int);
 	std::set<ItemType>* Producables();
 
 	void UpdateWorkshops(boost::weak_ptr<Construction>, bool add);

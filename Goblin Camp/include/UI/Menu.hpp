@@ -1,0 +1,162 @@
+/* Copyright 2010 Ilkka Halila
+This file is part of Goblin Camp.
+
+Goblin Camp is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+Goblin Camp is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License 
+along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#pragma once
+
+#include <string>
+#include <vector>
+
+#include <boost/function.hpp>
+#include <boost/bind.hpp>
+#include <boost/weak_ptr.hpp>
+#include <libtcod.hpp>
+
+#include "Game.hpp"
+#include "UIComponents.hpp"
+#include "Grid.hpp"
+#include "Dialog.hpp"
+#include "UIList.hpp"
+#include "Frame.hpp"
+
+class MenuChoice {
+public:
+	MenuChoice(std::string = "", boost::function<void()> = boost::bind(Game::DoNothing));
+	std::string label;
+	boost::function<void()> callback;
+};
+
+class Menu: public Panel {
+private:
+    static std::map<std::string, Menu *> constructionCategoryMenus;
+protected:
+	std::vector<MenuChoice> choices;
+	int _selected;
+    std::string title;
+	void CalculateSize();
+public:
+	Menu(std::vector<MenuChoice>, std::string="");
+	virtual ~Menu();
+	virtual void Draw(int, int, TCODConsole*);
+	virtual MenuResult Update(int, int, bool, TCOD_key_t);
+	void selected(int);
+	void AddChoice(MenuChoice);
+	void Callback(unsigned int);
+
+	static Menu* mainMenu;
+	static Menu* MainMenu();
+	static Menu* constructionMenu;
+	static Menu* ConstructionMenu();
+	static Menu* basicsMenu;
+	static Menu* BasicsMenu();
+	static Menu* WorkshopsMenu();
+	static Menu* ordersMenu;
+	static Menu* OrdersMenu();
+	static Menu* FurnitureMenu();
+    static Menu* ConstructionCategoryMenu(std::string);
+
+	static void YesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction,
+                            std::string leftButton = "Yes", std::string rightButton = "No");
+	static ItemCategory WeaponChoiceDialog();
+};
+
+class JobMenu : public Scrollable {
+public:
+	JobMenu() {}
+	void Draw(int, int, int, int, int, TCODConsole*);
+    int TotalHeight();
+	static Dialog* jobListingMenu;
+	static Dialog* JobListingMenu();
+};
+
+class AnnounceMenu : public Scrollable {
+public:
+	AnnounceMenu() {}
+	void Draw(int, int, int, int, int, TCODConsole*);
+    int TotalHeight();
+	static Dialog* announcementsMenu;
+	static Dialog* AnnouncementsMenu();
+};
+
+class NPCMenu : public UIContainer {
+public:
+	NPCMenu();
+	static void DrawNPC(std::pair<int, boost::shared_ptr<NPC> >, int, int, int, bool, TCODConsole*);
+	static Dialog* npcListMenu;
+	static Dialog* NPCListMenu();
+};
+
+class ConstructionMenu : public UIContainer {
+private:
+	Construction* construct;
+    class ProductList : public Scrollable {
+    private:
+        Construction* construct;
+    public:
+        ProductList(Construction* nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
+        int height;
+        std::vector<int> productPlacement;
+        void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+        int TotalHeight();
+        MenuResult Update(int x, int y, bool clicked, TCOD_key_t key);
+    };
+public:
+	ConstructionMenu(int nwidth, int nheight):
+    UIContainer(std::vector<Drawable *>(), 0, 0, nwidth, nheight) {}
+	static Dialog* constructionInfoMenu;
+    static Construction* cachedConstruct;
+	static Dialog* ConstructionInfoMenu(Construction*);
+	void Construct(Construction*);
+    void Rename();
+    void Dismantle();
+    void DrawCategory(ItemCat, int, int, int, bool, TCODConsole *);
+    void DrawJob(ItemType, int, int, int, bool, TCODConsole *);
+};
+
+class StockManagerMenu : public Dialog {
+private:
+	std::string filter;
+    Grid *grid;
+public:
+	StockManagerMenu();
+	static Dialog* stocksMenu;
+	static Dialog* StocksMenu();
+};
+
+class SquadsMenu : public Dialog {
+private:
+	std::string squadName;
+	int squadMembers;
+	int squadPriority;
+	boost::shared_ptr<Squad> GetSquad(int);
+    UIList<std::pair<std::string, boost::shared_ptr<Squad> >, std::map<std::string, boost::shared_ptr<Squad> > > *squadList;
+    Frame *rightFrame;
+    Frame *orders;
+public:
+	SquadsMenu(Drawable *ncontents, std::string ntitle, int nwidth, int nheight):
+        Dialog(ncontents, ntitle, nwidth, nheight), squadName(""), squadMembers(1), squadPriority(0) {}
+	static SquadsMenu* squadMenu;
+	static SquadsMenu* SquadMenu();
+    static void DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> >, int, int, int, bool, TCODConsole *);
+    void SelectSquad(int i);
+    bool SquadSelected(bool selected);
+    void CreateSquad();
+    void ModifySquad();
+    void DeleteSquad();
+    void SelectOrder(Orders order);
+    bool OrderSelected(Orders order);
+    std::string SelectedSquadWeapon();
+    void SelectWeapon();
+    void Rearm();
+};
