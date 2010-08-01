@@ -31,7 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "UI.hpp"
-#include "ConstructionDialog.hpp"
+#include "UI/ConstructionDialog.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;

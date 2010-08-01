@@ -41,7 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 #include "Data.hpp"
-#include "YesNoDialog.hpp"
+#include "UI/YesNoDialog.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;

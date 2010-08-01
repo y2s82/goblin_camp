@@ -22,10 +22,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "StockManagerDialog.hpp"
-#include "ScrollPanel.hpp"
+#include "UI/StockManagerDialog.hpp"
+#include "UI/ScrollPanel.hpp"
 #include "StockManager.hpp"
-#include "Spinner.hpp"
+#include "UI/Spinner.hpp"
 
 Dialog* StockManagerDialog::stocksDialog = 0;
 

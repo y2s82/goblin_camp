@@ -22,16 +22,16 @@
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "UIComponents.hpp"
-#include "Label.hpp"
-#include "Dialog.hpp"
-#include "ScrollPanel.hpp"
-#include "Button.hpp"
+#include "UI/UIComponents.hpp"
+#include "UI/Label.hpp"
+#include "UI/Dialog.hpp"
+#include "UI/ScrollPanel.hpp"
+#include "UI/Button.hpp"
 #include "UI.hpp"
-#include "Grid.hpp"
-#include "Spinner.hpp"
-#include "Frame.hpp"
-#include "TextBox.hpp"
+#include "UI/Grid.hpp"
+#include "UI/Spinner.hpp"
+#include "UI/Frame.hpp"
+#include "UI/TextBox.hpp"
 
 void Label::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(align);

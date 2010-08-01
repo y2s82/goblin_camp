@@ -89,7 +89,7 @@ MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
 
 template <class T, class C>
 int UIList<T, C>::Selected() {
-    if(selection >= 0 && selection < items->size()) {
+    if(selection >= 0 && selection < (signed int)items->size()) {
         return selection;
     }
     return -1;

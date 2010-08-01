@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/set.hpp>
 
 #include "Coordinate.hpp"
-#include "UIComponents.hpp"
+#include "UI/UIComponents.hpp"
 
 class Entity: public boost::enable_shared_from_this<Entity>
 {

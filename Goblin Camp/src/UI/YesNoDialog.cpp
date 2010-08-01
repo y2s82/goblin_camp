@@ -22,10 +22,10 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "YesNoDialog.hpp"
-#include "Dialog.hpp"
-#include "Label.hpp"
-#include "Button.hpp"
+#include "UI/YesNoDialog.hpp"
+#include "UI/Dialog.hpp"
+#include "UI/Label.hpp"
+#include "UI/Button.hpp"
 
 void YesNoDialog::ShowYesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction, std::string leftButton, std::string rightButton) {
     UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 10);
