@@ -34,7 +34,7 @@ namespace fs = boost::filesystem;
 #include "NatureObject.hpp"
 #include "NPC.hpp"
 #include "Construction.hpp"
-#include "Menu.hpp"
+#include "YesNoDialog.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
 void _ImplFindPersonalDirectory(std::string&);
@@ -297,7 +297,7 @@ namespace Data {
         if (!fs::exists(file)) {
             DoSave(file);
         } else {
-            Menu::YesNoDialog("Really exit?", boost::bind(DoSave, file), NULL);
+            YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(DoSave, file), NULL);
         }
 
 	}
