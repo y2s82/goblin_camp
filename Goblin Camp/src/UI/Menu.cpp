@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/format.hpp>
 
 #include "Menu.hpp"
 #include "UI.hpp"
@@ -31,6 +32,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Grid.hpp"
 #include "UIList.hpp"
 #include "Spinner.hpp"
+#include "Frame.hpp"
+#include "TextBox.hpp"
 #include "Announce.hpp"
 #include "StockManager.hpp"
 #include "JobManager.hpp"
@@ -397,9 +400,15 @@ private:
     ItemType itemType;
     StockManagerMenu *owner;
 public:
+    bool ShowItem() {
+        // TODO filter
+        return StockManager::Inst()->TypeQuantity(itemType) > -1;
+    }    
+    
     StockPanel(ItemType nItemType, StockManagerMenu *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
         AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
                                  boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
+        visible = boost::bind(&StockPanel::ShowItem, this);
     }
     
     void Draw(int x, int y, TCODConsole *console) {
@@ -411,10 +420,6 @@ public:
         UIContainer::Draw(x, y, console);
     }
     
-    bool Visible() {
-        // TODO filter
-        return StockManager::Inst()->TypeQuantity(itemType) > -1;
-    }
 };
     
     
@@ -432,219 +437,140 @@ Dialog* StockManagerMenu::StocksMenu() {
 	return stocksMenu;
 }
 
+class 
+
 SquadsMenu* SquadsMenu::squadMenu = 0;
 SquadsMenu* SquadsMenu::SquadMenu() {
-	if (!squadMenu) squadMenu = new SquadsMenu();
+	if (!squadMenu){
+        UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 20);
+        squadMenu = new SquadsMenu(contents, "Squads", 50, 20);
+        squadMenu->squadList = new UIList<std::pair<std::string, boost::shared_ptr<Squad> >, std::map<std::string, boost::shared_ptr<Squad> > >(
+                            &(Game::Inst()->squadList), 0, 0, 46, 16, SquadsMenu::DrawSquad, boost::bind(&SquadsMenu::SelectSquad, squadMenu, _1), true);
+        Frame *left = new Frame("Existing", std::vector<Drawable *>(), 1, 1, 24, 18);
+        left->AddComponent(new ScrollPanel(1, 0, 23, 18, squadMenu->squadList, false));
+        contents->AddComponent(left);
+        squadMenu->rightFrame = new Frame("New Squad", std::vector<Drawable *>(), 25, 1, 24, 18);
+        squadMenu->rightFrame->AddComponent(new Label("Name (required)", 12, 2));
+        squadMenu->rightFrame->AddComponent(new TextBox(1, 3, 22, &(squadMenu->squadName)));
+        squadMenu->rightFrame->AddComponent(new Label("Members", 12, 5));
+        squadMenu->rightFrame->AddComponent(new Spinner(1, 6, 22, &(squadMenu->squadMembers), 1, INT_MAX));
+        squadMenu->rightFrame->AddComponent(new Label("Priority", 12, 8));
+        squadMenu->rightFrame->AddComponent(new Spinner(1, 9, 22, &(squadMenu->squadPriority), 0, INT_MAX));
+        Button *create = new Button("Create", boost::bind(&SquadsMenu::CreateSquad, squadMenu), 2, 11, 10);
+        create->SetVisible(boost::bind(&SquadsMenu::SquadSelected, squadMenu, false));
+        Button *modify = new Button("Modify", boost::bind(&SquadsMenu::ModifySquad, squadMenu), 2, 11, 10);
+        modify->SetVisible(boost::bind(&SquadsMenu::SquadSelected, squadMenu, true));
+        Button *deleteSquad = new Button("Delete", boost::bind(&SquadsMenu::DeleteSquad, squadMenu), 13, 11, 10);
+        deleteSquad->SetVisible(boost::bind(&SquadsMenu::SquadSelected, squadMenu, true));
+        squadMenu->rightFrame->AddComponent(create);
+        squadMenu->rightFrame->AddComponent(modify);
+        squadMenu->rightFrame->AddComponent(deleteSquad);
+        contents->AddComponent(squadMenu->rightFrame);
+        squadMenu->orders = new Frame("Orders for ", std::vector<Drawable *>(), 0, 20, 50, 5);
+        squadMenu->orders->SetVisible(boost::bind(&SquadsMenu::SquadSelected, squadMenu, true));
+        contents->AddComponent(squadMenu->orders);
+        squadMenu->orders->AddComponent(new ToggleButton("Guard", boost::bind(&SquadsMenu::SelectOrder, squadMenu, GUARD), boost::bind(&SquadsMenu::OrderSelected, squadMenu, GUARD), 2, 1, 9));
+        squadMenu->orders->AddComponent(new ToggleButton("Escort", boost::bind(&SquadsMenu::SelectOrder, squadMenu, ESCORT), boost::bind(&SquadsMenu::OrderSelected, squadMenu, ESCORT), 14, 1, 10));
+        Frame *weapons = new Frame("Weapons", std::vector<Drawable *>(), 0, 25, 23, 5);
+        weapons->SetVisible(boost::bind(&SquadsMenu::SquadSelected, squadMenu, true));
+        contents->AddComponent(weapons);
+        weapons->AddComponent(new LiveButton(boost::bind(&SquadsMenu::SelectedSquadWeapon, squadMenu), boost::bind(&SquadsMenu::SelectWeapon, squadMenu), 1, 1, 21));
+        Button *rearm = new Button("Rearm", boost::bind(&SquadsMenu::Rearm, squadMenu), 0, 30, 10);
+        rearm->SetVisible(boost::bind(&SquadsMenu::SquadSelected, squadMenu, true));
+        contents->AddComponent(rearm);
+    } 
 	return squadMenu;
 }
 
-SquadsMenu::SquadsMenu() : Menu(std::vector<MenuChoice>()),
-	squadName(""),
-	squadMembers(1),
-	squadPriority(0),
-	chosenSquad(boost::weak_ptr<Squad>())
-{
-	width = 50;
-	height = 20;
-	_x = (Game::Inst()->ScreenWidth() - width) / 2;
-	_y = (Game::Inst()->ScreenHeight() - height) / 2;
-
-}
-
-void SquadsMenu::Draw(int x, int y, TCODConsole* console) {
-	console->printFrame(_x, _y, width, height, true, TCOD_BKGND_SET, "Squads");
-
-	console->printFrame(_x+1, _y+1, width / 2 - 1, height - 2, false, TCOD_BKGND_SET, "Existing");
-	y = _y+2;
-	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin(); squadi != Game::Inst()->squadList.end(); ++squadi) {
-		console->setBackgroundColor((chosenSquad.lock() == squadi->second) ? TCODColor::blue : TCODColor::black);
-		console->print(_x+2, y++, "%s (%d/%d)", squadi->first.c_str(), squadi->second->MemberCount(),
-			squadi->second->MemberLimit());
-	}
+void SquadsMenu::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > squadi, int i, int x, int y, bool selected, TCODConsole *console) {
+	console->setBackgroundFlag(TCOD_BKGND_SET);
+    console->setBackgroundColor(selected ? TCODColor::blue : TCODColor::black);
+    console->print(x, y, "%s (%d/%d)", squadi.first.c_str(), squadi.second->MemberCount(),
+                   squadi.second->MemberLimit());    
     console->setBackgroundColor(TCODColor::black);
-
-	x = _x+(width/2);
-	y = _y+2;
-	console->printFrame(x, _y+1, width / 2 - 1, height-2, false, TCOD_BKGND_SET, (chosenSquad.lock()) ? "Modify Squad" : "New Squad");
-	console->setAlignment(TCOD_CENTER);
-	++x;
-	console->print(x+(width/4)-2, y, "Name (required)");
-	console->setBackgroundColor(TCODColor::darkGrey);
-	console->rect(x,y+1,(width/2)-3,1,true,TCOD_BKGND_SET);
-	console->setBackgroundColor(TCODColor::black);
-	console->print(x+(width/4)-1, y+1, squadName.c_str());
-	y += 3;
-	console->printFrame(x+3, y, 3, 3, false, TCOD_BKGND_SET);
-	console->printFrame(x+17, y++, 3, 3, false, TCOD_BKGND_SET);
-	console->setForegroundColor(TCODColor::red);
-	console->print(x+4, y, "-");
-	console->setForegroundColor(TCODColor::white);
-	console->print(x+(width/4)-1, y, "Members");
-	console->print(x+(width/4)-1, y+1, "%d", squadMembers);
-	console->setForegroundColor(TCODColor::green);
-	console->print(x+18, y, "+");
-	console->setForegroundColor(TCODColor::white);
-	y += 3;
-	console->printFrame(x+3, ++y, 3, 3, false, TCOD_BKGND_SET);
-	console->printFrame(x+17, y++, 3, 3, false, TCOD_BKGND_SET);
-	console->setForegroundColor(TCODColor::red);
-	console->print(x+4, y, "-");
-	console->setForegroundColor(TCODColor::white);
-	console->print(x+(width/4)-1, y, "Priority");
-	console->print(x+(width/4)-1, y+1, "%d", squadPriority);
-	console->setForegroundColor(TCODColor::green);
-	console->print(x+18, y++, "+");
-	console->setForegroundColor(TCODColor::white);
-
-	console->printFrame(x+(width/4)-11, y+2, 10, 3, false);
-	console->print(x+(width/4)-6, y+3, (chosenSquad.lock()) ? "Modify" : "Create");
-	if (chosenSquad.lock()) {
-		console->printFrame(x+(width/4)-1, y+2, 10, 3, false);
-		console->print(x+(width/4)+4, y+3, "Delete");
-	}
-
-	if (chosenSquad.lock()) {
-		x = _x;
-		y = _y+19;
-		console->printFrame(x, y, width, 7, true, TCOD_BKGND_SET, "Orders for %s", chosenSquad.lock()->Name().c_str());
-		console->setBackgroundColor((chosenSquad.lock()->Order() == GUARD) ? TCODColor::blue : TCODColor::black);
-		console->printFrame(x+2, y+2, 7, 3, false);
-		console->print(x+5, y+3, "Guard");
-		console->setBackgroundColor((chosenSquad.lock()->Order() == ESCORT) ? TCODColor::blue : TCODColor::black);
-		console->printFrame(x+12, y+2, 8, 3, false);
-		console->print(x+16, y+3, "Escort");
-		console->setBackgroundColor(TCODColor::black);
-
-		console->printFrame(x, y+7, 23, 5, true, TCOD_BKGND_SET, "Weapons");
-		console->printFrame(x+1, y+8, 21, 3);
-		console->print(x+11, y+9, chosenSquad.lock()->Weapon() >= 0 ? Item::Categories[chosenSquad.lock()->Weapon()].name.c_str() : "None");
-		console->printFrame(x, y+11, 7, 3);
-		console->print(x+3, y+12, "Rearm");
-	}
-
-	console->setAlignment(TCOD_LEFT);
 }
 
-MenuResult SquadsMenu::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	squadName = UI::Inst()->InputString();
-	if (clicked) {
-		if (y < _y+19) {
-			if (x > _x + (width/2)) {
-				if (x > _x + (width/2) + 3 && x < _x + (width/2) + 6) {
-					if (y > _y+2+3 && y < _y+2+6) {
-						if (squadMembers > 0) --squadMembers; 
-						return MENUHIT;
-					}
-					else if (y > _y+2+8 && y < _y+2+11) {
-						if (squadPriority > 0) --squadPriority; 
-						return MENUHIT; 
-					}
-				} else if (x > _x + (width/2) + 17 && x < _x + (width/2) + 20) {
-					if (y > _y+2+3 && y < _y+2+6) {
-						++squadMembers; 
-						return MENUHIT; 
-					}
-					else if (y > _y+2+8 && y < _y+2+11) {
-						++squadPriority; 
-						return MENUHIT; 
-					}
-				} else if (x > _x + (width/2) + 1 && x < _x + (width/2) + 11
-					&& y > _y+2+12 && y < _y+2+15) {
-						if (squadName != "" && !chosenSquad.lock()) { //Create
-							Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
-								(squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
-							chosenSquad = Game::Inst()->squadList[squadName];
-							return MENUHIT;					
-						} else if (chosenSquad.lock()) { //Modify
-							boost::shared_ptr<Squad> tempSquad = chosenSquad.lock();
-							Game::Inst()->squadList.erase(tempSquad->Name());
-							tempSquad->Name(squadName);
-							Game::Inst()->squadList.insert(std::pair<std::string, 
-								boost::shared_ptr<Squad> >(squadName, tempSquad));
-							tempSquad->MemberLimit(squadMembers);
-							tempSquad->Priority(squadPriority);
-							return MENUHIT;
-						}
-				} else if (x > _x + (width/2) + 12 && x < _x + (width/2) + 22
-					&& y > _y+2+12 && y < _y+2+15) {
-						if (chosenSquad.lock()) {
-							chosenSquad.lock()->RemoveAllMembers();
-							Game::Inst()->squadList.erase(chosenSquad.lock()->Name());
-							chosenSquad = boost::weak_ptr<Squad>();
-							return MENUHIT;
-						}
-				}
-
-			} else if (x > _x && y >= _y+2 && y < _y + height-2) {
-				y -= (_y+2);
-				if (y >= 0 && y < (signed int)Game::Inst()->squadList.size()) {
-					std::map<std::string, boost::shared_ptr<Squad> >::iterator squadi = Game::Inst()->squadList.begin();
-					squadi = boost::next(squadi, y);
-					if (squadi != Game::Inst()->squadList.end()) {
-						chosenSquad = squadi->second;
-						squadMembers = squadi->second->MemberLimit();
-						squadPriority = squadi->second->Priority();
-						UI::Inst()->InputString(squadi->first);
-					}
-					else {
-						chosenSquad = boost::weak_ptr<Squad>();
-						squadMembers = 1;
-						squadPriority = 0;
-						squadName = "";
-						UI::Inst()->InputString("");
-					}
-					return MENUHIT;
-				} else { 
-					chosenSquad = boost::weak_ptr<Squad>(); 
-					squadMembers = 1;
-					squadPriority = 0;
-					squadName = "";
-					UI::Inst()->InputString("");
-					return MENUHIT;
-				}
-			}
-		} else {
-			if (y > _y+20 && y < _y+24) {
-				if (x > _x+1 && x < _x+9) { //Guard
-					chosenSquad.lock()->Order(GUARD);
-					UI::ChooseOrderTargetCoordinate(chosenSquad.lock());
-					UI::Inst()->HideMenu();
-					return MENUHIT;
-				} else if (x > _x+11 && x < _x+20) { //Escort
-					chosenSquad.lock()->Order(ESCORT);
-					UI::ChooseOrderTargetEntity(chosenSquad.lock());
-					UI::Inst()->HideMenu();
-					return MENUHIT;
-				}
-			} else if (y > _y+26 && y < _y+30) {
-				if (x > _x && x < _x+22) {
-					Menu *weaponChoiceDialog = new Menu(std::vector<MenuChoice>(), "Weapons");
-                    weaponChoiceDialog->AddChoice(MenuChoice("None", boost::bind(&Squad::Weapon, chosenSquad.lock(), -1)));
-                    for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-                        if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Weapon")) {
-                            weaponChoiceDialog->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), boost::bind(&Squad::Weapon, chosenSquad.lock(), i)));
-                        }
-                    }
-					weaponChoiceDialog->ShowModal();
-					return MENUHIT;
-				}
-			} else if (y >= _y+30 && y < _y+33) {
-				if (x >= _x && x < _x+7) {
-					chosenSquad.lock()->Rearm();
-					Announce::Inst()->AddMsg(chosenSquad.lock()->Name() + " rearming.");
-					return MENUHIT;
-				}
-			}
-		}
-		if (x > _x && x < _x+width && y > _y && y < _y+height) return MENUHIT;
-	}
-	return NOMENUHIT;
+boost::shared_ptr<Squad> SquadsMenu::GetSquad(int i) {
+    int count = 0;
+    for(std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin(); it != Game::Inst()->squadList.end(); it++) {
+        if(count == i) {
+            return (*it).second;
+        }
+    }
+    return boost::shared_ptr<Squad>();
 }
 
-void SquadsMenu::Open() {
-	UI::Inst()->SetTextMode(true, 22);
-	if (boost::shared_ptr<Squad> squad = chosenSquad.lock()) {
-		squadName = squad->Name();
-		UI::Inst()->InputString(squadName);
-	}
+void SquadsMenu::SelectSquad(int i) {
+    if(i >= 0 && i < Game::Inst()->squadList.size()) {
+        rightFrame->SetTitle("Modify Squad");
+        squadName = GetSquad(i)->Name();
+        squadPriority = GetSquad(i)->Priority();
+        squadMembers = GetSquad(i)->MemberLimit();
+        orders->SetTitle((boost::format("Orders for %s") % squadName).str());
+    } else {
+        rightFrame->SetTitle("New Squad");
+        squadName = "";
+        squadMembers = 1;
+        squadPriority = 0;
+    }
+}
+
+bool SquadsMenu::SquadSelected(bool selected) {
+    return (squadList->Selected() >= 0) == selected;
+}
+
+void SquadsMenu::CreateSquad() {
+    if(squadName.length() > 0) {
+        Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
+                                       (squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
+        squadList->Select(Game::Inst()->squadList.size() - 1);
+        SelectSquad(Game::Inst()->squadList.size() - 1);
+    }
+}
+
+void SquadsMenu::ModifySquad() {
+    boost::shared_ptr<Squad> tempSquad = GetSquad(squadList->Selected());
+    Game::Inst()->squadList.erase(tempSquad->Name());
+    tempSquad->Name(squadName);
+    Game::Inst()->squadList.insert(std::pair<std::string, 
+                                   boost::shared_ptr<Squad> >(squadName, tempSquad));
+    tempSquad->MemberLimit(squadMembers);
+    tempSquad->Priority(squadPriority);
+}
+
+void SquadsMenu::DeleteSquad() {
+    boost::shared_ptr<Squad> tempSquad = GetSquad(squadList->Selected());
+    tempSquad->RemoveAllMembers();
+    Game::Inst()->squadList.erase(tempSquad->Name());
+}
+
+void SquadsMenu::SelectOrder(Orders order) {
+    GetSquad(squadList->Selected())->Order(order);
+    UI::ChooseOrderTargetCoordinate(GetSquad(squadList->Selected()));
+    UI::Inst()->HideMenu();
+}
+
+bool SquadsMenu::OrderSelected(Orders order) {
+    return GetSquad(squadList->Selected())->Order() == order;
+}
+
+std::string SquadsMenu::SelectedSquadWeapon() {
+    int weapon = GetSquad(squadList->Selected())->Weapon();
+    return weapon >= 0 ? Item::Categories[weapon].name : "None";
+}
+
+void SquadsMenu::SelectWeapon() {
+    Menu *weaponChoiceDialog = new Menu(std::vector<MenuChoice>(), "Weapons");
+    weaponChoiceDialog->AddChoice(MenuChoice("None", boost::bind(&Squad::Weapon, GetSquad(squadList->Selected()), -1)));
+    for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+        if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Weapon")) {
+            weaponChoiceDialog->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), boost::bind(&Squad::Weapon, GetSquad(squadList->Selected()), i)));
+        }
+    }
+    weaponChoiceDialog->ShowModal();
+}
+
+void SquadsMenu::Rearm() {
+    GetSquad(squadList->Selected())->Rearm();
+    Announce::Inst()->AddMsg(GetSquad(squadList->Selected())->Name() + " rearming.");
 }

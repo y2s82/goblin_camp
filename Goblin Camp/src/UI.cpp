@@ -72,117 +72,119 @@ UI* UI::Inst() {
 void UI::Update() {
 	if (keyHelpTextColor > 0) keyHelpTextColor -= 2;
 	if (keyHelpTextColor < 0) keyHelpTextColor = 0;
-	HandleKeyboard();
-	HandleMouse();
+    HandleKeyboard();
+    HandleMouse();
 }
 
 void UI::HandleKeyboard() {
 	//TODO: This isn't pretty, but it works.
-	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
-	if (!textMode) {
-		if (key.c == 'q') Game::Exit();
-		else if (key.c == 'b') {
-			menuX = mouseInput.cx;
-			menuY = mouseInput.cy;
-			ChangeMenu(Menu::BasicsMenu());
-		} else if (key.c == 'w') {
-			menuX = mouseInput.cx;
-			menuY = mouseInput.cy;
-			ChangeMenu(Menu::WorkshopsMenu());
-		} else if (key.c == 'o') {
-			menuX = mouseInput.cx;
-			menuY = mouseInput.cy;
-			ChangeMenu(Menu::OrdersMenu());
-		} else if (key.c == 's') {
-			menuX = mouseInput.cx;
-			menuY = mouseInput.cy;
-			ChangeMenu(StockManagerMenu::StocksMenu());
-		} else if (key.c == 'f') {
-			menuX = mouseInput.cx;
-			menuY = mouseInput.cy;
-			ChangeMenu(Menu::FurnitureMenu());
-		} else if (key.c == 'm') {
-			menuX = mouseInput.cx;
-			menuY = mouseInput.cy;
-			ChangeMenu(SquadsMenu::SquadMenu());
-		} else if (key.c == 'h') {
-			keyHelpTextColor = 255;
-		}
+    key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+    if (!currentMenu || currentMenu->Update(-1, -1, false, key) != KEYRESPOND) {
+        if (!textMode) {
+            if (key.c == 'q') Game::Exit();
+            else if (key.c == 'b') {
+                menuX = mouseInput.cx;
+                menuY = mouseInput.cy;
+                ChangeMenu(Menu::BasicsMenu());
+            } else if (key.c == 'w') {
+                menuX = mouseInput.cx;
+                menuY = mouseInput.cy;
+                ChangeMenu(Menu::WorkshopsMenu());
+            } else if (key.c == 'o') {
+                menuX = mouseInput.cx;
+                menuY = mouseInput.cy;
+                ChangeMenu(Menu::OrdersMenu());
+            } else if (key.c == 's') {
+                menuX = mouseInput.cx;
+                menuY = mouseInput.cy;
+                ChangeMenu(StockManagerMenu::StocksMenu());
+            } else if (key.c == 'f') {
+                menuX = mouseInput.cx;
+                menuY = mouseInput.cy;
+                ChangeMenu(Menu::FurnitureMenu());
+            } else if (key.c == 'm') {
+                menuX = mouseInput.cx;
+                menuY = mouseInput.cy;
+                ChangeMenu(SquadsMenu::SquadMenu());
+            } else if (key.c == 'h') {
+                keyHelpTextColor = 255;
+            }
 
-		int addition = 1;
-		if (ShiftPressed()) addition *= 10;
-		if (key.vk == TCODK_UP) {
-			if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
-		} else if (key.vk == TCODK_DOWN) {
-			if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
-		} else if (key.vk == TCODK_LEFT) {
-			if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
-		} else if (key.vk == TCODK_RIGHT) {
-			if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
-		} else if (key.vk == TCODK_KP1) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.x -= Game::Inst()->CharWidth() * addition;
-			mouseInput.cx -= addition;
-			mouseInput.y += Game::Inst()->CharHeight() * addition;
-			mouseInput.cy += addition;
-		} else if (key.vk == TCODK_KP2) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.y += Game::Inst()->CharHeight() * addition;
-			mouseInput.cy += addition;
-		} else if (key.vk == TCODK_KP3) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.x += Game::Inst()->CharWidth() * addition;
-			mouseInput.cx += addition;
-			mouseInput.y += Game::Inst()->CharHeight() * addition;
-			mouseInput.cy += addition;
-		} else if (key.vk == TCODK_KP4) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.x -= Game::Inst()->CharWidth() * addition;
-			mouseInput.cx -= addition;
-		} else if (key.vk == TCODK_KP6) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.x += Game::Inst()->CharWidth() * addition;
-			mouseInput.cx += addition;
-		} else if (key.vk == TCODK_KP7) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.x -= Game::Inst()->CharWidth() * addition;
-			mouseInput.cx -= addition;
-			mouseInput.y -= Game::Inst()->CharHeight() * addition;
-			mouseInput.cy -= addition;
-		} else if (key.vk == TCODK_KP8) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.y -= Game::Inst()->CharHeight() * addition;
-			mouseInput.cy -= addition;
-		} else if (key.vk == TCODK_KP9) {
-			TCODMouse::showCursor(false);
-			drawCursor = true;
-			mouseInput.x += Game::Inst()->CharWidth() * addition;
-			mouseInput.cx += addition;
-			mouseInput.y -= Game::Inst()->CharHeight() * addition;
-			mouseInput.cy -= addition;
-		} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
-			lbuttonPressed = true;
-		} else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
-		} else if (key.vk == TCODK_PRINTSCREEN) { 
-			Data::SaveScreenshot();
-		}
-	} else {
-		if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
-			inputString += key.c;
-		} else if (key.vk == TCODK_BACKSPACE) {
-			if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
-		}
-	}
-	if (key.vk == TCODK_ESCAPE && menuOpen) {
-		rbuttonPressed = true;
-	}
+            int addition = 1;
+            if (ShiftPressed()) addition *= 10;
+            if (key.vk == TCODK_UP) {
+                if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
+            } else if (key.vk == TCODK_DOWN) {
+                if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+            } else if (key.vk == TCODK_LEFT) {
+                if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
+            } else if (key.vk == TCODK_RIGHT) {
+                if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+            } else if (key.vk == TCODK_KP1) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.x -= Game::Inst()->CharWidth() * addition;
+                mouseInput.cx -= addition;
+                mouseInput.y += Game::Inst()->CharHeight() * addition;
+                mouseInput.cy += addition;
+            } else if (key.vk == TCODK_KP2) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.y += Game::Inst()->CharHeight() * addition;
+                mouseInput.cy += addition;
+            } else if (key.vk == TCODK_KP3) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.x += Game::Inst()->CharWidth() * addition;
+                mouseInput.cx += addition;
+                mouseInput.y += Game::Inst()->CharHeight() * addition;
+                mouseInput.cy += addition;
+            } else if (key.vk == TCODK_KP4) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.x -= Game::Inst()->CharWidth() * addition;
+                mouseInput.cx -= addition;
+            } else if (key.vk == TCODK_KP6) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.x += Game::Inst()->CharWidth() * addition;
+                mouseInput.cx += addition;
+            } else if (key.vk == TCODK_KP7) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.x -= Game::Inst()->CharWidth() * addition;
+                mouseInput.cx -= addition;
+                mouseInput.y -= Game::Inst()->CharHeight() * addition;
+                mouseInput.cy -= addition;
+            } else if (key.vk == TCODK_KP8) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.y -= Game::Inst()->CharHeight() * addition;
+                mouseInput.cy -= addition;
+            } else if (key.vk == TCODK_KP9) {
+                TCODMouse::showCursor(false);
+                drawCursor = true;
+                mouseInput.x += Game::Inst()->CharWidth() * addition;
+                mouseInput.cx += addition;
+                mouseInput.y -= Game::Inst()->CharHeight() * addition;
+                mouseInput.cy -= addition;
+            } else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
+                lbuttonPressed = true;
+            } else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
+            } else if (key.vk == TCODK_PRINTSCREEN) { 
+                Data::SaveScreenshot();
+            }
+        } else {
+            if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
+                inputString += key.c;
+            } else if (key.vk == TCODK_BACKSPACE) {
+                if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
+            }
+        }
+        if (key.vk == TCODK_ESCAPE && menuOpen) {
+            rbuttonPressed = true;
+        }
+    }
 
 	if (mouseInput.x < 0) {
 		Game::Inst()->upleft.X(Game::Inst()->upleft.X() + mouseInput.cx);
@@ -240,7 +242,8 @@ void UI::HandleMouse() {
 		b.Y(mouseInput.cy + Game::Inst()->upleft.Y());
 	}
 
-	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, key);
+	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
+    
 	if (lbuttonPressed) {
         if (draggingViewport) {
             draggingViewport = false;

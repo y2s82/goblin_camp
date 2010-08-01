@@ -38,6 +38,8 @@ public:
     void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
     int TotalHeight();
     MenuResult Update(int, int, bool, TCOD_key_t);
+    int Selected();
+    void Select(int);
 };
 
 template <class T, class C>
@@ -83,4 +85,17 @@ MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
         return MENUHIT;
     }
     return NOMENUHIT;
+}
+
+template <class T, class C>
+int UIList<T, C>::Selected() {
+    if(selection >= 0 && selection < items->size()) {
+        return selection;
+    }
+    return -1;
+}
+
+template <class T, class C>
+void UIList<T, C>::Select(int i) {
+    selection = i;
 }

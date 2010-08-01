@@ -32,13 +32,15 @@ enum MenuResult {
 class Drawable {
 protected:
 	int _x, _y, width, height;
+    boost::function<bool()> visible;
 public:
     Drawable(int x, int y, int nwidth, int nheight):
-    _x(x), _y(y), width(nwidth), height(nheight) {}
+    _x(x), _y(y), width(nwidth), height(nheight), visible(0) {}
     virtual void Draw(int, int, TCODConsole *) = 0;
 	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
     int Height() { return height; }
-    virtual bool Visible() { return true; }
+    bool Visible() { return !visible || visible(); }
+    void SetVisible(boost::function<bool()> nvisible) { visible = nvisible; }
 };
 
 class Scrollable {
