@@ -31,8 +31,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Data.hpp"
-#include "StockManagerDialog.hpp"
-#include "SquadsDialog.hpp"
+#include "UI/StockManagerDialog.hpp"
+#include "UI/SquadsDialog.hpp"
 
 static TCOD_key_t NO_KEY = {
     TCODK_NONE, 0, false, false, false, false, false, false

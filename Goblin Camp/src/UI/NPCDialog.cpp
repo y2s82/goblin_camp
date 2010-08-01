@@ -22,9 +22,9 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "NPCDialog.hpp"
-#include "ScrollPanel.hpp"
-#include "UIList.hpp"
+#include "UI/NPCDialog.hpp"
+#include "UI/ScrollPanel.hpp"
+#include "UI/UIList.hpp"
 
 Dialog* NPCDialog::npcListDialog = 0;
 Dialog* NPCDialog::NPCListDialog() {

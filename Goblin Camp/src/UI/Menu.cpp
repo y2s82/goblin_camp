@@ -22,14 +22,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "Menu.hpp"
+#include "UI/Menu.hpp"
 #include "UI.hpp"
-#include "UIComponents.hpp"
-#include "JobDialog.hpp"
-#include "AnnounceDialog.hpp"
-#include "StockManagerDialog.hpp"
-#include "SquadsDialog.hpp"
-#include "NPCDialog.hpp"
+#include "UI/UIComponents.hpp"
+#include "UI/JobDialog.hpp"
+#include "UI/AnnounceDialog.hpp"
+#include "UI/StockManagerDialog.hpp"
+#include "UI/SquadsDialog.hpp"
+#include "UI/NPCDialog.hpp"
 
 MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
 	label = ntext;

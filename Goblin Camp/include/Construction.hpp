@@ -26,7 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Entity.hpp"
 #include "Item.hpp"
 #include "Container.hpp"
-#include "UIComponents.hpp"
+#include "UI/UIComponents.hpp"
 
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999

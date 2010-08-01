@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/function.hpp>
 #include <boost/weak_ptr.hpp>
 
-#include "Menu.hpp"
+#include "UI/Menu.hpp"
 #include "Entity.hpp"
 #include "Game.hpp"
 

@@ -22,8 +22,8 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "AnnounceDialog.hpp"
-#include "ScrollPanel.hpp"
+#include "UI/AnnounceDialog.hpp"
+#include "UI/ScrollPanel.hpp"
 #include "Announce.hpp"
 
 void AnnounceDialog::Draw(int x, int y, int scroll, int width, int height, TCODConsole* console) {

@@ -34,7 +34,7 @@ namespace fs = boost::filesystem;
 #include "NatureObject.hpp"
 #include "NPC.hpp"
 #include "Construction.hpp"
-#include "YesNoDialog.hpp"
+#include "UI/YesNoDialog.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
 void _ImplFindPersonalDirectory(std::string&);

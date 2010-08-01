@@ -22,11 +22,11 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "ConstructionDialog.hpp"
-#include "Button.hpp"
-#include "ScrollPanel.hpp"
-#include "UIList.hpp"
-#include "Label.hpp"
+#include "UI/ConstructionDialog.hpp"
+#include "UI/Button.hpp"
+#include "UI/ScrollPanel.hpp"
+#include "UI/UIList.hpp"
+#include "UI/Label.hpp"
 #include "UI.hpp"
 
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
@@ -87,7 +87,7 @@ void ConstructionDialog::DrawCategory(ItemCat category, int i, int x, int y, boo
     if (!category.parent) {
         console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
     } else {
-        if (i+1 < Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {
+        if (i+1 < (signed int)Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {
             console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
         } else {
             console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());

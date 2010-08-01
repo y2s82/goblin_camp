@@ -22,14 +22,14 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/format.hpp>
 
-#include "SquadsDialog.hpp"
-#include "ScrollPanel.hpp"
-#include "Label.hpp"
-#include "Button.hpp"
-#include "Spinner.hpp"
+#include "UI/SquadsDialog.hpp"
+#include "UI/ScrollPanel.hpp"
+#include "UI/Label.hpp"
+#include "UI/Button.hpp"
+#include "UI/Spinner.hpp"
 #include "UI.hpp"
-#include "TextBox.hpp"
-#include "Frame.hpp"
+#include "UI/TextBox.hpp"
+#include "UI/Frame.hpp"
 #include "Announce.hpp"
 
 SquadsDialog* SquadsDialog::squadDialog = 0;
@@ -84,17 +84,15 @@ void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > s
 }
 
 boost::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
-    int count = 0;
-    for(std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin(); it != Game::Inst()->squadList.end(); it++) {
-        if(count == i) {
-            return (*it).second;
-        }
-    }
+	std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
+	if (i < Game::Inst()->squadList.size()) {
+		return boost::next(it, i)->second;
+	}
     return boost::shared_ptr<Squad>();
 }
 
 void SquadsDialog::SelectSquad(int i) {
-    if(i >= 0 && i < Game::Inst()->squadList.size()) {
+    if(i >= 0 && i < (signed int)Game::Inst()->squadList.size()) {
         rightFrame->SetTitle("Modify Squad");
         squadName = GetSquad(i)->Name();
         squadPriority = GetSquad(i)->Priority();
