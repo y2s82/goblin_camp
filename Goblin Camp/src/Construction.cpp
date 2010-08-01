@@ -31,7 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "UI.hpp"
-#include "Menu.hpp"
+#include "ConstructionDialog.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -552,7 +552,7 @@ void Construction::Dismantle() {
 }
 
 Panel *Construction::GetContextMenu() {
-    return ConstructionMenu::ConstructionInfoMenu(this);
+    return ConstructionDialog::ConstructionInfoDialog(this);
 }
 
 ConstructionPreset::ConstructionPreset() :

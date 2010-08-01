@@ -31,6 +31,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Data.hpp"
+#include "StockManagerDialog.hpp"
+#include "SquadsDialog.hpp"
 
 static TCOD_key_t NO_KEY = {
     TCODK_NONE, 0, false, false, false, false, false, false
@@ -97,7 +99,7 @@ void UI::HandleKeyboard() {
             } else if (key.c == 's') {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
-                ChangeMenu(StockManagerMenu::StocksMenu());
+                ChangeMenu(StockManagerDialog::StocksDialog());
             } else if (key.c == 'f') {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
@@ -105,7 +107,7 @@ void UI::HandleKeyboard() {
             } else if (key.c == 'm') {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
-                ChangeMenu(SquadsMenu::SquadMenu());
+                ChangeMenu(SquadsDialog::SquadDialog());
             } else if (key.c == 'h') {
                 keyHelpTextColor = 255;
             }
