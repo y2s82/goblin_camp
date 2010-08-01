@@ -99,10 +99,6 @@ void StartNewGame() {
 	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), middleCorner, itemBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), middleCorner, itemBottomCorner);
 
-	for (int i = 0; i < Item::Presets.size(); ++i) {
-		game->CreateItem(Coordinate(20,20), i);
-	}
-
 	MainLoop();
 }
 
