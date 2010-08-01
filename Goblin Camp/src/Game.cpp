@@ -41,6 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 #include "Data.hpp"
+#include "YesNoDialog.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -316,7 +317,14 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
-	if (confirm && !Menu::YesNoDialog("Really exit?")) return;
+    if (confirm) {
+        YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+    } else {
+        ExitConfirmed();
+    }
+}
+
+void Game::ExitConfirmed() {
 	Logger::End();
 	exit(0);
 }
