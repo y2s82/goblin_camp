@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 	extern const char *_GOBLIN_CAMP_VERSION_;
 #	define GC_VERSION _GOBLIN_CAMP_VERSION_
 #elif !defined(GC_VERSION)
-#	define GC_VERSION "Goblin Camp 0.111"
+#	define GC_VERSION "Goblin Camp 0.12"
 #endif
 
 int GCMain() {
