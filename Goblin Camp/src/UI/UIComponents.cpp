@@ -169,7 +169,7 @@ MenuResult TextBox::Update(int x, int y, bool clicked, TCOD_key_t key) {
         value->erase(value->end() - 1);
         return KEYRESPOND;
     } else if(key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-') {
-        (*value) += key.c;
+        if (value->size() < width) (*value) += key.c;
         return KEYRESPOND;
     }
     return NOMENUHIT;
