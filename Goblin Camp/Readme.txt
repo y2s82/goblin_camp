@@ -9,6 +9,10 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.111: ---
+
+Fixed stockmanager not scrolling
+
 -- Version 0.11: --
 Lots of small fixes and enhancements, and a few major additions. You can now 
 craft weapons to make your orcs more effective fighters, mine stone from 
