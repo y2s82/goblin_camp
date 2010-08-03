@@ -78,7 +78,7 @@ actions make-nsis {
 # Collect sources and dependencies
 ##
 data-files      = [ path.glob $(GC_SOURCE_ROOT) : *.dat *.ini *.png *.txt ] ;
-current-sources = [ path.glob $(GC_SOURCES) : *.cpp ] ;
+current-sources = [ path.glob-tree $(GC_SOURCES) : *.cpp : win32 linux osx ] ;
 win32-sources   = [ get-platform-sources $(GC_WIN32_SOURCES) ] ;
 linux-sources   = [ get-platform-sources $(GC_LINUX_SOURCES) ] ;
 macosx-sources  = [ get-platform-sources $(GC_OSX_SOURCES) ] ;
