@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 	extern const char *_GOBLIN_CAMP_VERSION_;
 #	define GC_VERSION _GOBLIN_CAMP_VERSION_
 #elif !defined(GC_VERSION)
-#	define GC_VERSION "Goblin Camp 0.11"
+#	define GC_VERSION "Goblin Camp 0.111"
 #endif
 
 int GCMain() {
@@ -98,6 +98,7 @@ void StartNewGame() {
 	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), middleCorner, itemBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), middleCorner, itemBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), middleCorner, itemBottomCorner);
+
 	MainLoop();
 }
 

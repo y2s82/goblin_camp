@@ -30,6 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 #include "GCamp.hpp"
 #include "StockManager.hpp"
+#include "UI.hpp"
+#include "UI/ConstructionDialog.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -260,6 +262,7 @@ int Construction::Use() {
 	return -1;
 }
 
+std::set<std::string> Construction::Categories = std::set<std::string>();
 std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
 
 class ConstructionListener : public ITCODParserListener {
@@ -324,6 +327,11 @@ class ConstructionListener : public ITCODParserListener {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets.back().graphic.push_back((int)TCOD_list_get(value.list,i));
 			}
+        } else if (boost::iequals(name, "category")) {
+            Construction::Presets.back().category = value.s;
+            Construction::Categories.insert(value.s);
+        } else if (boost::iequals(name, "placementType")) {
+            Construction::Presets.back().placementType = value.i;
 		} else if (boost::iequals(name, "products")) {
 			Construction::Presets.back().producer = true;
 			Construction::Presets.back().tags[WORKSHOP] = true;
@@ -386,6 +394,8 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("furniture");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
+    constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
+    constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
 	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
 	constructionTypeStruct->addFlag("unique");
@@ -541,6 +551,10 @@ void Construction::Dismantle() {
 	}
 }
 
+Panel *Construction::GetContextMenu() {
+    return ConstructionDialog::ConstructionInfoDialog(this);
+}
+
 ConstructionPreset::ConstructionPreset() :
 maxCondition(0),
 	graphic(std::vector<int>()),
@@ -554,6 +568,7 @@ maxCondition(0),
 	dynamic(false),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
+    placementType(UIPLACEMENT),
 	blocksLight(true),
 	permanent(false),
 	color(TCODColor::black)
