@@ -63,6 +63,10 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	}
 
 	attack = Item::Presets[type].attack;
+
+	for (int i = 0; i < RES_COUNT; ++i) {
+		resistanceChanges[i] = Item::Presets[type].resistanceChanges[i];
+	}
 }
 
 Item::~Item() {
@@ -419,7 +423,11 @@ graphic('?'),
 	decaySpeed(0),
 	decayList(std::vector<ItemType>()),
 	attack(Attack())
-{}
+{
+	for (int i = 0; i < RES_COUNT; ++i) {
+		resistanceChanges[i] = 1.0;
+	}
+}
 
 OrganicItem::OrganicItem(Coordinate pos, ItemType typeVal) : Item(pos, typeVal),
 	nutrition(-1),
