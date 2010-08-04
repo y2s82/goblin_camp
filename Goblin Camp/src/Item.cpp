@@ -65,7 +65,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	attack = Item::Presets[type].attack;
 
 	for (int i = 0; i < RES_COUNT; ++i) {
-		resistanceChanges[i] = Item::Presets[type].resistanceChanges[i];
+		resistances[i] = Item::Presets[type].resistances[i];
 	}
 }
 
@@ -326,6 +326,16 @@ private:
 			presetProjectile.back() = value.s;
 		} else if (boost::iequals(name,"parent")) {
 			presetCategoryParent.back() = value.s;
+		} else if (boost::iequals(name,"physical")) {
+			Item::Presets.back().resistances[PHYSICAL_RES] = value.i;
+		} else if (boost::iequals(name,"magic")) {
+			Item::Presets.back().resistances[MAGIC_RES] = value.i;
+		} else if (boost::iequals(name,"cold")) {
+			Item::Presets.back().resistances[COLD_RES] = value.i;
+		} else if (boost::iequals(name,"fire")) {
+			Item::Presets.back().resistances[FIRE_RES] = value.i;
+		} else if (boost::iequals(name,"poison")) {
+			Item::Presets.back().resistances[POISON_RES] = value.i;
 		}
 		return true;
 	}
@@ -373,6 +383,14 @@ void Item::LoadPresets(std::string filename) {
 	attackTypeStruct->addProperty("projectile", TCOD_TYPE_STRING, false);
 
 	itemTypeStruct->addStructure(attackTypeStruct);
+
+	TCODParserStruct *resistancesStruct = parser.newStructure("resistances");
+	resistancesStruct->addProperty("physical", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("magic", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
+	itemTypeStruct->addStructure(resistancesStruct);
 
 	ItemListener* itemListener = new ItemListener();
 	parser.run(filename.c_str(), itemListener);
@@ -425,7 +443,7 @@ graphic('?'),
 	attack(Attack())
 {
 	for (int i = 0; i < RES_COUNT; ++i) {
-		resistanceChanges[i] = 1.0;
+		resistances[i] = 0;
 	}
 }
 
