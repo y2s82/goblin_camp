@@ -59,7 +59,7 @@ struct ItemPreset {
 	int decaySpeed;
 	std::vector<ItemType> decayList;
 	Attack attack;
-	double resistanceChanges[RES_COUNT];
+	int resistances[RES_COUNT];
 };
 
 class Item : public Entity {
@@ -86,7 +86,7 @@ private:
 	static std::map<std::string, ItemCategory> itemCategoryNames;
 
 	Attack attack;
-	double resistanceChanges[RES_COUNT];
+	int resistances[RES_COUNT];
 
 protected:
 	int ownerFaction;
