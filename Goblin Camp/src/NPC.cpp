@@ -688,7 +688,26 @@ MOVENEARend:
 					carried.reset();
 					TaskFinished(TASKSUCCESS);
 #ifdef DEBUG
-					std::cout<<"Wielded "<<mainHand.lock()->Name()<<" successfully\n";
+					std::cout<<name<<" wielded "<<mainHand.lock()->Name()<<"\n";
+#endif
+					break;
+				}
+				TaskFinished(TASKFAILFATAL);
+				break;
+
+			case WEAR:
+				if (carried.lock()) {
+					if (armor.lock()) { //Remove armor and drop if already wearing
+						inventory->RemoveItem(armor);
+						armor.lock()->Position(Position());
+						armor.lock()->PutInContainer(boost::weak_ptr<Item>());
+						armor.reset();
+					}
+					armor = carried;
+					carried.reset();
+					TaskFinished(TASKSUCCESS);
+#ifdef DEBUG
+					std::cout<<name<<" wearing "<<mainHand.lock()->Name()<<"\n";
 #endif
 					break;
 				}
