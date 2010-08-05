@@ -208,7 +208,7 @@ void NPC::HandleHunger() {
 	}
 	if (!found) {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"));
-		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Raw Food"));}
+		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Raw food"));}
 		if (!item.lock()) { //Nothing to eat!
 			//:ohdear:
 		} else { //Something to eat!
