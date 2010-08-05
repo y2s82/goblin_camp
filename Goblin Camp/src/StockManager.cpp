@@ -98,7 +98,7 @@ void StockManager::Init() {
 #endif
 			//Seeds, raw food and fibers are added even though they aren't "produced" so to speak
 			if (Item::Presets[item].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[item].categories.end() ||
-				Item::Presets[item].categories.find(Item::StringToItemCategory("Raw Food")) != Item::Presets[item].categories.end() ||
+				Item::Presets[item].categories.find(Item::StringToItemCategory("Raw food")) != Item::Presets[item].categories.end() ||
 				Item::Presets[item].categories.find(Item::StringToItemCategory("Fiber")) != Item::Presets[item].categories.end()) {
 #ifdef DEBUG
 					std::cout<<"Adding "<<Item::Presets[item].name<<" to stocks anyway\n";
