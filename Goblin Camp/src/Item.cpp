@@ -228,7 +228,7 @@ public:
 private:
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+		std::cout<<(boost::format("new %s structure\n") % str->getName()).str();
 #endif
 		if (boost::iequals(str->getName(), "category_type")) {
 			mode = CATEGORYMODE;
@@ -342,7 +342,7 @@ private:
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
+		std::cout<<(boost::format("end of %s structure\n") % str->getName()).str();
 #endif
 		return true;
 	}
