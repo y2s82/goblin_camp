@@ -712,7 +712,7 @@ MOVENEARend:
 					carried.reset();
 					TaskFinished(TASKSUCCESS);
 #ifdef DEBUG
-					std::cout<<name<<" wearing "<<mainHand.lock()->Name()<<"\n";
+					std::cout<<name<<" wearing "<<armor.lock()->Name()<<"\n";
 #endif
 					break;
 				}
@@ -891,6 +891,10 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 						break;
 					}
 			}
+		}
+
+		if (!npc->armor.lock() && npc->Faction() == 0 && squad->Armor() >= 0) {
+			npc->FindNewArmor();
 		}
 
 		switch (squad->Order()) {
@@ -1360,8 +1364,31 @@ void NPC::FindNewWeapon() {
 	}
 }
 
+void NPC::FindNewArmor() {
+	int armorValue = 0;
+	if (armor.lock() && armor.lock()->IsCategory(squad.lock()->Armor())) {
+		armorValue = armor.lock()->RelativeValue();
+	}
+	ItemCategory armorCategory = squad.lock() ? squad.lock()->Armor() : Item::StringToItemCategory("Armor");
+	boost::weak_ptr<Item> newArmor = Game::Inst()->FindItemByCategoryFromStockpiles(armorCategory, BETTERTHAN, armorValue);
+	if (boost::shared_ptr<Item> arm = newArmor.lock()) {
+		boost::shared_ptr<Job> armorJob(new Job("Grab armor"));
+		armorJob->internal = true;
+		armorJob->ReserveEntity(arm);
+		armorJob->tasks.push_back(Task(MOVE, arm->Position()));
+		armorJob->tasks.push_back(Task(TAKE, arm->Position(), arm));
+		armorJob->tasks.push_back(Task(WEAR));
+		jobs.push_back(armorJob);
+		run = true;
+	}
+}
+
 boost::weak_ptr<Item> NPC::Wielding() {
 	return mainHand;
+}
+
+boost::weak_ptr<Item> NPC::Wearing() {
+	return armor;
 }
 
 bool NPC::HasHands() { return hasHands; }

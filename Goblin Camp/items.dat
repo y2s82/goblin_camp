@@ -119,9 +119,6 @@ category_type "Piercing weapon" {
 category_type "Armor" {
 }
 
-category_type "Metal" {
-}
-
 category_type "Light armor" {
 	parent="Armor"
 }
@@ -132,6 +129,9 @@ category_type "Medium armor" {
 
 category_type "Heavy armor" {
 	parent="Armor"
+}
+
+category_type "Metal" {
 }
 
 category_type "Garbage" {
