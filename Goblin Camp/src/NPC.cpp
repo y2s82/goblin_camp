@@ -152,7 +152,8 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
 		jobs.pop_front();
 		taskIndex = 0;
-		DropCarriedItem();
+		DropItem(carried);
+		carried.reset();
 		foundItem = boost::weak_ptr<Item>();
 	}
 
@@ -458,7 +459,8 @@ MOVENEARend:
 				break;
 
 			case DROP:
-				DropCarriedItem();
+				DropItem(carried);
+				carried.reset();
 				TaskFinished(TASKSUCCESS);
 				break;
 
@@ -470,7 +472,8 @@ MOVENEARend:
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
 						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
 					} else {
-						DropCarriedItem();
+						DropItem(carried); 
+						carried.reset();
 						TaskFinished(TASKFAILFATAL);
 						break;
 					}
@@ -679,9 +682,7 @@ MOVENEARend:
 			case WIELD:
 				if (carried.lock()) {
 					if (mainHand.lock()) { //Drop currently wielded weapon if such exists
-						inventory->RemoveItem(mainHand);
-						mainHand.lock()->Position(Position());
-						mainHand.lock()->PutInContainer(boost::weak_ptr<Item>());
+						DropItem(mainHand);
 						mainHand.reset();
 					}
 					mainHand = carried;
@@ -698,9 +699,7 @@ MOVENEARend:
 			case WEAR:
 				if (carried.lock()) {
 					if (armor.lock()) { //Remove armor and drop if already wearing
-						inventory->RemoveItem(armor);
-						armor.lock()->Position(Position());
-						armor.lock()->PutInContainer(boost::weak_ptr<Item>());
+						DropItem(armor);
 						armor.reset();
 					}
 					armor = carried;
@@ -831,12 +830,11 @@ void NPC::Kill() {
 	}
 }
 
-void NPC::DropCarriedItem() {
-	if (carried.lock()) {
-		inventory->RemoveItem(carried);
-		carried.lock()->Position(Position());
-		carried.lock()->PutInContainer(boost::weak_ptr<Item>());
-		carried.reset();
+void NPC::DropItem(boost::weak_ptr<Item> item) {
+	if (item.lock()) {
+		inventory->RemoveItem(item);
+		item.lock()->Position(Position());
+		item.lock()->PutInContainer(boost::weak_ptr<Item>());
 	}
 }
 

@@ -196,7 +196,7 @@ public:
 
 	bool Dead();
 	void Kill();
-	void DropCarriedItem();
+	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>);
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();
