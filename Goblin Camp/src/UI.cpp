@@ -792,6 +792,9 @@ void SideBar::Draw(TCODConsole* console) {
 			if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
 				console->print(edgeX-width+1, topY+27, "W: %s", weapon->Name().c_str());
 			}
+			if (boost::shared_ptr<Item> armor = npc->Wearing().lock()) {
+				console->print(edgeX-width+1, topY+28, "A: %s", armor->Name().c_str());
+			}
 		} else if (construction) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
 			if (construct->HasTag(WORKSHOP)) {

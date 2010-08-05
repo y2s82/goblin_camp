@@ -204,6 +204,8 @@ public:
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
 	bool HasHands();
+	void FindNewArmor();
+	boost::weak_ptr<Item> Wearing();
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;

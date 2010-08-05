@@ -53,4 +53,7 @@ public:
     std::string SelectedSquadWeapon();
     void SelectWeapon();
     void Rearm();
+	std::string SelectedSquadArmor();
+	void SelectArmor();
+	void Reequip();
 };
