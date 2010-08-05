@@ -125,6 +125,7 @@ public:
 	virtual int Faction() const;
 	Attack GetAttack() const;
 	int RelativeValue();
+	int Resistance(int) const;
 };
 
 class OrganicItem : public Item {

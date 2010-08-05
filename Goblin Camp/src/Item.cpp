@@ -415,6 +415,8 @@ int Item::RelativeValue() {
 	return (minDamage + maxDamage) / 2;
 }
 
+int Item::Resistance(int i) const { return resistances[i]; }
+
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
 	parent(0)

@@ -256,6 +256,12 @@ void NPC::Update() {
 	else _bgcolor = TCODColor::black;
 
 	UpdateStatusEffects();
+	//Apply armor effects if present
+	if (boost::shared_ptr<Item> arm = armor.lock()) {
+		for (int i = 0; i < RES_COUNT; ++i) {
+			effectiveResistances[i] += arm->Resistance(i);
+		}
+	}
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
