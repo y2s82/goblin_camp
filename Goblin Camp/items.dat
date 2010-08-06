@@ -101,6 +101,17 @@ category_type "Statue" {
 category_type "Leather" {
 }
 
+category_type "Metal" {
+}
+
+category_type "Impure metal" {
+	parent="Metal"
+}
+
+category_type "Metal bar" {
+	parent="Metal"
+} 
+
 category_type "Weapon" {
 }
 
@@ -129,9 +140,6 @@ category_type "Medium armor" {
 
 category_type "Heavy armor" {
 	parent="Armor"
-}
-
-category_type "Metal" {
 }
 
 category_type "Garbage" {
@@ -503,7 +511,7 @@ item_type "Chainmail" {
 	category = ["Medium armor"]
 	graphic = 91
 	color = "255,255,255"
-	components = ["Metal", "Metal", "Metal"]
+	components = ["Metal bar", "Metal bar", "Metal bar"]
 	resistances {
 		physical = 20
 	}
