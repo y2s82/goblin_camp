@@ -123,6 +123,7 @@ private:
 	boost::weak_ptr<Item> carried;
 	boost::weak_ptr<Item> mainHand;
 	boost::weak_ptr<Item> offHand;
+	boost::weak_ptr<Item> armor;
 	int thirst, hunger, weariness;
 	int thinkSpeed;
 	std::list<StatusEffect> statusEffects;
@@ -195,7 +196,7 @@ public:
 
 	bool Dead();
 	void Kill();
-	void DropCarriedItem();
+	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>);
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();
@@ -203,6 +204,8 @@ public:
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
 	bool HasHands();
+	void FindNewArmor();
+	boost::weak_ptr<Item> Wearing();
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;

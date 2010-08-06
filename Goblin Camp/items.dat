@@ -25,11 +25,11 @@ category_type "Sharpened stone" {
 category_type "Food" {
 }
 
-category_type "Raw Food" {
+category_type "Meat" {
 	parent="Food"
 }
 
-category_type "Prepared Food" {
+category_type "Prepared food" {
 	parent="Food"
 }
 
@@ -62,23 +62,23 @@ category_type "Flour" {
 category_type "Container" {
 }
 
-category_type "Plank Container" {
+category_type "Plank container" {
 	parent="Container"
 }
 
-category_type "Liquid Container" {
+category_type "Liquid container" {
 	parent="Container"
 }
 
-category_type "Bone Container" {
+category_type "Bone container" {
 	parent="Container"
 }
 
-category_type "Seed Container" {
+category_type "Seed container" {
 	parent="Container"
 }
 
-category_type "Flour Container" {
+category_type "Flour container" {
 	parent="Container"
 }
 
@@ -98,6 +98,9 @@ category_type "Statue" {
 	parent="Furniture"
 }
 
+category_type "Leather" {
+}
+
 category_type "Weapon" {
 }
 
@@ -111,6 +114,24 @@ category_type "Slashing weapon" {
 
 category_type "Piercing weapon" {
 	parent="Weapon"
+}
+
+category_type "Armor" {
+}
+
+category_type "Light armor" {
+	parent="Armor"
+}
+
+category_type "Medium armor" {
+	parent="Armor"
+}
+
+category_type "Heavy armor" {
+	parent="Armor"
+}
+
+category_type "Metal" {
 }
 
 category_type "Garbage" {
@@ -142,7 +163,7 @@ item_type "Wood plank" {
 	graphic = 124
 	color = "255,73,7"
 	components = ["Log"]
-	fitsin = "Plank Container"
+	fitsin = "Plank container"
 	multiplier = 10
 }
 
@@ -161,7 +182,7 @@ item_type "Bone door" {
 }
 
 item_type "Wooden barrel" {
-	category = ["Liquid Container"]
+	category = ["Liquid container"]
 	containerSize = 20
 	graphic = 155
 	color = "255,73,7"
@@ -169,7 +190,7 @@ item_type "Wooden barrel" {
 }
 
 item_type "Crate" {
-	category = ["Plank Container"]
+	category = ["Plank container"]
 	containerSize = 10
 	graphic = 230
 	color = "255,186,0"
@@ -205,7 +226,7 @@ item_type "Bloodberry seed" {
 	graphic = 250
 	color = "175,128,128"
 	growth = "Young Bloodberry shrub"
-	fitsin = "Seed Container"
+	fitsin = "Seed container"
 }
 
 item_type "Young Bloodberry shrub" {
@@ -231,7 +252,7 @@ item_type "Blueleaf seed" {
 	graphic = 250
 	color = "128,128,175"
 	growth = "Blueleaf sapling"
-	fitsin = "Seed Container"
+	fitsin = "Seed container"
 }
 
 item_type "Blueleaf sapling" {
@@ -282,13 +303,13 @@ item_type "Wine" {
 	graphic = 33
 	color = "127,0,0"
 	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
-	containIn = "Liquid Container"
+	containIn = "Liquid container"
 	nutrition = 72000
 	multiplier = 10
 }
 
 item_type "Pie" {
-	category = ["Prepared Food"]
+	category = ["Prepared food"]
 	graphic = 37
 	color = "255,0,220"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour"]
@@ -296,7 +317,7 @@ item_type "Pie" {
 }
 
 item_type "Meat" {
-	category = ["Raw Food"]
+	category = ["Meat"]
 	graphic = 37
 	color = "198,0,0"
 	components = ["Corpse"]
@@ -306,7 +327,7 @@ item_type "Meat" {
 }
 
 item_type "Bone Stew" {
-	category = ["Food"]
+	category = ["Prepared food"]
 	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat"]
@@ -314,7 +335,7 @@ item_type "Bone Stew" {
 }
 
 item_type "Bread" {
-	category = ["Prepared Food"]
+	category = ["Prepared food"]
 	graphic = 37
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
@@ -326,11 +347,11 @@ item_type "Flour" {
 	graphic = 44
 	color = "255,233,177"
 	components = ["Seed", "Seed"]
-	containIn = "Flour Container"
+	containIn = "Flour container"
 }
 
 item_type "Flower" {
-	category = ["Raw Food"]
+	category = ["Garbage"]
 	graphic = 12
 	color = "255,255,255"
 	nutrition = 500
@@ -453,7 +474,7 @@ item_type "Stone statue" {
 }
 
 item_type "Seed sack" {
-	category = ["Seed Container"]
+	category = ["Seed container"]
 	containerSize = 50
 	graphic = 208
 	color = "255,255,255"
@@ -461,9 +482,29 @@ item_type "Seed sack" {
 }
 
 item_type "Flour sack" {
-	category = ["Flour Container"]
+	category = ["Flour container"]
 	containerSize = 50
 	graphic = 208
 	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
+}
+
+item_type "Leather armor" {
+	category = ["Light armor"]
+	graphic = 91
+	color = "255,255,255"
+	components = ["Leather", "Leather", "Leather"]
+	resistances {
+		physical = 10
+	}
+}
+
+item_type "Chainmail" {
+	category = ["Medium armor"]
+	graphic = 91
+	color = "255,255,255"
+	components = ["Metal", "Metal", "Metal"]
+	resistances {
+		physical = 20
+	}
 }

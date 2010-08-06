@@ -87,7 +87,6 @@
     <ClInclude Include="include\JobManager.hpp" />
     <ClInclude Include="include\Logger.hpp" />
     <ClInclude Include="include\Map.hpp" />
-    <ClInclude Include="include\Menu.hpp" />
     <ClInclude Include="include\NatureObject.hpp" />
     <ClInclude Include="include\NPC.hpp" />
     <ClInclude Include="include\Squad.hpp" />

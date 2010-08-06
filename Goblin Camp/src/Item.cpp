@@ -63,6 +63,10 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	}
 
 	attack = Item::Presets[type].attack;
+
+	for (int i = 0; i < RES_COUNT; ++i) {
+		resistances[i] = Item::Presets[type].resistances[i];
+	}
 }
 
 Item::~Item() {
@@ -224,7 +228,7 @@ public:
 private:
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
+		std::cout<<(boost::format("new %s structure\n") % str->getName()).str();
 #endif
 		if (boost::iequals(str->getName(), "category_type")) {
 			mode = CATEGORYMODE;
@@ -322,13 +326,23 @@ private:
 			presetProjectile.back() = value.s;
 		} else if (boost::iequals(name,"parent")) {
 			presetCategoryParent.back() = value.s;
+		} else if (boost::iequals(name,"physical")) {
+			Item::Presets.back().resistances[PHYSICAL_RES] = value.i;
+		} else if (boost::iequals(name,"magic")) {
+			Item::Presets.back().resistances[MAGIC_RES] = value.i;
+		} else if (boost::iequals(name,"cold")) {
+			Item::Presets.back().resistances[COLD_RES] = value.i;
+		} else if (boost::iequals(name,"fire")) {
+			Item::Presets.back().resistances[FIRE_RES] = value.i;
+		} else if (boost::iequals(name,"poison")) {
+			Item::Presets.back().resistances[POISON_RES] = value.i;
 		}
 		return true;
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
+		std::cout<<(boost::format("end of %s structure\n") % str->getName()).str();
 #endif
 		return true;
 	}
@@ -370,6 +384,14 @@ void Item::LoadPresets(std::string filename) {
 
 	itemTypeStruct->addStructure(attackTypeStruct);
 
+	TCODParserStruct *resistancesStruct = parser.newStructure("resistances");
+	resistancesStruct->addProperty("physical", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("magic", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
+	itemTypeStruct->addStructure(resistancesStruct);
+
 	ItemListener* itemListener = new ItemListener();
 	parser.run(filename.c_str(), itemListener);
 	itemListener->translateNames();
@@ -392,6 +414,8 @@ int Item::RelativeValue() {
 	int maxDamage = (int)((amount.nb_dices * amount.nb_faces) + amount.addsub);
 	return (minDamage + maxDamage) / 2;
 }
+
+int Item::Resistance(int i) const { return resistances[i]; }
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
@@ -419,7 +443,11 @@ graphic('?'),
 	decaySpeed(0),
 	decayList(std::vector<ItemType>()),
 	attack(Attack())
-{}
+{
+	for (int i = 0; i < RES_COUNT; ++i) {
+		resistances[i] = 0;
+	}
+}
 
 OrganicItem::OrganicItem(Coordinate pos, ItemType typeVal) : Item(pos, typeVal),
 	nutrition(-1),

@@ -60,7 +60,8 @@ enum Action {
 	FLEEMAP,
 	SLEEP,
 	DISMANTLE,
-	WIELD
+	WIELD,
+	WEAR
 };
 
 enum TaskResult {
