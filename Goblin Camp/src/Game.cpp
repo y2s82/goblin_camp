@@ -837,6 +837,12 @@ void Game::GenerateMap() {
 		}
 	}
  
+	for (int x = 100; x < 150; ++x) {
+		for (int y = 100; y < 150; ++y) {
+			map->Type(x,y,TILEBOG);
+		}
+	}
+
 	std::vector<NPCType> peacefulAnimals;
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
