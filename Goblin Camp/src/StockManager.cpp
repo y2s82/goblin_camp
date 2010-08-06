@@ -143,17 +143,21 @@ void StockManager::Update() {
 					int workshopCount = std::distance(workshopRange.first, workshopRange.second);
 					if (workshopCount > 0) {
 						//We clamp this value to 10, no point in queuing up more at a time
-						difference = std::min(std::max(1, difference / workshopCount), 10);
-						//Now we just check that each workshop has 'difference' amount of jobs for this product
+						int jobCount = std::min(std::max(1, difference / workshopCount), 10);
+						//Now we just check that each workshop has 'jobCount' amount of jobs for this product
 						for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki =
-							workshopRange.first; worki != workshopRange.second; ++worki) {
+							workshopRange.first; worki != workshopRange.second && difference > 0; ++worki) {
 								int jobsFound = 0;
 								for (int jobi = 0; jobi < (signed int)worki->second.lock()->JobList()->size(); ++jobi) {
-									if ((*worki->second.lock()->JobList())[jobi] == *prodi) ++jobsFound;
+									if ((*worki->second.lock()->JobList())[jobi] == *prodi) {
+										++jobsFound;
+										--difference;
+									}
 								}
-								if (jobsFound < difference) {
-									for (int i = 0; i < difference - jobsFound; ++i) {
-										worki->second.lock()->AddJob(*prodi);
+								if (jobsFound < jobCount) {
+									for (int i = 0; i < jobCount - jobsFound; ++i) {
+										worki->second.lock()->AddJob(*prodi);									
+										if (rand() % 10 < 8) --difference; //Adds a bit of inexactness (see orcyness) to production
 									}
 								}
 						}
