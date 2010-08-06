@@ -209,8 +209,8 @@ void NPC::HandleHunger() {
 		if ((*jobIter)->name.find("Eat") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"));
-		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Raw food"));}
+		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"));
+		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"));}
 		if (!item.lock()) { //Nothing to eat!
 			//:ohdear:
 		} else { //Something to eat!

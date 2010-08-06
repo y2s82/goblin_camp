@@ -25,7 +25,7 @@ category_type "Sharpened stone" {
 category_type "Food" {
 }
 
-category_type "Raw food" {
+category_type "Meat" {
 	parent="Food"
 }
 
@@ -317,7 +317,7 @@ item_type "Pie" {
 }
 
 item_type "Meat" {
-	category = ["Raw food"]
+	category = ["Meat"]
 	graphic = 37
 	color = "198,0,0"
 	components = ["Corpse"]
@@ -327,7 +327,7 @@ item_type "Meat" {
 }
 
 item_type "Bone Stew" {
-	category = ["Food"]
+	category = ["Prepared food"]
 	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat"]
@@ -351,7 +351,7 @@ item_type "Flour" {
 }
 
 item_type "Flower" {
-	category = ["Raw food"]
+	category = ["Garbage"]
 	graphic = 12
 	color = "255,255,255"
 	nutrition = 500
