@@ -50,6 +50,7 @@ private:
 	boost::weak_ptr<Entity> targetEntity;
 	int priority;
 	ItemCategory weapon;
+	ItemCategory armor;
 public:
 	Squad(std::string name="Noname nancyboys", int members=0, int priority=0);
 	~Squad();
@@ -73,4 +74,7 @@ public:
 	ItemCategory Weapon();
 	void Weapon(ItemCategory);
 	void Rearm();
+	ItemCategory Armor();
+	void Armor(ItemCategory);
+	void Reequip();
 };
