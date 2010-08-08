@@ -132,18 +132,18 @@ void Spinner::Draw(int x, int y, TCODConsole *console) {
 }
 
 MenuResult Spinner::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if (x >= _x && x < _x + width && y == _y) {
-		if (clicked) {
+	if ((x >= _x && x < _x + width && y == _y) || (key.vk == TCODK_KPADD || key.vk == TCODK_KPSUB)) {
+		if (clicked || (key.vk == TCODK_KPADD || key.vk == TCODK_KPSUB)) {
 			int curr = value ? *value : getter();
 			int adj = UI::Inst()->ShiftPressed() ? 10 : 1;
 			int strWidth = 4 + numDigits(curr);
-			if(x == _x + width / 2 - strWidth / 2) {
+			if(x == _x + width / 2 - strWidth / 2 || key.vk == TCODK_KPSUB) {
 				if(value) {
 					(*value) = std::max(min, curr - adj);
 				} else {
 					setter(std::max(min, curr - adj));
 				}
-			} else if(x == _x + width / 2 + (strWidth-1) / 2) {
+			} else if(x == _x + width / 2 + (strWidth-1) / 2 || key.vk == TCODK_KPADD) {
 				if(value) {
 					(*value) = std::max(min, curr + adj);
 				} else {
@@ -216,6 +216,7 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
 		}
 		return MENUHIT;
 	}
+	if (key.vk != TCODK_NONE) return contents->Update(x, y, clicked, key);
 	return NOMENUHIT;
 }
 
