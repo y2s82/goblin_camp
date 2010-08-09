@@ -226,3 +226,59 @@ construction_type "Spawning pool" {
 	color="0,255,128"
 	unique
 }
+
+construction_type "Bloomery" {
+    category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,176,191,
+			  40, 10, 46, 10,
+			 170,157,176,217]
+	products=["Wrought iron"]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Brick","Brick","Brick","Brick","Brick"]
+}
+
+construction_type "Clay pit" {
+    category="Permanent"
+	graphicLength=5
+	graphic=[201, 203, 203, 203, 187,
+			204,  92,  31,  47, 185,
+			204,  16, 176,  17, 185,
+			204,  47,  30,  92, 185,
+			200, 202, 202, 202, 188]
+
+	products=["Red clay"]
+	walkable
+	maxCondition=800
+	productionx=2
+	productiony=2
+	spawnsCreatures="claypit"
+	spawnFrequency=600
+	permanent
+	color="220,80,70"
+}
+
+construction_type "Clay kiln" {
+    category="Workshops"
+	graphicLength=2
+	graphic=[ 10, 35,
+			  35, 46,
+			 231,  9,
+			   2,173]
+	products=["Amphora", "Red brick"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank"]
+	productionx=1
+	productiony=1
+}
+
+construction_type "Brick Wall" {
+    category="Basics"
+	wall
+	maxCondition=50
+	materials=["Brick"]
+}
