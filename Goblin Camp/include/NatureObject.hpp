@@ -68,6 +68,7 @@ public:
 	void Update();
 	virtual void CancelJob(int=0);
 	void Mark();
+	void Unmark();
 	bool Marked();
 	int Fell();
 	int Harvest();

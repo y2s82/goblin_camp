@@ -806,6 +806,13 @@ void Game::GenerateMap() {
 		}
 	}
 
+	for (int x = 100; x < 150; ++x) {
+		for (int y = 100; y < 150; ++y) {
+			map->Type(x,y,TILEBOG);
+		}
+	}
+
+
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
 			if (map->Walkable(x,y) && map->Type(x,y) == TILEGRASS) {
@@ -837,12 +844,6 @@ void Game::GenerateMap() {
 		}
 	}
  
-	for (int x = 100; x < 150; ++x) {
-		for (int y = 100; y < 150; ++y) {
-			map->Type(x,y,TILEBOG);
-		}
-	}
-
 	std::vector<NPCType> peacefulAnimals;
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
@@ -891,7 +892,7 @@ void Game::DesignateTree(Coordinate a, Coordinate b) {
 				if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
 					//TODO: Implement proper map marker system and change this to use that
 					natObj.lock()->Mark();
-					StockManager::Inst()->UpdateDesignations(natObj, true);
+					StockManager::Inst()->UpdateTreeDesignations(natObj, true);
 				}
 			}
 		}
@@ -921,6 +922,46 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 	Map::Inst()->NatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
 	natureList.erase(natObj.lock()->Uid());
+}
+
+bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
+	for (int x = target.X(); x < target.X()+size.X(); ++x) {
+		for (int y = target.Y(); y < target.Y()+size.Y(); ++y) {
+			if (Map::Inst()->Type(x,y) == type) return true;
+		}
+	}
+	return false;
+}
+
+void Game::DesignateBog(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (Map::Inst()->Type(x,y) == TILEBOG) {
+				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), true);
+				Map::Inst()->Mark(x,y);
+			}
+		}
+	}
+}
+
+void Game::Undesignate(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {	
+			int natUid = Map::Inst()->NatureObject(x,y);
+			if (natUid >= 0) {
+				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+				if (natObj.lock() && natObj.lock()->Tree() && natObj.lock()->Marked()) {
+					//TODO: Implement proper map marker system and change this to use that
+					natObj.lock()->Unmark();
+					StockManager::Inst()->UpdateTreeDesignations(natObj, false);
+				}
+			}
+			if (Map::Inst()->Type(x,y) == TILEBOG) {
+				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
+				Map::Inst()->Unmark(x,y);
+			}
+		}
+	}
 }
 
 std::string Game::SeasonToString(Season season) {
