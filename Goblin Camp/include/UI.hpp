@@ -30,7 +30,6 @@ enum UIState {
 	UIPLACEMENT,
 	UIABPLACEMENT,
 	UIRECTPLACEMENT,
-    
     UICOUNT
 };
 
@@ -95,6 +94,8 @@ public:
 	static void ChooseOrderTargetEntity(boost::shared_ptr<Squad>);
 	static void ChooseDesignateTree();
 	static void ChooseDismantle();
+	static void ChooseUndesignate();
+	static void ChooseDesignateBog();
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);

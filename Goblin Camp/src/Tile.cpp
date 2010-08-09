@@ -42,7 +42,8 @@ vis(true),
 	backColor(TCODColor::black),
 	natureObject(-1),
 	filth(boost::shared_ptr<FilthNode>()),
-	blood(boost::shared_ptr<BloodNode>())
+	blood(boost::shared_ptr<BloodNode>()),
+	marked(false)
 {
 	type(newType);
 }
@@ -85,6 +86,7 @@ void Tile::type(TileType newType) {
 		case 9: graphic = '\''; break;
 		}
 		foreColor = TCODColor(rand() % 185, 127, 70);
+		backColor = TCODColor(60,30,20);
 		_moveCost = rand() % 5 + 1;
 	} else { vis = false; walkable = false; buildable = false; }
 }
@@ -168,9 +170,12 @@ TCODColor Tile::ForeColor() const {
 	return foreColor;
 }
 TCODColor Tile::BackColor() const {
-	if (!blood) return backColor;
+	if (!blood && !marked) return backColor;
 	TCODColor result = backColor;
-	result.r = std::min(255, backColor.r + blood->Depth());
+	if (blood)
+		result.r = std::min(255, backColor.r + blood->Depth());
+	if (marked)
+		result = result + TCODColor::darkGrey;
 	return result; 
 }
 
@@ -183,3 +188,5 @@ void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
 boost::weak_ptr<BloodNode> Tile::GetBlood() const {return boost::weak_ptr<BloodNode>(blood);}
 void Tile::SetBlood(boost::shared_ptr<BloodNode> value) {blood = value;}
 
+void Tile::Mark() { marked = true; }
+void Tile::Unmark() { marked = false; }

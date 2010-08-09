@@ -109,6 +109,8 @@ public:
 
 	static int DiceToInt(TCOD_dice_t);
 
+	static void Undesignate(Coordinate, Coordinate);
+
 	/*      NPCS        NPCS        NPCS        */
 	std::map<int,boost::shared_ptr<NPC> > npcList;
 	int CreateNPC(Coordinate, NPCType);
@@ -168,6 +170,8 @@ public:
 	static void DesignateTree(Coordinate, Coordinate);
 	void RemoveNatureObject(boost::weak_ptr<NatureObject>);
 	static void HarvestWildPlant(Coordinate, Coordinate);
+	static void DesignateBog(Coordinate, Coordinate);
+	static bool CheckTileType(TileType, Coordinate, Coordinate);
 
 	Season CurrentSeason();
 	std::string SeasonToString(Season);

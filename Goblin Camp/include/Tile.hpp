@@ -59,6 +59,7 @@ private:
 	std::set<int> itemList; //Set of Item uid's
 	boost::shared_ptr<FilthNode> filth;
 	boost::shared_ptr<BloodNode> blood;
+	bool marked;
 
 public:
 	Tile(TileType = TILEGRASS, int = 1);
@@ -92,4 +93,6 @@ public:
 	void SetFilth(boost::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood() const;
 	void SetBlood(boost::shared_ptr<BloodNode>);
+	void Mark();
+	void Unmark();
 };

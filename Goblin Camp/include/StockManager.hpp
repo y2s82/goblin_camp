@@ -48,6 +48,8 @@ private:
 	std::set<ItemType> fromEarth;
 	std::list<boost::weak_ptr<NatureObject> > designatedTrees;
 	std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > > treeFellingJobs;
+	std::set<Coordinate> designatedBog;
+	std::list<boost::weak_ptr<Job> > bogIronJobs;
 public:
 	static StockManager* Inst();
 	~StockManager(void);
@@ -64,6 +66,7 @@ public:
 	std::set<ItemType>* Producables();
 
 	void UpdateWorkshops(boost::weak_ptr<Construction>, bool add);
-	void UpdateDesignations(boost::weak_ptr<NatureObject>, bool add);
+	void UpdateTreeDesignations(boost::weak_ptr<NatureObject>, bool add);
+	void UpdateBogDesignations(Coordinate, bool add);
 };
 
