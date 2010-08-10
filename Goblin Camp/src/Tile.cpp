@@ -66,13 +66,27 @@ void Tile::type(TileType newType) {
 		case 8: graphic = ':'; break;
 		case 9: graphic = '\''; break;
 		}
-	}
-	else if (_type == TILEDITCH || _type == TILERIVERBED) {
+	} else if (_type == TILEDITCH || _type == TILERIVERBED) {
 		vis = true; walkable = true; buildable = false; low = true;
 		graphic = '_';
 		foreColor = TCODColor(125,50,0);
-	}
-	else { vis = false; walkable = false; buildable = false; }
+	} else if (_type == TILEBOG) {
+		vis = true; walkable = true; buildable = false; low = false;
+		switch ((rand() % 10)) {
+		case 0:
+		case 1:
+		case 2:
+		case 3: graphic = '~'; break;
+		case 4:
+		case 5:
+		case 6:
+		case 7: graphic = ','; break;
+		case 8: graphic = ':'; break;
+		case 9: graphic = '\''; break;
+		}
+		foreColor = TCODColor(rand() % 185, 127, 70);
+		_moveCost = rand() % 5 + 1;
+	} else { vis = false; walkable = false; buildable = false; }
 }
 
 bool Tile::BlocksLight() const { return !vis; }

@@ -29,7 +29,8 @@ enum TileType {
 	TILENONE,
 	TILEGRASS,
 	TILEDITCH,
-	TILERIVERBED
+	TILERIVERBED,
+	TILEBOG
 };
 
 class Tile {

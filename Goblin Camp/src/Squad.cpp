@@ -29,7 +29,8 @@ name(nameValue),
 	targetCoordinate(Coordinate(-1,-1)),
 	targetEntity(boost::weak_ptr<Entity>()),
 	priority(pri),
-	weapon(-1)
+	weapon(-1),
+	armor(-1)
 {}
 
 Squad::~Squad() {
@@ -100,5 +101,14 @@ void Squad::Weapon(ItemCategory value) { weapon = value; }
 void Squad::Rearm() {
 	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
 		Game::Inst()->npcList[*memberi]->FindNewWeapon();
+	}
+}
+
+ItemCategory Squad::Armor() { return armor; }
+void Squad::Armor(ItemCategory value) { armor = value; }
+
+void Squad::Reequip() {
+	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
+		Game::Inst()->npcList[*memberi]->FindNewArmor();
 	}
 }

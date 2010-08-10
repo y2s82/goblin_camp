@@ -71,6 +71,14 @@ SquadsDialog* SquadsDialog::SquadDialog() {
         Button *rearm = new Button("Rearm", boost::bind(&SquadsDialog::Rearm, squadDialog), 0, 30, 10);
         rearm->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, true));
         contents->AddComponent(rearm);
+
+		Frame *armor = new Frame("Armor", std::vector<Drawable *>(), 23, 25, 23, 5);
+        armor->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, true));
+        contents->AddComponent(armor);
+        armor->AddComponent(new LiveButton(boost::bind(&SquadsDialog::SelectedSquadArmor, squadDialog), boost::bind(&SquadsDialog::SelectArmor, squadDialog), 1, 1, 21));
+        Button *reequip = new Button("Re-equip", boost::bind(&SquadsDialog::Reequip, squadDialog), 23, 30, 10);
+        reequip->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, true));
+        contents->AddComponent(reequip);
     } 
 	return squadDialog;
 }
@@ -85,7 +93,7 @@ void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > s
 
 boost::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
 	std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
-	if (i < Game::Inst()->squadList.size()) {
+	if (i < (signed int)Game::Inst()->squadList.size()) {
 		return boost::next(it, i)->second;
 	}
     return boost::shared_ptr<Squad>();
@@ -163,5 +171,26 @@ void SquadsDialog::SelectWeapon() {
 
 void SquadsDialog::Rearm() {
     GetSquad(squadList->Selected())->Rearm();
-    Announce::Inst()->AddMsg(GetSquad(squadList->Selected())->Name() + " rearming.");
+    Announce::Inst()->AddMsg(GetSquad(squadList->Selected())->Name() + " rearming");
+}
+
+std::string SquadsDialog::SelectedSquadArmor() {
+	int armor = GetSquad(squadList->Selected())->Armor();
+	return armor >= 0 ? Item::Categories[armor].name : "None";
+}
+
+void SquadsDialog::SelectArmor() {
+	Menu *armorChoiceMenu = new Menu(std::vector<MenuChoice>(), "Armor");
+    armorChoiceMenu->AddChoice(MenuChoice("None", boost::bind(&Squad::Armor, GetSquad(squadList->Selected()), -1)));
+    for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
+        if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Armor")) {
+            armorChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), boost::bind(&Squad::Armor, GetSquad(squadList->Selected()), i)));
+        }
+    }
+    armorChoiceMenu->ShowModal();
+}
+
+void SquadsDialog::Reequip() {
+	GetSquad(squadList->Selected())->Reequip();
+	Announce::Inst()->AddMsg(GetSquad(squadList->Selected())->Name() + " re-equipping armor");
 }

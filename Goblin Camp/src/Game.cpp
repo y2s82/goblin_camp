@@ -791,12 +791,14 @@ void Game::DeTillFarmPlots() {
 void Game::GenerateMap() {
 	Map* map = Map::Inst();
 
+	int basey = 260;
 	for (int x = 0; x < map->Width(); ++x) {
-		for (int y = 260; y <= 270; ++y) {
-			if (y >= 264 && y <= 266 && rand() % 5 == 0) {
+		basey += ((rand() % 3) - 1);
+		for (int y = basey; y <= basey+10; ++y) {
+			if (y >= basey+4 && y <= basey+6 && rand() % 5 == 0) {
 				map->Type(x,y,TILERIVERBED);
 				CreateWater(Coordinate(x,y));
-			} else if ((y == 260 || y == 270) && rand() % 3 == 0) {
+			} else if ((y == basey || y == basey+10) && rand() % 3 == 0) {
 			} else {
 				map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
@@ -835,6 +837,12 @@ void Game::GenerateMap() {
 		}
 	}
  
+	for (int x = 100; x < 150; ++x) {
+		for (int y = 100; y < 150; ++y) {
+			map->Type(x,y,TILEBOG);
+		}
+	}
+
 	std::vector<NPCType> peacefulAnimals;
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
