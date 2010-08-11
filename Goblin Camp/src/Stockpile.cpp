@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/format.hpp>
+
 #include "Stockpile.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
@@ -28,7 +30,9 @@ Construction(type, target),
 {
 	condition = maxCondition;
 	reserved.insert(std::pair<Coordinate,bool>(target,false));
-	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(new Container(target, 0, 1, -1))));
+	Container *container = new Container(target, 0, 1, -1);
+	container->AddListener(this);
+	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
@@ -163,7 +167,9 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							if (iy < a.Y()) a.Y(iy);
 							if (iy > b.Y()) b.Y(iy);
 							reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), 0, 1, -1))));
+							Container *container = new Container(Coordinate(ix,iy), 0, 1, -1);
+							container->AddListener(this);
+							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
 					}
 				}
 			}
@@ -248,6 +254,51 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 			} else {
 				break;
 			}
+		}
+	}
+}
+
+void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
+	std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
+	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
+		amount[*it] = amount[*it] + 1;
+	}
+}
+
+void Stockpile::ItemRemoved(boost::weak_ptr<Item> item) {
+	std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
+	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
+		amount[*it] = amount[*it] - 1;
+	}
+}
+
+struct AmountCompare {
+	bool operator()(const std::pair<ItemCategory, int> &lhs, const std::pair<ItemCategory, int> &rhs) {
+		return lhs.second > rhs.second;
+	}
+};
+
+void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
+	if(!containers[Coordinate(x, y)]->empty()) {
+		boost::weak_ptr<Item> item = containers[Coordinate(x, y)]->GetFirstItem();
+		if(item.lock()) {
+			item.lock()->GetTooltip(x, y, tooltip);
+		}
+	}
+	tooltip->AddEntry(TooltipEntry("Stockpile", TCODColor::white));
+	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
+	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
+		if(it->second > 0) {
+			vecView.push_back(*it);
+		}
+	}
+	if(!vecView.empty()) {
+		std::partial_sort(vecView.begin(), vecView.begin() + std::min(10, (int)vecView.size()), vecView.end(), AmountCompare());
+		for(int i = 0; i < 10 && i < vecView.size(); i++) {
+			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
+		}
+		if(vecView.size() > 10) {
+			tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 		}
 	}
 }

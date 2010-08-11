@@ -46,3 +46,7 @@ void Entity::CancelJob(int) {}
 
 int Entity::Faction() const { return faction; }
 void Entity::Faction(int val) { faction = val; }
+
+void Entity::GetTooltip(int x, int y, Tooltip *tooltip) {
+	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
+}
