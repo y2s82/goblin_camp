@@ -233,7 +233,7 @@ void UI::HandleMouse() {
 	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
 
 	if (_state == UINORMAL) {
-		HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
+		HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()), &underCursor);
 	}
 
 	if (_state == UIPLACEMENT || _state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
@@ -421,8 +421,9 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	if (menuOpen) {
 		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
 	}
+	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
 	if (_state == UINORMAL && currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) == NOMENUHIT 
-		&& !underCursor.empty() && underCursor.begin()->lock()) {
+		&& sideBar.Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT && !underCursor.empty() && underCursor.begin()->lock()) {
 		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
 			ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
 		}
@@ -676,14 +677,14 @@ boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 	return boost::weak_ptr<Entity>();
 }
 
-void UI::HandleUnderCursor(Coordinate pos) {
-	underCursor.clear();
+void UI::HandleUnderCursor(Coordinate pos, std::list<boost::weak_ptr<Entity> >* result) {
+	result->clear();
 
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
 		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
 		if (!npcList->empty()) {
 			for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
-				underCursor.push_back(Game::Inst()->npcList[*npci]);
+				result->push_back(Game::Inst()->npcList[*npci]);
 			}
 		}
 
@@ -691,18 +692,18 @@ void UI::HandleUnderCursor(Coordinate pos) {
 		if (!itemList->empty()) {
 			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
 			if (itemi != Game::Inst()->freeItems.end()) {
-				underCursor.push_back(*itemi);
+				result->push_back(*itemi);
 			}
 		}
 
 		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
 		if (entity > -1) {
-			underCursor.push_back(Game::Inst()->natureList[entity]);
+			result->push_back(Game::Inst()->natureList[entity]);
 		}
 
 		entity = Map::Inst()->GetConstruction(pos.X(), pos.Y());
 		if (entity > -1) {
-			underCursor.push_back(Game::Inst()->GetConstruction(entity));
+			result->push_back(Game::Inst()->GetConstruction(entity));
 		}
 	}
 }
@@ -854,6 +855,26 @@ void SideBar::Draw(TCODConsole* console) {
 		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
 	}
 	console->setForegroundColor(TCODColor::white);
+}
+
+void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
+	if(entity.lock()) {
+		int edgeX = console->getWidth();
+		int minimapX = edgeX - (width-4);
+		int minimapY = topY + 2;
+		if (x >= minimapX && x < minimapX + 11 &&
+			y >= minimapY && y < minimapY + 11) {
+			int actualX = (entity.lock()->Position()-5).X() + x - minimapX;
+			int actualY = (entity.lock()->Position()-5).Y() + y - minimapY;
+			std::list<boost::weak_ptr<Entity> > minimapUnderCursor = std::list<boost::weak_ptr<Entity> >();
+			UI::Inst()->HandleUnderCursor(Coordinate(actualX, actualY), &minimapUnderCursor);
+			if (!minimapUnderCursor.empty() && minimapUnderCursor.begin()->lock()) {
+				for (std::list<boost::weak_ptr<Entity> >::iterator ucit = minimapUnderCursor.begin(); ucit != minimapUnderCursor.end(); ++ucit) {
+					ucit->lock()->GetTooltip(actualX, actualY, tooltip);
+				}
+			}
+		}
+	}
 }
 
 void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
