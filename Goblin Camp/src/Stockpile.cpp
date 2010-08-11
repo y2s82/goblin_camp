@@ -288,16 +288,27 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry("Stockpile", TCODColor::white));
 	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
 	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
-		if(it->second > 0) {
+		if(Item::Categories[it->first].parent == 0 && it->second > 0) {
 			vecView.push_back(*it);
 		}
 	}
 	if(!vecView.empty()) {
-		std::partial_sort(vecView.begin(), vecView.begin() + std::min(10, (int)vecView.size()), vecView.end(), AmountCompare());
-		for(int i = 0; i < 10 && i < vecView.size(); i++) {
+		std::sort(vecView.begin(), vecView.end(), AmountCompare());
+		int count = 0;
+		for(int i = 0; count < 10 && i < vecView.size(); i++) {
 			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
+			count++;
+			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); count < 10 && cati != Item::Categories.end(); cati++) {
+				if(cati->parent && Item::StringToItemCategory(cati->parent->GetName()) == vecView[i].first) {
+					int amt = amount[Item::StringToItemCategory(cati->GetName())];
+					if (amt > 0) {
+						tooltip->AddEntry(TooltipEntry((boost::format("  %s x%d") % cati->GetName() % amt).str(), TCODColor::grey));
+						count++;
+					}
+				}
+			}
 		}
-		if(vecView.size() > 10) {
+		if(count >= 10) {
 			tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 		}
 	}
