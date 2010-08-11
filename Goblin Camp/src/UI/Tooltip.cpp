@@ -51,4 +51,5 @@ void Tooltip::Draw(int x, int y, TCODConsole *console) {
 			y++;
 		}
 	}
+	console->setForegroundColor(TCODColor::white);
 }
