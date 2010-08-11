@@ -306,6 +306,7 @@ MenuResult Grid::Update(int x, int y, bool clicked, TCOD_key_t key) {
 }
 
 void Grid::GetTooltip(int x, int y, Tooltip *tooltip) {
+	Drawable::GetTooltip(x, y, tooltip);
 	int col = 0;
 	int colWidth = width / cols;
 	int rowHeight = 0;
@@ -389,6 +390,7 @@ MenuResult UIContainer::Update(int x, int y, bool clicked, TCOD_key_t key) {
 }
 
 void UIContainer::GetTooltip(int x, int y, Tooltip *tooltip) {
+	Drawable::GetTooltip(x, y, tooltip);
 	for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
 		Drawable *component = *it;
 		if(component->Visible()) {
@@ -430,5 +432,6 @@ MenuResult Dialog::Update(int x, int y, bool clicked, TCOD_key_t key) {
 }
 
 void Dialog::GetTooltip(int x, int y, Tooltip *tooltip) {
+	Drawable::GetTooltip(x, y, tooltip);
 	contents->GetTooltip(_x, _y, tooltip);
 }
