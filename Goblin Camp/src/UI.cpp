@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
+#include "UI/Tooltip.hpp"
 
 static TCOD_key_t NO_KEY = {
     TCODK_NONE, 0, false, false, false, false, false, false
@@ -413,13 +414,20 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 
 	if (menuOpen) {
 		currentMenu->Draw(menuX, menuY, console);
-	} else if (_state == UINORMAL && !underCursor.empty() && underCursor.begin()->lock()) {
-		int y = 0;
+	}
+	
+	Tooltip *tooltip = Tooltip::Inst();
+	tooltip->Clear();
+	if (menuOpen) {
+		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
+	}
+	if (_state == UINORMAL && currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) == NOMENUHIT 
+		&& !underCursor.empty() && underCursor.begin()->lock()) {
 		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-			console->print(std::min(console->getWidth()-1, mouseInput.cx+1), std::max(0, mouseInput.cy-1-y), ucit->lock()->Name().c_str());
-			++y;
+			ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
 		}
 	}
+	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
 
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.X() == 0)) {
 		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.X() && x < console->getWidth(); ++x) {
@@ -677,7 +685,6 @@ void UI::HandleUnderCursor(Coordinate pos) {
 			for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
 				underCursor.push_back(Game::Inst()->npcList[*npci]);
 			}
-			return;
 		}
 
 		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
@@ -685,20 +692,17 @@ void UI::HandleUnderCursor(Coordinate pos) {
 			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
 			if (itemi != Game::Inst()->freeItems.end()) {
 				underCursor.push_back(*itemi);
-				return;
 			}
 		}
 
 		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
 		if (entity > -1) {
 			underCursor.push_back(Game::Inst()->natureList[entity]);
-			return;
 		}
 
 		entity = Map::Inst()->GetConstruction(pos.X(), pos.Y());
 		if (entity > -1) {
 			underCursor.push_back(Game::Inst()->GetConstruction(entity));
-			return;
 		}
 	}
 }
