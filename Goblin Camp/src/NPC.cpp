@@ -125,6 +125,7 @@ void NPC::Position(Coordinate pos, bool firstTime) {
 		x = pos.X();
 		y = pos.Y();
 	}
+	inventory->Position(pos);
 }
 
 void NPC::Position(Coordinate pos) { Position(pos, false); }
@@ -132,6 +133,14 @@ void NPC::Position(Coordinate pos) { Position(pos, false); }
 bool *NPC::visArray() { return _visArray; }
 
 Task* NPC::currentTask() { return jobs.empty() ? 0 : &(jobs.front()->tasks[taskIndex]); }
+Task* NPC::nextTask() { 
+	if (!jobs.empty()) {
+		if ((signed int)jobs.front()->tasks.size() > taskIndex+1) {
+			return &jobs.front()->tasks[taskIndex+1];
+		}
+	}
+	return 0;
+}
 
 boost::weak_ptr<Job> NPC::currentJob() { return jobs.empty() ? boost::weak_ptr<Job>() : boost::weak_ptr<Job>(jobs.front()); }
 
@@ -574,8 +583,18 @@ MOVENEARend:
 				if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = tree->Fell();
 					if (tmp <= 0) {
+						bool stockpile = false;
+						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[tree->Type()].components.begin(); iti != NatureObject::Presets[tree->Type()].components.end(); ++iti) {
-							Game::Inst()->CreateItem(tree->Position(), *iti, true);
+							if (stockpile) {
+								int item = Game::Inst()->CreateItem(tree->Position(), *iti, false);
+								DropItem(carried);
+								carried = Game::Inst()->GetItem(item);
+								inventory->AddItem(carried);
+								stockpile = false;
+							} else {
+								Game::Inst()->CreateItem(tree->Position(), *iti, true);
+							}
 						}
 						Map::Inst()->SetWalkable(tree->X(), tree->Y(), true);
 						Map::Inst()->Buildable(tree->X(), tree->Y(), true);
@@ -715,6 +734,25 @@ MOVENEARend:
 					std::cout<<name<<" wearing "<<armor.lock()->Name()<<"\n";
 #endif
 					break;
+				}
+				TaskFinished(TASKFAILFATAL);
+				break;
+
+			case BOGIRON:
+				TaskFinished(TASKFAILFATAL);
+				break;
+
+			case STOCKPILEITEM:
+				if (carried.lock()) {
+					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true);
+					if (stockJob) {
+						stockJob->internal = true;
+						jobs.push_back(stockJob);
+						DropItem(carried); //The stockpiling job will pickup the item
+						carried.reset();
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
 				}
 				TaskFinished(TASKFAILFATAL);
 				break;
