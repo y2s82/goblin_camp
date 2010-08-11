@@ -35,6 +35,7 @@ public:
     ~Dialog() { delete contents; }
     void Draw(int, int, TCODConsole *);
     MenuResult Update(int, int, bool, TCOD_key_t);
+	void GetTooltip(int, int, Tooltip *);
     void SetTitle(std::string ntitle);
     void SetHeight(int nheight);
 };

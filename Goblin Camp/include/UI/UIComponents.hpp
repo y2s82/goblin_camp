@@ -65,6 +65,7 @@ public:
     void AddComponent(Drawable *component);
     virtual void Draw(int, int, TCODConsole *);
     virtual MenuResult Update(int, int, bool, TCOD_key_t);
+	virtual void GetTooltip(int, int, Tooltip *);
 };
 
 class Panel: public Drawable {

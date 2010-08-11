@@ -305,6 +305,25 @@ MenuResult Grid::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	return NOMENUHIT;
 }
 
+void Grid::GetTooltip(int x, int y, Tooltip *tooltip) {
+	int col = 0;
+	int colWidth = width / cols;
+	int rowHeight = 0;
+	for(std::vector<Drawable *>::iterator it = contents.begin(); it != contents.end(); it++) {
+		Drawable *component = *it;
+		if(component->Visible()) {
+			component->GetTooltip(x - _x - col * colWidth, y - _y, tooltip);
+			rowHeight = std::max(rowHeight, component->Height());
+			col++;
+			if(col >= cols) {
+				col = 0;
+				y -= rowHeight;
+				rowHeight = 0;
+			}
+		}
+	}
+}
+
 void Panel::selected(int newSel) {}
 void Panel::Open() {}
 void Panel::Close() {
@@ -369,6 +388,15 @@ MenuResult UIContainer::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	return NOMENUHIT;
 }
 
+void UIContainer::GetTooltip(int x, int y, Tooltip *tooltip) {
+	for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
+		Drawable *component = *it;
+		if(component->Visible()) {
+			component->GetTooltip(x + _x, y + _y, tooltip);
+		}
+	}
+}
+
 UIContainer::~UIContainer() {
 	for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
 		delete *it;
@@ -399,4 +427,8 @@ void Dialog::Draw(int x, int y, TCODConsole *console) {
 
 MenuResult Dialog::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	return contents->Update(x - _x, y - _y, clicked, key);
+}
+
+void Dialog::GetTooltip(int x, int y, Tooltip *tooltip) {
+	contents->GetTooltip(_x, _y, tooltip);
 }
