@@ -139,6 +139,7 @@ void StockManager::Update() {
 							fellJob->ConnectToEntity(*treei);
 							fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
 							fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
+							fellJob->tasks.push_back(Task(STOCKPILEITEM));
 							JobManager::Inst()->AddJob(fellJob);
 							--difference;
 							treeFellingJobs.push_back(
@@ -146,8 +147,16 @@ void StockManager::Update() {
 							treei = designatedTrees.erase(treei);
 					}
 				} else if (fromEarth.find(*prodi) != fromEarth.end()) {
+					difference -= bogIronJobs.size();
 					if (designatedBog.size() > 0) {
-
+						for (int i = 0; i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
+							int cIndex = rand() % designatedBog.size();
+							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
+							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
+							ironJob->tasks.push_back(Task(MOVE, coord));
+							ironJob->tasks.push_back(Task(BOGIRON));
+							ironJob->tasks.push_back(Task(STOCKPILEITEM));
+						}
 					}
 				} else {
 					//First get all the workshops capable of producing this product

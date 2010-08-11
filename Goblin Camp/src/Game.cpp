@@ -692,7 +692,7 @@ void Game::Update() {
 	if (safeMonths <= 0) events->Update();
 }
 
-void Game::StockpileItem(boost::weak_ptr<Item> item) {
+boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
 			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
@@ -719,19 +719,23 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
 				if (target.X() != -1) {
 					stockJob->ReserveSpot(sp, target);
 					stockJob->ReserveEntity(item);
-					stockJob->tasks.push_back(Task(MOVE, item.lock()->Entity::Position()));
-					stockJob->tasks.push_back(Task(TAKE, item.lock()->Entity::Position(), item));
+					stockJob->tasks.push_back(Task(MOVE, item.lock()->Position()));
+					stockJob->tasks.push_back(Task(TAKE, item.lock()->Position(), item));
 					stockJob->tasks.push_back(Task(MOVE, target));
 					if (!container.lock())
 						stockJob->tasks.push_back(Task(PUTIN, target, sp->Storage(target)));
 					else
 						stockJob->tasks.push_back(Task(PUTIN, target, container));
-					JobManager::Inst()->AddJob(stockJob);
-					return;
+
+					if (!returnJob) JobManager::Inst()->AddJob(stockJob);
+					else return stockJob;
+
+					return boost::shared_ptr<Job>();
 				}
 			}
 		}
 	}
+	return boost::shared_ptr<Job>();
 }
 
 void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
@@ -876,6 +880,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					fellJob->ConnectToEntity(natObj);
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj.lock()->Position(), natObj));
+					fellJob->tasks.push_back(Task(STOCKPILEITEM));
 					JobManager::Inst()->AddJob(fellJob);
 				}
 			}

@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NPC.hpp"
 #include "NatureObject.hpp"
 #include "Events.hpp"
+#include "Job.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -154,7 +155,7 @@ public:
 	std::set<boost::weak_ptr<Item> > freeItems; //Free as in not contained
 	static int ItemTypeCount;
 	static int ItemCatCount;
-	void StockpileItem(boost::weak_ptr<Item>);
+	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false);
 	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, int flags = 0, int value = 0);
 	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, int flags = 0, int value = 0);
 	void CreateItems(int,ItemType,Coordinate,Coordinate);
