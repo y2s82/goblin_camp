@@ -38,5 +38,6 @@ public:
     void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
     int TotalHeight();
     MenuResult Update(int, int, bool, TCOD_key_t);
+	void GetTooltip(int, int, Tooltip *);
 };
 
