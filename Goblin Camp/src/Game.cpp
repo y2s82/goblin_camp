@@ -692,7 +692,7 @@ void Game::Update() {
 	if (safeMonths <= 0) events->Update();
 }
 
-void Game::StockpileItem(boost::weak_ptr<Item> item) {
+boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
 			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
@@ -719,19 +719,23 @@ void Game::StockpileItem(boost::weak_ptr<Item> item) {
 				if (target.X() != -1) {
 					stockJob->ReserveSpot(sp, target);
 					stockJob->ReserveEntity(item);
-					stockJob->tasks.push_back(Task(MOVE, item.lock()->Entity::Position()));
-					stockJob->tasks.push_back(Task(TAKE, item.lock()->Entity::Position(), item));
+					stockJob->tasks.push_back(Task(MOVE, item.lock()->Position()));
+					stockJob->tasks.push_back(Task(TAKE, item.lock()->Position(), item));
 					stockJob->tasks.push_back(Task(MOVE, target));
 					if (!container.lock())
 						stockJob->tasks.push_back(Task(PUTIN, target, sp->Storage(target)));
 					else
 						stockJob->tasks.push_back(Task(PUTIN, target, container));
-					JobManager::Inst()->AddJob(stockJob);
-					return;
+
+					if (!returnJob) JobManager::Inst()->AddJob(stockJob);
+					else return stockJob;
+
+					return boost::shared_ptr<Job>();
 				}
 			}
 		}
 	}
+	return boost::shared_ptr<Job>();
 }
 
 void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
@@ -791,18 +795,27 @@ void Game::DeTillFarmPlots() {
 void Game::GenerateMap() {
 	Map* map = Map::Inst();
 
+	int basey = 260;
 	for (int x = 0; x < map->Width(); ++x) {
-		for (int y = 260; y <= 270; ++y) {
-			if (y >= 264 && y <= 266 && rand() % 5 == 0) {
+		basey += ((rand() % 3) - 1);
+		for (int y = basey; y <= basey+10; ++y) {
+			if (y >= basey+4 && y <= basey+6 && rand() % 5 == 0) {
 				map->Type(x,y,TILERIVERBED);
 				CreateWater(Coordinate(x,y));
-			} else if ((y == 260 || y == 270) && rand() % 3 == 0) {
+			} else if ((y == basey || y == basey+10) && rand() % 3 == 0) {
 			} else {
 				map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
 			}
 		}
 	}
+
+	for (int x = 100; x < 150; ++x) {
+		for (int y = 100; y < 150; ++y) {
+			map->Type(x,y,TILEBOG);
+		}
+	}
+
 
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
@@ -867,6 +880,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					fellJob->ConnectToEntity(natObj);
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj.lock()->Position(), natObj));
+					fellJob->tasks.push_back(Task(STOCKPILEITEM));
 					JobManager::Inst()->AddJob(fellJob);
 				}
 			}
@@ -883,7 +897,7 @@ void Game::DesignateTree(Coordinate a, Coordinate b) {
 				if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
 					//TODO: Implement proper map marker system and change this to use that
 					natObj.lock()->Mark();
-					StockManager::Inst()->UpdateDesignations(natObj, true);
+					StockManager::Inst()->UpdateTreeDesignations(natObj, true);
 				}
 			}
 		}
@@ -913,6 +927,46 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 	Map::Inst()->NatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
 	natureList.erase(natObj.lock()->Uid());
+}
+
+bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
+	for (int x = target.X(); x < target.X()+size.X(); ++x) {
+		for (int y = target.Y(); y < target.Y()+size.Y(); ++y) {
+			if (Map::Inst()->Type(x,y) == type) return true;
+		}
+	}
+	return false;
+}
+
+void Game::DesignateBog(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (Map::Inst()->Type(x,y) == TILEBOG) {
+				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), true);
+				Map::Inst()->Mark(x,y);
+			}
+		}
+	}
+}
+
+void Game::Undesignate(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {	
+			int natUid = Map::Inst()->NatureObject(x,y);
+			if (natUid >= 0) {
+				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+				if (natObj.lock() && natObj.lock()->Tree() && natObj.lock()->Marked()) {
+					//TODO: Implement proper map marker system and change this to use that
+					natObj.lock()->Unmark();
+					StockManager::Inst()->UpdateTreeDesignations(natObj, false);
+				}
+			}
+			if (Map::Inst()->Type(x,y) == TILEBOG) {
+				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
+				Map::Inst()->Unmark(x,y);
+			}
+		}
+	}
 }
 
 std::string Game::SeasonToString(Season season) {

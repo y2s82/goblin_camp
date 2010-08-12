@@ -145,6 +145,7 @@ void NatureObject::LoadPresets(std::string filename) {
 
 
 void NatureObject::Mark() { marked = true; }
+void NatureObject::Unmark() { marked = false; }
 bool NatureObject::Marked() { return marked; }
 
 void NatureObject::CancelJob(int) { 

@@ -101,6 +101,24 @@ category_type "Statue" {
 category_type "Leather" {
 }
 
+category_type "Clay" {
+}
+
+category_type "Brick" {
+	parent="Clay"
+}
+
+category_type "Metal" {
+}
+
+category_type "Impure metal" {
+	parent="Metal"
+}
+
+category_type "Metal bar" {
+	parent="Metal"
+} 
+
 category_type "Weapon" {
 }
 
@@ -129,9 +147,6 @@ category_type "Medium armor" {
 
 category_type "Heavy armor" {
 	parent="Armor"
-}
-
-category_type "Metal" {
 }
 
 category_type "Garbage" {
@@ -503,8 +518,43 @@ item_type "Chainmail" {
 	category = ["Medium armor"]
 	graphic = 91
 	color = "255,255,255"
-	components = ["Metal", "Metal", "Metal"]
+	components = ["Metal bar", "Metal bar", "Metal bar"]
 	resistances {
 		physical = 20
 	}
+}
+
+item_type "Bog iron" {
+	category = ["Impure metal"]
+	graphic = 145
+	color = "230,135,80"
+}
+
+item_type "Wrought iron" {
+	category = ["Metal bar"]
+	graphic = 170
+	color = "110,110,110"
+	components = ["Impure metal", "Impure metal", "Impure metal"]
+}
+
+item_type "Red clay" {
+    category=["Clay"]
+    graphic = 4
+    color = "220,80,70"
+	multiplier = 5
+}
+
+item_type "Amphora" {
+    category = ["Liquid container"]
+    containerSize = 10
+    graphic = 173
+    color = "220,40,32"
+    components = [ "Clay", "Clay", "Wood" ]
+}
+
+item_type "Red brick" {
+    category = ["Brick"]
+    graphic = 22
+    color = "120,22,11"
+    components = [ "Clay", "Clay", "Clay", "Wood" ]
 }

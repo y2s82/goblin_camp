@@ -179,6 +179,7 @@ public:
 	bool *visArray();
 
 	Task* currentTask();
+	Task* nextTask();
 	boost::weak_ptr<Job> currentJob();
 	Coordinate currentTarget();
 	boost::weak_ptr<Entity> currentEntity();

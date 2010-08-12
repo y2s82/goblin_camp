@@ -236,3 +236,6 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
 	tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
 }
+
+void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
+void Map::Unmark(int x, int y) { tileMap[x][y].Unmark(); }

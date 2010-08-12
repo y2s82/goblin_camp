@@ -480,3 +480,48 @@ npc_type "will o wisp" {
 	}
 	spawnAsGroup="1d3"
 }
+
+npc_type "raw golem" {
+   name="Raw golem"
+   tags=["claypit", "hasHands"]
+   speed=10
+   color="220,80,70"
+   graphic='G'
+   health=600
+   AI="HostileAnimal"
+   dodge=3
+   resistances {
+      physical=15
+      poison=100
+   }
+   attack "Smash" {
+      type="blunt"
+      damage="1d60+5"
+      cooldown=80
+      statusEffects=["Concussion"]
+      effectChances=[     70     ]
+   }
+}
+
+
+npc_type "fired golem" {
+   name="Fired golem"
+   tags=["attacksRandomly", "hasHands"]
+   speed=6
+   color="120,22,11"
+   graphic='G'
+   health=900
+   AI="HostileAnimal"
+   dodge=1
+   resistances {
+      physical=25
+      poison=100
+   }
+   attack "Smash" {
+      type="blunt"
+      damage="1d80+40"
+      cooldown=120
+      statusEffects=["Concussion"]
+      effectChances=[     80     ]
+   }
+}
