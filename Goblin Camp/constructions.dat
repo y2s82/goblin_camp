@@ -30,7 +30,6 @@ construction_type "Carpenter" {
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
 			 178, 46,177]
-	products=["Crate", "Wood plank", "Wooden barrel", "Wooden bed", "Wooden club", "Wooden door"]
 	walkable
 	maxCondition=90
 	materials=["Log","Log","Log"]
@@ -43,7 +42,6 @@ construction_type "Brewery" {
 	graphicLength=4
 	graphic=[ 10, 46, 46,231,
 			  10, 33, 35,231]
-	products=["Wine"]
 	walkable
 	maxCondition=90
 	materials=["Plank","Plank","Plank"]
@@ -57,7 +55,6 @@ construction_type "Kitchen" {
 	graphic=[  9, 179,178, 127, 
 			  10, 179,178, 16,
 			 127,  95, 95, 127]
-	products=["Pie", "Bone Stew", "Bread"]
 	walkable
 	maxCondition=90
 	materials=["Plank","Plank","Plank","Plank"]
@@ -70,7 +67,6 @@ construction_type "Bone Carver" {
 	graphic=[  9, 179,179,  9, 
 			  19, 179,179, 19,
 			  41,  42, 42, 40]
-	products=["Bone statue", "Bone door", "Bone dagger", "Bone bed"]
 	walkable
 	maxCondition=90
 	materials=["Plank","Plank","Plank","Plank"]
@@ -83,7 +79,6 @@ construction_type "Butcher" {
 	graphic=[ 37,179,179, 37, 
 			  19,179,179, 19,
 			  37, 42, 42, 37]
-	products=["Meat"]
 	walkable
 	maxCondition=90
 	materials=["Plank","Plank","Plank","Plank"]
@@ -125,7 +120,6 @@ construction_type "Stone quarry" {
 			 178, 46, 46,177,176,178,176, 44, 46,178,
 			 176, 46,178,176,176,177,176, 44, 46, 46,
 			 178, 46,177,177,178,178,177, 44, 46, 46]
-	products=["Rough stone"]
 	walkable
 	maxCondition=1000
 	productionx=3
@@ -142,7 +136,6 @@ construction_type "Stone mason" {
 	graphic=[ 40, 46,157,178,
 			  40, 10, 46,178,
 			 170,157, 46,178]
-	products=["Sharpened stone", "Stone statue"]
 	walkable
 	maxCondition=90
 	productionx=2
@@ -157,7 +150,6 @@ construction_type "Weapon crafter" {
 			 124, 46,
 			 124, 46,
 			 123,125]
-	products=["Stone axe", "Stone spear", "Stone maul"]
 	walkable
 	maxCondition=90
 	productionx=1
@@ -171,7 +163,6 @@ construction_type "Mill" {
 	graphic=[157, 46,157,
 			  46, 46, 46,
 			 157, 46,157]
-	products=["Flour"]
 	walkable
 	maxCondition=90
 	productionx=1
@@ -185,7 +176,6 @@ construction_type "Weaver" {
 	graphic=[ 21, 30, 30,
 			  46, 46, 46,
 			  30, 30, 21]
-	products=["Cloth", "Seed sack", "Flour sack"]
 	walkable
 	maxCondition=90
 	productionx=1
@@ -233,7 +223,6 @@ construction_type "Bloomery" {
 	graphic=[ 40, 46,176,191,
 			  40, 10, 46, 10,
 			 170,157,176,217]
-	products=["Wrought iron"]
 	walkable
 	maxCondition=90
 	productionx=2
@@ -249,8 +238,6 @@ construction_type "Clay pit" {
 			204,  16, 176,  17, 185,
 			204,  47,  30,  92, 185,
 			200, 202, 202, 202, 188]
-
-	products=["Red clay"]
 	walkable
 	maxCondition=800
 	productionx=2
@@ -268,7 +255,6 @@ construction_type "Clay kiln" {
 			  35, 46,
 			 231,  9,
 			   2,173]
-	products=["Amphora", "Red brick"]
 	walkable
 	maxCondition=90
 	materials=["Plank","Plank","Plank"]
