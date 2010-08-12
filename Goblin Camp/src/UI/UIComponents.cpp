@@ -220,6 +220,10 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	return NOMENUHIT;
 }
 
+void ScrollPanel::GetTooltip(int x, int y, Tooltip *tooltip) {
+	contents->GetTooltip(x - _x - 1, y - _y - 1 + scroll, tooltip);
+}
+
 void Frame::Draw(int x, int y, TCODConsole *console) {
 	console->printFrame(x + _x, y + _y, width, height, true, TCOD_BKGND_SET, title.c_str());
 	UIContainer::Draw(x, y, console);
@@ -433,5 +437,5 @@ MenuResult Dialog::Update(int x, int y, bool clicked, TCOD_key_t key) {
 
 void Dialog::GetTooltip(int x, int y, Tooltip *tooltip) {
 	Drawable::GetTooltip(x, y, tooltip);
-	contents->GetTooltip(_x, _y, tooltip);
+	contents->GetTooltip(x - _x, y - _y, tooltip);
 }

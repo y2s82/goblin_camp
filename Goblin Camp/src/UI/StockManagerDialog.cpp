@@ -41,11 +41,35 @@ public:
 			return StockManager::Inst()->TypeQuantity(itemType) > -1;
 		else
 			return false;
-    }    
+    }
+	
+	void _GetTooltip(int x, int y, Tooltip *tooltip) {
+		if(x >= _x && x < _x + width && y >= _y && y < _y + height - 2) { // subtract 2 from height so tooltip doesn't appear when mouse is over spinner
+			tooltip->AddEntry(TooltipEntry(Item::ItemTypeToString(itemType), TCODColor::white));
+			std::string compName = "";
+			int compAmt = 0;
+			for (int compi = 0; compi < (signed int)Item::Components(itemType).size(); ++compi) {
+				std::string thisCompName = Item::ItemCategoryToString(Item::Components(itemType, compi));
+				if(compName == thisCompName) {
+					compAmt++;
+				} else {
+					if(compName.length() > 0) {
+						tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % compName % compAmt).str(), TCODColor::grey));
+					}
+					compName = thisCompName;
+					compAmt = 1;
+				}
+			}
+			if(compName.length() > 0) {
+				tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % compName % compAmt).str(), TCODColor::grey));
+			}
+		}
+	}
     
     StockPanel(ItemType nItemType, StockManagerDialog *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
         AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
                                  boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
+		SetTooltip(boost::bind(&StockPanel::_GetTooltip, this, _1, _2, _3));
         visible = boost::bind(&StockPanel::ShowItem, this);
     }
     
