@@ -1,5 +1,5 @@
 construction_type "Stockpile" {
-    category="Basics"
+	category="Basics"
 	stockpile
 	walkable
 	graphicLength=1
@@ -8,7 +8,7 @@ construction_type "Stockpile" {
 }
 
 construction_type "Farm plot" {
-    category="Basics"
+	category="Basics"
 	farmplot
 	walkable
 	graphicLength=1
@@ -17,15 +17,15 @@ construction_type "Farm plot" {
 }
 
 construction_type "Wooden Wall" {
-    category="Basics"
+	category="Basics"
 	wall
 	maxCondition=30
 	materials=["Log"]
-    placementType=2
+	placementType=2
 }
 
 construction_type "Carpenter" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=3
 	graphic=[ 35, 46,177,
 			  35, 67, 46,
@@ -39,7 +39,7 @@ construction_type "Carpenter" {
 }
 
 construction_type "Brewery" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=4
 	graphic=[ 10, 46, 46,231,
 			  10, 33, 35,231]
@@ -52,7 +52,7 @@ construction_type "Brewery" {
 }
 
 construction_type "Kitchen" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=4
 	graphic=[  9, 179,178, 127, 
 			  10, 179,178, 16,
@@ -92,7 +92,7 @@ construction_type "Butcher" {
 }
 
 construction_type "Bed" {
-    category="Furniture"
+	category="Furniture"
 	bed
 	graphicLength=1
 	graphic=[220]
@@ -102,7 +102,7 @@ construction_type "Bed" {
 }
 
 construction_type "Door" {
-    category="Furniture"
+	category="Furniture"
 	door
 	graphicLength=1
 	graphic=[43]
@@ -113,7 +113,7 @@ construction_type "Door" {
 }
 
 construction_type "Stone quarry" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=10
 	graphic=[176,176,178, 44,177,176,177,178,178,176,
 			 177, 46, 46, 44, 44, 44, 46,177,176,177,
@@ -137,7 +137,7 @@ construction_type "Stone quarry" {
 }
 
 construction_type "Stone mason" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=4
 	graphic=[ 40, 46,157,178,
 			  40, 10, 46,178,
@@ -151,7 +151,7 @@ construction_type "Stone mason" {
 }
 
 construction_type "Weapon crafter" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=2
 	graphic=[ 91, 92,
 			 124, 46,
@@ -166,7 +166,7 @@ construction_type "Weapon crafter" {
 }
 
 construction_type "Mill" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=3
 	graphic=[157, 46,157,
 			  46, 46, 46,
@@ -180,7 +180,7 @@ construction_type "Mill" {
 }
 
 construction_type "Weaver" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=3
 	graphic=[ 21, 30, 30,
 			  46, 46, 46,
@@ -194,7 +194,7 @@ construction_type "Weaver" {
 }
 
 construction_type "Statue" {
-    category="Furniture"
+	category="Furniture"
 	furniture
 	graphicLength=1
 	graphic=[190]
@@ -203,7 +203,7 @@ construction_type "Statue" {
 }
 
 construction_type "Spawning pool" {
-    category="Permanent"
+	category="Permanent"
 	graphicLength=10
 	graphic=[ 46, 44, 46, 94,126,126,126, 44, 44, 46,
 		 	  46, 46,126,126,126,126,126,126, 46, 44,
@@ -228,7 +228,7 @@ construction_type "Spawning pool" {
 }
 
 construction_type "Bloomery" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=4
 	graphic=[ 40, 46,176,191,
 			  40, 10, 46, 10,
@@ -242,7 +242,7 @@ construction_type "Bloomery" {
 }
 
 construction_type "Clay pit" {
-    category="Permanent"
+	category="Permanent"
 	graphicLength=5
 	graphic=[201, 203, 203, 203, 187,
 			204,  92,  31,  47, 185,
@@ -262,7 +262,7 @@ construction_type "Clay pit" {
 }
 
 construction_type "Clay kiln" {
-    category="Workshops"
+	category="Workshops"
 	graphicLength=2
 	graphic=[ 10, 35,
 			  35, 46,
@@ -277,7 +277,7 @@ construction_type "Clay kiln" {
 }
 
 construction_type "Brick Wall" {
-    category="Basics"
+	category="Basics"
 	wall
 	maxCondition=50
 	materials=["Brick"]
