@@ -612,8 +612,18 @@ MOVENEARend:
 				if (boost::shared_ptr<NatureObject> plant = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = plant->Harvest();
 					if (tmp <= 0) {
+						bool stockpile = false;
+						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[plant->Type()].components.begin(); iti != NatureObject::Presets[plant->Type()].components.end(); ++iti) {
-							Game::Inst()->CreateItem(plant->Position(), *iti, true);
+							if (stockpile) {
+								int item = Game::Inst()->CreateItem(plant->Position(), *iti, false);
+								DropItem(carried);
+								carried = Game::Inst()->GetItem(item);
+								inventory->AddItem(carried);
+								stockpile = false;
+							} else {
+								Game::Inst()->CreateItem(plant->Position(), *iti, true);
+							}
 						}
 						Map::Inst()->SetWalkable(plant->X(), plant->Y(), true);
 						Map::Inst()->Buildable(plant->X(), plant->Y(), true);
