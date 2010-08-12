@@ -40,7 +40,8 @@ public:
     Drawable(int x, int y, int nwidth, int nheight):
     _x(x), _y(y), width(nwidth), height(nheight), visible(0), getTooltip(0) {}
     virtual void Draw(int, int, TCODConsole *) = 0;
-	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key)
+		{return (x >= _x && x < _x + height && y >= _y && y < _y + height) ? MENUHIT : NOMENUHIT;}
     int Height() { return height; }
     bool Visible() { return !visible || visible(); }
     void SetVisible(boost::function<bool()> nvisible) { visible = nvisible; }
@@ -52,7 +53,7 @@ class Scrollable {
 public:
     virtual void Draw(int x, int y, int scroll, int width, int height, TCODConsole *) = 0;
     virtual int TotalHeight() = 0;
-	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) { return NOMENUHIT; }
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip) {};
 };
 
