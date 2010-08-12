@@ -117,7 +117,7 @@ category_type "Impure metal" {
 
 category_type "Metal bar" {
 	parent="Metal"
-} 
+}
 
 category_type "Weapon" {
 }
@@ -538,23 +538,23 @@ item_type "Wrought iron" {
 }
 
 item_type "Red clay" {
-    category=["Clay"]
-    graphic = 4
-    color = "220,80,70"
+	category=["Clay"]
+	graphic = 4
+	color = "220,80,70"
 	multiplier = 5
 }
 
 item_type "Amphora" {
-    category = ["Liquid container"]
-    containerSize = 10
-    graphic = 173
-    color = "220,40,32"
-    components = [ "Clay", "Clay", "Wood" ]
+	category = ["Liquid container"]
+	containerSize = 10
+	graphic = 173
+	color = "220,40,32"
+	components = [ "Clay", "Clay", "Wood" ]
 }
 
 item_type "Red brick" {
-    category = ["Brick"]
-    graphic = 22
-    color = "120,22,11"
-    components = [ "Clay", "Clay", "Clay", "Wood" ]
+	category = ["Brick"]
+	graphic = 22
+	color = "120,22,11"
+	components = [ "Clay", "Clay", "Clay", "Wood" ]
 }
