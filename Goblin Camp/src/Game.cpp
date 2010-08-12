@@ -912,11 +912,12 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj.lock() && natObj.lock()->Harvestable() && !natObj.lock()->Marked()) {
 					natObj.lock()->Mark();
-					boost::shared_ptr<Job> fellJob(new Job("Harvest wild plant"));
-					fellJob->ConnectToEntity(natObj);
-					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
-					fellJob->tasks.push_back(Task(HARVESTWILDPLANT, natObj.lock()->Position(), natObj));
-					JobManager::Inst()->AddJob(fellJob);
+					boost::shared_ptr<Job> harvestJob(new Job("Harvest wild plant"));
+					harvestJob->ConnectToEntity(natObj);
+					harvestJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
+					harvestJob->tasks.push_back(Task(HARVESTWILDPLANT, natObj.lock()->Position(), natObj));
+					harvestJob->tasks.push_back(Task(STOCKPILEITEM));
+					JobManager::Inst()->AddJob(harvestJob);
 				}
 			}
 		}
