@@ -18,24 +18,20 @@
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
-#include <libtcod.hpp>
+struct TooltipEntry {
+	std::string text;
+	TCODColor color;
+	TooltipEntry(std::string ntext, TCODColor ncolor): text(ntext), color(ncolor) {}
+};
 
-#include "UIComponents.hpp"
-#include "Game.hpp"
-
-class Dialog: public Panel {
-protected:
-    std::string title;
-    Drawable *contents;
+class Tooltip {
+private:
+	std::vector<TooltipEntry> entries;
+	Tooltip(): entries(std::vector<TooltipEntry>()) {}
+	static Tooltip* instance;
 public:
-    Dialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight);
-    ~Dialog() { delete contents; }
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
-	void GetTooltip(int, int, Tooltip *);
-    void SetTitle(std::string ntitle);
-    void SetHeight(int nheight);
+	static Tooltip* Inst();
+	void Clear();
+	void AddEntry(TooltipEntry entry);
+	void Draw(int x, int y, TCODConsole *console);
 };

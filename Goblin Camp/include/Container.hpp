@@ -18,9 +18,16 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 
 #include <boost/weak_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include "Item.hpp"
+
+class ContainerListener {
+public:
+	virtual void ItemAdded(boost::weak_ptr<Item>) = 0;
+	virtual void ItemRemoved(boost::weak_ptr<Item>) = 0;
+};
 
 class Container : public Item {
 	friend class boost::serialization::access;
@@ -34,9 +41,12 @@ private:
 	std::set<boost::weak_ptr<Item> > items;
 	int capacity;
 	int reservedSpace;
+	
+	std::vector<boost::shared_ptr<ContainerListener> > listeners;
 public:
 	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0,
-		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
+		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >(),
+		std::vector<boost::shared_ptr<ContainerListener> > = std::vector<boost::shared_ptr<ContainerListener> >());
 	virtual ~Container();
 	virtual bool AddItem(boost::weak_ptr<Item>);
 	virtual void RemoveItem(boost::weak_ptr<Item>);
@@ -50,5 +60,5 @@ public:
 	bool Full();
 	std::set<boost::weak_ptr<Item> >::iterator begin();
 	std::set<boost::weak_ptr<Item> >::iterator end();
+	void AddListener(ContainerListener *listener);
 };
-

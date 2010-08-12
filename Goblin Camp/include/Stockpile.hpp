@@ -24,7 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define BETTERTHAN (1 << 1)
 #define APPLYMINIMUMS (1 << 2)
 
-class Stockpile : public Construction {
+class Stockpile : public Construction, public ContainerListener {
 	friend class boost::serialization::access;
 	friend class Game;
 private:
@@ -61,5 +61,8 @@ public:
 	void ReserveSpot(Coordinate, bool);
 	boost::weak_ptr<Container> Storage(Coordinate);
 	void SwitchAllowed(ItemCategory, bool childrenAlso = false);
+	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
+	void ItemAdded(boost::weak_ptr<Item>);
+	void ItemRemoved(boost::weak_ptr<Item>);
 };
 

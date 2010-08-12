@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Coordinate.hpp"
 #include "UI/UIComponents.hpp"
+#include "UI/Tooltip.hpp"
 
 class Entity: public boost::enable_shared_from_this<Entity>
 {
@@ -59,5 +60,6 @@ public:
 	virtual int Faction() const;
     
     virtual Panel* GetContextMenu() {return 0;}
+	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 };
 
