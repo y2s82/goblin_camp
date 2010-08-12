@@ -61,7 +61,9 @@ enum Action {
 	SLEEP,
 	DISMANTLE,
 	WIELD,
-	WEAR
+	WEAR,
+	BOGIRON,
+	STOCKPILEITEM
 };
 
 enum TaskResult {

@@ -620,7 +620,7 @@ void UI::ChoosePlantHarvest() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::HarvestWildPlant, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('X');
+	UI::Inst()->SetCursor('H');
 }
 
 void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
@@ -654,6 +654,22 @@ void UI::ChooseDismantle() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('D');
 }
+
+void UI::ChooseUndesignate() {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(Game::Undesignate, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('U');
+}
+void UI::ChooseDesignateBog() {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(Game::DesignateBog, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTileType, TILEBOG, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('B');
+}
+
 
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {

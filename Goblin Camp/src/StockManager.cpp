@@ -15,11 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/algorithm/string.hpp>
+
 #include "StockManager.hpp"
 #include "Item.hpp"
 #include "Construction.hpp"
 #include "NatureObject.hpp"
 #include "JobManager.hpp"
+#include "Map.hpp"
 
 #ifdef DEBUG
 #include <iostream>
@@ -59,6 +62,15 @@ void StockManager::Init() {
 
 		//Now figure out if this item is producable either from a workshop, or designations
 		bool producerFound = false;
+
+		//Bog iron is a hard coded special case, for now. TODO: Think about this
+		if (boost::iequals(Item::Presets[item].name, "Bog iron")) {
+			producables.insert(item);
+			fromEarth.insert(item);
+			producerFound = true;
+			UpdateQuantity(item, 0);
+		}
+
 		for (unsigned int cons = 0; cons < Construction::Presets.size(); ++cons) { //Look through all constructions
 			for (unsigned int prod = 0; prod < Construction::Presets[cons].products.size(); ++prod) { //Products
 				if (Construction::Presets[cons].products[prod] == item) {
@@ -127,6 +139,7 @@ void StockManager::Update() {
 							fellJob->ConnectToEntity(*treei);
 							fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
 							fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
+							fellJob->tasks.push_back(Task(STOCKPILEITEM));
 							JobManager::Inst()->AddJob(fellJob);
 							--difference;
 							treeFellingJobs.push_back(
@@ -134,6 +147,17 @@ void StockManager::Update() {
 							treei = designatedTrees.erase(treei);
 					}
 				} else if (fromEarth.find(*prodi) != fromEarth.end()) {
+					difference -= bogIronJobs.size();
+					if (designatedBog.size() > 0) {
+						for (int i = 0; i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
+							int cIndex = rand() % designatedBog.size();
+							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
+							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
+							ironJob->tasks.push_back(Task(MOVE, coord));
+							ironJob->tasks.push_back(Task(BOGIRON));
+							ironJob->tasks.push_back(Task(STOCKPILEITEM));
+						}
+					}
 				} else {
 					//First get all the workshops capable of producing this product
 					std::pair<std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator,
@@ -237,7 +261,7 @@ void StockManager::SetMinimum(ItemType item, int value) {
 	minimums[item] = std::max(0, value);
 }
 
-void StockManager::UpdateDesignations(boost::weak_ptr<NatureObject> nObj, bool add) {
+void StockManager::UpdateTreeDesignations(boost::weak_ptr<NatureObject> nObj, bool add) {
 	if (boost::shared_ptr<NatureObject> natObj = nObj.lock()) {
 		if (add) {
 			designatedTrees.push_back(natObj);
@@ -254,7 +278,16 @@ void StockManager::UpdateDesignations(boost::weak_ptr<NatureObject> nObj, bool a
 			}
 		}
 	}
-	return;
+}
+
+void StockManager::UpdateBogDesignations(Coordinate coord, bool add) {
+	if (add) {
+		if (Map::Inst()->Type(coord.X(), coord.Y()) == TILEBOG) {
+			designatedBog.insert(coord);
+		}
+	} else if (!add && designatedBog.find(coord) != designatedBog.end()) {
+		designatedBog.erase(coord);
+	}
 }
 
 void StockManager::Reset() {
@@ -268,5 +301,6 @@ void StockManager::Reset() {
 	fromEarth.clear();
 	designatedTrees.clear();
 	treeFellingJobs.clear();
+	designatedBog.clear();
 	Init();
 }

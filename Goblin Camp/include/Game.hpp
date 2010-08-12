@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NPC.hpp"
 #include "NatureObject.hpp"
 #include "Events.hpp"
+#include "Job.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -109,6 +110,8 @@ public:
 
 	static int DiceToInt(TCOD_dice_t);
 
+	static void Undesignate(Coordinate, Coordinate);
+
 	/*      NPCS        NPCS        NPCS        */
 	std::map<int,boost::shared_ptr<NPC> > npcList;
 	int CreateNPC(Coordinate, NPCType);
@@ -152,7 +155,7 @@ public:
 	std::set<boost::weak_ptr<Item> > freeItems; //Free as in not contained
 	static int ItemTypeCount;
 	static int ItemCatCount;
-	void StockpileItem(boost::weak_ptr<Item>);
+	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false);
 	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, int flags = 0, int value = 0);
 	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, int flags = 0, int value = 0);
 	void CreateItems(int,ItemType,Coordinate,Coordinate);
@@ -168,6 +171,8 @@ public:
 	static void DesignateTree(Coordinate, Coordinate);
 	void RemoveNatureObject(boost::weak_ptr<NatureObject>);
 	static void HarvestWildPlant(Coordinate, Coordinate);
+	static void DesignateBog(Coordinate, Coordinate);
+	static bool CheckTileType(TileType, Coordinate, Coordinate);
 
 	Season CurrentSeason();
 	std::string SeasonToString(Season);

@@ -75,4 +75,6 @@ public:
 	void BlocksLight(int, int, bool);
 	bool LineOfSight(Coordinate, Coordinate);
 	bool LineOfSight(int, int, int, int);
+	void Mark(int,int);
+	void Unmark(int,int);
 };
