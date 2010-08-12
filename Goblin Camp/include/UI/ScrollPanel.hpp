@@ -36,4 +36,5 @@ public:
     contents(ncontents), scroll(0), scrollBar(0), drawFrame(ndrawFrame), step(nstep), Drawable(x, y, nwidth, nheight) {}
     void Draw(int, int, TCODConsole *);
     MenuResult Update(int, int, bool, TCOD_key_t);
+	void GetTooltip(int, int, Tooltip *);
 };
