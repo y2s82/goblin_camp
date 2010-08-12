@@ -221,7 +221,9 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
 }
 
 void ScrollPanel::GetTooltip(int x, int y, Tooltip *tooltip) {
-	contents->GetTooltip(x - _x - 1, y - _y - 1 + scroll, tooltip);
+	if(x >= _x + 1 && x < _x + width - 1 && y >= _y + 1 && y < _y + height - 1) {
+		contents->GetTooltip(x - _x - 1, y - _y - 1 + scroll, tooltip);
+	}
 }
 
 void Frame::Draw(int x, int y, TCODConsole *console) {
@@ -398,7 +400,7 @@ void UIContainer::GetTooltip(int x, int y, Tooltip *tooltip) {
 	for(std::vector<Drawable *>::iterator it = components.begin(); it != components.end(); it++) {
 		Drawable *component = *it;
 		if(component->Visible()) {
-			component->GetTooltip(x + _x, y + _y, tooltip);
+			component->GetTooltip(x - _x, y - _y, tooltip);
 		}
 	}
 }

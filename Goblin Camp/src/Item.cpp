@@ -135,7 +135,7 @@ ItemType Item::StringToItemType(std::string str) {
 }
 
 std::string Item::ItemCategoryToString(ItemCategory category) {
-	return Item::Categories[category].name;
+	return category == -1 ? "None" : Item::Categories[category].name;
 }
 
 ItemCategory Item::StringToItemCategory(std::string str) {
