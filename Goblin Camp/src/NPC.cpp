@@ -564,12 +564,27 @@ MOVENEARend:
 
 			case HARVEST:
 				if (carried.lock()) {
-					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
-						Game::Inst()->CreateItem(Position(), *fruiti, true);
-					}
+					bool stockpile = false;
+					if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
+
+					boost::shared_ptr<Item> plant = carried.lock();
 					inventory->RemoveItem(carried);
-					Game::Inst()->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
+
+					for (std::list<ItemType>::iterator fruiti = Item::Presets[plant->Type()].fruits.begin(); fruiti != Item::Presets[plant->Type()].fruits.end(); ++fruiti) {
+						if (stockpile) {
+							int item = Game::Inst()->CreateItem(Position(), *fruiti, false);
+							DropItem(carried);
+							carried = Game::Inst()->GetItem(item);
+							inventory->AddItem(carried);
+							stockpile = false;
+						} else {
+							Game::Inst()->CreateItem(Position(), *fruiti, true);
+						}
+					}
+
+					Game::Inst()->RemoveItem(plant);
+
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else {
@@ -612,8 +627,18 @@ MOVENEARend:
 				if (boost::shared_ptr<NatureObject> plant = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = plant->Harvest();
 					if (tmp <= 0) {
+						bool stockpile = false;
+						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[plant->Type()].components.begin(); iti != NatureObject::Presets[plant->Type()].components.end(); ++iti) {
-							Game::Inst()->CreateItem(plant->Position(), *iti, true);
+							if (stockpile) {
+								int item = Game::Inst()->CreateItem(plant->Position(), *iti, false);
+								DropItem(carried);
+								carried = Game::Inst()->GetItem(item);
+								inventory->AddItem(carried);
+								stockpile = false;
+							} else {
+								Game::Inst()->CreateItem(plant->Position(), *iti, true);
+							}
 						}
 						Map::Inst()->SetWalkable(plant->X(), plant->Y(), true);
 						Map::Inst()->Buildable(plant->X(), plant->Y(), true);
@@ -739,6 +764,26 @@ MOVENEARend:
 				break;
 
 			case BOGIRON:
+				if (Map::Inst()->Type(x, y) == TILEBOG) {
+					if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+						bool stockpile = false;
+						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
+
+						if (stockpile) {
+							int item = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Bog iron"), false);
+							DropItem(carried);
+							carried = Game::Inst()->GetItem(item);
+							inventory->AddItem(carried);
+							stockpile = false;
+						} else {
+							Game::Inst()->CreateItem(Position(), Item::StringToItemType("Bog iron"), true);
+						}
+						TaskFinished(TASKSUCCESS);
+						break;
+					} else {
+						break;
+					}
+				}
 				TaskFinished(TASKFAILFATAL);
 				break;
 
