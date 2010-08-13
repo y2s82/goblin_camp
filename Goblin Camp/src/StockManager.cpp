@@ -149,13 +149,16 @@ void StockManager::Update() {
 				} else if (fromEarth.find(*prodi) != fromEarth.end()) {
 					difference -= bogIronJobs.size();
 					if (designatedBog.size() > 0) {
-						for (int i = 0; i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
+						for (int i = bogIronJobs.size(); i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
 							int cIndex = rand() % designatedBog.size();
 							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
 							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
 							ironJob->tasks.push_back(Task(MOVE, coord));
 							ironJob->tasks.push_back(Task(BOGIRON));
 							ironJob->tasks.push_back(Task(STOCKPILEITEM));
+							JobManager::Inst()->AddJob(ironJob);
+							bogIronJobs.push_back(ironJob);
+							--difference;
 						}
 					}
 				} else {
@@ -193,7 +196,7 @@ void StockManager::Update() {
 
 	//We need to check our treefelling jobs for successes and cancellations
 	for (std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > >::iterator jobi =
-		treeFellingJobs.begin(); jobi != treeFellingJobs.end(); ++jobi) { //*Phew*
+		treeFellingJobs.begin(); jobi != treeFellingJobs.end();) { //*Phew*
 			if (!jobi->first.lock()) {
 				//Job no longer exists, so remove it from our list
 				//If the tree still exists, it means that the job was cancelled, so add
@@ -202,7 +205,17 @@ void StockManager::Update() {
 					designatedTrees.push_back(jobi->second);
 				}
 				jobi = treeFellingJobs.erase(jobi);
+			} else {
+				++jobi;
 			}
+	}
+
+	for (std::list<boost::weak_ptr<Job> >::iterator jobi = bogIronJobs.begin(); jobi != bogIronJobs.end();) {
+		if (!jobi->lock()) {
+			jobi = bogIronJobs.erase(jobi);
+		} else {
+			++jobi;
+		}
 	}
 
 }
