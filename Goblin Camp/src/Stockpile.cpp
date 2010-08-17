@@ -295,7 +295,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 	if(!vecView.empty()) {
 		std::sort(vecView.begin(), vecView.end(), AmountCompare());
 		int count = 0;
-		for(int i = 0; count < 10 && i < vecView.size(); i++) {
+		for(int i = 0; count < 10 && i < (signed int)vecView.size(); i++) {
 			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
 			count++;
 			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); count < 10 && cati != Item::Categories.end(); cati++) {

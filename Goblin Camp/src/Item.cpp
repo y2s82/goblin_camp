@@ -40,9 +40,9 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	flammable(false),
 	attemptedStore(false),
 	decayCounter(-1),
-	ownerFaction(owner),
 	container(boost::weak_ptr<Item>())
 {
+	SetFaction(owner);
 	//Remember that the components are destroyed after this constructor!
 	x = pos.X();
 	y = pos.Y();
@@ -58,7 +58,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.5f);
 	}
 
-	if (ownerFaction == 0) { //Player owned
+	if (faction == 0) { //Player owned
 		StockManager::Inst()->UpdateQuantity(type, 1);
 	}
 
@@ -73,7 +73,7 @@ Item::~Item() {
 #ifdef DEBUG
 	std::cout<<"Item destroyed\n";
 #endif
-	if (ownerFaction == 0) {
+	if (faction == 0) {
 		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 }
@@ -397,16 +397,16 @@ void Item::LoadPresets(std::string filename) {
 	itemListener->translateNames();
 }
 
-void Item::Faction(int val) {
-	if (val == 0 && ownerFaction != 0) { //Transferred to player
+void Item::SetFaction(int val) {
+	if (val == 0 && faction != 0) { //Transferred to player
 		StockManager::Inst()->UpdateQuantity(type, 1);
-	} else if (val != 0 && ownerFaction == 0) { //Transferred from player
+	} else if (val != 0 && faction == 0) { //Transferred from player
 		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
-	ownerFaction = val;
+	faction = val;
 }
 
-int Item::Faction() const { return ownerFaction; }
+int Item::GetFaction() const { return faction; }
 
 int Item::RelativeValue() {
 	TCOD_dice_t amount = attack.Amount();
@@ -416,6 +416,51 @@ int Item::RelativeValue() {
 }
 
 int Item::Resistance(int i) const { return resistances[i]; }
+
+void Item::SetVelocity(int speed) {
+	velocity = speed;
+	if (speed > 0) {
+		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
+	} else {
+		Game::Inst()->flyingItems.erase(boost::static_pointer_cast<Item>(shared_from_this()));
+	}
+}
+
+void Item::UpdateVelocity() {
+	if (velocity > 0) {
+		nextVelocityMove += velocity;
+		while (nextVelocityMove > 100) {
+			nextVelocityMove -= 100;
+			if (flightPath.size() > 0) {
+				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
+					int tx = flightPath.back().coord.X();
+					int ty = flightPath.back().coord.Y();
+					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
+						SetVelocity(0);
+						flightPath.clear();
+						return;
+					}
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+						
+						Attack attack = GetAttack();
+						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
+						npc->Damage(&attack);
+
+						SetVelocity(0);
+						flightPath.clear();
+						return;
+					}
+				}
+				if (flightPath.back().height == 0) {
+					SetVelocity(0);
+				}
+				Position(flightPath.back().coord);
+				
+				flightPath.pop_back();
+			} else SetVelocity(0);
+		}
+	}
+}
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
