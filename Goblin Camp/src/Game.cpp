@@ -670,11 +670,16 @@ void Game::Update() {
 		consi->second->Update();
 	}
 
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = flyingItems.begin(); itemi != flyingItems.end(); ++itemi) {
+		itemi->lock()->UpdateVelocity();
+	}
+
 	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
 	//15 seconds, on average.
 	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
-			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->Faction() == 0) StockpileItem(*itemi);
+			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
+				StockpileItem(*itemi);
 		}
 	}
 

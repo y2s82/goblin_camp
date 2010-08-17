@@ -351,10 +351,14 @@ void NPC::UpdateStatusEffects() {
 AiThink NPC::Think() {
 	Coordinate tmpCoord;
 	int tmp;
+	
+	UpdateVelocity();
 
 	lastMoveResult = Move(lastMoveResult);
 
-	timeCount += thinkSpeed;
+	if (velocity == 0) timeCount += thinkSpeed; //Can't think while hurtling through the air, sorry
+	else if (!jobs.empty()) TaskFinished(TASKFAILFATAL, "Flying through the air");
+
 	while (timeCount > UPDATES_PER_SECOND) {
 
 		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
@@ -854,7 +858,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 		boost::mutex::scoped_try_lock pathLock(pathMutex);
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
-			if (pathIndex < path->size()) {
+			if (pathIndex < path->size() && pathIndex >= 0) {
 				path->get(pathIndex, &moveX, &moveY);
 				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) {
 					Position(Coordinate(moveX,moveY));
@@ -956,7 +960,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		//Priority #1, if the creature can wield a weapon get one if possible
 		/*TODO: Right now this only makes friendlies take a weapon from a stockpile
 		It should be expanded to allow all npc's to search for nearby weapons lying around. */
-		if (!npc->mainHand.lock() && npc->Faction() == 0 && squad->Weapon() >= 0) {
+		if (!npc->mainHand.lock() && npc->GetFaction() == 0 && squad->Weapon() >= 0) {
 			for (std::list<Attack>::iterator attacki = npc->attacks.begin(); attacki != npc->attacks.end();
 				++attacki) {
 					if (attacki->Type() == DAMAGE_WIELDED) {
@@ -976,7 +980,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			}
 		}
 
-		if (!npc->armor.lock() && npc->Faction() == 0 && squad->Armor() >= 0) {
+		if (!npc->armor.lock() && npc->GetFaction() == 0 && squad->Armor() >= 0) {
 			npc->FindNewArmor();
 		}
 
@@ -1039,7 +1043,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	} else if (npc->coward) { //Aggressiveness trumps cowardice
 		Game::Inst()->FindNearbyNPCs(npc);
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if (npci->lock()->Faction() != npc->faction && npci->lock()->aggressive) {
+			if (npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) {
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
 			}
@@ -1060,7 +1064,7 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 	animal->aggressive = false;
 	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
 		//Turn into a hostile animal if attacked by the player's creatures
-		if (animal->aggressor.lock()->Faction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		if (animal->aggressor.lock()->GetFaction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 	}
 	return false;
 }
@@ -1176,49 +1180,61 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 #ifdef DEBUG
 					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
 #endif
+					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
 
-					Resistance res;
-					switch (attacki->Type()) {
-					case DAMAGE_SLASH:
-					case DAMAGE_PIERCE:
-					case DAMAGE_BLUNT: res = PHYSICAL_RES; break;
-
-					case DAMAGE_MAGIC: res = MAGIC_RES; break;
-
-					case DAMAGE_FIRE: res = FIRE_RES; break;
-
-					case DAMAGE_COLD: res = COLD_RES; break;
-
-					case DAMAGE_POISON: res = POISON_RES; break;
-
-					default: res = PHYSICAL_RES; break;
-					}
-						
-					double resistance = (100.0 - (float)npc->effectiveResistances[res]) / 100.0;
-					int damage = (int)(Game::DiceToInt(attack.Amount()) * resistance);
-					npc->health -= damage;
-
-#ifdef DEBUG
-					std::cout<<"Resistance: "<<resistance<<"\n";
-					std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
-#endif
-
-					for (unsigned int effecti = 0; effecti < attack.StatusEffects()->size(); ++effecti) {
-						if (rand() % 100 < attack.StatusEffects()->at(effecti).second) {
-							npc->AddEffect(attack.StatusEffects()->at(effecti).first);
-						}
-					}
-
-					if (npc->health <= 0) npc->Kill();
-
-					if (damage > 0) {
-						Game::Inst()->CreateBlood(Coordinate(npc->Position().X() + ((rand() % 3) - 1), 
-							npc->Position().Y() + ((rand() % 3) - 1)));
-						npc->aggressor = boost::static_pointer_cast<NPC>(shared_from_this());
+					if (effectiveStats[STRENGTH] > 20) {
+						Coordinate tar;
+						tar.X((x - npc->Position().X()) * (effectiveStats[STRENGTH] - 10));
+						tar.Y((y - npc->Position().Y()) * (effectiveStats[STRENGTH] - 10));
+						npc->CalculateFlightPath(npc->Position()+tar, rand() % 20 + 25);
+						npc->pathIndex = -1;
 					}
 				}
 			}
 		}
+	}
+}
+
+void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
+	Resistance res;
+
+	switch (attack->Type()) {
+	case DAMAGE_SLASH:
+	case DAMAGE_PIERCE:
+	case DAMAGE_BLUNT: res = PHYSICAL_RES; break;
+
+	case DAMAGE_MAGIC: res = MAGIC_RES; break;
+
+	case DAMAGE_FIRE: res = FIRE_RES; break;
+
+	case DAMAGE_COLD: res = COLD_RES; break;
+
+	case DAMAGE_POISON: res = POISON_RES; break;
+
+	default: res = PHYSICAL_RES; break;
+	}
+						
+	double resistance = (100.0 - (float)effectiveResistances[res]) / 100.0;
+	int damage = (int)(Game::DiceToInt(attack->Amount()) * resistance);
+	health -= damage;
+
+	#ifdef DEBUG
+	std::cout<<"Resistance: "<<resistance<<"\n";
+	std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
+	#endif
+
+	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
+		if (rand() % 100 < attack->StatusEffects()->at(effecti).second) {
+			AddEffect(attack->StatusEffects()->at(effecti).first);
+		}
+	}
+
+	if (health <= 0) Kill();
+
+	if (damage > 0) {
+		Game::Inst()->CreateBlood(Coordinate(Position().X() + ((rand() % 3) - 1), 
+			Position().Y() + ((rand() % 3) - 1)));
+		if (aggr.lock()) aggressor = aggr;
 	}
 }
 
@@ -1327,6 +1343,8 @@ class NPCListener : public ITCODParserListener {
 				std::string tag = (char*)TCOD_list_get(value.list,i);
 				NPC::Presets.back().tags.insert(boost::to_lower_copy(tag));
 			}
+		} else if (boost::iequals(name,"strength")) {
+			NPC::Presets.back().stats[STRENGTH] = value.i;
 		}
 		return true;
 	}
@@ -1379,8 +1397,12 @@ void NPC::LoadPresets(std::string filename) {
 	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
 	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
 
+	TCODParserStruct *statsStruct = parser.newStructure("stats");
+	statsStruct->addProperty("strength", TCOD_TYPE_INT, false);
+
 	npcTypeStruct->addStructure(attackTypeStruct);
 	npcTypeStruct->addStructure(resistancesStruct);
+	npcTypeStruct->addStructure(statsStruct);
 
 	parser.run(filename.c_str(), new NPCListener());
 }
@@ -1475,6 +1497,43 @@ boost::weak_ptr<Item> NPC::Wearing() {
 }
 
 bool NPC::HasHands() { return hasHands; }
+
+void NPC::UpdateVelocity() {
+	if (velocity > 0) {
+		nextVelocityMove += velocity;
+		while (nextVelocityMove > 100) {
+			nextVelocityMove -= 100;
+			if (flightPath.size() > 0) {
+				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
+					int tx = flightPath.back().coord.X();
+					int ty = flightPath.back().coord.Y();
+					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
+						health -= velocity/5;
+						AddEffect(CONCUSSION);
+						SetVelocity(0);
+						flightPath.clear();
+						return;
+					}
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+						health -= velocity/5;
+						AddEffect(CONCUSSION);
+						SetVelocity(0);
+						flightPath.clear();
+						return;
+					}
+				}
+				if (flightPath.back().height == 0) {
+					health -= velocity/5;
+					AddEffect(CONCUSSION);
+					SetVelocity(0);
+				}
+				Position(flightPath.back().coord);
+				
+				flightPath.pop_back();
+			} else SetVelocity(0);
+		}
+	}
+}
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 
 typeName(typeNameVal),

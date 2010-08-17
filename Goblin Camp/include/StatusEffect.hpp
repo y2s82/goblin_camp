@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 enum NPCStat {
 	MOVESPEED,
 	DODGE,
+	STRENGTH,
 	STAT_COUNT
 };
 

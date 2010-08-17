@@ -227,7 +227,6 @@ void Item::save(Archive & ar, const unsigned int version) const {
 	ar & flammable;
 	ar & attemptedStore;
 	ar & decayCounter;
-	ar & ownerFaction;
 	ar & container;
 }
 
@@ -243,7 +242,6 @@ void Item::load(Archive & ar, const unsigned int version) {
 	ar & flammable;
 	ar & attemptedStore;
 	ar & decayCounter;
-	ar & ownerFaction;
 	ar & container;
 }
 
@@ -260,17 +258,19 @@ void OrganicItem::load(Archive & ar, const unsigned int version) {
 	ar & growth;
 }
 
-
 template<class Archive>
 void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
 	ar & uid;
-	ar & uids,
-		ar & zone;
+	ar & uids;
+	ar & zone;
 	ar & reserved;
 	ar & name;
 	ar & faction;
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
 }
 
 template<class Archive>
@@ -283,8 +283,10 @@ void Entity::load(Archive & ar, const unsigned int version) {
 	ar & reserved;
 	ar & name;
 	ar & faction;
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
 }
-
 
 template<class Archive>
 void Job::save(Archive & ar, const unsigned int version) const {

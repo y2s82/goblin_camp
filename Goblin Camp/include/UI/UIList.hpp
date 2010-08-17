@@ -95,7 +95,7 @@ MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
 template <class T, class C>
 void UIList<T, C>::GetTooltip(int x, int y, Tooltip *tooltip) {
 	if(getTooltip) {
-		if (x >= _x && x < _x + width && y >= _y && y < _y + width && y - _y < items->size()) {
+		if (x >= _x && x < _x + width && y >= _y && y < _y + width && y - _y < (signed int)items->size()) {
 			typename C::iterator it = items->begin();
 			for(int i = 0; i < (y - _y); i++) {
 				it++;

@@ -111,7 +111,9 @@ void UI::HandleKeyboard() {
                 ChangeMenu(SquadsDialog::SquadDialog());
             } else if (key.c == 'h') {
                 keyHelpTextColor = 255;
-            }
+            } else if (key.c == '.') {
+				Game::Inst()->CreateNPC(Coordinate(100,100), NPC::StringToNPCType("giant"));
+			}
 
             int addition = 1;
             if (ShiftPressed()) addition *= 10;
