@@ -1294,7 +1294,6 @@ class NPCListener : public ITCODParserListener {
 		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
 		else if (boost::iequals(name,"needsSleep")) { NPC::Presets.back().needsSleep = true; }
 		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
-		else if (boost::iequals(name,"ranged")) { NPC::Presets.back().attacks.back().Ranged(true); }
 		return true;
 	}
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
@@ -1441,7 +1440,6 @@ void NPC::GetMainHandAttack(Attack &attack) {
 		Attack wAttack = weapon->GetAttack();
 		attack.Type(wAttack.Type());
 		attack.AddDamage(wAttack.Amount());
-		attack.Ranged(wAttack.Ranged());
 		attack.Projectile(wAttack.Projectile());
 		for (std::vector<std::pair<StatusEffectType, int> >::iterator effecti = wAttack.StatusEffects()->begin();
 			effecti != wAttack.StatusEffects()->end(); ++effecti) {

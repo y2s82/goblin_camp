@@ -322,7 +322,7 @@ private:
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets.back().attack.StatusEffects()->at(i).second = (int)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"projectile")) {
+		} else if (boost::iequals(name,"ammo")) {
 			presetProjectile.back() = value.s;
 		} else if (boost::iequals(name,"parent")) {
 			presetCategoryParent.back() = value.s;
@@ -379,8 +379,7 @@ void Item::LoadPresets(std::string filename) {
 	attackTypeStruct->addProperty("cooldown", TCOD_TYPE_INT, false);
 	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
 	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);
-	attackTypeStruct->addFlag("ranged");
-	attackTypeStruct->addProperty("projectile", TCOD_TYPE_STRING, false);
+	attackTypeStruct->addProperty("ammo", TCOD_TYPE_STRING, false);
 
 	itemTypeStruct->addStructure(attackTypeStruct);
 
