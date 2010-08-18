@@ -32,8 +32,9 @@ enum DamageType {
 	DAMAGE_FIRE,
 	DAMAGE_COLD,
 	DAMAGE_POISON,
-	DAMAGE_COUNT, //Nothing can deal "wielded" damage
-	DAMAGE_WIELDED
+	DAMAGE_COUNT, //Nothing can deal "wielded" or "ranged" damage
+	DAMAGE_WIELDED,
+	DAMAGE_RANGED
 };
 
 class Attack {
@@ -50,7 +51,6 @@ private:
 	int cooldown;
 	int cooldownMax;
 	std::vector<std::pair<StatusEffectType, int> > statusEffects;
-	bool ranged;
 	int projectile;
 public:
 	Attack();
@@ -70,7 +70,6 @@ public:
 	void ResetCooldown();
 	std::vector<std::pair<StatusEffectType, int> >* StatusEffects();
 	bool Ranged();
-	void Ranged(bool);
 	int Projectile();
 	void Projectile(int);
 };

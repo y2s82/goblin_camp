@@ -794,7 +794,6 @@ void Attack::save(Archive & ar, const unsigned int version) const {
 	ar & cooldown;
 	ar & cooldownMax;
 	ar & statusEffects;
-	ar & ranged;
 	ar & projectile;
 }
 
@@ -808,7 +807,6 @@ void Attack::load(Archive & ar, const unsigned int version) {
 	ar & cooldown;
 	ar & cooldownMax;
 	ar & statusEffects;
-	ar & ranged;
 	ar & projectile;
 }
 

@@ -134,6 +134,13 @@ category_type "Piercing weapon" {
 	parent="Weapon"
 }
 
+category_type "Ammunition" {
+}
+
+category_type "Arrow" {
+	parent="Ammunition"
+}
+
 category_type "Armor" {
 }
 
@@ -441,6 +448,32 @@ item_type "Bone Dagger" {
 		cooldown=25
 		statusEffects=["Bleeding"]
 		effectChances=[    10    ]
+	}
+}
+
+item_type "Wooden Arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "128,64,0"
+	components = [ "Plank" ]
+	attack "Pierce" {
+		type="piercing"
+		damage="1d10+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
+	}
+}
+
+item_type "Wooden bow" {
+	category = ["Ranged weapon"]
+	graphic = 41
+	color = "200,64,0"
+	components = ["Plank", "Plank"]
+	attack "Fire" {
+		type="ranged"
+		ammo="Arrow"
+		cooldown=50
 	}
 }
 
