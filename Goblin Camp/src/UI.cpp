@@ -33,7 +33,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
+#include "UI/ConstructionDialog.hpp"
 #include "UI/Tooltip.hpp"
+#include "UI/ScrollPanel.hpp"
 
 static TCOD_key_t NO_KEY = {
     TCODK_NONE, 0, false, false, false, false, false, false
@@ -763,12 +765,9 @@ MenuResult SideBar::Update(int x, int y, bool clicked) {
 	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
 		if (construction) {
 			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
-				int i = y - (topY + 15);			
-				if (i >= 0 && i < (signed int)Item::Categories.size()) {
-                    if (clicked) {
-                        boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i, UI::Inst()->ShiftPressed());
-                    }
-					return MENUHIT;
+				MenuResult result = contents->Update(x - (leftX + 1), y - (topY + 14), clicked, NO_KEY);
+				if(result != NOMENUHIT) {
+					return result;
 				}
 			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
 				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(entity.lock()));
@@ -793,6 +792,7 @@ MenuResult SideBar::Update(int x, int y, bool clicked) {
 void SideBar::Draw(TCODConsole* console) {
 	if (entity.lock()) {
 		int edgeX = console->getWidth();
+		leftX = edgeX - width;
 		topY = std::max(0,(console->getHeight() - height) / 2);
 		TCODConsole minimap(11,11);
 
@@ -827,23 +827,7 @@ void SideBar::Draw(TCODConsole* console) {
 					console->print(edgeX - width + 2, topY+15+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
 				}		
 			} else if (construct->HasTag(STOCKPILE)) {
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 36, false, TCOD_BKGND_DEFAULT, "Categories");
-				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
-				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-					if (!Item::Categories[i].parent) {
-						console->print(edgeX-(width-2),topY+15+i, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
-					} else {
-						if (i+1 < Item::Categories.size() && Item::Categories[i+1].parent == Item::Categories[i].parent) {
-							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
-						} else {
-							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
-						}
-					}
-				}
-				console->setForegroundColor(TCODColor::white);
+				contents->Draw(edgeX - (width-1), topY+14, console);
 			} else if (construct->HasTag(FARMPLOT)) {
 				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
@@ -897,6 +881,7 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 	entity = ent;
 	npc = construction = false;
 	height = 15;
+	contents.reset();
 	if (boost::dynamic_pointer_cast<NPC>(entity.lock())) {
 		height = 30;
 		npc = true;
@@ -906,6 +891,10 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 	} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
 		height = 51;
 		construction = true;
+		contents = boost::shared_ptr<Drawable>(new ScrollPanel(0, 0, width - 2, 36,
+														new UIList<ItemCat>(&Item::Categories, 0, 0, width, Item::Categories.size(),
+																			boost::bind(&ConstructionDialog::DrawCategory, boost::dynamic_pointer_cast<Construction>(entity.lock()).get(), _1, _2, _3, _4, width - 2, _5, _6),
+																			boost::bind(&Stockpile::SwitchAllowed, boost::dynamic_pointer_cast<Stockpile>(entity.lock()), _1, boost::bind(&UI::ShiftPressed, UI::Inst())))));
 	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
 		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
 		if (construct->HasTag(WORKSHOP)) {
