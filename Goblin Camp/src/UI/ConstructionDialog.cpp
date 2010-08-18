@@ -44,9 +44,10 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
         dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
         if(cons->HasTag(STOCKPILE)) {
             constructionInfoDialog->SetHeight(40);
-            dialog->AddComponent(new UIList<ItemCat>(&Item::Categories, 2, 5, 46, Item::Categories.size(),
+            dialog->AddComponent(new ScrollPanel(2, 5, 46, 34,
+								 new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
                                                    boost::bind(&ConstructionDialog::DrawCategory, dialog, _1, _2, _3, _4, _5, _6),
-                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))));
+                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))), false));
         } else if(cons->Producer()) {
             constructionInfoDialog->SetHeight(40);
             dialog->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
