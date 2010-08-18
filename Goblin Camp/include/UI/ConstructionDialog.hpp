@@ -50,6 +50,6 @@ public:
 	void Construct(Construction*);
     void Rename();
     void Dismantle();
-    void DrawCategory(ItemCat, int, int, int, bool, TCODConsole *);
+    static void DrawCategory(Construction *, ItemCat, int, int, int, int, bool, TCODConsole *);
     void DrawJob(ItemType, int, int, int, bool, TCODConsole *);
 };

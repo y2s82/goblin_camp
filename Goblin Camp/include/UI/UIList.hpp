@@ -78,7 +78,7 @@ int UIList<T, C>::TotalHeight() {
 
 template <class T, class C>
 MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
-    if (x >= _x && x < _x + width && y >= _y && y < _y + width) {
+    if (x >= _x && x < _x + width && y >= _y && y < _y + height) {
         if (clicked) {
             if (selectable) {
                 selection = y - _y;
