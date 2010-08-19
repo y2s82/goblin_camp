@@ -708,9 +708,8 @@ void UI::HandleUnderCursor(Coordinate pos, std::list<boost::weak_ptr<Entity> >* 
 
 		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
 		if (!itemList->empty()) {
-			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
-			if (itemi != Game::Inst()->freeItems.end()) {
-				result->push_back(*itemi);
+			for (std::set<int>::iterator itemi = itemList->begin(); itemi != itemList->end(); ++itemi) {
+				result->push_back(Game::Inst()->itemList[*itemi]);
 			}
 		}
 
