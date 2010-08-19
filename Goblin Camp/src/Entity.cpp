@@ -15,10 +15,15 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/utility.hpp>
+
 #include "Entity.hpp"
 #include "Logger.hpp"
 
-Entity::Entity() : zone(0), reserved(0), name("NONAME"), faction(0) {
+FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
+
+Entity::Entity() : zone(0), reserved(0), name("NONAME"), faction(-1),
+velocity(0), nextVelocityMove(0), velocityTarget(Coordinate(0,0)) {
 	uid = uids++; //FIXME: Entity should keep track of freed uids
 }
 
@@ -44,5 +49,44 @@ void Entity::Name(std::string newName) { name = newName; }
 
 void Entity::CancelJob(int) {}
 
-int Entity::Faction() const { return faction; }
-void Entity::Faction(int val) { faction = val; }
+int Entity::GetFaction() const { return faction; }
+void Entity::SetFaction(int val) { faction = val; }
+
+void Entity::GetTooltip(int x, int y, Tooltip *tooltip) {
+	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
+}
+
+int Entity::GetVelocity() { return velocity; }
+void Entity::SetVelocity(int value) { velocity = value; }
+
+Coordinate Entity::GetVelocityTarget() { return velocityTarget; }
+void Entity::SetVelocityTarget(Coordinate value) { velocityTarget = value; }
+
+void Entity::CalculateFlightPath(Coordinate target, int speed) {
+	flightPath.clear();
+	TCODLine::init(target.X(), target.Y(), x, y);
+	int px, py;
+	while (!TCODLine::step(&px, &py)) {
+		flightPath.push_back(FlightPath(Coordinate(px,py)));
+	}
+
+	if (flightPath.size() > 0) {
+		int h = 0;
+		int hAdd = 50 / speed; /* The lower the speed, the higher the entity has to arch in order
+							   for it to fly the distance */
+		
+		std::list<FlightPath>::iterator begIt = flightPath.begin();
+		std::list<FlightPath>::iterator endIt = flightPath.end();
+
+		while (begIt->height == -1 && endIt->height == -1) {
+			begIt->height = h;
+			endIt->height = h;
+			h += hAdd;
+			++begIt;
+			--endIt;
+			if (begIt == flightPath.end() || endIt == flightPath.end()) break;
+		}
+		flightPath.pop_back(); //Last coordinate is the entity's coordinate
+	}
+	SetVelocity(speed);
+}

@@ -41,6 +41,8 @@ vis(true),
 	foreColor(TCODColor::white),
 	backColor(TCODColor::black),
 	natureObject(-1),
+	npcList(std::set<int>()),
+	itemList(std::set<int>()),
 	filth(boost::shared_ptr<FilthNode>()),
 	blood(boost::shared_ptr<BloodNode>()),
 	marked(false)

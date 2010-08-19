@@ -42,6 +42,7 @@ public:
 	void SetEntity(boost::weak_ptr<Entity>);
 	MenuResult Update(int, int, bool);
 	void Draw(TCODConsole*);
+	void GetTooltip(int, int, Tooltip *, TCODConsole *);
 };
 
 class UI {
@@ -74,7 +75,6 @@ private:
 	int inputStringLimit;
 	int cursorChar;
 
-	void HandleUnderCursor(Coordinate);
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
 	void DrawTopBar(TCODConsole*);
 	void HandleKeyboard();
@@ -110,5 +110,6 @@ public:
 	void CloseMenu();
 	void SetCursor(int);
 	bool ShiftPressed();
+	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
 };
