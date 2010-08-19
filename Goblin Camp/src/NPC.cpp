@@ -668,6 +668,8 @@ MOVENEARend:
 					Hit(currentEntity());
 					break;
 				} else if (WieldingRangedWeapon()) {
+					FireProjectile(currentEntity());
+					break;
 				}
 
 				if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
@@ -1014,6 +1016,35 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			}
 		}
 
+		if (npc->WieldingRangedWeapon()) {
+			if (!npc->quiver.lock()) {
+				if (Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Quiver")).lock()) {
+						newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
+							Item::StringToItemCategory("Quiver")));
+						newJob->tasks.push_back(Task(MOVE));
+						newJob->tasks.push_back(Task(TAKE));
+						newJob->tasks.push_back(Task(WEAR));
+						npc->jobs.push_back(newJob);
+						npc->run = true;
+						return true;
+				}
+			} else if (npc->quiver.lock()->empty()) {
+				if (Game::Inst()->FindItemByCategoryFromStockpiles(
+					npc->mainHand.lock()->GetAttack().Projectile()).lock()) {
+						for (int i = 0; i < 10; ++i) {
+							newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
+								npc->mainHand.lock()->GetAttack().Projectile()));
+							newJob->tasks.push_back(Task(MOVE));
+							newJob->tasks.push_back(Task(TAKE));
+							newJob->tasks.push_back(Task(QUIVER));
+							npc->jobs.push_back(newJob);
+						}
+						npc->run = true;
+						return true;
+				}
+			}
+		}
+
 		if (!npc->armor.lock() && npc->GetFaction() == 0 && squad->Armor() >= 0) {
 			npc->FindNewArmor();
 		}
@@ -1228,6 +1259,14 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 		}
 	}
 }
+
+void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
+	if (target.lock() && !quiver.lock()->empty()) {
+		boost::shared_ptr<Item> projectile = quiver.lock()->GetFirstItem().lock();
+		quiver.lock()->RemoveItem(projectile);
+		projectile->CalculateFlightPath(target.lock()->Position(), 60);
+	}
+ }
 
 void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	Resistance res;

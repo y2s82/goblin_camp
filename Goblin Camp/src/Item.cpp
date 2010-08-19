@@ -373,7 +373,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("decaySpeed", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
-	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
+	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
 	attackTypeStruct->addValueList("type", damageTypes, true);
 	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
 	attackTypeStruct->addProperty("cooldown", TCOD_TYPE_INT, false);

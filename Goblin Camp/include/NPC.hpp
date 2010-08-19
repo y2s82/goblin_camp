@@ -204,6 +204,7 @@ public:
 	void Kill();
 	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>);
+	void FireProjectile(boost::weak_ptr<Entity>);
 	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
 
 	void MemberOf(boost::weak_ptr<Squad>);
