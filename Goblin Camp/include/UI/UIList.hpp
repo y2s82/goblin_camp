@@ -31,11 +31,11 @@ private:
     C* items;
     bool selectable;
     int selection;
-    boost::function<void(T, int, int, int, bool, TCODConsole *)> draw;
+    boost::function<void(T, int, int, int, int, bool, TCODConsole *)> draw;
 	boost::function<void(T, Tooltip *)> getTooltip;
     boost::function<void(int)> onclick;
 public:
-    UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, bool, TCODConsole *)> ndraw, 
+    UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, int, bool, TCODConsole *)> ndraw, 
 				 boost::function<void(int)> nonclick = 0, bool nselectable = false, boost::function<void(T, Tooltip *)> ntooltip = 0):
     items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), getTooltip(ntooltip), Drawable(x, y, nwidth, nheight) {}
     void Draw(int, int, TCODConsole *);
@@ -51,9 +51,9 @@ template <class T, class C>
 void UIList<T, C>::Draw(int x, int y, TCODConsole *console) {
     console->setAlignment(TCOD_LEFT);
     int count = 0;
-    for(typename C::iterator it = items->begin(); it != items->end(); it++) {
+    for(typename C::iterator it = items->begin(); it != items->end() && count < height; it++) {
         T item = *it;
-        draw(item, count, x + _x, y + _y + count, selection == count, console);
+        draw(item, count, x + _x, y + _y + count, width, selection == count, console);
         count++;
     }
 }
@@ -65,7 +65,7 @@ void UIList<T, C>::Draw(int x, int y, int scroll, int _width, int _height, TCODC
     for(typename C::iterator it = items->begin(); it != items->end(); it++) {
         T item = *it;
 		if (count >= scroll && count < scroll + _height) {
-			draw(item, count, x, y + (count - scroll), selection == count, console);
+			draw(item, count, x, y + (count - scroll), _width, selection == count, console);
 		}
         count++;
     }

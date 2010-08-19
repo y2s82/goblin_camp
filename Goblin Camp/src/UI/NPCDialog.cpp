@@ -39,7 +39,7 @@ NPCDialog::NPCDialog(): UIContainer(std::vector<Drawable*>(), 0, 0, Game::Inst()
                                  new UIList<std::pair<int, boost::shared_ptr<NPC> >, std::map<int, boost::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCDialog::DrawNPC), false));
 }
 
-void NPCDialog::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int x, int y, bool selected, TCODConsole* console) {
+void NPCDialog::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int x, int y, int width, bool selected, TCODConsole* console) {
     console->print(x, y, "NPC: %d", npci.second->Uid());
     console->print(x+11, y, "%s: %s",
                    npci.second->currentJob().lock() ? npci.second->currentJob().lock()->name.c_str() : "No job",

@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 
 #include <boost/serialization/split_member.hpp>
+#include <boost/format.hpp>
 #include <libtcod.hpp>
 
 enum NPCStat {
