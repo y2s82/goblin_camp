@@ -26,7 +26,6 @@ Attack::Attack() : damageType(DAMAGE_BLUNT),
 	cooldown(0),
 	cooldownMax(UPDATES_PER_SECOND),
 	statusEffects(std::vector<std::pair<StatusEffectType, int> >()),
-	ranged(false),
 	projectile(0)
 {
 	damageAmount.addsub = 1;
@@ -54,8 +53,7 @@ void Attack::ResetCooldown() {cooldown = cooldownMax;}
 
 std::vector<std::pair<StatusEffectType, int> >* Attack::StatusEffects() {return &statusEffects;}
 
-bool Attack::Ranged() {return ranged;}
-void Attack::Ranged(bool value) {ranged = value;}
+bool Attack::Ranged() {return damageType == DAMAGE_RANGED;}
 
 int Attack::Projectile() {return projectile;}
 void Attack::Projectile(int value) {projectile = value;}
@@ -77,6 +75,8 @@ DamageType Attack::StringToDamageType(std::string type) {
 		return DAMAGE_POISON;
 	} else if (boost::iequals(type, "wielded")) {
 		return DAMAGE_WIELDED;
+	} else if (boost::iequals(type, "ranged")) {
+		return DAMAGE_RANGED;
 	}
 	return DAMAGE_SLASH;
 }
@@ -98,6 +98,8 @@ std::string Attack::DamageTypeToString(DamageType type) {
 		return "poison";
 	} else if (type == DAMAGE_WIELDED) {
 		return "wielded";
+	} else if (type == DAMAGE_RANGED) {
+		return "ranged";
 	}
 	return "";
 }

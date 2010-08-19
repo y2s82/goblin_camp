@@ -59,6 +59,7 @@
     <ClCompile Include="src\UI\NPCDialog.cpp" />
     <ClCompile Include="src\UI\SquadsDialog.cpp" />
     <ClCompile Include="src\UI\StockManagerDialog.cpp" />
+    <ClCompile Include="src\UI\Tooltip.cpp" />
     <ClCompile Include="src\UI\UIComponents.cpp" />
     <ClCompile Include="src\UI\YesNoDialog.cpp" />
     <ClCompile Include="src\Water.cpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="include\UI\SquadsDialog.hpp" />
     <ClInclude Include="include\UI\StockManagerDialog.hpp" />
     <ClInclude Include="include\UI\TextBox.hpp" />
+    <ClInclude Include="include\UI\Tooltip.hpp" />
     <ClInclude Include="include\UI\UIComponents.hpp" />
     <ClInclude Include="include\UI\UIList.hpp" />
     <ClInclude Include="include\UI\YesNoDialog.hpp" />

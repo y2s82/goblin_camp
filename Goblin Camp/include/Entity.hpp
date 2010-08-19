@@ -17,11 +17,21 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <set>
 #include <string>
+#include <list>
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/serialization/set.hpp>
 
 #include "Coordinate.hpp"
 #include "UI/UIComponents.hpp"
+#include "UI/Tooltip.hpp"
+
+#define ENTITYHEIGHT 5
+
+struct FlightPath {
+	FlightPath(Coordinate);
+	Coordinate coord;
+	int height;
+};
 
 class Entity: public boost::enable_shared_from_this<Entity>
 {
@@ -38,6 +48,9 @@ protected:
 	bool reserved;
 	std::string name;
 	int faction;
+	int velocity, nextVelocityMove;
+	Coordinate velocityTarget;
+	std::list<FlightPath> flightPath;
 public:
 	Entity();
 	virtual ~Entity();
@@ -54,10 +67,16 @@ public:
 	std::string Name();
 	void Name(std::string);
 	virtual void CancelJob(int=0);
-
-	virtual void Faction(int);
-	virtual int Faction() const;
+	void SetFaction(int);
+	int GetFaction() const;
     
     virtual Panel* GetContextMenu() {return 0;}
+	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
+
+	int GetVelocity();
+	virtual void SetVelocity(int);
+	Coordinate GetVelocityTarget();
+	void SetVelocityTarget(Coordinate);
+	void CalculateFlightPath(Coordinate, int speed);
 };
 

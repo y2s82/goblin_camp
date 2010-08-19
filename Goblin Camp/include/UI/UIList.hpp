@@ -23,6 +23,8 @@
 #include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
 
+#include "UI/Tooltip.hpp"
+
 template <class T, class C = std::vector<T> >
 class UIList: public Drawable, public Scrollable {
 private:
@@ -30,14 +32,17 @@ private:
     bool selectable;
     int selection;
     boost::function<void(T, int, int, int, bool, TCODConsole *)> draw;
+	boost::function<void(T, Tooltip *)> getTooltip;
     boost::function<void(int)> onclick;
 public:
-    UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, bool, TCODConsole *)> ndraw, boost::function<void(int)> nonclick = 0, bool nselectable = false):
-    items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), Drawable(x, y, nwidth, nheight) {}
+    UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, bool, TCODConsole *)> ndraw, 
+				 boost::function<void(int)> nonclick = 0, bool nselectable = false, boost::function<void(T, Tooltip *)> ntooltip = 0):
+    items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), getTooltip(ntooltip), Drawable(x, y, nwidth, nheight) {}
     void Draw(int, int, TCODConsole *);
     void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
     int TotalHeight();
     MenuResult Update(int, int, bool, TCOD_key_t);
+	void GetTooltip(int, int, Tooltip *);
     int Selected();
     void Select(int);
 };
@@ -85,6 +90,19 @@ MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
         return MENUHIT;
     }
     return NOMENUHIT;
+}
+
+template <class T, class C>
+void UIList<T, C>::GetTooltip(int x, int y, Tooltip *tooltip) {
+	if(getTooltip) {
+		if (x >= _x && x < _x + width && y >= _y && y < _y + width && y - _y < (signed int)items->size()) {
+			typename C::iterator it = items->begin();
+			for(int i = 0; i < (y - _y); i++) {
+				it++;
+			}
+			getTooltip(*it, tooltip);
+		}
+	}
 }
 
 template <class T, class C>

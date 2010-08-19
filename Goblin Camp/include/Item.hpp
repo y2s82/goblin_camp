@@ -92,7 +92,6 @@ private:
 	int resistances[RES_COUNT];
 
 protected:
-	int ownerFaction;
 	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 	boost::weak_ptr<Item> container;
@@ -125,11 +124,13 @@ public:
 	void Color(TCODColor);
 	bool IsCategory(ItemCategory);
 	virtual void Reserve(bool);
-	virtual void Faction(int);
-	virtual int Faction() const;
+	virtual void SetFaction(int);
+	virtual int GetFaction() const;
 	Attack GetAttack() const;
 	int RelativeValue();
 	int Resistance(int) const;
+	virtual void SetVelocity(int);
+	void UpdateVelocity();
 };
 
 class OrganicItem : public Item {

@@ -23,6 +23,8 @@
 #include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
 
+#include "UI/Tooltip.hpp"
+
 enum MenuResult {
 	MENUHIT,
 	NOMENUHIT,
@@ -33,21 +35,26 @@ class Drawable {
 protected:
 	int _x, _y, width, height;
     boost::function<bool()> visible;
+	boost::function<void(int, int, Tooltip*)> getTooltip;
 public:
     Drawable(int x, int y, int nwidth, int nheight):
-    _x(x), _y(y), width(nwidth), height(nheight), visible(0) {}
+    _x(x), _y(y), width(nwidth), height(nheight), visible(0), getTooltip(0) {}
     virtual void Draw(int, int, TCODConsole *) = 0;
-	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key)
+		{return (x >= _x && x < _x + height && y >= _y && y < _y + height) ? MENUHIT : NOMENUHIT;}
     int Height() { return height; }
     bool Visible() { return !visible || visible(); }
     void SetVisible(boost::function<bool()> nvisible) { visible = nvisible; }
+	virtual void GetTooltip(int x, int y, Tooltip *tooltip) { if(getTooltip) getTooltip(x, y, tooltip); }
+	void SetTooltip(boost::function<void(int, int, Tooltip*)> ntooltip) { getTooltip = ntooltip; }
 };
 
 class Scrollable {
 public:
     virtual void Draw(int x, int y, int scroll, int width, int height, TCODConsole *) = 0;
     virtual int TotalHeight() = 0;
-	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) {return NOMENUHIT;}
+	virtual MenuResult Update(int x, int y, bool clicked, TCOD_key_t key) { return NOMENUHIT; }
+	virtual void GetTooltip(int x, int y, Tooltip *tooltip) {};
 };
 
 class UIContainer: public Drawable {
@@ -60,6 +67,7 @@ public:
     void AddComponent(Drawable *component);
     virtual void Draw(int, int, TCODConsole *);
     virtual MenuResult Update(int, int, bool, TCOD_key_t);
+	virtual void GetTooltip(int, int, Tooltip *);
 };
 
 class Panel: public Drawable {
