@@ -667,6 +667,7 @@ MOVENEARend:
 				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 					Hit(currentEntity());
 					break;
+				} else if (WieldingRangedWeapon()) {
 				}
 
 				if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
@@ -752,16 +753,27 @@ MOVENEARend:
 
 			case WEAR:
 				if (carried.lock()) {
-					if (armor.lock()) { //Remove armor and drop if already wearing
-						DropItem(armor);
-						armor.reset();
-					}
-					armor = carried;
-					carried.reset();
-					TaskFinished(TASKSUCCESS);
+					if (carried.lock()->IsCategory(Item::StringToItemCategory("Armor"))) {
+						if (armor.lock()) { //Remove armor and drop if already wearing
+							DropItem(armor);
+							armor.reset();
+						}
+						armor = carried;
 #ifdef DEBUG
 					std::cout<<name<<" wearing "<<armor.lock()->Name()<<"\n";
 #endif
+					}  else if (carried.lock()->IsCategory(Item::StringToItemCategory("Quiver"))) {
+						if (quiver.lock()) { //Remove quiver and drop if already wearing
+							DropItem(quiver);
+							quiver.reset();
+						}
+						quiver = boost::static_pointer_cast<Container>(carried.lock());
+#ifdef DEBUG
+					std::cout<<name<<" wearing "<<quiver.lock()->Name()<<"\n";
+#endif
+					}
+					carried.reset();
+					TaskFinished(TASKSUCCESS);
 					break;
 				}
 				TaskFinished(TASKFAILFATAL);
@@ -802,6 +814,28 @@ MOVENEARend:
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
+				}
+				TaskFinished(TASKFAILFATAL);
+				break;
+
+			case QUIVER:
+				if (carried.lock()) {
+					if (!quiver.lock()) {
+						DropItem(carried);
+						carried.reset();
+						TaskFinished(TASKFAILFATAL, "No quiver!");
+						break;
+					}
+					inventory->RemoveItem(carried);
+					if (!quiver.lock()->AddItem(carried)) {
+						DropItem(carried);
+						carried.reset();
+						TaskFinished(TASKFAILFATAL, "Quiver full!");
+						break;
+					}
+					carried.reset();
+					TaskFinished(TASKSUCCESS);
+					break;
 				}
 				TaskFinished(TASKFAILFATAL);
 				break;
@@ -1446,6 +1480,14 @@ void NPC::GetMainHandAttack(Attack &attack) {
 				attack.StatusEffects()->push_back(*effecti);
 		}
 	}
+}
+
+bool NPC::WieldingRangedWeapon() {
+	if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
+		Attack wAttack = weapon->GetAttack();
+		return wAttack.Type() == DAMAGE_RANGED;
+	}
+	return false;
 }
 
 void NPC::FindNewWeapon() {

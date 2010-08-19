@@ -120,10 +120,13 @@ private:
 	int _graphic;
 	bool taskBegun;
 	bool expert;
+
 	boost::weak_ptr<Item> carried;
 	boost::weak_ptr<Item> mainHand;
 	boost::weak_ptr<Item> offHand;
 	boost::weak_ptr<Item> armor;
+	boost::weak_ptr<Container> quiver;
+
 	int thirst, hunger, weariness;
 	int thinkSpeed;
 	std::list<StatusEffect> statusEffects;
@@ -206,6 +209,7 @@ public:
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();
 	void GetMainHandAttack(Attack&);
+	bool WieldingRangedWeapon();
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
 	bool HasHands();
