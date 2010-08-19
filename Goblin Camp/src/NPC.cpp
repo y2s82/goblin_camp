@@ -1261,10 +1261,21 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 }
 
 void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
-	if (target.lock() && !quiver.lock()->empty()) {
-		boost::shared_ptr<Item> projectile = quiver.lock()->GetFirstItem().lock();
-		quiver.lock()->RemoveItem(projectile);
-		projectile->CalculateFlightPath(target.lock()->Position(), 60);
+	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+		if (attacki->Type() == DAMAGE_WIELDED) {
+			if (attacki->Cooldown() <= 0) {
+				attacki->ResetCooldown();
+
+				if (target.lock() && !quiver.lock()->empty()) {
+					boost::shared_ptr<Item> projectile = quiver.lock()->GetFirstItem().lock();
+					quiver.lock()->RemoveItem(projectile);
+					projectile->PutInContainer();
+					projectile->Position(Position());
+					projectile->CalculateFlightPath(target.lock()->Position(), 50);
+				}
+			}
+			break;
+		}
 	}
  }
 
