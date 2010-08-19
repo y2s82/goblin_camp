@@ -155,11 +155,11 @@ void Map::BlocksWater(int x, int y, bool value) {
 
 std::set<int>* Map::NPCList(int x, int y) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].npcList; 
-	return &std::set<int>();
+	return &tileMap[0][0].npcList;
 }
 std::set<int>* Map::ItemList(int x, int y) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].itemList;
-	return &std::set<int>();
+	return &tileMap[0][0].itemList;
 }
 
 int Map::Graphic(int x, int y) const { 
