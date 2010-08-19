@@ -44,6 +44,11 @@ public:
 	MenuResult Update(int, int, bool);
 	void Draw(TCODConsole*);
 	void GetTooltip(int, int, Tooltip *, TCODConsole *);
+	static void DrawStatusEffect(StatusEffect, int, int, int, int, bool, TCODConsole *);
+	static void DrawSeed(std::pair<ItemType, bool>, int, int, int, int, bool, TCODConsole *);
+	static std::string NPCSquadLabel(NPC *);
+	static std::string NPCWeaponLabel(NPC *);
+	static std::string NPCArmorLabel(NPC *);
 };
 
 class UI {

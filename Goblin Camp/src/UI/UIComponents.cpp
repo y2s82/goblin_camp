@@ -42,7 +42,7 @@ void Label::Draw(int x, int y, TCODConsole *console) {
 void LiveLabel::Draw(int x, int y, TCODConsole *console) {
 	console->setAlignment(align);
 	console->setForegroundColor(TCODColor::white);
-	console->print(x + _x, y + _y, text());
+	console->print(x + _x, y + _y, text().c_str());
 }
 
 void Button::Draw(int x, int y, TCODConsole *console) {

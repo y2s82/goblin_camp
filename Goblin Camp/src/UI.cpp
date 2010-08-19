@@ -36,6 +36,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/ConstructionDialog.hpp"
 #include "UI/Tooltip.hpp"
 #include "UI/ScrollPanel.hpp"
+#include "UI/Frame.hpp"
+#include "UI/UIList.hpp"
+#include "UI/Label.hpp"
 
 static TCOD_key_t NO_KEY = {
     TCODK_NONE, 0, false, false, false, false, false, false
@@ -762,27 +765,10 @@ width(19),
 {}
 
 MenuResult SideBar::Update(int x, int y, bool clicked) {
-	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
-		if (construction) {
-			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
-				MenuResult result = contents->Update(x - (leftX + 1), y - (topY + 14), clicked, NO_KEY);
-				if(result != NOMENUHIT) {
-					return result;
-				}
-			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
-				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(entity.lock()));
-				int i = y - (topY + 15);
-				if (clicked && i >= 0) {
-					for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin();
-						seedi != fp->AllowedSeeds()->end(); ++seedi) {
-							if (i-- == 0) {
-								fp->AllowSeed(seedi->first, !fp->SeedAllowed(seedi->first));
-								break;
-							}
-					}
-				}
-				return MENUHIT;
-			}
+	if (contents && x > Game::Inst()->ScreenWidth() - width) {
+		MenuResult result = contents->Update(x - (leftX + 1), y - (topY + 14), clicked, NO_KEY);
+		if(result != NOMENUHIT) {
+			return result;
 		}
 		if (y > topY && y < topY+height) return MENUHIT;
 	}
@@ -796,56 +782,10 @@ void SideBar::Draw(TCODConsole* console) {
 		topY = std::max(0,(console->getHeight() - height) / 2);
 		TCODConsole minimap(11,11);
 
-		if (npc) {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(entity.lock()));
-			console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Effects");
-			int y = 0;
-			for (std::list<StatusEffect>::iterator effectI = npc->StatusEffects()->begin(); effectI != npc->StatusEffects()->end(); ++effectI) {
-				console->setForegroundColor(effectI->color);
-				console->print(edgeX - width + 2, topY+15+y, "%c%s", effectI->graphic, effectI->name.c_str());
-				if (++y > 10) break;
-			}
-			console->setForegroundColor(TCODColor::white);
-			if (npc->MemberOf().lock()) { //Member of a squad
-				console->print(edgeX-width+1, topY+26, "S: %s", npc->MemberOf().lock()->Name().c_str());
-			}
-			if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
-				console->print(edgeX-width+1, topY+27, "W: %s", weapon->Name().c_str());
-			}
-			if (boost::shared_ptr<Item> armor = npc->Wearing().lock()) {
-				console->print(edgeX-width+1, topY+28, "A: %s", armor->Name().c_str());
-			}
-		} else if (construction) {
-			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
-			if (construct->HasTag(WORKSHOP)) {
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+		console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Production");
-				for (int jobi = 0; jobi < std::min(10, (signed int)construct->JobList()->size()); ++jobi) {
-					console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
-					console->print(edgeX - width + 2, topY+15+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
-				}		
-			} else if (construct->HasTag(STOCKPILE)) {
-				contents->Draw(edgeX - (width-1), topY+14, console);
-			} else if (construct->HasTag(FARMPLOT)) {
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 10, false, TCOD_BKGND_DEFAULT, "Seeds");
-				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(construct));
-				int i = 0;
-				for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin(); 
-					seedi != fp->AllowedSeeds()->end(); ++seedi) {
-						console->setForegroundColor(seedi->second ? TCODColor::green : TCODColor::red);
-						console->print(edgeX-(width-2),topY+15+i, "%c %s", seedi->second ? 225 : 224, Item::Presets[seedi->first].name.substr(0,width-6).c_str());
-					++i;
-				}
-				console->setForegroundColor(TCODColor::white);
-			} else { 
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-			}
-		} else {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
+		if(contents) {
+			contents->Draw(edgeX - (width-1), topY+14, console);
 		}
 
 		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
@@ -874,6 +814,9 @@ void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
 				}
 			}
 		}
+		if (contents) {
+			contents->GetTooltip(x - (leftX + 1), y - (topY + 14), tooltip);
+		}
 	}
 }
 
@@ -882,25 +825,84 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 	npc = construction = false;
 	height = 15;
 	contents.reset();
-	if (boost::dynamic_pointer_cast<NPC>(entity.lock())) {
+	if (boost::shared_ptr<NPC> npci = boost::dynamic_pointer_cast<NPC>(entity.lock())) {
 		height = 30;
 		npc = true;
-	} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
+		contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 15));
+		boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
+		Frame *frame = new Frame("Effects", std::vector<Drawable *>(), 0, 0, width - 2, 12);
+		frame->AddComponent(new UIList<StatusEffect, std::list<StatusEffect> >(boost::dynamic_pointer_cast<NPC>(entity.lock())->StatusEffects(), 1, 1, width - 4, 10,
+													 SideBar::DrawStatusEffect));
+		container->AddComponent(frame);
+		boost::function<std::string()> func = boost::bind(&SideBar::NPCSquadLabel, npci.get());
+		container->AddComponent(new LiveLabel(boost::bind(&SideBar::NPCSquadLabel, npci.get()), 0, 12, TCOD_LEFT));
+		container->AddComponent(new LiveLabel(boost::bind(&SideBar::NPCWeaponLabel, npci.get()), 0, 13, TCOD_LEFT));
+		container->AddComponent(new LiveLabel(boost::bind(&SideBar::NPCArmorLabel, npci.get()), 0, 14, TCOD_LEFT));
+	} else if (boost::shared_ptr<FarmPlot> fp = boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
 		height = 30;
 		construction = true;
+		contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
+		boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
+		Frame *frame = new Frame("Seeds", std::vector<Drawable *>(), 0, 0, width - 2, 12);
+		frame->AddComponent(new UIList<std::pair<ItemType, bool>, std::map<ItemType, bool> >(fp->AllowedSeeds(), 1, 1, width - 4, 10,
+																							 SideBar::DrawSeed,
+																							 boost::bind(&FarmPlot::SwitchAllowed, fp, _1)));
+		container->AddComponent(frame);			
 	} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
 		height = 51;
 		construction = true;
 		contents = boost::shared_ptr<Drawable>(new ScrollPanel(0, 0, width - 2, 36,
 														new UIList<ItemCat>(&Item::Categories, 0, 0, width, Item::Categories.size(),
-																			boost::bind(&ConstructionDialog::DrawCategory, boost::dynamic_pointer_cast<Construction>(entity.lock()).get(), _1, _2, _3, _4, width - 2, _5, _6),
+																			boost::bind(&ConstructionDialog::DrawCategory, boost::dynamic_pointer_cast<Construction>(entity.lock()).get(), _1, _2, _3, _4, _5, _6, _7),
 																			boost::bind(&Stockpile::SwitchAllowed, boost::dynamic_pointer_cast<Stockpile>(entity.lock()), _1, boost::bind(&UI::ShiftPressed, UI::Inst())))));
 	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
 		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
 		if (construct->HasTag(WORKSHOP)) {
 			height = 30;
+			contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
+			boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
+			Frame *frame = new Frame("Production", std::vector<Drawable *>(), 0, 0, width - 2, 12);
+			frame->AddComponent(new UIList<ItemType, std::deque<ItemType> >(construct->JobList(), 1, 1, width - 4, 10,
+																				   ConstructionDialog::DrawJob));
+			container->AddComponent(frame);			
 		}
 		construction = true;
+	}
+}
+
+void SideBar::DrawStatusEffect(StatusEffect effect, int i, int x, int y, int width, bool selected, TCODConsole *console) {
+	console->setForegroundColor(effect.color);
+	console->print(x, y, "%c%s", effect.graphic, effect.name.c_str());
+	console->setForegroundColor(TCODColor::white);
+}
+
+void SideBar::DrawSeed(std::pair<ItemType, bool> seed, int i, int x, int y, int width, bool selected, TCODConsole *console) {
+	console->setForegroundColor(seed.second ? TCODColor::green : TCODColor::red);
+	console->print(x, y, "%c %s", seed.second ? 225 : 224, Item::Presets[seed.first].name.substr(0, width-3).c_str());
+	console->setForegroundColor(TCODColor::white);
+}
+
+std::string SideBar::NPCSquadLabel(NPC *npc) {
+	if(npc->MemberOf().lock()) {
+		return boost::str(boost::format("S: %s") % npc->MemberOf().lock()->Name());
+	} else {
+		return "";
+	}
+}
+
+std::string SideBar::NPCWeaponLabel(NPC *npc) {
+	if(npc->Wielding().lock()) {
+		return boost::str(boost::format("W: %s") % npc->Wielding().lock()->Name());
+	} else {
+		return "";
+	}
+}
+
+std::string SideBar::NPCArmorLabel(NPC *npc) {
+	if(npc->Wearing().lock()) {
+		return boost::str(boost::format("A: %s") % npc->Wearing().lock()->Name());
+	} else {
+		return "";
 	}
 }
 

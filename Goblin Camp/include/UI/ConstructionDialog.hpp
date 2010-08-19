@@ -51,5 +51,5 @@ public:
     void Rename();
     void Dismantle();
     static void DrawCategory(Construction *, ItemCat, int, int, int, int, bool, TCODConsole *);
-    void DrawJob(ItemType, int, int, int, bool, TCODConsole *);
+    static void DrawJob(ItemType, int, int, int, int, bool, TCODConsole *);
 };

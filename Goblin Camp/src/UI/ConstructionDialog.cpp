@@ -46,14 +46,14 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
             constructionInfoDialog->SetHeight(40);
             dialog->AddComponent(new ScrollPanel(2, 5, 46, 34,
 								 new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
-                                                   boost::bind(&ConstructionDialog::DrawCategory, cons, _1, _2, _3, _4, dialog->width, _5, _6),
+                                                   boost::bind(&ConstructionDialog::DrawCategory, cons, _1, _2, _3, _4, _5, _6, _7),
                                                    boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))), false));
         } else if(cons->Producer()) {
             constructionInfoDialog->SetHeight(40);
             dialog->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
             dialog->AddComponent(new ScrollPanel(2, 6, 23, 34, 
                                                new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
-                                                                                           boost::bind(&ConstructionDialog::DrawJob, dialog, _1, _2, _3, _4, _5, _6),
+                                                                                           ConstructionDialog::DrawJob,
                                                                                            boost::bind(&Construction::CancelJob, cons, _1)),
                                                false));
             dialog->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
@@ -97,7 +97,7 @@ void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category,
     console->setForegroundColor(TCODColor::white);
 }
 
-void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, bool selected, TCODConsole *console) {
+void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
     console->setForegroundColor(i == 0 ? TCODColor::white : TCODColor::grey);
     console->print(x, y, Item::ItemTypeToString(category).c_str());
     console->setForegroundColor(TCODColor::white);
