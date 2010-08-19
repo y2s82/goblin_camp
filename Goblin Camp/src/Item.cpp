@@ -221,7 +221,7 @@ public:
 					Item::Presets[firstItemIndex+i].decayList.push_back(Item::StringToItemType(presetDecay[i][decay]));
 			}
 
-			if (presetProjectile[i] != "") Item::Presets[firstItemIndex+i].attack.Projectile(Item::StringToItemType(presetProjectile[i]));
+			if (presetProjectile[i] != "") Item::Presets[firstItemIndex+i].attack.Projectile(Item::StringToItemCategory(presetProjectile[i]));
 		}
 	}
 
@@ -421,7 +421,7 @@ void Item::SetVelocity(int speed) {
 	if (speed > 0) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
 	} else {
-		Game::Inst()->flyingItems.erase(boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
 	}
 }
 
@@ -439,7 +439,7 @@ void Item::UpdateVelocity() {
 						flightPath.clear();
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {// && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 						
 						Attack attack = GetAttack();
 						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];

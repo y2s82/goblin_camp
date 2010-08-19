@@ -458,7 +458,7 @@ item_type "Bone Dagger" {
 	}
 }
 
-item_type "Wooden Arrow" {
+item_type "Wooden arrow" {
 	category = ["Arrow"]
 	graphic = 41
 	color = "128,64,0"
