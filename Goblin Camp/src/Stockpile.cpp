@@ -285,7 +285,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 			item.lock()->GetTooltip(x, y, tooltip);
 		}
 	}
-	tooltip->AddEntry(TooltipEntry("Stockpile", TCODColor::white));
+	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
 	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
 	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
 		if(Item::Categories[it->first].parent == 0 && it->second > 0) {
