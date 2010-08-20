@@ -36,6 +36,45 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/ConstructionDialog.hpp"
 #include "UI/Tooltip.hpp"
 
+#pragma mark Keyboard command config parsing
+
+class KeyMap : public ITCODParserListener {
+public:
+	std::map<std::string, char> keyMap;
+	
+	char operator[](std::string s) {
+		return keyMap[s];
+	}
+	
+	KeyMap(): keyMap(std::map<std::string, char>()) {}
+	
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		return true;
+	}
+	
+	bool parserFlag(TCODParser *parser,const char *name) {
+		return true;
+	}
+	
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+		keyMap[name] = value.c;
+		return true;
+	}
+	
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		return true;
+	}
+	
+	void error(const char *msg) {
+		Logger::Inst()->output<<"KeyConfigListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
+};
+
+KeyMap keyMap = KeyMap();
+
+#pragma mark UI
+
 UI* UI::instance = 0;
 
 UI::UI() :
@@ -81,34 +120,36 @@ void UI::HandleKeyboard() {
     key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
     if (!currentMenu || currentMenu->Update(-1, -1, false, key) != KEYRESPOND) {
         if (!textMode) {
-            if (key.c == 'q') Game::Exit();
-            else if (key.c == 'b') {
+            if (key.c == keyMap["Exit"]) Game::Exit();
+            else if (key.c == keyMap["Basics"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::BasicsMenu());
-            } else if (key.c == 'w') {
+            } else if (key.c == keyMap["Workshops"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::WorkshopsMenu());
-            } else if (key.c == 'o') {
+            } else if (key.c == keyMap["Orders"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::OrdersMenu());
-            } else if (key.c == 's') {
+            } else if (key.c == keyMap["StockManager"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(StockManagerDialog::StocksDialog());
-            } else if (key.c == 'f') {
+            } else if (key.c == keyMap["Furniture"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::FurnitureMenu());
-            } else if (key.c == 'm') {
+            } else if (key.c == keyMap["Squads"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(SquadsDialog::SquadDialog());
-            } else if (key.c == 'h') {
+            } else if (key.c == keyMap["Help"]) {
                 keyHelpTextColor = 255;
-            }
+            } else if (key.c == keyMap["Pause"]) {
+				Game::Inst()->Pause();
+			}
 
             int addition = 1;
             if (ShiftPressed()) addition *= 10;
@@ -170,7 +211,6 @@ void UI::HandleKeyboard() {
                 mouseInput.cy -= addition;
             } else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
                 lbuttonPressed = true;
-            } else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
             } else if (key.vk == TCODK_PRINTSCREEN) { 
                 Data::SaveScreenshot();
             }
@@ -750,3 +790,20 @@ void UI::SetCursor(int value) { cursorChar = value; }
 
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
 TCOD_key_t UI::getKey() { return key; }
+
+void UI::LoadKeys(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* keysTypeStruct = parser.newStructure("keys");
+	keysTypeStruct->addProperty("Exit", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Basics", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Workshops", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Orders", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Furniture", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("StockManager", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Squads", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
+
+	parser.run(filename.c_str(), &keyMap);
+	
+}
