@@ -81,7 +81,7 @@ Construction::~Construction() {
 
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (itemi->lock()) {
-			itemi->lock()->Faction(0); //Return item to player faction
+			itemi->lock()->SetFaction(0); //Return item to player faction
 			itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
 		}
 	}
@@ -127,7 +127,7 @@ int Construction::Build() {
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
-			itemi->lock()->Faction(-1); //Remove from player faction so it doesn't show up in stocks
+			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
 		}
 
 		//TODO: constructions should have the option of having both walkable and unwalkable tiles

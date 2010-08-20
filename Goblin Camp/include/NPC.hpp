@@ -120,10 +120,13 @@ private:
 	int _graphic;
 	bool taskBegun;
 	bool expert;
+
 	boost::weak_ptr<Item> carried;
 	boost::weak_ptr<Item> mainHand;
 	boost::weak_ptr<Item> offHand;
 	boost::weak_ptr<Item> armor;
+	boost::weak_ptr<Container> quiver;
+
 	int thirst, hunger, weariness;
 	int thinkSpeed;
 	std::list<StatusEffect> statusEffects;
@@ -162,6 +165,8 @@ private:
 	void UpdateStatusEffects();
 
 	static std::map<std::string, NPCType> NPCTypeNames;
+
+	void UpdateVelocity();
 public:
 	~NPC();
 	SkillSet Skills;
@@ -199,9 +204,13 @@ public:
 	void Kill();
 	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>);
+	void FireProjectile(boost::weak_ptr<Entity>);
+	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
+
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();
 	void GetMainHandAttack(Attack&);
+	bool WieldingRangedWeapon();
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
 	bool HasHands();

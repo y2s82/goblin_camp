@@ -410,6 +410,9 @@ npc_type "giant" {
 		statusEffects=["Concussion"]
 		effectChances=[     80     ]
 	}
+	stats {
+	    strength=25
+	}
 }
 
 npc_type "griffon" { 
