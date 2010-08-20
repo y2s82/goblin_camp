@@ -40,7 +40,8 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	flammable(false),
 	attemptedStore(false),
 	decayCounter(-1),
-	container(boost::weak_ptr<Item>())
+	container(boost::weak_ptr<Item>()),
+	internal(false)
 {
 	SetFaction(owner);
 	//Remember that the components are destroyed after this constructor!
@@ -92,7 +93,9 @@ TCODColor Item::Color() {return color;}
 void Item::Color(TCODColor col) {color = col;}
 
 void Item::Position(Coordinate pos) {
+	if (!internal) Map::Inst()->ItemList(x,y)->erase(uid);
 	x = pos.X(); y = pos.Y();
+	if (!internal) Map::Inst()->ItemList(x,y)->insert(uid);
 }
 Coordinate Item::Position() {
 	if (container.lock()) return container.lock()->Position();
@@ -460,6 +463,8 @@ void Item::UpdateVelocity() {
 		}
 	}
 }
+
+void Item::SetInternal() { internal = true; }
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),

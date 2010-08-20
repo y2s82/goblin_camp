@@ -92,6 +92,7 @@ protected:
 	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 	boost::weak_ptr<Item> container;
+	bool internal;
 
 public:
 	static std::string ItemTypeToString(ItemType);
@@ -127,6 +128,7 @@ public:
 	int Resistance(int) const;
 	virtual void SetVelocity(int);
 	void UpdateVelocity();
+	void SetInternal();
 };
 
 class OrganicItem : public Item {
