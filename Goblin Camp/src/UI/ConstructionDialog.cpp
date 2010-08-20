@@ -86,12 +86,12 @@ void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category,
     Stockpile *sp = static_cast<Stockpile*>(construct);
     console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
     if (!category.parent) {
-        console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
+        console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-3).c_str());
     } else {
         if (i+1 < (signed int)Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {
-            console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
+            console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
         } else {
-            console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
+            console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
         }
     }
     console->setForegroundColor(TCODColor::white);
