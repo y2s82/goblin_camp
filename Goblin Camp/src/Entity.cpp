@@ -65,18 +65,20 @@ void Entity::SetVelocityTarget(Coordinate value) { velocityTarget = value; }
 void Entity::CalculateFlightPath(Coordinate target, int speed) {
 	flightPath.clear();
 	TCODLine::init(target.X(), target.Y(), x, y);
-	int px, py;
-	while (!TCODLine::step(&px, &py)) {
+	int px = target.X();
+	int py = target.Y();
+	do {
 		flightPath.push_back(FlightPath(Coordinate(px,py)));
-	}
+	} while (!TCODLine::step(&px, &py));
 
 	if (flightPath.size() > 0) {
 		int h = 0;
-		int hAdd = 50 / speed; /* The lower the speed, the higher the entity has to arch in order
+		int hAdd = std::max(1, 50 / speed); /* The lower the speed, the higher the entity has to arch in order
 							   for it to fly the distance */
 		
 		std::list<FlightPath>::iterator begIt = flightPath.begin();
 		std::list<FlightPath>::iterator endIt = flightPath.end();
+		--endIt;
 
 		while (begIt->height == -1 && endIt->height == -1) {
 			begIt->height = h;
