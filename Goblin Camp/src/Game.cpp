@@ -670,11 +670,21 @@ void Game::Update() {
 		consi->second->Update();
 	}
 
+	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
+		flyingItems.erase(*itemi);
+		itemi = stoppedItems.erase(itemi);
+	}
+
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = flyingItems.begin(); itemi != flyingItems.end(); ++itemi) {
+		if (boost::shared_ptr<Item> item = itemi->lock()) item->UpdateVelocity();
+	}
+
 	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
 	//15 seconds, on average.
 	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
-			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->Faction() == 0) StockpileItem(*itemi);
+			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
+				StockpileItem(*itemi);
 		}
 	}
 
@@ -749,7 +759,6 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 	}
 	for (std::map<int,boost::shared_ptr<Item> >::iterator iit = itemList.begin(); iit != itemList.end(); ++iit) {
 		iit->second->Draw(upleft, buffer);
-
 	}
 	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator natit = natureList.begin(); natit != natureList.end(); ++natit) {
 		natit->second->Draw(upleft, buffer);

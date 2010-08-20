@@ -153,6 +153,8 @@ public:
 	std::map<int,boost::shared_ptr<Item> > itemList;
 	void ItemContained(boost::weak_ptr<Item>, bool contained);
 	std::set<boost::weak_ptr<Item> > freeItems; //Free as in not contained
+	std::set<boost::weak_ptr<Item> > flyingItems; //These need to be updated
+	std::list<boost::weak_ptr<Item> > stoppedItems; //These need to be removed from flyingItems
 	static int ItemTypeCount;
 	static int ItemCatCount;
 	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false);
