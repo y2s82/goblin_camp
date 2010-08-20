@@ -442,15 +442,17 @@ void Item::UpdateVelocity() {
 						flightPath.clear();
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {// && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {
+						if (rand() % std::max(1, flightPath.back().height) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 						
-						Attack attack = GetAttack();
-						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
-						npc->Damage(&attack);
+							Attack attack = GetAttack();
+							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
+							npc->Damage(&attack);
 
-						SetVelocity(0);
-						flightPath.clear();
-						return;
+							SetVelocity(0);
+							flightPath.clear();
+							return;
+						}
 					}
 				}
 				if (flightPath.back().height == 0) {
