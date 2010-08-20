@@ -258,6 +258,12 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 	}
 }
 
+void Stockpile::SetAllAllowed(bool nallowed) {
+	for(int i = 0; i < Item::Categories.size(); i++) {
+		allowed[i] = nallowed;
+	}
+}
+
 void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
 	std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
 	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
