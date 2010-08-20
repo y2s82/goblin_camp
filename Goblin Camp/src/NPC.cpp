@@ -669,7 +669,7 @@ MOVENEARend:
 				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 					Hit(currentEntity());
 					break;
-				} else if (WieldingRangedWeapon()) {
+				} else if (WieldingRangedWeapon() && quiver.lock() && !quiver.lock()->empty()) {
 					FireProjectile(currentEntity());
 					break;
 				}
