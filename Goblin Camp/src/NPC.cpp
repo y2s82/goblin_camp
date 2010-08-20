@@ -1039,8 +1039,8 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 							newJob->tasks.push_back(Task(MOVE));
 							newJob->tasks.push_back(Task(TAKE));
 							newJob->tasks.push_back(Task(QUIVER));
-							npc->jobs.push_back(newJob);
 						}
+						npc->jobs.push_back(newJob);
 						npc->run = true;
 						return true;
 				}
