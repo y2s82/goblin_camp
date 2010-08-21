@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/weak_ptr.hpp>
 
 #include "UI/Menu.hpp"
+#include "UI/SideBar.hpp"
 #include "Entity.hpp"
 #include "Game.hpp"
 
@@ -33,16 +34,8 @@ enum UIState {
     UICOUNT
 };
 
-class SideBar {
-	boost::weak_ptr<Entity> entity;
-	int width, height, topY;
-	bool npc, construction, stockpile, farmplot;
-public:
-	SideBar();
-	void SetEntity(boost::weak_ptr<Entity>);
-	MenuResult Update(int, int, bool);
-	void Draw(TCODConsole*);
-	void GetTooltip(int, int, Tooltip *, TCODConsole *);
+static TCOD_key_t NO_KEY = {
+    TCODK_NONE, 0, false, false, false, false, false, false
 };
 
 class UI {
@@ -112,4 +105,6 @@ public:
 	bool ShiftPressed();
 	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
+	static void LoadKeys(std::string);
+
 };
