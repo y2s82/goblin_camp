@@ -36,7 +36,7 @@ public:
 	ItemCat();
 	bool flammable;
 	std::string name;
-    std::string GetName();
+	std::string GetName();
 	ItemCat* parent;
 };
 
@@ -53,6 +53,9 @@ struct ItemPreset {
 	bool organic;
 	int container;
 	int multiplier;
+	std::string fitsInRaw;
+	std::string containInRaw;
+	std::string constructedInRaw;
 	ItemCategory fitsin;
 	ItemCategory containIn;
 	bool decays;
@@ -104,6 +107,7 @@ public:
 	static ItemCategory Components(ItemType, int);
 
 	static void LoadPresets(std::string);
+	static void ResolveContainers();
 
 	static std::vector<ItemCat> Categories;
 	static std::vector<ItemPreset> Presets;

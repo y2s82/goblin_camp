@@ -63,6 +63,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/accumulators/statistics/weighted_mean.hpp>
 #		include <boost/function.hpp>
 #		include <boost/bind.hpp>
+#		include <boost/lambda/lambda.hpp>
+#		include <boost/lambda/bind.hpp>
 #		include <boost/lexical_cast.hpp>
 #		include <boost/date_time/local_time/local_time.hpp>
 #	pragma warning(pop)

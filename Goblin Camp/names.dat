@@ -1,16 +1,16 @@
 name "orc" {
-syllablesPre = "Blackeye, Redeye, Bloodeye, Hardhead, Terrorizing, Murderer"
-syllablesStart = "Snag, Dak, Brub, Waat, Skar, Ug, Dur, Naff, Grot, Gob, Zog, Gut, Wort, Mor"
-syllablesMiddle = "yu, oi, lok, man, nik, rip, trim"
-syllablesEnd = "grim, naga, gut, snik, shak, bog, gul"
-syllablesPost = "the_Longlegged, the_Strong, the_Fat, the_Fearless"
-rules = "$s$30m$e_$50p, $50P_$s$30m$e"
+	syllablesPre = "Blackeye, Redeye, Bloodeye, Hardhead, Terrorizing, Murderer"
+	syllablesStart = "Snag, Dak, Brub, Waat, Skar, Ug, Dur, Naff, Grot, Gob, Zog, Gut, Wort, Mor"
+	syllablesMiddle = "yu, oi, lok, man, nik, rip, trim"
+	syllablesEnd = "grim, naga, gut, snik, shak, bog, gul"
+	syllablesPost = "the_Longlegged, the_Strong, the_Fat, the_Fearless"
+	rules = "$s$30m$e_$50p, $50P_$s$30m$e"
 }
 
 name "goblin" {
-syllablesPre = "Dimwitted, Shortlegged, Fearful"
-syllablesStart = "Im, Om, Am, Ip, Orp, Irp, Kap, Kop, Hip"
-syllablesEnd = "pik, pak, ak, ik, sit, it, et, ot, ol, ong, onk"
-syllablesPost = "the_Stupid, the_Slow, the_Skinny, the_Coward"
-rules = "$s$e_$50p, $50P_$s$e"
+	syllablesPre = "Dimwitted, Shortlegged, Fearful"
+	syllablesStart = "Im, Om, Am, Ip, Orp, Irp, Kap, Kop, Hip"
+	syllablesEnd = "pik, pak, ak, ik, sit, it, et, ot, ol, ong, onk"
+	syllablesPost = "the_Stupid, the_Slow, the_Skinny, the_Coward"
+	rules = "$s$e_$50p, $50P_$s$e"
 }

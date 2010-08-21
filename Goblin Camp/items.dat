@@ -117,7 +117,7 @@ category_type "Impure metal" {
 
 category_type "Metal bar" {
 	parent="Metal"
-} 
+}
 
 category_type "Weapon" {
 }
@@ -194,6 +194,7 @@ item_type "Wood plank" {
 	components = ["Log"]
 	fitsin = "Plank container"
 	multiplier = 10
+	constructedin = "Carpenter"
 }
 
 item_type "Wooden door" {
@@ -201,6 +202,7 @@ item_type "Wooden door" {
 	graphic = 197
 	color = "255,73,7"
 	components = ["Plank", "Plank", "Plank"]
+	constructedin = "Carpenter"
 }
 
 item_type "Bone door" {
@@ -208,6 +210,7 @@ item_type "Bone door" {
 	graphic = 197
 	color = "255,255,255"
 	components = ["Bone", "Bone", "Bone"]
+	constructedin = "Bone carver"
 }
 
 item_type "Wooden barrel" {
@@ -216,6 +219,7 @@ item_type "Wooden barrel" {
 	graphic = 155
 	color = "255,73,7"
 	components = [ "Plank", "Plank" ]
+	constructedin = "Carpenter"
 }
 
 item_type "Crate" {
@@ -224,6 +228,7 @@ item_type "Crate" {
 	graphic = 230
 	color = "255,186,0"
 	components = [ "Plank", "Plank", "Plank" ]
+	constructedin = "Carpenter"
 }
 
 item_type "Wooden bed" {
@@ -231,6 +236,7 @@ item_type "Wooden bed" {
 	graphic = 220
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
+	constructedin = "Carpenter"
 }
 
 item_type "Bone bed" {
@@ -238,6 +244,7 @@ item_type "Bone bed" {
 	graphic = 220
 	color = "225,225,225"
 	components = [ "Bone", "Bone", "Bone" ]
+	constructedin = "Bone carver"
 }
 
 item_type "Bloodberry" {
@@ -335,6 +342,7 @@ item_type "Wine" {
 	containIn = "Liquid container"
 	nutrition = 72000
 	multiplier = 10
+	constructedin = "Brewery"
 }
 
 item_type "Pie" {
@@ -343,6 +351,7 @@ item_type "Pie" {
 	color = "255,0,220"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour"]
 	nutrition = 48000
+	constructedin = "Kitchen"
 }
 
 item_type "Meat" {
@@ -353,6 +362,7 @@ item_type "Meat" {
 	decay = [ "Filth" ]
 	decaySpeed = 12
 	nutrition = 10000
+	constructedin = "Butcher"
 }
 
 item_type "Bone Stew" {
@@ -361,6 +371,7 @@ item_type "Bone Stew" {
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat"]
 	nutrition = 90000
+	constructedin = "Kitchen"
 }
 
 item_type "Bread" {
@@ -369,6 +380,7 @@ item_type "Bread" {
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed"]
 	nutrition = 86000
+	constructedin = "Kitchen"
 }
 
 item_type "Flour" {
@@ -377,6 +389,7 @@ item_type "Flour" {
 	color = "255,233,177"
 	components = ["Seed", "Seed"]
 	containIn = "Flour container"
+	constructedin = "Mill"
 }
 
 item_type "Flower" {
@@ -400,6 +413,7 @@ item_type "Wooden club" {
 		statusEffects=["Concussion"]
 		effectChances=[     20     ]
 	}
+	constructedin = "Carpenter"
 }
 
 item_type "Stone maul" {
@@ -414,6 +428,7 @@ item_type "Stone maul" {
 		statusEffects=["Concussion"]
 		effectChances=[    33    ]
 	}
+	constructedin = "Weapon crafter"
 }
 
 item_type "Stone axe" {
@@ -428,6 +443,7 @@ item_type "Stone axe" {
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
 	}
+	constructedin = "Weapon crafter"
 }
 
 item_type "Stone spear" {
@@ -442,6 +458,7 @@ item_type "Stone spear" {
 		statusEffects=["Bleeding"]
 		effectChances=[    10    ]
 	}
+	constructedin = "Weapon crafter"
 }
 
 item_type "Bone Dagger" {
@@ -456,6 +473,7 @@ item_type "Bone Dagger" {
 		statusEffects=["Bleeding"]
 		effectChances=[    10    ]
 	}
+	constructedin = "Bone carver"
 }
 
 item_type "Wooden arrow" {
@@ -497,6 +515,7 @@ item_type "Rough stone" {
 	graphic = 96
 	color = "192,192,192"
 	multiplier = 3
+	constructedin = "Stone quarry"
 }
 
 item_type "Sharpened stone" {
@@ -504,6 +523,7 @@ item_type "Sharpened stone" {
 	graphic = 30
 	color = "192,192,192"
 	components = ["Rough stone"]
+	constructedin = "Stone mason"
 }
 
 item_type "Blueleaf boll" {
@@ -520,6 +540,7 @@ item_type "Cloth" {
 	graphic = 21
 	color = "255,255,255"
 	components = ["Fiber", "Fiber"]
+	constructedin = "Weaver"
 }
 
 item_type "Bone statue" {
@@ -527,6 +548,7 @@ item_type "Bone statue" {
 	graphic = 190
 	components = ["Bone", "Bone", "Bone", "Bone", "Bone"]
 	color = "255,255,255"
+	constructedin = "Bone carver"
 }
 
 item_type "Stone statue" {
@@ -534,6 +556,7 @@ item_type "Stone statue" {
 	graphic = 190
 	components = ["Rough stone", "Rough stone"]
 	color = "255,255,255"
+	constructedin = "Stone mason"
 }
 
 item_type "Seed sack" {
@@ -542,6 +565,7 @@ item_type "Seed sack" {
 	graphic = 208
 	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
+	constructedin = "Weaver"
 }
 
 item_type "Flour sack" {
@@ -550,6 +574,7 @@ item_type "Flour sack" {
 	graphic = 208
 	color = "255,255,255"
 	components = [ "Cloth", "Cloth" ]
+	constructedin = "Weaver"
 }
 
 item_type "Leather armor" {
@@ -583,26 +608,30 @@ item_type "Wrought iron" {
 	graphic = 170
 	color = "110,110,110"
 	components = ["Impure metal", "Impure metal", "Impure metal"]
+	constructedin = "Bloomery"
 }
 
 item_type "Red clay" {
-    category=["Clay"]
-    graphic = 4
-    color = "220,80,70"
+	category=["Clay"]
+	graphic = 4
+	color = "220,80,70"
 	multiplier = 5
+	constructedin = "Clay pit"
 }
 
 item_type "Amphora" {
-    category = ["Liquid container"]
-    containerSize = 10
-    graphic = 173
-    color = "220,40,32"
-    components = [ "Clay", "Clay", "Wood" ]
+	category = ["Liquid container"]
+	containerSize = 10
+	graphic = 173
+	color = "220,40,32"
+	components = [ "Clay", "Clay", "Wood" ]
+	constructedin = "Clay kiln"
 }
 
 item_type "Red brick" {
-    category = ["Brick"]
-    graphic = 22
-    color = "120,22,11"
-    components = [ "Clay", "Clay", "Clay", "Wood" ]
+	category = ["Brick"]
+	graphic = 22
+	color = "120,22,11"
+	components = [ "Clay", "Clay", "Clay", "Wood" ]
+	constructedin = "Clay kiln"
 }
