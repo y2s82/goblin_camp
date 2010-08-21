@@ -26,7 +26,7 @@ project goblin-camp
       <define>GC_BOOST_BUILD
       # NT specific defines
       <os>NT:<define>WINDOWS
-      <os>NT:<user-interface>gui
+      <os>NT,<variant>release:<user-interface>gui
       <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
