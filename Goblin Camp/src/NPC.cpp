@@ -95,6 +95,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 		pos.X(pos.X()+1);
 		pos.Y(pos.Y()+1);
 	}
+	inventory->SetInternal();
 	Position(pos,true);
 
 	thirst += rand() % 10; //Just for some variety
@@ -667,7 +668,7 @@ MOVENEARend:
 				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 					Hit(currentEntity());
 					break;
-				} else if (WieldingRangedWeapon()) {
+				} else if (WieldingRangedWeapon() && quiver.lock() && !quiver.lock()->empty()) {
 					FireProjectile(currentEntity());
 					break;
 				}
@@ -1037,8 +1038,8 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 							newJob->tasks.push_back(Task(MOVE));
 							newJob->tasks.push_back(Task(TAKE));
 							newJob->tasks.push_back(Task(QUIVER));
-							npc->jobs.push_back(newJob);
 						}
+						npc->jobs.push_back(newJob);
 						npc->run = true;
 						return true;
 				}
