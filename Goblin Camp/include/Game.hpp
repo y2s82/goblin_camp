@@ -75,6 +75,8 @@ private:
 	bool toMainMenu, running;
 	int safeMonths;
 	bool refreshStockpiles;
+	
+	Coordinate marks[12];
 
 	boost::shared_ptr<Events> events;
 public:
@@ -99,6 +101,8 @@ public:
 	void Update();
 	Coordinate upleft;
 	void CenterOn(Coordinate target);
+	void SetMark(int);
+	void ReturnToMark(int);
 
 	void Pause();
 	bool Paused();
