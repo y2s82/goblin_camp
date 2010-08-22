@@ -51,3 +51,15 @@ build\dist
 build\msvc
 user-config.jam
 *.exp
+.DS_Store
+*.swp
+*~.nib
+build
+*.pbxuser
+*.perspective
+*.perspectivev3
+*.mode1v3
+*.xcworkspacedata
+*.xcuserstate
+*.xcbkptlist
+xcuserdata
