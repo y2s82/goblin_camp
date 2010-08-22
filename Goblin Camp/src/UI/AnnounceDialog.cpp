@@ -30,6 +30,13 @@ void AnnounceDialog::Draw(int x, int y, int scroll, int width, int height, TCODC
 	Announce::Inst()->Draw(Coordinate(x + 1, y), scroll, height, console);
 }
 
+MenuResult AnnounceDialog::Update(int x, int y, bool clicked, TCOD_key_t key) {
+	if(clicked) {
+		Announce::Inst()->AnnouncementClicked(y - 1);
+	}
+	return MENUHIT;
+}
+
 int AnnounceDialog::TotalHeight() {
 	return Announce::Inst()->AnnounceAmount();
 }

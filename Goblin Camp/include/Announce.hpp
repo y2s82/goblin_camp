@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 
 #include "Coordinate.hpp"
+#include "UI/UIComponents.hpp"
 
 #define ANNOUNCE_MAX_LENGTH 71
 #define ANNOUNCE_HEIGHT 10
@@ -44,15 +45,18 @@ private:
 	std::deque<AnnounceMessage*> messageQueue;
 	std::deque<AnnounceMessage*> history;
 	int timer;
-	unsigned int length, height;
+	unsigned int length, height, top;
+	void AnnouncementClicked(AnnounceMessage*);
 public:
 	static Announce* Inst();
 	void Reset();
-	void AddMsg(std::string, TCODColor = TCODColor::white);
+	void AddMsg(std::string, TCODColor = TCODColor::white, Coordinate = Coordinate(-1, -1));
 	void Update();
+	MenuResult Update(int, int, bool);
 	void Draw(TCODConsole*);
 	void Draw(Coordinate, int from, int amount, TCODConsole*);
 	int AnnounceAmount();
 	void EmptyMessageQueue();
 	Coordinate CurrentCoordinate();
+	void AnnouncementClicked(int);
 };
