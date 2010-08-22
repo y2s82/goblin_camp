@@ -31,6 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Data.hpp"
+#include "Camp.hpp"
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
 #include "UI/ConstructionDialog.hpp"
@@ -85,6 +86,7 @@ void UI::LoadKeys(std::string filename) {
 	keysTypeStruct->addProperty("StockManager", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Squads", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Announcements", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Center", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
 	
@@ -162,6 +164,8 @@ void UI::HandleKeyboard() {
                 ChangeMenu(SquadsDialog::SquadDialog());
 			} else if (key.c == keyMap["Announcements"]) {
 				ChangeMenu(AnnounceDialog::AnnouncementsDialog());
+			} else if (key.c == keyMap["Center"]) {
+				Game::Inst()->CenterOn(Camp::Inst()->Center());
             } else if (key.c == keyMap["Help"]) {
                 keyHelpTextColor = 255;
             } else if (key.c == keyMap["Pause"]) {
@@ -605,7 +609,7 @@ void UI::DrawTopBar(TCODConsole* console) {
 		int x = 10;
 		console->print(x, 3, "%cQ%cuit  %cB%casics  %cW%corkshops  %cO%crders  %cF%curniture  %cS%ctockmanager  %cM%cilitary  %cA%cnnouncements ",
 					   TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
-		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
+		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark  %cC%center Camp", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
 		console->print(x, 7, "Space to pause");
 	}
 
