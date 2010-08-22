@@ -769,7 +769,6 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, buffer);
-		Announce::Inst()->Draw(buffer);
 	}
 }
 
@@ -1124,7 +1123,7 @@ void Game::CreateSquad(std::string name) {
 void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
 	squad->TargetCoordinate(target);
 	UI::Inst()->CloseMenu();
-	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str());
+	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str(), TCODColor::white, target);
 }
 void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squad) {
 	if (target.X() >= 0 && target.X() < Map::Inst()->Width() && target.Y() >= 0 && target.Y() < Map::Inst()->Height()) {
@@ -1132,7 +1131,7 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 		if (!npcList->empty()) {
 			squad->TargetEntity(Game::Inst()->npcList[*npcList->begin()]);
 			UI::Inst()->CloseMenu();
-			Announce::Inst()->AddMsg((boost::format("[%1%] escorting %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str());
+			Announce::Inst()->AddMsg((boost::format("[%1%] escorting %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str(), TCODColor::white, target);
 		}
 	}
 }
@@ -1215,4 +1214,10 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 	if (npcList.size() > 0)
 		return npcList[rand() % npcList.size()];
 	return -1;
+}
+
+void Game::CenterOn(Coordinate target) {
+	int x = std::max(0, target.X() - ScreenWidth() / 2);
+	int y = std::max(0, target.Y() - ScreenHeight() / 2);
+	upleft = Coordinate(x, y);
 }

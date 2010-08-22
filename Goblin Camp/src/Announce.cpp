@@ -27,9 +27,14 @@ msg(nmsg),
 	target(pos) {}
 
 std::string AnnounceMessage::ToString() {
-	if (counter == 1) return msg;
 	result.str("");
-	result<<msg<<" x"<<counter;
+	result<<msg;
+	if (counter > 1) {
+		result<<" x"<<counter;
+	}
+	if (target.X() > -1 && target.Y() > -1) {
+		result<<" "<<(char)TCOD_CHAR_ARROW_E;
+	}
 	return result.str();
 }
 
@@ -46,13 +51,13 @@ timer(0),
 	height(0)
 {}
 
-void Announce::AddMsg(std::string msg, TCODColor color) {
+void Announce::AddMsg(std::string msg, TCODColor color, Coordinate coordinate) {
 	msg = msg.substr(0,ANNOUNCE_MAX_LENGTH);
-	if (!messageQueue.empty() && messageQueue.back()->msg == msg) {
+	if (!messageQueue.empty() && messageQueue.back()->msg == msg && messageQueue.back()->target == coordinate) {
 		messageQueue.back()->counter++;
 		if (messageQueue.size() == 1) timer = 0;
 	} else {
-		messageQueue.push_back(new AnnounceMessage(msg, color));
+		messageQueue.push_back(new AnnounceMessage(msg, color, coordinate));
 		if (messageQueue.size() <= ANNOUNCE_HEIGHT) {
 			if (msg.length() > length) length = msg.length();
 			height = messageQueue.size();
@@ -81,14 +86,37 @@ void Announce::Update() {
 	} else timer = 0;
 }
 
+void Announce::AnnouncementClicked(AnnounceMessage *msg) {
+	if(msg->target.X() > -1 && msg->target.Y() > -1) {
+		Game::Inst()->CenterOn(msg->target);
+	}
+}
+
+void Announce::AnnouncementClicked(int i) {
+	if(i >= 0 && i < history.size()) {
+		AnnouncementClicked(history[i]);
+	}	
+}
+
+MenuResult Announce::Update(int x, int y, bool clicked) {
+	if(x < length + 4 && y >= top) {
+		if(clicked && y > top) {
+			AnnouncementClicked(messageQueue[y - top - 1]);
+		}
+		return MENUHIT;
+	}
+	return NOMENUHIT;
+}
+
 void Announce::Draw(TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 
+	top = console->getHeight() - 1 - height;
 	if (height > 0 && (signed int)height < console->getHeight() - 1) {
-		console->hline(0, console->getHeight()-1-height, length+4);
-		console->putChar(length+3, console->getHeight()-1-height, TCOD_CHAR_NE, TCOD_BKGND_SET);
-		console->vline(length+3, console->getHeight()-height, height);
-		console->rect(0, console->getHeight()-height, length+3, height, true);
+		console->hline(0, top, length+4);
+		console->putChar(length+3, top, TCOD_CHAR_NE, TCOD_BKGND_SET);
+		console->vline(length+3, top + 1, height);
+		console->rect(0, top + 1, length+3, height, true);
 
 		for (int i = std::min((int)messageQueue.size() - 1, (int)height-1); i >= 0; --i) {
 			AnnounceMessage* msg = messageQueue[i];

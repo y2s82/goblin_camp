@@ -34,6 +34,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
 #include "UI/ConstructionDialog.hpp"
+#include "UI/AnnounceDialog.hpp"
 #include "UI/Tooltip.hpp"
 
 #pragma mark Keyboard command config parsing
@@ -72,6 +73,24 @@ public:
 };
 
 KeyMap keyMap = KeyMap();
+
+void UI::LoadKeys(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* keysTypeStruct = parser.newStructure("keys");
+	keysTypeStruct->addProperty("Exit", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Basics", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Workshops", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Orders", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Furniture", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("StockManager", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Squads", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Announcements", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
+	
+	parser.run(filename.c_str(), &keyMap);
+	
+}
 
 #pragma mark UI
 
@@ -134,17 +153,15 @@ void UI::HandleKeyboard() {
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::OrdersMenu());
             } else if (key.c == keyMap["StockManager"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
                 ChangeMenu(StockManagerDialog::StocksDialog());
             } else if (key.c == keyMap["Furniture"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::FurnitureMenu());
             } else if (key.c == keyMap["Squads"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
                 ChangeMenu(SquadsDialog::SquadDialog());
+			} else if (key.c == keyMap["Announcements"]) {
+				ChangeMenu(AnnounceDialog::AnnouncementsDialog());
             } else if (key.c == keyMap["Help"]) {
                 keyHelpTextColor = 255;
             } else if (key.c == keyMap["Pause"]) {
@@ -294,7 +311,12 @@ void UI::HandleMouse() {
             if(!draggingPlacement) {
                 menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
                 if (menuResult == NOMENUHIT) {
-                    if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false; }
+					menuResult = Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, true);
+					if (menuResult == NOMENUHIT) {
+						if (menuOpen) {
+							menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false;
+						}
+					}
                 }                    
             }
             if (menuResult == NOMENUHIT) {
@@ -462,7 +484,9 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	}
 	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
 	if (_state == UINORMAL && currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) == NOMENUHIT 
-		&& sideBar.Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT && !underCursor.empty() && underCursor.begin()->lock()) {
+		&& sideBar.Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT 
+		&& Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT
+		&& !underCursor.empty() && underCursor.begin()->lock()) {
 		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
 			ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
 		}
@@ -551,6 +575,8 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	}
 
 	if (drawCursor) console->putCharEx(mouseInput.cx, mouseInput.cy, 'X', TCODColor::azure, TCODColor::black);
+
+	Announce::Inst()->Draw(console);
 }
 
 void UI::DrawTopBar(TCODConsole* console) {
@@ -566,42 +592,12 @@ void UI::DrawTopBar(TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 
 	if (keyHelpTextColor > 0) {
+		console->setForegroundColor(TCODColor(keyHelpTextColor, keyHelpTextColor, keyHelpTextColor));
+		console->setColorControl(TCOD_COLCTRL_1, TCODColor(0, keyHelpTextColor, 0), TCODColor::black);
 		int x = 10;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "Q");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "uit");
+		console->print(x, 3, "%cQ%cuit  %cB%casics  %cW%corkshops  %cO%crders  %cF%curniture  %cS%ctockmanager  %cM%cilitary  %cA%cnnouncements ",
+					   TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
 		console->print(x, 4, "Space to pause");
-		x += 3 + 2;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "B");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "asics");
-		x += 5 + 2;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "W");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "orkshops");
-		x += 8 + 2;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "O");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "rders");
-		x += 5 + 2;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "F");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "urniture");
-		x += 8 + 2;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "S");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "tockmanager");
-		x += 11 + 2;
-		console->setForegroundColor(TCODColor(0,keyHelpTextColor,0));
-		console->print(x++, 3, "M");
-		console->setForegroundColor(TCODColor(keyHelpTextColor,keyHelpTextColor,keyHelpTextColor));
-		console->print(x, 3, "ilitary");
 	}
 
 	console->setForegroundColor(TCODColor::white);
@@ -791,20 +787,3 @@ void UI::SetCursor(int value) { cursorChar = value; }
 
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
 TCOD_key_t UI::getKey() { return key; }
-
-void UI::LoadKeys(std::string filename) {
-	TCODParser parser = TCODParser();
-	TCODParserStruct* keysTypeStruct = parser.newStructure("keys");
-	keysTypeStruct->addProperty("Exit", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Basics", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Workshops", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Orders", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Furniture", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("StockManager", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Squads", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
-
-	parser.run(filename.c_str(), &keyMap);
-	
-}
