@@ -66,6 +66,9 @@ screenWidth(0),
 	upleft(Coordinate(0,0)),
 	events(boost::shared_ptr<Events>())
 {
+	for(int i = 0; i < 12; i++) {
+		marks[i] = Coordinate(-1, -1);
+	}
 }
 
 Game* Game::Inst() {
@@ -172,6 +175,8 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	} else {
 		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
 	}
+	
+	Game::Inst()->RefreshStockpiles();
 
 	//Spawning a BUILD job is not required because stockpiles are created "built"
 	return newSp->Uid();
@@ -680,8 +685,9 @@ void Game::Update() {
 	}
 
 	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
-	//15 seconds, on average.
-	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+	//15 seconds, on average, or immediately if a new stockpile is built or a stockpile's allowed items are changed.
+	if (rand() % (UPDATES_PER_SECOND * 15) == 0 || refreshStockpiles) {
+		refreshStockpiles = false;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
 				StockpileItem(*itemi);
@@ -706,7 +712,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
 			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
-			if (sp->Allowed(Item::Presets[item.lock()->Type()].categories) && !sp->Full()) {
+			if (sp->Allowed(Item::Presets[item.lock()->Type()].specificCategories) && !sp->Full()) {
 
 				//Found a stockpile that both allows the item, and has space
 				//Check if the item can be contained, and if so if any containers are in the stockpile
@@ -769,7 +775,6 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, buffer);
-		Announce::Inst()->Draw(buffer);
 	}
 }
 
@@ -1124,7 +1129,7 @@ void Game::CreateSquad(std::string name) {
 void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
 	squad->TargetCoordinate(target);
 	UI::Inst()->CloseMenu();
-	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str());
+	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str(), TCODColor::white, target);
 }
 void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squad) {
 	if (target.X() >= 0 && target.X() < Map::Inst()->Width() && target.Y() >= 0 && target.Y() < Map::Inst()->Height()) {
@@ -1132,7 +1137,7 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 		if (!npcList->empty()) {
 			squad->TargetEntity(Game::Inst()->npcList[*npcList->begin()]);
 			UI::Inst()->CloseMenu();
-			Announce::Inst()->AddMsg((boost::format("[%1%] escorting %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str());
+			Announce::Inst()->AddMsg((boost::format("[%1%] escorting %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str(), TCODColor::white, target);
 		}
 	}
 }
@@ -1215,4 +1220,18 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 	if (npcList.size() > 0)
 		return npcList[rand() % npcList.size()];
 	return -1;
+}
+
+void Game::CenterOn(Coordinate target) {
+	int x = std::max(0, target.X() - ScreenWidth() / 2);
+	int y = std::max(0, target.Y() - ScreenHeight() / 2);
+	upleft = Coordinate(x, y);
+}
+
+void Game::SetMark(int i) {
+	marks[i] = Coordinate(upleft.X(), upleft.Y());
+}
+
+void Game::ReturnToMark(int i) {
+	upleft = Coordinate(marks[i].X(), marks[i].Y());
 }
