@@ -74,6 +74,7 @@ private:
 	int charWidth, charHeight;
 	bool toMainMenu, running;
 	int safeMonths;
+	bool refreshStockpiles;
 
 	boost::shared_ptr<Events> events;
 public:
@@ -137,6 +138,7 @@ public:
 	static void DismantleConstruction(Coordinate, Coordinate);
 	void RemoveConstruction(boost::weak_ptr<Construction>);
 	static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
+	void RefreshStockpiles() { refreshStockpiles = true; }
 	std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
 	std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
 	Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>);
