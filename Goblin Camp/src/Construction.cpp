@@ -126,6 +126,12 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	}
 }
 
+Coordinate Construction::Center() {
+	int width = graphic[0];
+	int height = (graphic.size() - 1) / width;
+	return Coordinate(Position().X() + (width - 1) / 2, Position().Y() + (height - 1) / 2);
+}
+
 int Construction::Build() {
 	++condition;
 	if (condition > 0) {

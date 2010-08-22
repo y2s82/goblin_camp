@@ -321,3 +321,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 		}
 	}
 }
+
+Coordinate Stockpile::Center() {
+	return Coordinate((a.X() + b.X() - 1) / 2, (a.Y() + b.Y() - 1) / 2);
+}
