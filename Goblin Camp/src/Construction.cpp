@@ -110,14 +110,18 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	int screeny = y - upleft.Y();
 	int screenx = x - upleft.X();
 	int ychange = 0;
-	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
+	int width = graphic[0];
+	int height = (graphic.size() - 1) / width;
+	if (screenx + width - 1 >= 0 && screenx < console->getWidth() && screeny + height - 1 >= 0 && screeny < console->getHeight()) {
 		for (int i = 1; i < (signed int)graphic.size(); ++i) {
-			if (dismantle) console->setBack(screenx+i-1,screeny, TCODColor::darkGrey);
-			console->setFore(screenx+i-1,screeny, color);
-			if (condition > i*-10) console->setChar(screenx+i-1,screeny, (graphic[i]));
-			else console->setChar(screenx+i-1,screeny, TCOD_CHAR_BLOCK2);
+			if(screenx + i - 1 >= 0 && screeny >= 0) {
+				if (dismantle) console->setBack(screenx+i-1,screeny, TCODColor::darkGrey);
+				console->setFore(screenx+i-1,screeny, color);
+				if (condition > i*-10) console->setChar(screenx+i-1,screeny, (graphic[i]));
+				else console->setChar(screenx+i-1,screeny, TCOD_CHAR_BLOCK2);
+			}
 			++ychange;
-			if (ychange == graphic[0]) { ++screeny; screenx -= graphic[0]; ychange = 0; }
+			if (ychange == width) { ++screeny; screenx -= width; ychange = 0; }
 		}
 	}
 }
