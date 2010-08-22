@@ -42,7 +42,7 @@ public:
     Dialog(ncontents, ntitle, nwidth, nheight), squadName(""), squadMembers(1), squadPriority(0) {}
 	static SquadsDialog* squadDialog;
 	static SquadsDialog* SquadDialog();
-    static void DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> >, int, int, int, bool, TCODConsole *);
+    static void DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> >, int, int, int, int, bool, TCODConsole *);
 	static void GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squad> >, Tooltip *);
     void SelectSquad(int i);
     bool SquadSelected(bool selected);

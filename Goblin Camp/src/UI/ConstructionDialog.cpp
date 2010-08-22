@@ -44,15 +44,18 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
         dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
         if(cons->HasTag(STOCKPILE)) {
             constructionInfoDialog->SetHeight(40);
-            dialog->AddComponent(new UIList<ItemCat>(&Item::Categories, 2, 5, 46, Item::Categories.size(),
-                                                   boost::bind(&ConstructionDialog::DrawCategory, dialog, _1, _2, _3, _4, _5, _6),
-                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))));
+			dialog->AddComponent(new Button("All", boost::bind(&Stockpile::SetAllAllowed, static_cast<Stockpile *>(cons), true), 2, 5, 8));
+			dialog->AddComponent(new Button("None", boost::bind(&Stockpile::SetAllAllowed, static_cast<Stockpile *>(cons), false), 11, 5, 8));
+            dialog->AddComponent(new ScrollPanel(2, 8, 46, 31,
+								 new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
+                                                   boost::bind(&ConstructionDialog::DrawCategory, cons, _1, _2, _3, _4, _5, _6, _7),
+                                                   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))), false));
         } else if(cons->Producer()) {
             constructionInfoDialog->SetHeight(40);
             dialog->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
             dialog->AddComponent(new ScrollPanel(2, 6, 23, 34, 
                                                new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
-                                                                                           boost::bind(&ConstructionDialog::DrawJob, dialog, _1, _2, _3, _4, _5, _6),
+                                                                                           ConstructionDialog::DrawJob,
                                                                                            boost::bind(&Construction::CancelJob, cons, _1)),
                                                false));
             dialog->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
@@ -81,22 +84,22 @@ void ConstructionDialog::Dismantle() {
     
 }
 
-void ConstructionDialog::DrawCategory(ItemCat category, int i, int x, int y, bool selected, TCODConsole *console) {
+void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
     Stockpile *sp = static_cast<Stockpile*>(construct);
     console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
     if (!category.parent) {
-        console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
+        console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-3).c_str());
     } else {
         if (i+1 < (signed int)Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {
-            console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
+            console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
         } else {
-            console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-7).c_str());
+            console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
         }
     }
     console->setForegroundColor(TCODColor::white);
 }
 
-void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, bool selected, TCODConsole *console) {
+void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
     console->setForegroundColor(i == 0 ? TCODColor::white : TCODColor::grey);
     console->print(x, y, Item::ItemTypeToString(category).c_str());
     console->setForegroundColor(TCODColor::white);

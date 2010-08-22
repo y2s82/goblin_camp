@@ -15,23 +15,28 @@
  along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <string>
-#include <vector>
-
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
 #include <libtcod.hpp>
+#include <vector>
+#include <string>
+#include <boost/weak_ptr.hpp>
 
-#include "UIComponents.hpp"
-#include "NPC.hpp"
-#include "Dialog.hpp"
+#include "Entity.hpp"
 
-class NPCDialog : public UIContainer {
+class SideBar {
+	boost::weak_ptr<Entity> entity;
+	boost::shared_ptr<Drawable> contents;
+	int width, height, topY, leftX;
+	bool npc, construction, stockpile, farmplot;
 public:
-	NPCDialog();
-	static void DrawNPC(std::pair<int, boost::shared_ptr<NPC> >, int, int, int, int, bool, TCODConsole*);
-	static Dialog* npcListDialog;
-	static Dialog* NPCListDialog();
+	SideBar();
+	void SetEntity(boost::weak_ptr<Entity>);
+	MenuResult Update(int, int, bool);
+	void Draw(TCODConsole*);
+	void GetTooltip(int, int, Tooltip *, TCODConsole *);
+	static void DrawStatusEffect(StatusEffect, int, int, int, int, bool, TCODConsole *);
+	static void DrawSeed(std::pair<ItemType, bool>, int, int, int, int, bool, TCODConsole *);
+	static std::string NPCSquadLabel(NPC *);
+	static std::string NPCWeaponLabel(NPC *);
+	static std::string NPCArmorLabel(NPC *);
 };
 
