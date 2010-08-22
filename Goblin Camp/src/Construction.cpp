@@ -561,9 +561,9 @@ void Construction::Update() {
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
 			if (amount == 1) {
-				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!", announceColor);
+				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!", announceColor, Position());
 			} else {
-				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!", announceColor);
+				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!", announceColor, Position());
 			}
 			for (int i = 0; i < amount; ++i) {
 				Game::Inst()->CreateNPC(Position() + ProductionSpot(type), monsterType);

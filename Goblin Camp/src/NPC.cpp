@@ -449,7 +449,7 @@ MOVENEARend:
 				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
-						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str());
+						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
 						Camp::Inst()->UpdateCenter(currentEntity().lock()->Position());
 						TaskFinished(TASKSUCCESS);
 						break;
@@ -490,7 +490,7 @@ MOVENEARend:
 					carried.lock()->Position(Position());
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
-						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!", TCODColor::white, cont->Position());
 					} else {
 						DropItem(carried); 
 						carried.reset();
@@ -955,8 +955,8 @@ void NPC::Kill() {
 			mainHand.reset();
 		}
 
-		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red);
-		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red);
+		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
+		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red, Position());
 	}
 }
 

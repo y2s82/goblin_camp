@@ -97,6 +97,7 @@ public:
 
 	void Update();
 	Coordinate upleft;
+	void CenterOn(Coordinate target);
 
 	void Pause();
 	bool Paused();
