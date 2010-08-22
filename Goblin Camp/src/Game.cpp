@@ -66,6 +66,9 @@ screenWidth(0),
 	upleft(Coordinate(0,0)),
 	events(boost::shared_ptr<Events>())
 {
+	for(int i = 0; i < 12; i++) {
+		marks[i] = Coordinate(-1, -1);
+	}
 }
 
 Game* Game::Inst() {
@@ -1223,4 +1226,12 @@ void Game::CenterOn(Coordinate target) {
 	int x = std::max(0, target.X() - ScreenWidth() / 2);
 	int y = std::max(0, target.Y() - ScreenHeight() / 2);
 	upleft = Coordinate(x, y);
+}
+
+void Game::SetMark(int i) {
+	marks[i] = Coordinate(upleft.X(), upleft.Y());
+}
+
+void Game::ReturnToMark(int i) {
+	upleft = Coordinate(marks[i].X(), marks[i].Y());
 }

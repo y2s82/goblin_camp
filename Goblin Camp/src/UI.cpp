@@ -233,6 +233,14 @@ void UI::HandleKeyboard() {
             } else if (key.vk == TCODK_PRINTSCREEN) { 
                 Data::SaveScreenshot();
             }
+			
+			if (key.vk >= TCODK_F1 && key.vk <= TCODK_F12) {
+				if(ShiftPressed()) {
+					Game::Inst()->SetMark(key.vk - TCODK_F1);
+				} else {
+					Game::Inst()->ReturnToMark(key.vk - TCODK_F1);
+				}
+			}
         } else {
             if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
                 inputString += key.c;
@@ -597,7 +605,8 @@ void UI::DrawTopBar(TCODConsole* console) {
 		int x = 10;
 		console->print(x, 3, "%cQ%cuit  %cB%casics  %cW%corkshops  %cO%crders  %cF%curniture  %cS%ctockmanager  %cM%cilitary  %cA%cnnouncements ",
 					   TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
-		console->print(x, 4, "Space to pause");
+		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
+		console->print(x, 7, "Space to pause");
 	}
 
 	console->setForegroundColor(TCODColor::white);
