@@ -256,12 +256,14 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 			}
 		}
 	}
+	Game::Inst()->RefreshStockpiles();
 }
 
 void Stockpile::SetAllAllowed(bool nallowed) {
 	for(int i = 0; i < Item::Categories.size(); i++) {
 		allowed[i] = nallowed;
 	}
+	Game::Inst()->RefreshStockpiles();
 }
 
 void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {

@@ -172,6 +172,8 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	} else {
 		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
 	}
+	
+	Game::Inst()->RefreshStockpiles();
 
 	//Spawning a BUILD job is not required because stockpiles are created "built"
 	return newSp->Uid();
@@ -680,8 +682,9 @@ void Game::Update() {
 	}
 
 	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
-	//15 seconds, on average.
-	if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+	//15 seconds, on average, or immediately if a new stockpile is built or a stockpile's allowed items are changed.
+	if (rand() % (UPDATES_PER_SECOND * 15) == 0 || refreshStockpiles) {
+		refreshStockpiles = false;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
 				StockpileItem(*itemi);
