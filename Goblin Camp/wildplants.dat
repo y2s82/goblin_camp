@@ -1,0 +1,72 @@
+plant_type "Pine Tree" {
+	tree
+	graphic=6
+	color="0,200,14"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
+				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=100
+	condition=150
+}
+
+plant_type "Wild Bloodberry bush" {
+	graphic=35
+	color="140,0,0"
+	components=["Bloodberry"]
+	rarity=10
+	condition=10
+	cluster=5
+	harvestable
+	walkable
+}
+
+plant_type "Wild Blueleaf" {
+	graphic=216
+	color="50,0,200"
+	components=["Blueleaf boll"]
+	rarity=10
+	condition=10
+	harvestable
+}
+
+plant_type "Yellow Flower" {
+	graphic=12
+	color="255,242,0"
+	components=["Flower"]
+	rarity=10
+	cluster=3
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Red Flower" {
+	graphic=12
+	color="237,21,85"
+	components=["Flower"]
+	rarity=10
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Pink Flower" {
+	graphic=12
+	color="230,150,193"
+	components=["Flower"]
+	rarity=10
+	cluster=3
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Blue Flower" {
+	graphic=12
+	color="0,0,230"
+	components=["Flower"]
+	rarity=10
+	cluster=3
+	condition=1
+	harvestable
+	walkable
+}
