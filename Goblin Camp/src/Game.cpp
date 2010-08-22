@@ -709,7 +709,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
 			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
-			if (sp->Allowed(Item::Presets[item.lock()->Type()].categories) && !sp->Full()) {
+			if (sp->Allowed(Item::Presets[item.lock()->Type()].specificCategories) && !sp->Full()) {
 
 				//Found a stockpile that both allows the item, and has space
 				//Check if the item can be contained, and if so if any containers are in the stockpile
