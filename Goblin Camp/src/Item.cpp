@@ -285,8 +285,7 @@ private:
 				Item::Presets.back().components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
 			}
 		} else if (boost::iequals(name, "containin")) {
-			Item::Presets.back().containIn = Item::StringToItemCategory(value.s);
-			Item::Presets.back().components.push_back(Item::StringToItemCategory(value.s));
+			Item::Presets.back().containInRaw = value.s;
 		} else if (boost::iequals(name, "nutrition")) {
 			Item::Presets.back().nutrition = value.i;
 			Item::Presets.back().organic = true;
@@ -303,7 +302,9 @@ private:
 		} else if (boost::iequals(name, "containerSize")) {
 			Item::Presets.back().container = value.i;
 		} else if (boost::iequals(name, "fitsin")) {
-			Item::Presets.back().fitsin = Item::StringToItemCategory(value.s);
+			Item::Presets.back().fitsInRaw = value.s;
+		} else if (boost::iequals(name, "constructedin")) {
+			Item::Presets.back().constructedInRaw = value.s;
 		} else if (boost::iequals(name, "decay")) {
 			Item::Presets.back().decays = true;
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -374,6 +375,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("fitsin", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addListProperty("decay", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("decaySpeed", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("constructedin", TCOD_TYPE_STRING, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
@@ -399,6 +401,23 @@ void Item::LoadPresets(std::string filename) {
 	itemListener->translateNames();
 }
 
+void Item::ResolveContainers() {
+	for (std::vector<ItemPreset>::iterator it = Item::Presets.begin(); it != Item::Presets.end(); ++it) {
+		ItemPreset& preset = *it;
+		
+		if (!preset.fitsInRaw.empty()) {
+			preset.fitsin = Item::StringToItemCategory(preset.fitsInRaw);
+		}
+		
+		if (!preset.containInRaw.empty()) {
+			preset.containIn = Item::StringToItemCategory(preset.containInRaw);
+			preset.components.push_back(preset.containIn);
+		}
+		
+		preset.fitsInRaw.clear();
+		preset.containInRaw.clear();
+	}
+}
 void Item::SetFaction(int val) {
 	if (val == 0 && faction != 0) { //Transferred to player
 		StockManager::Inst()->UpdateQuantity(type, 1);
@@ -474,7 +493,7 @@ ItemCat::ItemCat() : flammable(false),
 {}
 
 std::string ItemCat::GetName() {
-    return name;
+	return name;
 }
 
 ItemPreset::ItemPreset() :

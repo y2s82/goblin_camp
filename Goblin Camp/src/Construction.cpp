@@ -15,12 +15,16 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/bind.hpp>
+#include <boost/lambda/lambda.hpp>
+#include <boost/lambda/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
 #ifdef DEBUG
 #include <iostream>
 #endif
+#include <algorithm>
 
 #include "Construction.hpp"
 #include "Announce.hpp"
@@ -32,6 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StockManager.hpp"
 #include "UI.hpp"
 #include "UI/ConstructionDialog.hpp"
+#include "Item.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -327,17 +332,11 @@ class ConstructionListener : public ITCODParserListener {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets.back().graphic.push_back((int)TCOD_list_get(value.list,i));
 			}
-        } else if (boost::iequals(name, "category")) {
-            Construction::Presets.back().category = value.s;
-            Construction::Categories.insert(value.s);
-        } else if (boost::iequals(name, "placementType")) {
-            Construction::Presets.back().placementType = value.i;
-		} else if (boost::iequals(name, "products")) {
-			Construction::Presets.back().producer = true;
-			Construction::Presets.back().tags[WORKSHOP] = true;
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().products.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
-			}
+		} else if (boost::iequals(name, "category")) {
+			Construction::Presets.back().category = value.s;
+			Construction::Categories.insert(value.s);
+		} else if (boost::iequals(name, "placementType")) {
+			Construction::Presets.back().placementType = value.i;
 		} else if (boost::iequals(name, "materials")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets.back().materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
@@ -379,7 +378,6 @@ void Construction::LoadPresets(std::string filename) {
 	TCODParserStruct* constructionTypeStruct = parser.newStructure("construction_type");
 	constructionTypeStruct->addProperty("graphicLength", TCOD_TYPE_INT, true);
 	constructionTypeStruct->addListProperty("graphic", TCOD_TYPE_INT, true);
-	constructionTypeStruct->addListProperty("products", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addFlag("walkable");
 	constructionTypeStruct->addListProperty("materials", TCOD_TYPE_STRING, true);
 	constructionTypeStruct->addProperty("productionx", TCOD_TYPE_INT, false);
@@ -394,13 +392,51 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("furniture");
 	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
-    constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
-    constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
+	constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
 	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
 	constructionTypeStruct->addFlag("unique");
 
 	parser.run(filename.c_str(), new ConstructionListener());
+}
+
+bool _ResolveProductsPredicate(const ConstructionPreset& preset, const std::string& name) {
+	return boost::iequals(preset.name, name);
+}
+
+void Construction::ResolveProducts() {
+	typedef std::vector<ConstructionPreset>::iterator conIterator;
+	typedef std::vector<ItemPreset>::iterator itmIterator;
+	using boost::lambda::_1;
+	
+	for (itmIterator it = Item::Presets.begin(); it != Item::Presets.end(); ++it) {
+		ItemPreset& itemPreset = *it;
+		
+		if (!itemPreset.constructedInRaw.empty()) {
+			conIterator conIt = std::find_if(
+				Construction::Presets.begin(), Construction::Presets.end(),
+				// Could use bit more complicated lambda expression to eliminate
+				// separate predicate function entirely, but I think this is more
+				// clear to people not used to Boost.Lambda
+				boost::bind(_ResolveProductsPredicate, _1, itemPreset.constructedInRaw)
+			);
+			
+			if (conIt != Construction::Presets.end()) {
+				ConstructionPreset& conPreset = *conIt;
+				
+				conPreset.producer = conPreset.tags[WORKSHOP] = true;
+				conPreset.products.push_back(Item::StringToItemType(itemPreset.name));
+				
+				itemPreset.constructedInRaw.clear();
+			} else {
+				Logger::Inst()->output <<
+					"[ResolveProducts] Item " << itemPreset.name <<
+					" refers to nonexistant construction " << itemPreset.constructedInRaw <<
+				".\n";
+			}
+		}
+	}
 }
 
 bool Construction::SpawnProductionJob() {
@@ -552,7 +588,7 @@ void Construction::Dismantle() {
 }
 
 Panel *Construction::GetContextMenu() {
-    return ConstructionDialog::ConstructionInfoDialog(this);
+	return ConstructionDialog::ConstructionInfoDialog(this);
 }
 
 ConstructionPreset::ConstructionPreset() :

@@ -60,8 +60,8 @@ struct ConstructionPreset {
 	bool dynamic;
 	std::string spawnCreaturesTag;
 	int spawnFrequency;
-    std::string category;
-    int placementType;
+	std::string category;
+	int placementType;
 	bool blocksLight;
 	bool permanent;
 	TCODColor color;
@@ -119,11 +119,12 @@ public:
 	ItemType JobList(int);
 	virtual int Use();
 	static std::vector<ConstructionPreset> Presets;
-    static std::set<std::string> Categories;
+	static std::set<std::string> Categories;
 	static void LoadPresets(std::string);
+	static void ResolveProducts();
 	virtual boost::weak_ptr<Container> Storage();
 	bool HasTag(ConstructionTag);
 	virtual void Update();
 	virtual void Dismantle();
-    virtual Panel *GetContextMenu();
+	virtual Panel *GetContextMenu();
 };
