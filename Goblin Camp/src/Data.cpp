@@ -115,7 +115,6 @@ namespace {
 	void LoadGlobalMod() {
 		Logger::Inst()->output << "[Data] Loading global data files.\n";
 		
-		// Item presets _must_ be loaded first because constructions refer to items by name
 		TryLoadGlobalDataFile("items",         Item::LoadPresets);
 		TryLoadGlobalDataFile("constructions", Construction::LoadPresets);
 		TryLoadGlobalDataFile("wildplants",    NatureObject::LoadPresets);
@@ -293,6 +292,10 @@ namespace Data {
 		TCODConsole::setCustomFont(globals::font.string().c_str());
 		#endif
 		
+		// now resolve containers and products
+		Item::ResolveContainers();
+		Construction::ResolveProducts();
+		
 		Logger::Inst()->output << "[Data] Data::Load() finished.\n";
 		Logger::Inst()->output.flush();
 	}
@@ -316,23 +319,22 @@ namespace Data {
 		Logger::Inst()->output.flush();
 	}
 	
-    void DoSave(std::string file) {
-        Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
-        Game::Inst()->SaveGame(file);
-		Logger::Inst()->output.flush();        
-    }
+	void DoSave(std::string file) {
+		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+		Game::Inst()->SaveGame(file);
+		Logger::Inst()->output.flush();
+	}
 	
 	void SaveGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
-        
-        if (!fs::exists(file)) {
-            DoSave(file);
-        } else {
-            YesNoDialog::ShowYesNoDialog("Save game exists, overwrite?", boost::bind(DoSave, file), NULL);
-        }
-
+		
+		if (!fs::exists(file)) {
+			DoSave(file);
+		} else {
+			YesNoDialog::ShowYesNoDialog("Save game exists, overwrite?", boost::bind(DoSave, file), NULL);
+		}
 	}
-    
+	
 	void SaveScreenshot() {
 		// sadly, libtcod supports autonumbering only when saving to current dir
 		fs::directory_iterator end;
