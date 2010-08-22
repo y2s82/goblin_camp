@@ -67,8 +67,8 @@ public:
 	std::string Name();
 	void Name(std::string);
 	virtual void CancelJob(int=0);
-	void SetFaction(int);
-	int GetFaction() const;
+	virtual void SetFaction(int);
+	virtual int GetFaction() const;
     
     virtual Panel* GetContextMenu() {return 0;}
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
