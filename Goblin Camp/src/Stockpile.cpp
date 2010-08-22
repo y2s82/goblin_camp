@@ -285,12 +285,15 @@ struct AmountCompare {
 };
 
 void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
-	if(!containers[Coordinate(x, y)]->empty()) {
-		boost::weak_ptr<Item> item = containers[Coordinate(x, y)]->GetFirstItem();
-		if(item.lock()) {
-			item.lock()->GetTooltip(x, y, tooltip);
+	if (containers.find(Coordinate(x,y)) != containers.end()) {
+		if(!containers[Coordinate(x, y)]->empty()) {
+			boost::weak_ptr<Item> item = containers[Coordinate(x, y)]->GetFirstItem();
+			if(item.lock()) {
+				item.lock()->GetTooltip(x, y, tooltip);
+			}
 		}
 	}
+
 	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
 	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
 	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
