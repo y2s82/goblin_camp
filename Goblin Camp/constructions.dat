@@ -1,0 +1,284 @@
+construction_type "Stockpile" {
+    category="Basics"
+	stockpile
+	walkable
+	graphicLength=1
+	graphic=[61]
+	maxCondition=10
+}
+
+construction_type "Farm plot" {
+    category="Basics"
+	farmplot
+	walkable
+	graphicLength=1
+	graphic=[126]
+	maxCondition=10
+}
+
+construction_type "Wooden Wall" {
+    category="Basics"
+	wall
+	maxCondition=30
+	materials=["Log"]
+    placementType=2
+}
+
+construction_type "Carpenter" {
+    category="Workshops"
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  35, 67, 46,
+			 178, 46,177]
+	products=["Crate", "Wood plank", "Wooden barrel", "Wooden bed", "Wooden club", "Wooden door"]
+	walkable
+	maxCondition=90
+	materials=["Log","Log","Log"]
+	productionx=1
+	productiony=1
+}
+
+construction_type "Brewery" {
+    category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10, 33, 35,231]
+	products=["Wine"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank"]
+	productionx=2
+	productiony=0
+}
+
+construction_type "Kitchen" {
+    category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  95, 95, 127]
+	products=["Pie", "Bone Stew", "Bread"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Bone Carver" {
+	graphicLength=4
+	graphic=[  9, 179,179,  9, 
+			  19, 179,179, 19,
+			  41,  42, 42, 40]
+	products=["Bone statue", "Bone door", "Bone dagger", "Bone bed"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Butcher" {
+	graphicLength=4
+	graphic=[ 37,179,179, 37, 
+			  19,179,179, 19,
+			  37, 42, 42, 37]
+	products=["Meat"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Bed" {
+    category="Furniture"
+	bed
+	graphicLength=1
+	graphic=[220]
+	walkable
+	maxCondition=10
+	materials=["Bed"]
+}
+
+construction_type "Door" {
+    category="Furniture"
+	door
+	graphicLength=1
+	graphic=[43]
+	walkable
+	blocksLight
+	maxCondition=10
+	materials=["Door"]
+}
+
+construction_type "Stone quarry" {
+    category="Workshops"
+	graphicLength=10
+	graphic=[176,176,178, 44,177,176,177,178,178,176,
+			 177, 46, 46, 44, 44, 44, 46,177,176,177,
+			  46, 46,178,176,177,176, 46, 46, 44,176,
+			 178, 46, 46,176,178,178,177,178, 44, 46,
+			 176, 46,177,178, 32, 32,176,177, 46,178,
+			 176, 46, 46, 44, 32, 32,177,176, 46,177,
+			 177,176,177,178,177,177,176,178, 46,177,
+			 178, 46, 46,177,176,178,176, 44, 46,178,
+			 176, 46,178,176,176,177,176, 44, 46, 46,
+			 178, 46,177,177,178,178,177, 44, 46, 46]
+	products=["Rough stone"]
+	walkable
+	maxCondition=1000
+	productionx=3
+	productiony=5
+	spawnsCreatures="underground"
+	//Spawn creatures every x seconds
+	spawnFrequency=600
+	permanent
+}
+
+construction_type "Stone mason" {
+    category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,157,178,
+			  40, 10, 46,178,
+			 170,157, 46,178]
+	products=["Sharpened stone", "Stone statue"]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weapon crafter" {
+    category="Workshops"
+	graphicLength=2
+	graphic=[ 91, 92,
+			 124, 46,
+			 124, 46,
+			 123,125]
+	products=["Stone axe", "Stone spear", "Stone maul"]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Mill" {
+    category="Workshops"
+	graphicLength=3
+	graphic=[157, 46,157,
+			  46, 46, 46,
+			 157, 46,157]
+	products=["Flour"]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weaver" {
+    category="Workshops"
+	graphicLength=3
+	graphic=[ 21, 30, 30,
+			  46, 46, 46,
+			  30, 30, 21]
+	products=["Cloth", "Seed sack", "Flour sack"]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Statue" {
+    category="Furniture"
+	furniture
+	graphicLength=1
+	graphic=[190]
+	maxCondition=20
+	materials=["Statue"]
+}
+
+construction_type "Spawning pool" {
+    category="Permanent"
+	graphicLength=10
+	graphic=[ 46, 44, 46, 94,126,126,126, 44, 44, 46,
+		 	  46, 46,126,126,126,126,126,126, 46, 44,
+			  44,126,126,126,126,126,126,126,126, 46,
+			 126,126,136,126,176,126,199,126,126,126,
+			 126,126,126,126,126,126,126,126,126,126,
+			 126,126,126,126,126,126,126,126,147,126,
+			  94,126,126,237,126,126,126,126,126,126,
+			  46,126,126,126,126,136,126,126,126, 44,
+			  44, 46,126,126,126,126,126, 94, 44, 44,
+			  44, 46, 44,126,126,126,126, 46, 46, 44]
+	walkable
+	maxCondition=1000
+	productionx=5
+	productiony=5
+	spawnsCreatures="friendly"
+	//Spawn creatures every x seconds
+	spawnFrequency=300
+	permanent
+	color="0,255,128"
+	unique
+}
+
+construction_type "Bloomery" {
+    category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,176,191,
+			  40, 10, 46, 10,
+			 170,157,176,217]
+	products=["Wrought iron"]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Brick","Brick","Brick","Brick","Brick"]
+}
+
+construction_type "Clay pit" {
+    category="Permanent"
+	graphicLength=5
+	graphic=[201, 203, 203, 203, 187,
+			204,  92,  31,  47, 185,
+			204,  16, 176,  17, 185,
+			204,  47,  30,  92, 185,
+			200, 202, 202, 202, 188]
+
+	products=["Red clay"]
+	walkable
+	maxCondition=800
+	productionx=2
+	productiony=2
+	spawnsCreatures="claypit"
+	spawnFrequency=600
+	permanent
+	color="220,80,70"
+}
+
+construction_type "Clay kiln" {
+    category="Workshops"
+	graphicLength=2
+	graphic=[ 10, 35,
+			  35, 46,
+			 231,  9,
+			   2,173]
+	products=["Amphora", "Red brick"]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank"]
+	productionx=1
+	productiony=1
+}
+
+construction_type "Brick Wall" {
+    category="Basics"
+	wall
+	maxCondition=50
+	materials=["Brick"]
+}
