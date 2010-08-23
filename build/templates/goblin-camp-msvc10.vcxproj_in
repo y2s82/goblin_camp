@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <ItemGroup Label="ProjectConfigurations">
+        <ProjectConfiguration Include="Debug|Win32">
+            <Configuration>Debug</Configuration>
+            <Platform>Win32</Platform>
+        </ProjectConfiguration>
+        <ProjectConfiguration Include="Release|Win32">
+            <Configuration>Release</Configuration>
+            <Platform>Win32</Platform>
+        </ProjectConfiguration>
+    </ItemGroup>
+    
+    <PropertyGroup Label="Globals">
+        <ProjectGuid>{C372BB46-FA78-4FD4-8940-600735990118}</ProjectGuid>
+        <Keyword>MakeFileProj</Keyword>
+    </PropertyGroup>
+    
+    <ItemGroup>
+        %GC_RESOURCE_FILES%
+    </ItemGroup>
+    <ItemGroup>
+        %GC_SOURCE_FILES%
+    </ItemGroup>
+    <ItemGroup>
+        %GC_HEADER_FILES%
+    </ItemGroup>
+    
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+    
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+        <ConfigurationType>Makefile</ConfigurationType>
+        <UseDebugLibraries>true</UseDebugLibraries>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+        <ConfigurationType>Makefile</ConfigurationType>
+        <UseDebugLibraries>false</UseDebugLibraries>
+    </PropertyGroup>
+    
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+    
+    <ImportGroup Label="ExtensionSettings">
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+        <Import
+            Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+            Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+            Label="LocalAppDataPlatform"
+        />
+    </ImportGroup>
+    <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+        <Import
+            Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props"
+            Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')"
+            Label="LocalAppDataPlatform"
+        />
+    </ImportGroup>
+    
+    <PropertyGroup Label="UserMacros" />
+    
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+        <NMakeBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug dist</NMakeBuildCommandLine>
+        <NMakeCleanCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug dist</NMakeCleanCommandLine>
+        <NMakeReBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug dist</NMakeReBuildCommandLine>
+        
+        <NMakeOutput>..\dist\debug\goblin-camp.exe</NMakeOutput>
+        
+        <NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+    </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+        <NMakeBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release dist</NMakeBuildCommandLine>
+        <NMakeCleanCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release dist</NMakeCleanCommandLine>
+        <NMakeReBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release dist</NMakeReBuildCommandLine>
+        
+        <NMakeOutput>..\dist\release\goblin-camp.exe</NMakeOutput>
+        
+        <NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+    </PropertyGroup>
+    
+    <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+    <ImportGroup Label="ExtensionTargets">
+    </ImportGroup>
+</Project>
