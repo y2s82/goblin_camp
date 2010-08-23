@@ -487,6 +487,7 @@ item_type "Wooden arrow" {
 	graphic = 41
 	color = "128,64,0"
 	components = [ "Plank" ]
+	multiplier = 10
 	attack "Pierce" {
 		type="piercing"
 		damage="1d10+10"
@@ -502,6 +503,7 @@ item_type "Stone-tipped arrow" {
 	graphic = 41
 	color = "160,160,160"
 	components = ["Plank", "Sharpened stone"]
+	multiplier = 5
 	attack "Pierce" {
 		type="piercing"
 		damage="1d20+10"
