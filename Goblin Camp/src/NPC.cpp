@@ -1124,14 +1124,17 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 			animal->AddEffect(PANIC);
 		}
 	}
+
+	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
+		//Turn into a hostile animal if attacked by the player's creatures
+		if (animal->aggressor.lock()->GetFaction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		animal->RemoveEffect(PANIC);
+		animal->AddEffect(RAGE);
+	}
 }
 
 bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 	animal->aggressive = false;
-	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
-		//Turn into a hostile animal if attacked by the player's creatures
-		if (animal->aggressor.lock()->GetFaction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
-	}
 	return false;
 }
 

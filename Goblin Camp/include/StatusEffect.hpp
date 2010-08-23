@@ -47,7 +47,8 @@ enum StatusEffectType {
 	POISON,
 	BLEEDING,
 	FLYING,
-	BADSLEEP
+	BADSLEEP,
+	RAGE
 };
 
 struct StatusEffect {
