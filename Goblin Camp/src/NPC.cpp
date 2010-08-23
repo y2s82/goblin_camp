@@ -1127,7 +1127,11 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 
 	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
 		//Turn into a hostile animal if attacked by the player's creatures
-		if (animal->aggressor.lock()->GetFaction() == 0) animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		if (animal->aggressor.lock()->GetFaction() == 0){
+			animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+			animal->React = boost::bind(NPC::HostileAnimalReact, _1);
+		}
+		animal->aggressive = true;
 		animal->RemoveEffect(PANIC);
 		animal->AddEffect(RAGE);
 	}
