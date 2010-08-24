@@ -91,3 +91,7 @@ void Container::RemoveListener(ContainerListener *listener) {
         }
 	}
 }
+
+void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
+    tooltip->AddEntry(TooltipEntry((boost::format("%s (%d/%d)") % name % size() % (Capacity() + size())).str(), TCODColor::white));
+}
