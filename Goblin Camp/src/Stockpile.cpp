@@ -269,9 +269,25 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
 	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
 		amount[*it] = amount[*it] + 1;
 	}
+
+    if(item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+        boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+        for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
+            ItemAdded(*i);
+        }
+        container->AddListener(this);
+    }
 }
 
 void Stockpile::ItemRemoved(boost::weak_ptr<Item> item) {
+    if(item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+        boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+        container->RemoveListener(this);
+        for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
+            ItemRemoved(*i);
+        }
+    }
+
 	std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
 	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
 		amount[*it] = amount[*it] - 1;

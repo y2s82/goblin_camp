@@ -61,4 +61,5 @@ public:
 	std::set<boost::weak_ptr<Item> >::iterator begin();
 	std::set<boost::weak_ptr<Item> >::iterator end();
 	void AddListener(ContainerListener *listener);
+	void RemoveListener(ContainerListener *listener);
 };
