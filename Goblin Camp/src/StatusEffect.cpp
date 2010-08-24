@@ -118,7 +118,7 @@ type(typeval),
 		name = "Enraged";
 		graphic = '!';
 		color = TCODColor::red;
-		cooldown = UPDATES_PER_SECOND * 5;
+		cooldown = UPDATES_PER_SECOND * 7;
 		statChanges[STRENGTH] = 2;
 		statChanges[DODGE] = 0.5;
 		break;
