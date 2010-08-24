@@ -1436,6 +1436,8 @@ class NPCListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name,"strength")) {
 			NPC::Presets.back().stats[STRENGTH] = value.i;
+		}  else if (boost::iequals(name,"size")) {
+			NPC::Presets.back().stats[SIZE] = value.i;
 		}
 		return true;
 	}
@@ -1457,17 +1459,14 @@ void NPC::LoadPresets(std::string filename) {
 	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
 	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
 	npcTypeStruct->addProperty("plural", TCOD_TYPE_STRING, false);
-	npcTypeStruct->addProperty("speed", TCOD_TYPE_INT, true);
 	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
 	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
 	npcTypeStruct->addFlag("expert");
-	npcTypeStruct->addProperty("health", TCOD_TYPE_INT, true);
 	const char* aiTypes[] = { "PlayerNPC", "PeacefulAnimal", "HungryAnimal", "HostileAnimal", NULL }; 
 	npcTypeStruct->addValueList("AI", aiTypes, true);
 	npcTypeStruct->addFlag("needsNutrition");
 	npcTypeStruct->addFlag("needsSleep");
 	npcTypeStruct->addFlag("generateName");
-	npcTypeStruct->addProperty("dodge", TCOD_TYPE_INT, true);
 	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
 	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
 	
@@ -1489,6 +1488,10 @@ void NPC::LoadPresets(std::string filename) {
 	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *statsStruct = parser.newStructure("stats");
+	statsStruct->addProperty("health", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("speed", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("dodge", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("size", TCOD_TYPE_INT, true);
 	statsStruct->addProperty("strength", TCOD_TYPE_INT, false);
 
 	npcTypeStruct->addStructure(attackTypeStruct);
