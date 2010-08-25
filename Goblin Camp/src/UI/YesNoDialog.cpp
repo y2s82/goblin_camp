@@ -28,11 +28,11 @@
 #include "UI/Button.hpp"
 
 void YesNoDialog::ShowYesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction, std::string leftButton, std::string rightButton) {
-    UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 10);
-    Dialog *dialog = new Dialog(contents, "", 50, 10);
-    contents->AddComponent(new Label(text, 25, 2));
-    contents->AddComponent(new Button(leftButton, leftAction, 10, 4, 10, 'y'));
-    contents->AddComponent(new Button(rightButton, rightAction, 30, 4, 10, 'n'));
-    dialog->ShowModal();
+	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 10);
+	Dialog *dialog = new Dialog(contents, "", 50, 10);
+	contents->AddComponent(new Label(text, 25, 2));
+	contents->AddComponent(new Button(leftButton, leftAction, 10, 4, 10, 'y'));
+	contents->AddComponent(new Button(rightButton, rightAction, 30, 4, 10, 'n'));
+	dialog->ShowModal();
 }
 

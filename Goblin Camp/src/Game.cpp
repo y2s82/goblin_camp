@@ -49,7 +49,7 @@ int Game::ItemCatCount = 0;
 Game* Game::instance = 0;
 
 Game::Game() :
-screenWidth(0),
+	screenWidth(0),
 	screenHeight(0),
 	resolutionWidth(0),
 	resolutionHeight(0),
@@ -317,11 +317,11 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
-    if (confirm) {
-        YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
-    } else {
-        ExitConfirmed();
-    }
+	if (confirm) {
+		YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+	} else {
+		ExitConfirmed();
+	}
 }
 
 void Game::ExitConfirmed() {

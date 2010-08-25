@@ -27,31 +27,33 @@
 
 class Button: public Drawable {
 protected:
-    std::string text;
-    bool selected;
-    char shortcut;
-    boost::function<void()> callback;
+	std::string text;
+	bool selected;
+	char shortcut;
+	boost::function<void()> callback;
 public:
-    Button(std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
-        text(ntext), callback(ncallback), shortcut(nshortcut), Drawable(x, y, nwidth, 0), selected(false) {}
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	Button(
+		std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0
+	):
+		text(ntext), callback(ncallback), shortcut(nshortcut), Drawable(x, y, nwidth, 0), selected(false) {}
+	void Draw(int, int, TCODConsole *);
+	MenuResult Update(int, int, bool, TCOD_key_t);
 };
 
 class LiveButton: public Button {
 private:
-    boost::function<std::string()> textFunc;
+	boost::function<std::string()> textFunc;
 public:
-    LiveButton(boost::function<std::string()> ntextFunc, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
-        Button("", ncallback, x, y, nwidth, nshortcut), textFunc(ntextFunc) {}
-    void Draw(int, int, TCODConsole *);
+	LiveButton(boost::function<std::string()> ntextFunc, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
+		Button("", ncallback, x, y, nwidth, nshortcut), textFunc(ntextFunc) {}
+	void Draw(int, int, TCODConsole *);
 };
 
 class ToggleButton: public Button {
 private:
-    boost::function<bool()> isOn;
+	boost::function<bool()> isOn;
 public:
-    ToggleButton(std::string ntext, boost::function<void()> ncallback, boost::function<bool()> nisOn, int x, int y, int nwidth, char nshortcut = 0):
-        Button(ntext, ncallback, x, y, nwidth, nshortcut), isOn(nisOn) {}
-    void Draw(int, int, TCODConsole *);    
+	ToggleButton(std::string ntext, boost::function<void()> ncallback, boost::function<bool()> nisOn, int x, int y, int nwidth, char nshortcut = 0):
+		Button(ntext, ncallback, x, y, nwidth, nshortcut), isOn(nisOn) {}
+	void Draw(int, int, TCODConsole *);
 };

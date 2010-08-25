@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
 #ifdef DEBUG
-#include <iostream>
+#	include <iostream>
 #endif
 #include <algorithm>
 
@@ -592,7 +592,7 @@ Panel *Construction::GetContextMenu() {
 }
 
 ConstructionPreset::ConstructionPreset() :
-maxCondition(0),
+	maxCondition(0),
 	graphic(std::vector<int>()),
 	walkable(false),
 	materials(std::list<ItemCategory>()),
@@ -604,7 +604,7 @@ maxCondition(0),
 	dynamic(false),
 	spawnCreaturesTag(""),
 	spawnFrequency(10),
-    placementType(UIPLACEMENT),
+	placementType(UIPLACEMENT),
 	blocksLight(true),
 	permanent(false),
 	color(TCODColor::black)
