@@ -42,11 +42,11 @@ private:
 	int capacity;
 	int reservedSpace;
 	
-	std::vector<boost::shared_ptr<ContainerListener> > listeners;
+	std::vector<ContainerListener*> listeners;
 public:
 	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >(),
-		std::vector<boost::shared_ptr<ContainerListener> > = std::vector<boost::shared_ptr<ContainerListener> >());
+		std::vector<ContainerListener*> = std::vector<ContainerListener*>());
 	virtual ~Container();
 	virtual bool AddItem(boost::weak_ptr<Item>);
 	virtual void RemoveItem(boost::weak_ptr<Item>);
@@ -60,5 +60,5 @@ public:
 	bool Full();
 	std::set<boost::weak_ptr<Item> >::iterator begin();
 	std::set<boost::weak_ptr<Item> >::iterator end();
-	void AddListener(ContainerListener *listener);
+	void AddListener(ContainerListener* listener);
 };

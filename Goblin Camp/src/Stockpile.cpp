@@ -259,7 +259,7 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 }
 
 void Stockpile::SetAllAllowed(bool nallowed) {
-	for(int i = 0; i < Item::Categories.size(); i++) {
+	for(unsigned int i = 0; i < Item::Categories.size(); i++) {
 		allowed[i] = nallowed;
 	}
 }
