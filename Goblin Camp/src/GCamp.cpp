@@ -33,6 +33,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
+#ifdef GC_PYTHON
+#	include "Python.hpp"
+#endif
 
 #if defined(GC_BOOST_BUILD)
 // This variable is defined in buildsystem-generated _version.cpp.
@@ -44,6 +47,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 int GCMain() {
 	Data::Init();
+#ifdef GC_PYTHON
+	Python::Init();
+#endif
 	Game::Inst()->Init();
 	return MainMenu();
 }

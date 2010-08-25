@@ -41,7 +41,7 @@ Dependencies
 Goblin Camp requires several third party libraries to build and link:
 
 * `Boost`_ **1.43**.
-* `libtcod`_ **r427** (GC uses not-yet-released SVN version — listed here is a known working revision).
+* `libtcod`_ **r474** (GC uses not-yet-released SVN version — listed here is a known working revision).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
 
 .. _Boost:       http://boost.org
