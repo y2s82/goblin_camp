@@ -18,7 +18,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Container.hpp"
 #include "Logger.hpp"
 
-Container::Container(Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components, std::vector<boost::shared_ptr<ContainerListener> > nlisteners) : 
+Container::Container(Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components, 
+	std::vector<ContainerListener*> nlisteners) : 
 	Item(pos, type, faction, components),
 	capacity(capValue),
 	reservedSpace(0),
@@ -39,7 +40,7 @@ bool Container::AddItem(boost::weak_ptr<Item> item) {
 		item.lock()->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
 		--capacity;
-		for(std::vector<boost::shared_ptr<ContainerListener> >::iterator it = listeners.begin(); it != listeners.end(); it++) {
+		for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
 			(*it)->ItemAdded(item);
 		}
 		return true;
@@ -50,7 +51,7 @@ bool Container::AddItem(boost::weak_ptr<Item> item) {
 void Container::RemoveItem(boost::weak_ptr<Item> item) {
 	items.erase(item);
 	++capacity;
-	for(std::vector<boost::shared_ptr<ContainerListener> >::iterator it = listeners.begin(); it != listeners.end(); it++) {
+	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
 		(*it)->ItemRemoved(item);
 	}
 }
@@ -79,6 +80,6 @@ void Container::ReserveSpace(bool res) {
 	else --reservedSpace;
 }
 
-void Container::AddListener(ContainerListener *listener) {
-	listeners.push_back(boost::shared_ptr<ContainerListener>(listener));
+void Container::AddListener(ContainerListener* listener) {
+	listeners.push_back(listener);
 }

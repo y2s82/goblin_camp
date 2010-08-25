@@ -411,7 +411,7 @@ void UI::HandleMouse() {
 		}
         currentMenu = 0;
         if(!underCursor.empty()) {
-            currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
+            if ((*underCursor.begin()).lock()) currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
         }
         if(!currentMenu) {
             currentMenu = Menu::MainMenu();
@@ -464,7 +464,9 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	if (_state == UINORMAL && currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) == NOMENUHIT 
 		&& sideBar.Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT && !underCursor.empty() && underCursor.begin()->lock()) {
 		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-			ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+			if (ucit->lock()) {
+				ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+			}
 		}
 	}
 	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);

@@ -131,12 +131,12 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 		construction = true;
 		contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
 		boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
-		container->AddComponent(new Button("All", boost::bind(&Stockpile::SetAllAllowed, sp, true), 0, 0, 8));
-		container->AddComponent(new Button("None", boost::bind(&Stockpile::SetAllAllowed, sp, false), 9, 0, 8));
+		container->AddComponent(new Button("All", boost::bind(&Stockpile::SetAllAllowed, sp.get(), true), 0, 0, 8));
+		container->AddComponent(new Button("None", boost::bind(&Stockpile::SetAllAllowed, sp.get(), false), 9, 0, 8));
 		container->AddComponent(new ScrollPanel(0, 3, width - 2, 33,
 												new UIList<ItemCat>(&Item::Categories, 0, 0, width, Item::Categories.size(),
 																	boost::bind(&ConstructionDialog::DrawCategory, boost::dynamic_pointer_cast<Construction>(entity.lock()).get(), _1, _2, _3, _4, _5, _6, _7),
-																	boost::bind(&Stockpile::SwitchAllowed, boost::dynamic_pointer_cast<Stockpile>(entity.lock()), _1, boost::bind(&UI::ShiftPressed, UI::Inst())))));
+																	boost::bind(&Stockpile::SwitchAllowed, boost::dynamic_pointer_cast<Stockpile>(entity.lock()).get(), _1, boost::bind(&UI::ShiftPressed, UI::Inst())))));
 	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
 		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
 		if (construct->HasTag(WORKSHOP)) {
