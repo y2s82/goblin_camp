@@ -1258,11 +1258,11 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 #ifdef DEBUG
 					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
 #endif
-					if (effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE_]) {
+					if (effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
 						if (attack.Type() == DAMAGE_BLUNT || rand() % 2 == 0) {
 							Coordinate tar;
-							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE_], 1));
-							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE_], 1));
+							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
 							npc->CalculateFlightPath(npc->Position()+tar, rand() % 20 + 25);
 							npc->pathIndex = -1;
 						}
@@ -1444,7 +1444,7 @@ class NPCListener : public ITCODParserListener {
 		} else if (boost::iequals(name,"strength")) {
 			NPC::Presets.back().stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"size")) {
-			NPC::Presets.back().stats[SIZE_] = value.i;
+			NPC::Presets.back().stats[SIZE] = value.i;
 			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
 		}
 		return true;
