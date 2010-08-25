@@ -465,6 +465,7 @@ void Item::UpdateVelocity() {
 							npc->Damage(&attack);
 
 							SetVelocity(0);
+							Position(flightPath.back().coord);
 							flightPath.clear();
 							return;
 						}
