@@ -17,12 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 // precompiled header
 #ifdef BOOST_BUILD_PCH_ENABLED
-// WinSDK
-#	ifdef WINDOWS
-#		define NOMINMAX
-#		define WIN32_LEAN_AND_MEAN
-#		include <windows.h>
-#	endif
 // STL/CRT
 #	include <vector>
 #	include <deque>
