@@ -25,7 +25,7 @@ enum NPCStat {
 	MOVESPEED,
 	DODGE,
 	STRENGTH,
-	SIZE,
+	SIZE_,
 	STAT_COUNT
 };
 
