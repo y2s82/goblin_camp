@@ -76,7 +76,8 @@ public:
 	int GetVelocity();
 	virtual void SetVelocity(int);
 	Coordinate GetVelocityTarget();
+	int GetHeight();
 	void SetVelocityTarget(Coordinate);
-	void CalculateFlightPath(Coordinate, int speed);
+	void CalculateFlightPath(Coordinate, int speed, int initialHeight=0);
 };
 
