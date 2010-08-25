@@ -30,7 +30,7 @@
 class StockManagerDialog : public Dialog {
 private:
 	std::string filter;
-    Grid *grid;
+	Grid *grid;
 public:
 	StockManagerDialog();
 	static Dialog* stocksDialog;

@@ -24,8 +24,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
 
-Entity::Entity() : zone(0), reserved(0), name("NONAME"), faction(-1),
-velocity(0), nextVelocityMove(0), velocityTarget(Coordinate(0,0)) {
+Entity::Entity() :
+	zone(0), reserved(0), name("NONAME"), faction(-1),
+	velocity(0), nextVelocityMove(0), velocityTarget(Coordinate(0,0))
+{
 	uid = uids++; //FIXME: Entity should keep track of freed uids
 }
 

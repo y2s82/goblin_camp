@@ -146,7 +146,7 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-		int nutrition;
+	int nutrition;
 	ItemType growth;
 
 public:

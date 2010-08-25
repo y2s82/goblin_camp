@@ -27,11 +27,11 @@
 
 class Frame: public UIContainer {
 private:
-    std::string title;
+	std::string title;
 public:
-    Frame(std::string ntitle, std::vector<Drawable *> ncomponents, int x, int y, int nwidth, int nheight):
-        title(ntitle), UIContainer(ncomponents, x, y, nwidth, nheight) {}
-    void Draw(int, int, TCODConsole *);
-    void SetTitle(std::string ntitle) { title = ntitle; }
+	Frame(std::string ntitle, std::vector<Drawable *> ncomponents, int x, int y, int nwidth, int nheight):
+		title(ntitle), UIContainer(ncomponents, x, y, nwidth, nheight) {}
+	void Draw(int, int, TCODConsole *);
+	void SetTitle(std::string ntitle) { title = ntitle; }
 };
 

@@ -27,10 +27,10 @@
 
 class TextBox: public Drawable {
 private:
-    std::string *value;
+	std::string *value;
 public:
-    TextBox(int x, int y, int nwidth, std::string *nvalue):
-        Drawable(x, y, nwidth, 1), value(nvalue) {}
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	TextBox(int x, int y, int nwidth, std::string *nvalue):
+		Drawable(x, y, nwidth, 1), value(nvalue) {}
+	void Draw(int, int, TCODConsole *);
+	MenuResult Update(int, int, bool, TCOD_key_t);
 };

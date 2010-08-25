@@ -30,7 +30,7 @@ class AnnounceDialog : public Scrollable {
 public:
 	AnnounceDialog() {}
 	void Draw(int, int, int, int, int, TCODConsole*);
-    int TotalHeight();
+	int TotalHeight();
 	static Dialog* announcementsDialog;
 	static Dialog* AnnouncementsDialog();
 };

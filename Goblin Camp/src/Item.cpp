@@ -494,7 +494,7 @@ std::string ItemCat::GetName() {
 }
 
 ItemPreset::ItemPreset() :
-graphic('?'),
+	graphic('?'),
 	color(TCODColor::pink),
 	name("Preset default"),
 	categories(std::set<ItemCategory>()),

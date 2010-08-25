@@ -30,26 +30,26 @@
 class ConstructionDialog : public UIContainer {
 private:
 	Construction* construct;
-    class ProductList : public Scrollable {
-    private:
-        Construction* construct;
-    public:
-        ProductList(Construction* nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
-        int height;
-        std::vector<int> productPlacement;
-        void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
-        int TotalHeight();
-        MenuResult Update(int x, int y, bool clicked, TCOD_key_t key);
-    };
+	class ProductList : public Scrollable {
+	private:
+		Construction* construct;
+	public:
+		ProductList(Construction* nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
+		int height;
+		std::vector<int> productPlacement;
+		void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+		int TotalHeight();
+		MenuResult Update(int x, int y, bool clicked, TCOD_key_t key);
+	};
 public:
 	ConstructionDialog(int nwidth, int nheight):
-    UIContainer(std::vector<Drawable *>(), 0, 0, nwidth, nheight) {}
+	UIContainer(std::vector<Drawable *>(), 0, 0, nwidth, nheight) {}
 	static Dialog* constructionInfoDialog;
-    static Construction* cachedConstruct;
+	static Construction* cachedConstruct;
 	static Dialog* ConstructionInfoDialog(Construction*);
 	void Construct(Construction*);
-    void Rename();
-    void Dismantle();
-    static void DrawCategory(Construction *, ItemCat, int, int, int, int, bool, TCODConsole *);
-    static void DrawJob(ItemType, int, int, int, int, bool, TCODConsole *);
+	void Rename();
+	void Dismantle();
+	static void DrawCategory(Construction *, ItemCat, int, int, int, int, bool, TCODConsole *);
+	static void DrawJob(ItemType, int, int, int, int, bool, TCODConsole *);
 };

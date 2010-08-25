@@ -89,7 +89,7 @@ menuOpen(false),
 	rbuttonPressed(false),
 	keyHelpTextColor(0),
 	draggingViewport(false),
-    draggingPlacement(false),
+	draggingPlacement(false),
 	textMode(false),
 	inputString(std::string("")),
 	cursorChar('X')
@@ -111,122 +111,122 @@ UI* UI::Inst() {
 void UI::Update() {
 	if (keyHelpTextColor > 0) keyHelpTextColor -= 2;
 	if (keyHelpTextColor < 0) keyHelpTextColor = 0;
-    HandleKeyboard();
-    HandleMouse();
+	HandleKeyboard();
+	HandleMouse();
 }
 
 void UI::HandleKeyboard() {
 	//TODO: This isn't pretty, but it works.
-    key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
-    if (!currentMenu || currentMenu->Update(-1, -1, false, key) != KEYRESPOND) {
-        if (!textMode) {
-            if (key.c == keyMap["Exit"]) Game::Exit();
-            else if (key.c == keyMap["Basics"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
-                ChangeMenu(Menu::BasicsMenu());
-            } else if (key.c == keyMap["Workshops"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
-                ChangeMenu(Menu::WorkshopsMenu());
-            } else if (key.c == keyMap["Orders"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
-                ChangeMenu(Menu::OrdersMenu());
-            } else if (key.c == keyMap["StockManager"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
-                ChangeMenu(StockManagerDialog::StocksDialog());
-            } else if (key.c == keyMap["Furniture"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
-                ChangeMenu(Menu::FurnitureMenu());
-            } else if (key.c == keyMap["Squads"]) {
-                menuX = mouseInput.cx;
-                menuY = mouseInput.cy;
-                ChangeMenu(SquadsDialog::SquadDialog());
-            } else if (key.c == keyMap["Help"]) {
-                keyHelpTextColor = 255;
-            } else if (key.c == keyMap["Pause"]) {
+	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+	if (!currentMenu || currentMenu->Update(-1, -1, false, key) != KEYRESPOND) {
+		if (!textMode) {
+			if (key.c == keyMap["Exit"]) Game::Exit();
+			else if (key.c == keyMap["Basics"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(Menu::BasicsMenu());
+			} else if (key.c == keyMap["Workshops"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(Menu::WorkshopsMenu());
+			} else if (key.c == keyMap["Orders"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(Menu::OrdersMenu());
+			} else if (key.c == keyMap["StockManager"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(StockManagerDialog::StocksDialog());
+			} else if (key.c == keyMap["Furniture"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(Menu::FurnitureMenu());
+			} else if (key.c == keyMap["Squads"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(SquadsDialog::SquadDialog());
+			} else if (key.c == keyMap["Help"]) {
+				keyHelpTextColor = 255;
+			} else if (key.c == keyMap["Pause"]) {
 				Game::Inst()->Pause();
-            } else if (key.c == '.') {
+			} else if (key.c == '.') {
 				Game::Inst()->CreateNPC(Coordinate(100,100), NPC::StringToNPCType("giant"));
 			}
 
-            int addition = 1;
-            if (ShiftPressed()) addition *= 10;
-            if (key.vk == TCODK_UP) {
-                if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
-            } else if (key.vk == TCODK_DOWN) {
-                if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
-            } else if (key.vk == TCODK_LEFT) {
-                if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
-            } else if (key.vk == TCODK_RIGHT) {
-                if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
-            } else if (key.vk == TCODK_KP1) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.x -= Game::Inst()->CharWidth() * addition;
-                mouseInput.cx -= addition;
-                mouseInput.y += Game::Inst()->CharHeight() * addition;
-                mouseInput.cy += addition;
-            } else if (key.vk == TCODK_KP2) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.y += Game::Inst()->CharHeight() * addition;
-                mouseInput.cy += addition;
-            } else if (key.vk == TCODK_KP3) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.x += Game::Inst()->CharWidth() * addition;
-                mouseInput.cx += addition;
-                mouseInput.y += Game::Inst()->CharHeight() * addition;
-                mouseInput.cy += addition;
-            } else if (key.vk == TCODK_KP4) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.x -= Game::Inst()->CharWidth() * addition;
-                mouseInput.cx -= addition;
-            } else if (key.vk == TCODK_KP6) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.x += Game::Inst()->CharWidth() * addition;
-                mouseInput.cx += addition;
-            } else if (key.vk == TCODK_KP7) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.x -= Game::Inst()->CharWidth() * addition;
-                mouseInput.cx -= addition;
-                mouseInput.y -= Game::Inst()->CharHeight() * addition;
-                mouseInput.cy -= addition;
-            } else if (key.vk == TCODK_KP8) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.y -= Game::Inst()->CharHeight() * addition;
-                mouseInput.cy -= addition;
-            } else if (key.vk == TCODK_KP9) {
-                TCODMouse::showCursor(false);
-                drawCursor = true;
-                mouseInput.x += Game::Inst()->CharWidth() * addition;
-                mouseInput.cx += addition;
-                mouseInput.y -= Game::Inst()->CharHeight() * addition;
-                mouseInput.cy -= addition;
-            } else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
-                lbuttonPressed = true;
-            } else if (key.vk == TCODK_PRINTSCREEN) { 
-                Data::SaveScreenshot();
-            }
-        } else {
-            if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
-                inputString += key.c;
-            } else if (key.vk == TCODK_BACKSPACE) {
-                if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
-            }
-        }
-        if (key.vk == TCODK_ESCAPE && menuOpen) {
-            rbuttonPressed = true;
-        }
-    }
+			int addition = 1;
+			if (ShiftPressed()) addition *= 10;
+			if (key.vk == TCODK_UP) {
+				if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
+			} else if (key.vk == TCODK_DOWN) {
+				if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+			} else if (key.vk == TCODK_LEFT) {
+				if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
+			} else if (key.vk == TCODK_RIGHT) {
+				if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+			} else if (key.vk == TCODK_KP1) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.x -= Game::Inst()->CharWidth() * addition;
+				mouseInput.cx -= addition;
+				mouseInput.y += Game::Inst()->CharHeight() * addition;
+				mouseInput.cy += addition;
+			} else if (key.vk == TCODK_KP2) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.y += Game::Inst()->CharHeight() * addition;
+				mouseInput.cy += addition;
+			} else if (key.vk == TCODK_KP3) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.x += Game::Inst()->CharWidth() * addition;
+				mouseInput.cx += addition;
+				mouseInput.y += Game::Inst()->CharHeight() * addition;
+				mouseInput.cy += addition;
+			} else if (key.vk == TCODK_KP4) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.x -= Game::Inst()->CharWidth() * addition;
+				mouseInput.cx -= addition;
+			} else if (key.vk == TCODK_KP6) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.x += Game::Inst()->CharWidth() * addition;
+				mouseInput.cx += addition;
+			} else if (key.vk == TCODK_KP7) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.x -= Game::Inst()->CharWidth() * addition;
+				mouseInput.cx -= addition;
+				mouseInput.y -= Game::Inst()->CharHeight() * addition;
+				mouseInput.cy -= addition;
+			} else if (key.vk == TCODK_KP8) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.y -= Game::Inst()->CharHeight() * addition;
+				mouseInput.cy -= addition;
+			} else if (key.vk == TCODK_KP9) {
+				TCODMouse::showCursor(false);
+				drawCursor = true;
+				mouseInput.x += Game::Inst()->CharWidth() * addition;
+				mouseInput.cx += addition;
+				mouseInput.y -= Game::Inst()->CharHeight() * addition;
+				mouseInput.cy -= addition;
+			} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
+				lbuttonPressed = true;
+			} else if (key.vk == TCODK_PRINTSCREEN) { 
+				Data::SaveScreenshot();
+			}
+		} else {
+			if (key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-' && (signed int)inputString.size() < inputStringLimit) {
+				inputString += key.c;
+			} else if (key.vk == TCODK_BACKSPACE) {
+				if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
+			}
+		}
+		if (key.vk == TCODK_ESCAPE && menuOpen) {
+			rbuttonPressed = true;
+		}
+	}
 
 	if (mouseInput.x < 0) {
 		Game::Inst()->upleft.X(Game::Inst()->upleft.X() + mouseInput.cx);
@@ -285,117 +285,119 @@ void UI::HandleMouse() {
 	}
 
 	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
-    
+
 	if (lbuttonPressed) {
-        if (draggingViewport) {
-            draggingViewport = false;
-        } else {
-            menuResult = NOMENUHIT;
-            if(!draggingPlacement) {
-                menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
-                if (menuResult == NOMENUHIT) {
-                    if (menuOpen) {menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false; }
-                }                    
-            }
-            if (menuResult == NOMENUHIT) {
-                if (menuOpen && _state == UINORMAL) {
-                    CloseMenu();
-                }
-                if (_state == UIPLACEMENT && placeable) {
-                    callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
-                } else if (_state == UIABPLACEMENT && placeable) {
-                    if (a.X() == 0) {
-                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
-                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
-                    }
-                    else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
-                        //Place construction from a->b
-                        if (a.X() > b.X()) {
-                            tmp = a.X();
-                            a.X(b.X());
-                            b.X(tmp);
-                            xswap = true;
-                        }
-                        if (a.Y() > b.Y()) {
-                            tmp = a.Y();
-                            a.Y(b.Y());
-                            b.Y(tmp);
-                            yswap = true;
-                        }
-                        for (int ix = a.X(); ix <= b.X(); ++ix) {
-                            if (!yswap) {
-                                if (placementCallback(Coordinate(ix, a.Y()), _blueprint))
-                                    callback(Coordinate(ix, a.Y()));
-                            } else {
-                                if (placementCallback(Coordinate(ix, b.Y()), _blueprint))
-                                    callback(Coordinate(ix, b.Y()));
-                            }
-                        }
-                        for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-                            if (!xswap) {
-                                if (placementCallback(Coordinate(b.X(), iy), _blueprint))
-                                    callback(Coordinate(b.X(), iy));
-                            } else {
-                                if (placementCallback(Coordinate(a.X(), iy), _blueprint))
-                                    callback(Coordinate(a.X(), iy));
-                            }
-                        }
-                        a.X(0); a.Y(0); b.X(0); b.Y(0);
-                    }
-                } else if (_state == UIRECTPLACEMENT && placeable) {
-                    if (a.X() == 0) {
-                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
-                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
-                    }
-                    else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
-                        //Place construction from a->b
-                        if (a.X() > b.X()) {
-                            tmp = a.X();
-                            a.X(b.X());
-                            b.X(tmp);
-                            xswap = true;
-                        }
-                        if (a.Y() > b.Y()) {
-                            tmp = a.Y();
-                            a.Y(b.Y());
-                            b.Y(tmp);
-                            yswap = true;
-                        }
+		if (draggingViewport) {
+			draggingViewport = false;
+		} else {
+			menuResult = NOMENUHIT;
+			if(!draggingPlacement) {
+				menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
+				if (menuResult == NOMENUHIT) {
+					if (menuOpen) {
+						menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false;
+					}
+				}
+			}
+			if (menuResult == NOMENUHIT) {
+				if (menuOpen && _state == UINORMAL) {
+					CloseMenu();
+				}
+				if (_state == UIPLACEMENT && placeable) {
+					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
+				} else if (_state == UIABPLACEMENT && placeable) {
+					if (a.X() == 0) {
+						a.X(mouseInput.cx + Game::Inst()->upleft.X());
+						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+					}
+					else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
+						//Place construction from a->b
+						if (a.X() > b.X()) {
+							tmp = a.X();
+							a.X(b.X());
+							b.X(tmp);
+							xswap = true;
+						}
+						if (a.Y() > b.Y()) {
+							tmp = a.Y();
+							a.Y(b.Y());
+							b.Y(tmp);
+							yswap = true;
+						}
+						for (int ix = a.X(); ix <= b.X(); ++ix) {
+							if (!yswap) {
+								if (placementCallback(Coordinate(ix, a.Y()), _blueprint))
+									callback(Coordinate(ix, a.Y()));
+							} else {
+								if (placementCallback(Coordinate(ix, b.Y()), _blueprint))
+									callback(Coordinate(ix, b.Y()));
+							}
+						}
+						for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+							if (!xswap) {
+								if (placementCallback(Coordinate(b.X(), iy), _blueprint))
+									callback(Coordinate(b.X(), iy));
+							} else {
+								if (placementCallback(Coordinate(a.X(), iy), _blueprint))
+									callback(Coordinate(a.X(), iy));
+							}
+						}
+						a.X(0); a.Y(0); b.X(0); b.Y(0);
+					}
+				} else if (_state == UIRECTPLACEMENT && placeable) {
+					if (a.X() == 0) {
+						a.X(mouseInput.cx + Game::Inst()->upleft.X());
+						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+					}
+					else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
+						//Place construction from a->b
+						if (a.X() > b.X()) {
+							tmp = a.X();
+							a.X(b.X());
+							b.X(tmp);
+							xswap = true;
+						}
+						if (a.Y() > b.Y()) {
+							tmp = a.Y();
+							a.Y(b.Y());
+							b.Y(tmp);
+							yswap = true;
+						}
 
-                        if (placementCallback(Coordinate(a.X(), a.Y()), _blueprint))
-                            rectCallback(a,b);
+						if (placementCallback(Coordinate(a.X(), a.Y()), _blueprint))
+							rectCallback(a,b);
 
-                        a.X(0); a.Y(0); b.X(0); b.Y(0);
-                    }
-                } else { //Current state is not any kind of placement, so open construction/npc context menu if over one
-                    if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
-                    else sideBar.SetEntity(boost::weak_ptr<Entity>());
-                }
-            }
-        }
-        draggingPlacement = false;
-    } else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
-        menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
-        if (menuResult == NOMENUHIT) {
-            if (menuOpen) {
-                menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
-            }
-            if (menuResult == NOMENUHIT) {
-                if (_state == UIABPLACEMENT && placeable) {
-                    if (a.X() == 0) {
-                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
-                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
-                        draggingPlacement = true;
-                    }
-                } else if (_state == UIRECTPLACEMENT && placeable) {
-                    if (a.X() == 0) {
-                        a.X(mouseInput.cx + Game::Inst()->upleft.X());
-                        a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
-                        draggingPlacement = true;
-                    }
-                }
-            }
-        }
+						a.X(0); a.Y(0); b.X(0); b.Y(0);
+					}
+				} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
+					if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
+					else sideBar.SetEntity(boost::weak_ptr<Entity>());
+				}
+			}
+		}
+		draggingPlacement = false;
+	} else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
+		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
+		if (menuResult == NOMENUHIT) {
+			if (menuOpen) {
+				menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
+			}
+			if (menuResult == NOMENUHIT) {
+				if (_state == UIABPLACEMENT && placeable) {
+					if (a.X() == 0) {
+						a.X(mouseInput.cx + Game::Inst()->upleft.X());
+						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+						draggingPlacement = true;
+					}
+				} else if (_state == UIRECTPLACEMENT && placeable) {
+					if (a.X() == 0) {
+						a.X(mouseInput.cx + Game::Inst()->upleft.X());
+						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+						draggingPlacement = true;
+					}
+				}
+			}
+		}
 	}
 
 	if (rbuttonPressed) {
@@ -409,13 +411,13 @@ void UI::HandleMouse() {
 			a.Y(0); 
 			if (currentMenu) currentMenu->Close();
 		}
-        currentMenu = 0;
-        if(!underCursor.empty()) {
-            if ((*underCursor.begin()).lock()) currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
-        }
-        if(!currentMenu) {
-            currentMenu = Menu::MainMenu();
-        }
+		currentMenu = 0;
+		if(!underCursor.empty()) {
+			if ((*underCursor.begin()).lock()) currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
+		}
+		if(!currentMenu) {
+			currentMenu = Menu::MainMenu();
+		}
 		if (menuOpen) currentMenu->Open();
 		menuHistory.clear();
 	}
@@ -442,7 +444,7 @@ void UI::HandleMouse() {
 	lbuttonPressed = false;
 	mbuttonPressed = false;
 	rbuttonPressed = false;
-    oldMouseInput = mouseInput;
+	oldMouseInput = mouseInput;
 }
 void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	int tmp;
@@ -808,5 +810,4 @@ void UI::LoadKeys(std::string filename) {
 	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
 
 	parser.run(filename.c_str(), &keyMap);
-	
 }

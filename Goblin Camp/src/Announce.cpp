@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 AnnounceMessage::AnnounceMessage(std::string nmsg, TCODColor col, Coordinate pos) :
-msg(nmsg),
+	msg(nmsg),
 	counter(1),
 	color(col),
 	target(pos) {}
@@ -40,8 +40,8 @@ Announce* Announce::Inst() {
 	return instance;
 }
 
-Announce::Announce() : 
-timer(0),
+Announce::Announce() :
+	timer(0),
 	length(0),
 	height(0)
 {}

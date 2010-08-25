@@ -27,7 +27,9 @@
 
 class YesNoDialog {
 public:
-    static void ShowYesNoDialog(std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction,
-                            std::string leftButton = "Yes", std::string rightButton = "No");
+	static void ShowYesNoDialog(
+		std::string text, boost::function<void()> leftAction, boost::function<void()> rightAction,
+		std::string leftButton = "Yes", std::string rightButton = "No"
+	);
 };
 
