@@ -41,9 +41,25 @@ project goblin-camp
     : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
 
+withPython = ;
+
+if --with-python in [ modules.peek : ARGV ] {
+    ECHO ** Building with Python support ;
+    
+    import python ;
+    
+    if ! [ python.configured ] {
+        ECHO ** Using default Python configuration ;
+        using python ;
+    }
+    
+    withPython = yes ;
+}
+
 import gc-version ;
 modules.poke gc-version : GC_TEMPLATES : $(GC_TEMPLATES) ;
 modules.poke gc-version : GC_VERSION   : $(GC_VERSION) ;
+modules.poke gc-version : GC_PYTHON    : $(withPython:E=no) ;
 
 import gc-sln ;
 modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
@@ -87,6 +103,7 @@ binaries-dist-dir   = . ;
 data-dist-dir       = . ;
 additional-dist-dir = . ;
 additional-files    = ;
+additional-reqs     = ;
 
 # Generated files
 win32-ver-sources += $(GC_TEMPLATES)/_version.rc_in ;
@@ -97,8 +114,18 @@ explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
 explicit-alias linux-deps ;
 explicit-alias osx-deps : : : : <framework>CoreFoundation ;
 
+# Python dependencies
+python-deps = ;
+boost-libs  = ;
+
+if $(withPython) {
+    boost-libs      += python ;
+    additional-reqs += <define>GC_PYTHON ;
+    python-deps      = /python//python.lib ;
+}
+
 # Boost dependencies
-boost-libs = serialization thread system filesystem ;
+boost-libs += serialization thread system filesystem ;
 
 boost-deps = ;
 for local name in $(boost-libs) {
@@ -107,7 +134,7 @@ for local name in $(boost-libs) {
 
 # All common dependencies
 explicit-alias common-deps
-    : $(boost-deps) /libtcod//libtcod
+    : $(python-deps) $(boost-deps) /libtcod//libtcod
 ;
 
 if [ os.name ] = NT {
@@ -145,7 +172,12 @@ if [ os.name ] = NT {
 }
 
 # Platform-specific and common dependencies combined
-explicit-alias gc-deps : platform-deps common-deps ;
+explicit-alias gc-deps
+    : platform-deps common-deps
+    :
+    :
+    : $(additional-reqs)
+;
 
 ##
 # Define targets
