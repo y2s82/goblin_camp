@@ -33,11 +33,47 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
+#include "UI/ConstructionDialog.hpp"
 #include "UI/Tooltip.hpp"
 
-static TCOD_key_t NO_KEY = {
-    TCODK_NONE, 0, false, false, false, false, false, false
+#pragma mark Keyboard command config parsing
+
+class KeyMap : public ITCODParserListener {
+public:
+	std::map<std::string, char> keyMap;
+	
+	char operator[](std::string s) {
+		return keyMap[s];
+	}
+	
+	KeyMap(): keyMap(std::map<std::string, char>()) {}
+	
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		return true;
+	}
+	
+	bool parserFlag(TCODParser *parser,const char *name) {
+		return true;
+	}
+	
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+		keyMap[name] = value.c;
+		return true;
+	}
+	
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		return true;
+	}
+	
+	void error(const char *msg) {
+		Logger::Inst()->output<<"KeyConfigListener: "<<msg<<"\n";
+		Game::Inst()->Exit();
+	}
 };
+
+KeyMap keyMap = KeyMap();
+
+#pragma mark UI
 
 UI* UI::instance = 0;
 
@@ -84,33 +120,35 @@ void UI::HandleKeyboard() {
     key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
     if (!currentMenu || currentMenu->Update(-1, -1, false, key) != KEYRESPOND) {
         if (!textMode) {
-            if (key.c == 'q') Game::Exit();
-            else if (key.c == 'b') {
+            if (key.c == keyMap["Exit"]) Game::Exit();
+            else if (key.c == keyMap["Basics"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::BasicsMenu());
-            } else if (key.c == 'w') {
+            } else if (key.c == keyMap["Workshops"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::WorkshopsMenu());
-            } else if (key.c == 'o') {
+            } else if (key.c == keyMap["Orders"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::OrdersMenu());
-            } else if (key.c == 's') {
+            } else if (key.c == keyMap["StockManager"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(StockManagerDialog::StocksDialog());
-            } else if (key.c == 'f') {
+            } else if (key.c == keyMap["Furniture"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(Menu::FurnitureMenu());
-            } else if (key.c == 'm') {
+            } else if (key.c == keyMap["Squads"]) {
                 menuX = mouseInput.cx;
                 menuY = mouseInput.cy;
                 ChangeMenu(SquadsDialog::SquadDialog());
-            } else if (key.c == 'h') {
+            } else if (key.c == keyMap["Help"]) {
                 keyHelpTextColor = 255;
+            } else if (key.c == keyMap["Pause"]) {
+				Game::Inst()->Pause();
             } else if (key.c == '.') {
 				Game::Inst()->CreateNPC(Coordinate(100,100), NPC::StringToNPCType("giant"));
 			}
@@ -175,7 +213,6 @@ void UI::HandleKeyboard() {
                 mouseInput.cy -= addition;
             } else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
                 lbuttonPressed = true;
-            } else if (key.vk == TCODK_SPACE) { Game::Inst()->Pause();
             } else if (key.vk == TCODK_PRINTSCREEN) { 
                 Data::SaveScreenshot();
             }
@@ -374,7 +411,7 @@ void UI::HandleMouse() {
 		}
         currentMenu = 0;
         if(!underCursor.empty()) {
-            currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
+            if ((*underCursor.begin()).lock()) currentMenu = (*underCursor.begin()).lock()->GetContextMenu();
         }
         if(!currentMenu) {
             currentMenu = Menu::MainMenu();
@@ -427,7 +464,9 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	if (_state == UINORMAL && currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) == NOMENUHIT 
 		&& sideBar.Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT && !underCursor.empty() && underCursor.begin()->lock()) {
 		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-			ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+			if (ucit->lock()) {
+				ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+			}
 		}
 	}
 	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
@@ -752,169 +791,22 @@ void UI::CloseMenu() {
 
 void UI::SetCursor(int value) { cursorChar = value; }
 
-SideBar::SideBar() :
-width(19),
-	height(30),
-	topY(0),
-	npc(false),
-	construction(false)
-{}
-
-MenuResult SideBar::Update(int x, int y, bool clicked) {
-	if (entity.lock() && x > Game::Inst()->ScreenWidth() - width) {
-		if (construction) {
-			if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(STOCKPILE)) {
-				int i = y - (topY + 15);			
-				if (i >= 0 && i < (signed int)Item::Categories.size()) {
-                    if (clicked) {
-                        boost::static_pointer_cast<Stockpile>(entity.lock())->SwitchAllowed(i, UI::Inst()->ShiftPressed());
-                    }
-					return MENUHIT;
-				}
-			} else if (boost::static_pointer_cast<Construction>(entity.lock())->HasTag(FARMPLOT)) {
-				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(entity.lock()));
-				int i = y - (topY + 15);
-				if (clicked && i >= 0) {
-					for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin();
-						seedi != fp->AllowedSeeds()->end(); ++seedi) {
-							if (i-- == 0) {
-								fp->AllowSeed(seedi->first, !fp->SeedAllowed(seedi->first));
-								break;
-							}
-					}
-				}
-				return MENUHIT;
-			}
-		}
-		if (y > topY && y < topY+height) return MENUHIT;
-	}
-	return NOMENUHIT;
-}
-
-void SideBar::Draw(TCODConsole* console) {
-	if (entity.lock()) {
-		int edgeX = console->getWidth();
-		topY = std::max(0,(console->getHeight() - height) / 2);
-		TCODConsole minimap(11,11);
-
-		if (npc) {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(entity.lock()));
-			console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Effects");
-			int y = 0;
-			for (std::list<StatusEffect>::iterator effectI = npc->StatusEffects()->begin(); effectI != npc->StatusEffects()->end(); ++effectI) {
-				console->setForegroundColor(effectI->color);
-				console->print(edgeX - width + 2, topY+15+y, "%c%s", effectI->graphic, effectI->name.c_str());
-				if (++y > 10) break;
-			}
-			console->setForegroundColor(TCODColor::white);
-			if (npc->MemberOf().lock()) { //Member of a squad
-				console->print(edgeX-width+1, topY+26, "S: %s", npc->MemberOf().lock()->Name().c_str());
-			}
-			if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
-				console->print(edgeX-width+1, topY+27, "W: %s", weapon->Name().c_str());
-			}
-			if (boost::shared_ptr<Item> armor = npc->Wearing().lock()) {
-				console->print(edgeX-width+1, topY+28, "A: %s", armor->Name().c_str());
-			}
-		} else if (construction) {
-			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
-			if (construct->HasTag(WORKSHOP)) {
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 12, false, TCOD_BKGND_DEFAULT, "Production");
-				for (int jobi = 0; jobi < std::min(10, (signed int)construct->JobList()->size()); ++jobi) {
-					console->setForegroundColor(jobi == 0 ? TCODColor::white : TCODColor::grey);
-					console->print(edgeX - width + 2, topY+15+jobi, Item::ItemTypeToString(construct->JobList(jobi)).c_str());
-				}		
-			} else if (construct->HasTag(STOCKPILE)) {
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 36, false, TCOD_BKGND_DEFAULT, "Categories");
-				boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(construct));
-				for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-					console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-					if (!Item::Categories[i].parent) {
-						console->print(edgeX-(width-2),topY+15+i, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-6).c_str());
-					} else {
-						if (i+1 < Item::Categories.size() && Item::Categories[i+1].parent == Item::Categories[i].parent) {
-							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
-						} else {
-							console->print(edgeX-(width-2),topY+15+i, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-7).c_str());
-						}
-					}
-				}
-				console->setForegroundColor(TCODColor::white);
-			} else if (construct->HasTag(FARMPLOT)) {
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-
-				console->printFrame(edgeX-(width-1), topY+14, width-2, 10, false, TCOD_BKGND_DEFAULT, "Seeds");
-				boost::shared_ptr<FarmPlot> fp(boost::static_pointer_cast<FarmPlot>(construct));
-				int i = 0;
-				for (std::map<ItemType, bool>::iterator seedi = fp->AllowedSeeds()->begin(); 
-					seedi != fp->AllowedSeeds()->end(); ++seedi) {
-						console->setForegroundColor(seedi->second ? TCODColor::green : TCODColor::red);
-						console->print(edgeX-(width-2),topY+15+i, "%c %s", seedi->second ? 225 : 224, Item::Presets[seedi->first].name.substr(0,width-6).c_str());
-					++i;
-				}
-				console->setForegroundColor(TCODColor::white);
-			} else { 
-				console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-			}
-		} else {
-			console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
-		}
-
-		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
-		console->setForegroundColor(TCODColor::white);
-		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
-		minimap.flush();
-		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
-	}
-	console->setForegroundColor(TCODColor::white);
-}
-
-void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
-	if(entity.lock()) {
-		int edgeX = console->getWidth();
-		int minimapX = edgeX - (width-4);
-		int minimapY = topY + 2;
-		if (x >= minimapX && x < minimapX + 11 &&
-			y >= minimapY && y < minimapY + 11) {
-			int actualX = (entity.lock()->Position()-5).X() + x - minimapX;
-			int actualY = (entity.lock()->Position()-5).Y() + y - minimapY;
-			std::list<boost::weak_ptr<Entity> > minimapUnderCursor = std::list<boost::weak_ptr<Entity> >();
-			UI::Inst()->HandleUnderCursor(Coordinate(actualX, actualY), &minimapUnderCursor);
-			if (!minimapUnderCursor.empty() && minimapUnderCursor.begin()->lock()) {
-				for (std::list<boost::weak_ptr<Entity> >::iterator ucit = minimapUnderCursor.begin(); ucit != minimapUnderCursor.end(); ++ucit) {
-					ucit->lock()->GetTooltip(actualX, actualY, tooltip);
-				}
-			}
-		}
-	}
-}
-
-void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
-	entity = ent;
-	npc = construction = false;
-	height = 15;
-	if (boost::dynamic_pointer_cast<NPC>(entity.lock())) {
-		height = 30;
-		npc = true;
-	} else if (boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
-		height = 30;
-		construction = true;
-	} else if (boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
-		height = 51;
-		construction = true;
-	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
-		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
-		if (construct->HasTag(WORKSHOP)) {
-			height = 30;
-		}
-		construction = true;
-	}
-}
-
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
 TCOD_key_t UI::getKey() { return key; }
+
+void UI::LoadKeys(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct* keysTypeStruct = parser.newStructure("keys");
+	keysTypeStruct->addProperty("Exit", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Basics", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Workshops", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Orders", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Furniture", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("StockManager", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Squads", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
+
+	parser.run(filename.c_str(), &keyMap);
+	
+}

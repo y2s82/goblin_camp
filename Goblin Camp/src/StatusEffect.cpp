@@ -113,6 +113,15 @@ type(typeval),
 		statChanges[DODGE] = 0.75;
 		resistanceChanges[POISON_RES] = 0.75;
 		break;
+
+	case RAGE:
+		name = "Enraged";
+		graphic = '!';
+		color = TCODColor::red;
+		cooldown = UPDATES_PER_SECOND * 7;
+		statChanges[STRENGTH] = 2;
+		statChanges[DODGE] = 0.5;
+		break;
 	}
 	cooldownDefault = cooldown;
 }

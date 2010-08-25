@@ -258,6 +258,12 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 	}
 }
 
+void Stockpile::SetAllAllowed(bool nallowed) {
+	for(unsigned int i = 0; i < Item::Categories.size(); i++) {
+		allowed[i] = nallowed;
+	}
+}
+
 void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
 	std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
 	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
@@ -279,13 +285,16 @@ struct AmountCompare {
 };
 
 void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
-	if(!containers[Coordinate(x, y)]->empty()) {
-		boost::weak_ptr<Item> item = containers[Coordinate(x, y)]->GetFirstItem();
-		if(item.lock()) {
-			item.lock()->GetTooltip(x, y, tooltip);
+	if (containers.find(Coordinate(x,y)) != containers.end()) {
+		if(!containers[Coordinate(x, y)]->empty()) {
+			boost::weak_ptr<Item> item = containers[Coordinate(x, y)]->GetFirstItem();
+			if(item.lock()) {
+				item.lock()->GetTooltip(x, y, tooltip);
+			}
 		}
 	}
-	tooltip->AddEntry(TooltipEntry("Stockpile", TCODColor::white));
+
+	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
 	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
 	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
 		if(Item::Categories[it->first].parent == 0 && it->second > 0) {

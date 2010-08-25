@@ -67,8 +67,8 @@ public:
 	std::string Name();
 	void Name(std::string);
 	virtual void CancelJob(int=0);
-	void SetFaction(int);
-	int GetFaction() const;
+	virtual void SetFaction(int);
+	virtual int GetFaction() const;
     
     virtual Panel* GetContextMenu() {return 0;}
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
@@ -76,7 +76,8 @@ public:
 	int GetVelocity();
 	virtual void SetVelocity(int);
 	Coordinate GetVelocityTarget();
+	int GetHeight();
 	void SetVelocityTarget(Coordinate);
-	void CalculateFlightPath(Coordinate, int speed);
+	void CalculateFlightPath(Coordinate, int speed, int initialHeight=0);
 };
 

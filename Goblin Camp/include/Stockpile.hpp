@@ -46,7 +46,7 @@ protected:
 	std::map<Coordinate, bool> reserved;
 	std::map<Coordinate, boost::shared_ptr<Container> > containers;
 public:
-	~Stockpile();
+	virtual ~Stockpile();
 	int Build();
 	virtual void Draw(Coordinate, TCODConsole*);
 	boost::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0, int value=0);
@@ -61,6 +61,7 @@ public:
 	void ReserveSpot(Coordinate, bool);
 	boost::weak_ptr<Container> Storage(Coordinate);
 	void SwitchAllowed(ItemCategory, bool childrenAlso = false);
+	void SetAllAllowed(bool);
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 	void ItemAdded(boost::weak_ptr<Item>);
 	void ItemRemoved(boost::weak_ptr<Item>);

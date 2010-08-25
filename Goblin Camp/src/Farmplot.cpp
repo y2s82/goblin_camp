@@ -137,5 +137,17 @@ int FarmPlot::Use() {
 }
 
 std::map<ItemType, bool>* FarmPlot::AllowedSeeds() { return &allowedSeeds; }
+
 void FarmPlot::AllowSeed(ItemType type, bool value) { allowedSeeds[type] = value; }
+
+void FarmPlot::SwitchAllowed(int index) {
+	std::map<ItemType, bool>::iterator it = allowedSeeds.begin();
+	for(int i = 0; i < index && it != allowedSeeds.end(); i++) {
+		it++;
+	}
+	if(it != allowedSeeds.end()) {
+		allowedSeeds[it->first] = !allowedSeeds[it->first];
+	}
+}
+
 bool FarmPlot::SeedAllowed(ItemType type) { return allowedSeeds[type]; }

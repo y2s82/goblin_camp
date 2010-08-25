@@ -5,12 +5,15 @@ npc_type "orc" {
 	needsSleep
 	generateName
 	name="orc"
-	speed=17
 	color="0,0,255"
 	graphic='o'
-	health=200
 	AI="PlayerNPC"
-	dodge=5
+	stats {
+		speed=17
+		health=200
+		dodge=5
+		size=10
+	}
 	resistances {
 		physical=10
 		magic=5
@@ -29,12 +32,15 @@ npc_type "goblin" {
 	needsSleep
 	generateName
 	name="goblin"
-	speed=18
 	color="128,128,128"
 	graphic='g'
-	health=50
 	AI="PlayerNPC"
-	dodge=15
+	stats {
+		dodge=15
+		health=50
+		speed=18
+		size=5
+	}
 	resistances {
 		physical=5
 		poison=10
@@ -49,12 +55,16 @@ npc_type "goblin" {
 npc_type "giant snail" {
 	name="Giant Snail"
 	tags=["localWildlife"]
-	speed=4
 	color="219,199,109"
 	graphic='b'
-	health=50
 	AI="PeacefulAnimal"
-	dodge=1
+	stats {
+		speed=4
+		health=50
+		dodge=1
+		strength=5
+		size=10
+	}		
 	resistances {
 		physical=25
 	}
@@ -70,12 +80,15 @@ npc_type "starving wolf" {
 	name="Starving Wolf"
 	plural="Starving Wolves"
 	tags = ["attacksRandomly"]
-	speed=24
 	color="219,219,219"
 	graphic='d'
-	health=150
 	AI="HungryAnimal"
-	dodge=10
+	stats {
+		speed=24
+		health=150
+		dodge=10
+		size=7
+	}
 	resistances {
 		physical=5
 		cold=15
@@ -93,12 +106,15 @@ npc_type "starving wolf" {
 npc_type "rabid albino rat" {
 	name="Rabid Albino Rat"
 	tags = ["attacksRandomly"]
-	speed=17
 	color="255,255,255"
 	graphic='r'
-	health=25
 	AI="HungryAnimal"
-	dodge=20
+	stats {
+		speed=17
+		health=25
+		dodge=20
+		size=3
+	}
 	resistances {
 		physical=3
 	}
@@ -113,12 +129,15 @@ npc_type "rabid albino rat" {
 npc_type "snake" {
 	name="Snake"
 	tags=["localWildlife", "angers"]
-	speed=10
 	color="0,0,250"
 	graphic='S'
-	health=25
 	AI="PeacefulAnimal"
-	dodge=7
+	stats {
+		speed=10
+		health=25
+		dodge=7
+		size=3
+	}
 	resistances {
 		physical=7
 		poison=90
@@ -133,12 +152,16 @@ npc_type "snake" {
 
 npc_type "soldier ant" {
 	name="Soldier Ant"
-	speed=18
 	color="0,0,255"
 	graphic='a'
-	health=45
 	AI="HostileAnimal"
-	dodge=5
+	stats {
+		speed=18
+		health=45
+		dodge=5
+		size=5
+		strength=15
+	}
 	resistances {
 		physical=10
 	}
@@ -154,12 +177,15 @@ npc_type "soldier ant" {
 npc_type "killer bee" {
 	name="Killer Bee"
 	tags=["attacksRandomly", "flying"]
-	speed=15
 	color="255,255,0"
 	graphic='a'
-	health=10
 	AI="HostileAnimal"
-	dodge=20
+	stats {
+		speed=15
+		health=10
+		dodge=20
+		size=2
+	}
 	resistances {
 		physical=1
 	}
@@ -176,12 +202,15 @@ npc_type "harpy" {
 	name="Harpy"
 	plural="Harpies"
 	tags=["attacksRandomly", "flying"]
-	speed=12
 	color="128,128,0"
 	graphic='B'
-	health=150
 	AI="HostileAnimal"
-	dodge=3
+	stats {
+		speed=12
+		health=150
+		dodge=3
+		size=8
+	}
 	resistances {
 		physical=5
 	}
@@ -198,12 +227,15 @@ npc_type "harpy" {
 npc_type "kobold" { 
 	name="Kobold"
 	tags=["attacksRandomly"]
-	speed=15
 	color="128,128,0"
 	graphic='k'
-	health=40
 	AI="HostileAnimal"
-	dodge=10
+	stats {
+		speed=15
+		health=40
+		dodge=10
+		size=5
+	}
 	resistances {
 		physical=3
 	}
@@ -218,12 +250,15 @@ npc_type "kobold" {
 npc_type "ogre" {
 	name="Ogre"
 	tags=["attacksRandomly", "hasHands"]
-	speed=12
 	color="192,192,192"
 	graphic='O'
-	health=425
 	AI="HostileAnimal"
-	dodge=3
+	stats {
+		speed=12
+		health=425
+		dodge=3
+		size=20
+	}
 	resistances {
 		physical=12
 	}
@@ -239,12 +274,15 @@ npc_type "ogre" {
 npc_type "troll" { 
 	name="Troll"
 	tags=["attacksRandomly", "hasHands"]
-	speed=15
 	color="128,128,128"
 	graphic='T'
-	health=350
 	AI="HostileAnimal"
-	dodge=5
+	stats {
+		speed=15
+		health=350
+		dodge=5
+		size=15
+	}
 	resistances {
 		physical=15
 	}
@@ -268,12 +306,16 @@ npc_type "troll" {
 npc_type "skeleton" { 
 	name="Skeleton"
 	tags=["attacksRandomly", "hasHands"]
-	speed=5
 	color="250,250,250"
 	graphic='Z'
-	health=20
 	AI="HostileAnimal"
-	dodge=0
+	stats {
+		health=20
+		speed=5
+		dodge=0
+		size=7
+		strength=10
+	}
 	resistances {
 		physical=15
 	}
@@ -289,12 +331,15 @@ npc_type "bandersnatch" {
 	name="Bandersnatch"
 	plural="Bandersnatches"
 	tags=["attacksRandomly"]
-	speed=25
 	color="15,15,150"
 	graphic='t'
-	health=50
 	AI="HungryAnimal"
-	dodge=15
+	stats {
+		speed=25
+		health=50
+		dodge=15
+		size=5
+	}
 	resistances {
 		physical=5
 	}
@@ -309,12 +354,15 @@ npc_type "jabberwock" {
 	name="Jabberwock"
 	plural="Jabberwocky"
 	tags=["attacksRandomly"]
-	speed=12
 	color="255,0,0"
 	graphic='J'
-	health=375
 	AI="HungryAnimal"
-	dodge=5
+	stats {
+		speed=12
+		health=375
+		dodge=5
+		size=15
+	}
 	resistances {
 		physical=10
 		poison=50
@@ -336,12 +384,16 @@ npc_type "jabberwock" {
 npc_type "minotaur" { 
 	name="Minotaur"
 	tags=["attacksRandomly", "hasHands"]
-	speed=20
 	color="128,128,0"
 	graphic='H'
-	health=350
 	AI="HungryAnimal"
-	dodge=3
+	stats {
+		speed=20
+		health=350
+		dodge=3
+		size=13
+		strength=17
+	}
 	resistances {
 		physical=10
 	}
@@ -373,12 +425,15 @@ npc_type "cyclops" {
 	name="Cyclops"
 	plural="Cyclopses"
 	tags=["attacksRandomly", "hasHands"]
-	speed=15
 	color="230,0,0"
 	graphic='H'
-	health=780
 	AI="HostileAnimal"
-	dodge=0
+	stats {
+		speed=15
+		health=780
+		dodge=0
+		size=40
+	}
 	resistances {
 		physical=15
 	}
@@ -393,12 +448,15 @@ npc_type "cyclops" {
 npc_type "giant" { 
 	name="Giant"
 	tags=["attacksRandomly", "hasHands"]
-	speed=15
 	color="0,128,128"
 	graphic='H'
-	health=700
 	AI="HostileAnimal"
-	dodge=3
+	stats {
+		speed=15
+		health=700
+		dodge=3
+		size=35
+	}
 	resistances {
 		physical=10
 	}
@@ -418,12 +476,15 @@ npc_type "giant" {
 npc_type "griffon" { 
 	name="Griffon"
 	tags=["attacksRandomly", "flying"]
-	speed=20
 	color="240,240,240"
 	graphic='B'
-	health=175
 	AI="HostileAnimal"
-	dodge=10
+	stats {
+		speed=20
+		health=175
+		dodge=10
+		size=15
+	}
 	resistances {
 		physical=12
 	}
@@ -438,12 +499,15 @@ npc_type "griffon" {
 npc_type "unicorn" { 
 	name="Unicorn"
 	tags=["localWildlife", "angers"]
-	speed=25
 	color="250,250,250"
 	graphic='u'
-	health=200
 	AI="PeacefulAnimal"
-	dodge=5
+	stats {
+		speed=25
+		health=200
+		dodge=5
+	    size=14
+	}
 	resistances {
 		physical=5
 		magic=75
@@ -466,12 +530,15 @@ npc_type "unicorn" {
 npc_type "will o wisp" { 
 	name="Will o' the wisp"
 	tags=["localWildlife", "flying"]
-	speed=10
 	color="255,255,90"
 	graphic='*'
-	health=5
 	AI="PeacefulAnimal"
-	dodge=0
+	stats {
+		speed=10
+		health=5
+		dodge=0
+		size=1
+	}
 	resistances {
 		physical=30
 		magic=30
@@ -487,12 +554,15 @@ npc_type "will o wisp" {
 npc_type "raw golem" {
 	name="Raw golem"
 	tags=["claypit", "hasHands"]
-	speed=10
 	color="220,80,70"
 	graphic='G'
-	health=600
 	AI="HostileAnimal"
-	dodge=3
+	stats {
+		speed=10
+		health=600
+		dodge=3
+		size=20
+	}
 	resistances {
 		physical=15
 		poison=100
@@ -510,12 +580,15 @@ npc_type "raw golem" {
 npc_type "fired golem" {
 	name="Fired golem"
 	tags=["attacksRandomly", "hasHands"]
-	speed=6
 	color="120,22,11"
 	graphic='G'
-	health=900
 	AI="HostileAnimal"
-	dodge=1
+	stats {
+		speed=6
+		health=900
+		dodge=1
+		size=20
+	}
 	resistances {
 		physical=25
 		poison=100

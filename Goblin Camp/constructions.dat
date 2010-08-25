@@ -63,6 +63,7 @@ construction_type "Kitchen" {
 }
 
 construction_type "Bone Carver" {
+	category="Workshops"
 	graphicLength=4
 	graphic=[  9, 179,179,  9, 
 			  19, 179,179, 19,
@@ -75,6 +76,7 @@ construction_type "Bone Carver" {
 }
 
 construction_type "Butcher" {
+	category="Workshops"
 	graphicLength=4
 	graphic=[ 37,179,179, 37, 
 			  19,179,179, 19,

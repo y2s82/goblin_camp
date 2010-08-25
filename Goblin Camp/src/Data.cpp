@@ -34,6 +34,7 @@ namespace fs = boost::filesystem;
 #include "NatureObject.hpp"
 #include "NPC.hpp"
 #include "Construction.hpp"
+#include "UI.hpp"
 #include "UI/YesNoDialog.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
@@ -44,7 +45,7 @@ namespace {
 	namespace globals {
 		fs::path personalDir, exec, execDir, dataDir;
 		fs::path savesDir, screensDir, modsDir;
-		fs::path config, font;
+		fs::path config, defaultKeys, keys, font;
 	}
 	
 	// Finds path to 'personal dir' and subdirs.
@@ -57,6 +58,7 @@ namespace {
 		globals::savesDir    = globals::personalDir / "saves";
 		globals::screensDir  = globals::personalDir / "screenshots";
 		globals::config      = globals::personalDir / "config.ini";
+		globals::keys        = globals::personalDir / "keys.ini";
 		globals::font        = globals::personalDir / "terminal.png";
 		globals::modsDir     = globals::personalDir / "mods";
 	}
@@ -64,6 +66,10 @@ namespace {
 	// Finds 'executable', 'bin-dir' and 'global data'.
 	inline void FindExecutableDirectory() {
 		_ImplFindExecutableDirectory(globals::exec, globals::execDir, globals::dataDir);
+		globals::defaultKeys = globals::dataDir / "keys.ini";
+		if(!fs::exists(globals::defaultKeys)) {
+			globals::defaultKeys = globals::execDir / "keys.ini";
+		}
 	}
 	
 	void _LoadNames(std::string fn) {
@@ -156,6 +162,7 @@ namespace Data {
 			"[Data] --------\n" <<
 			"[Data] Executable: " << globals::exec << "\n" <<
 			"[Data] Config: " << globals::config << "\n" <<
+			"[Data] Keys: " << globals::keys << "\n" <<
 			"[Data] Font: " << globals::font << "\n"
 		;
 		
@@ -208,6 +215,28 @@ namespace Data {
 			}
 		}
 		
+		// now check whether user has keys.ini
+		//   if not, copy the default one (data-dir/keys.ini)
+		if (!fs::exists(globals::keys)) {
+			Logger::Inst()->output << "[Data] User's keys.ini does not exist.\n";
+			
+			if (fs::exists(globals::defaultKeys)) {
+				Logger::Inst()->output << "[Data] Copying default keys.ini to user directory.\n";
+				
+				try {
+					fs::copy_file(globals::defaultKeys, globals::keys);
+				} catch (const fs::filesystem_error& e) {
+					Logger::Inst()->output << "[Data] filesystem_error while copying keys: " << e.what() << "\n";
+					Logger::Inst()->output.flush();
+					exit(2);
+				}
+			} else {
+				Logger::Inst()->output << "[Data] No keys.ini found in user's directory or in defaults.\n";
+				Logger::Inst()->output.flush();
+				exit(3);
+			}
+		}
+		
 		// check whether custom font exists
 		// if not, copy default one
 		if (!fs::exists(globals::font)) {
@@ -229,6 +258,8 @@ namespace Data {
 		
 		Logger::Inst()->output << "[Data] Loading config.ini.\n";
 		Game::Inst()->LoadConfig(globals::config.string());
+		UI::LoadKeys(globals::defaultKeys.string());
+		UI::LoadKeys(globals::keys.string());
 		
 		Logger::Inst()->output << "[Data] Loading terminal.png.\n";
 		TCODConsole::setCustomFont(globals::font.string().c_str());

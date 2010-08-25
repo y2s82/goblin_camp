@@ -59,10 +59,6 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.5f);
 	}
 
-	if (faction == 0) { //Player owned
-		StockManager::Inst()->UpdateQuantity(type, 1);
-	}
-
 	attack = Item::Presets[type].attack;
 
 	for (int i = 0; i < RES_COUNT; ++i) {
@@ -469,6 +465,7 @@ void Item::UpdateVelocity() {
 							npc->Damage(&attack);
 
 							SetVelocity(0);
+							Position(flightPath.back().coord);
 							flightPath.clear();
 							return;
 						}

@@ -40,6 +40,7 @@ public:
 	virtual void Draw(Coordinate, TCODConsole*);
 	virtual int Use();
 	void AllowSeed(ItemType, bool);
+	void SwitchAllowed(int);
 	bool SeedAllowed(ItemType);
 	std::map<ItemType, bool>* AllowedSeeds();
 };
