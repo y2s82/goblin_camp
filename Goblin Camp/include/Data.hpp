@@ -63,5 +63,5 @@ namespace Data {
 	// Saves screenshot. Handles autonumbering.
 	void SaveScreenshot();
 	// Saves config.
-	void SaveConfig(unsigned int, unsigned int, const std::string&);
+	void SaveConfig(unsigned int, unsigned int, const std::string&, bool);
 }
