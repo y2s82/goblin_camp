@@ -340,7 +340,7 @@ class ConstructionListener : public ITCODParserListener {
 			if (Construction::Presets.back().graphic.size() == 0) //In case graphicLength hasn't been parsed yet
 				Construction::Presets.back().graphic.push_back(1);
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().graphic.push_back((int)TCOD_list_get(value.list,i));
+				Construction::Presets.back().graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
 		} else if (boost::iequals(name, "category")) {
 			Construction::Presets.back().category = value.s;
