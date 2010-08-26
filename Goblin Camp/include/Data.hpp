@@ -62,4 +62,6 @@ namespace Data {
 	void SaveGame(const std::string&);
 	// Saves screenshot. Handles autonumbering.
 	void SaveScreenshot();
+	// Saves config.
+	void SaveConfig(unsigned int, unsigned int, const std::string&);
 }

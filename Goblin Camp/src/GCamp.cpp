@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/lexical_cast.hpp>
 #include <cstdlib>
 #include <cmath>
 
@@ -131,7 +132,7 @@ int MainMenu() {
 		{"Continue", 0,   false, true,  MainLoop},
 		{"Load",     0,   false, false, LoadMenu},
 		{"Save",     0,   false, true,  SaveMenu},
-		{"Settings", 0,   false, false, NULL},
+		{"Settings", 0,   false, false, SettingsMenu},
 		{"Mods",     0,   false, false, NULL},
 		{"Exit",     'q', true,  false, NULL}
 	};
@@ -330,4 +331,143 @@ void SaveMenu() {
 
 	}
 	return;
+}
+
+// XXX: No, really.
+struct SettingRenderer {
+	const char *label;
+	TCOD_renderer_t renderer;
+};
+
+struct SettingField {
+	const char  *label;
+	std::string *value;
+};
+
+void SettingsMenu() {
+	std::string width  = boost::lexical_cast<std::string>(Game::Inst()->resolutionWidth);
+	std::string height = boost::lexical_cast<std::string>(Game::Inst()->resolutionHeight);
+	TCOD_renderer_t renderer = Game::Inst()->renderer;
+	
+	TCODConsole::root->setAlignment(TCOD_LEFT);
+	
+	const int w = 40;
+	const int h = 14;
+	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
+	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
+	
+	SettingRenderer renderers[] = {
+		{ "GLSL",   TCOD_RENDERER_GLSL   },
+		{ "OpenGL", TCOD_RENDERER_OPENGL },
+		{ "SDL",    TCOD_RENDERER_SDL    }
+	};
+	
+	SettingField fields[] = {
+		{ "Resolution (width)",  &width  },
+		{ "Resolution (height)", &height },
+	};
+	
+	SettingField *focus = &fields[0];
+	const unsigned int rendererCount = sizeof(renderers) / sizeof(SettingRenderer);
+	const unsigned int fieldCount    = sizeof(fields) / sizeof(SettingField);
+	
+	TCOD_mouse_t mouse;
+	TCOD_key_t   key;
+	bool         clicked;
+	
+	while (true) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		if (key.vk == TCODK_ESCAPE) return;
+		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
+		
+		// if field had 'mask' property it would be bit more generic..
+		if (focus != NULL) {
+			std::string& str = *focus->value;
+			
+			if (key.c >= '0' && key.c <= '9' && str.size() < (w - 7)) {
+				str.push_back(key.c);
+			} else if (key.vk == TCODK_BACKSPACE && str.size() > 0) {
+				str.erase(str.end() - 1);
+			}
+		}
+		
+		TCODConsole::root->clear();
+		
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		
+		TCODConsole::root->printFrame(x, y, w, h, true, TCOD_BKGND_SET, "Settings");
+		TCODConsole::root->print(x + 1, y + 1, "ENTER to save changes, ESC to discard.");
+		
+		int currentY = y + 3;
+		
+		for (unsigned int idx = 0; idx < fieldCount; ++idx) {
+			if (focus == &fields[idx]) {
+				TCODConsole::root->setForegroundColor(TCODColor::green);
+			}
+			TCODConsole::root->print(x + 1, currentY, fields[idx].label);
+			
+			TCODConsole::root->setForegroundColor(TCODColor::white);
+			TCODConsole::root->setBackgroundColor(TCODColor::darkGrey);
+			TCODConsole::root->rect(x + 3, currentY + 1, w - 7, 1, true);
+			TCODConsole::root->print(x + 3, currentY + 1, "%s", fields[idx].value->c_str());
+			TCODConsole::root->setBackgroundColor(TCODColor::black);
+			
+			currentY += 3;
+		}
+		
+		TCODConsole::root->print(x + 1, currentY, "Renderer");
+		
+		for (unsigned int idx = 0; idx < rendererCount; ++idx) {
+			if (renderer == renderers[idx].renderer) {
+				TCODConsole::root->setForegroundColor(TCODColor::green);
+			} else {
+				TCODConsole::root->setForegroundColor(TCODColor::grey);
+			}
+			TCODConsole::root->print(x + 3, currentY + idx + 1, renderers[idx].label);
+		}
+		
+		TCODConsole::root->flush();
+		
+		mouse = TCODMouse::getStatus();
+		if (mouse.lbutton) {
+			clicked = true;
+		}
+		
+		if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
+			clicked = false;
+			int whereX = mouse.cx - x;
+			int whereY = mouse.cy - y - 1;
+			int rendererY = currentY - y - 1;
+			
+			if (whereY > 1 && whereY < rendererY) {
+				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
+				if (whereFocus >= 0 && whereFocus < fieldCount) {
+					focus = &fields[whereFocus];
+				}
+			} else if (whereY > rendererY) {
+				int whereRenderer = whereY - rendererY - 1;
+				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
+					renderer = renderers[whereRenderer].renderer;
+				}
+			}
+		}
+	}
+	
+	unsigned int cfgWidth  = boost::lexical_cast<unsigned int>(width);
+	unsigned int cfgHeight = boost::lexical_cast<unsigned int>(height);
+	const char *cfgRenderer;
+	// it happens that TCOD_RENDERER_GLSL = 0, TCOD_RENDERER_OPENGL = 1 and TCOD_RENDERER_SDL = 2
+	// but I'd rather not rely on that
+	for (unsigned int idx = 0; idx < rendererCount; ++idx) {
+		if (renderers[idx].renderer == renderer) {
+			cfgRenderer = renderers[idx].label;
+		}
+	}
+	
+	try {
+		Data::SaveConfig(cfgWidth, cfgHeight, cfgRenderer);
+	} catch (const std::exception& e) {
+		Logger::Inst()->output << "Could not save configuration! " << e.what() << "\n";
+	}
 }
