@@ -118,13 +118,15 @@ int Distance(Coordinate a, Coordinate b) {
 }
 
 // XXX: This really needs serious refactoring.
-struct MainMenuEntry {
-	const char *label;
-	char shortcut;
-	bool setExit;
-	bool ifRunning;
-	void (*function)();
-};
+namespace {
+	struct MainMenuEntry {
+		const char *label;
+		char shortcut;
+		bool setExit;
+		bool ifRunning;
+		void (*function)();
+	};
+}
 
 int MainMenu() {
 	MainMenuEntry entries[] = {
@@ -334,15 +336,17 @@ void SaveMenu() {
 }
 
 // XXX: No, really.
-struct SettingRenderer {
-	const char *label;
-	TCOD_renderer_t renderer;
-};
-
-struct SettingField {
-	const char  *label;
-	std::string *value;
-};
+namespace {
+	struct SettingRenderer {
+		const char *label;
+		TCOD_renderer_t renderer;
+	};
+	
+	struct SettingField {
+		const char  *label;
+		std::string *value;
+	};
+}
 
 void SettingsMenu() {
 	std::string width  = boost::lexical_cast<std::string>(Game::Inst()->resolutionWidth);
