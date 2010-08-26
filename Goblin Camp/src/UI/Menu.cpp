@@ -124,9 +124,9 @@ Menu* Menu::MainMenu() {
 		mainMenu->AddChoice(MenuChoice("Stock Manager", boost::bind(UI::ChangeMenu, StockManagerDialog::StocksDialog())));
 #ifdef DEBUG
 		mainMenu->AddChoice(MenuChoice("Jobs", boost::bind(UI::ChangeMenu, JobDialog::JobListingDialog())));
-		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceDialog::AnnouncementsDialog())));
 		mainMenu->AddChoice(MenuChoice("NPC List", boost::bind(UI::ChangeMenu, NPCDialog::NPCListDialog())));
 #endif
+		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceDialog::AnnouncementsDialog())));
 		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
 		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
 		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));

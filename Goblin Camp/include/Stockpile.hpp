@@ -65,5 +65,6 @@ public:
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 	void ItemAdded(boost::weak_ptr<Item>);
 	void ItemRemoved(boost::weak_ptr<Item>);
+	Coordinate Center();
 };
 
