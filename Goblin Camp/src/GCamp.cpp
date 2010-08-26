@@ -349,14 +349,15 @@ namespace {
 }
 
 void SettingsMenu() {
-	std::string width  = boost::lexical_cast<std::string>(Game::Inst()->resolutionWidth);
-	std::string height = boost::lexical_cast<std::string>(Game::Inst()->resolutionHeight);
+	std::string width        = boost::lexical_cast<std::string>(Game::Inst()->resolutionWidth);
+	std::string height       = boost::lexical_cast<std::string>(Game::Inst()->resolutionHeight);
 	TCOD_renderer_t renderer = Game::Inst()->renderer;
+	bool fullscreen          = Game::Inst()->fullscreen;
 	
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 	
 	const int w = 40;
-	const int h = 14;
+	const int h = 16;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 	
@@ -420,6 +421,11 @@ void SettingsMenu() {
 			currentY += 3;
 		}
 		
+		TCODConsole::root->setForegroundColor((fullscreen ? TCODColor::green : TCODColor::grey));
+		TCODConsole::root->print(x + 1, currentY, "Fullscreen mode");
+		
+		currentY += 2;
+		TCODConsole::root->setForegroundColor(TCODColor::white);
 		TCODConsole::root->print(x + 1, currentY, "Renderer");
 		
 		for (unsigned int idx = 0; idx < rendererCount; ++idx) {
@@ -440,15 +446,18 @@ void SettingsMenu() {
 		
 		if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
 			clicked = false;
-			int whereX = mouse.cx - x;
-			int whereY = mouse.cy - y - 1;
-			int rendererY = currentY - y - 1;
+			int whereX      = mouse.cx - x;
+			int whereY      = mouse.cy - y - 1;
+			int rendererY   = currentY - y - 1;
+			int fullscreenY = rendererY - 2;
 			
-			if (whereY > 1 && whereY < rendererY) {
+			if (whereY > 1 && whereY < rendererY && whereY != fullscreenY) {
 				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
 				if (whereFocus >= 0 && whereFocus < fieldCount) {
 					focus = &fields[whereFocus];
 				}
+			} else if (whereY == fullscreenY) {
+				fullscreen = !fullscreen;
 			} else if (whereY > rendererY) {
 				int whereRenderer = whereY - rendererY - 1;
 				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
@@ -470,8 +479,16 @@ void SettingsMenu() {
 	}
 	
 	try {
-		Data::SaveConfig(cfgWidth, cfgHeight, cfgRenderer);
+		Data::SaveConfig(cfgWidth, cfgHeight, cfgRenderer, fullscreen);
 	} catch (const std::exception& e) {
 		Logger::Inst()->output << "Could not save configuration! " << e.what() << "\n";
 	}
+	
+	// remember new settings
+	// I tried to make it apply new settings immediately, but it didn't work reliably
+	// this is only so the settings dialog will display updated values next time
+	Game::Inst()->resolutionWidth  = cfgWidth;
+	Game::Inst()->resolutionHeight = cfgHeight;
+	Game::Inst()->renderer         = renderer;
+	Game::Inst()->fullscreen       = fullscreen;
 }

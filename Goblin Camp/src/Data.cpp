@@ -204,7 +204,7 @@ namespace Data {
 				Logger::Inst()->output << "[Data] Creating default config.ini.\n";
 				
 				try {
-					SaveConfig(800, 600, "SDL");
+					SaveConfig(800, 600, "SDL", false);
 				} catch (const std::exception &e) {
 					Logger::Inst()->output << "[Data] std::exception while creating config: " << e.what() << "\n";
 					Logger::Inst()->output.flush();
@@ -364,14 +364,15 @@ namespace Data {
 		Logger::Inst()->output.flush();
 	}
 	
-	void SaveConfig(unsigned int resWidth, unsigned int resHeight, const std::string& renderer) {
+	void SaveConfig(unsigned int resWidth, unsigned int resHeight, const std::string& renderer, bool fullscreen) {
 		// It's up to caller to deal with exceptions.
 		std::ofstream configStream(globals::config.string().c_str());
 		// I hate -th and -ht suffixes.
 		configStream <<
-			"config {\n\twidth = " << resWidth <<
-			"\n\theight = " << resHeight << "\n\trenderer = \"" << renderer <<
-		"\"\n}";
+			"config {\n\twidth    = " << resWidth <<
+			"\n\theight   = " << resHeight << "\n\trenderer = \"" << renderer << "\"" <<
+			(fullscreen ? "\n\tfullscreen" : "") <<
+		"\n}";
 		configStream.close();
 	}
 }
