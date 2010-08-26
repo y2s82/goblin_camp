@@ -28,6 +28,7 @@ int MainMenu();
 void LoadMenu();
 void SaveMenu();
 void MainLoop();
+void SettingsMenu();
 int Distance(int,int,int,int);
 int Distance(Coordinate,Coordinate);
 

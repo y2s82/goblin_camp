@@ -204,9 +204,7 @@ namespace Data {
 				Logger::Inst()->output << "[Data] Creating default config.ini.\n";
 				
 				try {
-					std::ofstream configStream(globals::config.string().c_str());
-					configStream << "config {\n\twidth = 800\n\theight = 600\n\trenderer = \"SDL\"\n}";
-					configStream.close();
+					SaveConfig(800, 600, "SDL");
 				} catch (const std::exception &e) {
 					Logger::Inst()->output << "[Data] std::exception while creating config: " << e.what() << "\n";
 					Logger::Inst()->output.flush();
@@ -228,12 +226,12 @@ namespace Data {
 				} catch (const fs::filesystem_error& e) {
 					Logger::Inst()->output << "[Data] filesystem_error while copying keys: " << e.what() << "\n";
 					Logger::Inst()->output.flush();
-					exit(2);
+					exit(6);
 				}
 			} else {
 				Logger::Inst()->output << "[Data] No keys.ini found in user's directory or in defaults.\n";
 				Logger::Inst()->output.flush();
-				exit(3);
+				exit(7);
 			}
 		}
 		
@@ -364,5 +362,16 @@ namespace Data {
 		TCODSystem::saveScreenshot(png.c_str());
 		
 		Logger::Inst()->output.flush();
+	}
+	
+	void SaveConfig(unsigned int resWidth, unsigned int resHeight, const std::string& renderer) {
+		// It's up to caller to deal with exceptions.
+		std::ofstream configStream(globals::config.string().c_str());
+		// I hate -th and -ht suffixes.
+		configStream <<
+			"config {\n\twidth = " << resWidth <<
+			"\n\theight = " << resHeight << "\n\trenderer = \"" << renderer <<
+		"\"\n}";
+		configStream.close();
 	}
 }

@@ -31,6 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Events.hpp"
 #include "Job.hpp"
+#include "GCamp.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -54,6 +55,7 @@ enum Season {
 class Game {
 	friend class boost::serialization::access;
 	friend class ConfigListener;
+	friend void SettingsMenu();
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
