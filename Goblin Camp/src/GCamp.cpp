@@ -166,7 +166,9 @@ int MainMenu() {
 		TCODConsole::root->setAlignment(TCOD_CENTER);
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
 		
+		TCODConsole::root->setForegroundColor(TCODColor::celadon);
 		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
+		TCODConsole::root->setForegroundColor(TCODColor::white);
 		
 		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
 		for (unsigned int idx = 0; idx < entryCount; ++idx) {
