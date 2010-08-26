@@ -64,4 +64,16 @@ namespace Data {
 	void SaveScreenshot();
 	// Saves config.
 	void SaveConfig(unsigned int, unsigned int, const std::string&, bool);
+	
+	// Mod metadata
+	struct Mod {
+		std::string mod, name, author, version;
+		
+		Mod(const std::string& mod, const std::string& name, const std::string& author, const std::string& version) :
+			mod(mod), name(name), author(author), version(version) {
+		}
+	};
+	
+	// Returns mod list.
+	std::list<Mod>& GetLoadedMods();
 }

@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <cstdlib>
 #include <cmath>
+#include <algorithm>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -135,7 +136,7 @@ int MainMenu() {
 		{"Load",     0,   false, false, LoadMenu},
 		{"Save",     0,   false, true,  SaveMenu},
 		{"Settings", 0,   false, false, SettingsMenu},
-		{"Mods",     0,   false, false, NULL},
+		{"Mods",     0,   false, false, ModsMenu},
 		{"Exit",     'q', true,  false, NULL}
 	};
 	
@@ -493,4 +494,78 @@ void SettingsMenu() {
 	Game::Inst()->resolutionHeight = cfgHeight;
 	Game::Inst()->renderer         = renderer;
 	Game::Inst()->fullscreen       = fullscreen;
+}
+
+// Possible TODO: toggle mods on and off.
+void ModsMenu() {
+	TCODConsole::root->setAlignment(TCOD_LEFT);
+	
+	const int w = 60;
+	const int h = 20;
+	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
+	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
+	
+	std::list<Data::Mod>& modList = Data::GetLoadedMods();
+	const int subH = modList.size() * 5;
+	TCODConsole sub(w - 2, subH);
+	
+	int currentY = 0;
+	for (std::list<Data::Mod>::iterator it = modList.begin(); it != modList.end(); ++it) {
+		sub.setBackgroundColor(TCODColor::black);
+		Data::Mod& mod = *it;
+		
+		sub.setAlignment(TCOD_CENTER);
+		sub.setForegroundColor(TCODColor::azure);
+		sub.print(w / 2, currentY, "%s", mod.mod.c_str());
+		
+		sub.setAlignment(TCOD_LEFT);
+		sub.setForegroundColor(TCODColor::white);
+		sub.print(3, currentY + 1, "Name:    %s", mod.name.c_str());
+		sub.print(3, currentY + 2, "Author:  %s", mod.author.c_str());
+		sub.print(3, currentY + 3, "Version: %s", mod.version.c_str());
+		
+		currentY += 5;
+	}
+	
+	TCOD_key_t   key;
+	TCOD_mouse_t mouse;
+	
+	int scroll = 0;
+	bool clicked = false;
+	
+	while (true) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		if (key.vk == TCODK_ESCAPE) return;
+		
+		TCODConsole::root->clear();
+		
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		
+		TCODConsole::root->printFrame(x, y, w, h, true, TCOD_BKGND_SET, "Loaded mods");
+		TCODConsole::blit(
+			&sub, 0, scroll, w - 2, h - 3, TCODConsole::root, x + 1, y + 2
+		);
+		
+		TCODConsole::root->putChar(x + w - 2, y + 1,     TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+		TCODConsole::root->putChar(x + w - 2, y + h - 2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+		
+		mouse = TCODMouse::getStatus();
+		if (mouse.lbutton) {
+			clicked = true;
+		}
+		
+		if (clicked && !mouse.lbutton) {
+			if (mouse.cx == x + w - 2) {
+				if (mouse.cy == y + 1) {
+					scroll = std::max(0, scroll - 1);
+				} else if (mouse.cy == y + h - 2) {
+					scroll = std::min(subH - h + 3, scroll + 1);
+				}
+			}
+			clicked = false;
+		}
+		
+		TCODConsole::root->flush();
+	}
 }
