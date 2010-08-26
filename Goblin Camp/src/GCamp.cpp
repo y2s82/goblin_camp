@@ -19,8 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <cstdlib>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include <cmath>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -117,106 +116,118 @@ int Distance(Coordinate a, Coordinate b) {
 	return Distance(a.X(), a.Y(), b.X(), b.Y());
 }
 
+// XXX: This really needs serious refactoring.
+struct MainMenuEntry {
+	const char *label;
+	char shortcut;
+	bool setExit;
+	bool ifRunning;
+	void (*function)();
+};
+
 int MainMenu() {
+	MainMenuEntry entries[] = {
+		{"New Game", 'n', false, false, StartNewGame},
+		{"Continue", 0,   false, true,  MainLoop},
+		{"Load",     0,   false, false, LoadMenu},
+		{"Save",     0,   false, true,  SaveMenu},
+		{"Settings", 0,   false, false, NULL},
+		{"Mods",     0,   false, false, NULL},
+		{"Exit",     'q', true,  false, NULL}
+	};
+	
+	const unsigned int entryCount = sizeof(entries) / sizeof(MainMenuEntry);
+	void (*function)() = NULL;
+	
 	bool exit = false;
 	int width = 20;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
-	int height = 13;
+	int height = (entryCount * 2) + 2;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
 	TCOD_key_t key;
 	bool endCredits = false;
-
 	bool lButtonDown = false;
+	
 	while (!exit) {
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->clear();
-
-		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_DEFAULT,
-			"Main Menu");
-
+		
+		TCODConsole::root->printFrame(
+			edgex, edgey, width, height, true, TCOD_BKGND_DEFAULT,
+			"Main Menu"
+		);
+		
 		TCODConsole::root->setAlignment(TCOD_CENTER);
-
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
-		if (selected == 0) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		TCODConsole::root->print(edgex+width/2, edgey+2, "New Game");
-
-		if (selected == 2) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		if (!Game::Inst()->Running()) TCODConsole::root->setForegroundColor(TCODColor::grey);
-		TCODConsole::root->print(edgex+width/2, edgey+4, "Continue");
-
-		if (selected == 4) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		TCODConsole::root->print(edgex+width/2, edgey+6, "Load");
-
-		if (selected == 6) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		if (!Game::Inst()->Running()) TCODConsole::root->setForegroundColor(TCODColor::grey);
-		TCODConsole::root->print(edgex+width/2, edgey+8, "Save");
-
-		if (selected == 8) {
-			TCODConsole::root->setForegroundColor(TCODColor::black);
-			TCODConsole::root->setBackgroundColor(TCODColor::white);
-		} else {
-			TCODConsole::root->setForegroundColor(TCODColor::white);
-			TCODConsole::root->setBackgroundColor(TCODColor::black);
-		}
-		TCODConsole::root->print(edgex+width/2, edgey+10, "Exit");
-
-		TCODConsole::root->setForegroundColor(TCODColor::celadon);
-		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		
 		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
-		if (!endCredits) endCredits = TCODConsole::renderCredits(edgex+5, 
-			edgey+25, true);
-
+		
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		for (unsigned int idx = 0; idx < entryCount; ++idx) {
+			const MainMenuEntry& entry = entries[idx];
+			
+			if (selected == (idx * 2)) {
+				TCODConsole::root->setForegroundColor(TCODColor::black);
+				TCODConsole::root->setBackgroundColor(TCODColor::white);
+			} else {
+				TCODConsole::root->setForegroundColor(TCODColor::white);
+				TCODConsole::root->setBackgroundColor(TCODColor::black);
+			}
+			
+			if ((entry.function == NULL && !entry.setExit) || (entry.ifRunning && !Game::Inst()->Running())) {
+				TCODConsole::root->setForegroundColor(TCODColor::grey);
+			}
+			
+			TCODConsole::root->print(
+				edgex + width / 2, edgey + ((idx + 1) * 2), entry.label
+			);
+			
+			if (entry.shortcut != NULL && key.c == entry.shortcut) {
+				exit     = entry.setExit;
+				function = entry.function;
+			}
+		}
+		
+		if (!endCredits) {
+			endCredits = TCODConsole::renderCredits(
+				edgex + 5, edgey + 25, true
+			);
+		}
+		
 		TCODConsole::root->flush();
-
+		
 		mouseStatus = TCODMouse::getStatus();
 		if (mouseStatus.lbutton) {
 			lButtonDown = true;
 		}
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-
-		if (key.c == 'q') exit = true;
-		else if (key.c == 'n') StartNewGame();
-
-		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
-			selected = mouseStatus.cy - (edgey+2);
-		} else selected = -1;
-
-		if (!mouseStatus.lbutton && lButtonDown) {
-			lButtonDown = false;
-			if (selected == 0) StartNewGame();
-			else if (selected == 2 && Game::Inst()->Running()) MainLoop();
-			else if (selected == 4) LoadMenu();
-			else if (selected == 6 && Game::Inst()->Running()) SaveMenu();
-			else if (selected == 8) exit = true;
+		
+		if (function != NULL) {
+			function();
+		} else {
+			function = NULL;
+			
+			if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
+				selected = mouseStatus.cy - (edgey+2);
+			} else selected = -1;
+			
+			if (!mouseStatus.lbutton && lButtonDown) {
+				lButtonDown = false;
+				int entry = static_cast<int>(floor(selected / 2.));
+				
+				if (entry < entryCount) {
+					exit = entries[entry].setExit;
+					if (
+						entries[entry].function != NULL &&
+						(!entries[entry].ifRunning || (entries[entry].ifRunning && Game::Inst()->Running()))
+					) {
+						entries[entry].function();
+					}
+				}
+			}
 		}
-
 	}
 	Game::Inst()->Exit(false);
 	return 0;
