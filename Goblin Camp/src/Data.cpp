@@ -19,11 +19,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <cassert>
 #include <string>
 #include <cstring>
 #include <fstream>
 #include <iostream>
+#include <list>
 
 namespace fs = boost::filesystem;
 
@@ -46,6 +49,8 @@ namespace {
 		fs::path personalDir, exec, execDir, dataDir;
 		fs::path savesDir, screensDir, modsDir;
 		fs::path config, defaultKeys, keys, font;
+		
+		std::list<Data::Mod> loadedMods;
 	}
 	
 	// Finds path to 'personal dir' and subdirs.
@@ -122,8 +127,44 @@ namespace {
 		TryLoadGlobalDataFile("creatures",     NPC::LoadPresets);
 	}
 	
+	struct ModListener : public ITCODParserListener {
+		Data::Mod *ptr;
+		
+		ModListener(Data::Mod *ptr) : ptr(ptr) {
+			assert(ptr != NULL);
+		}
+		
+		bool parserProperty(TCODParser*, const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+			if (boost::iequals(name, "name")) {
+				ptr->name = value.s;
+			} else if (boost::iequals(name, "author")) {
+				ptr->author = value.s;
+			} else if (boost::iequals(name, "version")) {
+				ptr->version = value.s;
+			}
+			
+			return true;
+		}
+		
+		void error(const char *err) {
+			Logger::Inst()->output << "ModListener: " << err << "\n";
+		}
+		
+		// unused
+		bool parserNewStruct(TCODParser*, const TCODParserStruct*, const char*) { return true; }
+		bool parserFlag(TCODParser*, const char*) { return true; }
+		bool parserEndStruct(TCODParser*, const TCODParserStruct*, const char*) { return true; }
+	};
+	
 	void LoadLocalMods() {
 		fs::directory_iterator end;
+		
+		TCODParser parser;
+		TCODParserStruct *type = parser.newStructure("mod");
+		type->addProperty("name",    TCOD_TYPE_STRING, true);
+		type->addProperty("author",  TCOD_TYPE_STRING, true);
+		type->addProperty("version", TCOD_TYPE_STRING, true);
+		
 		for (fs::directory_iterator it(globals::modsDir); it != end; ++it) {
 			if (!fs::is_directory(it->status())) continue;
 			
@@ -135,6 +176,17 @@ namespace {
 			TryLoadLocalDataFile(mod, "wildplants",    NatureObject::LoadPresets);
 			TryLoadLocalDataFile(mod, "names",         _LoadNames);
 			TryLoadLocalDataFile(mod, "creatures",     NPC::LoadPresets);
+			
+			Data::Mod metadata(mod.filename(), "<unknown>", "<unknown>", "<unknown>");
+			if (fs::exists(mod / "mod.dat")) {
+				Logger::Inst()->output << "[Data] Loading mod metadata.\n";
+				
+				ModListener *listener = new ModListener(&metadata);
+				parser.run((mod / "mod.dat").string().c_str(), listener);
+				delete listener;
+			}
+			
+			globals::loadedMods.push_back(metadata);
 		}
 	}
 }
@@ -374,5 +426,9 @@ namespace Data {
 			(fullscreen ? "\n\tfullscreen" : "") <<
 		"\n}";
 		configStream.close();
+	}
+	
+	std::list<Mod>& GetLoadedMods() {
+		return globals::loadedMods;
 	}
 }
