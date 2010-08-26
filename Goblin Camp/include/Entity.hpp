@@ -59,6 +59,7 @@ public:
 	int Uid();
 	static int uids;
 	virtual Coordinate Position();
+	virtual Coordinate Center();
 	virtual void Position(Coordinate);
 	void Zone(int);
 	int Zone();
