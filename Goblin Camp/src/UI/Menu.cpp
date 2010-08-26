@@ -92,12 +92,15 @@ MenuResult Menu::Update(int x, int y, bool clicked, TCOD_key_t key) {
 				--y;
 				if (y > 0) y /= 2;
 				_selected = y;
-				if (clicked) choices[y].callback();
-				return MENUHIT; //Mouse was inside menu
+				if (clicked) {
+					choices[y].callback();
+					return (MenuResult) (DISMISS | MENUHIT);
+				} 
+				return MENUHIT;
 			}
 		}
 	}
-	return NOMENUHIT; //Mouse was not inside menu
+	return NOMENUHIT;
 }
 
 void Menu::selected(int newSel) {

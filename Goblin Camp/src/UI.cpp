@@ -139,7 +139,7 @@ void UI::Update() {
 void UI::HandleKeyboard() {
 	//TODO: This isn't pretty, but it works.
     key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
-    if (!currentMenu || currentMenu->Update(-1, -1, false, key) != KEYRESPOND) {
+    if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
         if (!textMode) {
             if (key.c == keyMap["Exit"]) Game::Exit();
             else if (key.c == keyMap["Basics"]) {
@@ -322,16 +322,16 @@ void UI::HandleMouse() {
             menuResult = NOMENUHIT;
             if(!draggingPlacement) {
                 menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
-                if (menuResult == NOMENUHIT) {
+                if (menuResult & NOMENUHIT) {
 					menuResult = Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, true);
-					if (menuResult == NOMENUHIT) {
+					if (menuResult & NOMENUHIT) {
 						if (menuOpen) {
 							menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false;
 						}
 					}
                 }                    
             }
-            if (menuResult == NOMENUHIT) {
+            if (menuResult & NOMENUHIT) {
                 if (menuOpen && _state == UINORMAL) {
                     CloseMenu();
                 }
@@ -410,11 +410,11 @@ void UI::HandleMouse() {
         draggingPlacement = false;
     } else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
         menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
-        if (menuResult == NOMENUHIT) {
+        if (menuResult & NOMENUHIT) {
             if (menuOpen) {
                 menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
             }
-            if (menuResult == NOMENUHIT) {
+            if (menuResult & NOMENUHIT) {
                 if (_state == UIABPLACEMENT && placeable) {
                     if (a.X() == 0) {
                         a.X(mouseInput.cx + Game::Inst()->upleft.X());
@@ -495,9 +495,9 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
 	}
 	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
-	if (_state == UINORMAL && currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) == NOMENUHIT 
-		&& sideBar.Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT 
-		&& Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) == NOMENUHIT
+	if (_state == UINORMAL && (currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) & NOMENUHIT) 
+		&& (sideBar.Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
+		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& !underCursor.empty() && underCursor.begin()->lock()) {
 		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
 			if (ucit->lock()) {
