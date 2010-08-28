@@ -6,6 +6,7 @@
 import modules ;
 import os ;
 import path ;
+import property-set ;
 
 import boost ;
 import libtcod ;
@@ -24,6 +25,9 @@ project goblin-camp
       <include>$(GC_HEADERS)
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
+      # Architecture defines
+      <address-model>32:<define>X86
+      <address-model>64:<define>X64
       # NT specific defines
       <os>NT:<define>WINDOWS
       <os>NT,<variant>release:<user-interface>gui
@@ -99,9 +103,9 @@ win32-sources   = [ get-platform-sources $(GC_WIN32_SOURCES) ] ;
 linux-sources   = [ get-platform-sources $(GC_LINUX_SOURCES) ] ;
 macosx-sources  = [ get-platform-sources $(GC_OSX_SOURCES) ] ;
 
-binaries-dist-dir   = . ;
-data-dist-dir       = . ;
-additional-dist-dir = . ;
+binaries-dist-dir   = ;
+data-dist-dir       = ;
+additional-dist-dir = ;
 additional-files    = ;
 additional-reqs     = ;
 
@@ -207,23 +211,57 @@ make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis ;
 
 #
 # dist targets
+local rule get-dist-dir ( properties * : what * ) {
+    local dir     = $(GC_DIST_ROOT)/ ;
+    local propset = [ property-set.create $(properties) ] ;
+    local variant = [ $(propset).get <variant> ] ;
+    local arch    = x86 ;
+    
+    if <address-model>64 in $(properties) {
+        arch = x64 ;
+    }
+    
+    dir = $(dir)$(variant)-$(arch)/ ;
+    
+    if $(additional-dist-dir) {
+        dir = $(dir)$(additional-dist-dir)/ ;
+    }
+    
+    if $(what) = bin && $(binaries-dist-dir) {
+        dir = $(dir)$(binaries-dist-dir) ;
+    } else if $(what) = data && $(data-dist-dir) {
+        dir = $(dir)$(data-dist-dir) ;
+    }
+    
+    return <location>$(dir) ;
+}
+
+rule get-dist-additional ( properties * ) {
+    return [ get-dist-dir $(properties) ] ;
+}
+
+rule get-dist-bin ( properties * ) {
+    return [ get-dist-dir $(properties) : bin ] ;
+}
+
+rule get-dist-data ( properties * ) {
+    return [ get-dist-dir $(properties) : data ] ;
+}
+
 install dist-additional
     : $(additional-files)
-    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)
-      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)
+    : <conditional>@get-dist-additional
 ;
 
 install dist-binaries
     : goblin-camp
     : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
-      <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
-      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(binaries-dist-dir:E=)
+      <conditional>@get-dist-bin
 ;
 
 install dist-data
     : $(data-files)
-    : <variant>debug:<location>$(GC_DIST_ROOT)/debug/$(additional-dist-dir:E=)/$(data-dist-dir:E=)
-      <variant>release:<location>$(GC_DIST_ROOT)/release/$(additional-dist-dir:E=)/$(data-dist-dir:E=)
+    : <conditional>@get-dist-data
 ;
 
 alias dist : dist-data dist-binaries dist-additional ;
