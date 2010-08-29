@@ -751,8 +751,8 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 namespace {
 	template <typename MapT>
 	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
-		for (MapT::iterator it = map.begin(); it != map.end(); ) {
-			MapT::mapped_type ptr = it->second;
+		for (typename MapT::iterator it = map.begin(); it != map.end(); ) {
+			typename MapT::mapped_type ptr = it->second;
 			
 			if (ptr.get() != NULL) {
 				ptr->Draw(upleft, buffer);
@@ -761,7 +761,7 @@ namespace {
 		#ifdef DEBUG
 				std::cout << "!!! NULL POINTER !!! " << name << " ; id " << it->first << std::endl;
 		#endif
-				MapT::iterator tmp = it;
+				typename MapT::iterator tmp = it;
 				++it;
 				map.erase(tmp);
 			}
