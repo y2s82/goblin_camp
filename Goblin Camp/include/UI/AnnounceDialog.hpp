@@ -31,7 +31,7 @@ public:
 	AnnounceDialog() {}
 	void Draw(int, int, int, int, int, TCODConsole*);
 	MenuResult Update(int, int, bool, TCOD_key_t);
-    int TotalHeight();
+	int TotalHeight();
 	static Dialog* announcementsDialog;
 	static Dialog* AnnouncementsDialog();
 };

@@ -28,7 +28,7 @@
 
 void JobDialog::Draw(int _x, int _y, int scroll, int width, int height, TCODConsole* console) {
 	JobManager::Inst()->Draw(Coordinate(_x + 1, _y), scroll, height, console);
-    
+
 	for (int y = _y; y < _y+height; ++y) {
 		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - _y + scroll));
 		if (job.lock()) {
@@ -41,15 +41,15 @@ void JobDialog::Draw(int _x, int _y, int scroll, int width, int height, TCODCons
 }
 
 int JobDialog::TotalHeight() {
-    return JobManager::Inst()->JobAmount();
+	return JobManager::Inst()->JobAmount();
 }
 
 Dialog* JobDialog::jobListingDialog = 0;
 Dialog* JobDialog::JobListingDialog() {
 	if (!jobListingDialog) {
-        int width = Game::Inst()->ScreenWidth() - 20;
-        int height = Game::Inst()->ScreenHeight() - 20;
-        jobListingDialog = new Dialog(new ScrollPanel(0, 0, width, height, new JobDialog(), false), "Jobs", width, height);
+		int width = Game::Inst()->ScreenWidth() - 20;
+		int height = Game::Inst()->ScreenHeight() - 20;
+		jobListingDialog = new Dialog(new ScrollPanel(0, 0, width, height, new JobDialog(), false), "Jobs", width, height);
 	}
 	return jobListingDialog;
 }

@@ -49,7 +49,7 @@ int Game::ItemCatCount = 0;
 Game* Game::instance = 0;
 
 Game::Game() :
-screenWidth(0),
+	screenWidth(0),
 	screenHeight(0),
 	resolutionWidth(0),
 	resolutionHeight(0),
@@ -322,11 +322,11 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
-    if (confirm) {
-        YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
-    } else {
-        ExitConfirmed();
-    }
+	if (confirm) {
+		YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+	} else {
+		ExitConfirmed();
+	}
 }
 
 void Game::ExitConfirmed() {
@@ -754,25 +754,36 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 	return boost::shared_ptr<Job>();
 }
 
+namespace {
+	template <typename MapT>
+	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
+		for (typename MapT::iterator it = map.begin(); it != map.end(); ) {
+			typename MapT::mapped_type ptr = it->second;
+			
+			if (ptr.get() != NULL) {
+				ptr->Draw(upleft, buffer);
+				++it;
+			} else {
+		#ifdef DEBUG
+				std::cout << "!!! NULL POINTER !!! " << name << " ; id " << it->first << std::endl;
+		#endif
+				typename MapT::iterator tmp = it;
+				++it;
+				map.erase(tmp);
+			}
+		}
+	}
+}
+
 void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 	Map::Inst()->Draw(upleft, buffer);
-
-	for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = staticConstructionList.begin(); cit != staticConstructionList.end(); ++cit) {
-		cit->second->Draw(upleft, buffer);
-	}
-	for (std::map<int,boost::shared_ptr<Construction> >::iterator cit = dynamicConstructionList.begin(); cit != dynamicConstructionList.end(); ++cit) {
-		cit->second->Draw(upleft, buffer);
-	}
-	for (std::map<int,boost::shared_ptr<Item> >::iterator iit = itemList.begin(); iit != itemList.end(); ++iit) {
-		iit->second->Draw(upleft, buffer);
-	}
-	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator natit = natureList.begin(); natit != natureList.end(); ++natit) {
-		natit->second->Draw(upleft, buffer);
-	}
-	for (std::map<int,boost::shared_ptr<NPC> >::iterator it = npcList.begin(); it != npcList.end(); ++it) {
-		it->second->Draw(upleft, buffer);
-	}
-
+	
+	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, buffer);
+	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, buffer);
+	InternalDrawMapItems("items",                 itemList, upleft, buffer);
+	InternalDrawMapItems("nature objects",        natureList, upleft, buffer);
+	InternalDrawMapItems("NPCs",                  npcList, upleft, buffer);
+	
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, buffer);
 	}

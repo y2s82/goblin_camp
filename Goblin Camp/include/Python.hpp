@@ -15,13 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Map.hpp"
+#ifdef GC_PYTHON
 
-class Events {
-private:
-	std::vector<int> hostileSpawningMonsters;
-	Map *map;
-public:
-	Events(Map*);
-	void Update();
-};
+namespace Python {
+	extern const unsigned int apiVersion;
+	void Init();
+}
+
+#endif

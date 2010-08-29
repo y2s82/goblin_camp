@@ -28,7 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StockManager.hpp"
 
 NatureObjectPreset::NatureObjectPreset() :
-name("NATUREOBJECT PRESET"),
+	name("NATUREOBJECT PRESET"),
 	graphic('?'),
 	color(TCODColor::pink),
 	components(std::list<ItemType>()),

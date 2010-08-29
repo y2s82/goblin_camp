@@ -28,7 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 
 WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
-x(vx), y(vy), depth(vdepth),
+	x(vx), y(vy), depth(vdepth),
 	graphic('?'), color(TCODColor(0,128,255)),
 	inertCounter(0), inert(false),
 	timeFromRiverBed(time)

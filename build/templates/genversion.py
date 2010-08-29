@@ -2,9 +2,9 @@
 # Requires Python 2.6.
 #
 # This script reads its input, replaces %VARIABLES%, and saves output.
-#  - genversion <version> <append-hg> <input> <output>
+#  - genversion <version> <append-hg> <append-py> <input> <output>
 # Expanded variables:
-#  - %GC_VERSION% to <version>-<revid>
+#  - %GC_VERSION% to <version>-<revid> + python designation if <append-py>
 #  - %GC_RC_VERSION% to <version> in format x.x.x.x
 #  - %GC_RC_VERSION_INT% to <version> in format x,x,x,x
 #  - %GC_HG_REV% to <revid>
@@ -13,17 +13,15 @@
 # if Mercurial is not available, or we're not building from Mercurial repository.
 import os, sys, subprocess
 
-assert len(sys.argv) == 5, 'Do not run directly, use build system instead.'
+assert len(sys.argv) == 6, 'Do not run directly, use build system instead.'
 
-version, appendHg, input, output = sys.argv[1:]
+version, appendHg, appendPy, input, output = sys.argv[1:]
 
 variables = {
     'GC_VERSION': version
 }
 
-version = version + '.0.0'
-parts   = version.split('.')[:4]
-
+parts = (version + '.0.0').split('.')[:4]
 variables['GC_RC_VERSION']     = '.'.join(parts)
 variables['GC_RC_VERSION_INT'] = ','.join(parts)
 
@@ -41,6 +39,9 @@ if appendHg == 'yes':
 variables['GC_HG_REV'] = revID
 if revID:
     variables['GC_VERSION'] += '-{0}'.format(revID)
+
+if appendPy == 'yes':
+    variables['GC_VERSION'] += ' (+ py)'
 
 with open(input, 'r') as fp:
     template = fp.read()
