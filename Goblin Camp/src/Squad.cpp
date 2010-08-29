@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 Squad::Squad(std::string nameValue, int memberValue, int pri) :
-name(nameValue),
+	name(nameValue),
 	memberReq(memberValue),
 	order(NOORDER),
 	targetCoordinate(Coordinate(-1,-1)),

@@ -33,15 +33,15 @@ Dialog* StockManagerDialog::stocksDialog = 0;
 
 class StockPanel: public UIContainer {
 private:
-    ItemType itemType;
-    StockManagerDialog *owner;
+	ItemType itemType;
+	StockManagerDialog *owner;
 public:
-    bool ShowItem() {
-        if (boost::icontains(Item::Presets[itemType].name, owner->GetFilter()))
+	bool ShowItem() {
+		if (boost::icontains(Item::Presets[itemType].name, owner->GetFilter()))
 			return StockManager::Inst()->TypeQuantity(itemType) > -1;
 		else
 			return false;
-    }
+	}
 	
 	void _GetTooltip(int x, int y, Tooltip *tooltip) {
 		if(x >= _x && x < _x + width && y >= _y && y < _y + height - 2) { // subtract 2 from height so tooltip doesn't appear when mouse is over spinner
@@ -65,23 +65,23 @@ public:
 			}
 		}
 	}
-    
-    StockPanel(ItemType nItemType, StockManagerDialog *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
-        AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
-                                 boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
+	
+	StockPanel(ItemType nItemType, StockManagerDialog *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
+		AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
+								 boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
 		SetTooltip(boost::bind(&StockPanel::_GetTooltip, this, _1, _2, _3));
-        visible = boost::bind(&StockPanel::ShowItem, this);
-    }
-    
-    void Draw(int x, int y, TCODConsole *console) {
-        console->setAlignment(TCOD_CENTER);
-        console->setForegroundColor(Item::Presets[itemType].color);
-        console->print(x + 8, y, "%c %s", Item::Presets[itemType].graphic, Item::Presets[itemType].name.c_str());
-        console->setForegroundColor(TCODColor::white);
-        console->print(x + 8, y+1, "%d", StockManager::Inst()->TypeQuantity(itemType));
-        UIContainer::Draw(x, y, console);
-    }
-    
+		visible = boost::bind(&StockPanel::ShowItem, this);
+	}
+	
+	void Draw(int x, int y, TCODConsole *console) {
+		console->setAlignment(TCOD_CENTER);
+		console->setForegroundColor(Item::Presets[itemType].color);
+		console->print(x + 8, y, "%c %s", Item::Presets[itemType].graphic, Item::Presets[itemType].name.c_str());
+		console->setForegroundColor(TCODColor::white);
+		console->print(x + 8, y+1, "%d", StockManager::Inst()->TypeQuantity(itemType));
+		UIContainer::Draw(x, y, console);
+	}
+
 };
 
 
@@ -94,8 +94,8 @@ StockManagerDialog::StockManagerDialog(): Dialog(0, "Stock Manager", 50, 50), fi
 
 	Grid *grid = new Grid(std::vector<Drawable *>(), 3, 0, 0, 48, 46);
 	for (std::set<ItemType>::iterator it = StockManager::Inst()->Producables()->begin(); it != StockManager::Inst()->Producables()->end(); it++) {
-        grid->AddComponent(new StockPanel(*it, this));
-    }
+		grid->AddComponent(new StockPanel(*it, this));
+	}
 	static_cast<UIContainer*>(contents)->AddComponent(new ScrollPanel(0, 3, 50, 47, grid, false, 4));
 }
 

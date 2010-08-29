@@ -28,14 +28,14 @@
 
 class Dialog: public Panel {
 protected:
-    std::string title;
-    Drawable *contents;
+	std::string title;
+	Drawable *contents;
 public:
-    Dialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight);
-    ~Dialog() { delete contents; }
-    void Draw(int, int, TCODConsole *);
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	Dialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight);
+	~Dialog() { delete contents; }
+	void Draw(int, int, TCODConsole *);
+	MenuResult Update(int, int, bool, TCOD_key_t);
 	void GetTooltip(int, int, Tooltip *);
-    void SetTitle(std::string ntitle);
-    void SetHeight(int nheight);
+	void SetTitle(std::string ntitle);
+	void SetHeight(int nheight);
 };

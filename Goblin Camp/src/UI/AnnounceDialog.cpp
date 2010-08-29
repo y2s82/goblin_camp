@@ -44,9 +44,12 @@ int AnnounceDialog::TotalHeight() {
 Dialog* AnnounceDialog::announcementsDialog = 0;
 Dialog* AnnounceDialog::AnnouncementsDialog() {
 	if (!announcementsDialog) {
-        int width = Game::Inst()->ScreenWidth() - 20;
-        int height = Game::Inst()->ScreenHeight() - 20;
-        announcementsDialog = new Dialog(new ScrollPanel(0, 0, width, height, new AnnounceDialog(), false), "Announcements", width, height);
+		int width = Game::Inst()->ScreenWidth() - 20;
+		int height = Game::Inst()->ScreenHeight() - 20;
+		announcementsDialog = new Dialog(
+			new ScrollPanel(0, 0, width, height, new AnnounceDialog(), false),
+			"Announcements", width, height
+		);
 	}
 	return announcementsDialog;
 }

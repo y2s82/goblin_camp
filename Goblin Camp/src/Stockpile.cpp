@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StockManager.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
-Construction(type, target),
+	Construction(type, target),
 	symbol(newSymbol),
 	a(target),
 	b(target)

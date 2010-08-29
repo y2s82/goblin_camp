@@ -29,7 +29,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Construction.hpp"
 
 Tile::Tile(TileType newType, int newCost) :
-vis(true),
+	vis(true),
 	walkable(true),
 	buildable(true),
 	_moveCost(newCost),

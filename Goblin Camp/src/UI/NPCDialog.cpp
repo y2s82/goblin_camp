@@ -29,20 +29,20 @@
 Dialog* NPCDialog::npcListDialog = 0;
 Dialog* NPCDialog::NPCListDialog() {
 	if (!npcListDialog) {
-        npcListDialog = new Dialog(new NPCDialog(), "NPCs", Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20);
+		npcListDialog = new Dialog(new NPCDialog(), "NPCs", Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20);
 	}
 	return npcListDialog;
 }
 
 NPCDialog::NPCDialog(): UIContainer(std::vector<Drawable*>(), 0, 0, Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20) {
-    AddComponent(new ScrollPanel(0, 0, width, height, 
-                                 new UIList<std::pair<int, boost::shared_ptr<NPC> >, std::map<int, boost::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCDialog::DrawNPC), false));
+	AddComponent(new ScrollPanel(0, 0, width, height, 
+								 new UIList<std::pair<int, boost::shared_ptr<NPC> >, std::map<int, boost::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCDialog::DrawNPC), false));
 }
 
 void NPCDialog::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int x, int y, int width, bool selected, TCODConsole* console) {
-    console->print(x, y, "NPC: %d", npci.second->Uid());
-    console->print(x+11, y, "%s: %s",
-                   npci.second->currentJob().lock() ? npci.second->currentJob().lock()->name.c_str() : "No job",
-                   npci.second->currentTask() ? Job::ActionToString(npci.second->currentTask()->action).c_str() : "No task");
+	console->print(x, y, "NPC: %d", npci.second->Uid());
+	console->print(x+11, y, "%s: %s",
+				   npci.second->currentJob().lock() ? npci.second->currentJob().lock()->name.c_str() : "No job",
+				   npci.second->currentTask() ? Job::ActionToString(npci.second->currentTask()->action).c_str() : "No task");
 }
 
