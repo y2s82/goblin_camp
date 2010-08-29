@@ -127,4 +127,5 @@ public:
 	virtual void Update();
 	virtual void Dismantle();
 	virtual Panel *GetContextMenu();
+	Coordinate Center();
 };

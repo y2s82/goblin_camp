@@ -271,6 +271,7 @@ private:
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
 				Item::Presets.back().categories.insert(cat);
+				Item::Presets.back().specificCategories.insert(cat);
 			}
 		} else if (boost::iequals(name, "graphic")) {
 			Item::Presets.back().graphic = value.i;
@@ -320,7 +321,7 @@ private:
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().attack.StatusEffects()->at(i).second = (int)TCOD_list_get(value.list,i);
+				Item::Presets.back().attack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		} else if (boost::iequals(name,"ammo")) {
 			presetProjectile.back() = value.s;
