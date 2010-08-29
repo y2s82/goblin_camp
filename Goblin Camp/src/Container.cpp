@@ -87,8 +87,8 @@ void Container::AddListener(ContainerListener* listener) {
 }
 
 void Container::RemoveListener(ContainerListener *listener) {
-  	for(std::vector<boost::shared_ptr<ContainerListener> >::iterator it = listeners.begin(); it != listeners.end(); it++) {
-        if(it->get() == listener) {
+  	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
+        if(*it == listener) {
             listeners.erase(it);
             return;
         }
