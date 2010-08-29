@@ -93,14 +93,14 @@ void Announce::AnnouncementClicked(AnnounceMessage *msg) {
 }
 
 void Announce::AnnouncementClicked(int i) {
-	if(i >= 0 && i < history.size()) {
+	if(i >= 0 && i < (signed int)history.size()) {
 		AnnouncementClicked(history[i]);
 	}	
 }
 
 MenuResult Announce::Update(int x, int y, bool clicked) {
-	if(x < length + 4 && y >= top) {
-		if(clicked && y > top) {
+	if(x < (signed int)length + 4 && y >= (signed int)top) {
+		if(clicked && y > (signed int)top) {
 			AnnouncementClicked(messageQueue[y - top - 1]);
 		}
 		return MENUHIT;
