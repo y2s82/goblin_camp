@@ -45,7 +45,7 @@ construction(false)
 MenuResult SideBar::Update(int x, int y, bool clicked) {
 	if (contents && x > Game::Inst()->ScreenWidth() - width) {
 		MenuResult result = contents->Update(x - (leftX + 1), y - (topY + 14), clicked, NO_KEY);
-		if(result != NOMENUHIT) {
+		if(!(result & NOMENUHIT)) {
 			return result;
 		}
 		if (y > topY && y < topY+height) return MENUHIT;
@@ -66,7 +66,7 @@ void SideBar::Draw(TCODConsole* console) {
 			contents->Draw(edgeX - (width-1), topY+14, console);
 		}
 		
-		Game::Inst()->Draw(entity.lock()->Position()-5, &minimap, false);
+		Game::Inst()->Draw(entity.lock()->Center()-5, &minimap, false);
 		console->setForegroundColor(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
 		minimap.flush();

@@ -26,9 +26,10 @@
 #include "UI/Tooltip.hpp"
 
 enum MenuResult {
-	MENUHIT,
-	NOMENUHIT,
-    KEYRESPOND
+	MENUHIT = 1,
+	NOMENUHIT = 2,
+    KEYRESPOND = 4,
+	DISMISS = 8
 };
 
 class Drawable {

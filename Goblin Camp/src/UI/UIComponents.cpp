@@ -76,18 +76,18 @@ void LiveButton::Draw(int x, int y, TCODConsole *console) {
 }
 
 MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if(shortcut && key.c == shortcut) {
+	if(shortcut && (key.c == shortcut || key.vk == shortcut)) {
 		if (callback) {
 			callback();
 		}
-		return KEYRESPOND;
+		return (MenuResult) ((dismiss ? DISMISS : 0) | KEYRESPOND);
 	}
 	if(x >= _x && x < _x + width && y >= _y && y < _y + 3) {
 		selected = true;
 		if(clicked && callback) {
 			callback();
 		}
-		return MENUHIT;
+		return (MenuResult) (((clicked && dismiss) ? DISMISS : 0) | MENUHIT);
 	} else {
 		selected = false;
 		return NOMENUHIT;
@@ -161,15 +161,37 @@ void TextBox::Draw(int x, int y, TCODConsole *console) {
 	console->setBackgroundColor(TCODColor::darkGrey);
 	console->rect(x + _x, y + _y, width, 1, true, TCOD_BKGND_SET);
 	console->setBackgroundColor(TCODColor::black);
-	console->print(x + _x + width / 2, y + _y, value->c_str());    
+	if(value) {
+		console->print(x + _x + width / 2, y + _y, value->c_str());
+	} else {
+		console->print(x + _x + width / 2, y + _y, getter().c_str());
+	}
 }
 
 MenuResult TextBox::Update(int x, int y, bool clicked, TCOD_key_t key) {
-	if(key.vk == TCODK_BACKSPACE && value->size() > 0) {
-		value->erase(value->end() - 1);
+	std::string currValue;
+	if(value) {
+		currValue = *value;
+	} else {
+		currValue = getter();
+	}
+	if(key.vk == TCODK_BACKSPACE && currValue.size() > 0) {
+		if(value) {
+			value->erase(value->end() - 1);
+		} else {
+			currValue.erase(currValue.end() - 1);
+			setter(currValue);
+		}
 		return KEYRESPOND;
 	} else if(key.c >= ' ' && key.c <= '}' && key.c != '+' && key.c != '-') {
-		if ((signed int)value->size() < width) (*value) += key.c;
+		if ((signed int)currValue.size() < width) {
+			if(value) {
+				(*value) += key.c;
+			} else {
+				currValue += key.c;
+				setter(currValue);
+			}
+		}
 		return KEYRESPOND;
 	}
 	return NOMENUHIT;
@@ -296,7 +318,7 @@ MenuResult Grid::Update(int x, int y, bool clicked, TCOD_key_t key) {
 		Drawable *component = *it;
 		if(component->Visible()) {
 			MenuResult result = component->Update(x - _x - col * colWidth, y - _y, clicked, key);
-			if(result != NOMENUHIT) {
+			if(!(result & NOMENUHIT)) {
 				return result;
 			}
 			rowHeight = std::max(rowHeight, component->Height());
@@ -361,8 +383,7 @@ void Panel::ShowModal() {
 		mouseStatus = TCODMouse::getStatus();
 
 		MenuResult result = Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed, key);
-		if((result == MENUHIT && mouseStatus.lbutton_pressed) ||
-			result == KEYRESPOND || mouseStatus.rbutton_pressed || key.vk == TCODK_ESCAPE) {
+		if((result & DISMISS) || key.vk == TCODK_ESCAPE) {
 				delete this;
 				return;
 		}
@@ -387,7 +408,7 @@ MenuResult UIContainer::Update(int x, int y, bool clicked, TCOD_key_t key) {
 		Drawable *component = *it;
 		if(component->Visible()) {
 			MenuResult result = component->Update(x - _x, y - _y, clicked, key);
-			if(result != NOMENUHIT) {
+			if(!(result & NOMENUHIT)) {
 				return result;
 			}
 		}

@@ -45,6 +45,7 @@ struct ItemPreset {
 	int graphic;
 	TCODColor color;
 	std::string name;
+	std::set<ItemCategory> specificCategories;
 	std::set<ItemCategory> categories;
 	std::vector<ItemCategory> components;
 	int nutrition;

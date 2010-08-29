@@ -256,12 +256,14 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 			}
 		}
 	}
+	Game::Inst()->RefreshStockpiles();
 }
 
 void Stockpile::SetAllAllowed(bool nallowed) {
 	for(unsigned int i = 0; i < Item::Categories.size(); i++) {
 		allowed[i] = nallowed;
 	}
+	Game::Inst()->RefreshStockpiles();
 }
 
 void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
@@ -321,4 +323,8 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 			tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 		}
 	}
+}
+
+Coordinate Stockpile::Center() {
+	return Coordinate((a.X() + b.X() - 1) / 2, (a.Y() + b.Y() - 1) / 2);
 }
