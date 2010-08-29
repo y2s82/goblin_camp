@@ -167,7 +167,7 @@ void UI::HandleKeyboard() {
 			} else if (key.c == keyMap["Center"]) {
 				Game::Inst()->CenterOn(Camp::Inst()->Center());
 			} else if (key.c == keyMap["Help"]) {
-				keyHelpTextColor = 255;
+				keyHelpTextColor = 855;
 			} else if (key.c == keyMap["Pause"]) {
 				Game::Inst()->Pause();
 			} else if (key.c == '.') {
@@ -606,8 +606,8 @@ void UI::DrawTopBar(TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 
 	if (keyHelpTextColor > 0) {
-		console->setForegroundColor(TCODColor(keyHelpTextColor, keyHelpTextColor, keyHelpTextColor));
-		console->setColorControl(TCOD_COLCTRL_1, TCODColor(0, keyHelpTextColor, 0), TCODColor::black);
+		console->setForegroundColor(TCODColor(std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor)));
+		console->setColorControl(TCOD_COLCTRL_1, TCODColor(0, std::min(255, keyHelpTextColor), 0), TCODColor::black);
 		int x = 10;
 		console->print(x, 3, "%cQ%cuit  %cB%casics  %cW%corkshops  %cO%crders  %cF%curniture  %cS%ctockmanager  %cM%cilitary  %cA%cnnouncements ",
 			TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
