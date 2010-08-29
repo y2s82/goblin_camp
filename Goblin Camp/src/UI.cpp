@@ -43,30 +43,30 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class KeyMap : public ITCODParserListener {
 public:
 	std::map<std::string, char> keyMap;
-	
+
 	char operator[](std::string s) {
 		return keyMap[s];
 	}
-	
+
 	KeyMap(): keyMap(std::map<std::string, char>()) {}
-	
+
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 		return true;
 	}
-	
+
 	bool parserFlag(TCODParser *parser,const char *name) {
 		return true;
 	}
-	
+
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 		keyMap[name] = value.c;
 		return true;
 	}
-	
+
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 		return true;
 	}
-	
+
 	void error(const char *msg) {
 		Logger::Inst()->output<<"KeyConfigListener: "<<msg<<"\n";
 		Game::Inst()->Exit();
@@ -89,9 +89,9 @@ void UI::LoadKeys(std::string filename) {
 	keysTypeStruct->addProperty("Center", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
-	
+
 	parser.run(filename.c_str(), &keyMap);
-	
+
 }
 
 #pragma mark UI
@@ -237,7 +237,7 @@ void UI::HandleKeyboard() {
 			} else if (key.vk == TCODK_PRINTSCREEN) { 
 				Data::SaveScreenshot();
 			}
-			
+
 			if (key.vk >= TCODK_F1 && key.vk <= TCODK_F12) {
 				if(ShiftPressed()) {
 					Game::Inst()->SetMark(key.vk - TCODK_F1);
@@ -329,10 +329,9 @@ void UI::HandleMouse() {
 							menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false;
 						}
 					}
-				}
-	                }                    
-            }
-            if (menuResult & NOMENUHIT) {
+				}                    
+			}
+			if (menuResult & NOMENUHIT) {
 				if (menuOpen && _state == UINORMAL) {
 					CloseMenu();
 				}
@@ -489,7 +488,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	if (menuOpen) {
 		currentMenu->Draw(menuX, menuY, console);
 	}
-	
+
 	Tooltip *tooltip = Tooltip::Inst();
 	tooltip->Clear();
 	if (menuOpen) {
@@ -500,11 +499,11 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		&& (sideBar.Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& !underCursor.empty() && underCursor.begin()->lock()) {
-		for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-			if (ucit->lock()) {
-				ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
+				if (ucit->lock()) {
+					ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+				}
 			}
-		}
 	}
 	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
 
@@ -611,7 +610,7 @@ void UI::DrawTopBar(TCODConsole* console) {
 		console->setColorControl(TCOD_COLCTRL_1, TCODColor(0, keyHelpTextColor, 0), TCODColor::black);
 		int x = 10;
 		console->print(x, 3, "%cQ%cuit  %cB%casics  %cW%corkshops  %cO%crders  %cF%curniture  %cS%ctockmanager  %cM%cilitary  %cA%cnnouncements ",
-					   TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
+			TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
 		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark  %cC%center Camp", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
 		console->print(x, 7, "Space to pause");
 	}
