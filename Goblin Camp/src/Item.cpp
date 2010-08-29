@@ -198,7 +198,7 @@ public:
 						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[*cati].parent->name));
 					}
 			}
-			
+
 #ifdef DEBUG
 			if (presetGrowth[i] != "") {
 				Item::Presets[firstItemIndex+i].growth = Item::StringToItemType(presetGrowth[i]);
@@ -401,16 +401,16 @@ void Item::LoadPresets(std::string filename) {
 void Item::ResolveContainers() {
 	for (std::vector<ItemPreset>::iterator it = Item::Presets.begin(); it != Item::Presets.end(); ++it) {
 		ItemPreset& preset = *it;
-		
+
 		if (!preset.fitsInRaw.empty()) {
 			preset.fitsin = Item::StringToItemCategory(preset.fitsInRaw);
 		}
-		
+
 		if (!preset.containInRaw.empty()) {
 			preset.containIn = Item::StringToItemCategory(preset.containInRaw);
 			preset.components.push_back(preset.containIn);
 		}
-		
+
 		preset.fitsInRaw.clear();
 		preset.containInRaw.clear();
 	}
@@ -460,7 +460,7 @@ void Item::UpdateVelocity() {
 					}
 					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {
 						if (rand() % std::max(1, flightPath.back().height) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
-						
+
 							Attack attack = GetAttack();
 							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
 							npc->Damage(&attack);
@@ -476,7 +476,6 @@ void Item::UpdateVelocity() {
 					SetVelocity(0);
 				}
 				Position(flightPath.back().coord);
-				
 				flightPath.pop_back();
 			} else SetVelocity(0);
 		}
@@ -495,7 +494,7 @@ std::string ItemCat::GetName() {
 }
 
 ItemPreset::ItemPreset() :
-	graphic('?'),
+graphic('?'),
 	color(TCODColor::pink),
 	name("Preset default"),
 	categories(std::set<ItemCategory>()),
