@@ -27,17 +27,17 @@
 
 class Grid: public Drawable, public Scrollable {
 private:
-    int cols;
-    std::vector<Drawable *> contents;
+	int cols;
+	std::vector<Drawable *> contents;
 public:
-    Grid(std::vector<Drawable *> ncontents, int ncols, int x, int y, int nwidth, int nheight):
-        contents(ncontents), cols(ncols), Drawable(x, y, nwidth, nheight) {}
-    void AddComponent(Drawable *component);
-    void RemoveAll();
-    void Draw(int, int, TCODConsole *);
-    void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
-    int TotalHeight();
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	Grid(std::vector<Drawable *> ncontents, int ncols, int x, int y, int nwidth, int nheight):
+		contents(ncontents), cols(ncols), Drawable(x, y, nwidth, nheight) {}
+	void AddComponent(Drawable *component);
+	void RemoveAll();
+	void Draw(int, int, TCODConsole *);
+	void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+	int TotalHeight();
+	MenuResult Update(int, int, bool, TCOD_key_t);
 	void GetTooltip(int, int, Tooltip *);
 };
 

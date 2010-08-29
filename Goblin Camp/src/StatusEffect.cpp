@@ -24,7 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 //TODO: All this needs to be put into data files at some point
 
 StatusEffect::StatusEffect(StatusEffectType typeval) : 
-type(typeval),
+	type(typeval),
 	bleed(false)
 {
 	//Initialize changes to nothing, ie. 100%

@@ -27,21 +27,21 @@
 
 class Label: public Drawable {
 private:
-    std::string text;
-    TCOD_alignment_t align;
+	std::string text;
+	TCOD_alignment_t align;
 public:
-    Label(std::string ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
-    Drawable(x, y, 0, 1), text(ntext), align(nalign) {}
-    void Draw(int, int, TCODConsole *);
+	Label(std::string ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
+	Drawable(x, y, 0, 1), text(ntext), align(nalign) {}
+	void Draw(int, int, TCODConsole *);
 };
 
 class LiveLabel: public Drawable {
 private:
-    boost::function<std::string()> text;
-    TCOD_alignment_t align;
+	boost::function<std::string()> text;
+	TCOD_alignment_t align;
 public:
-    LiveLabel(boost::function<std::string()> ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
-    Drawable(x, y, 0, 1), text(ntext), align(nalign) {}
-    void Draw(int, int, TCODConsole *);
+	LiveLabel(boost::function<std::string()> ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
+	Drawable(x, y, 0, 1), text(ntext), align(nalign) {}
+	void Draw(int, int, TCODConsole *);
 };
 

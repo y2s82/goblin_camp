@@ -30,7 +30,7 @@ class JobDialog : public Scrollable {
 public:
 	JobDialog() {}
 	void Draw(int, int, int, int, int, TCODConsole*);
-    int TotalHeight();
+	int TotalHeight();
 	static Dialog* jobListingDialog;
 	static Dialog* JobListingDialog();
 };
