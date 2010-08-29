@@ -30,12 +30,11 @@ protected:
 	std::string text;
 	bool selected;
 	char shortcut;
+	bool dismiss;
 	boost::function<void()> callback;
 public:
-	Button(
-		std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0
-	):
-		text(ntext), callback(ncallback), shortcut(nshortcut), Drawable(x, y, nwidth, 0), selected(false) {}
+	Button(std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0, bool ndismiss = false):
+		text(ntext), callback(ncallback), shortcut(nshortcut), Drawable(x, y, nwidth, 0), selected(false), dismiss(ndismiss) {}
 	void Draw(int, int, TCODConsole *);
 	MenuResult Update(int, int, bool, TCOD_key_t);
 };

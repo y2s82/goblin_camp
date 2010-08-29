@@ -39,6 +39,7 @@ int Entity::uids = 0;
 int Entity::X() {return x;}
 int Entity::Y() {return y;}
 Coordinate Entity::Position() {return Coordinate(x,y);}
+Coordinate Entity::Center() {return Position();}
 void Entity::Position(Coordinate pos) {x = pos.X(); y = pos.Y();}
 int Entity::Uid() {return uid;}
 

@@ -256,12 +256,14 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 			}
 		}
 	}
+	Game::Inst()->RefreshStockpiles();
 }
 
 void Stockpile::SetAllAllowed(bool nallowed) {
 	for(unsigned int i = 0; i < Item::Categories.size(); i++) {
 		allowed[i] = nallowed;
 	}
+	Game::Inst()->RefreshStockpiles();
 }
 
 void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
@@ -269,9 +271,25 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
 	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
 		amount[*it] = amount[*it] + 1;
 	}
+
+    if(item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+        boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+        for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
+            ItemAdded(*i);
+        }
+        container->AddListener(this);
+    }
 }
 
 void Stockpile::ItemRemoved(boost::weak_ptr<Item> item) {
+    if(item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+        boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+        container->RemoveListener(this);
+        for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
+            ItemRemoved(*i);
+        }
+    }
+
 	std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
 	for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
 		amount[*it] = amount[*it] - 1;
@@ -321,4 +339,8 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 			tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 		}
 	}
+}
+
+Coordinate Stockpile::Center() {
+	return Coordinate((a.X() + b.X() - 1) / 2, (a.Y() + b.Y() - 1) / 2);
 }
