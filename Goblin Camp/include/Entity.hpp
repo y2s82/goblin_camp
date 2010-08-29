@@ -59,6 +59,7 @@ public:
 	int Uid();
 	static int uids;
 	virtual Coordinate Position();
+	virtual Coordinate Center();
 	virtual void Position(Coordinate);
 	void Zone(int);
 	int Zone();
@@ -76,7 +77,8 @@ public:
 	int GetVelocity();
 	virtual void SetVelocity(int);
 	Coordinate GetVelocityTarget();
+	int GetHeight();
 	void SetVelocityTarget(Coordinate);
-	void CalculateFlightPath(Coordinate, int speed);
+	void CalculateFlightPath(Coordinate, int speed, int initialHeight=0);
 };
 

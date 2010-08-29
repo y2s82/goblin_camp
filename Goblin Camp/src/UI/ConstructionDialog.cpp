@@ -27,6 +27,9 @@
 #include "UI/ScrollPanel.hpp"
 #include "UI/UIList.hpp"
 #include "UI/Label.hpp"
+#include "UI/UIComponents.hpp"
+#include "UI/Dialog.hpp"
+#include "UI/TextBox.hpp"
 #include "UI.hpp"
 
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
@@ -77,7 +80,11 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
 void ConstructionDialog::Construct(Construction* cons) { construct = cons; }
 
 void ConstructionDialog::Rename() {
-    
+	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 1, 1, 28, 7);
+	contents->AddComponent(new TextBox(0, 1, 28, boost::bind(&Entity::Name, construct), boost::bind(&Entity::Name, construct, _1)));
+	contents->AddComponent(new Button("OK", boost::function<void()>(), 11, 3, 6, TCODK_ENTER, true));
+    Dialog *renameDialog = new Dialog(contents, "Rename", 30, 8);
+	renameDialog->ShowModal();
 }
 
 void ConstructionDialog::Dismantle() {

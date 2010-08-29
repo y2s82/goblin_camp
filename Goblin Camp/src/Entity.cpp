@@ -14,7 +14,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
-
+#ifdef DEBUG
+#include <iostream>
+#endif
 #include <boost/utility.hpp>
 
 #include "Entity.hpp"
@@ -35,6 +37,7 @@ int Entity::uids = 0;
 int Entity::X() {return x;}
 int Entity::Y() {return y;}
 Coordinate Entity::Position() {return Coordinate(x,y);}
+Coordinate Entity::Center() {return Position();}
 void Entity::Position(Coordinate pos) {x = pos.X(); y = pos.Y();}
 int Entity::Uid() {return uid;}
 
@@ -62,7 +65,13 @@ void Entity::SetVelocity(int value) { velocity = value; }
 Coordinate Entity::GetVelocityTarget() { return velocityTarget; }
 void Entity::SetVelocityTarget(Coordinate value) { velocityTarget = value; }
 
-void Entity::CalculateFlightPath(Coordinate target, int speed) {
+int Entity::GetHeight() { return flightPath.size() ? flightPath.back().height : 0; }
+
+void Entity::CalculateFlightPath(Coordinate target, int speed, int initialHeight) {
+#ifdef DEBUG
+	std::cout<<"Calculating flightpath for "<<name<<" from "<<x<<","<<y<<" to "<<target.X()<<","<<target.Y()<<" at v:"<<speed<<"\n";
+#endif
+	velocityTarget = target;
 	flightPath.clear();
 	TCODLine::init(target.X(), target.Y(), x, y);
 	int px = target.X();
@@ -82,7 +91,7 @@ void Entity::CalculateFlightPath(Coordinate target, int speed) {
 
 		while (begIt->height == -1 && endIt->height == -1) {
 			begIt->height = h;
-			endIt->height = h;
+			endIt->height = std::max(initialHeight, h);
 			h += hAdd;
 			++begIt;
 			--endIt;

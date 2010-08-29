@@ -110,16 +110,26 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	int screeny = y - upleft.Y();
 	int screenx = x - upleft.X();
 	int ychange = 0;
-	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
+	int width = graphic[0];
+	int height = (graphic.size() - 1) / width;
+	if (screenx + width - 1 >= 0 && screenx < console->getWidth() && screeny + height - 1 >= 0 && screeny < console->getHeight()) {
 		for (int i = 1; i < (signed int)graphic.size(); ++i) {
-			if (dismantle) console->setBack(screenx+i-1,screeny, TCODColor::darkGrey);
-			console->setFore(screenx+i-1,screeny, color);
-			if (condition > i*-10) console->setChar(screenx+i-1,screeny, (graphic[i]));
-			else console->setChar(screenx+i-1,screeny, TCOD_CHAR_BLOCK2);
+			if(screenx + i - 1 >= 0 && screeny >= 0) {
+				if (dismantle) console->setBack(screenx+i-1,screeny, TCODColor::darkGrey);
+				console->setFore(screenx+i-1,screeny, color);
+				if (condition > i*-10) console->setChar(screenx+i-1,screeny, (graphic[i]));
+				else console->setChar(screenx+i-1,screeny, TCOD_CHAR_BLOCK2);
+			}
 			++ychange;
-			if (ychange == graphic[0]) { ++screeny; screenx -= graphic[0]; ychange = 0; }
+			if (ychange == width) { ++screeny; screenx -= width; ychange = 0; }
 		}
 	}
+}
+
+Coordinate Construction::Center() {
+	int width = graphic[0];
+	int height = (graphic.size() - 1) / width;
+	return Coordinate(Position().X() + (width - 1) / 2, Position().Y() + (height - 1) / 2);
 }
 
 int Construction::Build() {
@@ -330,7 +340,7 @@ class ConstructionListener : public ITCODParserListener {
 			if (Construction::Presets.back().graphic.size() == 0) //In case graphicLength hasn't been parsed yet
 				Construction::Presets.back().graphic.push_back(1);
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().graphic.push_back((int)TCOD_list_get(value.list,i));
+				Construction::Presets.back().graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
 		} else if (boost::iequals(name, "category")) {
 			Construction::Presets.back().category = value.s;
@@ -561,9 +571,9 @@ void Construction::Update() {
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
 			if (amount == 1) {
-				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!", announceColor);
+				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!", announceColor, Position());
 			} else {
-				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!", announceColor);
+				Announce::Inst()->AddMsg(NPC::Presets[monsterType].plural+" emerge from the "+name+"!", announceColor, Position());
 			}
 			for (int i = 0; i < amount; ++i) {
 				Game::Inst()->CreateNPC(Position() + ProductionSpot(type), monsterType);
