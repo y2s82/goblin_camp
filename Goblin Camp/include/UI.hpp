@@ -31,11 +31,11 @@ enum UIState {
 	UIPLACEMENT,
 	UIABPLACEMENT,
 	UIRECTPLACEMENT,
-    UICOUNT
+	UICOUNT
 };
 
 static TCOD_key_t NO_KEY = {
-    TCODK_NONE, 0, false, false, false, false, false, false
+	TCODK_NONE, 0, false, false, false, false, false, false
 };
 
 class UI {
@@ -61,7 +61,7 @@ private:
 	TCOD_mouse_t oldMouseInput;
 	int keyHelpTextColor;
 	bool draggingViewport;
-    bool draggingPlacement;
+	bool draggingPlacement;
 	SideBar sideBar;
 	bool textMode;
 	std::string inputString;

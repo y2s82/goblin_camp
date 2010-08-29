@@ -39,11 +39,11 @@ public:
 
 class Menu: public Panel {
 private:
-    static std::map<std::string, Menu *> constructionCategoryMenus;
+	static std::map<std::string, Menu *> constructionCategoryMenus;
 protected:
 	std::vector<MenuChoice> choices;
 	int _selected;
-    std::string title;
+	std::string title;
 	void CalculateSize();
 public:
 	Menu(std::vector<MenuChoice>, std::string="");
@@ -64,7 +64,7 @@ public:
 	static Menu* ordersMenu;
 	static Menu* OrdersMenu();
 	static Menu* FurnitureMenu();
-    static Menu* ConstructionCategoryMenu(std::string);
+	static Menu* ConstructionCategoryMenu(std::string);
 
 	static ItemCategory WeaponChoiceDialog();
 };

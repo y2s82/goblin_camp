@@ -1645,7 +1645,7 @@ void NPC::UpdateVelocity() {
 }
 
 NPCPreset::NPCPreset(std::string typeNameVal) : 
-typeName(typeNameVal),
+	typeName(typeNameVal),
 	name("AA Club"),
 	plural(""),
 	color(TCODColor::pink),

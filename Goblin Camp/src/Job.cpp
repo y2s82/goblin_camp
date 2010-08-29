@@ -25,7 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 
 Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
-target(tar),
+	target(tar),
 	entity(ent),
 	action(act),
 	item(itt),
@@ -34,7 +34,7 @@ target(tar),
 }
 
 Job::Job(std::string value, JobPriority pri, int z, bool m) :
-_priority(pri),
+	_priority(pri),
 	completion(ONGOING),
 	parent(boost::weak_ptr<Job>()),
 	npcUid(-1),

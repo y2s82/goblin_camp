@@ -28,68 +28,73 @@
 template <class T, class C = std::vector<T> >
 class UIList: public Drawable, public Scrollable {
 private:
-    C* items;
-    bool selectable;
-    int selection;
-    boost::function<void(T, int, int, int, int, bool, TCODConsole *)> draw;
+	C* items;
+	bool selectable;
+	int selection;
+	boost::function<void(T, int, int, int, int, bool, TCODConsole *)> draw;
 	boost::function<void(T, Tooltip *)> getTooltip;
-    boost::function<void(int)> onclick;
+	boost::function<void(int)> onclick;
 public:
-    UIList<T, C>(C *nitems, int x, int y, int nwidth, int nheight, boost::function<void(T, int, int, int, int, bool, TCODConsole *)> ndraw, 
-				 boost::function<void(int)> nonclick = 0, bool nselectable = false, boost::function<void(T, Tooltip *)> ntooltip = 0):
-    items(nitems), selectable(nselectable), selection(-1), draw(ndraw), onclick(nonclick), getTooltip(ntooltip), Drawable(x, y, nwidth, nheight) {}
-    void Draw(int, int, TCODConsole *);
-    void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
-    int TotalHeight();
-    MenuResult Update(int, int, bool, TCOD_key_t);
+	UIList<T, C>(
+		C *nitems, int x, int y, int nwidth, int nheight,
+		boost::function<void(T, int, int, int, int, bool, TCODConsole *)> ndraw,
+		boost::function<void(int)> nonclick = 0, bool nselectable = false,
+		boost::function<void(T, Tooltip *)> ntooltip = 0
+	):
+		items(nitems), selectable(nselectable), selection(-1), draw(ndraw),
+		onclick(nonclick), getTooltip(ntooltip), Drawable(x, y, nwidth, nheight) {}
+	void Draw(int, int, TCODConsole *);
+	void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
+	int TotalHeight();
+	MenuResult Update(int, int, bool, TCOD_key_t);
 	void GetTooltip(int, int, Tooltip *);
-    int Selected();
-    void Select(int);
+	int Selected();
+	void Select(int);
 };
 
 template <class T, class C>
 void UIList<T, C>::Draw(int x, int y, TCODConsole *console) {
-    console->setAlignment(TCOD_LEFT);
-    int count = 0;
-    for(typename C::iterator it = items->begin(); it != items->end() && count < height; it++) {
-        T item = *it;
-        draw(item, count, x + _x, y + _y + count, width, selection == count, console);
-        count++;
-    }
+	console->setAlignment(TCOD_LEFT);
+	int count = 0;
+	for(typename C::iterator it = items->begin(); it != items->end() && count < height; it++) {
+		T item = *it;
+		draw(item, count, x + _x, y + _y + count, width, selection == count, console);
+		count++;
+	}
 }
 
 template <class T, class C>
 void UIList<T, C>::Draw(int x, int y, int scroll, int _width, int _height, TCODConsole *console) {
-    console->setAlignment(TCOD_LEFT);
-    int count = 0;
-    for(typename C::iterator it = items->begin(); it != items->end(); it++) {
-        T item = *it;
+	console->setAlignment(TCOD_LEFT);
+	int count = 0;
+	for(typename C::iterator it = items->begin(); it != items->end(); it++) {
+		T item = *it;
 		if (count >= scroll && count < scroll + _height) {
 			draw(item, count, x, y + (count - scroll), _width, selection == count, console);
 		}
-        count++;
-    }
+		count++;
+	}
 }
 
 template <class T, class C>
 int UIList<T, C>::TotalHeight() {
-    return items->size();
+	return items->size();
 }
 
 template <class T, class C>
 MenuResult UIList<T, C>::Update(int x, int y, bool clicked, TCOD_key_t key) {
-    if (x >= _x && x < _x + width && y >= _y && y < _y + height) {
-        if (clicked) {
-            if (selectable) {
-                selection = y - _y;
-            }
-            if (onclick) {
-                onclick(y - _y);
-            }
-        }
-        return MENUHIT;
-    }
-    return NOMENUHIT;
+	if (x >= _x && x < _x + width && y >= _y && y < _y + height) {
+		if (clicked) {
+			if (selectable) {
+				selection = y - _y;
+			}
+			if (onclick) {
+				onclick(y - _y);
+			}
+		}
+		return MENUHIT;
+	}
+	return NOMENUHIT;
 }
 
 template <class T, class C>
@@ -107,13 +112,13 @@ void UIList<T, C>::GetTooltip(int x, int y, Tooltip *tooltip) {
 
 template <class T, class C>
 int UIList<T, C>::Selected() {
-    if(selection >= 0 && selection < (signed int)items->size()) {
-        return selection;
-    }
-    return -1;
+	if(selection >= 0 && selection < (signed int)items->size()) {
+		return selection;
+	}
+	return -1;
 }
 
 template <class T, class C>
 void UIList<T, C>::Select(int i) {
-    selection = i;
+	selection = i;
 }
