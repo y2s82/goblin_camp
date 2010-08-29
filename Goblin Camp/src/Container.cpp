@@ -85,3 +85,16 @@ void Container::ReserveSpace(bool res) {
 void Container::AddListener(ContainerListener* listener) {
 	listeners.push_back(listener);
 }
+
+void Container::RemoveListener(ContainerListener *listener) {
+  	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
+        if(*it == listener) {
+            listeners.erase(it);
+            return;
+        }
+	}
+}
+
+void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
+    tooltip->AddEntry(TooltipEntry((boost::format("%s (%d/%d)") % name % size() % (Capacity() + size())).str(), TCODColor::white));
+}

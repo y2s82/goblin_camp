@@ -61,4 +61,6 @@ public:
 	std::set<boost::weak_ptr<Item> >::iterator begin();
 	std::set<boost::weak_ptr<Item> >::iterator end();
 	void AddListener(ContainerListener* listener);
+	void RemoveListener(ContainerListener *listener);
+	void GetTooltip(int x, int y, Tooltip *tooltip);
 };
