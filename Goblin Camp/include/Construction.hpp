@@ -99,7 +99,7 @@ protected:
 	int time;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 public:
-	~Construction();
+	virtual ~Construction();
 
 	static Coordinate Blueprint(ConstructionType);
 	static Coordinate ProductionSpot(ConstructionType);
@@ -127,4 +127,5 @@ public:
 	virtual void Update();
 	virtual void Dismantle();
 	virtual Panel *GetContextMenu();
+	Coordinate Center();
 };

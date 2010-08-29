@@ -449,7 +449,7 @@ MOVENEARend:
 				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
-						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str());
+						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
 						Camp::Inst()->UpdateCenter(currentEntity().lock()->Position());
 						TaskFinished(TASKSUCCESS);
 						break;
@@ -490,7 +490,7 @@ MOVENEARend:
 					carried.lock()->Position(Position());
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
-						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!");
+						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!", TCODColor::white, cont->Position());
 					} else {
 						DropItem(carried); 
 						carried.reset();
@@ -945,9 +945,14 @@ void NPC::Kill() {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
 		health = 0;
-		int corpse = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
-		Game::Inst()->GetItem(corpse).lock()->Color(_color);
-		Game::Inst()->GetItem(corpse).lock()->Name(Game::Inst()->GetItem(corpse).lock()->Name() + "(" + name + ")");
+		int corpsenum = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
+		boost::shared_ptr<Item> corpse = Game::Inst()->GetItem(corpsenum).lock();
+		corpse->Color(_color);
+		corpse->Name(corpse->Name() + "(" + name + ")");
+		if (velocity > 0) {
+			corpse->CalculateFlightPath(GetVelocityTarget(), velocity, GetHeight());
+		}
+
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
 		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
 			weapon->Position(Position());
@@ -955,8 +960,8 @@ void NPC::Kill() {
 			mainHand.reset();
 		}
 
-		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red);
-		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red);
+		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
+		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red, Position());
 	}
 }
 
@@ -1253,15 +1258,17 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 #ifdef DEBUG
 					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
 #endif
-					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
-
-					if (effectiveStats[STRENGTH] > 20) {
-						Coordinate tar;
-						tar.X((x - npc->Position().X()) * (effectiveStats[STRENGTH] - 10));
-						tar.Y((y - npc->Position().Y()) * (effectiveStats[STRENGTH] - 10));
-						npc->CalculateFlightPath(npc->Position()+tar, rand() % 20 + 25);
-						npc->pathIndex = -1;
+					if (effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
+						if (attack.Type() == DAMAGE_BLUNT || rand() % 2 == 0) {
+							Coordinate tar;
+							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+							npc->CalculateFlightPath(npc->Position()+tar, rand() % 20 + 25);
+							npc->pathIndex = -1;
+						}
 					}
+
+					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
 				}
 			}
 		}
@@ -1279,7 +1286,7 @@ void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
 					quiver.lock()->RemoveItem(projectile);
 					projectile->PutInContainer();
 					projectile->Position(Position());
-					projectile->CalculateFlightPath(target.lock()->Position(), 50);
+					projectile->CalculateFlightPath(target.lock()->Position(), 50, GetHeight());
 				}
 			}
 			break;
@@ -1415,7 +1422,7 @@ class NPCListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				NPC::Presets.back().attacks.back().StatusEffects()->at(i).second = (int)TCOD_list_get(value.list,i);
+				NPC::Presets.back().attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		} else if (boost::iequals(name,"projectile")) {
 			NPC::Presets.back().attacks.back().Projectile(Item::StringToItemType(value.s));
@@ -1436,8 +1443,9 @@ class NPCListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name,"strength")) {
 			NPC::Presets.back().stats[STRENGTH] = value.i;
-		}  else if (boost::iequals(name,"size")) {
+		} else if (boost::iequals(name,"size")) {
 			NPC::Presets.back().stats[SIZE] = value.i;
+			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
 		}
 		return true;
 	}
