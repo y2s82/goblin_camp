@@ -593,6 +593,33 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	Announce::Inst()->Draw(console);
 }
 
+int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut) {
+	std::string out = "";
+	bool found = false;
+	for(std::string::iterator it = shortcut.begin(); it != shortcut.end(); it++) {
+		if(!found && tolower(*it) == keyMap[shortcut]) {
+			out.push_back(TCOD_COLCTRL_1);
+			out.push_back(*it);
+			out.push_back(TCOD_COLCTRL_STOP);
+			found = true;
+		} else {
+			out.push_back(*it);
+		}
+	}
+	
+	if(!found) {
+		if(keyMap[shortcut] == ' ') {
+			out.insert(0, (boost::format("%cSpace%c-") % (char)TCOD_COLCTRL_1 % (char)TCOD_COLCTRL_STOP).str());
+		} else {
+			out.insert(0, (boost::format("%c%c%c-") % (char)TCOD_COLCTRL_1 % (char)toupper(keyMap[shortcut]) % (char)TCOD_COLCTRL_STOP).str());
+		}
+	}
+	
+	out.push_back(' ');
+	console->print(x, y, out.c_str());
+	return out.length() - 2;
+}
+
 void UI::DrawTopBar(TCODConsole* console) {
 	console->setAlignment(TCOD_CENTER);
 	console->setForegroundColor(TCODColor::white);
@@ -609,10 +636,21 @@ void UI::DrawTopBar(TCODConsole* console) {
 		console->setForegroundColor(TCODColor(std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor)));
 		console->setColorControl(TCOD_COLCTRL_1, TCODColor(0, std::min(255, keyHelpTextColor), 0), TCODColor::black);
 		int x = 10;
-		console->print(x, 3, "%cQ%cuit  %cB%casics  %cW%corkshops  %cO%crders  %cF%curniture  %cS%ctockmanager  %cM%cilitary  %cA%cnnouncements ",
-			TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
-		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark  %cC%center Camp", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
-		console->print(x, 7, "Space to pause");
+		x += DrawShortcutHelp(console, x, 3, "Exit");
+		x += DrawShortcutHelp(console, x, 3, "Basics");
+		x += DrawShortcutHelp(console, x, 3, "Workshops");
+		x += DrawShortcutHelp(console, x, 3, "Orders");
+		x += DrawShortcutHelp(console, x, 3, "Furniture");
+		x += DrawShortcutHelp(console, x, 3, "StockManager");
+		x += DrawShortcutHelp(console, x, 3, "Squads");
+		x += DrawShortcutHelp(console, x, 3, "Announcements");
+		x = 10;
+		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark  ", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
+		x = 56;
+		x += DrawShortcutHelp(console, x, 5, "Center");
+		console->print(x, 5, "Camp");
+		x = 10;
+		x += DrawShortcutHelp(console, x, 7, "Pause");
 	}
 
 	console->setForegroundColor(TCODColor::white);
