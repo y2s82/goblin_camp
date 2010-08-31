@@ -97,7 +97,6 @@ bool Tile::BlocksLight() const { return !vis; }
 void Tile::BlocksLight(bool value) { vis = !value; }
 
 bool Tile::Walkable() const {
-	if (water && water->Depth() > WALKABLE_WATER_DEPTH) return false;
 	return walkable;
 }
 void Tile::Walkable(bool value) {
@@ -133,7 +132,7 @@ int Tile::MoveCost(void* ptr) const {
 int Tile::MoveCost() const {
 	if (!Walkable()) return 0;
 	int cost = _moveCost;
-	if (water) cost += water->Depth();
+	if (water) cost += std::min(WALKABLE_WATER_DEPTH, water->Depth());
 	if (construction >= 0) cost += 1;
 	return cost;
 }
