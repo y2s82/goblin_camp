@@ -374,7 +374,7 @@ void Panel::ShowModal() {
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
-			TCODConsole::root, 0, 0, 0.7, 1.0);
+			TCODConsole::root, 0, 0, 0.7F, 1.0F);
 
 		Draw(_x, _y, TCODConsole::root);
 		TCODConsole::root->flush();
