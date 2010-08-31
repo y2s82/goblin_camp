@@ -364,8 +364,13 @@ AiThink NPC::Think() {
 
 		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
-		if (aggressor.lock())
+		if (aggressor.lock()) {
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
+			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
+				aggressor.reset();
+				TaskFinished(TASKFAILFATAL);
+			}
+		}
 
 		timeCount -= UPDATES_PER_SECOND;
 		if (!jobs.empty()) {

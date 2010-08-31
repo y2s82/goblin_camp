@@ -493,8 +493,7 @@ std::string ItemCat::GetName() {
 	return name;
 }
 
-ItemPreset::ItemPreset() :
-graphic('?'),
+ItemPreset::ItemPreset() : graphic('?'),
 	color(TCODColor::pink),
 	name("Preset default"),
 	categories(std::set<ItemCategory>()),
