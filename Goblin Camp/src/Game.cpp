@@ -426,7 +426,6 @@ void Game::Init() {
 	
 	Data::Load();
 	
-	GenerateMap();
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
@@ -835,9 +834,16 @@ void Game::GenerateMap() {
 		}
 	}
 
-	for (int x = 100; x < 150; ++x) {
-		for (int y = 100; y < 150; ++y) {
-			map->Type(x,y,TILEBOG);
+	int basex = 125;
+	basey = 125;
+	int lo_offset = 0;
+	int hi_offset = 0;
+	for (int x = -25; x < 25; ++x) {
+		int range = int(std::sqrt(25*25 - x*x));
+		lo_offset = std::min(std::max(rand() % 3 - 1 + lo_offset, -5), 5);
+		hi_offset = std::min(std::max(rand() % 3 - 1 + hi_offset, -5), 5);
+		for (int y = -range-lo_offset; y < range+hi_offset; ++y) {
+			map->Type(basex+x,basey+y,TILEBOG);
 		}
 	}
 
