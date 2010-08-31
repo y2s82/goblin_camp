@@ -30,6 +30,7 @@ enum JobPriority {
 	HIGH,
 	MED,
 	LOW,
+	WAITING,
 	PRIORITY_COUNT
 };
 

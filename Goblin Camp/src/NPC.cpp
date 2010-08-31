@@ -98,8 +98,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	inventory->SetInternal();
 	Position(pos,true);
 
-	thirst += rand() % 10; //Just for some variety
-	hunger += rand() % 10;
+	thirst = thirst - (THIRST_THRESHOLD / 2) + rand() % (THIRST_THRESHOLD);
+	hunger = hunger - (HUNGER_THRESHOLD / 2) + rand() % (HUNGER_THRESHOLD);
+	weariness = weariness - (WEARY_THRESHOLD / 2) + rand() % (WEARY_THRESHOLD);
 
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
@@ -1529,6 +1530,8 @@ std::string NPC::NPCTypeToString(NPCType type) {
 NPCType NPC::StringToNPCType(std::string typeName) {
 	return NPCTypeNames[typeName];
 }
+
+int NPC::GetNPCSymbol() { return Presets[type].graphic; }
 
 void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {

@@ -221,6 +221,7 @@ public:
 	static std::vector<NPCPreset> Presets;
 	static std::string NPCTypeToString(NPCType);
 	static NPCType StringToNPCType(std::string);
+	int GetNPCSymbol();
 
 	void InitializeAIFunctions();
 

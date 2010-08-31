@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 #include <libtcod.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "Job.hpp"
 #include "Announce.hpp"
@@ -52,6 +53,8 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	tasks(std::vector<Task>()),
 	internal(false)
 {
+	boost::to_lower(name);
+	name[0] = toupper(name[0]);
 }
 
 Job::~Job() {
@@ -151,14 +154,31 @@ void Job::Fail() {
 
 std::string Job::ActionToString(Action action) {
 	switch (action) {
-	case MOVE: return std::string("Move");
-	case MOVEADJACENT: return std::string("Move adjacent");
-	case BUILD: return std::string("Build");
-	case TAKE: return std::string("Pick up");
-	case DROP: return std::string("Drop");
-	case PUTIN: return std::string("Put in");
-	case USE: return std::string("Use");
-	default: return std::string("???");
+		case NOACTION: return std::string("No Action");
+		case USE: return std::string("Use");
+		case TAKE: return std::string("Pick up");
+		case DROP: return std::string("Drop");
+		case PUTIN: return std::string("Put in");
+		case BUILD: return std::string("Build");
+		case MOVE: return std::string("Move");
+		case MOVEADJACENT: return std::string("Move adjacent");
+		case MOVENEAR: return std::string("Move Near");
+		case WAIT: return std::string("Wait");
+		case DRINK: return std::string("Drink");
+		case EAT: return std::string("Eat");
+		case FIND: return std::string("Find");
+		case HARVEST: return std::string("Harvest");
+		case FELL: return std::string("Fell");
+		case HARVESTWILDPLANT: return std::string("Harvest plant");
+		case KILL: return std::string("Kill");	
+		case FLEEMAP: return std::string("Flee!!");
+		case SLEEP: return std::string("Sleep");
+		case DISMANTLE: return std::string("Dismantle");
+		case WIELD: return std::string("Wield");
+		case BOGIRON: return std::string("Collect bog iron");
+		case STOCKPILEITEM: return std::string("Stockpiling production");
+		case QUIVER: return std::string("Quiver");
+		default: return std::string("???");
 	}
 }
 

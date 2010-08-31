@@ -152,6 +152,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & offHand;
 	ar & thirst;
 	ar & hunger;
+	ar & weariness;
 	ar & thinkSpeed;
 	ar & statusEffects;
 	ar & health;
@@ -198,6 +199,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & offHand;
 	ar & thirst;
 	ar & hunger;
+	ar & weariness;
 	ar & thinkSpeed;
 	ar & statusEffects;
 	ar & health;
@@ -623,13 +625,11 @@ void NatureObject::load(Archive & ar, const unsigned int version) {
 template<class Archive>
 void JobManager::save(Archive & ar, const unsigned int version) const {
 	ar & availableList;
-	ar & waitingList;
 }
 
 template<class Archive>
 void JobManager::load(Archive & ar, const unsigned int version) {
 	ar & availableList;
-	ar & waitingList;
 }
 
 template<class Archive>

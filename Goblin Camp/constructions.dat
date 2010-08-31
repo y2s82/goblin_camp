@@ -159,6 +159,20 @@ construction_type "Weapon crafter" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
+construction_type "Armor Crafter" {
+	category="Workshops"
+	graphicLength=2
+	graphic=[16, 124,
+			 170, 124,
+			 91, 93,
+			 94, 251]
+	walkable
+	maxCondition=100
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Rough stone", "Rough stone"]
+}
+
 construction_type "Mill" {
 	category="Workshops"
 	graphicLength=3

@@ -479,7 +479,7 @@ bool Construction::SpawnProductionJob() {
 		newProductionJob->ReserveEntity(shared_from_this());
 
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-			boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
+			boost::shared_ptr<Job> newPickupJob(new Job("Pickup " + Item::ItemCategoryToString(Item::Components(jobList.front(), compi)) + " for " + Presets[Type()].name));
 			newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS));
 			newPickupJob->tasks.push_back(Task(MOVE));
 			newPickupJob->tasks.push_back(Task(TAKE));
@@ -589,7 +589,7 @@ void Construction::Dismantle() {
 			jobList.clear();
 		}
 
-		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), MED, 0, false));
+		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
 		dismantleJob->ConnectToEntity(shared_from_this());
 		dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
 		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));

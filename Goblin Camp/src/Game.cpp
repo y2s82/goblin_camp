@@ -139,10 +139,10 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		}
 	}
 
-	boost::shared_ptr<Job> buildJob(new Job("Build construction", MED, 0, false));
+	boost::shared_ptr<Job> buildJob(new Job("Build " + Construction::Presets[construct].name, MED, 0, false));
 
 	for (std::list<ItemCategory>::iterator materialIter = newCons->MaterialList()->begin(); materialIter != newCons->MaterialList()->end(); ++materialIter) {
-		boost::shared_ptr<Job> pickupJob(new Job("Pickup materials", MED, 0, true));
+		boost::shared_ptr<Job> pickupJob(new Job("Pickup " + Item::ItemCategoryToString(*materialIter) + " for " + Construction::Presets[construct].name, MED, 0, true));
 		pickupJob->Parent(buildJob);
 		buildJob->PreReqs()->push_back(pickupJob);
 
@@ -717,7 +717,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 				//Found a stockpile that both allows the item, and has space
 				//Check if the item can be contained, and if so if any containers are in the stockpile
 
-				boost::shared_ptr<Job> stockJob(new Job("Store item", LOW));
+				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item.lock()->Type()) + " in stockpile", LOW));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;

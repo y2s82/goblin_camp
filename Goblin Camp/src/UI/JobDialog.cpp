@@ -27,17 +27,7 @@
 #include "UI/ScrollPanel.hpp"
 
 void JobDialog::Draw(int _x, int _y, int scroll, int width, int height, TCODConsole* console) {
-	JobManager::Inst()->Draw(Coordinate(_x + 1, _y), scroll, height, console);
-
-	for (int y = _y; y < _y+height; ++y) {
-		boost::weak_ptr<Job> job(JobManager::Inst()->GetJobByListIndex(y - _y + scroll));
-		if (job.lock()) {
-			if (job.lock()->Paused()) {
-				console->print(_x+width-13, y, "P");
-			}
-			console->print(_x+width-16, y, "A-> %d", job.lock()->Assigned());
-		}
-	}
+	JobManager::Inst()->Draw(Coordinate(_x + 1, _y), scroll, width, height, console);
 }
 
 int JobDialog::TotalHeight() {
