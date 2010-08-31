@@ -221,6 +221,12 @@ bool Stockpile::Full()
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				if (containers[Coordinate(ix,iy)]->empty()) return false;
+
+				boost::weak_ptr<Item> item = containers[Coordinate(ix,iy)]->GetFirstItem();
+				if (item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					if (!container->Full()) return false;
+				}
 			}
 		}
 	}
