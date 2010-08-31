@@ -300,6 +300,12 @@ void NPC::Update() {
 		if (weariness > WEARY_THRESHOLD) HandleWeariness();
 	}
 
+	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
+		if (water->Depth() > WALKABLE_WATER_DEPTH) {
+			AddEffect(SWIM);
+		} else { RemoveEffect(SWIM); }
+	} else { RemoveEffect(SWIM); }
+
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
 	}
