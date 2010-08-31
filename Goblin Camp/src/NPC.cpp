@@ -273,6 +273,8 @@ void NPC::Update() {
 		}
 	}
 
+	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+
 	if (needsNutrition) {
 		++thirst; ++hunger;
 
@@ -297,6 +299,12 @@ void NPC::Update() {
 
 		if (weariness > WEARY_THRESHOLD) HandleWeariness();
 	}
+
+	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
+		if (water->Depth() > WALKABLE_WATER_DEPTH) {
+			AddEffect(SWIM);
+		} else { RemoveEffect(SWIM); }
+	} else { RemoveEffect(SWIM); }
 
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
@@ -364,8 +372,13 @@ AiThink NPC::Think() {
 
 		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
-		if (aggressor.lock())
+		if (aggressor.lock()) {
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
+			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
+				aggressor.reset();
+				TaskFinished(TASKFAILFATAL);
+			}
+		}
 
 		timeCount -= UPDATES_PER_SECOND;
 		if (!jobs.empty()) {
