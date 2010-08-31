@@ -77,4 +77,5 @@ public:
 	bool LineOfSight(int, int, int, int);
 	void Mark(int,int);
 	void Unmark(int,int);
+	int GetMoveModifier(int,int);
 };
