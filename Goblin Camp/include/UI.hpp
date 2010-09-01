@@ -69,6 +69,7 @@ private:
 	int cursorChar;
 
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
+	int DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut);
 	void DrawTopBar(TCODConsole*);
 	void HandleKeyboard();
 	void HandleMouse();

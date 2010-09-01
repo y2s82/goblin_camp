@@ -498,7 +498,7 @@ void ModsMenu() {
 
 	std::list<Data::Mod>& modList = Data::GetLoadedMods();
 	const int subH = modList.size() * 5;
-	TCODConsole sub(w - 2, subH);
+	TCODConsole sub(w - 2, std::max(1, subH));
 
 	int currentY = 0;
 	for (std::list<Data::Mod>::iterator it = modList.begin(); it != modList.end(); ++it) {
