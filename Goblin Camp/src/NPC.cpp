@@ -294,10 +294,10 @@ void NPC::Update() {
 	if (needsSleep) {
 		++weariness;
 
-		if (weariness >= WEARY_THRESHOLD) AddEffect(DROWSY);
-		else RemoveEffect(DROWSY);
-
-		if (weariness > WEARY_THRESHOLD) HandleWeariness();
+		if (weariness >= WEARY_THRESHOLD) { 
+			AddEffect(DROWSY);
+			HandleWeariness();
+		} else RemoveEffect(DROWSY);		
 	}
 
 	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
@@ -347,8 +347,7 @@ void NPC::UpdateStatusEffects() {
 			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
 		}
 	}
-
-
+	
 	if (statusGraphicCounter > 10) {
 		statusGraphicCounter = 0;
 		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
