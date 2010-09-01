@@ -122,6 +122,15 @@ StatusEffect::StatusEffect(StatusEffectType typeval) :
 		statChanges[STRENGTH] = 2;
 		statChanges[DODGE] = 0.5;
 		break;
+
+	case SWIM:
+		name = "Swimming";
+		graphic = '~';
+		color = TCODColor::lightBlue;
+		cooldown = -1;
+		statChanges[DODGE] = 0.0;
+		statChanges[STRENGTH] = 0.75;
+		break;
 	}
 	cooldownDefault = cooldown;
 }
