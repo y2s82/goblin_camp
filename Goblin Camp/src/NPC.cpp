@@ -337,7 +337,7 @@ void NPC::UpdateStatusEffects() {
 			if (statusEffectI->bleed) Game::Inst()->CreateBlood(Position());
 		}
 
-		//Remove the statuseffect if it's cooldown has run out
+		//Remove the statuseffect if its cooldown has run out
 		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
 			if (statusEffectI == statusEffectIterator) {
 				++statusEffectIterator;
