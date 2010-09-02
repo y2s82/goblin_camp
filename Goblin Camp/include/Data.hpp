@@ -68,9 +68,14 @@ namespace Data {
 	// Mod metadata
 	struct Mod {
 		std::string mod, name, author, version;
+		short apiVersion;
 		
-		Mod(const std::string& mod, const std::string& name, const std::string& author, const std::string& version) :
-			mod(mod), name(name), author(author), version(version) {
+		Mod(
+			const std::string& mod, const std::string& name,
+			const std::string& author, const std::string& version,
+			short apiVersion
+		) :
+			mod(mod), name(name), author(author), version(version), apiVersion(apiVersion) {
 		}
 	};
 	

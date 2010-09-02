@@ -39,6 +39,7 @@ namespace fs = boost::filesystem;
 #include "Construction.hpp"
 #include "UI.hpp"
 #include "UI/YesNoDialog.hpp"
+#include "scripting/Engine.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
 void _ImplFindPersonalDirectory(std::string&);
@@ -141,6 +142,8 @@ namespace {
 				ptr->author = value.s;
 			} else if (boost::iequals(name, "version")) {
 				ptr->version = value.s;
+			} else if (boost::iequals(name, "apiversion")) {
+				ptr->apiVersion = value.i;
 			}
 			
 			return true;
@@ -161,9 +164,10 @@ namespace {
 		
 		TCODParser parser;
 		TCODParserStruct *type = parser.newStructure("mod");
-		type->addProperty("name",    TCOD_TYPE_STRING, true);
-		type->addProperty("author",  TCOD_TYPE_STRING, true);
-		type->addProperty("version", TCOD_TYPE_STRING, true);
+		type->addProperty("name",       TCOD_TYPE_STRING, true);
+		type->addProperty("author",     TCOD_TYPE_STRING, true);
+		type->addProperty("version",    TCOD_TYPE_STRING, true);
+		type->addProperty("apiVersion", TCOD_TYPE_INT, false);
 		
 		for (fs::directory_iterator it(globals::modsDir); it != end; ++it) {
 			if (!fs::is_directory(it->status())) continue;
@@ -177,7 +181,7 @@ namespace {
 			TryLoadLocalDataFile(mod, "names",         _LoadNames);
 			TryLoadLocalDataFile(mod, "creatures",     NPC::LoadPresets);
 			
-			Data::Mod metadata(mod.filename(), "<unknown>", "<unknown>", "<unknown>");
+			Data::Mod metadata(mod.filename(), "<unknown>", "<unknown>", "<unknown>", -1);
 			if (fs::exists(mod / "mod.dat")) {
 				Logger::Inst()->output << "[Data] Loading mod metadata.\n";
 				

@@ -11,6 +11,7 @@ import property-set ;
 import boost ;
 import libtcod ;
 import winsdk ;
+import python ;
 
 ##
 # Project definition
@@ -23,8 +24,11 @@ project goblin-camp
       <debug-symbols>on
       <variant>debug:<define>DEBUG
       <include>$(GC_HEADERS)
+      <include>$(GC_HEADERS)/scripting/lua
+      <include>$(GC_HEADERS)/scripting
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
+      <python-debugging>off
       # Architecture defines
       <address-model>32:<define>X86
       <address-model>64:<define>X64
@@ -45,25 +49,9 @@ project goblin-camp
     : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
 
-withPython = ;
-
-if --with-python in [ modules.peek : ARGV ] {
-    ECHO ** Building with Python support ;
-    
-    import python ;
-    
-    if ! [ python.configured ] {
-        ECHO ** Using default Python configuration ;
-        using python ;
-    }
-    
-    withPython = yes ;
-}
-
 import gc-version ;
 modules.poke gc-version : GC_TEMPLATES : $(GC_TEMPLATES) ;
 modules.poke gc-version : GC_VERSION   : $(GC_VERSION) ;
-modules.poke gc-version : GC_PYTHON    : $(withPython:E=no) ;
 
 import gc-sln ;
 modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
@@ -118,27 +106,21 @@ explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
 explicit-alias linux-deps ;
 explicit-alias osx-deps : : : : <framework>CoreFoundation ;
 
-# Python dependencies
-python-deps = ;
-boost-libs  = ;
-
-if $(withPython) {
-    boost-libs      += python ;
-    additional-reqs += <define>GC_PYTHON ;
-    python-deps      = /python//python.lib ;
-}
-
 # Boost dependencies
-boost-libs += serialization thread system filesystem ;
+boost-libs = serialization thread system filesystem ;
 
 boost-deps = ;
 for local name in $(boost-libs) {
     boost-deps += /boost//$(name) ;
 }
 
+if ! [ python.configured ] {
+    using python ;
+}
+
 # All common dependencies
 explicit-alias common-deps
-    : $(python-deps) $(boost-deps) /libtcod//libtcod
+    : $(boost-deps) /libtcod//libtcod /python//python
 ;
 
 if [ os.name ] = NT {

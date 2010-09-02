@@ -34,6 +34,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
+#include "scripting/Engine.hpp"
 
 #if defined(GC_BOOST_BUILD)
 // This variable is defined in buildsystem-generated _version.cpp.
@@ -45,6 +46,7 @@ extern const char *_GOBLIN_CAMP_VERSION_;
 
 int GCMain(std::vector<std::string>& args) {
 	Data::Init();
+	Script::Init(args);
 	Game::Inst()->Init();
 	
 	Logger::Inst()->output << "[GCMain] args.size() = " << args.size() << "\n";
@@ -52,6 +54,7 @@ int GCMain(std::vector<std::string>& args) {
 	
 	int exitcode = MainMenu();
 	
+	Script::Shutdown();
 	Logger::End();
 	return exitcode;
 }
