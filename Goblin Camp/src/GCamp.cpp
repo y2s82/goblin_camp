@@ -34,9 +34,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
-#ifdef GC_PYTHON
-#	include "Python.hpp"
-#endif
 
 #if defined(GC_BOOST_BUILD)
 // This variable is defined in buildsystem-generated _version.cpp.
@@ -48,11 +45,12 @@ extern const char *_GOBLIN_CAMP_VERSION_;
 
 int GCMain() {
 	Data::Init();
-#ifdef GC_PYTHON
-	Python::Init();
-#endif
 	Game::Inst()->Init();
-	return MainMenu();
+	
+	int exitcode = MainMenu();
+	
+	Logger::End();
+	return exitcode;
 }
 
 void MainLoop() {
@@ -64,7 +62,7 @@ void MainLoop() {
 	int elapsedMilli;
 	int targetMilli = 1000 / (UPDATES_PER_SECOND*2);
 	int startMilli = TCODSystem::getElapsedMilli();
-	while(true) {
+	while (game->Running()) {
 
 		if (Game::ToMainMenu()) {
 			Game::ToMainMenu(false);
@@ -226,7 +224,7 @@ int MainMenu() {
 			}
 		}
 	}
-	Game::Inst()->Exit(false);
+	
 	return 0;
 }
 

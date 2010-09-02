@@ -322,16 +322,13 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
+	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
+	
 	if (confirm) {
-		YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
-		ExitConfirmed();
+		exitFunc();
 	}
-}
-
-void Game::ExitConfirmed() {
-	Logger::End();
-	exit(0);
 }
 
 int Game::ScreenWidth() const {	return screenWidth; }
