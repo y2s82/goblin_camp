@@ -64,6 +64,17 @@ namespace Data {
 	void SaveScreenshot();
 	// Saves config.
 	void SaveConfig(unsigned int, unsigned int, const std::string&, bool);
+	// Saves keymap.
+	void SaveKeys(const std::map<std::string, char>&);
+	
+	namespace Path {
+		enum Path {
+			Executable, GlobalData, Personal, Mods, Saves, Screenshots, Font, Config, Keys
+		};
+	}
+	
+	// Retrieves given path into a buffer.
+	void GetPath(Path::Path, std::string&);
 	
 	// Mod metadata
 	struct Mod {

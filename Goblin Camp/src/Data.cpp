@@ -21,12 +21,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
+
 #include <cassert>
 #include <string>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <map>
 
 namespace fs = boost::filesystem;
 
@@ -312,6 +315,8 @@ namespace Data {
 		
 		Logger::Inst()->output << "[Data] Loading config.ini.\n";
 		Game::Inst()->LoadConfig(globals::config.string());
+		
+		Logger::Inst()->output << "[Data] Loading keymaps.\n";
 		UI::LoadKeys(globals::defaultKeys.string());
 		UI::LoadKeys(globals::keys.string());
 		
@@ -430,6 +435,34 @@ namespace Data {
 			(fullscreen ? "\n\tfullscreen" : "") <<
 		"\n}";
 		configStream.close();
+	}
+	
+	void SaveKeys(std::map<std::string, char>& keymap) {
+		typedef std::pair<std::string, char> KeyPair;
+		std::ofstream keysStream(globals::keys.string().c_str());
+		
+		keysStream << "keys {\n";
+		BOOST_FOREACH(KeyPair mapping, keymap) {
+			keysStream << "\t" << mapping.first << " = '" << mapping.second << "'\n";
+		}
+		keysStream << "}";
+		keysStream.close();
+	}
+	
+	void GetPath(Path::Path what, std::string& buffer) {
+		fs::path *path;
+		switch (what) {
+			case Path::Executable:  path = &globals::exec;        break;
+			case Path::GlobalData:  path = &globals::dataDir;     break;
+			case Path::Personal:    path = &globals::personalDir; break;
+			case Path::Mods:        path = &globals::modsDir;     break;
+			case Path::Saves:       path = &globals::savesDir;    break;
+			case Path::Screenshots: path = &globals::screensDir;  break;
+			case Path::Font:        path = &globals::font;        break;
+			case Path::Config:      path = &globals::config;      break;
+			case Path::Keys:        path = &globals::keys;        break;
+		}
+		buffer = path->string();
 	}
 	
 	std::list<Mod>& GetLoadedMods() {
