@@ -1242,6 +1242,16 @@ bool NPC::HasEffect(StatusEffectType effect) {
 
 std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 
+void NPC::AbortCurrentJob(bool remove_job) {
+	jobs.clear();
+	if (carried.lock()) {
+		carried.lock()->Reserve(false);
+		DropItem(carried);
+		carried.reset();
+	}
+	if (remove_job) { JobManager::Inst()->RemoveJobByNPC(uid); }
+}
+
 void NPC::Hit(boost::weak_ptr<Entity> target) {
 	if (target.lock()) {
 		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {

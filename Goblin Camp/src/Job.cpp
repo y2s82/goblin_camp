@@ -192,3 +192,5 @@ void Job::ReserveSpace(boost::weak_ptr<Container> cont) {
 		reservedSpace = cont;
 	}
 }
+
+boost::weak_ptr<Entity> Job::ConnectedEntity() { return connectedEntity; }

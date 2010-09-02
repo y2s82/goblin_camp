@@ -66,6 +66,28 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 	}
 }
 
+void JobManager::CancelJob(boost::weak_ptr<Entity> construction) {
+	boost::shared_ptr<Entity> construction_ptr, job_ptr, job_parent_ptr;
+	for (int i=0; i<PRIORITY_COUNT; i++) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
+			job_parent_ptr.reset();
+			job_ptr = (*jobi)->ConnectedEntity().lock();
+			construction_ptr = construction.lock();
+			if ((*jobi)->Parent().lock()) { job_parent_ptr = (*jobi)->Parent().lock()->ConnectedEntity().lock(); }
+			// If a job is connected to a contruction task which is cancelled or parent is such a task then remove them
+			if (construction_ptr && 
+				( (job_ptr && job_ptr->Uid() == construction_ptr->Uid()) || 
+				(job_parent_ptr && job_parent_ptr->Uid() == construction_ptr->Uid()) ) ) { 
+				std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
+				if (npc != Game::Inst()->npcList.end())  { npc->second->AbortCurrentJob(false); }
+				jobi = availableList[i].erase(jobi);
+			} else {
+				++jobi;
+			}
+		}
+	}
+}
+
 void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConsole* console) {
 	int skip = 0;
 	int y = pos.Y();
@@ -188,8 +210,20 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	return boost::weak_ptr<Job>();
 }
 
+void JobManager::RemoveJobByNPC(int uid) {
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
+			if ((*jobi)->Assigned() == uid) {
+				jobi = availableList[i].erase(jobi);
+				return;
+			}
+		}
+	}
+}
+
 void JobManager::Reset() {
 	for (int i = 0; i < PRIORITY_COUNT; ++i) {
 		availableList[i].clear();
 	}
 }
+

@@ -461,18 +461,14 @@ bool Construction::SpawnProductionJob() {
 				item.lock()->Reserve(true);
 			} else {
 				//Not all items available, cancel job and unreserve the reserved items.
-				for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
-					resi->lock()->Reserve(false);
-				}
+				ReserveComponents(false);
 				jobList.pop_front();
 				return false;
 			}
 		}
 
 		//Unreserve the items now, because the individual jobs will reserve them for themselves
-		for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
-			resi->lock()->Reserve(false);
-		}
+		ReserveComponents(false);
 
 		boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
 		newProductionJob->ConnectToEntity(shared_from_this());
@@ -589,11 +585,29 @@ void Construction::Dismantle() {
 			jobList.clear();
 		}
 
-		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
-		dismantleJob->ConnectToEntity(shared_from_this());
-		dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
-		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
-		JobManager::Inst()->AddJob(dismantleJob);
+		if (CheckMaterialsPresent() && Condition() > 0) { 
+			boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
+			dismantleJob->ConnectToEntity(shared_from_this());
+			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
+			JobManager::Inst()->AddJob(dismantleJob);
+		} else { // Remove construction and cancel associated jobs
+			ReserveComponents(false);
+			JobManager::Inst()->CancelJob(shared_from_this());
+			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		}
+	}
+}
+
+bool Construction::CheckMaterialsPresent() { 
+	if ((signed int)materials.size() != materialsUsed->size()) { return false; }
+	return true;
+}
+
+void Construction::ReserveComponents(bool set_component_status) {
+	std::list<boost::weak_ptr<Item> > componentList;
+	for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+		resi->lock()->Reserve(set_component_status);
 	}
 }
 
