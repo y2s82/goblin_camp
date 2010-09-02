@@ -1631,6 +1631,13 @@ void NPC::UpdateVelocity() {
 					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
 						health -= velocity/5;
 						AddEffect(CONCUSSION);
+
+						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
+							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
+								//TODO: Create attack based on weight and damage construct
+							}
+						}
+
 						SetVelocity(0);
 						flightPath.clear();
 						return;
