@@ -43,9 +43,12 @@ extern const char *_GOBLIN_CAMP_VERSION_;
 #	define GC_VERSION "Goblin Camp 0.12"
 #endif
 
-int GCMain() {
+int GCMain(std::vector<std::string>& args) {
 	Data::Init();
 	Game::Inst()->Init();
+	
+	Logger::Inst()->output << "[GCMain] args.size() = " << args.size() << "\n";
+	Logger::Inst()->output.flush();
 	
 	int exitcode = MainMenu();
 	

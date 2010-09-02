@@ -19,33 +19,22 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
-#include <shlobj.h>
 
-#include <boost/filesystem.hpp>
-#include <string>
 #include <vector>
-#include <cstring>
+#include <string>
 #include <cstdlib>
 
-namespace fs = boost::filesystem;
-
-void _ImplFindPersonalDirectory(std::string& dir) {
-	char myGames[MAX_PATH];
-	// gotta love WinAPI
-	SHGetFolderPathAndSubDirA(
-		NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, "My Games", myGames
-	);
-	dir = myGames;
-	dir += "\\Goblin Camp";
-}
-
-void GCCommandLine(std::vector<std::string>&);
-
-void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-	std::vector<std::string> args;
-	GCCommandLine(args);
+void GCCommandLine(std::vector<std::string>& args) {
+	int argc = 0;
+	wchar_t **argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+	char buffer[4096];
+	args.resize(argc);
 	
-	exec    = fs::path(std::string(args[0]));
-	execDir = exec.parent_path();
-	dataDir = execDir;
+	for (int i = 0; i < argc; ++i) {
+		size_t converted;
+		wcstombs_s(&converted, buffer, sizeof(buffer), argvW[i], _TRUNCATE);
+		buffer[converted] = '\0';
+		
+		args[i] = buffer;
+	}
 }
