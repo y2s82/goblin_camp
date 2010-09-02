@@ -126,6 +126,8 @@ public:
 	bool HasTag(ConstructionTag);
 	virtual void Update();
 	virtual void Dismantle();
+	bool CheckMaterialsPresent();
+	void ReserveComponents(bool);
 	virtual Panel *GetContextMenu();
 	Coordinate Center();
 };

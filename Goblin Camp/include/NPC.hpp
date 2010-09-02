@@ -191,11 +191,11 @@ public:
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
-
 	void AddEffect(StatusEffectType);
 	void RemoveEffect(StatusEffectType);
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();
+	void AbortCurrentJob(bool);
 
 	bool Expert();
 	void Expert(bool);
