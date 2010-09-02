@@ -15,11 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#ifdef GC_PYTHON
-
-namespace Python {
-	extern const unsigned int apiVersion;
-	void Init();
+namespace Script {
+	// only mods with apiVersion property that equals to this will be loaded
+	extern const short version;
+	
+	void Init(std::vector<std::string>&);
+	void Shutdown();
+	void LoadScript(const std::string&, const std::string&);
 }
-
-#endif
