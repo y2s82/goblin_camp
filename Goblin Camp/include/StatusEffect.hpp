@@ -49,7 +49,8 @@ enum StatusEffectType {
 	BLEEDING,
 	FLYING,
 	BADSLEEP,
-	RAGE
+	RAGE,
+	SWIM
 };
 
 struct StatusEffect {

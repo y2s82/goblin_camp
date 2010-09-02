@@ -153,7 +153,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
-				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->Walkable(ix,iy)) {
+				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->Buildable(ix,iy)) {
 					if (Map::Inst()->GetConstruction(ix-1,iy) == uid ||
 						Map::Inst()->GetConstruction(ix+1,iy) == uid ||
 						Map::Inst()->GetConstruction(ix,iy-1) == uid ||
