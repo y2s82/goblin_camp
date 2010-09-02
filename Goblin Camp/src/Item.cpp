@@ -454,6 +454,12 @@ void Item::UpdateVelocity() {
 					int tx = flightPath.back().coord.X();
 					int ty = flightPath.back().coord.Y();
 					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
+						Attack attack = GetAttack();
+						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
+							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
+								construct->Damage(&attack);
+							}
+						}
 						SetVelocity(0);
 						flightPath.clear();
 						return;
