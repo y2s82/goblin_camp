@@ -128,4 +128,6 @@ public:
 	virtual void Dismantle();
 	virtual Panel *GetContextMenu();
 	Coordinate Center();
+	void Damage(Attack*);
+	void Explode();
 };

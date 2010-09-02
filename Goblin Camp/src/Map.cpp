@@ -239,3 +239,12 @@ void Map::Reset(int x, int y) {
 
 void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
 void Map::Unmark(int x, int y) { tileMap[x][y].Unmark(); }
+
+int Map::GetMoveModifier(int x, int y) {
+	int modifier = 0;
+	if (tileMap[x][y].type() == TILEBOG) modifier += 10;
+	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) {
+		modifier += water->Depth();
+	}
+	return modifier;
+}

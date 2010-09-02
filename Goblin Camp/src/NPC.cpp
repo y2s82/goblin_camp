@@ -273,6 +273,8 @@ void NPC::Update() {
 		}
 	}
 
+	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+
 	if (needsNutrition) {
 		++thirst; ++hunger;
 
@@ -292,11 +294,17 @@ void NPC::Update() {
 	if (needsSleep) {
 		++weariness;
 
-		if (weariness >= WEARY_THRESHOLD) AddEffect(DROWSY);
-		else RemoveEffect(DROWSY);
-
-		if (weariness > WEARY_THRESHOLD) HandleWeariness();
+		if (weariness >= WEARY_THRESHOLD) { 
+			AddEffect(DROWSY);
+			HandleWeariness();
+		} else RemoveEffect(DROWSY);		
 	}
+
+	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
+		if (water->Depth() > WALKABLE_WATER_DEPTH) {
+			AddEffect(SWIM);
+		} else { RemoveEffect(SWIM); }
+	} else { RemoveEffect(SWIM); }
 
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
@@ -329,7 +337,7 @@ void NPC::UpdateStatusEffects() {
 			if (statusEffectI->bleed) Game::Inst()->CreateBlood(Position());
 		}
 
-		//Remove the statuseffect if it's cooldown has run out
+		//Remove the statuseffect if its cooldown has run out
 		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
 			if (statusEffectI == statusEffectIterator) {
 				++statusEffectIterator;
@@ -339,8 +347,7 @@ void NPC::UpdateStatusEffects() {
 			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
 		}
 	}
-
-
+	
 	if (statusGraphicCounter > 10) {
 		statusGraphicCounter = 0;
 		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
@@ -364,8 +371,13 @@ AiThink NPC::Think() {
 
 		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
-		if (aggressor.lock())
+		if (aggressor.lock()) {
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
+			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
+				aggressor.reset();
+				TaskFinished(TASKFAILFATAL);
+			}
+		}
 
 		timeCount -= UPDATES_PER_SECOND;
 		if (!jobs.empty()) {
@@ -1619,6 +1631,13 @@ void NPC::UpdateVelocity() {
 					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
 						health -= velocity/5;
 						AddEffect(CONCUSSION);
+
+						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
+							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
+								//TODO: Create attack based on weight and damage construct
+							}
+						}
+
 						SetVelocity(0);
 						flightPath.clear();
 						return;
