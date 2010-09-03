@@ -62,6 +62,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/lexical_cast.hpp>
 #		include <boost/date_time/local_time/local_time.hpp>
 #		include <boost/foreach.hpp>
+#		include <boost/filesystem.hpp>
 #	pragma warning(pop)
 // libtcod
 #	include <libtcod.hpp>

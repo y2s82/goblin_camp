@@ -449,20 +449,18 @@ namespace Data {
 		keysStream.close();
 	}
 	
-	void GetPath(Path::Path what, std::string& buffer) {
-		fs::path *path;
+	fs::path& GetPath(Path::Path what) {
 		switch (what) {
-			case Path::Executable:  path = &globals::exec;        break;
-			case Path::GlobalData:  path = &globals::dataDir;     break;
-			case Path::Personal:    path = &globals::personalDir; break;
-			case Path::Mods:        path = &globals::modsDir;     break;
-			case Path::Saves:       path = &globals::savesDir;    break;
-			case Path::Screenshots: path = &globals::screensDir;  break;
-			case Path::Font:        path = &globals::font;        break;
-			case Path::Config:      path = &globals::config;      break;
-			case Path::Keys:        path = &globals::keys;        break;
+			case Path::Executable:  return globals::exec;
+			case Path::GlobalData:  return globals::dataDir;
+			case Path::Personal:    return globals::personalDir;
+			case Path::Mods:        return globals::modsDir;
+			case Path::Saves:       return globals::savesDir;
+			case Path::Screenshots: return globals::screensDir;
+			case Path::Font:        return globals::font;
+			case Path::Config:      return globals::config;
+			case Path::Keys:        return globals::keys;
 		}
-		buffer = path->string();
 	}
 	
 	std::list<Mod>& GetLoadedMods() {
