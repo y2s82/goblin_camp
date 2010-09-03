@@ -24,8 +24,6 @@ project goblin-camp
       <debug-symbols>on
       <variant>debug:<define>DEBUG
       <include>$(GC_HEADERS)
-      <include>$(GC_HEADERS)/scripting/lua
-      <include>$(GC_HEADERS)/scripting
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
       <python-debugging>off
