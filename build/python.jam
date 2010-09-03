@@ -1,0 +1,73 @@
+# Python tool. Replacement for boost-build/tools/python.jam.
+#
+# To configure:
+#   using python : <include>path-to-includes <library>path-to-libraries <version>2.7 <pydebug>on/off <suffix>_d ;
+
+import os ;
+import property-set ;
+import project ;
+import "class" : new ;
+import modules ;
+
+rule init ( options * ) {
+    modules.poke python : .python-options : [ property-set.create $(options) ] ;
+}
+
+# Validate the version string and extract the major/minor part we care about.
+# <from original python.jam>
+local rule split-version ( version ) {
+    local major-minor = [ MATCH ^([0-9]+)\.([0-9]+)(.*)$ : $(version) : 1 2 3 ] ;
+    if ! $(major-minor[2]) || $(major-minor[3]) {
+        ECHO "Warning: <version> in \"using python\" expects a two part (major, minor) version number; got" $(version) instead ;
+        
+        # Add a zero to account for the missing digit if necessary.
+        major-minor += 0 ;
+    }
+    
+    return $(major-minor[1]) $(major-minor[2]) ;
+}
+
+rule use-project ( ) {
+    project.push-current [ project.current ] ;
+    
+    local reqs = ;
+    local usage-reqs = ;
+    
+    .py-debug   = ;
+    .py-version = 2.7 ;
+    
+    if $(.python-options) {
+        local inc     = [ $(.python-options).get <include> ] ;
+        local lib     = [ $(.python-options).get <library> ] ;
+        local version = [ $(.python-options).get <version> ] ;
+        local debug   = [ $(.python-options).get <pydebug> ] ;
+        local suffix  = [ $(.python-options).get <suffix> ] ;
+        
+        reqs = <include>$(inc) <search>$(lib) ;
+        usage-reqs = <include>$(inc) ;
+        
+        if $(version) {
+            .py-version = $(version) ;
+        }
+        
+        if $(debug) = "on" {
+            .py-debug = $(suffix:E=_d) ;
+            usage-reqs += <define>Py_DEBUG ;
+        }
+    }
+    
+    project.initialize $(__name__) ;
+    project = [ project.current ] ;
+    project python
+        : requirements $(reqs)
+        : usage-requirements $(usage-reqs)
+    ;
+    
+    local namever = [ split-version $(.py-version) ] ;
+    local name    = python$(namever:J="")$(.py-debug:E=) ;
+    
+    ECHO ** Using python: $(name) ;
+    lib python : : <name>$(name) ;
+    
+    project.pop-current ;
+}

@@ -465,19 +465,21 @@ using build/winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C
 </div>
 <div class="section" id="id4">
 <h3><a class="toc-backref" href="#id14">Python</a></h3>
-<p>Format (all parameters are optional — Boost.Build can find default Python on its own):</p>
+<p>Format:</p>
 <pre class="literal-block">
-using python ; # to autodetect the interpreter and libraries
-using python : 2.7 : path to python.exe : path to Python includes : path to Python libraries : : library filename suffix ;
+using python : properties ;
 </pre>
-<p>If you're building debug version, build system may want debug version of Python (i.e. one built with --with-pydebug).
-On Windows, this means it'll try to link to library with _d suffix (e.g. python27_d.lib). You can try changing
-last argument of <tt class="docutils literal">using</tt>, or just create a copy of a regular library with that name — I wasn't able to turn
-that behaviour off.</p>
-<p>Use <tt class="docutils literal"><span class="pre">--debug-configuration</span></tt> bjam switch to see if your interpreter is found.</p>
+<p>Properties:</p>
+<ul class="simple">
+<li><tt class="docutils literal">&lt;library&gt;path</tt> — path to libraries</li>
+<li><tt class="docutils literal">&lt;include&gt;path</tt> — path to headers</li>
+<li><tt class="docutils literal">&lt;version&gt;version</tt> — Python version (major.minor; by default 2.7)</li>
+<li><tt class="docutils literal">&lt;pydebug&gt;on</tt> — enable Python debugging (link to debug version of Python)</li>
+<li><tt class="docutils literal">&lt;suffix&gt;suffix</tt> — library name suffix (_d is default for debug libs)</li>
+</ul>
 <p>Example:</p>
 <pre class="literal-block">
-using python ;
+using python : &lt;version&gt;2.7 &lt;library&gt;C:\dev\apps\Python27\libs &lt;include&gt;C:\dev\apps\Python27\include ;
 </pre>
 </div>
 </div>

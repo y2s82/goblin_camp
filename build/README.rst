@@ -138,21 +138,21 @@ Example::
 Python
 ++++++
 
-Format (all parameters are optional — Boost.Build can find default Python on its own)::
+Format::
 
-    using python ; # to autodetect the interpreter and libraries
-    using python : 2.7 : path to python.exe : path to Python includes : path to Python libraries : : library filename suffix ;
+    using python : properties ;
 
-If you're building debug version, build system may want debug version of Python (i.e. one built with --with-pydebug).
-On Windows, this means it'll try to link to library with _d suffix (e.g. python27_d.lib). You can try changing
-last argument of ``using``, or just create a copy of a regular library with that name — I wasn't able to turn
-that behaviour off.
+Properties:
 
-Use ``--debug-configuration`` bjam switch to see if your interpreter is found.
+* ``<library>path`` — path to libraries
+* ``<include>path`` — path to headers
+* ``<version>version`` — Python version (major.minor; by default 2.7)
+* ``<pydebug>on`` — enable Python debugging (link to debug version of Python)
+* ``<suffix>suffix`` — library name suffix (_d is default for debug libs)
 
 Example::
 
-    using python ;
+    using python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
 
 Building
 ~~~~~~~~
