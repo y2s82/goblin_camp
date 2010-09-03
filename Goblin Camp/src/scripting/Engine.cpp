@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <Python.h>
+#include "scripting/_python.hpp"
 
 #include <vector>
 #include <string>
@@ -23,14 +23,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 
 #include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
+namespace py = boost::python;
 
 #include "Data.hpp"
 #include "scripting/Engine.hpp"
+//#include "scripting/API.hpp"
 #include "Logger.hpp"
 
 namespace {
 	namespace globals {
-		//lua_State *lua;
+		
 	}
 }
 
@@ -40,6 +45,7 @@ namespace Script {
 	void Init(std::vector<std::string>& args) {
 		Logger::Inst()->output << "[Script] Initialising engine.\n";
 		
+		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
 		
@@ -48,6 +54,37 @@ namespace Script {
 		PySys_SetArgvEx(1, pyargv, 0);
 		
 		Logger::Inst()->output << "[Script] Python " << Py_GetVersion() << "\n";
+		
+		// Don't use default search path.
+		{
+		#ifdef WINDOWS
+			char pathsep = ';';
+		#else
+			char pathsep = ':';
+		#endif
+			std::string path = (Data::GetPath(Data::Path::GlobalData) / "lib").string();
+			path += pathsep;
+			path += (Data::GetPath(Data::Path::GlobalData) / "lib" / "stdlib.zip").string();
+			
+			PySys_SetPath(const_cast<char*>(path.c_str()));
+		}
+		
+		try {
+			// This cannot possibly fail. Unless the universe has blown up.
+			py::object res = py::eval(
+				"repr(__import__('sys').path)",
+				py::import("__builtin__").attr("__dict__")
+			);
+			Logger::Inst()->output << "[Script] sys.path = " << py::extract<char*>(res) << "\n";
+		} catch (const py::error_already_set&) {
+			Logger::Inst()->output << "[Script] Bootstrap failed.\n";
+			Logger::Inst()->output.flush();
+			PyErr_Print();
+			exit(20);
+		}
+		
+		//ExposeAPI();
+		Logger::Inst()->output.flush();
 	}
 	
 	void Shutdown() {
@@ -58,5 +95,6 @@ namespace Script {
 	
 	void LoadScript(const std::string& mod, const std::string& filename) {
 		Logger::Inst()->output << "[Script] Loading " << filename << " into mods." << mod << "\n";
+		
 	}
 }

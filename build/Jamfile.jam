@@ -240,7 +240,13 @@ install dist-data
     : <conditional>@get-dist-data
 ;
 
-alias dist : dist-data dist-binaries dist-additional ;
+install dist-pylib
+    : $(GC_SOURCE_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp : *.py ]
+    : <conditional>@get-dist-data
+      <install-source-root>$(GC_SOURCE_ROOT)
+;
+
+alias dist : dist-data dist-binaries dist-additional dist-pylib ;
 
 #
 # Solution files
@@ -264,7 +270,7 @@ install sln2010
 
 #
 # Explicit targets
-explicit nsis dist dist-binaries dist-data dist-additional make-sln2008 make-sln2010 sln2008 sln2010 ;
+explicit nsis dist dist-binaries dist-data dist-additional dist-pylib make-sln2008 make-sln2010 sln2008 sln2010 ;
 explicit goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
 
 #
