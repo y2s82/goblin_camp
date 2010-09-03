@@ -68,7 +68,12 @@ rule use-project ( ) {
     ;
     
     local namever = [ split-version $(.py-version) ] ;
-    local name    = python$(namever:J="")$(.py-debug:E=) ;
+    if [ os.name ] = NT {
+        namever = $(namever:J="") ;
+    } else {
+        namever = $(namever:J=".") ;
+    }
+    local name = python$(namever)$(.py-debug:E=) ;
     
     ECHO ** Using Python: $(name) ;
     lib python : : <name>$(name) ;
