@@ -68,6 +68,7 @@
     <ClCompile Include="src\win32\CrashHandler.cpp" />
     <ClCompile Include="src\win32\main.cpp" />
     <ClCompile Include="src\win32\DataImpl.cpp" />
+    <ClCompile Include="src\scripting\Engine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp" />
@@ -121,6 +122,7 @@
     <ClInclude Include="include\UI\YesNoDialog.hpp" />
     <ClInclude Include="include\Water.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="include\scripting/Engine.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Goblin Camp.rc" />
