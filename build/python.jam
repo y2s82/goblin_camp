@@ -1,8 +1,12 @@
 # Python tool. Replacement for boost-build/tools/python.jam.
 #
 # To configure:
-#   using python : <include>path-to-includes <library>path-to-libraries <version>2.7 <pydebug>on/off <suffix>_d ;
+#   using python
+#       : <include>path-to-includes <library>path-to-libraries <version>2.7 <pydebug>on/off <suffix>_d
+#   ;
+#
 
+import path ;
 import os ;
 import property-set ;
 import project ;
@@ -30,8 +34,8 @@ local rule split-version ( version ) {
 rule use-project ( ) {
     project.push-current [ project.current ] ;
     
-    local reqs = ;
-    local usage-reqs = ;
+    local reqs        = ;
+    local usage-reqs  = ;
     
     .py-debug   = ;
     .py-version = 2.7 ;
@@ -66,7 +70,7 @@ rule use-project ( ) {
     local namever = [ split-version $(.py-version) ] ;
     local name    = python$(namever:J="")$(.py-debug:E=) ;
     
-    ECHO ** Using python: $(name) ;
+    ECHO ** Using Python: $(name) ;
     lib python : : <name>$(name) ;
     
     project.pop-current ;
