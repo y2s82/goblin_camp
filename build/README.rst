@@ -22,7 +22,7 @@ Tools
 Except for C++ compiler, you will need several tools to be able to build Goblin Camp.
 Here's list with known working versions:
 
-* `Python`_ **2.7.x**.
+* `Python`_ **2.6.6** or newer (**not** 3.x).
 * `bjam`_ **03.1.19** — included with Goblin Camp.
 
 .. _Python: http://python.org/
@@ -43,6 +43,7 @@ Goblin Camp requires several third party libraries to build and link:
 * `Boost`_ **1.43**.
 * `libtcod`_ **r474** (GC uses not-yet-released SVN version — listed here is a known working revision).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
+* `Python`_ **2.6.6** or **2.7.x** (3.x will not work).
 
 .. _Boost:       http://boost.org
 .. _libtcod:     http://doryen.eptalys.net/libtcod
@@ -133,6 +134,25 @@ Properties:
 Example::
 
     using build/winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
+
+Python
+++++++
+
+Format (all parameters are optional — Boost.Build can find default Python on its own)::
+
+    using python ; # to autodetect the interpreter and libraries
+    using python : 2.7 : path to python.exe : path to Python includes : path to Python libraries : : library filename suffix ;
+
+If you're building debug version, build system may want debug version of Python (i.e. one built with --with-pydebug).
+On Windows, this means it'll try to link to library with _d suffix (e.g. python27_d.lib). You can try changing
+last argument of ``using``, or just create a copy of a regular library with that name — I wasn't able to turn
+that behaviour off.
+
+Use ``--debug-configuration`` bjam switch to see if your interpreter is found.
+
+Example::
+
+    using python ;
 
 Building
 ~~~~~~~~
