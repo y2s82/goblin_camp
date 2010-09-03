@@ -30,7 +30,7 @@ namespace py = boost::python;
 
 #include "Data.hpp"
 #include "scripting/Engine.hpp"
-//#include "scripting/API.hpp"
+#include "scripting/API.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -83,7 +83,7 @@ namespace Script {
 			exit(20);
 		}
 		
-		//ExposeAPI();
+		ExposeAPI();
 		Logger::Inst()->output.flush();
 	}
 	
