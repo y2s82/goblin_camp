@@ -48,6 +48,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // This should allow GC to be installed without any administrative privileges, or
 // installed once system-wide and used comfortably without admin privileges on both systems.
 
+namespace boost { namespace filesystem {
+	template <class String, class Traits> class basic_path;
+	struct path_traits;
+	typedef basic_path<std::string, path_traits> path;
+}}
+
 namespace Data {
 	// Checks if required user directories are present, and creates them if not.
 	// Also loads user config file, creating it if necessary.
@@ -73,8 +79,8 @@ namespace Data {
 		};
 	}
 	
-	// Retrieves given path into a buffer.
-	void GetPath(Path::Path, std::string&);
+	// Retrieves given path.
+	boost::filesystem::path& GetPath(Path::Path);
 	
 	// Mod metadata
 	struct Mod {
