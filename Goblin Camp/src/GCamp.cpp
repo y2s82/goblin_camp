@@ -450,7 +450,6 @@ void SettingsMenu() {
 
 		if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
 			clicked = false;
-			int whereX      = mouse.cx - x;
 			int whereY      = mouse.cy - y - 1;
 			int rendererY   = currentY - y - 1;
 			int fullscreenY = rendererY - 2;
