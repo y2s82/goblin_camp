@@ -94,6 +94,10 @@ void UI::LoadKeys(std::string filename) {
 
 }
 
+std::map<std::string, char>& UI::GetKeys() {
+	return keyMap.keyMap;
+}
+
 #pragma mark UI
 
 UI* UI::instance = 0;

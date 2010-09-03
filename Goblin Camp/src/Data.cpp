@@ -437,7 +437,7 @@ namespace Data {
 		configStream.close();
 	}
 	
-	void SaveKeys(std::map<std::string, char>& keymap) {
+	void SaveKeys(const std::map<std::string, char>& keymap) {
 		typedef std::pair<std::string, char> KeyPair;
 		std::ofstream keysStream(globals::keys.string().c_str());
 		
