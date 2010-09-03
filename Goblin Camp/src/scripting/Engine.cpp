@@ -25,7 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/foreach.hpp>
 
 #include "Data.hpp"
-#include "Engine.hpp"
+#include "scripting/Engine.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -42,6 +42,8 @@ namespace Script {
 		
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
+		
+		// Requires at least Python 2.6.6.
 		char *pyargv[] = { "" };
 		PySys_SetArgvEx(1, pyargv, 0);
 		
@@ -54,5 +56,7 @@ namespace Script {
 		Py_Finalize();
 	}
 	
-	//void Load
+	void LoadScript(const std::string& mod, const std::string& filename) {
+		Logger::Inst()->output << "[Script] Loading " << filename << " into mods." << mod << "\n";
+	}
 }
