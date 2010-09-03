@@ -26,7 +26,6 @@ project goblin-camp
       <include>$(GC_HEADERS)
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
-      <python-debugging>off
       # Architecture defines
       <address-model>32:<define>X86
       <address-model>64:<define>X64
@@ -58,6 +57,7 @@ modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
 boost.use-project 1.43 ;
 winsdk.use-project ;
 libtcod.use-project ;
+python.use-project ;
 
 ##
 # Local rules
@@ -105,15 +105,11 @@ explicit-alias linux-deps ;
 explicit-alias osx-deps : : : : <framework>CoreFoundation ;
 
 # Boost dependencies
-boost-libs = serialization thread system filesystem ;
+boost-libs = serialization thread system filesystem python ;
 
 boost-deps = ;
 for local name in $(boost-libs) {
     boost-deps += /boost//$(name) ;
-}
-
-if ! [ python.configured ] {
-    using python ;
 }
 
 # All common dependencies
