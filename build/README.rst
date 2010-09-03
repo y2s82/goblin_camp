@@ -140,7 +140,7 @@ Python
 
 Format::
 
-    using python : properties ;
+    using build/python : properties ;
 
 Properties:
 
@@ -152,7 +152,7 @@ Properties:
 
 Example::
 
-    using python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
+    using build/python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
 
 Building
 ~~~~~~~~
