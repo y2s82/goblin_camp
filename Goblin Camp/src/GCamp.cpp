@@ -53,7 +53,11 @@ int GCMain(std::vector<std::string>& args) {
 	Logger::Inst()->output << "[GCMain] args.size() = " << args.size() << "\n";
 	Logger::Inst()->output.flush();
 	
-	int exitcode = MainMenu();
+	int exitcode = 0;
+	
+	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
+		exitcode = MainMenu();
+	}
 	
 	Script::Shutdown();
 	Logger::End();
