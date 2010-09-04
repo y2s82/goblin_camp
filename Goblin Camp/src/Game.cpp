@@ -709,48 +709,60 @@ void Game::Update() {
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
+	boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
+	int nearestDistance = INT_MAX;
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
 			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
 			if (sp->Allowed(Item::Presets[item.lock()->Type()].specificCategories) && !sp->Full()) {
 
 				//Found a stockpile that both allows the item, and has space
-				//Check if the item can be contained, and if so if any containers are in the stockpile
-
-				boost::shared_ptr<Job> stockJob(new Job("Store item", LOW));
-				stockJob->Attempts(1);
-				Coordinate target = Coordinate(-1,-1);
-				boost::weak_ptr<Item> container;
-
-				if (Item::Presets[item.lock()->Type()].fitsin >= 0) {
-					container = sp->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL);
-					if (container.lock()) {
-						target = container.lock()->Position();
-						stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()));
-					}
-				}
-
-				if (target.X() == -1) target = sp->FreePosition();
-
-				if (target.X() != -1) {
-					stockJob->ReserveSpot(sp, target);
-					stockJob->ReserveEntity(item);
-					stockJob->tasks.push_back(Task(MOVE, item.lock()->Position()));
-					stockJob->tasks.push_back(Task(TAKE, item.lock()->Position(), item));
-					stockJob->tasks.push_back(Task(MOVE, target));
-					if (!container.lock())
-						stockJob->tasks.push_back(Task(PUTIN, target, sp->Storage(target)));
-					else
-						stockJob->tasks.push_back(Task(PUTIN, target, container));
-
-					if (!returnJob) JobManager::Inst()->AddJob(stockJob);
-					else return stockJob;
-
-					return boost::shared_ptr<Job>();
+				int distance = Distance(sp->Center(), item.lock()->Position());
+				if(distance < nearestDistance) {
+					nearestDistance = distance;
+					nearest = sp;
 				}
 			}
 		}
 	}
+	
+	if(nearest) {
+		//Check if the item can be contained, and if so if any containers are in the stockpile
+		
+		boost::shared_ptr<Job> stockJob(new Job("Store item", LOW));
+		stockJob->Attempts(1);
+		Coordinate target = Coordinate(-1,-1);
+		boost::weak_ptr<Item> container;
+		
+		if (Item::Presets[item.lock()->Type()].fitsin >= 0) {
+			container = nearest->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL);
+			if (container.lock()) {
+				target = container.lock()->Position();
+				stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()));
+			}
+		}
+		
+		if (target.X() == -1) target = nearest->FreePosition();
+		
+		if (target.X() != -1) {
+			stockJob->ReserveSpot(nearest, target);
+			stockJob->ReserveEntity(item);
+			stockJob->tasks.push_back(Task(MOVE, item.lock()->Position()));
+			stockJob->tasks.push_back(Task(TAKE, item.lock()->Position(), item));
+			stockJob->tasks.push_back(Task(MOVE, target));
+			if (!container.lock())
+				stockJob->tasks.push_back(Task(PUTIN, target, nearest->Storage(target)));
+			else
+				stockJob->tasks.push_back(Task(PUTIN, target, container));
+			
+			if (!returnJob) JobManager::Inst()->AddJob(stockJob);
+			else return stockJob;
+			
+			return boost::shared_ptr<Job>();
+		}
+		
+	}
+
 	return boost::shared_ptr<Job>();
 }
 
