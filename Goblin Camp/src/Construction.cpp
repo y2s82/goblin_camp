@@ -83,7 +83,7 @@ Construction::~Construction() {
 			Map::Inst()->BlocksLight(ix,iy,false);
 		}
 	}
-
+	
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (itemi->lock()) {
 			itemi->lock()->SetFaction(0); //Return item to player faction
@@ -599,6 +599,53 @@ void Construction::Dismantle() {
 
 Panel *Construction::GetContextMenu() {
 	return ConstructionDialog::ConstructionInfoDialog(this);
+}
+
+void Construction::Damage(Attack* attack) {
+	double damageModifier = 1.0;
+
+	switch (attack->Type()) {
+	case DAMAGE_SLASH: damageModifier = 0.5; break;
+
+	case DAMAGE_PIERCE: damageModifier = 0.25; break;
+
+	case DAMAGE_BLUNT:
+	case DAMAGE_MAGIC:
+	case DAMAGE_FIRE:
+	case DAMAGE_COLD: damageModifier = 1.0; break;
+
+	case DAMAGE_POISON: damageModifier = 0.1; break;
+
+	default: damageModifier = 1.0; break;
+	}
+
+	int damage = (int)(Game::DiceToInt(attack->Amount()) * damageModifier);
+	condition -= damage;
+
+	#ifdef DEBUG
+	std::cout<<"Damagemod: "<<damageModifier<<"\n";
+	std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
+	#endif
+
+	if (condition <= 0) {
+		Explode();
+		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	}
+}
+
+void Construction::Explode() {
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		if (boost::shared_ptr<Item> item = itemi->lock()) {
+			item->SetFaction(0); //Return item to player faction
+			item->PutInContainer(); //Set container to none
+			Coordinate randomTarget;
+			randomTarget.X(Position().X() + ((rand() % 11) - 5));
+			randomTarget.Y(Position().Y() + ((rand() % 11) - 5));
+			item->CalculateFlightPath(randomTarget, 50, GetHeight());
+		}
+	}
+	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
+
 }
 
 ConstructionPreset::ConstructionPreset() :
