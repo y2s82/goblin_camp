@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "JobManager.hpp"
 #include "GCamp.hpp"
+#include "Camp.hpp"
 #include "StockManager.hpp"
 #include "UI.hpp"
 #include "UI/ConstructionDialog.hpp"
@@ -100,6 +101,9 @@ Construction::~Construction() {
 	if (Construction::AllowedAmount[type] >= 0) {
 		++Construction::AllowedAmount[type];
 	}
+	
+	Camp::Inst()->UpdateCenter(Center(), false);
+
 }
 
 
@@ -163,6 +167,7 @@ int Construction::Build() {
 				StockManager::Inst()->UpdateQuantity(Construction::Presets[type].products[prod], 0);
 			}
 		}
+		Camp::Inst()->UpdateCenter(Center(), true);
 	}
 	return condition;
 }
