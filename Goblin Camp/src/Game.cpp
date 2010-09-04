@@ -87,14 +87,6 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
-	if (Construction::AllowedAmount[construct] >= 0) {
-		if (Construction::AllowedAmount[construct] == 0) {
-			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
-			return -1;
-		}
-		--Construction::AllowedAmount[construct];
-	}
-
 	//Check if the required materials exist before creating the build job
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
@@ -114,6 +106,14 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 			}
 	}
 
+	if (Construction::AllowedAmount[construct] >= 0) {
+		if (Construction::AllowedAmount[construct] == 0) {
+			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
+			return -1;
+		}
+		--Construction::AllowedAmount[construct];
+	}
+	
 	for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
 		compi != componentList.end(); ++compi) {
 			compi->lock()->Reserve(false);
