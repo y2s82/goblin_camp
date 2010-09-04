@@ -495,7 +495,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
 	}
 	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
-	if (_state == UINORMAL && (currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) & NOMENUHIT) 
+	if (_state == UINORMAL && (!menuOpen || (currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) & NOMENUHIT)) 
 		&& (sideBar.Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& !underCursor.empty() && underCursor.begin()->lock()) {
