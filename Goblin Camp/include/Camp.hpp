@@ -15,10 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/weighted_mean.hpp>
-
 #include "Coordinate.hpp"
 
 class Camp {
@@ -34,11 +30,9 @@ private:
 	static Camp* instance;
 	Coordinate center;
 	unsigned int buildingCount;
-	boost::accumulators::accumulator_set< int, boost::accumulators::features< boost::accumulators::tag::mean>, int > xAcc;
-	boost::accumulators::accumulator_set< int, boost::accumulators::features< boost::accumulators::tag::mean>, int > yAcc;
 
 public:
 	static Camp* Inst();
 	Coordinate Center();
-	void UpdateCenter(Coordinate);
+	void UpdateCenter(Coordinate, bool);
 };
