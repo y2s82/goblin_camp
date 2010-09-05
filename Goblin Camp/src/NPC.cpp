@@ -178,7 +178,7 @@ void NPC::HandleThirst() {
 		if ((*jobIter)->name.find("Drink") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"));
+		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"), Position());
 		if (!item.lock()) {tmpCoord = Game::Inst()->FindWater(Position());}
 		if (!item.lock() && tmpCoord.X() == -1) { //Nothing to drink!
 			//:ohdear:
@@ -219,8 +219,8 @@ void NPC::HandleHunger() {
 		if ((*jobIter)->name.find("Eat") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"));
-		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"));}
+		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position());
+		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position());}
 		if (!item.lock()) { //Nothing to eat!
 			//:ohdear:
 		} else { //Something to eat!
@@ -552,7 +552,7 @@ MOVENEARend:
 				break;
 
 			case FIND:
-				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->flags);
+				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->target, currentTask()->flags);
 				if (!foundItem.lock()) {
 					TaskFinished(TASKFAILFATAL); 
 #ifdef DEBUG
@@ -1018,8 +1018,8 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 				++attacki) {
 					if (attacki->Type() == DAMAGE_WIELDED) {
 						if (Game::Inst()->FindItemByCategoryFromStockpiles(
-							squad->Weapon()).lock()) {
-								newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
+							squad->Weapon(), npc->Position()).lock()) {
+								newJob->tasks.push_back(Task(FIND, npc->Position(), boost::shared_ptr<Entity>(), 
 									squad->Weapon()));
 								newJob->tasks.push_back(Task(MOVE));
 								newJob->tasks.push_back(Task(TAKE));
@@ -1035,8 +1035,8 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 
 		if (npc->WieldingRangedWeapon()) {
 			if (!npc->quiver.lock()) {
-				if (Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Quiver")).lock()) {
-						newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
+				if (Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Quiver"), npc->Position()).lock()) {
+						newJob->tasks.push_back(Task(FIND, npc->Position(), boost::shared_ptr<Entity>(), 
 							Item::StringToItemCategory("Quiver")));
 						newJob->tasks.push_back(Task(MOVE));
 						newJob->tasks.push_back(Task(TAKE));
@@ -1047,9 +1047,9 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 				}
 			} else if (npc->quiver.lock()->empty()) {
 				if (Game::Inst()->FindItemByCategoryFromStockpiles(
-					npc->mainHand.lock()->GetAttack().Projectile()).lock()) {
+					npc->mainHand.lock()->GetAttack().Projectile(), npc->Position()).lock()) {
 						for (int i = 0; i < 10; ++i) {
-							newJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), 
+							newJob->tasks.push_back(Task(FIND, npc->Position(), boost::shared_ptr<Entity>(), 
 								npc->mainHand.lock()->GetAttack().Projectile()));
 							newJob->tasks.push_back(Task(MOVE));
 							newJob->tasks.push_back(Task(TAKE));
@@ -1190,7 +1190,7 @@ bool NPC::HostileAnimalFindJob(boost::shared_ptr<NPC> animal) {
 bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
 	//We could use Task(FIND for this, but it doesn't give us feedback if there's
 	//any food available
-	boost::weak_ptr<Item> wfood = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"));
+	boost::weak_ptr<Item> wfood = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), animal->Position());
 	if (boost::shared_ptr<Item> food = wfood.lock()) {
 		//Found a food item
 		boost::shared_ptr<Job> stealJob(new Job("Steal food"));
@@ -1576,7 +1576,7 @@ void NPC::FindNewWeapon() {
 		weaponValue = mainHand.lock()->RelativeValue();
 	}
 	ItemCategory weaponCategory = squad.lock() ? squad.lock()->Weapon() : Item::StringToItemCategory("Weapon");
-	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, BETTERTHAN, weaponValue);
+	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, Position(), BETTERTHAN, weaponValue);
 	if (boost::shared_ptr<Item> weapon = newWeapon.lock()) {
 		boost::shared_ptr<Job> weaponJob(new Job("Grab weapon"));
 		weaponJob->internal = true;
@@ -1595,7 +1595,7 @@ void NPC::FindNewArmor() {
 		armorValue = armor.lock()->RelativeValue();
 	}
 	ItemCategory armorCategory = squad.lock() ? squad.lock()->Armor() : Item::StringToItemCategory("Armor");
-	boost::weak_ptr<Item> newArmor = Game::Inst()->FindItemByCategoryFromStockpiles(armorCategory, BETTERTHAN, armorValue);
+	boost::weak_ptr<Item> newArmor = Game::Inst()->FindItemByCategoryFromStockpiles(armorCategory, Position(), BETTERTHAN, armorValue);
 	if (boost::shared_ptr<Item> arm = newArmor.lock()) {
 		boost::shared_ptr<Job> armorJob(new Job("Grab armor"));
 		armorJob->internal = true;

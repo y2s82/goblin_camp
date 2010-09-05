@@ -460,7 +460,7 @@ bool Construction::SpawnProductionJob() {
 		//First check that the requisite items actually exist
 		std::list<boost::weak_ptr<Item> > componentList;
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-			boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi), APPLYMINIMUMS);
+			boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi), Center(), APPLYMINIMUMS);
 			if (item.lock()) {
 				componentList.push_back(item);
 				item.lock()->Reserve(true);
@@ -485,7 +485,7 @@ bool Construction::SpawnProductionJob() {
 
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
 			boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
-			newPickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS));
+			newPickupJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS));
 			newPickupJob->tasks.push_back(Task(MOVE));
 			newPickupJob->tasks.push_back(Task(TAKE));
 			newPickupJob->tasks.push_back(Task(MOVE, container->Position(), container));
