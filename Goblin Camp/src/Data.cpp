@@ -193,6 +193,14 @@ namespace {
 				delete listener;
 			}
 			
+			if (metadata.apiVersion != -1) {
+				if (metadata.apiVersion != Script::version) {
+					Logger::Inst()->output << "[Data] WARNING: Ignoring mod scripts because of incorrect API version.\n";
+				} else {
+					Script::LoadScript(metadata.mod, mod.string());
+				}
+			}
+			
 			globals::loadedMods.push_back(metadata);
 		}
 	}
@@ -449,6 +457,9 @@ namespace Data {
 		keysStream.close();
 	}
 	
+	#pragma warning(push)
+	// "warning C4715: 'Data::GetPath' : not all control paths return a value"
+	#pragma warning(disable : 4715)
 	fs::path& GetPath(Path::Path what) {
 		switch (what) {
 			case Path::Executable:  return globals::exec;
@@ -461,7 +472,13 @@ namespace Data {
 			case Path::Config:      return globals::config;
 			case Path::Keys:        return globals::keys;
 		}
+		
+		// If control reaches here, then someone added new value to the enum,
+		// forgot to add it here, and missed the 'switch not checking
+		// every value' warning. So, crash and burn.
+		assert(false);
 	}
+	#pragma warning(pop)
 	
 	std::list<Mod>& GetLoadedMods() {
 		return globals::loadedMods;
