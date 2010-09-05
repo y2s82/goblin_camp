@@ -36,12 +36,12 @@ namespace Script { namespace Event {
 		Script::InvokeListeners("onGameEnd");
 	}
 	
-	void GameSaved(const std::string&) {
-	
+	void GameSaved(const std::string& filename) {
+		Script::InvokeListeners("onGameSaved", Py_BuildValue("(s)", filename.c_str()));
 	}
 	
-	void GameLoaded(const std::string&) {
-	
+	void GameLoaded(const std::string& filename) {
+		Script::InvokeListeners("onGameLoaded", Py_BuildValue("(s)", filename.c_str()));
 	}
 	
 	void BuildingCreated(Construction*, int, int) {
