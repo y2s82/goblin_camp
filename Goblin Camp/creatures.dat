@@ -354,7 +354,7 @@ npc_type "jabberwock" {
 	name="Jabberwock"
 	plural="Jabberwocky"
 	tags=["attacksRandomly"]
-	color="255,0,0"
+	color="255,100,0"
 	graphic='J'
 	AI="HungryAnimal"
 	stats {

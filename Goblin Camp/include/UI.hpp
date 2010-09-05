@@ -69,6 +69,7 @@ private:
 	int cursorChar;
 
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
+	int DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut);
 	void DrawTopBar(TCODConsole*);
 	void HandleKeyboard();
 	void HandleMouse();
@@ -106,5 +107,5 @@ public:
 	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
 	static void LoadKeys(std::string);
-
+	static std::map<std::string, char>& GetKeys();
 };

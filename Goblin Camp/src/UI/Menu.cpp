@@ -66,7 +66,7 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 	for (int i = 0; i < (signed int)choices.size(); ++i) {
 		console->setBackgroundColor(TCODColor::black);
 		if (UI::Inst()->KeyHelpTextColor() > 0) {
-			console->setForegroundColor(TCODColor(0,UI::Inst()->KeyHelpTextColor(),0));
+			console->setForegroundColor(TCODColor(0,std::min(255, UI::Inst()->KeyHelpTextColor()),0));
 			console->print(x, y+1+(i*2), boost::lexical_cast<std::string>(i+1).c_str());
 		}
 		console->setForegroundColor(TCODColor::white);
@@ -122,7 +122,8 @@ Menu* Menu::mainMenu = 0;
 Menu* Menu::MainMenu() {
 	if (!mainMenu) {
 		mainMenu = new Menu(std::vector<MenuChoice>());
-		mainMenu->AddChoice(MenuChoice("Construction", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
+		mainMenu->AddChoice(MenuChoice("Build", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
+		mainMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));		
 		mainMenu->AddChoice(MenuChoice("Orders", boost::bind(UI::ChangeMenu, Menu::OrdersMenu())));
 		mainMenu->AddChoice(MenuChoice("Stock Manager", boost::bind(UI::ChangeMenu, StockManagerDialog::StocksDialog())));
 		mainMenu->AddChoice(MenuChoice("Jobs", boost::bind(UI::ChangeMenu, JobDialog::JobListingDialog())));
@@ -146,7 +147,7 @@ Menu* Menu::ConstructionMenu() {
 		}
 		Menu *basicsMenu = ConstructionCategoryMenu("Basics");
 		if(basicsMenu) {
-			basicsMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));
+			
 		}
 	}
 	return constructionMenu;
@@ -181,7 +182,7 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
 }
 
 Menu* Menu::BasicsMenu() {
-	return ConstructionCategoryMenu("basics");
+	return ConstructionCategoryMenu("Basics");
 }
 
 Menu* Menu::WorkshopsMenu() {

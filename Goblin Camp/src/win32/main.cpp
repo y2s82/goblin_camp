@@ -19,17 +19,30 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-int GCMain();
+#include <vector>
+#include <string>
+#include <boost/foreach.hpp>
+
+int GCMain(std::vector<std::string>&);
 void InstallExceptionHandler();
+void GCCommandLine(std::vector<std::string>&);
 
 #ifdef DEBUG
-int main() {
+int main(int argc, char **argv) {
 	InstallExceptionHandler();
-	return GCMain();
+	
+	std::vector<std::string> args(argc);
+	for (int i = 0; i < argc; ++i) {
+		args[i] = argv[i];
+	}
+	return GCMain(args);
 }
 #endif
 
 int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
 	InstallExceptionHandler();
-	return GCMain();
+	
+	std::vector<std::string> args;
+	GCCommandLine(args);
+	return GCMain(args);
 }

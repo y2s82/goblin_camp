@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Map.hpp"
 #include "StockManager.hpp"
+#include "Camp.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Construction(type, target),
@@ -37,6 +38,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
 	}
+	Camp::Inst()->UpdateCenter(Center(), true);
 }
 
 Stockpile::~Stockpile() {
@@ -215,12 +217,17 @@ bool Stockpile::Allowed(std::set<ItemCategory> cats) {
 	return true;
 }
 
-bool Stockpile::Full()
-{
+bool Stockpile::Full() {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				if (containers[Coordinate(ix,iy)]->empty()) return false;
+
+				boost::weak_ptr<Item> item = containers[Coordinate(ix,iy)]->GetFirstItem();
+				if (item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					if (!container->Full()) return false;
+				}
 			}
 		}
 	}
@@ -322,21 +329,25 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 	if(!vecView.empty()) {
 		std::sort(vecView.begin(), vecView.end(), AmountCompare());
 		int count = 0;
-		for(int i = 0; count < 10 && i < (signed int)vecView.size(); i++) {
+		for(size_t i = 0; i < vecView.size(); i++) {
+			if(++count > 10) {
+				tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
+				return;
+			}
 			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
-			count++;
-			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); count < 10 && cati != Item::Categories.end(); cati++) {
+
+			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); cati != Item::Categories.end(); cati++) {
 				if(cati->parent && Item::StringToItemCategory(cati->parent->GetName()) == vecView[i].first) {
 					int amt = amount[Item::StringToItemCategory(cati->GetName())];
 					if (amt > 0) {
-						tooltip->AddEntry(TooltipEntry((boost::format("  %s x%d") % cati->GetName() % amt).str(), TCODColor::grey));
-						count++;
+						if(++count > 10) {
+							tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
+							return;
+						}
+						tooltip->AddEntry(TooltipEntry((boost::format("	 %s x%d") % cati->GetName() % amt).str(), TCODColor::grey));
 					}
 				}
 			}
-		}
-		if(count >= 10) {
-			tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 		}
 	}
 }

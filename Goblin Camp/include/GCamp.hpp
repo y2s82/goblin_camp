@@ -30,5 +30,6 @@ void SaveMenu();
 void MainLoop();
 void SettingsMenu();
 void ModsMenu();
+void KeysMenu();
 int Distance(int,int,int,int);
 int Distance(Coordinate,Coordinate);

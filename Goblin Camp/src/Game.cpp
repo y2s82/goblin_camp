@@ -87,14 +87,6 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
-	if (Construction::AllowedAmount[construct] >= 0) {
-		if (Construction::AllowedAmount[construct] == 0) {
-			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
-			return -1;
-		}
-		--Construction::AllowedAmount[construct];
-	}
-
 	//Check if the required materials exist before creating the build job
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
@@ -114,6 +106,14 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 			}
 	}
 
+	if (Construction::AllowedAmount[construct] >= 0) {
+		if (Construction::AllowedAmount[construct] == 0) {
+			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
+			return -1;
+		}
+		--Construction::AllowedAmount[construct];
+	}
+	
 	for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
 		compi != componentList.end(); ++compi) {
 			compi->lock()->Reserve(false);
@@ -159,6 +159,10 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	buildJob->ConnectToEntity(newCons);
 
 	JobManager::Inst()->AddJob(buildJob);
+	if (Construction::AllowedAmount[construct] >= 0) {
+		--Construction::AllowedAmount[construct];
+	}
+
 	return newCons->Uid();
 }
 
@@ -322,16 +326,13 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
+	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
+	
 	if (confirm) {
-		YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
-		ExitConfirmed();
+		exitFunc();
 	}
-}
-
-void Game::ExitConfirmed() {
-	Logger::End();
-	exit(0);
 }
 
 int Game::ScreenWidth() const {	return screenWidth; }
@@ -426,7 +427,6 @@ void Game::Init() {
 	
 	Data::Load();
 	
-	GenerateMap();
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
@@ -835,9 +835,16 @@ void Game::GenerateMap() {
 		}
 	}
 
-	for (int x = 100; x < 150; ++x) {
-		for (int y = 100; y < 150; ++y) {
-			map->Type(x,y,TILEBOG);
+	int basex = 125;
+	basey = 125;
+	int lo_offset = 0;
+	int hi_offset = 0;
+	for (int x = -25; x < 25; ++x) {
+		int range = int(std::sqrt(25*25 - x*x));
+		lo_offset = std::min(std::max(rand() % 3 - 1 + lo_offset, -5), 5);
+		hi_offset = std::min(std::max(rand() % 3 - 1 + hi_offset, -5), 5);
+		for (int y = -range-lo_offset; y < range+hi_offset; ++y) {
+			map->Type(basex+x,basey+y,TILEBOG);
 		}
 	}
 

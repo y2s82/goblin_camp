@@ -130,4 +130,6 @@ public:
 	void ReserveComponents(bool);
 	virtual Panel *GetContextMenu();
 	Coordinate Center();
+	void Damage(Attack*);
+	void Explode();
 };
