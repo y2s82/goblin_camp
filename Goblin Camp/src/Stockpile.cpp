@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Map.hpp"
 #include "StockManager.hpp"
+#include "Camp.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Construction(type, target),
@@ -37,6 +38,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
 	}
+	Camp::Inst()->UpdateCenter(Center(), true);
 }
 
 Stockpile::~Stockpile() {

@@ -31,6 +31,7 @@
 #include "UI/Dialog.hpp"
 #include "UI/TextBox.hpp"
 #include "UI.hpp"
+#include "Game.hpp"
 
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
 Construction* ConstructionDialog::cachedConstruct = 0;
@@ -88,7 +89,8 @@ void ConstructionDialog::Rename() {
 }
 
 void ConstructionDialog::Dismantle() {
-
+	UI::Inst()->CloseMenu();
+	construct->Dismantle();
 }
 
 void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
