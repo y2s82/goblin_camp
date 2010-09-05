@@ -462,7 +462,6 @@ MOVENEARend:
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
 						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
-						Camp::Inst()->UpdateCenter(currentEntity().lock()->Position());
 						TaskFinished(TASKSUCCESS);
 						break;
 					} else if (tmp == BUILD_NOMATERIAL) {

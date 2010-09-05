@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/filesystem.hpp>
 #include <string>
+#include <vector>
 #include <cstring>
 #include <cstdlib>
 
@@ -38,15 +39,13 @@ void _ImplFindPersonalDirectory(std::string& dir) {
 	dir += "\\Goblin Camp";
 }
 
+void GCCommandLine(std::vector<std::string>&);
+
 void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-	int argc;
-	wchar_t **argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+	std::vector<std::string> args;
+	GCCommandLine(args);
 	
-	char exe[MAX_PATH];
-	size_t converted;
-	wcstombs_s(&converted, exe, MAX_PATH, argv[0], MAX_PATH);
-	
-	exec    = fs::path(std::string(exe));
+	exec    = fs::path(std::string(args[0]));
 	execDir = exec.parent_path();
 	dataDir = execDir;
 }

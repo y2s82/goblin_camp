@@ -15,24 +15,28 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Coordinate.hpp"
+class Logger;
 
-class Camp {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-	Camp();
-	static Camp* instance;
-	Coordinate center;
-	unsigned int buildingCount;
-
-public:
-	static Camp* Inst();
-	Coordinate Center();
-	void UpdateCenter(Coordinate, bool);
-};
+namespace Script {
+	namespace API {
+		// Implements minimal file-like interface for use with logging.
+		class LoggerStream {
+			Logger *logger;
+		public:
+			LoggerStream();
+			void close();
+			void write(const char*);
+			void flush();
+		};
+		
+		// Announcer.
+		void announce(const char*);
+		
+		extern boost::python::object pyLoggerStream;
+	}
+	
+	void ExposeAPI();
+	void AppendListener(PyObject*);
+	void InvokeListeners(char*, PyObject *args = NULL);
+	void ReleaseListeners();
+}

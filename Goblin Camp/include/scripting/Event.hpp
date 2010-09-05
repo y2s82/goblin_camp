@@ -15,24 +15,17 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Coordinate.hpp"
-
-class Camp {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-	Camp();
-	static Camp* instance;
-	Coordinate center;
-	unsigned int buildingCount;
-
-public:
-	static Camp* Inst();
-	Coordinate Center();
-	void UpdateCenter(Coordinate, bool);
-};
+namespace Script {
+	namespace Event {
+		void GameStart();
+		void GameEnd();
+		void GameSaved(const std::string&);
+		void GameLoaded(const std::string&);
+		void BuildingCreated(Construction*, int, int);
+		void BuildingDestroyed(Construction*, int, int);
+		void ItemCreated(Item*, Construction*, NPC*, int, int);
+		void ItemDestroyed(Item*, int, int);
+		void NPCSpawned(NPC*, Construction*, int, int);
+		void NPCKilled(NPC*, NPC*, int, int);
+	}
+}

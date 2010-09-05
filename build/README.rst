@@ -22,7 +22,7 @@ Tools
 Except for C++ compiler, you will need several tools to be able to build Goblin Camp.
 Here's list with known working versions:
 
-* `Python`_ **2.7.x**.
+* `Python`_ **2.6.6** or newer (**not** 3.x).
 * `bjam`_ **03.1.19** — included with Goblin Camp.
 
 .. _Python: http://python.org/
@@ -43,6 +43,7 @@ Goblin Camp requires several third party libraries to build and link:
 * `Boost`_ **1.43**.
 * `libtcod`_ **r474** (GC uses not-yet-released SVN version — listed here is a known working revision).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
+* `Python`_ **2.6.6** or **2.7.x** (3.x will not work).
 
 .. _Boost:       http://boost.org
 .. _libtcod:     http://doryen.eptalys.net/libtcod
@@ -133,6 +134,25 @@ Properties:
 Example::
 
     using build/winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
+
+Python
+++++++
+
+Format::
+
+    using build/python : properties ;
+
+Properties:
+
+* ``<library>path`` — path to libraries
+* ``<include>path`` — path to headers
+* ``<version>version`` — Python version (major.minor; by default 2.7)
+* ``<pydebug>on`` — enable Python debugging (link to debug version of Python)
+* ``<suffix>suffix`` — library name suffix (_d is default for debug libs)
+
+Example::
+
+    using build/python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
 
 Building
 ~~~~~~~~
