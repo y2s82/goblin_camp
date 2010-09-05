@@ -14,24 +14,15 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-import logging, sys
-import _gcampapi
-from . import utils
+import sys, os
 
-def getLogger():
-	'Create and return mod logger'
+def _getModName(stackLevel):
+	'Try to find mod name by inspecting given stack frame'
 	
-	mod = utils._getModName(2)
-	log = logging.getLogger('gcamp.{0}'.format(mod))
+	frame    = sys._getframe(stackLevel)
+	filename = frame.f_code.co_filename
 	
-	if not hasattr(log, '_init'):
-		handler = logging.StreamHandler(_gcampapi.LoggerStream())
-		handler.setFormatter(logging.Formatter(
-			'[Mod: {0}] [%(levelname)8s] [%(funcName)s] %(message)s'.format(mod)
-		))
-		
-		log.setLevel(logging.DEBUG)
-		log.handlers = [handler]
-		log._init = True
-	
-	return log
+	if 'mods' in filename:
+		return os.path.basename(os.path.dirname(filename))
+	else:
+		return '<unknown>'

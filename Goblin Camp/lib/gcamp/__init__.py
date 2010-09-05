@@ -14,13 +14,8 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-import sys, os
-#from _gcampapi import *
+from . import log, events, utils
+import _gcampapi
 
-def _getModName(stackLevel):
-	'Find mod name by inspecting given stack frame'
-	frame    = sys._getframe(stackLevel)
-	filename = frame.f_code.co_filename
-	
-	if 'mod.py' in filename:
-		return os.path.filename(os.path.dirname(filename))
+announce = _gcampapi.announce
+announce.__doc__ = 'Add a string to announce area'

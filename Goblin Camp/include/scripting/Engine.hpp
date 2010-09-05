@@ -16,10 +16,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 namespace Script {
-	// only mods with apiVersion property that equals to this will be loaded
+	// Only mods with apiVersion property that equals to this will have their scripts loaded.
 	extern const short version;
 	
+	// Initialises the engine.
 	void Init(std::vector<std::string>&);
+	
+	// Shuts down the engine.
 	void Shutdown();
+	
+	// Loads mod's __init__.py.
 	void LoadScript(const std::string&, const std::string&);
+	
+	// Logs active exception (noop if no exception is active).
+	void LogException(bool clear = true);
 }

@@ -17,39 +17,93 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "scripting/_python.hpp"
 
-#include "Logger.hpp"
+#include <cassert>
 
 namespace py = boost::python;
 
+#include "Announce.hpp"
+#include "Logger.hpp"
+#include "scripting/API.hpp"
+#include "scripting/Engine.hpp"
+
 namespace {
-	// type(_gcampLogStream)
-	// Implements minimal file-like interface for use with logging.
-	class LoggerStream {
-		Logger *logger;
-	public:
-		LoggerStream() : logger(Logger::Inst()) { }
-		void close() { }
-		
-		void write(const char *str) {
-			logger->output << str;
-		}
-		
-		void flush() {
-			logger->output.flush();
-		}
-	};
+	namespace globals {
+		std::list<PyObject*> listeners;
+	}
+}
+
+namespace Script { namespace API {
+	LoggerStream::LoggerStream() : logger(Logger::Inst()) { }
+	void LoggerStream::close() { }
 	
-	BOOST_PYTHON_MODULE(_gcamplog) {
-		py::class_<LoggerStream>("LoggerStream")
+	void LoggerStream::write(const char *str) {
+		logger->output << str;
+	}
+	
+	void LoggerStream::flush() {
+		logger->output.flush();
+	}
+	
+	void announce(const char *str) {
+		Announce::Inst()->AddMsg(str);
+	}
+	
+	py::object pyLoggerStream;
+	
+	BOOST_PYTHON_MODULE(_gcampapi) {
+		pyLoggerStream = py::class_<LoggerStream>("LoggerStream")
 			.def("close", &LoggerStream::close)
 			.def("write", &LoggerStream::write)
 			.def("flush", &LoggerStream::flush)
 		;
+		
+		py::def("announce", &announce);
+		py::def("appendListener", &Script::AppendListener);
 	}
-}
+}}
 
 namespace Script {
 	void ExposeAPI() {
-		init_gcamplog();
+		API::init_gcampapi();
+	}
+	
+	void AppendListener(PyObject *listener) {
+		assert(listener);
+		Py_INCREF(listener);
+		
+		PyObject *repr = PyObject_Repr(listener);
+		assert(repr);
+		Logger::Inst()->output << "[Script:API] New listener: " << PyString_AsString(repr) << ".\n";
+		Py_DECREF(repr);
+		
+		globals::listeners.push_back(listener);
+	}
+	
+	void InvokeListeners(char *method, PyObject *args) {
+		BOOST_FOREACH(PyObject *listener, globals::listeners) {
+			if (!PyObject_HasAttrString(listener, method)) {
+				continue;
+			}
+			
+			PyObject *callable = PyObject_GetAttrString(listener, method);
+			Py_DECREF(PyObject_CallObject(callable, args));
+			Py_DECREF(callable);
+			
+			LogException();
+		}
+		// Caller is expected to do InvokeListeners("foo", Py_BuildValue("...")).
+		// That's why we DECREF the args tuple here.
+		Py_XDECREF(args);
+	}
+	
+	void ReleaseListeners() {
+		typedef std::list<PyObject*>::iterator Iterator;
+		
+		// Removing items, so can't use foreach.
+		for (Iterator it = globals::listeners.begin(); it != globals::listeners.end();) {
+			Py_DECREF(*it);
+			
+			it = globals::listeners.erase(it);
+		}
 	}
 }

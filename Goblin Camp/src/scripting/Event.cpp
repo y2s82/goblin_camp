@@ -17,15 +17,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "scripting/_python.hpp"
 
+#include <list>
+#include <string>
+
 #include "NPC.hpp"
 #include "Construction.hpp"
 #include "Item.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/Event.hpp"
+#include "scripting/API.hpp"
 
 namespace Script { namespace Event {
 	void GameStart() {
-	
+		Script::InvokeListeners("onGameStart");
 	}
 	
 	void GameEnd() {

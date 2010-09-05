@@ -36,6 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NPC.hpp"
 #include "Item.hpp"
 #include "scripting/Engine.hpp"
+#include "scripting/Event.hpp"
 
 #if defined(GC_BOOST_BUILD)
 // This variable is defined in buildsystem-generated _version.cpp.
@@ -68,7 +69,10 @@ int GCMain(std::vector<std::string>& args) {
 
 void MainLoop() {
 	Game* game = Game::Inst();
-	if (!game->Running()) Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
+	if (!game->Running()) {
+		Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
+		Script::Event::GameStart();
+	}
 	game->Running(true);
 
 	bool update = false;

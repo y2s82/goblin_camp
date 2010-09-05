@@ -14,24 +14,16 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-import logging, sys
 import _gcampapi
-from . import utils
 
-def getLogger():
-	'Create and return mod logger'
+class EventListener(object):
+	'Base class for event listeners'
+	# currently does nothing interesting
+
+def register(listener):
+	'Register object as event listener'
 	
-	mod = utils._getModName(2)
-	log = logging.getLogger('gcamp.{0}'.format(mod))
+	if not isinstance(listener, EventListener):
+		raise TypeError('EventListener expected, got {0}'.format(type(listener)))
 	
-	if not hasattr(log, '_init'):
-		handler = logging.StreamHandler(_gcampapi.LoggerStream())
-		handler.setFormatter(logging.Formatter(
-			'[Mod: {0}] [%(levelname)8s] [%(funcName)s] %(message)s'.format(mod)
-		))
-		
-		log.setLevel(logging.DEBUG)
-		log.handlers = [handler]
-		log._init = True
-	
-	return log
+	_gcampapi.appendListener(listener)

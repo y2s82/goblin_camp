@@ -17,10 +17,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "scripting/_python.hpp"
 
+#include <cassert>
 #include <vector>
 #include <string>
 #include <list>
 #include <cstdlib>
+#include <ostream> // std::flush
 
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
@@ -35,7 +37,8 @@ namespace py = boost::python;
 
 namespace {
 	namespace globals {
-		
+		PyObject *loadPackageFunc, *printExcFunc;
+		py::object logger;
 	}
 }
 
@@ -48,10 +51,6 @@ namespace Script {
 		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
-		
-		// Requires at least Python 2.6.6.
-		char *pyargv[] = { "" };
-		PySys_SetArgvEx(1, pyargv, 0);
 		
 		Logger::Inst()->output << "[Script] Python " << Py_GetVersion() << "\n";
 		
@@ -78,23 +77,84 @@ namespace Script {
 			Logger::Inst()->output << "[Script] sys.path = " << py::extract<char*>(res) << "\n";
 		} catch (const py::error_already_set&) {
 			Logger::Inst()->output << "[Script] Bootstrap failed.\n";
+			LogException();
 			Logger::Inst()->output.flush();
-			PyErr_Print();
 			exit(20);
 		}
 		
+		// Get utility functions.
+		Logger::Inst()->output << "[Script] import imp.\n" << std::flush;
+		PyObject *modImp = PyImport_ImportModule("imp");
+		Logger::Inst()->output << "[Script] import traceback.\n" << std::flush;
+		PyObject *modTraceback = PyImport_ImportModule("traceback");
+		
+		assert(modImp);
+		assert(modTraceback);
+		
+		Logger::Inst()->output << "[Script] printExcFunc = traceback.print_exception.\n" << std::flush;
+		globals::printExcFunc = PyObject_GetAttrString(modTraceback, "print_exception");
+		Logger::Inst()->output << "[Script] loadPackageFunc = imp.load_package.\n" << std::flush;
+		globals::loadPackageFunc = PyObject_GetAttrString(modImp, "load_package");
+		
+		assert(globals::loadPackageFunc);
+		assert(globals::printExcFunc);
+		
+		Py_DECREF(modImp);
+		Py_DECREF(modTraceback);
+		
 		ExposeAPI();
+		
+		globals::logger = API::pyLoggerStream();
 		Logger::Inst()->output.flush();
 	}
 	
 	void Shutdown() {
 		Logger::Inst()->output << "[Script] Shutting down engine.\n";
 		
+		Py_DECREF(globals::loadPackageFunc);
+		
+		ReleaseListeners();
 		Py_Finalize();
 	}
 	
-	void LoadScript(const std::string& mod, const std::string& filename) {
-		Logger::Inst()->output << "[Script] Loading " << filename << " into mods." << mod << "\n";
+	void LoadScript(const std::string& mod, const std::string& directory) {
+		Logger::Inst()->output << "[Script] Loading '" << directory << "' into 'mods." << mod << "'.\n" << std::flush;
 		
+		try {
+			py::call<void>(globals::loadPackageFunc, mod, directory);
+		} catch (const py::error_already_set&) {
+			LogException();
+		}
+		//PyObject_CallFunction(globals::loadPackageFunc, "ss", mod.c_str(), directory.c_str());
+	}
+	
+	void LogException(bool clear) {
+		if (PyErr_Occurred() == NULL) return;
+		
+		PyObject *excType, *excVal, *excTB;
+		PyErr_Fetch(&excType, &excVal, &excTB);
+		PyErr_Clear();
+		
+		// Boost.Python's call cannot use raw PyObject*.
+		// And its documentation sucks.
+		Logger::Inst()->output << "**** Python exception occurred ****\n";
+		Py_DECREF(PyObject_CallFunction(
+			globals::printExcFunc, "OOOOO", excType, excVal, excTB, Py_None, globals::logger.ptr()
+		));
+		Logger::Inst()->output << "***********************************\n" << std::flush;
+		
+		if (PyErr_Occurred() != NULL) {
+			Logger::Inst()->output << "[Script] INTERNAL ERROR IN LOGEXCEPTION, SEE STDERR.\n";
+			PyErr_Print();
+			PyErr_Clear();
+		}
+		
+		if (!clear) {
+			PyErr_Restore(excType, excVal, excTB);
+		}
+		
+		Py_DECREF(excType);
+		Py_DECREF(excVal);
+		Py_DECREF(excTB);
 	}
 }
