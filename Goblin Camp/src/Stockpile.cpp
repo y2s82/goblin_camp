@@ -215,8 +215,7 @@ bool Stockpile::Allowed(std::set<ItemCategory> cats) {
 	return true;
 }
 
-bool Stockpile::Full()
-{
+bool Stockpile::Full() {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
