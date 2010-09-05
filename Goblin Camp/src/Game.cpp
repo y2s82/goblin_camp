@@ -91,7 +91,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
 		mati != Construction::Presets[construct].materials.end(); ++mati) {
-			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati);
+			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target);
 			if (boost::shared_ptr<Item> item = material.lock()) {
 				item->Reserve(true);
 				componentList.push_back(item);
@@ -146,7 +146,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		pickupJob->Parent(buildJob);
 		buildJob->PreReqs()->push_back(pickupJob);
 
-		pickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), *materialIter));
+		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter));
 		pickupJob->tasks.push_back(Task(MOVE));
 		pickupJob->tasks.push_back(Task(TAKE));
 		pickupJob->tasks.push_back(Task(MOVE, newCons->Position(), newCons));
@@ -546,28 +546,44 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
 
-boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, int flags, int value) {
+// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
+// first.
+boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
+	int nearestDistance = INT_MAX;
+	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				return item;
+				int distance = Distance(item.lock()->Position(), target);
+				if(distance < nearestDistance) {
+					nearestDistance = distance;
+					nearest = item;
+				}
 			}
 		}
 	}
-	return boost::weak_ptr<Item>();
+	return nearest;
 }
 
-boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, int flags, int value) {
+// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
+// first.
+boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
+	int nearestDistance = INT_MAX;
+	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				return item;
+				int distance = Distance(item.lock()->Position(), target);
+				if(distance < nearestDistance) {
+					nearestDistance = distance;
+					nearest = item;
+				}
 			}
 		}
 	}
-	return boost::weak_ptr<Item>();
+	return nearest;
 }
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
