@@ -43,6 +43,7 @@ namespace fs = boost::filesystem;
 #include "UI.hpp"
 #include "UI/YesNoDialog.hpp"
 #include "scripting/Engine.hpp"
+#include "scripting/Event.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
 void _ImplFindPersonalDirectory(std::string&);
@@ -381,14 +382,19 @@ namespace Data {
 	void LoadGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
 		Logger::Inst()->output << "[Data] Loading game from " << file << "\n";
+		
 		Game::Inst()->LoadGame(file);
+		Script::Event::GameLoaded(file);
 		
 		Logger::Inst()->output.flush();
 	}
 	
 	void DoSave(std::string file) {
 		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+		
 		Game::Inst()->SaveGame(file);
+		Script::Event::GameSaved(file);
+		
 		Logger::Inst()->output.flush();
 	}
 	
