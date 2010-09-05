@@ -191,6 +191,8 @@ public:
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
+	void Idle();
+	void StartJob(boost::shared_ptr<Job>);
 
 	void AddEffect(StatusEffectType);
 	void RemoveEffect(StatusEffectType);
