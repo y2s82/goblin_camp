@@ -13,36 +13,19 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
+#pragma once
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
-
-#include <vector>
-#include <string>
-#include <boost/foreach.hpp>
-
-int GCMain(std::vector<std::string>&);
-void InstallExceptionHandler();
-void GCCommandLine(std::vector<std::string>&);
-
-#ifdef DEBUG
-int main(int argc, char **argv) {
-	InstallExceptionHandler();
-	
-	std::vector<std::string> args(argc);
-	for (int i = 0; i < argc; ++i) {
-		args[i] = argv[i];
+namespace Script {
+	namespace Event {
+		void GameStart();
+		void GameEnd();
+		void GameSaved(const std::string&);
+		void GameLoaded(const std::string&);
+		void BuildingCreated(Construction*, int, int);
+		void BuildingDestroyed(Construction*, int, int);
+		void ItemCreated(Item*, Construction*, NPC*, int, int);
+		void ItemDestroyed(Item*, int, int);
+		void NPCSpawned(NPC*, Construction*, int, int);
+		void NPCKilled(NPC*, NPC*, int, int);
 	}
-	return GCMain(args);
-}
-#endif
-
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	InstallExceptionHandler();
-	
-	std::vector<std::string> args;
-	GCCommandLine(args);
-	return GCMain(args);
 }
