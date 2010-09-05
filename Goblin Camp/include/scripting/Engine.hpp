@@ -15,24 +15,19 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Coordinate.hpp"
-
-class Camp {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
-	Camp();
-	static Camp* instance;
-	Coordinate center;
-	unsigned int buildingCount;
-
-public:
-	static Camp* Inst();
-	Coordinate Center();
-	void UpdateCenter(Coordinate, bool);
-};
+namespace Script {
+	// Only mods with apiVersion property that equals to this will have their scripts loaded.
+	extern const short version;
+	
+	// Initialises the engine.
+	void Init(std::vector<std::string>&);
+	
+	// Shuts down the engine.
+	void Shutdown();
+	
+	// Loads mod's __init__.py.
+	void LoadScript(const std::string&, const std::string&);
+	
+	// Logs active exception (noop if no exception is active).
+	void LogException(bool clear = true);
+}

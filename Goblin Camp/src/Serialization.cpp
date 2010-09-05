@@ -642,8 +642,6 @@ template<class Archive>
 void Camp::load(Archive & ar, const unsigned int version) {
 	ar & center;
 	ar & buildingCount;
-	xAcc(center.X(), boost::accumulators::weight = buildingCount);
-	yAcc(center.Y(), boost::accumulators::weight = buildingCount);
 }
 
 template<class Archive>

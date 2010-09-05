@@ -15,8 +15,15 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-int GCMain();
+#include <vector>
+#include <string>
 
-int main() {
-	return GCMain();
+int GCMain(std::vector<std::string>&);
+
+int main(int argc, char **argv) {
+	std::vector<std::string> args(argc);
+	for (int i = 0; i < argc; ++i) {
+		args[i] = argv[i];
+	}
+	return GCMain(args);
 }

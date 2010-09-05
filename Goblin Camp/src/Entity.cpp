@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Entity.hpp"
 #include "Logger.hpp"
+#include "Map.hpp"
 
 FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
 
@@ -79,7 +80,8 @@ void Entity::CalculateFlightPath(Coordinate target, int speed, int initialHeight
 	int px = target.X();
 	int py = target.Y();
 	do {
-		flightPath.push_back(FlightPath(Coordinate(px,py)));
+		if (px >= 0 && px < Map::Inst()->Width() && py >= 0 && py < Map::Inst()->Height())
+			flightPath.push_back(FlightPath(Coordinate(px,py)));
 	} while (!TCODLine::step(&px, &py));
 
 	if (flightPath.size() > 0) {

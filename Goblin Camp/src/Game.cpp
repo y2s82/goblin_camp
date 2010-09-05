@@ -87,11 +87,6 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size) {
 }
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
-   	if (Construction::AllowedAmount[construct] == 0) {
-		Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
-		return -1;
-	}
-
 	//Check if the required materials exist before creating the build job
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
@@ -111,6 +106,14 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 			}
 	}
 
+	if (Construction::AllowedAmount[construct] >= 0) {
+		if (Construction::AllowedAmount[construct] == 0) {
+			Announce::Inst()->AddMsg("Cannot build another "+Construction::Presets[construct].name+"!", TCODColor::red);
+			return -1;
+		}
+		--Construction::AllowedAmount[construct];
+	}
+	
 	for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
 		compi != componentList.end(); ++compi) {
 			compi->lock()->Reserve(false);
@@ -323,16 +326,13 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
+	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
+	
 	if (confirm) {
-		YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
-		ExitConfirmed();
+		exitFunc();
 	}
-}
-
-void Game::ExitConfirmed() {
-	Logger::End();
-	exit(0);
 }
 
 int Game::ScreenWidth() const {	return screenWidth; }

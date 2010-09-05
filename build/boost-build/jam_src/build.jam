@@ -437,26 +437,21 @@ if $(tool.$(toolset).link.cc)
     --link-libs = $(tool.$(toolset).link.linklibs) ;
 }
 
-# Put executables in platform-specific subdirectory.
-locate-target = $(LOCATE_TARGET) ;
+locate-target = bin ;
 if $(VMS)
 {
-    locate-target ?= bin$(.)vms ;
     platform = vms ;
 }
 else if $(MAC)
 {
-    locate-target ?= bin$(.)$(OS:L)$(OSPLAT:L) ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
 else if $(OSPLAT)
 {
-    locate-target ?= bin$(.)$(OS:L)$(OSPLAT:L) ;
     platform = $(OS:L)$(OSPLAT:L) ;
 }
 else
 {
-    locate-target ?= bin$(.)$(OS:L) ;
     platform = $(OS:L) ;
 }
 if $(debug)
