@@ -37,6 +37,7 @@ namespace Script {
 	
 	void ExposeAPI();
 	void AppendListener(PyObject*);
-	void InvokeListeners(char*, PyObject *args = NULL);
+	void InvokeListeners(char*, char*, ...);
+	void InvokeListeners(char*, PyObject* = NULL);
 	void ReleaseListeners();
 }

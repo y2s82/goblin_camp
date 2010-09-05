@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/_python.hpp"
 
 #include <cassert>
+#include <cstdarg>
 
 namespace py = boost::python;
 
@@ -28,7 +29,7 @@ namespace py = boost::python;
 
 namespace {
 	namespace globals {
-		std::list<PyObject*> listeners;
+		std::list<py::object> listeners;
 	}
 }
 
@@ -70,41 +71,48 @@ namespace Script {
 	
 	void AppendListener(PyObject *listener) {
 		assert(listener);
-		Py_INCREF(listener);
+		py::handle<> hListener(py::borrowed(listener));
 		
-		PyObject *repr = PyObject_Repr(listener);
-		assert(repr);
-		Logger::Inst()->output << "[Script:API] New listener: " << PyString_AsString(repr) << ".\n";
-		Py_DECREF(repr);
+		py::object oListener(hListener);
+		{
+			py::object repr(py::handle<>(PyObject_Repr(listener)));
+			Logger::Inst()->output << "[Script:API] New listener: " << py::extract<char*>(repr) << ".\n";
+		}
 		
-		globals::listeners.push_back(listener);
+		globals::listeners.push_back(oListener);
 	}
 	
 	void InvokeListeners(char *method, PyObject *args) {
-		BOOST_FOREACH(PyObject *listener, globals::listeners) {
-			if (!PyObject_HasAttrString(listener, method)) {
+		BOOST_FOREACH(py::object listener, globals::listeners) {
+			if (!PyObject_HasAttrString(listener.ptr(), method)) {
 				continue;
 			}
 			
-			PyObject *callable = PyObject_GetAttrString(listener, method);
-			Py_DECREF(PyObject_CallObject(callable, args));
-			Py_DECREF(callable);
-			
-			LogException();
+			py::object callable = listener.attr(method);
+			try {
+				py::handle<> result(
+					PyObject_CallObject(callable.ptr(), args)
+				);
+			} catch (const py::error_already_set&) {
+				LogException();
+			}
 		}
-		// Caller is expected to do InvokeListeners("foo", Py_BuildValue("...")).
-		// That's why we DECREF the args tuple here.
-		Py_XDECREF(args);
+	}
+	
+	void InvokeListeners(char *method, char *format, ...) {
+		va_list argList;
+		va_start(argList, format);
+		
+		py::object args(py::handle<>(
+			Py_VaBuildValue(format, argList)
+		));
+		
+		va_end(argList);
+		
+		InvokeListeners(method, args.ptr());
 	}
 	
 	void ReleaseListeners() {
-		typedef std::list<PyObject*>::iterator Iterator;
-		
-		// Removing items, so can't use foreach.
-		for (Iterator it = globals::listeners.begin(); it != globals::listeners.end();) {
-			Py_DECREF(*it);
-			
-			it = globals::listeners.erase(it);
-		}
+		globals::listeners.clear();
 	}
 }

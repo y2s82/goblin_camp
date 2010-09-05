@@ -17,6 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "scripting/_python.hpp"
 
+namespace py = boost::python;
+
 #include <list>
 #include <string>
 
@@ -37,11 +39,11 @@ namespace Script { namespace Event {
 	}
 	
 	void GameSaved(const std::string& filename) {
-		Script::InvokeListeners("onGameSaved", Py_BuildValue("(s)", filename.c_str()));
+		Script::InvokeListeners("onGameSaved", "(s)", filename.c_str());
 	}
 	
 	void GameLoaded(const std::string& filename) {
-		Script::InvokeListeners("onGameLoaded", Py_BuildValue("(s)", filename.c_str()));
+		Script::InvokeListeners("onGameLoaded", "(s)", filename.c_str());
 	}
 	
 	void BuildingCreated(Construction*, int, int) {
