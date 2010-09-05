@@ -211,4 +211,32 @@ void JobManager::Reset() {
 		availableList[i].clear();
 	}
 	waitingList.clear();
+	npcsWaiting.clear();
+}
+
+void JobManager::NPCWaiting(int uid) {
+	npcsWaiting.push_back(uid);
+}
+
+void JobManager::ClearWaitingNpcs() {
+	npcsWaiting.clear();
+}
+
+void JobManager::AssignJobs() {
+	std::list<int>::iterator npci = npcsWaiting.begin();
+	for (int i = 0; i < PRIORITY_COUNT && npci != npcsWaiting.end(); i++) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
+			 jobi != availableList[i].end() && npci != npcsWaiting.end(); ++jobi) {
+			if ((*jobi)->Menial() != Game::Inst()->npcList[*npci]->Expert()) {
+				if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
+					(*jobi)->Assign(*npci);
+					Game::Inst()->npcList[*npci]->StartJob(*jobi);
+					npci++;
+				}
+			}
+		}
+	}
+	for(; npci != npcsWaiting.end(); npci++) {
+		Game::Inst()->npcList[*npci]->Idle();
+	}
 }
