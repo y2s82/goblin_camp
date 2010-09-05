@@ -71,7 +71,6 @@ void MainLoop() {
 	Game* game = Game::Inst();
 	if (!game->Running()) {
 		Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
-		Script::Event::GameStart();
 	}
 	game->Running(true);
 
@@ -110,6 +109,8 @@ void MainLoop() {
 void StartNewGame() {
 	Game* game = Game::Inst();
 	game->Reset();
+	
+	Script::Event::GameStart();
 	game->GenerateMap();
 
 	Coordinate spawnTopCorner(200,200);
