@@ -32,7 +32,9 @@ namespace Script {
 		// Announcer.
 		void announce(const char*);
 		
-		extern boost::python::object pyLoggerStream;
+		namespace py = boost::python;
+		extern py::object pyLoggerStream;
+		extern py::object pyCoordinate;
 	}
 	
 	void ExposeAPI();
