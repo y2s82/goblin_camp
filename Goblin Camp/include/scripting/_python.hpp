@@ -15,11 +15,26 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#ifdef GC_PYTHON
+// This is ridiculous. *Something* is defining _DEBUG symbol, which
+// causes win32's pyconfig.h to issue #pragma comment that causes linker
+// to search for python27_d.lib even when I *explicitly* tell it that I
+// *don't want* pydebug.
+//
+// So, stupid workaround. To use debug version of Python,
+// define Py_DEBUG directly (<pydebug>on with Boost.Build).
+//
+// Don't include Python.h directly, unless you want magic to take
+// control over what's linked in.
 
-namespace Python {
-	extern const unsigned int apiVersion;
-	void Init();
-}
+#ifdef _DEBUG
+#	define _SAVE_DEBUG
+#	undef _DEBUG
+#endif
 
+#include <Python.h>
+#include <boost/python.hpp>
+
+#ifdef _SAVE_DEBUG
+#	define _DEBUG
+#	undef _SAVE_DEBUG
 #endif

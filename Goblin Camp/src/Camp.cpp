@@ -34,9 +34,18 @@ Coordinate Camp::Center() {
 	return center;
 }
 
-void Camp::UpdateCenter(Coordinate newBuilding) {
-	++buildingCount;
-	xAcc(newBuilding.X(),boost::accumulators::weight = 1);
-	yAcc(newBuilding.Y(),boost::accumulators::weight = 1);
-	center = Coordinate((int)boost::accumulators::mean(xAcc), (int)boost::accumulators::mean(yAcc));
+void Camp::UpdateCenter(Coordinate newBuilding, bool add) {
+	if(add) {
+		center = Coordinate((center.X() * buildingCount + newBuilding.X()) / (buildingCount + 1),
+							(center.Y() * buildingCount + newBuilding.Y()) / (buildingCount + 1));
+		++buildingCount;
+	} else {
+		if(buildingCount > 1) {
+			center = Coordinate((center.X() * buildingCount - newBuilding.X()) / (buildingCount - 1),
+								(center.Y() * buildingCount - newBuilding.Y()) / (buildingCount - 1));
+		} else {
+			center = Coordinate(220, 220);
+		}
+		--buildingCount;
+	}
 }

@@ -21,12 +21,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
+
 #include <cassert>
 #include <string>
 #include <cstring>
 #include <fstream>
 #include <iostream>
 #include <list>
+#include <map>
 
 namespace fs = boost::filesystem;
 
@@ -39,6 +42,8 @@ namespace fs = boost::filesystem;
 #include "Construction.hpp"
 #include "UI.hpp"
 #include "UI/YesNoDialog.hpp"
+#include "scripting/Engine.hpp"
+#include "scripting/Event.hpp"
 
 // These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
 void _ImplFindPersonalDirectory(std::string&);
@@ -141,6 +146,8 @@ namespace {
 				ptr->author = value.s;
 			} else if (boost::iequals(name, "version")) {
 				ptr->version = value.s;
+			} else if (boost::iequals(name, "apiversion")) {
+				ptr->apiVersion = value.i;
 			}
 			
 			return true;
@@ -161,9 +168,10 @@ namespace {
 		
 		TCODParser parser;
 		TCODParserStruct *type = parser.newStructure("mod");
-		type->addProperty("name",    TCOD_TYPE_STRING, true);
-		type->addProperty("author",  TCOD_TYPE_STRING, true);
-		type->addProperty("version", TCOD_TYPE_STRING, true);
+		type->addProperty("name",       TCOD_TYPE_STRING, true);
+		type->addProperty("author",     TCOD_TYPE_STRING, true);
+		type->addProperty("version",    TCOD_TYPE_STRING, true);
+		type->addProperty("apiVersion", TCOD_TYPE_INT, false);
 		
 		for (fs::directory_iterator it(globals::modsDir); it != end; ++it) {
 			if (!fs::is_directory(it->status())) continue;
@@ -177,13 +185,21 @@ namespace {
 			TryLoadLocalDataFile(mod, "names",         _LoadNames);
 			TryLoadLocalDataFile(mod, "creatures",     NPC::LoadPresets);
 			
-			Data::Mod metadata(mod.filename(), "<unknown>", "<unknown>", "<unknown>");
+			Data::Mod metadata(mod.filename(), "<unknown>", "<unknown>", "<unknown>", -1);
 			if (fs::exists(mod / "mod.dat")) {
 				Logger::Inst()->output << "[Data] Loading mod metadata.\n";
 				
 				ModListener *listener = new ModListener(&metadata);
 				parser.run((mod / "mod.dat").string().c_str(), listener);
 				delete listener;
+			}
+			
+			if (metadata.apiVersion != -1) {
+				if (metadata.apiVersion != Script::version) {
+					Logger::Inst()->output << "[Data] WARNING: Ignoring mod scripts because of incorrect API version.\n";
+				} else {
+					Script::LoadScript(metadata.mod, mod.string());
+				}
 			}
 			
 			globals::loadedMods.push_back(metadata);
@@ -308,6 +324,8 @@ namespace Data {
 		
 		Logger::Inst()->output << "[Data] Loading config.ini.\n";
 		Game::Inst()->LoadConfig(globals::config.string());
+		
+		Logger::Inst()->output << "[Data] Loading keymaps.\n";
 		UI::LoadKeys(globals::defaultKeys.string());
 		UI::LoadKeys(globals::keys.string());
 		
@@ -364,14 +382,19 @@ namespace Data {
 	void LoadGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
 		Logger::Inst()->output << "[Data] Loading game from " << file << "\n";
+		
 		Game::Inst()->LoadGame(file);
+		Script::Event::GameLoaded(file);
 		
 		Logger::Inst()->output.flush();
 	}
 	
 	void DoSave(std::string file) {
 		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+		
 		Game::Inst()->SaveGame(file);
+		Script::Event::GameSaved(file);
+		
 		Logger::Inst()->output.flush();
 	}
 	
@@ -427,6 +450,41 @@ namespace Data {
 		"\n}";
 		configStream.close();
 	}
+	
+	void SaveKeys(const std::map<std::string, char>& keymap) {
+		typedef std::pair<std::string, char> KeyPair;
+		std::ofstream keysStream(globals::keys.string().c_str());
+		
+		keysStream << "keys {\n";
+		BOOST_FOREACH(KeyPair mapping, keymap) {
+			keysStream << "\t" << mapping.first << " = '" << mapping.second << "'\n";
+		}
+		keysStream << "}";
+		keysStream.close();
+	}
+	
+	#pragma warning(push)
+	// "warning C4715: 'Data::GetPath' : not all control paths return a value"
+	#pragma warning(disable : 4715)
+	fs::path& GetPath(Path::Path what) {
+		switch (what) {
+			case Path::Executable:  return globals::exec;
+			case Path::GlobalData:  return globals::dataDir;
+			case Path::Personal:    return globals::personalDir;
+			case Path::Mods:        return globals::modsDir;
+			case Path::Saves:       return globals::savesDir;
+			case Path::Screenshots: return globals::screensDir;
+			case Path::Font:        return globals::font;
+			case Path::Config:      return globals::config;
+			case Path::Keys:        return globals::keys;
+		}
+		
+		// If control reaches here, then someone added new value to the enum,
+		// forgot to add it here, and missed the 'switch not checking
+		// every value' warning. So, crash and burn.
+		assert(false);
+	}
+	#pragma warning(pop)
 	
 	std::list<Mod>& GetLoadedMods() {
 		return globals::loadedMods;

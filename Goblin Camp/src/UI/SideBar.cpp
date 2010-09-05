@@ -124,7 +124,7 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 		Frame *frame = new Frame("Seeds", std::vector<Drawable *>(), 0, 0, width - 2, 12);
 		frame->AddComponent(new UIList<std::pair<ItemType, bool>, std::map<ItemType, bool> >(fp->AllowedSeeds(), 1, 1, width - 4, 10,
 																							 SideBar::DrawSeed,
-																							 boost::bind(&FarmPlot::SwitchAllowed, fp, _1)));
+																							 boost::bind(&FarmPlot::SwitchAllowed, fp.get(), _1)));
 		container->AddComponent(frame);			
 	} else if (boost::shared_ptr<Stockpile> sp = boost::dynamic_pointer_cast<Stockpile>(entity.lock())) {
 		height = 51;

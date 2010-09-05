@@ -13,26 +13,28 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
 
-#include "Coordinate.hpp"
+#define NOMINMAX
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <shellapi.h>
 
-class Camp {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
+#include <vector>
+#include <string>
+#include <cstdlib>
 
-	Camp();
-	static Camp* instance;
-	Coordinate center;
-	unsigned int buildingCount;
-
-public:
-	static Camp* Inst();
-	Coordinate Center();
-	void UpdateCenter(Coordinate, bool);
-};
+void GCCommandLine(std::vector<std::string>& args) {
+	int argc = 0;
+	wchar_t **argvW = CommandLineToArgvW(GetCommandLineW(), &argc);
+	char buffer[4096];
+	args.resize(argc);
+	
+	for (int i = 0; i < argc; ++i) {
+		size_t converted;
+		wcstombs_s(&converted, buffer, sizeof(buffer), argvW[i], _TRUNCATE);
+		buffer[converted] = '\0';
+		
+		args[i] = buffer;
+	}
+}
