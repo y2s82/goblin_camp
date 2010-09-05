@@ -64,6 +64,7 @@ namespace Script { namespace API {
 
 namespace Script {
 	void ExposeAPI() {
+		Logger::Inst()->output << "[Script:API] Exposing API.\n";
 		API::init_gcampapi();
 	}
 	

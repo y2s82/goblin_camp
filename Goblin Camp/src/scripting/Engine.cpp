@@ -37,8 +37,7 @@ namespace py = boost::python;
 
 namespace {
 	namespace globals {
-		PyObject *loadPackageFunc, *printExcFunc;
-		py::object logger;
+		py::object logger, loadPackageFunc, printExcFunc;
 	}
 }
 
@@ -83,24 +82,12 @@ namespace Script {
 		}
 		
 		// Get utility functions.
-		Logger::Inst()->output << "[Script] import imp.\n" << std::flush;
-		PyObject *modImp = PyImport_ImportModule("imp");
-		Logger::Inst()->output << "[Script] import traceback.\n" << std::flush;
-		PyObject *modTraceback = PyImport_ImportModule("traceback");
+		Logger::Inst()->output << "[Script] Importing utils.\n" << std::flush;
+		py::object modImp = py::import("imp");
+		py::object modTB  = py::import("traceback");
 		
-		assert(modImp);
-		assert(modTraceback);
-		
-		Logger::Inst()->output << "[Script] printExcFunc = traceback.print_exception.\n" << std::flush;
-		globals::printExcFunc = PyObject_GetAttrString(modTraceback, "print_exception");
-		Logger::Inst()->output << "[Script] loadPackageFunc = imp.load_package.\n" << std::flush;
-		globals::loadPackageFunc = PyObject_GetAttrString(modImp, "load_package");
-		
-		assert(globals::loadPackageFunc);
-		assert(globals::printExcFunc);
-		
-		Py_DECREF(modImp);
-		Py_DECREF(modTraceback);
+		globals::printExcFunc    = modTB.attr("print_exception");
+		globals::loadPackageFunc = modImp.attr("load_package");
 		
 		ExposeAPI();
 		PyImport_AddModule("gcmods");
@@ -112,8 +99,6 @@ namespace Script {
 	void Shutdown() {
 		Logger::Inst()->output << "[Script] Shutting down engine.\n";
 		
-		Py_DECREF(globals::loadPackageFunc);
-		
 		ReleaseListeners();
 		Py_Finalize();
 	}
@@ -122,11 +107,10 @@ namespace Script {
 		Logger::Inst()->output << "[Script] Loading '" << directory << "' into 'gcmods." << mod << "'.\n" << std::flush;
 		
 		try {
-			py::call<void>(globals::loadPackageFunc, "gcmods." + mod, directory);
+			globals::loadPackageFunc("gcmods." + mod, directory);
 		} catch (const py::error_already_set&) {
 			LogException();
 		}
-		//PyObject_CallFunction(globals::loadPackageFunc, "ss", mod.c_str(), directory.c_str());
 	}
 	
 	void LogException(bool clear) {
@@ -136,26 +120,22 @@ namespace Script {
 		PyErr_Fetch(&excType, &excVal, &excTB);
 		PyErr_Clear();
 		
-		// Boost.Python's call cannot use raw PyObject*.
-		// And its documentation sucks.
-		Logger::Inst()->output << "**** Python exception occurred ****\n";
-		Py_DECREF(PyObject_CallFunction(
-			globals::printExcFunc, "OOOOO", excType, excVal, excTB, Py_None, globals::logger.ptr()
-		));
-		Logger::Inst()->output << "***********************************\n" << std::flush;
+		py::handle<> hExcType(excType);
+		py::handle<> hExcVal(excVal);
+		py::handle<> hExcTB(excTB);
+		py::handle<> none(py::borrowed(Py_None));
 		
-		if (PyErr_Occurred() != NULL) {
-			Logger::Inst()->output << "[Script] INTERNAL ERROR IN LOGEXCEPTION, SEE STDERR.\n";
+		Logger::Inst()->output << "**** Python exception occurred ****\n";
+		try {
+			globals::printExcFunc(hExcType, hExcVal, hExcTB, none, globals::logger);
+		} catch (const py::error_already_set&) {
+			Logger::Inst()->output << " < INTERNAL ERROR > \n";
 			PyErr_Print();
-			PyErr_Clear();
 		}
+		Logger::Inst()->output << "***********************************\n" << std::flush;
 		
 		if (!clear) {
 			PyErr_Restore(excType, excVal, excTB);
 		}
-		
-		Py_DECREF(excType);
-		Py_DECREF(excVal);
-		Py_DECREF(excTB);
 	}
 }
