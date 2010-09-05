@@ -103,6 +103,7 @@ namespace Script {
 		Py_DECREF(modTraceback);
 		
 		ExposeAPI();
+		PyImport_AddModule("gcmods");
 		
 		globals::logger = API::pyLoggerStream();
 		Logger::Inst()->output.flush();
@@ -118,10 +119,10 @@ namespace Script {
 	}
 	
 	void LoadScript(const std::string& mod, const std::string& directory) {
-		Logger::Inst()->output << "[Script] Loading '" << directory << "' into 'mods." << mod << "'.\n" << std::flush;
+		Logger::Inst()->output << "[Script] Loading '" << directory << "' into 'gcmods." << mod << "'.\n" << std::flush;
 		
 		try {
-			py::call<void>(globals::loadPackageFunc, mod, directory);
+			py::call<void>(globals::loadPackageFunc, "gcmods." + mod, directory);
 		} catch (const py::error_already_set&) {
 			LogException();
 		}
