@@ -107,5 +107,5 @@ public:
 	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
 	static void LoadKeys(std::string);
-
+	static std::map<std::string, char>& GetKeys();
 };
