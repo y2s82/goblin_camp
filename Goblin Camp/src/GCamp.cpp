@@ -103,6 +103,8 @@ void MainLoop() {
 		startMilli = TCODSystem::getElapsedMilli();
 		if (elapsedMilli < targetMilli) TCODSystem::sleepMilli(targetMilli - elapsedMilli);
 	}
+	
+	Script::Event::GameEnd();
 }
 
 void StartNewGame() {
