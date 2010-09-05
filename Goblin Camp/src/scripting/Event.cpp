@@ -33,7 +33,7 @@ namespace Script { namespace Event {
 	}
 	
 	void GameEnd() {
-	
+		Script::InvokeListeners("onGameEnd");
 	}
 	
 	void GameSaved(const std::string&) {
