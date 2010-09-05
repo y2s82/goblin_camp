@@ -57,6 +57,8 @@ int GCMain(std::vector<std::string>& args) {
 	
 	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
 		exitcode = MainMenu();
+	} else {
+		Logger::Inst()->output << "[GCMain] Bootstrap test, going into shutdown.\n";
 	}
 	
 	Script::Shutdown();
