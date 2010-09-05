@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace py = boost::python;
 
+#include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "Logger.hpp"
 #include "scripting/API.hpp"
@@ -50,12 +51,26 @@ namespace Script { namespace API {
 	}
 	
 	py::object pyLoggerStream;
+	py::object pyCoordinate;
 	
 	BOOST_PYTHON_MODULE(_gcampapi) {
 		pyLoggerStream = py::class_<LoggerStream>("LoggerStream")
 			.def("close", &LoggerStream::close)
 			.def("write", &LoggerStream::write)
 			.def("flush", &LoggerStream::flush)
+		;
+		
+		// Coordinate is simple enough to be exposed directly
+		// (but with read-only X and Y properties).
+		pyCoordinate = py::class_<Coordinate>("Coordinate", py::init<int, int>())
+			.add_property("x", (int (Coordinate::*)() const)&Coordinate::X)
+			.add_property("y", (int (Coordinate::*)() const)&Coordinate::Y)
+			.def(py::self < py::self)
+			.def(py::self == py::self)
+			.def(py::self != py::self)
+			.def(py::self + py::self)
+			.def(py::self + py::other<int>())
+			.def(py::self - py::other<int>())
 		;
 		
 		py::def("announce", &announce);
