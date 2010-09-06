@@ -364,14 +364,18 @@ AiThink NPC::Think() {
 
 	lastMoveResult = Move(lastMoveResult);
 
-	if (velocity == 0) timeCount += thinkSpeed; //Can't think while hurtling through the air, sorry
-	else if (!jobs.empty()) TaskFinished(TASKFAILFATAL, "Flying through the air");
-
+	if (velocity == 0) {
+		timeCount += thinkSpeed; //Can't think while hurtling through the air, sorry
+	} else if (!jobs.empty()) {
+		TaskFinished(TASKFAILFATAL, "Flying through the air");
+		JobManager::Inst()->NPCNotWaiting(uid);
+	} 
 	while (timeCount > UPDATES_PER_SECOND) {
 
 		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock()) {
+			JobManager::Inst()->NPCNotWaiting(uid);
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
 			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
 				aggressor.reset();
@@ -858,6 +862,7 @@ MOVENEARend:
 			}
 		} else {
 			if (HasEffect(PANIC)) {
+				JobManager::Inst()->NPCNotWaiting(uid);
 				bool enemyFound = false;
 				if (jobs.empty() && !nearNpcs.empty()) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
@@ -1022,6 +1027,7 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex 
 
 bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 	if (boost::shared_ptr<Squad> squad = npc->MemberOf().lock()) {
+		JobManager::Inst()->NPCNotWaiting(npc->uid);
 		npc->aggressive = true;
 		boost::shared_ptr<Job> newJob(new Job("Follow orders"));
 		newJob->internal = true;
@@ -1121,6 +1127,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			Game::Inst()->FindNearbyNPCs(npc, true);
 			for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 				if (npci->lock()->faction != npc->faction) {
+					JobManager::Inst()->NPCNotWaiting(npc->uid);
 					boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 					killJob->internal = true;
 					killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
@@ -1137,6 +1144,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 		Game::Inst()->FindNearbyNPCs(npc);
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			if (npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) {
+				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
 			}
