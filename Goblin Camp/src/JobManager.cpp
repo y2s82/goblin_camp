@@ -44,7 +44,7 @@ void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 		return;
 	} else {
 		newJob->Paused(true);
-		availableList[WAITING].push_back(newJob);
+		waitingList.push_back(newJob);
 	}
 }
 
@@ -55,7 +55,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 		*/
 		job->Assign(-1);
 		job->Paused(true);
-		availableList[WAITING].push_back(job);
+		waitingList.push_back(job);
 
 		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[job->priority()].begin(); 
 			jobi != availableList[job->priority()].end(); ++jobi) {
@@ -127,7 +127,7 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 boost::weak_ptr<Job> JobManager::GetJob(int uid) {
 	boost::weak_ptr<Job> job;
 
-	for (int i = 0; i < PRIORITY_COUNT - 1; ++i) {
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
 		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 			jobi != availableList[i].end(); ++jobi) {
 				if ((*jobi)->Menial() != Game::Inst()->npcList[uid]->Expert()) {
@@ -148,10 +148,10 @@ void JobManager::Update() {
 
 	//Check the waiting list for jobs that have completed prerequisites, and move them to the
 	//job queue if so, remove removables, and retry retryables, remove unpauseds
-	for (std::list<boost::shared_ptr<Job> >::iterator jobIter = availableList[WAITING].begin(); jobIter != availableList[WAITING].end(); ) {
+	for (std::list<boost::shared_ptr<Job> >::iterator jobIter = waitingList.begin(); jobIter != waitingList.end(); ) {
 
 		if ((*jobIter)->Removable()) {
-			jobIter = availableList[WAITING].erase(jobIter);
+			jobIter = waitingList.erase(jobIter);
 		} else {
 
 			if (!(*jobIter)->PreReqs()->empty() && (*jobIter)->PreReqsCompleted()) {
@@ -160,7 +160,7 @@ void JobManager::Update() {
 
 			if (!(*jobIter)->Paused()) {
 				AddJob(*jobIter);
-				jobIter = availableList[WAITING].erase(jobIter);
+				jobIter = waitingList.erase(jobIter);
 			} else {
 				if (!(*jobIter)->Parent().lock() && !(*jobIter)->PreReqs()->empty()) {
 					//Job has unfinished prereqs, itsn't removable and is NOT a prereq itself
@@ -179,7 +179,7 @@ void JobManager::Update() {
 
 	//Check the normal queues for jobs that have all prerequisites and parents completed and
 	//remove them
-	for (int i = 0; i < PRIORITY_COUNT - 1; ++i) {
+	for (int i = 0; i < PRIORITY_COUNT; ++i) {
 		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 			jobi != availableList[i].end(); ) {
 				if ((*jobi)->Completed() && (*jobi)->PreReqsCompleted()) {
@@ -196,6 +196,7 @@ int JobManager::JobAmount() {
 	for (int i = 0; i < PRIORITY_COUNT; ++i) {
 		count += availableList[i].size();
 	}
+	count += waitingList.size();
 	return count;
 }
 
@@ -203,11 +204,15 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	int count = 0;
 
 	for (int i = 0; i < PRIORITY_COUNT; ++i) {
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
-			if (count++ == index) return (*jobi);
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
+			jobi != availableList[i].end(); ++jobi) {
+				if (count++ == index) return (*jobi);
 		}
 	}
 
+	for (std::list<boost::shared_ptr<Job> >::iterator waitingIter = waitingList.begin(); waitingIter != waitingList.end(); ++waitingIter) {
+		if (count++ == index) return (*waitingIter);
+	}
 	return boost::weak_ptr<Job>();
 }
 
@@ -244,7 +249,7 @@ void JobManager::ClearWaitingNpcs() {
 }
 
 void JobManager::AssignJobs() {
-	for (int i = 0; i < PRIORITY_COUNT && !npcsWaiting.empty(); i++) {
+	for (int i = 0; i < PRIORITY_COUNT - 1 && !npcsWaiting.empty(); i++) {
 		if(!availableList[i].empty()) {
 			std::vector<boost::shared_ptr<Job> > jobsToAssign;
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
