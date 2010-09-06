@@ -466,14 +466,19 @@ bool Construction::SpawnProductionJob() {
 				item.lock()->Reserve(true);
 			} else {
 				//Not all items available, cancel job and unreserve the reserved items.
-				ReserveComponents(false);
+				for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+					resi->lock()->Reserve(false);
+				}
 				jobList.pop_front();
 				return false;
 			}
 		}
 
 		//Unreserve the items now, because the individual jobs will reserve them for themselves
-		ReserveComponents(false);
+		for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+			resi->lock()->Reserve(false);
+		}
+
 
 		boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
 		newProductionJob->ConnectToEntity(shared_from_this());
@@ -596,8 +601,10 @@ void Construction::Dismantle() {
 			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
 			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
 			JobManager::Inst()->AddJob(dismantleJob);
-		} else { // Remove construction and cancel associated jobs
-			ReserveComponents(false);
+		} else { // Remove construction and cancel associated jobs //FIXME
+//			for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+	//			resi->lock()->Reserve(set_component_status);
+		//	}
 			JobManager::Inst()->CancelJob(shared_from_this());
 			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 		}
@@ -658,13 +665,6 @@ void Construction::Explode() {
 bool Construction::CheckMaterialsPresent() { 
 	if ((signed int)materials.size() != materialsUsed->size()) { return false; }
 	return true;
-}
-
-void Construction::ReserveComponents(bool set_component_status) {
-	std::list<boost::weak_ptr<Item> > componentList;
-	for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
-		resi->lock()->Reserve(set_component_status);
-	}
 }
 
 ConstructionPreset::ConstructionPreset() :
