@@ -53,8 +53,6 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	tasks(std::vector<Task>()),
 	internal(false)
 {
-	boost::to_lower(name);
-	name[0] = toupper(name[0]);
 }
 
 Job::~Job() {
