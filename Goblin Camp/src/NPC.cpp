@@ -152,22 +152,23 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		std::cout<<msg<<"\n";
 	}
 #endif
-	if (result == TASKSUCCESS) {
-		if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
-			jobs.front()->Complete();
+	if (jobs.size() > 0) {
+		if (result == TASKSUCCESS) {
+			if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
+				jobs.front()->Complete();
+				jobs.pop_front();
+				taskIndex = 0;
+				foundItem = boost::weak_ptr<Item>();
+			}
+		} else {
+			if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
 			jobs.pop_front();
 			taskIndex = 0;
+			DropItem(carried);
+			carried.reset();
 			foundItem = boost::weak_ptr<Item>();
 		}
-	} else {
-		if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
-		jobs.pop_front();
-		taskIndex = 0;
-		DropItem(carried);
-		carried.reset();
-		foundItem = boost::weak_ptr<Item>();
 	}
-
 	taskBegun = false;
 }
 
