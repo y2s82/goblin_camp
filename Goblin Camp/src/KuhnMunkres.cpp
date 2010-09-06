@@ -18,11 +18,11 @@
 
 std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 	int n = costs.size1();
-	int lx[n], ly[n];
-	int xy[n], yx[n];
-	bool S[n], T[n];
-	int slack[n], slackx[n];
-	int prev[n];
+	std::vector<int> lx(n,0), ly(n,0);
+	std::vector<int> xy(n,0), yx(n,0);
+	std::vector<bool> S(n,false), T(n,false);
+	std::vector<int> slack(n,0), slackx(n,0);
+	std::vector<int> prev(n,-1);
 	for(int x = 0; x < n; x++) {
 		for(int y = 0; y < n; y++) {
 			lx[x] = std::max(lx[x], costs(x, y));
@@ -34,10 +34,9 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 	
 	int numMatched = 0;
 	while(numMatched < n) {
-		int q[n], rd = 0, wr = 0;
-		memset(S, false, sizeof(S));
-		memset(T, false, sizeof(T));
-		memset(prev, -1, sizeof(prev));
+		std::vector<int> q(n,0);
+		int rd = 0, wr = 0;
+		for (int i = 0; i < n; ++i) { S[i] = false; T[i] = false; prev[i] = -1; }
 		int root = -1;
 		for(int x = 0; x < n; x++) {
 			if(xy[x] == -1) {
