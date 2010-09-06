@@ -884,7 +884,13 @@ MOVENEARend:
 				}
 			} else if (!GetSquadJob(boost::static_pointer_cast<NPC>(shared_from_this())) && 
 				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
-				Idle();
+				boost::shared_ptr<Job> idleJob(new Job("Idle"));
+				idleJob->internal = true;
+				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
+				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
+				jobs.push_back(idleJob);
+				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
+				else run = true;
 			}
 		}
 	}
@@ -892,17 +898,8 @@ MOVENEARend:
 	return AINOTHING;
 }
 
-void NPC::Idle() {
-	boost::shared_ptr<Job> idleJob(new Job("Idle"));
-	idleJob->internal = true;
-	idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
-	idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
-	jobs.push_back(idleJob);
-	if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
-	else run = true;
-}
-
 void NPC::StartJob(boost::shared_ptr<Job> job) {
+	TaskFinished(TASKOWNDONE, "");
 	jobs.push_back(job);
 	run = true;
 }
@@ -1104,7 +1101,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 	if (!npc->MemberOf().lock()) {
 		JobManager::Inst()->NPCWaiting(npc->uid);
-		return true;
 	}
 	return false;
 }
