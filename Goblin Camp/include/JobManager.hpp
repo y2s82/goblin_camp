@@ -29,7 +29,7 @@ private:
 	static JobManager *instance;
 	std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
 	std::list<boost::shared_ptr<Job> > waitingList;
-	std::list<int> npcsWaiting;
+	std::vector<int> npcsWaiting;
 public:
 	static JobManager* Inst();
 	void Reset();

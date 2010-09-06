@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		7821252F121E06E700F5C47E /* SideBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7821252E121E06E700F5C47E /* SideBar.cpp */; };
 		7821258C121E247E00F5C47E /* keys.ini in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78212564121E0E1B00F5C47E /* keys.ini */; };
+		7862EB811234519800D09AEB /* KuhnMunkres.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7862EB801234519800D09AEB /* KuhnMunkres.hpp */; };
+		7862EB831234520400D09AEB /* KuhnMunkres.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7862EB821234520400D09AEB /* KuhnMunkres.cpp */; };
 		78B37CA712060A76003F23A8 /* DataImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9A12060A76003F23A8 /* DataImpl.cpp */; };
 		78B37CA812060A76003F23A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9B12060A76003F23A8 /* main.cpp */; };
 		78B37CA912060A76003F23A8 /* AnnounceDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9D12060A76003F23A8 /* AnnounceDialog.cpp */; };
@@ -161,6 +163,7 @@
 				78E275A711FB37F300EEF2A7 /* names.dat in CopyFiles */,
 				78E275A811FB37F300EEF2A7 /* terminal.png in CopyFiles */,
 				78E275A911FB37F300EEF2A7 /* wildplants.dat in CopyFiles */,
+				7862EB811234519800D09AEB /* KuhnMunkres.hpp in CopyFiles */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -170,6 +173,8 @@
 		7821252D121E06A300F5C47E /* SideBar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SideBar.hpp; sourceTree = "<group>"; };
 		7821252E121E06E700F5C47E /* SideBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SideBar.cpp; sourceTree = "<group>"; };
 		78212564121E0E1B00F5C47E /* keys.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = keys.ini; sourceTree = "<group>"; };
+		7862EB801234519800D09AEB /* KuhnMunkres.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KuhnMunkres.hpp; sourceTree = "<group>"; };
+		7862EB821234520400D09AEB /* KuhnMunkres.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KuhnMunkres.cpp; sourceTree = "<group>"; };
 		78B37C9A12060A76003F23A8 /* DataImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataImpl.cpp; sourceTree = "<group>"; };
 		78B37C9B12060A76003F23A8 /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		78B37C9D12060A76003F23A8 /* AnnounceDialog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = AnnounceDialog.cpp; sourceTree = "<group>"; };
@@ -575,6 +580,7 @@
 				78E26FFE11FA8F4100EEF2A7 /* Item.hpp */,
 				78E26FFF11FA8F4100EEF2A7 /* Job.hpp */,
 				78E2700011FA8F4100EEF2A7 /* JobManager.hpp */,
+				7862EB801234519800D09AEB /* KuhnMunkres.hpp */,
 				78E2700111FA8F4100EEF2A7 /* Logger.hpp */,
 				78E2700211FA8F4100EEF2A7 /* Map.hpp */,
 				78E2700411FA8F4100EEF2A7 /* NatureObject.hpp */,
@@ -614,6 +620,7 @@
 				78E2702311FA8F4100EEF2A7 /* Item.cpp */,
 				78E2702411FA8F4100EEF2A7 /* Job.cpp */,
 				78E2702511FA8F4100EEF2A7 /* JobManager.cpp */,
+				7862EB821234520400D09AEB /* KuhnMunkres.cpp */,
 				78E2702611FA8F4100EEF2A7 /* Logger.cpp */,
 				78E2702711FA8F4100EEF2A7 /* Map.cpp */,
 				78E2702911FA8F4100EEF2A7 /* NatureObject.cpp */,
@@ -811,6 +818,7 @@
 				78B37CB112060A76003F23A8 /* YesNoDialog.cpp in Sources */,
 				78B37D171210DD11003F23A8 /* Tooltip.cpp in Sources */,
 				7821252F121E06E700F5C47E /* SideBar.cpp in Sources */,
+				7862EB831234520400D09AEB /* KuhnMunkres.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

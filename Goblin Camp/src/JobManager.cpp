@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 #include "Announce.hpp"
 #include "Game.hpp"
+#include "KuhnMunkres.hpp"
 
 JobManager::JobManager() {}
 JobManager *JobManager::instance = 0;
@@ -215,6 +216,11 @@ void JobManager::Reset() {
 }
 
 void JobManager::NPCWaiting(int uid) {
+	for(std::vector<int>::iterator it = npcsWaiting.begin(); it != npcsWaiting.end(); it++) {
+		if(*it == uid) {
+			return;
+		}
+	}
 	npcsWaiting.push_back(uid);
 }
 
@@ -223,20 +229,51 @@ void JobManager::ClearWaitingNpcs() {
 }
 
 void JobManager::AssignJobs() {
-	std::list<int>::iterator npci = npcsWaiting.begin();
-	for (int i = 0; i < PRIORITY_COUNT && npci != npcsWaiting.end(); i++) {
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
-			 jobi != availableList[i].end() && npci != npcsWaiting.end(); ++jobi) {
-			if ((*jobi)->Menial() != Game::Inst()->npcList[*npci]->Expert()) {
+	for (int i = 0; i < PRIORITY_COUNT && !npcsWaiting.empty(); i++) {
+		if(!availableList[i].empty()) {
+			std::vector<boost::shared_ptr<Job> > jobsToAssign;
+			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
+				 jobi != availableList[i].end(); ++jobi) {
 				if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
-					(*jobi)->Assign(*npci);
-					Game::Inst()->npcList[*npci]->StartJob(*jobi);
-					npci++;
+					jobsToAssign.push_back(*jobi);
+				}
+			}
+			if(!jobsToAssign.empty()) {
+				int matrixSize = std::max(jobsToAssign.size(), npcsWaiting.size());
+				boost::numeric::ublas::matrix<int> m(matrixSize, matrixSize);
+				for(int x = 0; x < matrixSize; x++) {
+					for(int y = 0; y < matrixSize; y++) {
+						if(x >= npcsWaiting.size() || y >= jobsToAssign.size()) {
+							m(x, y) = 1;
+						} else {
+							boost::shared_ptr<Job> job = jobsToAssign[y];
+							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcsWaiting[x]];
+							if(job->Menial() == npc->Expert() ||
+							   job->tasks.empty() ||
+							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
+								m(x, y) = 1;
+							} else {
+								m(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+							}
+						}
+					}
+				}
+				
+				std::vector<int> assignments = FindBestMatching(m);
+				
+				for(int i = 0, n = 0; n < npcsWaiting.size(); i++, n++) {
+					int jobNum = assignments[i];
+					if(jobNum < jobsToAssign.size()) {
+						int npcNum = npcsWaiting[n];
+						boost::shared_ptr<Job> job = jobsToAssign[jobNum];
+						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+						job->Assign(npcNum);
+						npc->StartJob(job);
+						npcsWaiting.erase(npcsWaiting.begin() + n);
+						n--;
+					}
 				}
 			}
 		}
-	}
-	for(; npci != npcsWaiting.end(); npci++) {
-		Game::Inst()->npcList[*npci]->Idle();
 	}
 }

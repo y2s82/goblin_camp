@@ -677,7 +677,6 @@ void Game::Update() {
 	}
 
 	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
-	JobManager::Inst()->ClearWaitingNpcs();
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		npci->second->Update();
 		if (!npci->second->Dead()) npci->second->Think();
