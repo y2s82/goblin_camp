@@ -1240,6 +1240,8 @@ bool NPC::HasEffect(StatusEffectType effect) {
 
 std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 
+/*TODO: Calling jobs.clear() isn't a good idea as the NPC can have more than one job queued up, should use
+TaskFinished(TASKFAILFATAL) or just remove the job we want aborted*/
 void NPC::AbortCurrentJob(bool remove_job) {
 	jobs.clear();
 	if (carried.lock()) {
