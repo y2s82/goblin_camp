@@ -173,6 +173,7 @@ public:
 	AiThink Think();
 	void Update();
 	void Draw(Coordinate, TCODConsole*);
+	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 	void Position(Coordinate,bool);
 	virtual void Position(Coordinate);
 	virtual Coordinate Position();

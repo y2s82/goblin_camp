@@ -949,6 +949,16 @@ void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 	}
 }
 
+void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
+	Entity::GetTooltip(x, y, tooltip);
+	if(faction == 0 && !jobs.empty()) {
+		boost::shared_ptr<Job> job = jobs.front();
+		if(job->name != "Idle") {
+			tooltip->AddEntry(TooltipEntry((boost::format("  %s") % job->name).str(), TCODColor::grey));
+		}
+	}
+}
+
 void NPC::color(TCODColor value, TCODColor bvalue) { _color = value; _bgcolor = bvalue; }
 void NPC::graphic(int value) { _graphic = value; }
 
