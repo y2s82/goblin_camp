@@ -660,6 +660,13 @@ bool Construction::CheckMaterialsPresent() {
 	return true;
 }
 
+void Construction::ReserveComponents(bool set_component_status) {
+	std::list<boost::weak_ptr<Item> > componentList;
+	for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+		resi->lock()->Reserve(set_component_status);
+	}
+}
+
 ConstructionPreset::ConstructionPreset() :
 	maxCondition(0),
 	graphic(std::vector<int>()),
