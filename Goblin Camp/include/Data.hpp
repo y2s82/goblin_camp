@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <string>
+#include <map>
+#include <libtcod.hpp>
+
 // Routines to find, load and save GC's data files.
 // Uses user personal directories to store saved games, config, local mods, etc.
 //
