@@ -91,7 +91,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
 		mati != Construction::Presets[construct].materials.end(); ++mati) {
-			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati);
+			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target);
 			if (boost::shared_ptr<Item> item = material.lock()) {
 				item->Reserve(true);
 				componentList.push_back(item);
@@ -146,7 +146,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		pickupJob->Parent(buildJob);
 		buildJob->PreReqs()->push_back(pickupJob);
 
-		pickupJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), *materialIter));
+		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter));
 		pickupJob->tasks.push_back(Task(MOVE));
 		pickupJob->tasks.push_back(Task(TAKE));
 		pickupJob->tasks.push_back(Task(MOVE, newCons->Position(), newCons));
@@ -546,28 +546,44 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
 
-boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, int flags, int value) {
+// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
+// first.
+boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
+	int nearestDistance = INT_MAX;
+	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				return item;
+				int distance = Distance(item.lock()->Position(), target);
+				if(distance < nearestDistance) {
+					nearestDistance = distance;
+					nearest = item;
+				}
 			}
 		}
 	}
-	return boost::weak_ptr<Item>();
+	return nearest;
 }
 
-boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, int flags, int value) {
+// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
+// first.
+boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
+	int nearestDistance = INT_MAX;
+	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				return item;
+				int distance = Distance(item.lock()->Position(), target);
+				if(distance < nearestDistance) {
+					nearestDistance = distance;
+					nearest = item;
+				}
 			}
 		}
 	}
-	return boost::weak_ptr<Item>();
+	return nearest;
 }
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
@@ -666,6 +682,7 @@ void Game::Update() {
 		if (!npci->second->Dead()) npci->second->Think();
 		if (npci->second->Dead() || npci->second->Escaped()) npcsWaitingForRemoval.push_back(npci->second);
 	}
+	JobManager::Inst()->AssignJobs();
 
 	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
 		RemoveNPC(*remNpci);
@@ -709,48 +726,60 @@ void Game::Update() {
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
+	boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
+	int nearestDistance = INT_MAX;
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
 			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
 			if (sp->Allowed(Item::Presets[item.lock()->Type()].specificCategories) && !sp->Full()) {
 
 				//Found a stockpile that both allows the item, and has space
-				//Check if the item can be contained, and if so if any containers are in the stockpile
-
-				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item.lock()->Type()) + " in stockpile", LOW));
-				stockJob->Attempts(1);
-				Coordinate target = Coordinate(-1,-1);
-				boost::weak_ptr<Item> container;
-
-				if (Item::Presets[item.lock()->Type()].fitsin >= 0) {
-					container = sp->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL);
-					if (container.lock()) {
-						target = container.lock()->Position();
-						stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()));
-					}
-				}
-
-				if (target.X() == -1) target = sp->FreePosition();
-
-				if (target.X() != -1) {
-					stockJob->ReserveSpot(sp, target);
-					stockJob->ReserveEntity(item);
-					stockJob->tasks.push_back(Task(MOVE, item.lock()->Position()));
-					stockJob->tasks.push_back(Task(TAKE, item.lock()->Position(), item));
-					stockJob->tasks.push_back(Task(MOVE, target));
-					if (!container.lock())
-						stockJob->tasks.push_back(Task(PUTIN, target, sp->Storage(target)));
-					else
-						stockJob->tasks.push_back(Task(PUTIN, target, container));
-
-					if (!returnJob) JobManager::Inst()->AddJob(stockJob);
-					else return stockJob;
-
-					return boost::shared_ptr<Job>();
+				int distance = Distance(sp->Center(), item.lock()->Position());
+				if(distance < nearestDistance) {
+					nearestDistance = distance;
+					nearest = sp;
 				}
 			}
 		}
 	}
+	
+	if(nearest) {
+		//Check if the item can be contained, and if so if any containers are in the stockpile
+		
+		boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item.lock()->Type()) + " in stockpile", LOW));
+		stockJob->Attempts(1);
+		Coordinate target = Coordinate(-1,-1);
+		boost::weak_ptr<Item> container;
+		
+		if (Item::Presets[item.lock()->Type()].fitsin >= 0) {
+			container = nearest->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL);
+			if (container.lock()) {
+				target = container.lock()->Position();
+				stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()));
+			}
+		}
+		
+		if (target.X() == -1) target = nearest->FreePosition();
+		
+		if (target.X() != -1) {
+			stockJob->ReserveSpot(nearest, target);
+			stockJob->ReserveEntity(item);
+			stockJob->tasks.push_back(Task(MOVE, item.lock()->Position()));
+			stockJob->tasks.push_back(Task(TAKE, item.lock()->Position(), item));
+			stockJob->tasks.push_back(Task(MOVE, target));
+			if (!container.lock())
+				stockJob->tasks.push_back(Task(PUTIN, target, nearest->Storage(target)));
+			else
+				stockJob->tasks.push_back(Task(PUTIN, target, container));
+			
+			if (!returnJob) JobManager::Inst()->AddJob(stockJob);
+			else return stockJob;
+			
+			return boost::shared_ptr<Job>();
+		}
+		
+	}
+
 	return boost::shared_ptr<Job>();
 }
 
