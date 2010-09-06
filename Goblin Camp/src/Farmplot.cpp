@@ -115,7 +115,7 @@ int FarmPlot::Use() {
 			for (std::map<ItemType, bool>::iterator seedi = allowedSeeds.begin(); seedi != allowedSeeds.end(); ++seedi) {
 				growth[containerIt->first] = -(MONTH_LENGTH / 2) + rand() % (MONTH_LENGTH);
 				if (seedi->second) {
-					boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first);
+					boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first, Center());
 					if (seed.lock()) {
 						boost::shared_ptr<Job> plantJob(new Job("Plant " + Item::ItemTypeToString(seedi->first)));
 						plantJob->ReserveEntity(seed);

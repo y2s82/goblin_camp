@@ -166,8 +166,8 @@ public:
 	static int ItemTypeCount;
 	static int ItemCatCount;
 	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false);
-	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, int flags = 0, int value = 0);
-	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, int flags = 0, int value = 0);
+	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, Coordinate, int flags = 0, int value = 0);
+	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, Coordinate, int flags = 0, int value = 0);
 	void CreateItems(int,ItemType,Coordinate,Coordinate);
 
 	/*      NATURE      NATURE      NATURE      */
