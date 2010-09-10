@@ -23,8 +23,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Logger.hpp"
 
+// TODO: rework logging to be more useful and friendly
+
 Logger::Logger(const std::string& logFile) {
 	output.open(logFile.c_str());
+	#ifdef DEBUG
+	output.rdbuf()->pubsetbuf(0, 0); // make log unbuffered for debug mode
+	#endif
 	output<<"Logging to " << logFile << " begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
 }
 
