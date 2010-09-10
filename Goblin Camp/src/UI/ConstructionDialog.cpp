@@ -93,7 +93,7 @@ void ConstructionDialog::Dismantle() {
 
 void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
 	Stockpile *sp = static_cast<Stockpile*>(construct);
-	console->setForegroundColor(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
+	console->setDefaultForeground(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
 	if (!category.parent) {
 		console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-3).c_str());
 	} else {
@@ -103,35 +103,35 @@ void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category,
 			console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
 		}
 	}
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
-	console->setForegroundColor(i == 0 ? TCODColor::white : TCODColor::grey);
+	console->setDefaultForeground(i == 0 ? TCODColor::white : TCODColor::grey);
 	console->print(x, y, Item::ItemTypeToString(category).c_str());
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 void ConstructionDialog::ProductList::Draw(int x, int _y, int scroll, int width, int _height, TCODConsole *console) {
 	int y = 0;
 	for (int prodi = 0; prodi < (signed int)construct->Products()->size() && y < scroll + _height; ++prodi) {
 		if (y >= scroll) {
-			console->setForegroundColor(TCODColor::white);
+			console->setDefaultForeground(TCODColor::white);
 			console->print(x, _y + y - scroll, "%s x%d", Item::ItemTypeToString(construct->Products(prodi)).c_str(), Item::Presets[construct->Products(prodi)].multiplier);
 		}
 		++y;
 		for (int compi = 0; compi < (signed int)Item::Components(construct->Products(prodi)).size() && y < scroll + _height; ++compi) {
 			if (y >= scroll) {
-				console->setForegroundColor(TCODColor::white);
+				console->setDefaultForeground(TCODColor::white);
 				console->putChar(x + 1, _y + y - scroll, compi+1 < (signed int)Item::Components(construct->Products(prodi)).size() ? TCOD_CHAR_TEEE : TCOD_CHAR_SW, TCOD_BKGND_SET);
-				console->setForegroundColor(TCODColor::grey);
+				console->setDefaultForeground(TCODColor::grey);
 				console->print(x + 2, _y + y - scroll, Item::ItemCategoryToString(Item::Components(construct->Products(prodi), compi)).c_str());
 			}
 			++y;
 		}
 		++y;
 	}
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 int ConstructionDialog::ProductList::TotalHeight() {

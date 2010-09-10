@@ -115,8 +115,8 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	if (screenx + width - 1 >= 0 && screenx < console->getWidth() && screeny + height - 1 >= 0 && screeny < console->getHeight()) {
 		for (int i = 1; i < (signed int)graphic.size(); ++i) {
 			if(screenx + i - 1 >= 0 && screeny >= 0) {
-				if (dismantle) console->setBack(screenx+i-1,screeny, TCODColor::darkGrey);
-				console->setFore(screenx+i-1,screeny, color);
+				if (dismantle) console->setCharBackground(screenx+i-1,screeny, TCODColor::darkGrey);
+				console->setCharForeground(screenx+i-1,screeny, color);
 				if (condition > i*-10) console->setChar(screenx+i-1,screeny, (graphic[i]));
 				else console->setChar(screenx+i-1,screeny, TCOD_CHAR_BLOCK2);
 			}
