@@ -206,6 +206,15 @@ namespace {
 			globals::loadedMods.push_back(metadata);
 		}
 	}
+	
+	void DoSave(std::string file) {
+		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+		
+		Game::Inst()->SaveGame(file);
+		Script::Event::GameSaved(file);
+		
+		Logger::Inst()->output.flush();
+	}
 }
 
 namespace Data {
@@ -386,15 +395,6 @@ namespace Data {
 		
 		Game::Inst()->LoadGame(file);
 		Script::Event::GameLoaded(file);
-		
-		Logger::Inst()->output.flush();
-	}
-	
-	void DoSave(std::string file) {
-		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
-		
-		Game::Inst()->SaveGame(file);
-		Script::Event::GameSaved(file);
 		
 		Logger::Inst()->output.flush();
 	}
