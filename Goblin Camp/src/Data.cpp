@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
+#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/filesystem.hpp>
 #include <boost/format.hpp>
 #include <boost/lexical_cast.hpp>
@@ -185,7 +186,7 @@ namespace {
 			TryLoadLocalDataFile(mod, "names",         _LoadNames);
 			TryLoadLocalDataFile(mod, "creatures",     NPC::LoadPresets);
 			
-			Data::Mod metadata(mod.filename(), "<unknown>", "<unknown>", "<unknown>", -1);
+			Data::Mod metadata(mod.filename().string(), "<unknown>", "<unknown>", "<unknown>", -1);
 			if (fs::exists(mod / "mod.dat")) {
 				Logger::Inst()->output << "[Data] Loading mod metadata.\n";
 				
@@ -372,10 +373,10 @@ namespace Data {
 		fs::directory_iterator end;
 		for (fs::directory_iterator it(globals::savesDir); it != end; ++it) {
 			fs::path save = it->path();
-			if (!boost::iequals(save.extension(), ".sav")) continue;
+			if (!boost::iequals(save.extension().string(), ".sav")) continue;
 			
 			save.replace_extension();
-			list.push(save.filename());
+			list.push(save.filename().string());
 		}
 	}
 	
@@ -415,11 +416,11 @@ namespace Data {
 		
 		for (fs::directory_iterator it(globals::screensDir); it != end; ++it) {
 			fs::path png = it->path();
-			if (!boost::iequals(png.extension(), ".png")) continue;
+			if (!boost::iequals(png.extension().string(), ".png")) continue;
 			
 			png.replace_extension();
 			
-			std::string file = png.filename();
+			std::string file = png.filename().string();
 			try {
 				// screens are saved as screenXXXXXX.png
 				largest = std::max(largest, boost::lexical_cast<unsigned int>(file.substr(6)));

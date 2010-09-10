@@ -49,9 +49,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // installed once system-wide and used comfortably without admin privileges on both systems.
 
 namespace boost { namespace filesystem {
-	template <class String, class Traits> class basic_path;
-	struct path_traits;
-	typedef basic_path<std::string, path_traits> path;
+	class path;
 }}
 
 namespace Data {

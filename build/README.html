@@ -371,7 +371,7 @@ Here's list with known working versions:</p>
 <h2><a class="toc-backref" href="#id8">Dependencies</a></h2>
 <p>Goblin Camp requires several third party libraries to build and link:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://boost.org">Boost</a> <strong>1.43</strong>.</li>
+<li><a class="reference external" href="http://boost.org">Boost</a> <strong>1.44</strong>.</li>
 <li><a class="reference external" href="http://doryen.eptalys.net/libtcod">libtcod</a> <strong>r476</strong> (GC uses not-yet-released SVN version — listed here is a known working revision).
 <strong>Do not use newer revision — r477 introduces API/ABI breakage, and Goblin Camp codebase has not yet been upgraded.</strong></li>
 <li><a class="reference external" href="http://microsoft.com/downloads/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b">Windows SDK</a> <strong>7.1</strong> (or newer; 7.0 may work as well, but older are not supported).</li>
@@ -401,7 +401,7 @@ documentation instead.</p>
 <p>If your Boost is not on standard compiler's search path (MSVC: and you don't have LIB/INCLUDE environment
 variables set properly), you will need to provide them in config, in format:</p>
 <pre class="literal-block">
-using boost : 1.43 : properties ;
+using boost : 1.44 : properties ;
 </pre>
 <p>In properties field you can put:</p>
 <ul>
@@ -427,7 +427,7 @@ without compiler and version information (e.g. <tt class="docutils literal"><spa
 <p>See <a class="reference external" href="http://boost.org/doc/libs/1_43_0/more/getting_started/unix-variants.html#library-naming">Boost documentation</a> for more information about tags.</p>
 <p>Example:</p>
 <pre class="literal-block">
-using boost : 1.43 : &lt;layout&gt;tagged ;
+using boost : 1.44 : &lt;layout&gt;tagged ;
 </pre>
 </div>
 <div class="section" id="id2">
