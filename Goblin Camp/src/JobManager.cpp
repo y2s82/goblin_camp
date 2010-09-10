@@ -73,7 +73,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 	int skip = 0;
 	int y = pos.Y();
 
-	console->setForegroundColor(TCODColor::lightCyan);
+	console->setDefaultForeground(TCODColor::lightCyan);
 	for (std::list<boost::shared_ptr<Job> >::iterator highIter = availableList[HIGH].begin(); highIter != availableList[HIGH].end(); ++highIter) {
 		if (skip < from) ++skip;
 		else {
@@ -83,7 +83,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 		}
 	}
 
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 	for (std::list<boost::shared_ptr<Job> >::iterator medIter = availableList[MED].begin(); medIter != availableList[MED].end(); ++medIter) {
 		if (skip < from) ++skip;
 		else {
@@ -92,7 +92,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 		}
 	}
 
-	console->setForegroundColor(TCODColor::lightGrey);
+	console->setDefaultForeground(TCODColor::lightGrey);
 	for (std::list<boost::shared_ptr<Job> >::iterator lowIter = availableList[LOW].begin(); lowIter != availableList[LOW].end(); ++lowIter) {
 		if (skip < from) ++skip;
 		else {
@@ -101,7 +101,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 		}
 	}
 
-	console->setForegroundColor(TCODColor::grey);
+	console->setDefaultForeground(TCODColor::grey);
 	for (std::list<boost::shared_ptr<Job> >::iterator waitIter = waitingList.begin(); waitIter != waitingList.end(); ++waitIter) {
 		if (skip < from) ++skip;
 		else {
@@ -110,7 +110,7 @@ void JobManager::Draw(Coordinate pos, int from, int count, TCODConsole* console)
 		}
 	}
 
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 boost::weak_ptr<Job> JobManager::GetJob(int uid) {

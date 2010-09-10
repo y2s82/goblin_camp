@@ -64,20 +64,20 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	//Draw the menu entries
 	for (int i = 0; i < (signed int)choices.size(); ++i) {
-		console->setBackgroundColor(TCODColor::black);
+		console->setDefaultBackground(TCODColor::black);
 		if (UI::Inst()->KeyHelpTextColor() > 0) {
-			console->setForegroundColor(TCODColor(0,std::min(255, UI::Inst()->KeyHelpTextColor()),0));
+			console->setDefaultForeground(TCODColor(0,std::min(255, UI::Inst()->KeyHelpTextColor()),0));
 			console->print(x, y+1+(i*2), boost::lexical_cast<std::string>(i+1).c_str());
 		}
-		console->setForegroundColor(TCODColor::white);
+		console->setDefaultForeground(TCODColor::white);
 		if (_selected == i) {
-			console->setBackgroundColor(TCODColor::white);
-			console->setForegroundColor(TCODColor::darkerGrey);
+			console->setDefaultBackground(TCODColor::white);
+			console->setDefaultForeground(TCODColor::darkerGrey);
 		}
 		console->print(x+1, y+1+(i*2), choices[i].label.c_str());
 	}
-	console->setForegroundColor(TCODColor::white);
-	console->setBackgroundColor(TCODColor::black);
+	console->setDefaultForeground(TCODColor::white);
+	console->setDefaultBackground(TCODColor::black);
 }
 
 MenuResult Menu::Update(int x, int y, bool clicked, TCOD_key_t key) {

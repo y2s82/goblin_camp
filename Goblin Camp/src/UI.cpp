@@ -626,18 +626,18 @@ int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcu
 
 void UI::DrawTopBar(TCODConsole* console) {
 	console->setAlignment(TCOD_CENTER);
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 	console->print(console->getWidth() / 2, 0, "Orcs: %d   Goblins: %d  -  %s", Game::Inst()->OrcCount(),
 		Game::Inst()->GoblinCount(), Game::Inst()->SeasonToString(Game::Inst()->CurrentSeason()).c_str());
 
 	if (Game::Inst()->Paused()) {
-		console->setForegroundColor(TCODColor::red);
+		console->setDefaultForeground(TCODColor::red);
 		console->print(Game::Inst()->ScreenWidth() / 2, 1, "- - - - PAUSED - - - -");
 	}
 	console->setAlignment(TCOD_LEFT);
 
 	if (keyHelpTextColor > 0) {
-		console->setForegroundColor(TCODColor(std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor)));
+		console->setDefaultForeground(TCODColor(std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor), std::min(255, keyHelpTextColor)));
 		console->setColorControl(TCOD_COLCTRL_1, TCODColor(0, std::min(255, keyHelpTextColor), 0), TCODColor::black);
 		int x = 10;
 		x += DrawShortcutHelp(console, x, 3, "Exit");
@@ -657,7 +657,7 @@ void UI::DrawTopBar(TCODConsole* console) {
 		x += DrawShortcutHelp(console, x, 7, "Pause");
 	}
 
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
