@@ -256,7 +256,7 @@ void LoadMenu() {
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
 
-	TCODList<std::string> list;
+	std::vector<std::string> list;
 	Data::GetSavedGames(list);
 
 	int height = list.size()+5;
@@ -272,7 +272,7 @@ void LoadMenu() {
 
 		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
 
-		for (int i = 0; i <= list.size()+1; ++i) {
+		for (int i = 0; i < list.size(); ++i) {
 			if (selected == i) {
 				TCODConsole::root->setDefaultForeground(TCODColor::black);
 				TCODConsole::root->setDefaultBackground(TCODColor::white);
@@ -280,9 +280,10 @@ void LoadMenu() {
 				TCODConsole::root->setDefaultForeground(TCODColor::white);
 				TCODConsole::root->setDefaultBackground(TCODColor::black);
 			}
-			if (i < list.size()) TCODConsole::root->print(edgex+width/2, edgey+2+i, list.get(i).c_str());
-			else if (i == list.size()+1) TCODConsole::root->print(edgex+width/2, edgey+2+i, "Cancel");
+			TCODConsole::root->print(edgex+width/2, edgey+2+i, "%s", list[i].c_str());
 		}
+		
+		TCODConsole::root->print(edgex+width/2, edgey + 2 + list.size(), "Cancel");
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
 
@@ -297,16 +298,15 @@ void LoadMenu() {
 			selected = mouseStatus.cy - (edgey+2);
 		} else selected = -1;
 
-		if (selected < list.size() && selected >= 0 && !mouseStatus.lbutton && lButtonDown) {
-			Data::LoadGame(list.get(selected));
-			MainLoop();
+		if (!mouseStatus.lbutton && lButtonDown) {
 			lButtonDown = false;
-			return;
-		} else if (selected == list.size()+1 && !mouseStatus.lbutton && lButtonDown) {
-			lButtonDown = false;
-			return;
+			
+			if (selected < list.size() && selected >= 0) {
+				Data::LoadGame(list[selected]);
+				MainLoop();
+				return;
+			}
 		}
-
 	}
 }
 

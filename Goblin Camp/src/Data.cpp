@@ -378,14 +378,14 @@ namespace Data {
 		Logger::Inst()->output.flush();
 	}
 	
-	void GetSavedGames(TCODList<std::string>& list) {
+	void GetSavedGames(std::vector<std::string>& list) {
 		fs::directory_iterator end;
 		for (fs::directory_iterator it(globals::savesDir); it != end; ++it) {
 			fs::path save = it->path();
 			if (!boost::iequals(save.extension().string(), ".sav")) continue;
 			
 			save.replace_extension();
-			list.push(save.filename().string());
+			list.push_back(save.filename().string());
 		}
 	}
 	

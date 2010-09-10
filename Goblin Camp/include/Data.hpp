@@ -59,7 +59,7 @@ namespace Data {
 	// Loads global data and all local mods.
 	void Load();
 	// Populates the vector with the names of saved games.
-	void GetSavedGames(TCODList<std::string>&);
+	void GetSavedGames(std::vector<std::string>&);
 	// Loads saved game.
 	void LoadGame(const std::string&);
 	// Saves game.
