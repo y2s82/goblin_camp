@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <ostream> // std::flush
 
+#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 
