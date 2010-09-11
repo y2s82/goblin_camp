@@ -94,7 +94,7 @@ namespace {
 		std::string fn = filename + ".dat";
 		fs::path dir;
 		
-		Logger::Inst()->output << "[Data] Searching for: " << fn << "\n";
+		LOG_FUNC("Searching for: " << fn, "_TryLoadDataFile");
 		
 		if (fs::exists(dir1 / fn)) {
 			dir = dir1;
@@ -102,16 +102,15 @@ namespace {
 			if (fs::exists(dir2 / fn)) {
 				dir = dir2;
 			} else {
-				Logger::Inst()->output << "[Data] Cannot find global data file -- abort.\n";
-				Logger::Inst()->output.flush();
+				LOG_FUNC("Cannot find global data file -- abort.", "_TryLoadDataFile");
 				exit(5);
 			}
 		} else {
-			Logger::Inst()->output << "[Data] Not found, skipping.\n";
+			LOG_FUNC("Not found, skipping.", "_TryLoadDataFile");
 			return;
 		}
 		
-		Logger::Inst()->output << "[Data] Loading: " << (dir / fn).string() << "\n";
+		LOG_FUNC("Loading: " << (dir / fn).string(), "_TryLoadDataFile");
 		load((dir / fn).string());
 	}
 	
@@ -124,7 +123,7 @@ namespace {
 	}
 	
 	void LoadGlobalMod() {
-		Logger::Inst()->output << "[Data] Loading global data files.\n";
+		LOG_FUNC("Loading global data files.", "LoadGlobalMod");
 		
 		TryLoadGlobalDataFile("items",         Item::LoadPresets);
 		TryLoadGlobalDataFile("constructions", Construction::LoadPresets);
@@ -155,7 +154,7 @@ namespace {
 		}
 		
 		void error(const char *err) {
-			Logger::Inst()->output << "ModListener: " << err << "\n";
+			LOG("ModListener: " << err);
 		}
 		
 		// unused
@@ -178,7 +177,7 @@ namespace {
 			if (!fs::is_directory(it->status())) continue;
 			
 			fs::path mod = it->path();
-			Logger::Inst()->output << "[Data] Loading mod: " << mod.filename() << "\n";
+			LOG_FUNC("Loading mod: " << mod.filename(), "LoadLocalMods");
 			
 			TryLoadLocalDataFile(mod, "items",         Item::LoadPresets);
 			TryLoadLocalDataFile(mod, "constructions", Construction::LoadPresets);
@@ -188,7 +187,7 @@ namespace {
 			
 			Data::Mod metadata(mod.filename().string(), "<unknown>", "<unknown>", "<unknown>", -1);
 			if (fs::exists(mod / "mod.dat")) {
-				Logger::Inst()->output << "[Data] Loading mod metadata.\n";
+				LOG_FUNC("Loading mod metadata.", "LoadLocalMods");
 				
 				ModListener *listener = new ModListener(&metadata);
 				parser.run((mod / "mod.dat").string().c_str(), listener);
@@ -197,7 +196,7 @@ namespace {
 			
 			if (metadata.apiVersion != -1) {
 				if (metadata.apiVersion != Script::version) {
-					Logger::Inst()->output << "[Data] WARNING: Ignoring mod scripts because of incorrect API version.\n";
+					LOG_FUNC("WARNING: Ignoring mod scripts because of incorrect API version.", "LoadLocalMods");
 				} else {
 					Script::LoadScript(metadata.mod, mod.string());
 				}
@@ -208,12 +207,10 @@ namespace {
 	}
 	
 	void DoSave(std::string file) {
-		Logger::Inst()->output << "[Data] Saving game to " << file << "\n";
+		LOG_FUNC("Saving game to " << file, "DoSave");
 		
 		Game::Inst()->SaveGame(file);
 		Script::Event::GameSaved(file);
-		
-		Logger::Inst()->output.flush();
 	}
 }
 
@@ -225,24 +222,22 @@ namespace Data {
 		// bootstrap to get logging up and running
 		FindPersonalDirectory();
 		fs::create_directory(globals::personalDir);
-		Logger::Create((globals::personalDir / "goblin-camp.log").string());
+		Logger::OpenLogFile((globals::personalDir / "goblin-camp.log").string());
 		
-		Logger::Inst()->output << "[Data] Data::Init()\n";
+		LOG("Data::Init()");
 		FindExecutableDirectory();
 		
-		Logger::Inst()->output <<
-			"[Data] Personal directory: " << globals::personalDir << "\n" <<
-			"[Data] Saves directory: " << globals::savesDir << "\n" <<
-			"[Data] Screenshots directory: " << globals::screensDir << "\n" <<
-			"[Data] Mods directory: " << globals::modsDir << "\n" <<
-			"[Data] Executable Directory: " << globals::execDir << "\n" <<
-			"[Data] Global Data Directory: " << globals::dataDir << "\n" <<
-			"[Data] --------\n" <<
-			"[Data] Executable: " << globals::exec << "\n" <<
-			"[Data] Config: " << globals::config << "\n" <<
-			"[Data] Keys: " << globals::keys << "\n" <<
-			"[Data] Font: " << globals::font << "\n"
-		;
+		LOG("Personal directory: " << globals::personalDir);
+		LOG("Saves directory: " << globals::savesDir);
+		LOG("Screenshots directory: " << globals::screensDir);
+		LOG("Mods directory: " << globals::modsDir);
+		LOG("Executable Directory: " << globals::execDir);
+		LOG("Global Data Directory: " << globals::dataDir);
+		LOG("--------");
+		LOG("Executable: " << globals::exec);
+		LOG("Config: " << globals::config);
+		LOG("Keys: " << globals::keys);
+		LOG("Font: " << globals::font);
 		
 		// try to create personal directory structure
 		// create_directory doesn't throw if directory already exist
@@ -251,8 +246,7 @@ namespace Data {
 			fs::create_directory(globals::screensDir);
 			fs::create_directory(globals::modsDir);
 		} catch (const fs::filesystem_error& e) {
-			Logger::Inst()->output << "[Data] filesystem_error while creating directories: " << e.what() << "\n";
-			Logger::Inst()->output.flush();
+			LOG("filesystem_error while creating directories: " << e.what());
 			exit(1);
 		}
 		
@@ -261,7 +255,7 @@ namespace Data {
 		//     if so, copy it to user config.ini
 		//     if not, write hardcoded defaults
 		if (!fs::exists(globals::config)) {
-			Logger::Inst()->output << "[Data] User's config.ini does not exist.\n";
+			LOG("User's config.ini does not exist.");
 			
 			fs::path defaultConfig = globals::dataDir / "config.ini";
 			if (!fs::exists(defaultConfig)) {
@@ -269,23 +263,21 @@ namespace Data {
 			}
 			
 			if (fs::exists(defaultConfig)) {
-				Logger::Inst()->output << "[Data] Copying default config.ini to user directory.\n";
+				LOG("Copying default config.ini to user directory.");
 				
 				try {
 					fs::copy_file(defaultConfig, globals::config);
 				} catch (const fs::filesystem_error& e) {
-					Logger::Inst()->output << "[Data] filesystem_error while copying config: " << e.what() << "\n";
-					Logger::Inst()->output.flush();
+					LOG("filesystem_error while copying config: " << e.what());
 					exit(2);
 				}
 			} else {
-				Logger::Inst()->output << "[Data] Creating default config.ini.\n";
+				LOG("Creating default config.ini.");
 				
 				try {
 					SaveConfig(800, 600, "SDL", false);
 				} catch (const std::exception &e) {
-					Logger::Inst()->output << "[Data] std::exception while creating config: " << e.what() << "\n";
-					Logger::Inst()->output.flush();
+					LOG("std::exception while creating config: " << e.what());
 					exit(3);
 				}
 			}
@@ -294,21 +286,19 @@ namespace Data {
 		// now check whether user has keys.ini
 		//   if not, copy the default one (data-dir/keys.ini)
 		if (!fs::exists(globals::keys)) {
-			Logger::Inst()->output << "[Data] User's keys.ini does not exist.\n";
+			LOG("User's keys.ini does not exist.");
 			
 			if (fs::exists(globals::defaultKeys)) {
-				Logger::Inst()->output << "[Data] Copying default keys.ini to user directory.\n";
+				LOG("Copying default keys.ini to user directory.");
 				
 				try {
 					fs::copy_file(globals::defaultKeys, globals::keys);
 				} catch (const fs::filesystem_error& e) {
-					Logger::Inst()->output << "[Data] filesystem_error while copying keys: " << e.what() << "\n";
-					Logger::Inst()->output.flush();
+					LOG("filesystem_error while copying keys: " << e.what());
 					exit(6);
 				}
 			} else {
-				Logger::Inst()->output << "[Data] No keys.ini found in user's directory or in defaults.\n";
-				Logger::Inst()->output.flush();
+				LOG("No keys.ini found in user's directory or in defaults.");
 				exit(7);
 			}
 		}
@@ -316,7 +306,7 @@ namespace Data {
 		// check whether custom font exists
 		// if not, copy default one
 		if (!fs::exists(globals::font)) {
-			Logger::Inst()->output << "[Data] User's terminal.png does not exist, copying default.\n";
+			LOG("User's terminal.png does not exist, copying default.");
 			
 			fs::path defaultFont = globals::dataDir / "terminal.png";
 			if (!fs::exists(defaultFont)) {
@@ -326,28 +316,26 @@ namespace Data {
 			try {
 				fs::copy_file(defaultFont, globals::font);
 			} catch (const fs::filesystem_error& e) {
-				Logger::Inst()->output << "[Data] filesystem_error while copying font: " << e.what() << "\n";
-				Logger::Inst()->output.flush();
+				LOG("filesystem_error while copying font: " << e.what());
 				exit(4);
 			}
 		}
 		
-		Logger::Inst()->output << "[Data] Loading config.ini.\n";
+		LOG("Loading config.ini.");
 		Game::Inst()->LoadConfig(globals::config.string());
 		
-		Logger::Inst()->output << "[Data] Loading keymaps.\n";
+		LOG("Loading keymaps.");
 		UI::LoadKeys(globals::defaultKeys.string());
 		UI::LoadKeys(globals::keys.string());
 		
-		Logger::Inst()->output << "[Data] Loading terminal.png.\n";
+		LOG("Loading terminal.png.");
 		TCODConsole::setCustomFont(globals::font.string().c_str());
 		
-		Logger::Inst()->output << "[Data] Data::Init() finished.\n";
-		Logger::Inst()->output.flush();
+		LOG("Data::Init() finished.");
 	}
 	
 	void Load() {
-		Logger::Inst()->output << "[Data] Data::Load()\n";
+		LOG("Data::Load()");
 		
 		// load global data files
 		LoadGlobalMod();
@@ -366,7 +354,7 @@ namespace Data {
 		
 		#ifdef MACOSX
 		// workaround
-		Logger::Inst()->output << "[Data] Loading terminal.png again.\n";
+		LOG("Loading terminal.png again.");
 		TCODConsole::setCustomFont(globals::font.string().c_str());
 		#endif
 		
@@ -374,8 +362,7 @@ namespace Data {
 		Item::ResolveContainers();
 		Construction::ResolveProducts();
 		
-		Logger::Inst()->output << "[Data] Data::Load() finished.\n";
-		Logger::Inst()->output.flush();
+		LOG("Data::Load() finished.");
 	}
 	
 	void GetSavedGames(std::vector<std::string>& list) {
@@ -391,12 +378,10 @@ namespace Data {
 	
 	void LoadGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
-		Logger::Inst()->output << "[Data] Loading game from " << file << "\n";
+		LOG("Loading game from " << file);
 		
 		Game::Inst()->LoadGame(file);
 		Script::Event::GameLoaded(file);
-		
-		Logger::Inst()->output.flush();
 	}
 	
 	void SaveGame(const std::string& save) {
@@ -434,10 +419,8 @@ namespace Data {
 			globals::screensDir / ((boost::format("screen%|06|.png") % (largest + 1)).str())
 		).string();
 		
-		Logger::Inst()->output << "[Data] Saving screenshot to " << png << "\n";
+		LOG("Saving screenshot to " << png);
 		TCODSystem::saveScreenshot(png.c_str());
-		
-		Logger::Inst()->output.flush();
 	}
 	
 	void SaveConfig(unsigned int resWidth, unsigned int resHeight, const std::string& renderer, bool fullscreen) {
@@ -483,6 +466,7 @@ namespace Data {
 		// If control reaches here, then someone added new value to the enum,
 		// forgot to add it here, and missed the 'switch not checking
 		// every value' warning. So, crash and burn.
+		LOG("Impossible code path, crashing.");
 		assert(false);
 	}
 	#pragma warning(pop)

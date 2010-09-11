@@ -68,7 +68,7 @@ public:
 	}
 
 	void error(const char *msg) {
-		Logger::Inst()->output<<"KeyConfigListener: "<<msg<<"\n";
+		LOG("KeyConfigListener: " << msg);
 		Game::Inst()->Exit();
 	}
 };

@@ -46,13 +46,13 @@ namespace Script {
 	const short version = 0;
 	
 	void Init(std::vector<std::string>& args) {
-		Logger::Inst()->output << "[Script] Initialising engine.\n";
+		LOG("Initialising engine.");
 		
 		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
 		
-		Logger::Inst()->output << "[Script] Python " << Py_GetVersion() << "\n";
+		LOG("Python " << Py_GetVersion());
 		
 		// Don't use default search path.
 		{
@@ -74,16 +74,15 @@ namespace Script {
 				"repr(__import__('sys').path)",
 				py::import("__builtin__").attr("__dict__")
 			);
-			Logger::Inst()->output << "[Script] sys.path = " << py::extract<char*>(res) << "\n";
+			LOG("sys.path = " << py::extract<char*>(res));
 		} catch (const py::error_already_set&) {
-			Logger::Inst()->output << "[Script] Bootstrap failed.\n";
+			LOG("Bootstrap failed.");
 			LogException();
-			Logger::Inst()->output.flush();
 			exit(20);
 		}
 		
 		// Get utility functions.
-		Logger::Inst()->output << "[Script] Importing utils.\n" << std::flush;
+		LOG("Importing utils.");
 		py::object modImp = py::import("imp");
 		py::object modTB  = py::import("traceback");
 		
@@ -94,18 +93,17 @@ namespace Script {
 		PyImport_AddModule("gcmods");
 		
 		globals::logger = API::pyLoggerStream();
-		Logger::Inst()->output.flush();
 	}
 	
 	void Shutdown() {
-		Logger::Inst()->output << "[Script] Shutting down engine.\n";
+		LOG("Shutting down engine.");
 		
 		ReleaseListeners();
 		Py_Finalize();
 	}
 	
 	void LoadScript(const std::string& mod, const std::string& directory) {
-		Logger::Inst()->output << "[Script] Loading '" << directory << "' into 'gcmods." << mod << "'.\n" << std::flush;
+		LOG("Loading '" << directory << "' into 'gcmods." << mod << "'.");
 		
 		try {
 			globals::loadPackageFunc("gcmods." + mod, directory);
@@ -126,14 +124,14 @@ namespace Script {
 		py::handle<> hExcTB(excTB);
 		py::handle<> none(py::borrowed(Py_None));
 		
-		Logger::Inst()->output << "**** Python exception occurred ****\n";
+		Logger::log << "**** Python exception occurred ****\n";
 		try {
 			globals::printExcFunc(hExcType, hExcVal, hExcTB, none, globals::logger);
 		} catch (const py::error_already_set&) {
-			Logger::Inst()->output << " < INTERNAL ERROR > \n";
+			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();
 		}
-		Logger::Inst()->output << "***********************************\n" << std::flush;
+		Logger::log << "***********************************\n";
 		
 		if (!clear) {
 			PyErr_Restore(excType, excVal, excTB);

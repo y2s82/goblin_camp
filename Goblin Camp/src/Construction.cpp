@@ -378,7 +378,7 @@ class ConstructionListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		Logger::Inst()->output<<"ItemListener: "<<msg<<"\n";
+		LOG("ItemListener: " << msg);
 		Game::Inst()->Exit();
 	}
 };
@@ -440,10 +440,10 @@ void Construction::ResolveProducts() {
 				
 				itemPreset.constructedInRaw.clear();
 			} else {
-				Logger::Inst()->output <<
-					"[ResolveProducts] Item " << itemPreset.name <<
-					" refers to nonexistant construction " << itemPreset.constructedInRaw <<
-				".\n";
+				LOG(
+					"Item " << itemPreset.name <<
+					" refers to nonexistant construction " << itemPreset.constructedInRaw << "."
+				);
 			}
 		}
 	}
