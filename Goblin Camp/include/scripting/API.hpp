@@ -15,18 +15,24 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-class Logger;
+class Item;
 
 namespace Script {
 	namespace API {
 		// Implements minimal file-like interface for use with logging.
-		class LoggerStream {
-			Logger *logger;
-		public:
+		struct LoggerStream {
 			LoggerStream();
 			void close();
 			void write(const char*);
 			void flush();
+		};
+		
+		// Proxy interface to items.
+		class ItemProxy {
+			Item *item;
+		public:
+			ItemProxy(Item*);
+			std::string getName();
 		};
 		
 		// Announcer.
@@ -35,6 +41,7 @@ namespace Script {
 		namespace py = boost::python;
 		extern py::object pyLoggerStream;
 		extern py::object pyCoordinate;
+		extern py::object pyItem;
 	}
 	
 	void ExposeAPI();

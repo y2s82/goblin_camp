@@ -25,6 +25,7 @@ namespace py = boost::python;
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "Logger.hpp"
+#include "Item.hpp"
 #include "scripting/API.hpp"
 #include "scripting/Engine.hpp"
 
@@ -35,23 +36,30 @@ namespace {
 }
 
 namespace Script { namespace API {
-	LoggerStream::LoggerStream() : logger(Logger::Inst()) { }
+	// LoggerStream
+	LoggerStream::LoggerStream() { }
 	void LoggerStream::close() { }
+	void LoggerStream::flush() { }
 	
 	void LoggerStream::write(const char *str) {
-		logger->output << str;
-	}
-	
-	void LoggerStream::flush() {
-		logger->output.flush();
+		Logger::log << str;
 	}
 	
 	void announce(const char *str) {
 		Announce::Inst()->AddMsg(str);
 	}
 	
+	// ItemProxy
+	ItemProxy::ItemProxy(Item *item) : item(item) { }
+	
+	std::string ItemProxy::getName() {
+		return Item::ItemTypeToString(item->Type());
+	}
+	
 	py::object pyLoggerStream;
 	py::object pyCoordinate;
+	py::object pyItem;
+	py::object pyItemCat;
 	
 	BOOST_PYTHON_MODULE(_gcampapi) {
 		pyLoggerStream = py::class_<LoggerStream>("LoggerStream")
@@ -73,6 +81,10 @@ namespace Script { namespace API {
 			.def(py::self - py::other<int>())
 		;
 		
+		pyItem = py::class_<ItemProxy>("ItemProxy", py::init<Item*>())
+			.add_property("name", &ItemProxy::getName)
+		;
+		
 		py::def("announce", &announce);
 		py::def("appendListener", &Script::AppendListener);
 	}
@@ -80,7 +92,7 @@ namespace Script { namespace API {
 
 namespace Script {
 	void ExposeAPI() {
-		Logger::Inst()->output << "[Script:API] Exposing API.\n";
+		LOG("Exposing API.");
 		API::init_gcampapi();
 	}
 	
@@ -91,7 +103,7 @@ namespace Script {
 		py::object oListener(hListener);
 		{
 			py::object repr(py::handle<>(PyObject_Repr(listener)));
-			Logger::Inst()->output << "[Script:API] New listener: " << py::extract<char*>(repr) << ".\n";
+			LOG("New listener: " << py::extract<char*>(repr) << ".");
 		}
 		
 		globals::listeners.push_back(oListener);

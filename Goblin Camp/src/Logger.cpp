@@ -15,39 +15,43 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <iostream>
 #include <fstream>
 #include <cassert>
 
 #include <boost/date_time/local_time/local_time.hpp>
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/filesystem.hpp>
+
+namespace fs = boost::filesystem;
 
 #include "Logger.hpp"
 
-// TODO: rework logging to be more useful and friendly
-
-Logger::Logger(const std::string& logFile) {
-	output.open(logFile.c_str());
+namespace Logger {
+	std::ofstream log;
+	
+	std::ofstream& Prefix(const char *file, int line, const char *function) {
+		log <<
+			"[" << std::setw(15) << std::right <<
+			fs::path(file).filename().string() << ":" << std::setw(3) << std::left << line << "] " <<
+			"[" << function << "] "
+		;
+		return log;
+	}
+	
+	void OpenLogFile(const std::string& logFile) {
+		log.open(logFile.c_str());
 	#ifdef DEBUG
-	output.rdbuf()->pubsetbuf(0, 0); // make log unbuffered for debug mode
+		// no buffering in debug builds
+		log.rdbuf()->pubsetbuf(0, 0);
 	#endif
-	output<<"Logging to " << logFile << " begun @ "<<boost::posix_time::second_clock::local_time()<<"\n";
+		
+		LOG("Log opened " << boost::posix_time::second_clock::local_time());
+		// Instead of explicit closing: to ensure it's always flushed at the end, even when we bail out with exit().
+		atexit(CloseLogFile);
+	}
+	
+	void CloseLogFile() {
+		LOG("Log closed");
+		log.close();
+	}
 }
-
-Logger::~Logger() {
-	output<<"Logging ended @ "<<boost::posix_time::second_clock::local_time()<<"\n";
-	output.flush();
-}
-
-Logger* Logger::instance = NULL;
-
-void Logger::Create(const std::string& logFile) {
-	assert(instance == NULL);
-	instance = new Logger(logFile);
-}
-
-Logger *Logger::Inst() {
-	assert(instance != NULL);
-	return instance;
-}
-
-void Logger::End() { delete(instance); }

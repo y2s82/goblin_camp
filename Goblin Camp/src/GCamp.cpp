@@ -47,23 +47,21 @@ extern const char *_GOBLIN_CAMP_VERSION_;
 #endif
 
 int GCMain(std::vector<std::string>& args) {
+	int exitcode = 0;
+	
 	Data::Init();
 	Script::Init(args);
 	Game::Inst()->Init();
 	
-	Logger::Inst()->output << "[GCMain] args.size() = " << args.size() << "\n";
-	Logger::Inst()->output.flush();
-	
-	int exitcode = 0;
+	LOG("args.size() = " << args.size());
 	
 	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
 		exitcode = MainMenu();
 	} else {
-		Logger::Inst()->output << "[GCMain] Bootstrap test, going into shutdown.\n";
+		LOG("Bootstrap test, going into shutdown.");
 	}
 	
 	Script::Shutdown();
-	Logger::End();
 	return exitcode;
 }
 
@@ -493,7 +491,7 @@ void SettingsMenu() {
 	try {
 		Data::SaveConfig(cfgWidth, cfgHeight, cfgRenderer, fullscreen);
 	} catch (const std::exception& e) {
-		Logger::Inst()->output << "Could not save configuration! " << e.what() << "\n";
+		LOG("Could not save configuration! " << e.what());
 	}
 
 	// remember new settings
@@ -642,6 +640,6 @@ void KeysMenu() {
 	try {
 		Data::SaveKeys(keyMap);
 	} catch (const std::exception& e) {
-		Logger::Inst()->output << "Could not save keymap! " << e.what() << "\n";
+		LOG("Could not save keymap! " << e.what());
 	}
 }

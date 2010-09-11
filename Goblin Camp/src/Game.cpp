@@ -42,6 +42,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Door.hpp"
 #include "Data.hpp"
 #include "UI/YesNoDialog.hpp"
+#include "scripting/Event.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -380,7 +381,7 @@ class ConfigListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		Logger::Inst()->output<<"ConfigListener: "<<msg<<"\n";
+		LOG("ConfigListener: " << msg);
 		Game::Inst()->Exit();
 	}
 };
@@ -494,7 +495,9 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		}
 		itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 		if (store) StockpileItem(newItem);
-
+		
+		//Script::Event::ItemCreated(newItem.get(), NULL, NULL, pos.X(), pos.Y());
+		
 		return newItem->Uid();
 }
 
