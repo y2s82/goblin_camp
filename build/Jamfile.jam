@@ -55,7 +55,7 @@ import gc-sln ;
 modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
 modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
 
-boost.use-project 1.44 ;
+boost.use-project ;
 winsdk.use-project ;
 libtcod.use-project ;
 python.use-project ;
