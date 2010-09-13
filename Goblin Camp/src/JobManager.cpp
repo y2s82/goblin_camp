@@ -244,6 +244,15 @@ void JobManager::NPCWaiting(int uid) {
 	npcsWaiting.push_back(uid);
 }
 
+void JobManager::NPCNotWaiting(int uid) {
+	for(std::vector<int>::iterator it = npcsWaiting.begin(); it != npcsWaiting.end(); it++) {
+		if(*it == uid) {
+			npcsWaiting.erase(it);
+			return;
+		}
+	}
+}
+
 void JobManager::ClearWaitingNpcs() {
 	npcsWaiting.clear();
 }

@@ -43,6 +43,7 @@ public:
 	void Update();
 	int JobAmount();
 	void NPCWaiting(int);
+	void NPCNotWaiting(int);
 	void ClearWaitingNpcs();
 	void AssignJobs();
 };

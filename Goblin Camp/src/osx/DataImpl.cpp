@@ -40,24 +40,22 @@ void _ImplFindPersonalDirectory(std::string& dir) {
 void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
 	CFBundleRef bundle;
 	CFURLRef    execURL, resURL;
-	CFStringRef execStr, resStr;
+	CFStringRef execStr;
 	char execPath[1024], resPath[1024];
 	
 	bundle  = CFBundleGetMainBundle();
 	execURL = CFBundleCopyExecutableURL(bundle);
 	resURL  = CFBundleCopyResourcesDirectoryURL(bundle);
 	execStr = CFURLCopyFileSystemPath(execURL, kCFURLPOSIXPathStyle);
-	resStr  = CFURLCopyFileSystemPath(resURL, kCFURLPOSIXPathStyle);
 	
 	CFStringGetCString(execStr, execPath, sizeof(execPath), kCFStringEncodingUTF8);
-	CFStringGetCString(resStr, resPath, sizeof(resPath), kCFStringEncodingUTF8);
+	CFURLGetFileSystemRepresentation(resURL, true, (UInt8*)resPath, 1024);
 	exec = execPath;
 	
 	CFRelease(execStr);
-	CFRelease(resStr);
 	CFRelease(execURL);
 	CFRelease(resURL);
 	
-	execDir = exec.parent_path();
+	execDir = exec;
 	dataDir = fs::path(std::string(resPath) + "/");
 }
