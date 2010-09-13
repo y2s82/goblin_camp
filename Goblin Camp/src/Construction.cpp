@@ -57,7 +57,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
 	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
 	dismantle(false),
-	time(0)
+	time(0),
+	built(false)
 {
 	x = target.X();
 	y = target.Y();
@@ -102,8 +103,7 @@ Construction::~Construction() {
 		++Construction::AllowedAmount[type];
 	}
 	
-	Camp::Inst()->UpdateCenter(Center(), false);
-
+	if (built) Camp::Inst()->UpdateCenter(Center(), false);
 }
 
 
@@ -167,6 +167,7 @@ int Construction::Build() {
 				StockManager::Inst()->UpdateQuantity(Construction::Presets[type].products[prod], 0);
 			}
 		}
+		built = true;
 		Camp::Inst()->UpdateCenter(Center(), true);
 	}
 	return condition;
