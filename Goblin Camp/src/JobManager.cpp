@@ -249,7 +249,7 @@ void JobManager::ClearWaitingNpcs() {
 }
 
 void JobManager::AssignJobs() {
-	for (int i = 0; i < PRIORITY_COUNT - 1 && !npcsWaiting.empty(); i++) {
+	for (int i = 0; i < PRIORITY_COUNT && !npcsWaiting.empty(); i++) {
 		if(!availableList[i].empty()) {
 			std::vector<boost::shared_ptr<Job> > jobsToAssign;
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
