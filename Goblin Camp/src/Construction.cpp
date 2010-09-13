@@ -595,19 +595,11 @@ void Construction::Dismantle() {
 			jobList.clear();
 		}
 
-		if (CheckMaterialsPresent() && Condition() > 0) { 
-			boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
-			dismantleJob->ConnectToEntity(shared_from_this());
-			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
-			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
-			JobManager::Inst()->AddJob(dismantleJob);
-		} else { // Remove construction and cancel associated jobs //FIXME
-//			for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
-	//			resi->lock()->Reserve(set_component_status);
-		//	}
-			JobManager::Inst()->CancelJob(shared_from_this());
-			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
-		}
+		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
+		dismantleJob->ConnectToEntity(shared_from_this());
+		dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
+		JobManager::Inst()->AddJob(dismantleJob);
 	}
 }
 
