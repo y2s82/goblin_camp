@@ -19,3 +19,6 @@ import _gcampapi
 
 announce = _gcampapi.announce
 announce.__doc__ = 'Add a string to announce area'
+
+Coordinate = _gcampapi.Coordinate
+Coordinate.__doc__ = 'Represents coordinates of a point on the map'

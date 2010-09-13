@@ -26,6 +26,7 @@ project goblin-camp
       <include>$(GC_HEADERS)
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
+      <define>BOOST_LIB_DIAGNOSTIC
       # Architecture defines
       <address-model>32:<define>X86
       <address-model>64:<define>X64
@@ -54,7 +55,7 @@ import gc-sln ;
 modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
 modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
 
-boost.use-project 1.43 ;
+boost.use-project 1.44 ;
 winsdk.use-project ;
 libtcod.use-project ;
 python.use-project ;

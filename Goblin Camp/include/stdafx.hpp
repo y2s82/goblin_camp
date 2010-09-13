@@ -32,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <cstdlib>
 // Boost
 #	pragma warning(push, 2)
+#		define BOOST_FILESYSTEM_VERSION 3
 #		include <boost/thread/thread.hpp>
 #		include <boost/multi_array.hpp>
 #		include <boost/shared_ptr.hpp>

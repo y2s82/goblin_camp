@@ -96,7 +96,7 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 	TCODColor color_mappings[] = { TCODColor::green, TCODColor::yellow, TCODColor::red, TCODColor::grey };
 
 	for (int i=0; i<PRIORITY_COUNT; i++) {
-		console->setForegroundColor(color_mappings[i]);
+		console->setDefaultForeground(color_mappings[i]);
 		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
 			if (skip < from) ++skip;
 			else {
@@ -115,13 +115,13 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 				console->print(pos.X() + width - 11, y, "A-> %d", (*jobi)->Assigned());
 #endif
 				if (++y - pos.Y() >= height) {
-					console->setForegroundColor(TCODColor::white);
+					console->setDefaultForeground(TCODColor::white);
 					return;
 				}
 			}
 		}
 	}
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 boost::weak_ptr<Job> JobManager::GetJob(int uid) {
@@ -213,6 +213,7 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	for (std::list<boost::shared_ptr<Job> >::iterator waitingIter = waitingList.begin(); waitingIter != waitingList.end(); ++waitingIter) {
 		if (count++ == index) return (*waitingIter);
 	}
+
 	return boost::weak_ptr<Job>();
 }
 
