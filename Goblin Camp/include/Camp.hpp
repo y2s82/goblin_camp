@@ -28,7 +28,7 @@ private:
 
 	Camp();
 	static Camp* instance;
-	Coordinate center;
+	double centerX, centerY;
 	unsigned int buildingCount;
 
 public:
