@@ -7,167 +7,147 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7821252F121E06E700F5C47E /* SideBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7821252E121E06E700F5C47E /* SideBar.cpp */; };
-		7821258C121E247E00F5C47E /* keys.ini in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78212564121E0E1B00F5C47E /* keys.ini */; };
-		7862EB811234519800D09AEB /* KuhnMunkres.hpp in CopyFiles */ = {isa = PBXBuildFile; fileRef = 7862EB801234519800D09AEB /* KuhnMunkres.hpp */; };
-		7862EB831234520400D09AEB /* KuhnMunkres.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7862EB821234520400D09AEB /* KuhnMunkres.cpp */; };
-		78B37CA712060A76003F23A8 /* DataImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9A12060A76003F23A8 /* DataImpl.cpp */; };
-		78B37CA812060A76003F23A8 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9B12060A76003F23A8 /* main.cpp */; };
-		78B37CA912060A76003F23A8 /* AnnounceDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9D12060A76003F23A8 /* AnnounceDialog.cpp */; };
-		78B37CAA12060A76003F23A8 /* ConstructionDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9E12060A76003F23A8 /* ConstructionDialog.cpp */; };
-		78B37CAB12060A76003F23A8 /* JobDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9F12060A76003F23A8 /* JobDialog.cpp */; };
-		78B37CAC12060A76003F23A8 /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA012060A76003F23A8 /* Menu.cpp */; };
-		78B37CAD12060A76003F23A8 /* NPCDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA212060A76003F23A8 /* NPCDialog.cpp */; };
-		78B37CAE12060A76003F23A8 /* SquadsDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA312060A76003F23A8 /* SquadsDialog.cpp */; };
-		78B37CAF12060A76003F23A8 /* StockManagerDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA412060A76003F23A8 /* StockManagerDialog.cpp */; };
-		78B37CB012060A76003F23A8 /* UIComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA512060A76003F23A8 /* UIComponents.cpp */; };
-		78B37CB112060A76003F23A8 /* YesNoDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA612060A76003F23A8 /* YesNoDialog.cpp */; };
-		78B37D171210DD11003F23A8 /* Tooltip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37D161210DD11003F23A8 /* Tooltip.cpp */; };
-		78E2703611FA8F4100EEF2A7 /* Announce.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701411FA8F4100EEF2A7 /* Announce.cpp */; };
-		78E2703711FA8F4100EEF2A7 /* Attack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701511FA8F4100EEF2A7 /* Attack.cpp */; };
-		78E2703811FA8F4100EEF2A7 /* Blood.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701611FA8F4100EEF2A7 /* Blood.cpp */; };
-		78E2703911FA8F4100EEF2A7 /* Camp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701711FA8F4100EEF2A7 /* Camp.cpp */; };
-		78E2703A11FA8F4100EEF2A7 /* Construction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701811FA8F4100EEF2A7 /* Construction.cpp */; };
-		78E2703B11FA8F4100EEF2A7 /* Container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701911FA8F4100EEF2A7 /* Container.cpp */; };
-		78E2703C11FA8F4100EEF2A7 /* Coordinate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701A11FA8F4100EEF2A7 /* Coordinate.cpp */; };
-		78E2703D11FA8F4100EEF2A7 /* Data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701B11FA8F4100EEF2A7 /* Data.cpp */; };
-		78E2703E11FA8F4100EEF2A7 /* Door.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701C11FA8F4100EEF2A7 /* Door.cpp */; };
-		78E2703F11FA8F4100EEF2A7 /* Entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701D11FA8F4100EEF2A7 /* Entity.cpp */; };
-		78E2704011FA8F4100EEF2A7 /* Events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701E11FA8F4100EEF2A7 /* Events.cpp */; };
-		78E2704111FA8F4100EEF2A7 /* Farmplot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701F11FA8F4100EEF2A7 /* Farmplot.cpp */; };
-		78E2704211FA8F4100EEF2A7 /* Filth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702011FA8F4100EEF2A7 /* Filth.cpp */; };
-		78E2704311FA8F4100EEF2A7 /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702111FA8F4100EEF2A7 /* Game.cpp */; };
-		78E2704411FA8F4100EEF2A7 /* GCamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702211FA8F4100EEF2A7 /* GCamp.cpp */; };
-		78E2704511FA8F4100EEF2A7 /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702311FA8F4100EEF2A7 /* Item.cpp */; };
-		78E2704611FA8F4100EEF2A7 /* Job.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702411FA8F4100EEF2A7 /* Job.cpp */; };
-		78E2704711FA8F4100EEF2A7 /* JobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702511FA8F4100EEF2A7 /* JobManager.cpp */; };
-		78E2704811FA8F4100EEF2A7 /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702611FA8F4100EEF2A7 /* Logger.cpp */; };
-		78E2704911FA8F4100EEF2A7 /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702711FA8F4100EEF2A7 /* Map.cpp */; };
-		78E2704B11FA8F4100EEF2A7 /* NatureObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702911FA8F4100EEF2A7 /* NatureObject.cpp */; };
-		78E2704C11FA8F4100EEF2A7 /* NPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702A11FA8F4100EEF2A7 /* NPC.cpp */; };
-		78E2704D11FA8F4100EEF2A7 /* Serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702B11FA8F4100EEF2A7 /* Serialization.cpp */; };
-		78E2704E11FA8F4100EEF2A7 /* Squad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702C11FA8F4100EEF2A7 /* Squad.cpp */; };
-		78E2704F11FA8F4100EEF2A7 /* StatusEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702D11FA8F4100EEF2A7 /* StatusEffect.cpp */; };
-		78E2705011FA8F4100EEF2A7 /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702E11FA8F4100EEF2A7 /* StockManager.cpp */; };
-		78E2705111FA8F4100EEF2A7 /* Stockpile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702F11FA8F4100EEF2A7 /* Stockpile.cpp */; };
-		78E2705211FA8F4100EEF2A7 /* Tile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2703011FA8F4100EEF2A7 /* Tile.cpp */; };
-		78E2705311FA8F4100EEF2A7 /* UI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2703111FA8F4100EEF2A7 /* UI.cpp */; };
-		78E2705411FA8F4100EEF2A7 /* Water.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2703211FA8F4100EEF2A7 /* Water.cpp */; };
-		78E2731A11FA9EFD00EEF2A7 /* libtcod.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2731911FA9EFD00EEF2A7 /* libtcod.framework */; };
-		78E2739911FAA31C00EEF2A7 /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2739811FAA31C00EEF2A7 /* Carbon.framework */; };
-		78E274A511FB32EA00EEF2A7 /* libboost_date_time-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A411FB32EA00EEF2A7 /* libboost_date_time-d.dylib */; };
-		78E274A711FB32EA00EEF2A7 /* libboost_date_time-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A611FB32EA00EEF2A7 /* libboost_date_time-mt-d.dylib */; };
-		78E274A911FB32EA00EEF2A7 /* libboost_date_time-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A811FB32EA00EEF2A7 /* libboost_date_time-mt.dylib */; };
-		78E274AB11FB32EA00EEF2A7 /* libboost_date_time.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274AA11FB32EA00EEF2A7 /* libboost_date_time.dylib */; };
-		78E274AD11FB32EA00EEF2A7 /* libboost_filesystem-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274AC11FB32EA00EEF2A7 /* libboost_filesystem-d.dylib */; };
-		78E274AF11FB32EA00EEF2A7 /* libboost_filesystem-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274AE11FB32EA00EEF2A7 /* libboost_filesystem-mt-d.dylib */; };
-		78E274B111FB32EA00EEF2A7 /* libboost_filesystem-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B011FB32EA00EEF2A7 /* libboost_filesystem-mt.dylib */; };
-		78E274B311FB32EA00EEF2A7 /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B211FB32EA00EEF2A7 /* libboost_filesystem.dylib */; };
-		78E274B511FB32EB00EEF2A7 /* libboost_graph-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B411FB32EB00EEF2A7 /* libboost_graph-d.dylib */; };
-		78E274B711FB32EB00EEF2A7 /* libboost_graph-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B611FB32EB00EEF2A7 /* libboost_graph-mt-d.dylib */; };
-		78E274B911FB32EB00EEF2A7 /* libboost_graph-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B811FB32EB00EEF2A7 /* libboost_graph-mt.dylib */; };
-		78E274BB11FB32EB00EEF2A7 /* libboost_graph.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274BA11FB32EB00EEF2A7 /* libboost_graph.dylib */; };
-		78E274BD11FB32EB00EEF2A7 /* libboost_iostreams-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274BC11FB32EB00EEF2A7 /* libboost_iostreams-d.dylib */; };
-		78E274BF11FB32EB00EEF2A7 /* libboost_iostreams-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274BE11FB32EB00EEF2A7 /* libboost_iostreams-mt-d.dylib */; };
-		78E274C111FB32EB00EEF2A7 /* libboost_iostreams-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C011FB32EB00EEF2A7 /* libboost_iostreams-mt.dylib */; };
-		78E274C311FB32EB00EEF2A7 /* libboost_iostreams.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C211FB32EB00EEF2A7 /* libboost_iostreams.dylib */; };
-		78E274C511FB32EB00EEF2A7 /* libboost_math_c99-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C411FB32EB00EEF2A7 /* libboost_math_c99-d.dylib */; };
-		78E274C711FB32EB00EEF2A7 /* libboost_math_c99-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C611FB32EB00EEF2A7 /* libboost_math_c99-mt-d.dylib */; };
-		78E274C911FB32EB00EEF2A7 /* libboost_math_c99-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C811FB32EB00EEF2A7 /* libboost_math_c99-mt.dylib */; };
-		78E274CB11FB32EB00EEF2A7 /* libboost_math_c99.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274CA11FB32EB00EEF2A7 /* libboost_math_c99.dylib */; };
-		78E274CD11FB32EB00EEF2A7 /* libboost_math_c99f-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274CC11FB32EB00EEF2A7 /* libboost_math_c99f-d.dylib */; };
-		78E274CF11FB32EB00EEF2A7 /* libboost_math_c99f-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274CE11FB32EB00EEF2A7 /* libboost_math_c99f-mt-d.dylib */; };
-		78E274D111FB32EB00EEF2A7 /* libboost_math_c99f-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D011FB32EB00EEF2A7 /* libboost_math_c99f-mt.dylib */; };
-		78E274D311FB32EB00EEF2A7 /* libboost_math_c99f.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D211FB32EB00EEF2A7 /* libboost_math_c99f.dylib */; };
-		78E274D511FB32EB00EEF2A7 /* libboost_math_c99l-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D411FB32EB00EEF2A7 /* libboost_math_c99l-d.dylib */; };
-		78E274D711FB32EB00EEF2A7 /* libboost_math_c99l-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D611FB32EB00EEF2A7 /* libboost_math_c99l-mt-d.dylib */; };
-		78E274D911FB32EB00EEF2A7 /* libboost_math_c99l-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D811FB32EB00EEF2A7 /* libboost_math_c99l-mt.dylib */; };
-		78E274DB11FB32EB00EEF2A7 /* libboost_math_c99l.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274DA11FB32EB00EEF2A7 /* libboost_math_c99l.dylib */; };
-		78E274DD11FB32EB00EEF2A7 /* libboost_math_tr1-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274DC11FB32EB00EEF2A7 /* libboost_math_tr1-d.dylib */; };
-		78E274DF11FB32EB00EEF2A7 /* libboost_math_tr1-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274DE11FB32EB00EEF2A7 /* libboost_math_tr1-mt-d.dylib */; };
-		78E274E111FB32EB00EEF2A7 /* libboost_math_tr1-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E011FB32EB00EEF2A7 /* libboost_math_tr1-mt.dylib */; };
-		78E274E311FB32EB00EEF2A7 /* libboost_math_tr1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E211FB32EB00EEF2A7 /* libboost_math_tr1.dylib */; };
-		78E274E511FB32EB00EEF2A7 /* libboost_math_tr1f-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E411FB32EB00EEF2A7 /* libboost_math_tr1f-d.dylib */; };
-		78E274E711FB32EB00EEF2A7 /* libboost_math_tr1f-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E611FB32EB00EEF2A7 /* libboost_math_tr1f-mt-d.dylib */; };
-		78E274E911FB32EB00EEF2A7 /* libboost_math_tr1f-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E811FB32EB00EEF2A7 /* libboost_math_tr1f-mt.dylib */; };
-		78E274EB11FB32EB00EEF2A7 /* libboost_math_tr1f.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274EA11FB32EB00EEF2A7 /* libboost_math_tr1f.dylib */; };
-		78E274ED11FB32EB00EEF2A7 /* libboost_math_tr1l-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274EC11FB32EB00EEF2A7 /* libboost_math_tr1l-d.dylib */; };
-		78E274EF11FB32EB00EEF2A7 /* libboost_math_tr1l-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274EE11FB32EB00EEF2A7 /* libboost_math_tr1l-mt-d.dylib */; };
-		78E274F111FB32EB00EEF2A7 /* libboost_math_tr1l-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F011FB32EB00EEF2A7 /* libboost_math_tr1l-mt.dylib */; };
-		78E274F311FB32EB00EEF2A7 /* libboost_math_tr1l.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F211FB32EB00EEF2A7 /* libboost_math_tr1l.dylib */; };
-		78E274F511FB32EB00EEF2A7 /* libboost_prg_exec_monitor-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F411FB32EB00EEF2A7 /* libboost_prg_exec_monitor-d.dylib */; };
-		78E274F711FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F611FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt-d.dylib */; };
-		78E274F911FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F811FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt.dylib */; };
-		78E274FB11FB32EB00EEF2A7 /* libboost_prg_exec_monitor.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274FA11FB32EB00EEF2A7 /* libboost_prg_exec_monitor.dylib */; };
-		78E274FD11FB32EB00EEF2A7 /* libboost_program_options-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274FC11FB32EB00EEF2A7 /* libboost_program_options-d.dylib */; };
-		78E274FF11FB32EB00EEF2A7 /* libboost_program_options-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274FE11FB32EB00EEF2A7 /* libboost_program_options-mt-d.dylib */; };
-		78E2750111FB32EB00EEF2A7 /* libboost_program_options-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750011FB32EB00EEF2A7 /* libboost_program_options-mt.dylib */; };
-		78E2750311FB32EB00EEF2A7 /* libboost_program_options.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750211FB32EB00EEF2A7 /* libboost_program_options.dylib */; };
-		78E2750511FB32EB00EEF2A7 /* libboost_random-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750411FB32EB00EEF2A7 /* libboost_random-d.dylib */; };
-		78E2750711FB32EB00EEF2A7 /* libboost_random-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750611FB32EB00EEF2A7 /* libboost_random-mt-d.dylib */; };
-		78E2750911FB32EB00EEF2A7 /* libboost_random-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750811FB32EB00EEF2A7 /* libboost_random-mt.dylib */; };
-		78E2750B11FB32EB00EEF2A7 /* libboost_random.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750A11FB32EB00EEF2A7 /* libboost_random.dylib */; };
-		78E2750D11FB32EB00EEF2A7 /* libboost_regex-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750C11FB32EB00EEF2A7 /* libboost_regex-d.dylib */; };
-		78E2750F11FB32EB00EEF2A7 /* libboost_regex-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750E11FB32EB00EEF2A7 /* libboost_regex-mt-d.dylib */; };
-		78E2751111FB32EB00EEF2A7 /* libboost_regex-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751011FB32EB00EEF2A7 /* libboost_regex-mt.dylib */; };
-		78E2751311FB32EB00EEF2A7 /* libboost_regex.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751211FB32EB00EEF2A7 /* libboost_regex.dylib */; };
-		78E2751511FB32EB00EEF2A7 /* libboost_serialization-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751411FB32EB00EEF2A7 /* libboost_serialization-d.dylib */; };
-		78E2751711FB32EB00EEF2A7 /* libboost_serialization-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751611FB32EB00EEF2A7 /* libboost_serialization-mt-d.dylib */; };
-		78E2751911FB32EC00EEF2A7 /* libboost_serialization-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751811FB32EC00EEF2A7 /* libboost_serialization-mt.dylib */; };
-		78E2751B11FB32EC00EEF2A7 /* libboost_serialization.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751A11FB32EC00EEF2A7 /* libboost_serialization.dylib */; };
-		78E2751D11FB32EC00EEF2A7 /* libboost_signals-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751C11FB32EC00EEF2A7 /* libboost_signals-d.dylib */; };
-		78E2751F11FB32EC00EEF2A7 /* libboost_signals-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751E11FB32EC00EEF2A7 /* libboost_signals-mt-d.dylib */; };
-		78E2752111FB32EC00EEF2A7 /* libboost_signals-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752011FB32EC00EEF2A7 /* libboost_signals-mt.dylib */; };
-		78E2752311FB32EC00EEF2A7 /* libboost_signals.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752211FB32EC00EEF2A7 /* libboost_signals.dylib */; };
-		78E2752511FB32EC00EEF2A7 /* libboost_system-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752411FB32EC00EEF2A7 /* libboost_system-d.dylib */; };
-		78E2752711FB32EC00EEF2A7 /* libboost_system-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752611FB32EC00EEF2A7 /* libboost_system-mt-d.dylib */; };
-		78E2752911FB32EC00EEF2A7 /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752811FB32EC00EEF2A7 /* libboost_system-mt.dylib */; };
-		78E2752B11FB32EC00EEF2A7 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752A11FB32EC00EEF2A7 /* libboost_system.dylib */; };
-		78E2752D11FB32EC00EEF2A7 /* libboost_thread-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752C11FB32EC00EEF2A7 /* libboost_thread-mt-d.dylib */; };
-		78E2752F11FB32EC00EEF2A7 /* libboost_thread-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752E11FB32EC00EEF2A7 /* libboost_thread-mt.dylib */; };
-		78E2753111FB32EC00EEF2A7 /* libboost_unit_test_framework-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753011FB32EC00EEF2A7 /* libboost_unit_test_framework-d.dylib */; };
-		78E2753311FB32EC00EEF2A7 /* libboost_unit_test_framework-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753211FB32EC00EEF2A7 /* libboost_unit_test_framework-mt-d.dylib */; };
-		78E2753511FB32EC00EEF2A7 /* libboost_unit_test_framework-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753411FB32EC00EEF2A7 /* libboost_unit_test_framework-mt.dylib */; };
-		78E2753711FB32EC00EEF2A7 /* libboost_unit_test_framework.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753611FB32EC00EEF2A7 /* libboost_unit_test_framework.dylib */; };
-		78E2753911FB32EC00EEF2A7 /* libboost_wave-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753811FB32EC00EEF2A7 /* libboost_wave-d.dylib */; };
-		78E2753B11FB32EC00EEF2A7 /* libboost_wave-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753A11FB32EC00EEF2A7 /* libboost_wave-mt-d.dylib */; };
-		78E2753D11FB32EC00EEF2A7 /* libboost_wave-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753C11FB32EC00EEF2A7 /* libboost_wave-mt.dylib */; };
-		78E2753F11FB32EC00EEF2A7 /* libboost_wave.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753E11FB32EC00EEF2A7 /* libboost_wave.dylib */; };
-		78E2754111FB32EC00EEF2A7 /* libboost_wserialization-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754011FB32EC00EEF2A7 /* libboost_wserialization-d.dylib */; };
-		78E2754311FB32EC00EEF2A7 /* libboost_wserialization-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754211FB32EC00EEF2A7 /* libboost_wserialization-mt-d.dylib */; };
-		78E2754511FB32EC00EEF2A7 /* libboost_wserialization-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754411FB32EC00EEF2A7 /* libboost_wserialization-mt.dylib */; };
-		78E2754711FB32EC00EEF2A7 /* libboost_wserialization.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754611FB32EC00EEF2A7 /* libboost_wserialization.dylib */; };
-		78E275A211FB37F300EEF2A7 /* config.ini in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E26FE711FA8F4100EEF2A7 /* config.ini */; };
-		78E275A311FB37F300EEF2A7 /* constructions.dat in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E26FE811FA8F4100EEF2A7 /* constructions.dat */; };
-		78E275A411FB37F300EEF2A7 /* creatures.dat in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E26FEA11FA8F4100EEF2A7 /* creatures.dat */; };
-		78E275A511FB37F300EEF2A7 /* GoblinCamp.ico in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E26FED11FA8F4100EEF2A7 /* GoblinCamp.ico */; };
-		78E275A611FB37F300EEF2A7 /* items.dat in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E2700E11FA8F4100EEF2A7 /* items.dat */; };
-		78E275A711FB37F300EEF2A7 /* names.dat in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E2701011FA8F4100EEF2A7 /* names.dat */; };
-		78E275A811FB37F300EEF2A7 /* terminal.png in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E2703411FA8F4100EEF2A7 /* terminal.png */; };
-		78E275A911FB37F300EEF2A7 /* wildplants.dat in CopyFiles */ = {isa = PBXBuildFile; fileRef = 78E2703511FA8F4100EEF2A7 /* wildplants.dat */; };
+		78DD910B123D9D1000F7EBCA /* libtcod.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2731911FA9EFD00EEF2A7 /* libtcod.framework */; };
+		78DD910C123D9D1600F7EBCA /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2739811FAA31C00EEF2A7 /* Carbon.framework */; };
+		78DD910D123D9D8000F7EBCA /* libboost_date_time-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A411FB32EA00EEF2A7 /* libboost_date_time-d.dylib */; };
+		78DD910E123D9D8000F7EBCA /* libboost_date_time-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A611FB32EA00EEF2A7 /* libboost_date_time-mt-d.dylib */; };
+		78DD910F123D9D8000F7EBCA /* libboost_date_time-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A811FB32EA00EEF2A7 /* libboost_date_time-mt.dylib */; };
+		78DD9110123D9D8000F7EBCA /* libboost_date_time.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274AA11FB32EA00EEF2A7 /* libboost_date_time.dylib */; };
+		78DD9111123D9D8000F7EBCA /* libboost_filesystem-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274AC11FB32EA00EEF2A7 /* libboost_filesystem-d.dylib */; };
+		78DD9112123D9D8000F7EBCA /* libboost_filesystem-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274AE11FB32EA00EEF2A7 /* libboost_filesystem-mt-d.dylib */; };
+		78DD9113123D9D8000F7EBCA /* libboost_filesystem-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B011FB32EA00EEF2A7 /* libboost_filesystem-mt.dylib */; };
+		78DD9114123D9D8000F7EBCA /* libboost_filesystem.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B211FB32EA00EEF2A7 /* libboost_filesystem.dylib */; };
+		78DD9115123D9D8000F7EBCA /* libboost_graph-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B411FB32EB00EEF2A7 /* libboost_graph-d.dylib */; };
+		78DD9116123D9D8000F7EBCA /* libboost_graph-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B611FB32EB00EEF2A7 /* libboost_graph-mt-d.dylib */; };
+		78DD9117123D9D8000F7EBCA /* libboost_graph-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274B811FB32EB00EEF2A7 /* libboost_graph-mt.dylib */; };
+		78DD9118123D9D8000F7EBCA /* libboost_graph.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274BA11FB32EB00EEF2A7 /* libboost_graph.dylib */; };
+		78DD9119123D9D8000F7EBCA /* libboost_iostreams-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274BC11FB32EB00EEF2A7 /* libboost_iostreams-d.dylib */; };
+		78DD911A123D9D8000F7EBCA /* libboost_iostreams-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274BE11FB32EB00EEF2A7 /* libboost_iostreams-mt-d.dylib */; };
+		78DD911B123D9D8000F7EBCA /* libboost_iostreams-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C011FB32EB00EEF2A7 /* libboost_iostreams-mt.dylib */; };
+		78DD911C123D9D8000F7EBCA /* libboost_iostreams.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C211FB32EB00EEF2A7 /* libboost_iostreams.dylib */; };
+		78DD911D123D9D8000F7EBCA /* libboost_math_c99-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C411FB32EB00EEF2A7 /* libboost_math_c99-d.dylib */; };
+		78DD911E123D9D8000F7EBCA /* libboost_math_c99-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C611FB32EB00EEF2A7 /* libboost_math_c99-mt-d.dylib */; };
+		78DD911F123D9D8000F7EBCA /* libboost_math_c99-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274C811FB32EB00EEF2A7 /* libboost_math_c99-mt.dylib */; };
+		78DD9120123D9D8000F7EBCA /* libboost_math_c99.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274CA11FB32EB00EEF2A7 /* libboost_math_c99.dylib */; };
+		78DD9121123D9D8000F7EBCA /* libboost_math_c99f-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274CC11FB32EB00EEF2A7 /* libboost_math_c99f-d.dylib */; };
+		78DD9122123D9D8000F7EBCA /* libboost_math_c99f-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274CE11FB32EB00EEF2A7 /* libboost_math_c99f-mt-d.dylib */; };
+		78DD9123123D9D8000F7EBCA /* libboost_math_c99f-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D011FB32EB00EEF2A7 /* libboost_math_c99f-mt.dylib */; };
+		78DD9124123D9D8000F7EBCA /* libboost_math_c99f.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D211FB32EB00EEF2A7 /* libboost_math_c99f.dylib */; };
+		78DD9125123D9D8000F7EBCA /* libboost_math_c99l-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D411FB32EB00EEF2A7 /* libboost_math_c99l-d.dylib */; };
+		78DD9126123D9D8000F7EBCA /* libboost_math_c99l-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D611FB32EB00EEF2A7 /* libboost_math_c99l-mt-d.dylib */; };
+		78DD9127123D9D8000F7EBCA /* libboost_math_c99l-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274D811FB32EB00EEF2A7 /* libboost_math_c99l-mt.dylib */; };
+		78DD9128123D9D8000F7EBCA /* libboost_math_c99l.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274DA11FB32EB00EEF2A7 /* libboost_math_c99l.dylib */; };
+		78DD9129123D9D8000F7EBCA /* libboost_math_tr1-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274DC11FB32EB00EEF2A7 /* libboost_math_tr1-d.dylib */; };
+		78DD912A123D9D8000F7EBCA /* libboost_math_tr1-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274DE11FB32EB00EEF2A7 /* libboost_math_tr1-mt-d.dylib */; };
+		78DD912B123D9D8000F7EBCA /* libboost_math_tr1-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E011FB32EB00EEF2A7 /* libboost_math_tr1-mt.dylib */; };
+		78DD912C123D9D8000F7EBCA /* libboost_math_tr1.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E211FB32EB00EEF2A7 /* libboost_math_tr1.dylib */; };
+		78DD912D123D9D8000F7EBCA /* libboost_math_tr1f-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E411FB32EB00EEF2A7 /* libboost_math_tr1f-d.dylib */; };
+		78DD912E123D9D8000F7EBCA /* libboost_math_tr1f-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E611FB32EB00EEF2A7 /* libboost_math_tr1f-mt-d.dylib */; };
+		78DD912F123D9D8000F7EBCA /* libboost_math_tr1f-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274E811FB32EB00EEF2A7 /* libboost_math_tr1f-mt.dylib */; };
+		78DD9130123D9D8000F7EBCA /* libboost_math_tr1f.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274EA11FB32EB00EEF2A7 /* libboost_math_tr1f.dylib */; };
+		78DD9131123D9D8000F7EBCA /* libboost_math_tr1l-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274EC11FB32EB00EEF2A7 /* libboost_math_tr1l-d.dylib */; };
+		78DD9132123D9D8000F7EBCA /* libboost_math_tr1l-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274EE11FB32EB00EEF2A7 /* libboost_math_tr1l-mt-d.dylib */; };
+		78DD9133123D9D8000F7EBCA /* libboost_math_tr1l-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F011FB32EB00EEF2A7 /* libboost_math_tr1l-mt.dylib */; };
+		78DD9134123D9D8000F7EBCA /* libboost_math_tr1l.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F211FB32EB00EEF2A7 /* libboost_math_tr1l.dylib */; };
+		78DD9135123D9D8000F7EBCA /* libboost_prg_exec_monitor-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F411FB32EB00EEF2A7 /* libboost_prg_exec_monitor-d.dylib */; };
+		78DD9136123D9D8000F7EBCA /* libboost_prg_exec_monitor-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F611FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt-d.dylib */; };
+		78DD9137123D9D8000F7EBCA /* libboost_prg_exec_monitor-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274F811FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt.dylib */; };
+		78DD9138123D9D8000F7EBCA /* libboost_prg_exec_monitor.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274FA11FB32EB00EEF2A7 /* libboost_prg_exec_monitor.dylib */; };
+		78DD9139123D9D8000F7EBCA /* libboost_program_options-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274FC11FB32EB00EEF2A7 /* libboost_program_options-d.dylib */; };
+		78DD913A123D9D8000F7EBCA /* libboost_program_options-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274FE11FB32EB00EEF2A7 /* libboost_program_options-mt-d.dylib */; };
+		78DD913B123D9D8000F7EBCA /* libboost_program_options-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750011FB32EB00EEF2A7 /* libboost_program_options-mt.dylib */; };
+		78DD913C123D9D8000F7EBCA /* libboost_program_options.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750211FB32EB00EEF2A7 /* libboost_program_options.dylib */; };
+		78DD913D123D9D8000F7EBCA /* libboost_random-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750411FB32EB00EEF2A7 /* libboost_random-d.dylib */; };
+		78DD913E123D9D8000F7EBCA /* libboost_random-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750611FB32EB00EEF2A7 /* libboost_random-mt-d.dylib */; };
+		78DD913F123D9D8000F7EBCA /* libboost_random-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750811FB32EB00EEF2A7 /* libboost_random-mt.dylib */; };
+		78DD9140123D9D8000F7EBCA /* libboost_random.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750A11FB32EB00EEF2A7 /* libboost_random.dylib */; };
+		78DD9141123D9D8000F7EBCA /* libboost_regex-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750C11FB32EB00EEF2A7 /* libboost_regex-d.dylib */; };
+		78DD9142123D9D8000F7EBCA /* libboost_regex-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2750E11FB32EB00EEF2A7 /* libboost_regex-mt-d.dylib */; };
+		78DD9143123D9D8100F7EBCA /* libboost_regex-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751011FB32EB00EEF2A7 /* libboost_regex-mt.dylib */; };
+		78DD9144123D9D8100F7EBCA /* libboost_regex.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751211FB32EB00EEF2A7 /* libboost_regex.dylib */; };
+		78DD9145123D9D8100F7EBCA /* libboost_serialization-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751411FB32EB00EEF2A7 /* libboost_serialization-d.dylib */; };
+		78DD9146123D9D8100F7EBCA /* libboost_serialization-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751611FB32EB00EEF2A7 /* libboost_serialization-mt-d.dylib */; };
+		78DD9147123D9D8100F7EBCA /* libboost_serialization-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751811FB32EC00EEF2A7 /* libboost_serialization-mt.dylib */; };
+		78DD9148123D9D8100F7EBCA /* libboost_serialization.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751A11FB32EC00EEF2A7 /* libboost_serialization.dylib */; };
+		78DD9149123D9D8100F7EBCA /* libboost_signals-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751C11FB32EC00EEF2A7 /* libboost_signals-d.dylib */; };
+		78DD914A123D9D8100F7EBCA /* libboost_signals-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2751E11FB32EC00EEF2A7 /* libboost_signals-mt-d.dylib */; };
+		78DD914B123D9D8100F7EBCA /* libboost_signals-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752011FB32EC00EEF2A7 /* libboost_signals-mt.dylib */; };
+		78DD914C123D9D8100F7EBCA /* libboost_signals.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752211FB32EC00EEF2A7 /* libboost_signals.dylib */; };
+		78DD914D123D9D8100F7EBCA /* libboost_system-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752411FB32EC00EEF2A7 /* libboost_system-d.dylib */; };
+		78DD914E123D9D8100F7EBCA /* libboost_system-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752611FB32EC00EEF2A7 /* libboost_system-mt-d.dylib */; };
+		78DD914F123D9D8100F7EBCA /* libboost_system-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752811FB32EC00EEF2A7 /* libboost_system-mt.dylib */; };
+		78DD9150123D9D8100F7EBCA /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752A11FB32EC00EEF2A7 /* libboost_system.dylib */; };
+		78DD9151123D9D8100F7EBCA /* libboost_thread-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752C11FB32EC00EEF2A7 /* libboost_thread-mt-d.dylib */; };
+		78DD9152123D9D8100F7EBCA /* libboost_thread-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2752E11FB32EC00EEF2A7 /* libboost_thread-mt.dylib */; };
+		78DD9153123D9D8100F7EBCA /* libboost_unit_test_framework-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753011FB32EC00EEF2A7 /* libboost_unit_test_framework-d.dylib */; };
+		78DD9154123D9D8100F7EBCA /* libboost_unit_test_framework-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753211FB32EC00EEF2A7 /* libboost_unit_test_framework-mt-d.dylib */; };
+		78DD9155123D9D8100F7EBCA /* libboost_unit_test_framework-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753411FB32EC00EEF2A7 /* libboost_unit_test_framework-mt.dylib */; };
+		78DD9156123D9D8100F7EBCA /* libboost_unit_test_framework.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753611FB32EC00EEF2A7 /* libboost_unit_test_framework.dylib */; };
+		78DD9157123D9D8100F7EBCA /* libboost_wave-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753811FB32EC00EEF2A7 /* libboost_wave-d.dylib */; };
+		78DD9158123D9D8100F7EBCA /* libboost_wave-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753A11FB32EC00EEF2A7 /* libboost_wave-mt-d.dylib */; };
+		78DD9159123D9D8100F7EBCA /* libboost_wave-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753C11FB32EC00EEF2A7 /* libboost_wave-mt.dylib */; };
+		78DD915A123D9D8100F7EBCA /* libboost_wave.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2753E11FB32EC00EEF2A7 /* libboost_wave.dylib */; };
+		78DD915B123D9D8100F7EBCA /* libboost_wserialization-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754011FB32EC00EEF2A7 /* libboost_wserialization-d.dylib */; };
+		78DD915C123D9D8100F7EBCA /* libboost_wserialization-mt-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754211FB32EC00EEF2A7 /* libboost_wserialization-mt-d.dylib */; };
+		78DD915D123D9D8100F7EBCA /* libboost_wserialization-mt.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754411FB32EC00EEF2A7 /* libboost_wserialization-mt.dylib */; };
+		78DD915E123D9D8100F7EBCA /* libboost_wserialization.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2754611FB32EC00EEF2A7 /* libboost_wserialization.dylib */; };
+		78DD9160123D9D8100F7EBCA /* libbz2.1.0.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78DD915F123D9D8100F7EBCA /* libbz2.1.0.5.dylib */; };
+		78DD9162123D9D8100F7EBCA /* libexpat.1.5.2.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78DD9161123D9D8100F7EBCA /* libexpat.1.5.2.dylib */; };
+		78DD9164123D9D8100F7EBCA /* libz.1.2.5.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78DD9163123D9D8100F7EBCA /* libz.1.2.5.dylib */; };
+		78DD916B123D9E8800F7EBCA /* keys.ini in Resources */ = {isa = PBXBuildFile; fileRef = 78212564121E0E1B00F5C47E /* keys.ini */; };
+		78DD916C123D9E8800F7EBCA /* config.ini in Resources */ = {isa = PBXBuildFile; fileRef = 78E26FE711FA8F4100EEF2A7 /* config.ini */; };
+		78DD916D123D9E8800F7EBCA /* constructions.dat in Resources */ = {isa = PBXBuildFile; fileRef = 78E26FE811FA8F4100EEF2A7 /* constructions.dat */; };
+		78DD916E123D9E8800F7EBCA /* creatures.dat in Resources */ = {isa = PBXBuildFile; fileRef = 78E26FEA11FA8F4100EEF2A7 /* creatures.dat */; };
+		78DD916F123D9E8800F7EBCA /* items.dat in Resources */ = {isa = PBXBuildFile; fileRef = 78E2700E11FA8F4100EEF2A7 /* items.dat */; };
+		78DD9170123D9E8800F7EBCA /* names.dat in Resources */ = {isa = PBXBuildFile; fileRef = 78E2701011FA8F4100EEF2A7 /* names.dat */; };
+		78DD9171123D9E8800F7EBCA /* terminal.png in Resources */ = {isa = PBXBuildFile; fileRef = 78E2703411FA8F4100EEF2A7 /* terminal.png */; };
+		78DD9172123D9E8800F7EBCA /* wildplants.dat in Resources */ = {isa = PBXBuildFile; fileRef = 78E2703511FA8F4100EEF2A7 /* wildplants.dat */; };
+		78DD9175123D9EA800F7EBCA /* GoblinCamp.icns in Resources */ = {isa = PBXBuildFile; fileRef = 78DD9173123D9EA800F7EBCA /* GoblinCamp.icns */; };
+		78DD917A123D9EFE00F7EBCA /* DataImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9A12060A76003F23A8 /* DataImpl.cpp */; };
+		78DD917B123D9EFE00F7EBCA /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9B12060A76003F23A8 /* main.cpp */; };
+		78DD917C123D9EFE00F7EBCA /* AnnounceDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9D12060A76003F23A8 /* AnnounceDialog.cpp */; };
+		78DD917D123D9EFE00F7EBCA /* ConstructionDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9E12060A76003F23A8 /* ConstructionDialog.cpp */; };
+		78DD917E123D9EFE00F7EBCA /* JobDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37C9F12060A76003F23A8 /* JobDialog.cpp */; };
+		78DD917F123D9EFE00F7EBCA /* Menu.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA012060A76003F23A8 /* Menu.cpp */; };
+		78DD9180123D9EFE00F7EBCA /* NPCDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA212060A76003F23A8 /* NPCDialog.cpp */; };
+		78DD9181123D9EFE00F7EBCA /* SquadsDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA312060A76003F23A8 /* SquadsDialog.cpp */; };
+		78DD9182123D9EFE00F7EBCA /* StockManagerDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA412060A76003F23A8 /* StockManagerDialog.cpp */; };
+		78DD9183123D9EFE00F7EBCA /* UIComponents.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA512060A76003F23A8 /* UIComponents.cpp */; };
+		78DD9184123D9EFE00F7EBCA /* YesNoDialog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37CA612060A76003F23A8 /* YesNoDialog.cpp */; };
+		78DD9185123D9EFE00F7EBCA /* Tooltip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78B37D161210DD11003F23A8 /* Tooltip.cpp */; };
+		78DD9186123D9EFE00F7EBCA /* SideBar.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7821252E121E06E700F5C47E /* SideBar.cpp */; };
+		78DD9187123D9EFE00F7EBCA /* Announce.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701411FA8F4100EEF2A7 /* Announce.cpp */; };
+		78DD9188123D9EFE00F7EBCA /* Attack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701511FA8F4100EEF2A7 /* Attack.cpp */; };
+		78DD9189123D9EFE00F7EBCA /* Blood.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701611FA8F4100EEF2A7 /* Blood.cpp */; };
+		78DD918A123D9EFE00F7EBCA /* Camp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701711FA8F4100EEF2A7 /* Camp.cpp */; };
+		78DD918B123D9EFE00F7EBCA /* Construction.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701811FA8F4100EEF2A7 /* Construction.cpp */; };
+		78DD918C123D9EFE00F7EBCA /* Container.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701911FA8F4100EEF2A7 /* Container.cpp */; };
+		78DD918D123D9EFE00F7EBCA /* Coordinate.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701A11FA8F4100EEF2A7 /* Coordinate.cpp */; };
+		78DD918E123D9EFE00F7EBCA /* Data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701B11FA8F4100EEF2A7 /* Data.cpp */; };
+		78DD918F123D9EFE00F7EBCA /* Door.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701C11FA8F4100EEF2A7 /* Door.cpp */; };
+		78DD9190123D9EFE00F7EBCA /* Entity.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701D11FA8F4100EEF2A7 /* Entity.cpp */; };
+		78DD9191123D9EFE00F7EBCA /* Events.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701E11FA8F4100EEF2A7 /* Events.cpp */; };
+		78DD9192123D9EFE00F7EBCA /* Farmplot.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2701F11FA8F4100EEF2A7 /* Farmplot.cpp */; };
+		78DD9193123D9EFE00F7EBCA /* Filth.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702011FA8F4100EEF2A7 /* Filth.cpp */; };
+		78DD9194123D9EFE00F7EBCA /* Game.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702111FA8F4100EEF2A7 /* Game.cpp */; };
+		78DD9195123D9EFE00F7EBCA /* GCamp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702211FA8F4100EEF2A7 /* GCamp.cpp */; };
+		78DD9196123D9EFE00F7EBCA /* Item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702311FA8F4100EEF2A7 /* Item.cpp */; };
+		78DD9197123D9EFE00F7EBCA /* Job.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702411FA8F4100EEF2A7 /* Job.cpp */; };
+		78DD9198123D9EFE00F7EBCA /* JobManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702511FA8F4100EEF2A7 /* JobManager.cpp */; };
+		78DD9199123D9EFE00F7EBCA /* KuhnMunkres.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7862EB821234520400D09AEB /* KuhnMunkres.cpp */; };
+		78DD919A123D9EFE00F7EBCA /* Logger.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702611FA8F4100EEF2A7 /* Logger.cpp */; };
+		78DD919B123D9EFE00F7EBCA /* Map.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702711FA8F4100EEF2A7 /* Map.cpp */; };
+		78DD919C123D9EFE00F7EBCA /* NatureObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702911FA8F4100EEF2A7 /* NatureObject.cpp */; };
+		78DD919D123D9EFE00F7EBCA /* NPC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702A11FA8F4100EEF2A7 /* NPC.cpp */; };
+		78DD919E123D9EFE00F7EBCA /* Serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702B11FA8F4100EEF2A7 /* Serialization.cpp */; };
+		78DD919F123D9EFE00F7EBCA /* Squad.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702C11FA8F4100EEF2A7 /* Squad.cpp */; };
+		78DD91A0123D9EFE00F7EBCA /* StatusEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702D11FA8F4100EEF2A7 /* StatusEffect.cpp */; };
+		78DD91A1123D9EFE00F7EBCA /* StockManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702E11FA8F4100EEF2A7 /* StockManager.cpp */; };
+		78DD91A2123D9EFE00F7EBCA /* Stockpile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2702F11FA8F4100EEF2A7 /* Stockpile.cpp */; };
+		78DD91A3123D9EFE00F7EBCA /* Tile.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2703011FA8F4100EEF2A7 /* Tile.cpp */; };
+		78DD91A4123D9EFE00F7EBCA /* UI.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2703111FA8F4100EEF2A7 /* UI.cpp */; };
+		78DD91A5123D9EFE00F7EBCA /* Water.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78E2703211FA8F4100EEF2A7 /* Water.cpp */; };
 /* End PBXBuildFile section */
-
-/* Begin PBXCopyFilesBuildPhase section */
-		8DD76F690486A84900D96B5E /* CopyFiles */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 12;
-			dstPath = "";
-			dstSubfolderSpec = 7;
-			files = (
-				7821258C121E247E00F5C47E /* keys.ini in CopyFiles */,
-				78E275A211FB37F300EEF2A7 /* config.ini in CopyFiles */,
-				78E275A311FB37F300EEF2A7 /* constructions.dat in CopyFiles */,
-				78E275A411FB37F300EEF2A7 /* creatures.dat in CopyFiles */,
-				78E275A511FB37F300EEF2A7 /* GoblinCamp.ico in CopyFiles */,
-				78E275A611FB37F300EEF2A7 /* items.dat in CopyFiles */,
-				78E275A711FB37F300EEF2A7 /* names.dat in CopyFiles */,
-				78E275A811FB37F300EEF2A7 /* terminal.png in CopyFiles */,
-				78E275A911FB37F300EEF2A7 /* wildplants.dat in CopyFiles */,
-				7862EB811234519800D09AEB /* KuhnMunkres.hpp in CopyFiles */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		7821252D121E06A300F5C47E /* SideBar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SideBar.hpp; sourceTree = "<group>"; };
@@ -206,6 +186,12 @@
 		78B37CC412060A86003F23A8 /* YesNoDialog.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = YesNoDialog.hpp; sourceTree = "<group>"; };
 		78B37D151210DD01003F23A8 /* Tooltip.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Tooltip.hpp; sourceTree = "<group>"; };
 		78B37D161210DD11003F23A8 /* Tooltip.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Tooltip.cpp; sourceTree = "<group>"; };
+		78DD9103123D9CE500F7EBCA /* Goblin Camp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "Goblin Camp.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		78DD915F123D9D8100F7EBCA /* libbz2.1.0.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libbz2.1.0.5.dylib; path = /opt/local/lib/libbz2.1.0.5.dylib; sourceTree = "<absolute>"; };
+		78DD9161123D9D8100F7EBCA /* libexpat.1.5.2.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libexpat.1.5.2.dylib; path = /opt/local/lib/libexpat.1.5.2.dylib; sourceTree = "<absolute>"; };
+		78DD9163123D9D8100F7EBCA /* libz.1.2.5.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libz.1.2.5.dylib; path = /opt/local/lib/libz.1.2.5.dylib; sourceTree = "<absolute>"; };
+		78DD9173123D9EA800F7EBCA /* GoblinCamp.icns */ = {isa = PBXFileReference; lastKnownFileType = image.icns; name = GoblinCamp.icns; path = src/osx/GoblinCamp.icns; sourceTree = "<group>"; };
+		78DD9174123D9EA800F7EBCA /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist; name = Info.plist; path = src/osx/Info.plist; sourceTree = "<group>"; };
 		78E26FE711FA8F4100EEF2A7 /* config.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = config.ini; sourceTree = "<group>"; };
 		78E26FE811FA8F4100EEF2A7 /* constructions.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = constructions.dat; sourceTree = "<group>"; };
 		78E26FE911FA8F4100EEF2A7 /* COPYING.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = COPYING.txt; sourceTree = "<group>"; };
@@ -280,7 +266,6 @@
 		78E2703211FA8F4100EEF2A7 /* Water.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Water.cpp; sourceTree = "<group>"; };
 		78E2703411FA8F4100EEF2A7 /* terminal.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = terminal.png; sourceTree = "<group>"; };
 		78E2703511FA8F4100EEF2A7 /* wildplants.dat */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = wildplants.dat; sourceTree = "<group>"; };
-		78E2705611FA8F4100EEF2A7 /* Goblin Camp */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "Goblin Camp"; sourceTree = BUILT_PRODUCTS_DIR; };
 		78E2731911FA9EFD00EEF2A7 /* libtcod.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = libtcod.framework; path = /Library/Frameworks/libtcod.framework; sourceTree = "<absolute>"; };
 		78E2739811FAA31C00EEF2A7 /* Carbon.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Carbon.framework; path = System/Library/Frameworks/Carbon.framework; sourceTree = SDKROOT; };
 		78E274A411FB32EA00EEF2A7 /* libboost_date_time-d.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = "libboost_date_time-d.dylib"; path = "/opt/local/lib/libboost_date_time-d.dylib"; sourceTree = "<absolute>"; };
@@ -368,94 +353,97 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		8DD76F660486A84900D96B5E /* Frameworks */ = {
+		78DD9101123D9CE500F7EBCA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				78E2731A11FA9EFD00EEF2A7 /* libtcod.framework in Frameworks */,
-				78E2739911FAA31C00EEF2A7 /* Carbon.framework in Frameworks */,
-				78E274A511FB32EA00EEF2A7 /* libboost_date_time-d.dylib in Frameworks */,
-				78E274A711FB32EA00EEF2A7 /* libboost_date_time-mt-d.dylib in Frameworks */,
-				78E274A911FB32EA00EEF2A7 /* libboost_date_time-mt.dylib in Frameworks */,
-				78E274AB11FB32EA00EEF2A7 /* libboost_date_time.dylib in Frameworks */,
-				78E274AD11FB32EA00EEF2A7 /* libboost_filesystem-d.dylib in Frameworks */,
-				78E274AF11FB32EA00EEF2A7 /* libboost_filesystem-mt-d.dylib in Frameworks */,
-				78E274B111FB32EA00EEF2A7 /* libboost_filesystem-mt.dylib in Frameworks */,
-				78E274B311FB32EA00EEF2A7 /* libboost_filesystem.dylib in Frameworks */,
-				78E274B511FB32EB00EEF2A7 /* libboost_graph-d.dylib in Frameworks */,
-				78E274B711FB32EB00EEF2A7 /* libboost_graph-mt-d.dylib in Frameworks */,
-				78E274B911FB32EB00EEF2A7 /* libboost_graph-mt.dylib in Frameworks */,
-				78E274BB11FB32EB00EEF2A7 /* libboost_graph.dylib in Frameworks */,
-				78E274BD11FB32EB00EEF2A7 /* libboost_iostreams-d.dylib in Frameworks */,
-				78E274BF11FB32EB00EEF2A7 /* libboost_iostreams-mt-d.dylib in Frameworks */,
-				78E274C111FB32EB00EEF2A7 /* libboost_iostreams-mt.dylib in Frameworks */,
-				78E274C311FB32EB00EEF2A7 /* libboost_iostreams.dylib in Frameworks */,
-				78E274C511FB32EB00EEF2A7 /* libboost_math_c99-d.dylib in Frameworks */,
-				78E274C711FB32EB00EEF2A7 /* libboost_math_c99-mt-d.dylib in Frameworks */,
-				78E274C911FB32EB00EEF2A7 /* libboost_math_c99-mt.dylib in Frameworks */,
-				78E274CB11FB32EB00EEF2A7 /* libboost_math_c99.dylib in Frameworks */,
-				78E274CD11FB32EB00EEF2A7 /* libboost_math_c99f-d.dylib in Frameworks */,
-				78E274CF11FB32EB00EEF2A7 /* libboost_math_c99f-mt-d.dylib in Frameworks */,
-				78E274D111FB32EB00EEF2A7 /* libboost_math_c99f-mt.dylib in Frameworks */,
-				78E274D311FB32EB00EEF2A7 /* libboost_math_c99f.dylib in Frameworks */,
-				78E274D511FB32EB00EEF2A7 /* libboost_math_c99l-d.dylib in Frameworks */,
-				78E274D711FB32EB00EEF2A7 /* libboost_math_c99l-mt-d.dylib in Frameworks */,
-				78E274D911FB32EB00EEF2A7 /* libboost_math_c99l-mt.dylib in Frameworks */,
-				78E274DB11FB32EB00EEF2A7 /* libboost_math_c99l.dylib in Frameworks */,
-				78E274DD11FB32EB00EEF2A7 /* libboost_math_tr1-d.dylib in Frameworks */,
-				78E274DF11FB32EB00EEF2A7 /* libboost_math_tr1-mt-d.dylib in Frameworks */,
-				78E274E111FB32EB00EEF2A7 /* libboost_math_tr1-mt.dylib in Frameworks */,
-				78E274E311FB32EB00EEF2A7 /* libboost_math_tr1.dylib in Frameworks */,
-				78E274E511FB32EB00EEF2A7 /* libboost_math_tr1f-d.dylib in Frameworks */,
-				78E274E711FB32EB00EEF2A7 /* libboost_math_tr1f-mt-d.dylib in Frameworks */,
-				78E274E911FB32EB00EEF2A7 /* libboost_math_tr1f-mt.dylib in Frameworks */,
-				78E274EB11FB32EB00EEF2A7 /* libboost_math_tr1f.dylib in Frameworks */,
-				78E274ED11FB32EB00EEF2A7 /* libboost_math_tr1l-d.dylib in Frameworks */,
-				78E274EF11FB32EB00EEF2A7 /* libboost_math_tr1l-mt-d.dylib in Frameworks */,
-				78E274F111FB32EB00EEF2A7 /* libboost_math_tr1l-mt.dylib in Frameworks */,
-				78E274F311FB32EB00EEF2A7 /* libboost_math_tr1l.dylib in Frameworks */,
-				78E274F511FB32EB00EEF2A7 /* libboost_prg_exec_monitor-d.dylib in Frameworks */,
-				78E274F711FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt-d.dylib in Frameworks */,
-				78E274F911FB32EB00EEF2A7 /* libboost_prg_exec_monitor-mt.dylib in Frameworks */,
-				78E274FB11FB32EB00EEF2A7 /* libboost_prg_exec_monitor.dylib in Frameworks */,
-				78E274FD11FB32EB00EEF2A7 /* libboost_program_options-d.dylib in Frameworks */,
-				78E274FF11FB32EB00EEF2A7 /* libboost_program_options-mt-d.dylib in Frameworks */,
-				78E2750111FB32EB00EEF2A7 /* libboost_program_options-mt.dylib in Frameworks */,
-				78E2750311FB32EB00EEF2A7 /* libboost_program_options.dylib in Frameworks */,
-				78E2750511FB32EB00EEF2A7 /* libboost_random-d.dylib in Frameworks */,
-				78E2750711FB32EB00EEF2A7 /* libboost_random-mt-d.dylib in Frameworks */,
-				78E2750911FB32EB00EEF2A7 /* libboost_random-mt.dylib in Frameworks */,
-				78E2750B11FB32EB00EEF2A7 /* libboost_random.dylib in Frameworks */,
-				78E2750D11FB32EB00EEF2A7 /* libboost_regex-d.dylib in Frameworks */,
-				78E2750F11FB32EB00EEF2A7 /* libboost_regex-mt-d.dylib in Frameworks */,
-				78E2751111FB32EB00EEF2A7 /* libboost_regex-mt.dylib in Frameworks */,
-				78E2751311FB32EB00EEF2A7 /* libboost_regex.dylib in Frameworks */,
-				78E2751511FB32EB00EEF2A7 /* libboost_serialization-d.dylib in Frameworks */,
-				78E2751711FB32EB00EEF2A7 /* libboost_serialization-mt-d.dylib in Frameworks */,
-				78E2751911FB32EC00EEF2A7 /* libboost_serialization-mt.dylib in Frameworks */,
-				78E2751B11FB32EC00EEF2A7 /* libboost_serialization.dylib in Frameworks */,
-				78E2751D11FB32EC00EEF2A7 /* libboost_signals-d.dylib in Frameworks */,
-				78E2751F11FB32EC00EEF2A7 /* libboost_signals-mt-d.dylib in Frameworks */,
-				78E2752111FB32EC00EEF2A7 /* libboost_signals-mt.dylib in Frameworks */,
-				78E2752311FB32EC00EEF2A7 /* libboost_signals.dylib in Frameworks */,
-				78E2752511FB32EC00EEF2A7 /* libboost_system-d.dylib in Frameworks */,
-				78E2752711FB32EC00EEF2A7 /* libboost_system-mt-d.dylib in Frameworks */,
-				78E2752911FB32EC00EEF2A7 /* libboost_system-mt.dylib in Frameworks */,
-				78E2752B11FB32EC00EEF2A7 /* libboost_system.dylib in Frameworks */,
-				78E2752D11FB32EC00EEF2A7 /* libboost_thread-mt-d.dylib in Frameworks */,
-				78E2752F11FB32EC00EEF2A7 /* libboost_thread-mt.dylib in Frameworks */,
-				78E2753111FB32EC00EEF2A7 /* libboost_unit_test_framework-d.dylib in Frameworks */,
-				78E2753311FB32EC00EEF2A7 /* libboost_unit_test_framework-mt-d.dylib in Frameworks */,
-				78E2753511FB32EC00EEF2A7 /* libboost_unit_test_framework-mt.dylib in Frameworks */,
-				78E2753711FB32EC00EEF2A7 /* libboost_unit_test_framework.dylib in Frameworks */,
-				78E2753911FB32EC00EEF2A7 /* libboost_wave-d.dylib in Frameworks */,
-				78E2753B11FB32EC00EEF2A7 /* libboost_wave-mt-d.dylib in Frameworks */,
-				78E2753D11FB32EC00EEF2A7 /* libboost_wave-mt.dylib in Frameworks */,
-				78E2753F11FB32EC00EEF2A7 /* libboost_wave.dylib in Frameworks */,
-				78E2754111FB32EC00EEF2A7 /* libboost_wserialization-d.dylib in Frameworks */,
-				78E2754311FB32EC00EEF2A7 /* libboost_wserialization-mt-d.dylib in Frameworks */,
-				78E2754511FB32EC00EEF2A7 /* libboost_wserialization-mt.dylib in Frameworks */,
-				78E2754711FB32EC00EEF2A7 /* libboost_wserialization.dylib in Frameworks */,
+				78DD910B123D9D1000F7EBCA /* libtcod.framework in Frameworks */,
+				78DD910C123D9D1600F7EBCA /* Carbon.framework in Frameworks */,
+				78DD910D123D9D8000F7EBCA /* libboost_date_time-d.dylib in Frameworks */,
+				78DD910E123D9D8000F7EBCA /* libboost_date_time-mt-d.dylib in Frameworks */,
+				78DD910F123D9D8000F7EBCA /* libboost_date_time-mt.dylib in Frameworks */,
+				78DD9110123D9D8000F7EBCA /* libboost_date_time.dylib in Frameworks */,
+				78DD9111123D9D8000F7EBCA /* libboost_filesystem-d.dylib in Frameworks */,
+				78DD9112123D9D8000F7EBCA /* libboost_filesystem-mt-d.dylib in Frameworks */,
+				78DD9113123D9D8000F7EBCA /* libboost_filesystem-mt.dylib in Frameworks */,
+				78DD9114123D9D8000F7EBCA /* libboost_filesystem.dylib in Frameworks */,
+				78DD9115123D9D8000F7EBCA /* libboost_graph-d.dylib in Frameworks */,
+				78DD9116123D9D8000F7EBCA /* libboost_graph-mt-d.dylib in Frameworks */,
+				78DD9117123D9D8000F7EBCA /* libboost_graph-mt.dylib in Frameworks */,
+				78DD9118123D9D8000F7EBCA /* libboost_graph.dylib in Frameworks */,
+				78DD9119123D9D8000F7EBCA /* libboost_iostreams-d.dylib in Frameworks */,
+				78DD911A123D9D8000F7EBCA /* libboost_iostreams-mt-d.dylib in Frameworks */,
+				78DD911B123D9D8000F7EBCA /* libboost_iostreams-mt.dylib in Frameworks */,
+				78DD911C123D9D8000F7EBCA /* libboost_iostreams.dylib in Frameworks */,
+				78DD911D123D9D8000F7EBCA /* libboost_math_c99-d.dylib in Frameworks */,
+				78DD911E123D9D8000F7EBCA /* libboost_math_c99-mt-d.dylib in Frameworks */,
+				78DD911F123D9D8000F7EBCA /* libboost_math_c99-mt.dylib in Frameworks */,
+				78DD9120123D9D8000F7EBCA /* libboost_math_c99.dylib in Frameworks */,
+				78DD9121123D9D8000F7EBCA /* libboost_math_c99f-d.dylib in Frameworks */,
+				78DD9122123D9D8000F7EBCA /* libboost_math_c99f-mt-d.dylib in Frameworks */,
+				78DD9123123D9D8000F7EBCA /* libboost_math_c99f-mt.dylib in Frameworks */,
+				78DD9124123D9D8000F7EBCA /* libboost_math_c99f.dylib in Frameworks */,
+				78DD9125123D9D8000F7EBCA /* libboost_math_c99l-d.dylib in Frameworks */,
+				78DD9126123D9D8000F7EBCA /* libboost_math_c99l-mt-d.dylib in Frameworks */,
+				78DD9127123D9D8000F7EBCA /* libboost_math_c99l-mt.dylib in Frameworks */,
+				78DD9128123D9D8000F7EBCA /* libboost_math_c99l.dylib in Frameworks */,
+				78DD9129123D9D8000F7EBCA /* libboost_math_tr1-d.dylib in Frameworks */,
+				78DD912A123D9D8000F7EBCA /* libboost_math_tr1-mt-d.dylib in Frameworks */,
+				78DD912B123D9D8000F7EBCA /* libboost_math_tr1-mt.dylib in Frameworks */,
+				78DD912C123D9D8000F7EBCA /* libboost_math_tr1.dylib in Frameworks */,
+				78DD912D123D9D8000F7EBCA /* libboost_math_tr1f-d.dylib in Frameworks */,
+				78DD912E123D9D8000F7EBCA /* libboost_math_tr1f-mt-d.dylib in Frameworks */,
+				78DD912F123D9D8000F7EBCA /* libboost_math_tr1f-mt.dylib in Frameworks */,
+				78DD9130123D9D8000F7EBCA /* libboost_math_tr1f.dylib in Frameworks */,
+				78DD9131123D9D8000F7EBCA /* libboost_math_tr1l-d.dylib in Frameworks */,
+				78DD9132123D9D8000F7EBCA /* libboost_math_tr1l-mt-d.dylib in Frameworks */,
+				78DD9133123D9D8000F7EBCA /* libboost_math_tr1l-mt.dylib in Frameworks */,
+				78DD9134123D9D8000F7EBCA /* libboost_math_tr1l.dylib in Frameworks */,
+				78DD9135123D9D8000F7EBCA /* libboost_prg_exec_monitor-d.dylib in Frameworks */,
+				78DD9136123D9D8000F7EBCA /* libboost_prg_exec_monitor-mt-d.dylib in Frameworks */,
+				78DD9137123D9D8000F7EBCA /* libboost_prg_exec_monitor-mt.dylib in Frameworks */,
+				78DD9138123D9D8000F7EBCA /* libboost_prg_exec_monitor.dylib in Frameworks */,
+				78DD9139123D9D8000F7EBCA /* libboost_program_options-d.dylib in Frameworks */,
+				78DD913A123D9D8000F7EBCA /* libboost_program_options-mt-d.dylib in Frameworks */,
+				78DD913B123D9D8000F7EBCA /* libboost_program_options-mt.dylib in Frameworks */,
+				78DD913C123D9D8000F7EBCA /* libboost_program_options.dylib in Frameworks */,
+				78DD913D123D9D8000F7EBCA /* libboost_random-d.dylib in Frameworks */,
+				78DD913E123D9D8000F7EBCA /* libboost_random-mt-d.dylib in Frameworks */,
+				78DD913F123D9D8000F7EBCA /* libboost_random-mt.dylib in Frameworks */,
+				78DD9140123D9D8000F7EBCA /* libboost_random.dylib in Frameworks */,
+				78DD9141123D9D8000F7EBCA /* libboost_regex-d.dylib in Frameworks */,
+				78DD9142123D9D8000F7EBCA /* libboost_regex-mt-d.dylib in Frameworks */,
+				78DD9143123D9D8100F7EBCA /* libboost_regex-mt.dylib in Frameworks */,
+				78DD9144123D9D8100F7EBCA /* libboost_regex.dylib in Frameworks */,
+				78DD9145123D9D8100F7EBCA /* libboost_serialization-d.dylib in Frameworks */,
+				78DD9146123D9D8100F7EBCA /* libboost_serialization-mt-d.dylib in Frameworks */,
+				78DD9147123D9D8100F7EBCA /* libboost_serialization-mt.dylib in Frameworks */,
+				78DD9148123D9D8100F7EBCA /* libboost_serialization.dylib in Frameworks */,
+				78DD9149123D9D8100F7EBCA /* libboost_signals-d.dylib in Frameworks */,
+				78DD914A123D9D8100F7EBCA /* libboost_signals-mt-d.dylib in Frameworks */,
+				78DD914B123D9D8100F7EBCA /* libboost_signals-mt.dylib in Frameworks */,
+				78DD914C123D9D8100F7EBCA /* libboost_signals.dylib in Frameworks */,
+				78DD914D123D9D8100F7EBCA /* libboost_system-d.dylib in Frameworks */,
+				78DD914E123D9D8100F7EBCA /* libboost_system-mt-d.dylib in Frameworks */,
+				78DD914F123D9D8100F7EBCA /* libboost_system-mt.dylib in Frameworks */,
+				78DD9150123D9D8100F7EBCA /* libboost_system.dylib in Frameworks */,
+				78DD9151123D9D8100F7EBCA /* libboost_thread-mt-d.dylib in Frameworks */,
+				78DD9152123D9D8100F7EBCA /* libboost_thread-mt.dylib in Frameworks */,
+				78DD9153123D9D8100F7EBCA /* libboost_unit_test_framework-d.dylib in Frameworks */,
+				78DD9154123D9D8100F7EBCA /* libboost_unit_test_framework-mt-d.dylib in Frameworks */,
+				78DD9155123D9D8100F7EBCA /* libboost_unit_test_framework-mt.dylib in Frameworks */,
+				78DD9156123D9D8100F7EBCA /* libboost_unit_test_framework.dylib in Frameworks */,
+				78DD9157123D9D8100F7EBCA /* libboost_wave-d.dylib in Frameworks */,
+				78DD9158123D9D8100F7EBCA /* libboost_wave-mt-d.dylib in Frameworks */,
+				78DD9159123D9D8100F7EBCA /* libboost_wave-mt.dylib in Frameworks */,
+				78DD915A123D9D8100F7EBCA /* libboost_wave.dylib in Frameworks */,
+				78DD915B123D9D8100F7EBCA /* libboost_wserialization-d.dylib in Frameworks */,
+				78DD915C123D9D8100F7EBCA /* libboost_wserialization-mt-d.dylib in Frameworks */,
+				78DD915D123D9D8100F7EBCA /* libboost_wserialization-mt.dylib in Frameworks */,
+				78DD915E123D9D8100F7EBCA /* libboost_wserialization.dylib in Frameworks */,
+				78DD9160123D9D8100F7EBCA /* libbz2.1.0.5.dylib in Frameworks */,
+				78DD9162123D9D8100F7EBCA /* libexpat.1.5.2.dylib in Frameworks */,
+				78DD9164123D9D8100F7EBCA /* libz.1.2.5.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +456,9 @@
 				78E275A111FB37D400EEF2A7 /* lib */,
 				78E26FE611FA8F4100EEF2A7 /* Goblin Camp */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				78DD915F123D9D8100F7EBCA /* libbz2.1.0.5.dylib */,
+				78DD9161123D9D8100F7EBCA /* libexpat.1.5.2.dylib */,
+				78DD9163123D9D8100F7EBCA /* libz.1.2.5.dylib */,
 			);
 			name = xcode;
 			sourceTree = "<group>";
@@ -475,7 +466,7 @@
 		1AB674ADFE9D54B511CA2CBB /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				78E2705611FA8F4100EEF2A7 /* Goblin Camp */,
+				78DD9103123D9CE500F7EBCA /* Goblin Camp.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -537,6 +528,8 @@
 		78E26FE611FA8F4100EEF2A7 /* Goblin Camp */ = {
 			isa = PBXGroup;
 			children = (
+				78DD9173123D9EA800F7EBCA /* GoblinCamp.icns */,
+				78DD9174123D9EA800F7EBCA /* Info.plist */,
 				78E26FE711FA8F4100EEF2A7 /* config.ini */,
 				78E26FE811FA8F4100EEF2A7 /* constructions.dat */,
 				78E26FE911FA8F4100EEF2A7 /* COPYING.txt */,
@@ -731,23 +724,22 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		8DD76F620486A84900D96B5E /* Goblin Camp */ = {
+		78DD9102123D9CE500F7EBCA /* Goblin Camp App */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "Goblin Camp" */;
+			buildConfigurationList = 78DD9108123D9CE600F7EBCA /* Build configuration list for PBXNativeTarget "Goblin Camp App" */;
 			buildPhases = (
-				8DD76F640486A84900D96B5E /* Sources */,
-				8DD76F660486A84900D96B5E /* Frameworks */,
-				8DD76F690486A84900D96B5E /* CopyFiles */,
+				78DD90FF123D9CE500F7EBCA /* Resources */,
+				78DD9100123D9CE500F7EBCA /* Sources */,
+				78DD9101123D9CE500F7EBCA /* Frameworks */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = "Goblin Camp";
-			productInstallPath = "$(HOME)/bin";
-			productName = xcode;
-			productReference = 78E2705611FA8F4100EEF2A7 /* Goblin Camp */;
-			productType = "com.apple.product-type.tool";
+			name = "Goblin Camp App";
+			productName = "Goblin Camp App";
+			productReference = 78DD9103123D9CE500F7EBCA /* Goblin Camp.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -765,99 +757,85 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				8DD76F620486A84900D96B5E /* Goblin Camp */,
+				78DD9102123D9CE500F7EBCA /* Goblin Camp App */,
 			);
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		78DD90FF123D9CE500F7EBCA /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				78DD916B123D9E8800F7EBCA /* keys.ini in Resources */,
+				78DD916C123D9E8800F7EBCA /* config.ini in Resources */,
+				78DD916D123D9E8800F7EBCA /* constructions.dat in Resources */,
+				78DD916E123D9E8800F7EBCA /* creatures.dat in Resources */,
+				78DD916F123D9E8800F7EBCA /* items.dat in Resources */,
+				78DD9170123D9E8800F7EBCA /* names.dat in Resources */,
+				78DD9171123D9E8800F7EBCA /* terminal.png in Resources */,
+				78DD9172123D9E8800F7EBCA /* wildplants.dat in Resources */,
+				78DD9175123D9EA800F7EBCA /* GoblinCamp.icns in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
-		8DD76F640486A84900D96B5E /* Sources */ = {
+		78DD9100123D9CE500F7EBCA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				78E2703611FA8F4100EEF2A7 /* Announce.cpp in Sources */,
-				78E2703711FA8F4100EEF2A7 /* Attack.cpp in Sources */,
-				78E2703811FA8F4100EEF2A7 /* Blood.cpp in Sources */,
-				78E2703911FA8F4100EEF2A7 /* Camp.cpp in Sources */,
-				78E2703A11FA8F4100EEF2A7 /* Construction.cpp in Sources */,
-				78E2703B11FA8F4100EEF2A7 /* Container.cpp in Sources */,
-				78E2703C11FA8F4100EEF2A7 /* Coordinate.cpp in Sources */,
-				78E2703D11FA8F4100EEF2A7 /* Data.cpp in Sources */,
-				78E2703E11FA8F4100EEF2A7 /* Door.cpp in Sources */,
-				78E2703F11FA8F4100EEF2A7 /* Entity.cpp in Sources */,
-				78E2704011FA8F4100EEF2A7 /* Events.cpp in Sources */,
-				78E2704111FA8F4100EEF2A7 /* Farmplot.cpp in Sources */,
-				78E2704211FA8F4100EEF2A7 /* Filth.cpp in Sources */,
-				78E2704311FA8F4100EEF2A7 /* Game.cpp in Sources */,
-				78E2704411FA8F4100EEF2A7 /* GCamp.cpp in Sources */,
-				78E2704511FA8F4100EEF2A7 /* Item.cpp in Sources */,
-				78E2704611FA8F4100EEF2A7 /* Job.cpp in Sources */,
-				78E2704711FA8F4100EEF2A7 /* JobManager.cpp in Sources */,
-				78E2704811FA8F4100EEF2A7 /* Logger.cpp in Sources */,
-				78E2704911FA8F4100EEF2A7 /* Map.cpp in Sources */,
-				78E2704B11FA8F4100EEF2A7 /* NatureObject.cpp in Sources */,
-				78E2704C11FA8F4100EEF2A7 /* NPC.cpp in Sources */,
-				78E2704D11FA8F4100EEF2A7 /* Serialization.cpp in Sources */,
-				78E2704E11FA8F4100EEF2A7 /* Squad.cpp in Sources */,
-				78E2704F11FA8F4100EEF2A7 /* StatusEffect.cpp in Sources */,
-				78E2705011FA8F4100EEF2A7 /* StockManager.cpp in Sources */,
-				78E2705111FA8F4100EEF2A7 /* Stockpile.cpp in Sources */,
-				78E2705211FA8F4100EEF2A7 /* Tile.cpp in Sources */,
-				78E2705311FA8F4100EEF2A7 /* UI.cpp in Sources */,
-				78E2705411FA8F4100EEF2A7 /* Water.cpp in Sources */,
-				78B37CA712060A76003F23A8 /* DataImpl.cpp in Sources */,
-				78B37CA812060A76003F23A8 /* main.cpp in Sources */,
-				78B37CA912060A76003F23A8 /* AnnounceDialog.cpp in Sources */,
-				78B37CAA12060A76003F23A8 /* ConstructionDialog.cpp in Sources */,
-				78B37CAB12060A76003F23A8 /* JobDialog.cpp in Sources */,
-				78B37CAC12060A76003F23A8 /* Menu.cpp in Sources */,
-				78B37CAD12060A76003F23A8 /* NPCDialog.cpp in Sources */,
-				78B37CAE12060A76003F23A8 /* SquadsDialog.cpp in Sources */,
-				78B37CAF12060A76003F23A8 /* StockManagerDialog.cpp in Sources */,
-				78B37CB012060A76003F23A8 /* UIComponents.cpp in Sources */,
-				78B37CB112060A76003F23A8 /* YesNoDialog.cpp in Sources */,
-				78B37D171210DD11003F23A8 /* Tooltip.cpp in Sources */,
-				7821252F121E06E700F5C47E /* SideBar.cpp in Sources */,
-				7862EB831234520400D09AEB /* KuhnMunkres.cpp in Sources */,
+				78DD917A123D9EFE00F7EBCA /* DataImpl.cpp in Sources */,
+				78DD917B123D9EFE00F7EBCA /* main.cpp in Sources */,
+				78DD917C123D9EFE00F7EBCA /* AnnounceDialog.cpp in Sources */,
+				78DD917D123D9EFE00F7EBCA /* ConstructionDialog.cpp in Sources */,
+				78DD917E123D9EFE00F7EBCA /* JobDialog.cpp in Sources */,
+				78DD917F123D9EFE00F7EBCA /* Menu.cpp in Sources */,
+				78DD9180123D9EFE00F7EBCA /* NPCDialog.cpp in Sources */,
+				78DD9181123D9EFE00F7EBCA /* SquadsDialog.cpp in Sources */,
+				78DD9182123D9EFE00F7EBCA /* StockManagerDialog.cpp in Sources */,
+				78DD9183123D9EFE00F7EBCA /* UIComponents.cpp in Sources */,
+				78DD9184123D9EFE00F7EBCA /* YesNoDialog.cpp in Sources */,
+				78DD9185123D9EFE00F7EBCA /* Tooltip.cpp in Sources */,
+				78DD9186123D9EFE00F7EBCA /* SideBar.cpp in Sources */,
+				78DD9187123D9EFE00F7EBCA /* Announce.cpp in Sources */,
+				78DD9188123D9EFE00F7EBCA /* Attack.cpp in Sources */,
+				78DD9189123D9EFE00F7EBCA /* Blood.cpp in Sources */,
+				78DD918A123D9EFE00F7EBCA /* Camp.cpp in Sources */,
+				78DD918B123D9EFE00F7EBCA /* Construction.cpp in Sources */,
+				78DD918C123D9EFE00F7EBCA /* Container.cpp in Sources */,
+				78DD918D123D9EFE00F7EBCA /* Coordinate.cpp in Sources */,
+				78DD918E123D9EFE00F7EBCA /* Data.cpp in Sources */,
+				78DD918F123D9EFE00F7EBCA /* Door.cpp in Sources */,
+				78DD9190123D9EFE00F7EBCA /* Entity.cpp in Sources */,
+				78DD9191123D9EFE00F7EBCA /* Events.cpp in Sources */,
+				78DD9192123D9EFE00F7EBCA /* Farmplot.cpp in Sources */,
+				78DD9193123D9EFE00F7EBCA /* Filth.cpp in Sources */,
+				78DD9194123D9EFE00F7EBCA /* Game.cpp in Sources */,
+				78DD9195123D9EFE00F7EBCA /* GCamp.cpp in Sources */,
+				78DD9196123D9EFE00F7EBCA /* Item.cpp in Sources */,
+				78DD9197123D9EFE00F7EBCA /* Job.cpp in Sources */,
+				78DD9198123D9EFE00F7EBCA /* JobManager.cpp in Sources */,
+				78DD9199123D9EFE00F7EBCA /* KuhnMunkres.cpp in Sources */,
+				78DD919A123D9EFE00F7EBCA /* Logger.cpp in Sources */,
+				78DD919B123D9EFE00F7EBCA /* Map.cpp in Sources */,
+				78DD919C123D9EFE00F7EBCA /* NatureObject.cpp in Sources */,
+				78DD919D123D9EFE00F7EBCA /* NPC.cpp in Sources */,
+				78DD919E123D9EFE00F7EBCA /* Serialization.cpp in Sources */,
+				78DD919F123D9EFE00F7EBCA /* Squad.cpp in Sources */,
+				78DD91A0123D9EFE00F7EBCA /* StatusEffect.cpp in Sources */,
+				78DD91A1123D9EFE00F7EBCA /* StockManager.cpp in Sources */,
+				78DD91A2123D9EFE00F7EBCA /* Stockpile.cpp in Sources */,
+				78DD91A3123D9EFE00F7EBCA /* Tile.cpp in Sources */,
+				78DD91A4123D9EFE00F7EBCA /* UI.cpp in Sources */,
+				78DD91A5123D9EFE00F7EBCA /* Water.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
-		1DEB923208733DC60010E9CD /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				COPY_PHASE_STRIP = NO;
-				GCC_DYNAMIC_NO_PIC = NO;
-				GCC_ENABLE_FIX_AND_CONTINUE = YES;
-				GCC_MODEL_TUNING = G5;
-				GCC_OPTIMIZATION_LEVEL = 0;
-				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/opt/local/lib,
-				);
-				PRODUCT_NAME = "Goblin Camp";
-			};
-			name = Debug;
-		};
-		1DEB923308733DC60010E9CD /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				ALWAYS_SEARCH_USER_PATHS = NO;
-				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				GCC_MODEL_TUNING = G5;
-				INSTALL_PATH = /usr/local/bin;
-				LIBRARY_SEARCH_PATHS = (
-					"$(inherited)",
-					/opt/local/lib,
-				);
-				PRODUCT_NAME = "Goblin Camp";
-			};
-			name = Release;
-		};
 		1DEB923608733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -903,23 +881,57 @@
 			};
 			name = Release;
 		};
+		78DD9106123D9CE600F7EBCA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				INFOPLIST_FILE = "Goblin Camp/src/osx/Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_NAME = "Goblin Camp";
+			};
+			name = Debug;
+		};
+		78DD9107123D9CE600F7EBCA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_VERSION = com.apple.compilers.llvmgcc42;
+				INFOPLIST_FILE = "Goblin Camp/src/osx/Info.plist";
+				INSTALL_PATH = "$(HOME)/Applications";
+				LIBRARY_SEARCH_PATHS = "$(inherited)";
+				PRODUCT_NAME = "Goblin Camp";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "Goblin Camp" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				1DEB923208733DC60010E9CD /* Debug */,
-				1DEB923308733DC60010E9CD /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "Goblin Camp" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				1DEB923608733DC60010E9CD /* Debug */,
 				1DEB923708733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		78DD9108123D9CE600F7EBCA /* Build configuration list for PBXNativeTarget "Goblin Camp App" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				78DD9106123D9CE600F7EBCA /* Debug */,
+				78DD9107123D9CE600F7EBCA /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
