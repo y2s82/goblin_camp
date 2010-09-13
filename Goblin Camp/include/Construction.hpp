@@ -97,6 +97,7 @@ protected:
 	bool stockpile, farmplot;
 	bool dismantle;
 	int time;
+	bool built;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 public:
 	virtual ~Construction();
