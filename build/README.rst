@@ -40,8 +40,9 @@ Dependencies
 
 Goblin Camp requires several third party libraries to build and link:
 
-* `Boost`_ **1.43**.
-* `libtcod`_ **r474** (GC uses not-yet-released SVN version — listed here is a known working revision).
+* `Boost`_ **1.44**.
+* `libtcod`_ **r483** [must be later than **r477**: new API]
+  (GC uses not-yet-released SVN version — listed here is a known working revision).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
 * `Python`_ **2.6.6** or **2.7.x** (3.x will not work).
 
@@ -78,7 +79,7 @@ Boost
 If your Boost is not on standard compiler's search path (MSVC: and you don't have LIB/INCLUDE environment
 variables set properly), you will need to provide them in config, in format::
 
-    using boost : 1.43 : properties ;
+    using boost : 1.44 : properties ;
 
 In properties field you can put:
 
@@ -97,7 +98,7 @@ See `Boost documentation`_ for more information about tags.
 
 Example::
 
-    using boost : 1.43 : <layout>tagged ;
+    using boost : 1.44 : <layout>tagged ;
 
 .. _Boost documentation: http://boost.org/doc/libs/1_43_0/more/getting_started/unix-variants.html#library-naming
 

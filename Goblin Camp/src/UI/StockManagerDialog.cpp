@@ -75,9 +75,9 @@ public:
 	
 	void Draw(int x, int y, TCODConsole *console) {
 		console->setAlignment(TCOD_CENTER);
-		console->setForegroundColor(Item::Presets[itemType].color);
+		console->setDefaultForeground(Item::Presets[itemType].color);
 		console->print(x + 8, y, "%c %s", Item::Presets[itemType].graphic, Item::Presets[itemType].name.c_str());
-		console->setForegroundColor(TCODColor::white);
+		console->setDefaultForeground(TCODColor::white);
 		console->print(x + 8, y+1, "%d", StockManager::Inst()->TypeQuantity(itemType));
 		UIContainer::Draw(x, y, console);
 	}

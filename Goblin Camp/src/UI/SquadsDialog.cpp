@@ -85,10 +85,10 @@ SquadsDialog* SquadsDialog::SquadDialog() {
 
 void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > squadi, int i, int x, int y, int width, bool selected, TCODConsole *console) {
 	console->setBackgroundFlag(TCOD_BKGND_SET);
-    console->setBackgroundColor(selected ? TCODColor::blue : TCODColor::black);
+    console->setDefaultBackground(selected ? TCODColor::blue : TCODColor::black);
     console->print(x, y, "%s (%d/%d)", squadi.first.c_str(), squadi.second->MemberCount(),
                    squadi.second->MemberLimit());    
-    console->setBackgroundColor(TCODColor::black);
+    console->setDefaultBackground(TCODColor::black);
 }
 
 void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squad> > squadi, Tooltip *tooltip) {
