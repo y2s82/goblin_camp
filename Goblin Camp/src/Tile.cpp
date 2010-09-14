@@ -57,6 +57,7 @@ void Tile::type(TileType newType) {
 	if (_type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true;
 		foreColor = TCODColor(rand() % 190, 127, 0);
+		backColor = TCODColor(0, 0, 0);
 		switch ((rand() % 10)) {
 		case 0:
 		case 1:

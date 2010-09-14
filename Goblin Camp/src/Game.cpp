@@ -139,10 +139,10 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		}
 	}
 
-	boost::shared_ptr<Job> buildJob(new Job("Build construction", MED, 0, false));
+	boost::shared_ptr<Job> buildJob(new Job("Build " + Construction::Presets[construct].name, MED, 0, false));
 
 	for (std::list<ItemCategory>::iterator materialIter = newCons->MaterialList()->begin(); materialIter != newCons->MaterialList()->end(); ++materialIter) {
-		boost::shared_ptr<Job> pickupJob(new Job("Pickup materials", MED, 0, true));
+		boost::shared_ptr<Job> pickupJob(new Job("Pickup " + Item::ItemCategoryToString(*materialIter) + " for " + Construction::Presets[construct].name, MED, 0, true));
 		pickupJob->Parent(buildJob);
 		buildJob->PreReqs()->push_back(pickupJob);
 
@@ -159,6 +159,10 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	buildJob->ConnectToEntity(newCons);
 
 	JobManager::Inst()->AddJob(buildJob);
+	if (Construction::AllowedAmount[construct] >= 0) {
+		--Construction::AllowedAmount[construct];
+	}
+
 	return newCons->Uid();
 }
 
@@ -322,16 +326,13 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
+	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
+	
 	if (confirm) {
-		YesNoDialog::ShowYesNoDialog("Really exit?", boost::bind(Game::ExitConfirmed), NULL);
+		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
-		ExitConfirmed();
+		exitFunc();
 	}
-}
-
-void Game::ExitConfirmed() {
-	Logger::End();
-	exit(0);
 }
 
 int Game::ScreenWidth() const {	return screenWidth; }
@@ -426,7 +427,6 @@ void Game::Init() {
 	
 	Data::Load();
 	
-	GenerateMap();
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
@@ -746,7 +746,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 	if(nearest) {
 		//Check if the item can be contained, and if so if any containers are in the stockpile
 		
-		boost::shared_ptr<Job> stockJob(new Job("Store item", LOW));
+		boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item.lock()->Type()) + " in stockpile", LOW));
 		stockJob->Attempts(1);
 		Coordinate target = Coordinate(-1,-1);
 		boost::weak_ptr<Item> container;
@@ -864,9 +864,16 @@ void Game::GenerateMap() {
 		}
 	}
 
-	for (int x = 100; x < 150; ++x) {
-		for (int y = 100; y < 150; ++y) {
-			map->Type(x,y,TILEBOG);
+	int basex = 125;
+	basey = 125;
+	int lo_offset = 0;
+	int hi_offset = 0;
+	for (int x = -25; x < 25; ++x) {
+		int range = int(std::sqrt((double)(25*25 - x*x)));
+		lo_offset = std::min(std::max(rand() % 3 - 1 + lo_offset, -5), 5);
+		hi_offset = std::min(std::max(rand() % 3 - 1 + hi_offset, -5), 5);
+		for (int y = -range-lo_offset; y < range+hi_offset; ++y) {
+			map->Type(basex+x,basey+y,TILEBOG);
 		}
 	}
 

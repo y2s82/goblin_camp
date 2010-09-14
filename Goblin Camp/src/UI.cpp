@@ -37,6 +37,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/ConstructionDialog.hpp"
 #include "UI/AnnounceDialog.hpp"
 #include "UI/Tooltip.hpp"
+#include "UI/JobDialog.hpp"
 
 #pragma mark Keyboard command config parsing
 
@@ -89,9 +90,14 @@ void UI::LoadKeys(std::string filename) {
 	keysTypeStruct->addProperty("Center", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Joblist", TCOD_TYPE_CHAR, true);
 
 	parser.run(filename.c_str(), &keyMap);
 
+}
+
+std::map<std::string, char>& UI::GetKeys() {
+	return keyMap.keyMap;
 }
 
 #pragma mark UI
@@ -172,6 +178,8 @@ void UI::HandleKeyboard() {
 				Game::Inst()->Pause();
 			} else if (key.c == '.') {
 				Game::Inst()->CreateNPC(Coordinate(100,100), NPC::StringToNPCType("giant"));
+			} else if (key.c == keyMap["Joblist"]) { 
+				ChangeMenu(JobDialog::JobListingDialog());
 			}
 
 			int addition = 1;
@@ -644,6 +652,7 @@ void UI::DrawTopBar(TCODConsole* console) {
 		x += DrawShortcutHelp(console, x, 3, "StockManager");
 		x += DrawShortcutHelp(console, x, 3, "Squads");
 		x += DrawShortcutHelp(console, x, 3, "Announcements");
+		x += DrawShortcutHelp(console, x, 3, "Jobs");
 		x = 10;
 		console->print(x, 5, "%cShift+F1-F12%c Set Mark  %cF1-F12%c Return To Mark  ", TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP, TCOD_COLCTRL_1,TCOD_COLCTRL_STOP);
 		x = 56;

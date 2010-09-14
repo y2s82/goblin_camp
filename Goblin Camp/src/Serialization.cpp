@@ -152,6 +152,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & offHand;
 	ar & thirst;
 	ar & hunger;
+	ar & weariness;
 	ar & thinkSpeed;
 	ar & statusEffects;
 	ar & health;
@@ -198,6 +199,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & offHand;
 	ar & thirst;
 	ar & hunger;
+	ar & weariness;
 	ar & thinkSpeed;
 	ar & statusEffects;
 	ar & health;
@@ -480,6 +482,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & farmplot;
 	ar & time;
 	ar & AllowedAmount;
+	ar & built;
 }
 
 template<class Archive>
@@ -634,13 +637,15 @@ void JobManager::load(Archive & ar, const unsigned int version) {
 
 template<class Archive>
 void Camp::save(Archive & ar, const unsigned int version) const {
-	ar & center;
+	ar & centerX;
+	ar & centerY;
 	ar & buildingCount;
 }
 
 template<class Archive>
 void Camp::load(Archive & ar, const unsigned int version) {
-	ar & center;
+	ar & centerX;
+	ar & centerY;
 	ar & buildingCount;
 }
 

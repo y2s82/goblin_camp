@@ -11,6 +11,7 @@ import property-set ;
 import boost ;
 import libtcod ;
 import winsdk ;
+import python ;
 
 ##
 # Project definition
@@ -45,25 +46,9 @@ project goblin-camp
     : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
 
-withPython = ;
-
-if --with-python in [ modules.peek : ARGV ] {
-    ECHO ** Building with Python support ;
-    
-    import python ;
-    
-    if ! [ python.configured ] {
-        ECHO ** Using default Python configuration ;
-        using python ;
-    }
-    
-    withPython = yes ;
-}
-
 import gc-version ;
 modules.poke gc-version : GC_TEMPLATES : $(GC_TEMPLATES) ;
 modules.poke gc-version : GC_VERSION   : $(GC_VERSION) ;
-modules.poke gc-version : GC_PYTHON    : $(withPython:E=no) ;
 
 import gc-sln ;
 modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
@@ -72,6 +57,7 @@ modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
 boost.use-project 1.43 ;
 winsdk.use-project ;
 libtcod.use-project ;
+python.use-project ;
 
 ##
 # Local rules
@@ -118,18 +104,8 @@ explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
 explicit-alias linux-deps ;
 explicit-alias osx-deps : : : : <framework>CoreFoundation ;
 
-# Python dependencies
-python-deps = ;
-boost-libs  = ;
-
-if $(withPython) {
-    boost-libs      += python ;
-    additional-reqs += <define>GC_PYTHON ;
-    python-deps      = /python//python.lib ;
-}
-
 # Boost dependencies
-boost-libs += serialization thread system filesystem ;
+boost-libs = serialization thread system filesystem python ;
 
 boost-deps = ;
 for local name in $(boost-libs) {
@@ -138,7 +114,7 @@ for local name in $(boost-libs) {
 
 # All common dependencies
 explicit-alias common-deps
-    : $(python-deps) $(boost-deps) /libtcod//libtcod
+    : $(boost-deps) /libtcod//libtcod /python//python
 ;
 
 if [ os.name ] = NT {
@@ -264,7 +240,13 @@ install dist-data
     : <conditional>@get-dist-data
 ;
 
-alias dist : dist-data dist-binaries dist-additional ;
+install dist-pylib
+    : $(GC_SOURCE_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp : *.py ]
+    : <conditional>@get-dist-data
+      <install-source-root>$(GC_SOURCE_ROOT)
+;
+
+alias dist : dist-data dist-binaries dist-additional dist-pylib ;
 
 #
 # Solution files
@@ -288,7 +270,7 @@ install sln2010
 
 #
 # Explicit targets
-explicit nsis dist dist-binaries dist-data dist-additional make-sln2008 make-sln2010 sln2008 sln2010 ;
+explicit nsis dist dist-binaries dist-data dist-additional dist-pylib make-sln2008 make-sln2010 sln2008 sln2010 ;
 explicit goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
 
 #

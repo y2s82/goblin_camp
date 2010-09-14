@@ -97,6 +97,7 @@ protected:
 	bool stockpile, farmplot;
 	bool dismantle;
 	int time;
+	bool built;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 public:
 	virtual ~Construction();
@@ -126,6 +127,8 @@ public:
 	bool HasTag(ConstructionTag);
 	virtual void Update();
 	virtual void Dismantle();
+	bool CheckMaterialsPresent();
+	void ReserveComponents(bool);
 	virtual Panel *GetContextMenu();
 	Coordinate Center();
 	void Damage(Attack*);

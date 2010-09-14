@@ -42,10 +42,13 @@
     <ClCompile Include="src\Item.cpp" />
     <ClCompile Include="src\Job.cpp" />
     <ClCompile Include="src\JobManager.cpp" />
+    <ClCompile Include="src\KuhnMunkres.cpp" />
     <ClCompile Include="src\Logger.cpp" />
     <ClCompile Include="src\Map.cpp" />
     <ClCompile Include="src\NatureObject.cpp" />
     <ClCompile Include="src\NPC.cpp" />
+    <ClCompile Include="src\scripting\API.cpp" />
+    <ClCompile Include="src\scripting\Event.cpp" />
     <ClCompile Include="src\Serialization.cpp" />
     <ClCompile Include="src\Squad.cpp" />
     <ClCompile Include="src\StatusEffect.cpp" />
@@ -65,9 +68,11 @@
     <ClCompile Include="src\UI\UIComponents.cpp" />
     <ClCompile Include="src\UI\YesNoDialog.cpp" />
     <ClCompile Include="src\Water.cpp" />
+    <ClCompile Include="src\win32\CommandLine.cpp" />
     <ClCompile Include="src\win32\CrashHandler.cpp" />
     <ClCompile Include="src\win32\main.cpp" />
     <ClCompile Include="src\win32\DataImpl.cpp" />
+    <ClCompile Include="src\scripting\Engine.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\Announce.hpp" />
@@ -88,6 +93,7 @@
     <ClInclude Include="include\Item.hpp" />
     <ClInclude Include="include\Job.hpp" />
     <ClInclude Include="include\JobManager.hpp" />
+    <ClInclude Include="include\KuhnMunkres.hpp" />
     <ClInclude Include="include\Logger.hpp" />
     <ClInclude Include="include\Map.hpp" />
     <ClInclude Include="include\NatureObject.hpp" />
@@ -121,6 +127,7 @@
     <ClInclude Include="include\UI\YesNoDialog.hpp" />
     <ClInclude Include="include\Water.hpp" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="include\scripting/Engine.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Goblin Camp.rc" />

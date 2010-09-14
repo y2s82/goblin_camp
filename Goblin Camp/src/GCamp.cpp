@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/foreach.hpp>
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
@@ -34,9 +35,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Data.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
-#ifdef GC_PYTHON
-#	include "Python.hpp"
-#endif
+#include "scripting/Engine.hpp"
+#include "scripting/Event.hpp"
 
 #if defined(GC_BOOST_BUILD)
 // This variable is defined in buildsystem-generated _version.cpp.
@@ -46,25 +46,40 @@ extern const char *_GOBLIN_CAMP_VERSION_;
 #	define GC_VERSION "Goblin Camp 0.12"
 #endif
 
-int GCMain() {
+int GCMain(std::vector<std::string>& args) {
 	Data::Init();
-#ifdef GC_PYTHON
-	Python::Init();
-#endif
+	Script::Init(args);
 	Game::Inst()->Init();
-	return MainMenu();
+	
+	Logger::Inst()->output << "[GCMain] args.size() = " << args.size() << "\n";
+	Logger::Inst()->output.flush();
+	
+	int exitcode = 0;
+	
+	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
+		exitcode = MainMenu();
+	} else {
+		Logger::Inst()->output << "[GCMain] Bootstrap test, going into shutdown.\n";
+	}
+	
+	Script::Shutdown();
+	Logger::End();
+	return exitcode;
 }
 
 void MainLoop() {
 	Game* game = Game::Inst();
-	if (!game->Running()) Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
+	if (!game->Running()) {
+		Announce::Inst()->AddMsg("Press 'h' for keyboard shortcuts", TCODColor::cyan);
+		Script::Event::GameStart();
+	}
 	game->Running(true);
 
 	bool update = false;
 	int elapsedMilli;
 	int targetMilli = 1000 / (UPDATES_PER_SECOND*2);
 	int startMilli = TCODSystem::getElapsedMilli();
-	while(true) {
+	while (game->Running()) {
 
 		if (Game::ToMainMenu()) {
 			Game::ToMainMenu(false);
@@ -88,6 +103,8 @@ void MainLoop() {
 		startMilli = TCODSystem::getElapsedMilli();
 		if (elapsedMilli < targetMilli) TCODSystem::sleepMilli(targetMilli - elapsedMilli);
 	}
+	
+	Script::Event::GameEnd();
 }
 
 void StartNewGame() {
@@ -136,6 +153,7 @@ int MainMenu() {
 		{"Load",     0,   false, false, LoadMenu},
 		{"Save",     0,   false, true,  SaveMenu},
 		{"Settings", 0,   false, false, SettingsMenu},
+		{"Keys",     0,   false, false, KeysMenu},
 		{"Mods",     0,   false, false, ModsMenu},
 		{"Exit",     'q', true,  false, NULL}
 	};
@@ -226,7 +244,7 @@ int MainMenu() {
 			}
 		}
 	}
-	Game::Inst()->Exit(false);
+	
 	return 0;
 }
 
@@ -440,7 +458,6 @@ void SettingsMenu() {
 
 		if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
 			clicked = false;
-			int whereX      = mouse.cx - x;
 			int whereY      = mouse.cy - y - 1;
 			int rendererY   = currentY - y - 1;
 			int fullscreenY = rendererY - 2;
@@ -556,5 +573,74 @@ void ModsMenu() {
 		}
 
 		TCODConsole::root->flush();
+	}
+}
+
+void KeysMenu() {
+	std::map<std::string, char>& keyMap = UI::GetKeys();
+	std::vector<std::string> labels;
+	labels.reserve(keyMap.size());
+	
+	TCODConsole::root->setAlignment(TCOD_LEFT);
+	
+	int w = 40;
+	const int h = keyMap.size() + 4;
+	
+	typedef std::pair<std::string, char> KeyPair;
+	BOOST_FOREACH(KeyPair mapping, keyMap) {
+		w = std::max(w, (int)mapping.first.size() + 7); // 2 for borders, 5 for [ X ]
+		labels.push_back(mapping.first);
+	}
+	
+	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
+	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
+	
+	TCOD_mouse_t mouse;
+	TCOD_key_t   key;
+	
+	int focus = 0;
+	
+	while (true) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		if (key.vk == TCODK_ESCAPE) return;
+		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
+		
+		if (key.c >= ' ' && key.c <= '~') {
+			keyMap[labels[focus]] = key.c;
+		}
+		
+		TCODConsole::root->clear();
+		
+		TCODConsole::root->setForegroundColor(TCODColor::white);
+		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		
+		TCODConsole::root->printFrame(x, y, w, h, true, TCOD_BKGND_SET, "Keys");
+		TCODConsole::root->print(x + 1, y + 1, "ENTER to save changes, ESC to discard.");
+		
+		for (unsigned int idx = 0; idx < labels.size(); ++idx) {
+			if (focus == idx) {
+				TCODConsole::root->setForegroundColor(TCODColor::green);
+			}
+			TCODConsole::root->print(x + 1, y + idx + 3, labels[idx].c_str());
+			
+			char key = keyMap[labels[idx]];
+			TCODConsole::root->print(x + w - 6, y + idx + 3, (key == ' ' ? "[SPC]" : "[ %c ]"), key);
+			
+			TCODConsole::root->setForegroundColor(TCODColor::white);
+		}
+		
+		mouse = TCODMouse::getStatus();
+		
+		if (mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy >= y + 3 && mouse.cy < y + h - 1) {
+			focus = mouse.cy - y - 3;
+		}
+		
+		TCODConsole::root->flush();
+	}
+	
+	try {
+		Data::SaveKeys(keyMap);
+	} catch (const std::exception& e) {
+		Logger::Inst()->output << "Could not save keymap! " << e.what() << "\n";
 	}
 }

@@ -193,11 +193,11 @@ public:
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
 	void StartJob(boost::shared_ptr<Job>);
-
 	void AddEffect(StatusEffectType);
 	void RemoveEffect(StatusEffectType);
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();
+	void AbortCurrentJob(bool);
 
 	bool Expert();
 	void Expert(bool);
@@ -223,6 +223,7 @@ public:
 	static std::vector<NPCPreset> Presets;
 	static std::string NPCTypeToString(NPCType);
 	static NPCType StringToNPCType(std::string);
+	int GetNPCSymbol();
 
 	void InitializeAIFunctions();
 

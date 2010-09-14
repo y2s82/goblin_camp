@@ -57,7 +57,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
 	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
 	dismantle(false),
-	time(0)
+	time(0),
+	built(false)
 {
 	x = target.X();
 	y = target.Y();
@@ -102,8 +103,7 @@ Construction::~Construction() {
 		++Construction::AllowedAmount[type];
 	}
 	
-	Camp::Inst()->UpdateCenter(Center(), false);
-
+	if (built) Camp::Inst()->UpdateCenter(Center(), false);
 }
 
 
@@ -167,6 +167,7 @@ int Construction::Build() {
 				StockManager::Inst()->UpdateQuantity(Construction::Presets[type].products[prod], 0);
 			}
 		}
+		built = true;
 		Camp::Inst()->UpdateCenter(Center(), true);
 	}
 	return condition;
@@ -479,12 +480,13 @@ bool Construction::SpawnProductionJob() {
 			resi->lock()->Reserve(false);
 		}
 
+
 		boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
 		newProductionJob->ConnectToEntity(shared_from_this());
 		newProductionJob->ReserveEntity(shared_from_this());
 
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-			boost::shared_ptr<Job> newPickupJob(new Job("Pickup materials"));
+			boost::shared_ptr<Job> newPickupJob(new Job("Pickup " + Item::ItemCategoryToString(Item::Components(jobList.front(), compi)) + " for " + Presets[Type()].name));
 			newPickupJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS));
 			newPickupJob->tasks.push_back(Task(MOVE));
 			newPickupJob->tasks.push_back(Task(TAKE));
@@ -594,7 +596,7 @@ void Construction::Dismantle() {
 			jobList.clear();
 		}
 
-		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), MED, 0, false));
+		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
 		dismantleJob->ConnectToEntity(shared_from_this());
 		dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
 		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
@@ -605,7 +607,7 @@ void Construction::Dismantle() {
 Panel *Construction::GetContextMenu() {
 	return ConstructionDialog::ConstructionInfoDialog(this);
 }
-
+	
 void Construction::Damage(Attack* attack) {
 	double damageModifier = 1.0;
 
@@ -651,6 +653,11 @@ void Construction::Explode() {
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
+}
+
+bool Construction::CheckMaterialsPresent() { 
+	if ((signed int)materials.size() != materialsUsed->size()) { return false; }
+	return true;
 }
 
 ConstructionPreset::ConstructionPreset() :

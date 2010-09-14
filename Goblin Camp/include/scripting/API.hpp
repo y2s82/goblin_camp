@@ -13,36 +13,30 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
+#pragma once
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+class Logger;
 
-#include <vector>
-#include <string>
-#include <boost/foreach.hpp>
-
-int GCMain(std::vector<std::string>&);
-void InstallExceptionHandler();
-void GCCommandLine(std::vector<std::string>&);
-
-#ifdef DEBUG
-int main(int argc, char **argv) {
-	InstallExceptionHandler();
-	
-	std::vector<std::string> args(argc);
-	for (int i = 0; i < argc; ++i) {
-		args[i] = argv[i];
+namespace Script {
+	namespace API {
+		// Implements minimal file-like interface for use with logging.
+		class LoggerStream {
+			Logger *logger;
+		public:
+			LoggerStream();
+			void close();
+			void write(const char*);
+			void flush();
+		};
+		
+		// Announcer.
+		void announce(const char*);
+		
+		extern boost::python::object pyLoggerStream;
 	}
-	return GCMain(args);
-}
-#endif
-
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
-	InstallExceptionHandler();
 	
-	std::vector<std::string> args;
-	GCCommandLine(args);
-	return GCMain(args);
+	void ExposeAPI();
+	void AppendListener(PyObject*);
+	void InvokeListeners(char*, PyObject *args = NULL);
+	void ReleaseListeners();
 }

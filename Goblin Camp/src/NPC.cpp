@@ -98,8 +98,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	inventory->SetInternal();
 	Position(pos,true);
 
-	thirst += rand() % 10; //Just for some variety
-	hunger += rand() % 10;
+	thirst = thirst - (THIRST_THRESHOLD / 2) + rand() % (THIRST_THRESHOLD);
+	hunger = hunger - (HUNGER_THRESHOLD / 2) + rand() % (HUNGER_THRESHOLD);
+	weariness = weariness - (WEARY_THRESHOLD / 2) + rand() % (WEARY_THRESHOLD);
 
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
@@ -151,22 +152,23 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		std::cout<<msg<<"\n";
 	}
 #endif
-	if (result == TASKSUCCESS) {
-		if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
-			jobs.front()->Complete();
+	if (jobs.size() > 0) {
+		if (result == TASKSUCCESS) {
+			if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
+				jobs.front()->Complete();
+				jobs.pop_front();
+				taskIndex = 0;
+				foundItem = boost::weak_ptr<Item>();
+			}
+		} else {
+			if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
 			jobs.pop_front();
 			taskIndex = 0;
+			DropItem(carried);
+			carried.reset();
 			foundItem = boost::weak_ptr<Item>();
 		}
-	} else {
-		if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
-		jobs.pop_front();
-		taskIndex = 0;
-		DropItem(carried);
-		carried.reset();
-		foundItem = boost::weak_ptr<Item>();
 	}
-
 	taskBegun = false;
 }
 
@@ -273,7 +275,7 @@ void NPC::Update() {
 		}
 	}
 
-	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+	if (!HasEffect(FLYING)) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
@@ -1258,6 +1260,18 @@ bool NPC::HasEffect(StatusEffectType effect) {
 
 std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 
+/*TODO: Calling jobs.clear() isn't a good idea as the NPC can have more than one job queued up, should use
+TaskFinished(TASKFAILFATAL) or just remove the job we want aborted*/
+void NPC::AbortCurrentJob(bool remove_job) {
+	jobs.clear();
+	if (carried.lock()) {
+		carried.lock()->Reserve(false);
+		DropItem(carried);
+		carried.reset();
+	}
+	if (remove_job) { JobManager::Inst()->RemoveJobByNPC(uid); }
+}
+
 void NPC::Hit(boost::weak_ptr<Entity> target) {
 	if (target.lock()) {
 		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
@@ -1546,6 +1560,8 @@ std::string NPC::NPCTypeToString(NPCType type) {
 NPCType NPC::StringToNPCType(std::string typeName) {
 	return NPCTypeNames[typeName];
 }
+
+int NPC::GetNPCSymbol() { return Presets[type].graphic; }
 
 void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
