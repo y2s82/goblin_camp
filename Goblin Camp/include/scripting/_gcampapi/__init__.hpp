@@ -15,18 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-class Item;
-
-namespace Script {
-	void ExposeAPI();
-	
-	namespace API {
-		void CreateType(PyTypeObject*, Py_ssize_t);
-		void FinishType(PyTypeObject*, const char*, PyObject*);
-	}
-	
-	void AppendListener(PyObject*);
-	void InvokeListeners(char*, char*, ...);
-	void InvokeListeners(char*, PyObject* = NULL);
-	void ReleaseListeners();
-}
+namespace Script { namespace API {
+	PyObject* AddListener(PyObject*, PyObject*);
+	PyObject* Announce(PyObject*, PyObject*);
+}}
