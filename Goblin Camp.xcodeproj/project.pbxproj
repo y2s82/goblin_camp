@@ -7,6 +7,39 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		7842207B123EFF950021B611 /* API.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422078123EFF950021B611 /* API.cpp */; };
+		7842207C123EFF950021B611 /* Engine.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422079123EFF950021B611 /* Engine.cpp */; };
+		7842207D123EFF950021B611 /* Event.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842207A123EFF950021B611 /* Event.cpp */; };
+		78422704123F04320021B611 /* Python.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78422703123F04320021B611 /* Python.framework */; };
+		78422729123F06AE0021B611 /* dict.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842270B123F06AE0021B611 /* dict.cpp */; };
+		7842272A123F06AE0021B611 /* errors.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842270C123F06AE0021B611 /* errors.cpp */; };
+		7842272B123F06AE0021B611 /* exec.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842270D123F06AE0021B611 /* exec.cpp */; };
+		7842272C123F06AE0021B611 /* import.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842270E123F06AE0021B611 /* import.cpp */; };
+		7842272D123F06AE0021B611 /* list.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842270F123F06AE0021B611 /* list.cpp */; };
+		7842272E123F06AE0021B611 /* long.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422710123F06AE0021B611 /* long.cpp */; };
+		7842272F123F06AE0021B611 /* module.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422711123F06AE0021B611 /* module.cpp */; };
+		78422730123F06AE0021B611 /* numeric.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422712123F06AE0021B611 /* numeric.cpp */; };
+		78422731123F06AE0021B611 /* object_operators.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422713123F06AE0021B611 /* object_operators.cpp */; };
+		78422732123F06AE0021B611 /* object_protocol.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422714123F06AE0021B611 /* object_protocol.cpp */; };
+		78422733123F06AE0021B611 /* slice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422715123F06AE0021B611 /* slice.cpp */; };
+		78422734123F06AE0021B611 /* str.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422716123F06AE0021B611 /* str.cpp */; };
+		78422735123F06AE0021B611 /* tuple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422717123F06AE0021B611 /* tuple.cpp */; };
+		78422736123F06AE0021B611 /* wrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422718123F06AE0021B611 /* wrapper.cpp */; };
+		78422737123F06AE0021B611 /* arg_to_python_base.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842271A123F06AE0021B611 /* arg_to_python_base.cpp */; };
+		78422738123F06AE0021B611 /* builtin_converters.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842271B123F06AE0021B611 /* builtin_converters.cpp */; };
+		78422739123F06AE0021B611 /* from_python.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842271C123F06AE0021B611 /* from_python.cpp */; };
+		7842273A123F06AE0021B611 /* registry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842271D123F06AE0021B611 /* registry.cpp */; };
+		7842273B123F06AE0021B611 /* type_id.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7842271E123F06AE0021B611 /* type_id.cpp */; };
+		7842273C123F06AE0021B611 /* class.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422720123F06AE0021B611 /* class.cpp */; };
+		7842273D123F06AE0021B611 /* enum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422721123F06AE0021B611 /* enum.cpp */; };
+		7842273E123F06AE0021B611 /* function.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422722123F06AE0021B611 /* function.cpp */; };
+		7842273F123F06AE0021B611 /* function_doc_signature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422723123F06AE0021B611 /* function_doc_signature.cpp */; };
+		78422740123F06AE0021B611 /* inheritance.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422724123F06AE0021B611 /* inheritance.cpp */; };
+		78422741123F06AE0021B611 /* iterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422725123F06AE0021B611 /* iterator.cpp */; };
+		78422742123F06AE0021B611 /* life_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422726123F06AE0021B611 /* life_support.cpp */; };
+		78422743123F06AE0021B611 /* pickle_support.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422727123F06AE0021B611 /* pickle_support.cpp */; };
+		78422744123F06AE0021B611 /* stl_iterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 78422728123F06AE0021B611 /* stl_iterator.cpp */; };
+		7842277E123F0E930021B611 /* lib in Resources */ = {isa = PBXBuildFile; fileRef = 78422775123F0E930021B611 /* lib */; };
 		78DD910B123D9D1000F7EBCA /* libtcod.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2731911FA9EFD00EEF2A7 /* libtcod.framework */; };
 		78DD910C123D9D1600F7EBCA /* Carbon.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E2739811FAA31C00EEF2A7 /* Carbon.framework */; };
 		78DD910D123D9D8000F7EBCA /* libboost_date_time-d.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 78E274A411FB32EA00EEF2A7 /* libboost_date_time-d.dylib */; };
@@ -153,6 +186,43 @@
 		7821252D121E06A300F5C47E /* SideBar.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = SideBar.hpp; sourceTree = "<group>"; };
 		7821252E121E06E700F5C47E /* SideBar.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SideBar.cpp; sourceTree = "<group>"; };
 		78212564121E0E1B00F5C47E /* keys.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = keys.ini; sourceTree = "<group>"; };
+		78422073123EFF850021B611 /* _python.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = _python.hpp; sourceTree = "<group>"; };
+		78422074123EFF850021B611 /* API.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = API.hpp; sourceTree = "<group>"; };
+		78422075123EFF850021B611 /* Engine.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Engine.hpp; sourceTree = "<group>"; };
+		78422076123EFF850021B611 /* Event.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = Event.hpp; sourceTree = "<group>"; };
+		78422078123EFF950021B611 /* API.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = API.cpp; sourceTree = "<group>"; };
+		78422079123EFF950021B611 /* Engine.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Engine.cpp; sourceTree = "<group>"; };
+		7842207A123EFF950021B611 /* Event.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Event.cpp; sourceTree = "<group>"; };
+		78422703123F04320021B611 /* Python.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Python.framework; path = /Library/Frameworks/Python.framework; sourceTree = "<absolute>"; };
+		7842270B123F06AE0021B611 /* dict.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = dict.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/dict.cpp; sourceTree = "<absolute>"; };
+		7842270C123F06AE0021B611 /* errors.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = errors.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/errors.cpp; sourceTree = "<absolute>"; };
+		7842270D123F06AE0021B611 /* exec.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = exec.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/exec.cpp; sourceTree = "<absolute>"; };
+		7842270E123F06AE0021B611 /* import.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = import.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/import.cpp; sourceTree = "<absolute>"; };
+		7842270F123F06AE0021B611 /* list.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = list.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/list.cpp; sourceTree = "<absolute>"; };
+		78422710123F06AE0021B611 /* long.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = long.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/long.cpp; sourceTree = "<absolute>"; };
+		78422711123F06AE0021B611 /* module.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = module.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/module.cpp; sourceTree = "<absolute>"; };
+		78422712123F06AE0021B611 /* numeric.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = numeric.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/numeric.cpp; sourceTree = "<absolute>"; };
+		78422713123F06AE0021B611 /* object_operators.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = object_operators.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object_operators.cpp; sourceTree = "<absolute>"; };
+		78422714123F06AE0021B611 /* object_protocol.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = object_protocol.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object_protocol.cpp; sourceTree = "<absolute>"; };
+		78422715123F06AE0021B611 /* slice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = slice.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/slice.cpp; sourceTree = "<absolute>"; };
+		78422716123F06AE0021B611 /* str.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = str.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/str.cpp; sourceTree = "<absolute>"; };
+		78422717123F06AE0021B611 /* tuple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tuple.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/tuple.cpp; sourceTree = "<absolute>"; };
+		78422718123F06AE0021B611 /* wrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = wrapper.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/wrapper.cpp; sourceTree = "<absolute>"; };
+		7842271A123F06AE0021B611 /* arg_to_python_base.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = arg_to_python_base.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/converter/arg_to_python_base.cpp; sourceTree = "<absolute>"; };
+		7842271B123F06AE0021B611 /* builtin_converters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = builtin_converters.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/converter/builtin_converters.cpp; sourceTree = "<absolute>"; };
+		7842271C123F06AE0021B611 /* from_python.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = from_python.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/converter/from_python.cpp; sourceTree = "<absolute>"; };
+		7842271D123F06AE0021B611 /* registry.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = registry.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/converter/registry.cpp; sourceTree = "<absolute>"; };
+		7842271E123F06AE0021B611 /* type_id.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = type_id.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/converter/type_id.cpp; sourceTree = "<absolute>"; };
+		78422720123F06AE0021B611 /* class.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = class.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/class.cpp; sourceTree = "<absolute>"; };
+		78422721123F06AE0021B611 /* enum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = enum.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/enum.cpp; sourceTree = "<absolute>"; };
+		78422722123F06AE0021B611 /* function.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = function.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/function.cpp; sourceTree = "<absolute>"; };
+		78422723123F06AE0021B611 /* function_doc_signature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = function_doc_signature.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/function_doc_signature.cpp; sourceTree = "<absolute>"; };
+		78422724123F06AE0021B611 /* inheritance.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = inheritance.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/inheritance.cpp; sourceTree = "<absolute>"; };
+		78422725123F06AE0021B611 /* iterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = iterator.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/iterator.cpp; sourceTree = "<absolute>"; };
+		78422726123F06AE0021B611 /* life_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = life_support.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/life_support.cpp; sourceTree = "<absolute>"; };
+		78422727123F06AE0021B611 /* pickle_support.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = pickle_support.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/pickle_support.cpp; sourceTree = "<absolute>"; };
+		78422728123F06AE0021B611 /* stl_iterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = stl_iterator.cpp; path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object/stl_iterator.cpp; sourceTree = "<absolute>"; };
+		78422775123F0E930021B611 /* lib */ = {isa = PBXFileReference; lastKnownFileType = folder; path = lib; sourceTree = "<group>"; };
 		7862EB801234519800D09AEB /* KuhnMunkres.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = KuhnMunkres.hpp; sourceTree = "<group>"; };
 		7862EB821234520400D09AEB /* KuhnMunkres.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = KuhnMunkres.cpp; sourceTree = "<group>"; };
 		78B37C9A12060A76003F23A8 /* DataImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DataImpl.cpp; sourceTree = "<group>"; };
@@ -444,6 +514,7 @@
 				78DD9160123D9D8100F7EBCA /* libbz2.1.0.5.dylib in Frameworks */,
 				78DD9162123D9D8100F7EBCA /* libexpat.1.5.2.dylib in Frameworks */,
 				78DD9164123D9D8100F7EBCA /* libz.1.2.5.dylib in Frameworks */,
+				78422704123F04320021B611 /* Python.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -470,6 +541,80 @@
 			);
 			name = Products;
 			sourceTree = "<group>";
+		};
+		78422072123EFF850021B611 /* scripting */ = {
+			isa = PBXGroup;
+			children = (
+				78422073123EFF850021B611 /* _python.hpp */,
+				78422074123EFF850021B611 /* API.hpp */,
+				78422075123EFF850021B611 /* Engine.hpp */,
+				78422076123EFF850021B611 /* Event.hpp */,
+			);
+			path = scripting;
+			sourceTree = "<group>";
+		};
+		78422077123EFF950021B611 /* scripting */ = {
+			isa = PBXGroup;
+			children = (
+				78422078123EFF950021B611 /* API.cpp */,
+				78422079123EFF950021B611 /* Engine.cpp */,
+				7842207A123EFF950021B611 /* Event.cpp */,
+			);
+			path = scripting;
+			sourceTree = "<group>";
+		};
+		7842270A123F05F40021B611 /* boost python */ = {
+			isa = PBXGroup;
+			children = (
+				7842270B123F06AE0021B611 /* dict.cpp */,
+				7842270C123F06AE0021B611 /* errors.cpp */,
+				7842270D123F06AE0021B611 /* exec.cpp */,
+				7842270E123F06AE0021B611 /* import.cpp */,
+				7842270F123F06AE0021B611 /* list.cpp */,
+				78422710123F06AE0021B611 /* long.cpp */,
+				78422711123F06AE0021B611 /* module.cpp */,
+				78422712123F06AE0021B611 /* numeric.cpp */,
+				78422713123F06AE0021B611 /* object_operators.cpp */,
+				78422714123F06AE0021B611 /* object_protocol.cpp */,
+				78422715123F06AE0021B611 /* slice.cpp */,
+				78422716123F06AE0021B611 /* str.cpp */,
+				78422717123F06AE0021B611 /* tuple.cpp */,
+				78422718123F06AE0021B611 /* wrapper.cpp */,
+				78422719123F06AE0021B611 /* converter */,
+				7842271F123F06AE0021B611 /* object */,
+			);
+			name = "boost python";
+			sourceTree = "<group>";
+		};
+		78422719123F06AE0021B611 /* converter */ = {
+			isa = PBXGroup;
+			children = (
+				7842271A123F06AE0021B611 /* arg_to_python_base.cpp */,
+				7842271B123F06AE0021B611 /* builtin_converters.cpp */,
+				7842271C123F06AE0021B611 /* from_python.cpp */,
+				7842271D123F06AE0021B611 /* registry.cpp */,
+				7842271E123F06AE0021B611 /* type_id.cpp */,
+			);
+			name = converter;
+			path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/converter;
+			sourceTree = "<absolute>";
+		};
+		7842271F123F06AE0021B611 /* object */ = {
+			isa = PBXGroup;
+			children = (
+				78422720123F06AE0021B611 /* class.cpp */,
+				78422721123F06AE0021B611 /* enum.cpp */,
+				78422722123F06AE0021B611 /* function.cpp */,
+				78422723123F06AE0021B611 /* function_doc_signature.cpp */,
+				78422724123F06AE0021B611 /* inheritance.cpp */,
+				78422725123F06AE0021B611 /* iterator.cpp */,
+				78422726123F06AE0021B611 /* life_support.cpp */,
+				78422727123F06AE0021B611 /* pickle_support.cpp */,
+				78422728123F06AE0021B611 /* stl_iterator.cpp */,
+			);
+			name = object;
+			path = /opt/local/var/macports/distfiles/boost/boost_1_42_0/libs/python/src/object;
+			sourceTree = "<absolute>";
 		};
 		78B37C9912060A76003F23A8 /* osx */ = {
 			isa = PBXGroup;
@@ -528,6 +673,7 @@
 		78E26FE611FA8F4100EEF2A7 /* Goblin Camp */ = {
 			isa = PBXGroup;
 			children = (
+				78422775123F0E930021B611 /* lib */,
 				78DD9173123D9EA800F7EBCA /* GoblinCamp.icns */,
 				78DD9174123D9EA800F7EBCA /* Info.plist */,
 				78E26FE711FA8F4100EEF2A7 /* config.ini */,
@@ -554,6 +700,7 @@
 		78E26FEE11FA8F4100EEF2A7 /* include */ = {
 			isa = PBXGroup;
 			children = (
+				78422072123EFF850021B611 /* scripting */,
 				78B37CB212060A86003F23A8 /* UI */,
 				78E26FEF11FA8F4100EEF2A7 /* Announce.hpp */,
 				78E26FF011FA8F4100EEF2A7 /* Attack.hpp */,
@@ -593,6 +740,7 @@
 		78E2701311FA8F4100EEF2A7 /* src */ = {
 			isa = PBXGroup;
 			children = (
+				78422077123EFF950021B611 /* scripting */,
 				78B37C9912060A76003F23A8 /* osx */,
 				78B37C9C12060A76003F23A8 /* UI */,
 				78E2701411FA8F4100EEF2A7 /* Announce.cpp */,
@@ -633,6 +781,7 @@
 		78E275A111FB37D400EEF2A7 /* lib */ = {
 			isa = PBXGroup;
 			children = (
+				7842270A123F05F40021B611 /* boost python */,
 				78E2731911FA9EFD00EEF2A7 /* libtcod.framework */,
 				78E2739811FAA31C00EEF2A7 /* Carbon.framework */,
 				78E274A411FB32EA00EEF2A7 /* libboost_date_time-d.dylib */,
@@ -717,6 +866,7 @@
 				78E2754211FB32EC00EEF2A7 /* libboost_wserialization-mt-d.dylib */,
 				78E2754411FB32EC00EEF2A7 /* libboost_wserialization-mt.dylib */,
 				78E2754611FB32EC00EEF2A7 /* libboost_wserialization.dylib */,
+				78422703123F04320021B611 /* Python.framework */,
 			);
 			name = lib;
 			sourceTree = "<group>";
@@ -731,6 +881,7 @@
 				78DD90FF123D9CE500F7EBCA /* Resources */,
 				78DD9100123D9CE500F7EBCA /* Sources */,
 				78DD9101123D9CE500F7EBCA /* Frameworks */,
+				784227A0123F12D20021B611 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -748,7 +899,6 @@
 			isa = PBXProject;
 			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "Goblin Camp" */;
 			compatibilityVersion = "Xcode 3.1";
-			developmentRegion = English;
 			hasScannedForEncodings = 1;
 			knownRegions = (
 				en,
@@ -776,10 +926,27 @@
 				78DD9171123D9E8800F7EBCA /* terminal.png in Resources */,
 				78DD9172123D9E8800F7EBCA /* wildplants.dat in Resources */,
 				78DD9175123D9EA800F7EBCA /* GoblinCamp.icns in Resources */,
+				7842277E123F0E930021B611 /* lib in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		784227A0123F12D20021B611 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "unzip -o $TARGET_BUILD_DIR/Goblin\\ Camp.app/Contents/Resources/lib/stdlib.zip -d $TARGET_BUILD_DIR/Goblin\\ Camp.app/Contents/Resources/lib";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		78DD9100123D9CE500F7EBCA /* Sources */ = {
@@ -830,6 +997,37 @@
 				78DD91A3123D9EFE00F7EBCA /* Tile.cpp in Sources */,
 				78DD91A4123D9EFE00F7EBCA /* UI.cpp in Sources */,
 				78DD91A5123D9EFE00F7EBCA /* Water.cpp in Sources */,
+				7842207B123EFF950021B611 /* API.cpp in Sources */,
+				7842207C123EFF950021B611 /* Engine.cpp in Sources */,
+				7842207D123EFF950021B611 /* Event.cpp in Sources */,
+				78422729123F06AE0021B611 /* dict.cpp in Sources */,
+				7842272A123F06AE0021B611 /* errors.cpp in Sources */,
+				7842272B123F06AE0021B611 /* exec.cpp in Sources */,
+				7842272C123F06AE0021B611 /* import.cpp in Sources */,
+				7842272D123F06AE0021B611 /* list.cpp in Sources */,
+				7842272E123F06AE0021B611 /* long.cpp in Sources */,
+				7842272F123F06AE0021B611 /* module.cpp in Sources */,
+				78422730123F06AE0021B611 /* numeric.cpp in Sources */,
+				78422731123F06AE0021B611 /* object_operators.cpp in Sources */,
+				78422732123F06AE0021B611 /* object_protocol.cpp in Sources */,
+				78422733123F06AE0021B611 /* slice.cpp in Sources */,
+				78422734123F06AE0021B611 /* str.cpp in Sources */,
+				78422735123F06AE0021B611 /* tuple.cpp in Sources */,
+				78422736123F06AE0021B611 /* wrapper.cpp in Sources */,
+				78422737123F06AE0021B611 /* arg_to_python_base.cpp in Sources */,
+				78422738123F06AE0021B611 /* builtin_converters.cpp in Sources */,
+				78422739123F06AE0021B611 /* from_python.cpp in Sources */,
+				7842273A123F06AE0021B611 /* registry.cpp in Sources */,
+				7842273B123F06AE0021B611 /* type_id.cpp in Sources */,
+				7842273C123F06AE0021B611 /* class.cpp in Sources */,
+				7842273D123F06AE0021B611 /* enum.cpp in Sources */,
+				7842273E123F06AE0021B611 /* function.cpp in Sources */,
+				7842273F123F06AE0021B611 /* function_doc_signature.cpp in Sources */,
+				78422740123F06AE0021B611 /* inheritance.cpp in Sources */,
+				78422741123F06AE0021B611 /* iterator.cpp in Sources */,
+				78422742123F06AE0021B611 /* life_support.cpp in Sources */,
+				78422743123F06AE0021B611 /* pickle_support.cpp in Sources */,
+				78422744123F06AE0021B611 /* stl_iterator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -850,6 +1048,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7,
 					"${SOURCE_ROOT}/Goblin\\ Camp/include",
 					/Library/Frameworks/libtcod.framework/Headers,
 					/opt/local/include,
@@ -870,6 +1069,7 @@
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
+					/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7,
 					"${SOURCE_ROOT}/Goblin\\ Camp/include",
 					/Library/Frameworks/libtcod.framework/Headers,
 					/opt/local/include,
