@@ -90,7 +90,7 @@ void UI::LoadKeys(std::string filename) {
 	keysTypeStruct->addProperty("Center", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
 	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Joblist", TCOD_TYPE_CHAR, true);
+	keysTypeStruct->addProperty("Jobs", TCOD_TYPE_CHAR, true);
 
 	parser.run(filename.c_str(), &keyMap);
 
@@ -178,7 +178,7 @@ void UI::HandleKeyboard() {
 				Game::Inst()->Pause();
 			} else if (key.c == '.') {
 				Game::Inst()->CreateNPC(Coordinate(100,100), NPC::StringToNPCType("giant"));
-			} else if (key.c == keyMap["Joblist"]) { 
+			} else if (key.c == keyMap["Jobs"]) { 
 				ChangeMenu(JobDialog::JobListingDialog());
 			}
 
