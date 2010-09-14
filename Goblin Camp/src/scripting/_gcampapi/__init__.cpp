@@ -13,20 +13,36 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
 
-class Item;
+#include "scripting/_python.hpp"
 
-namespace Script {
-	void ExposeAPI();
-	
-	namespace API {
-		void CreateType(PyTypeObject*, Py_ssize_t);
-		void FinishType(PyTypeObject*, const char*, PyObject*);
+#include "scripting/Engine.hpp"
+#include "scripting/API.hpp"
+
+#include "Announce.hpp"
+#include "Logger.hpp"
+
+namespace Script { namespace API {
+	PyObject* AddListener(PyObject *self, PyObject *args) {
+		PyObject *listener;
+		
+		if (!PyArg_ParseTuple(args, "O", &listener)) {
+			return NULL;
+		}
+		
+		Script::AppendListener(listener);
+		Py_RETURN_NONE;
 	}
 	
-	void AppendListener(PyObject*);
-	void InvokeListeners(char*, char*, ...);
-	void InvokeListeners(char*, PyObject* = NULL);
-	void ReleaseListeners();
-}
+	PyObject* Announce(PyObject *self, PyObject *args) {
+		const char *message;
+		
+		if (!PyArg_ParseTuple(args, "s", &message)) {
+			return NULL;
+		}
+		
+		Announce::Inst()->AddMsg(message);
+		Py_RETURN_NONE;
+	}
+}}

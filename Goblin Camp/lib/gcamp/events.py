@@ -26,4 +26,4 @@ def register(listener):
 	if not isinstance(listener, EventListener):
 		raise TypeError('EventListener expected, got {0}'.format(type(listener)))
 	
-	_gcampapi.appendListener(listener)
+	_gcampapi.addListener(listener)
