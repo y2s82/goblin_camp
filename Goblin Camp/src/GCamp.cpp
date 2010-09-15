@@ -38,13 +38,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Engine.hpp"
 #include "scripting/Event.hpp"
 
-#if defined(GC_BOOST_BUILD)
-// This variable is defined in buildsystem-generated _version.cpp.
-extern const char *_GOBLIN_CAMP_VERSION_;
-#	define GC_VERSION _GOBLIN_CAMP_VERSION_
-#elif !defined(GC_VERSION)
-#	define GC_VERSION "Goblin Camp 0.12"
-#endif
+#include "Version.hpp"
 
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;

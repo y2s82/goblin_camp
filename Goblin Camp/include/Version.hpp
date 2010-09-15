@@ -13,36 +13,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
+#pragma once
 
-#include "scripting/_python.hpp"
-
-#include "scripting/_gcampapi/Functions.hpp"
-#include "Announce.hpp"
-#include "scripting/API.hpp"
-#include "Version.hpp"
-
-namespace Script { namespace API {
-	void Announce(const char *str) {
-		::Announce::Inst()->AddMsg(str);
-	}
-	
-	bool IsDebugBuild() {
-	#ifdef DEBUG
-		return true;
-	#else
-		return false;
-	#endif
-	}
-	
-	const char *GetVersionString() {
-		return GC_VERSION;
-	}
-	
-	void ExposeFunctions() {
-		py::def("announce",         &Announce);
-		py::def("appendListener",   &Script::AppendListener);
-		py::def("getVersionString", &GetVersionString);
-		py::def("isDebugBuild",     &IsDebugBuild);
-	}
-}}
+#if defined(GC_BOOST_BUILD)
+// This variable is defined in buildsystem-generated _version.cpp.
+extern const char *_GOBLIN_CAMP_VERSION_;
+#	define GC_VERSION _GOBLIN_CAMP_VERSION_
+#elif !defined(GC_VERSION)
+#	define GC_VERSION "Goblin Camp 0.12"
+#endif
