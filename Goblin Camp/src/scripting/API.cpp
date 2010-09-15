@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Engine.hpp"
 #include "scripting/_gcampapi/LoggerStream.hpp"
 #include "scripting/_gcampapi/Functions.hpp"
+#include "scripting/_gcampapi/APIItem.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -38,7 +39,7 @@ namespace Script { namespace API {
 	BOOST_PYTHON_MODULE(_gcampapi) {
 		typedef void (*ExposeFunc)(void);
 		ExposeFunc expose[] = {
-			&ExposeLoggerStream, &ExposeFunctions
+			&ExposeLoggerStream, &ExposeFunctions, &ExposeItem
 		};
 		
 		for (unsigned idx = 0; idx < sizeof(expose) / sizeof(expose[0]); ++idx) {

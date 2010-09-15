@@ -52,8 +52,8 @@ namespace Script { namespace Event {
 	
 	}
 	
-	void ItemCreated(Item*, Construction*, NPC*, int, int) {
-	
+	void ItemCreated(Item *item, Construction*, NPC*, int x, int y) {
+		Script::InvokeListeners("onItemCreated", "(Oii)", py::object(item).ptr(), x, y);
 	}
 	
 	void ItemDestroyed(Item*, int, int) {
