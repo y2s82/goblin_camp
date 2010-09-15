@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <Python.h>
 #include <boost/python.hpp>
+namespace py = boost::python;
 
 #ifdef _SAVE_DEBUG
 #	define _DEBUG

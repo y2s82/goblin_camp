@@ -14,8 +14,12 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-from . import log, events, utils
-import _gcampapi
 
-announce = _gcampapi.announce
-announce.__doc__ = 'Add a string to announce area'
+'''
+	Package that pretends to be a mod.
+	For things that should be implemented in Python, but don't
+	belong in separate mods.
+'''
+
+import gcamp
+gcamp.log.getLogger().info('Core mod loaded')
