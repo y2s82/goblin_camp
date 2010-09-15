@@ -499,7 +499,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 		if (store) StockpileItem(newItem);
 		
-		//Script::Event::ItemCreated(newItem.get(), NULL, NULL, pos.X(), pos.Y());
+		Script::Event::ItemCreated(newItem.get(), NULL, NULL, pos.X(), pos.Y());
 		
 		return newItem->Uid();
 }
