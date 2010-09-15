@@ -93,7 +93,7 @@ namespace Script {
 		PyImport_AddModule("gcmods");
 		
 		LOG("Loading __core__ mod.");
-		LoadScript("__core__", (Data::GetPath(Data::Path::GlobalData) / "__core__").string());
+		LoadScript("__core__", (Data::GetPath(Data::Path::GlobalData) / "lib" / "gcamp_core").string());
 	}
 	
 	void Shutdown() {

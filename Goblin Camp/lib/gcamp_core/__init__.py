@@ -22,4 +22,6 @@
 '''
 
 import gcamp
-gcamp.log.getLogger().info('Core mod loaded')
+log = gcamp.log._createLogger('gcamp.__core__')
+
+log.info('Core mod loaded')
