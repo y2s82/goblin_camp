@@ -17,8 +17,8 @@
 from . import log, events, utils
 import _gcampapi
 
-def announce(*args):
-	'Add a string to the announce area'
-	message = ' '.join(args)
-	_gcampapi.announce(message)
+announce = _gcampapi.announce
+announce.__doc__ = 'Add a string to announce area'
 
+Coordinate = _gcampapi.Coordinate
+Coordinate.__doc__ = 'Represents coordinates of a point on the map'
