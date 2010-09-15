@@ -13,12 +13,21 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
 
-namespace Script {
-	void ExposeAPI();
-	void AppendListener(PyObject*);
-	void InvokeListeners(char*, char*, ...);
-	void InvokeListeners(char*, PyObject* = NULL);
-	void ReleaseListeners();
-}
+#include "scripting/_python.hpp"
+
+#include "scripting/_gcampapi/LoggerStream.hpp"
+#include "Logger.hpp"
+
+namespace Script { namespace API {
+	void LoggerStream::write(const char *str) {
+		Logger::log << str;
+	}
+	
+	void ExposeLoggerStream() {
+		py::class_<LoggerStream>("LoggerStream")
+			.def("write", &LoggerStream::write)
+		;
+	}
+}}

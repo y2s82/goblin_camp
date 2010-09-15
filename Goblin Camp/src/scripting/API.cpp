@@ -22,14 +22,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 #include <boost/foreach.hpp>
 
-namespace py = boost::python;
-
-#include "Coordinate.hpp"
-#include "Announce.hpp"
-#include "Logger.hpp"
-#include "Item.hpp"
 #include "scripting/API.hpp"
 #include "scripting/Engine.hpp"
+#include "scripting/_gcampapi/LoggerStream.hpp"
+#include "scripting/_gcampapi/Functions.hpp"
+#include "Logger.hpp"
 
 namespace {
 	namespace globals {
@@ -38,63 +35,20 @@ namespace {
 }
 
 namespace Script { namespace API {
-	// LoggerStream
-	LoggerStream::LoggerStream() { }
-	void LoggerStream::close() { }
-	void LoggerStream::flush() { }
-	
-	void LoggerStream::write(const char *str) {
-		Logger::log << str;
-	}
-	
-	void announce(const char *str) {
-		Announce::Inst()->AddMsg(str);
-	}
-	
-	// ItemProxy
-	ItemProxy::ItemProxy(Item *item) : item(item) { }
-	
-	std::string ItemProxy::getName() {
-		return Item::ItemTypeToString(item->Type());
-	}
-	
-	py::object pyLoggerStream;
-	py::object pyCoordinate;
-	py::object pyItem;
-	py::object pyItemCat;
-	
 	BOOST_PYTHON_MODULE(_gcampapi) {
-		pyLoggerStream = py::class_<LoggerStream>("LoggerStream")
-			.def("close", &LoggerStream::close)
-			.def("write", &LoggerStream::write)
-			.def("flush", &LoggerStream::flush)
-		;
+		typedef void (*ExposeFunc)(void);
+		ExposeFunc expose[] = {
+			&ExposeLoggerStream, &ExposeFunctions
+		};
 		
-		// Coordinate is simple enough to be exposed directly
-		// (but with read-only X and Y properties).
-		pyCoordinate = py::class_<Coordinate>("Coordinate", py::init<int, int>())
-			.add_property("x", (int (Coordinate::*)() const)&Coordinate::X)
-			.add_property("y", (int (Coordinate::*)() const)&Coordinate::Y)
-			.def(py::self < py::self)
-			.def(py::self == py::self)
-			.def(py::self != py::self)
-			.def(py::self + py::self)
-			.def(py::self + py::other<int>())
-			.def(py::self - py::other<int>())
-		;
-		
-		pyItem = py::class_<ItemProxy>("ItemProxy", py::init<Item*>())
-			.add_property("name", &ItemProxy::getName)
-		;
-		
-		py::def("announce", &announce);
-		py::def("appendListener", &Script::AppendListener);
+		for (unsigned idx = 0; idx < sizeof(expose) / sizeof(expose[0]); ++idx) {
+			expose[idx]();
+		}
 	}
 }}
 
 namespace Script {
 	void ExposeAPI() {
-		LOG("Exposing API.");
 		API::init_gcampapi();
 	}
 	

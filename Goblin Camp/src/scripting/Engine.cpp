@@ -21,24 +21,23 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 #include <list>
-#include <cstdlib>
-#include <ostream> // std::flush
 
 #define BOOST_FILESYSTEM_VERSION 3
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
-namespace py = boost::python;
 
 #include "Data.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/API.hpp"
+#include "scripting/_gcampapi/LoggerStream.hpp"
 #include "Logger.hpp"
 
 namespace {
 	namespace globals {
-		py::object logger, loadPackageFunc, printExcFunc;
+		py::object loadPackageFunc, printExcFunc;
+		Script::API::LoggerStream stream;
 	}
 }
 
@@ -89,10 +88,12 @@ namespace Script {
 		globals::printExcFunc    = modTB.attr("print_exception");
 		globals::loadPackageFunc = modImp.attr("load_package");
 		
+		LOG("Exposing API.");
 		ExposeAPI();
 		PyImport_AddModule("gcmods");
 		
-		globals::logger = API::pyLoggerStream();
+		LOG("Loading __core__ mod.");
+		LoadScript("__core__", (Data::GetPath(Data::Path::GlobalData) / "__core__").string());
 	}
 	
 	void Shutdown() {
@@ -120,13 +121,15 @@ namespace Script {
 		PyErr_Clear();
 		
 		py::handle<> hExcType(excType);
-		py::handle<> hExcVal(excVal);
-		py::handle<> hExcTB(excTB);
-		py::handle<> none(py::borrowed(Py_None));
+		// "The value and traceback object may be NULL even when the type object is not."
+		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
+		py::handle<> hExcVal(py::allow_null(excVal));
+		py::handle<> hExcTB(py::allow_null(excTB));
+		py::object none;
 		
 		Logger::log << "**** Python exception occurred ****\n";
 		try {
-			globals::printExcFunc(hExcType, hExcVal, hExcTB, none, globals::logger);
+			globals::printExcFunc(hExcType, hExcVal, hExcTB, none, boost::ref(globals::stream));
 		} catch (const py::error_already_set&) {
 			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();
