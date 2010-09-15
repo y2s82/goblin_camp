@@ -243,6 +243,7 @@ install dist-data
 
 install dist-pylib
     : $(GC_SOURCE_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp : *.py ]
+      [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp_core : *.py ]
     : <conditional>@get-dist-data
       <install-source-root>$(GC_SOURCE_ROOT)
 ;
