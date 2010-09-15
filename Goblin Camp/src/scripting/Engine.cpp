@@ -34,7 +34,6 @@ namespace py = boost::python;
 #include "Data.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/API.hpp"
-#include "scripting/_gcampapi/LoggerStream.hpp"
 #include "Logger.hpp"
 
 namespace {
@@ -90,11 +89,10 @@ namespace Script {
 		globals::printExcFunc    = modTB.attr("print_exception");
 		globals::loadPackageFunc = modImp.attr("load_package");
 		
-		LOG("Exposing API.");
 		ExposeAPI();
 		PyImport_AddModule("gcmods");
 		
-		globals::logger = py::object(py::handle<>(API::LoggerStream()));
+		globals::logger = API::pyLoggerStream();
 	}
 	
 	void Shutdown() {
@@ -122,10 +120,8 @@ namespace Script {
 		PyErr_Clear();
 		
 		py::handle<> hExcType(excType);
-		// "The value and traceback object may be NULL even when the type object is not."
-		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
-		py::handle<> hExcVal(py::allow_null(excVal));
-		py::handle<> hExcTB(py::allow_null(excTB));
+		py::handle<> hExcVal(excVal);
+		py::handle<> hExcTB(excTB);
 		py::handle<> none(py::borrowed(Py_None));
 		
 		Logger::log << "**** Python exception occurred ****\n";

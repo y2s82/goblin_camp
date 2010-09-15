@@ -18,13 +18,33 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class Item;
 
 namespace Script {
-	void ExposeAPI();
-	
 	namespace API {
-		void CreateType(PyTypeObject*, Py_ssize_t);
-		void FinishType(PyTypeObject*, const char*, PyObject*);
+		// Implements minimal file-like interface for use with logging.
+		struct LoggerStream {
+			LoggerStream();
+			void close();
+			void write(const char*);
+			void flush();
+		};
+		
+		// Proxy interface to items.
+		class ItemProxy {
+			Item *item;
+		public:
+			ItemProxy(Item*);
+			std::string getName();
+		};
+		
+		// Announcer.
+		void announce(const char*);
+		
+		namespace py = boost::python;
+		extern py::object pyLoggerStream;
+		extern py::object pyCoordinate;
+		extern py::object pyItem;
 	}
 	
+	void ExposeAPI();
 	void AppendListener(PyObject*);
 	void InvokeListeners(char*, char*, ...);
 	void InvokeListeners(char*, PyObject* = NULL);
