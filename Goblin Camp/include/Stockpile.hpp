@@ -56,7 +56,7 @@ public:
 	void Expand(Coordinate,Coordinate);
 	bool Allowed(ItemCategory);
 	bool Allowed(std::set<ItemCategory>);
-	bool Full();
+	bool Full(ItemType = -1);
 	Coordinate FreePosition();
 	void ReserveSpot(Coordinate, bool);
 	boost::weak_ptr<Container> Storage(Coordinate);
