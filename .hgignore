@@ -66,3 +66,5 @@ build
 *.xcuserstate
 *.xcbkptlist
 xcuserdata
+docs.doxy
+docs\_build

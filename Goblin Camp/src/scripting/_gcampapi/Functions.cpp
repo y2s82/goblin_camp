@@ -13,23 +13,36 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
 
-// Reworked logging module.
-// Less verbose in usage (uses macros, though) -- LOG(foo), LOG(foo << bar),
-// with more automatic formatting (file, line, function) and no more
-// explicit flushing.
+#include "scripting/_python.hpp"
 
-#include <fstream>
+#include "scripting/_gcampapi/Functions.hpp"
+#include "Announce.hpp"
+#include "scripting/API.hpp"
+#include "Version.hpp"
 
-namespace Logger {
-	extern std::ofstream log;
+namespace Script { namespace API {
+	void Announce(const char *str) {
+		::Announce::Inst()->AddMsg(str);
+	}
 	
-	void OpenLogFile(const std::string&);
-	void CloseLogFile();
+	bool IsDebugBuild() {
+	#ifdef DEBUG
+		return true;
+	#else
+		return false;
+	#endif
+	}
 	
-	std::ofstream& Prefix(const char* = NULL, int = 0, const char* = NULL);
-}
-
-#define LOG_FUNC(x, func) Logger::Prefix(__FILE__, __LINE__, func) << x << "\n"
-#define LOG(x) LOG_FUNC(x, __FUNCTION__)
+	const char *GetVersionString() {
+		return GC_VERSION;
+	}
+	
+	void ExposeFunctions() {
+		py::def("announce",         &Announce);
+		py::def("appendListener",   &Script::AppendListener);
+		py::def("getVersionString", &GetVersionString);
+		py::def("isDebugBuild",     &IsDebugBuild);
+	}
+}}

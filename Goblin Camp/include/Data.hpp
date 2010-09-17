@@ -53,9 +53,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // installed once system-wide and used comfortably without admin privileges on both systems.
 
 namespace boost { namespace filesystem {
-	template <class String, class Traits> class basic_path;
-	struct path_traits;
-	typedef basic_path<std::string, path_traits> path;
+	class path;
 }}
 
 namespace Data {
@@ -65,7 +63,9 @@ namespace Data {
 	// Loads global data and all local mods.
 	void Load();
 	// Populates the vector with the names of saved games.
-	void GetSavedGames(TCODList<std::string>&);
+	void GetSavedGames(std::vector<std::string>&);
+	// Returns number of found saved games.
+	unsigned CountSavedGames();
 	// Loads saved game.
 	void LoadGame(const std::string&);
 	// Saves game.
