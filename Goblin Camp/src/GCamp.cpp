@@ -31,7 +31,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
-#include "JobManager.hpp"
 #include "Data.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
@@ -39,6 +38,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Event.hpp"
 
 #include "Version.hpp"
+
+int MainMenu();
+void LoadMenu();
+void SaveMenu();
+void SettingsMenu();
+void KeysMenu();
+void ModsMenu();
 
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;
@@ -120,41 +126,43 @@ void StartNewGame() {
 	MainLoop();
 }
 
-int Distance(int x0, int y0, int x1, int y1) {
-	return (abs(y1 - y0) + abs(x1 - x0));
-}
-
-int Distance(Coordinate a, Coordinate b) {
-	return Distance(a.X(), a.Y(), b.X(), b.Y());
-}
-
 // XXX: This really needs serious refactoring.
 namespace {
 	struct MainMenuEntry {
 		const char *label;
 		char shortcut;
-		bool setExit;
-		bool ifRunning;
+		bool (*isActive)();
 		void (*function)();
 	};
+	
+	bool ActiveAlways() {
+		return true;
+	}
+	
+	bool ActiveIfRunning() {
+		return Game::Inst()->Running();
+	}
+	
+	bool ActiveIfHasSaves() {
+		return Data::CountSavedGames() > 0;
+	}
 }
 
 int MainMenu() {
 	MainMenuEntry entries[] = {
-		{"New Game", 'n', false, false, StartNewGame},
-		{"Continue", 0,   false, true,  MainLoop},
-		{"Load",     0,   false, false, LoadMenu},
-		{"Save",     0,   false, true,  SaveMenu},
-		{"Settings", 0,   false, false, SettingsMenu},
-		{"Keys",     0,   false, false, KeysMenu},
-		{"Mods",     0,   false, false, ModsMenu},
-		{"Exit",     'q', true,  false, NULL}
+		{"New Game", 'n', &ActiveAlways,     &StartNewGame},
+		{"Continue", 'c', &ActiveIfRunning,  &MainLoop},
+		{"Load",     'l', &ActiveIfHasSaves, &LoadMenu},
+		{"Save",     's', &ActiveIfRunning,  &SaveMenu},
+		{"Settings", 'o', &ActiveAlways,     &SettingsMenu},
+		{"Keys",     'k', &ActiveAlways,     &KeysMenu},
+		{"Mods",     'm', &ActiveAlways,     &ModsMenu},
+		{"Exit",     'q', &ActiveAlways,     NULL}
 	};
 
 	const unsigned int entryCount = sizeof(entries) / sizeof(MainMenuEntry);
 	void (*function)() = NULL;
 
-	bool exit = false;
 	int width = 20;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int height = (entryCount * 2) + 2;
@@ -165,7 +173,7 @@ int MainMenu() {
 	bool endCredits = false;
 	bool lButtonDown = false;
 
-	while (!exit) {
+	while (true) {
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
 		TCODConsole::root->clear();
@@ -191,14 +199,14 @@ int MainMenu() {
 				TCODConsole::root->setDefaultBackground(TCODColor::black);
 			}
 
-			if ((entry.function == NULL && !entry.setExit) || (entry.ifRunning && !Game::Inst()->Running())) {
+			if (!entry.isActive()) {
 				TCODConsole::root->setDefaultForeground(TCODColor::grey);
 			}
 
 			TCODConsole::root->print(edgex + width / 2, edgey + ((idx + 1) * 2), entry.label);
 
-			if (entry.shortcut != NULL && key.c == entry.shortcut) {
-				exit     = entry.setExit;
+			if (entry.shortcut != NULL && key.c == entry.shortcut && entry.isActive()) {
+				if (entry.function == NULL) break;
 				function = entry.function;
 			}
 		}
@@ -227,12 +235,9 @@ int MainMenu() {
 				lButtonDown = false;
 				int entry = static_cast<int>(floor(selected / 2.));
 
-				if (entry < entryCount) {
-					exit = entries[entry].setExit;
-					if (entries[entry].function != NULL &&
-						(!entries[entry].ifRunning || (entries[entry].ifRunning && Game::Inst()->Running()))) {
-							entries[entry].function();
-					}
+				if (entry < entryCount && entries[entry].isActive()) {
+					if (entries[entry].function == NULL) break;
+					entries[entry].function();
 				}
 			}
 		}
@@ -242,7 +247,6 @@ int MainMenu() {
 }
 
 void LoadMenu() {
-	bool exit = false;
 	int width = 30;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
@@ -251,15 +255,20 @@ void LoadMenu() {
 	std::vector<std::string> list;
 	Data::GetSavedGames(list);
 
-	int height = list.size()+5;
+	int height = list.size() + 4;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 
 	TCODConsole::root->setAlignment(TCOD_CENTER);
 
 	bool lButtonDown = false;
-
-	while (!exit) {
-
+	TCOD_key_t key;
+	
+	while (true) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		if (key.vk == TCODK_ESCAPE) {
+			break;
+		}
+		
 		TCODConsole::root->clear();
 
 		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
@@ -275,7 +284,6 @@ void LoadMenu() {
 			TCODConsole::root->print(edgex+width/2, edgey+2+i, "%s", list[i].c_str());
 		}
 		
-		TCODConsole::root->print(edgex+width/2, edgey + 2 + list.size(), "Cancel");
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
 
@@ -296,7 +304,7 @@ void LoadMenu() {
 			if (selected < list.size() && selected >= 0) {
 				Data::LoadGame(list[selected]);
 				MainLoop();
-				return;
+				break;
 			}
 		}
 	}
