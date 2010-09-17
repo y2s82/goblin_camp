@@ -64,6 +64,8 @@ namespace Data {
 	void Load();
 	// Populates the vector with the names of saved games.
 	void GetSavedGames(std::vector<std::string>&);
+	// Returns number of found saved games.
+	unsigned CountSavedGames();
 	// Loads saved game.
 	void LoadGame(const std::string&);
 	// Saves game.
