@@ -232,76 +232,132 @@ void JobManager::Reset() {
 		availableList[i].clear();
 	}
 	waitingList.clear();
-	npcsWaiting.clear();
+	menialNPCsWaiting.clear();
+	expertNPCsWaiting.clear();
 }
 
 void JobManager::NPCWaiting(int uid) {
-	for(std::vector<int>::iterator it = npcsWaiting.begin(); it != npcsWaiting.end(); it++) {
-		if(*it == uid) {
-			return;
+	if (Game::Inst()->npcList[uid]->Expert()) {
+		for(std::vector<int>::iterator it = expertNPCsWaiting.begin(); it != expertNPCsWaiting.end(); it++) {
+			if(*it == uid) {
+				return;
+			}
 		}
+		expertNPCsWaiting.push_back(uid);
+	} else {
+		for(std::vector<int>::iterator it = menialNPCsWaiting.begin(); it != menialNPCsWaiting.end(); it++) {
+			if(*it == uid) {
+				return;
+			}
+		}
+		menialNPCsWaiting.push_back(uid);
 	}
-	npcsWaiting.push_back(uid);
 }
 
 void JobManager::NPCNotWaiting(int uid) {
-	for(std::vector<int>::iterator it = npcsWaiting.begin(); it != npcsWaiting.end(); it++) {
-		if(*it == uid) {
-			npcsWaiting.erase(it);
-			return;
+	if (Game::Inst()->npcList[uid]->Expert()) {
+		for(std::vector<int>::iterator it = expertNPCsWaiting.begin(); it != expertNPCsWaiting.end(); it++) {
+			if(*it == uid) {
+				expertNPCsWaiting.erase(it);
+				return;
+			}
+		}
+	} else {
+		for(std::vector<int>::iterator it = menialNPCsWaiting.begin(); it != menialNPCsWaiting.end(); it++) {
+			if(*it == uid) {
+				menialNPCsWaiting.erase(it);
+				return;
+			}
 		}
 	}
 }
 
 void JobManager::ClearWaitingNpcs() {
-	npcsWaiting.clear();
+	expertNPCsWaiting.clear();
+	menialNPCsWaiting.clear();
 }
 
 void JobManager::AssignJobs() {
-	for (int i = 0; i < PRIORITY_COUNT && !npcsWaiting.empty(); i++) {
+	for (int i = 0; i < PRIORITY_COUNT && (!expertNPCsWaiting.empty() || !menialNPCsWaiting.empty()); i++) {
 		if(!availableList[i].empty()) {
-			std::vector<boost::shared_ptr<Job> > jobsToAssign;
+			std::vector<boost::shared_ptr<Job> > menialJobsToAssign;
+			std::vector<boost::shared_ptr<Job> > expertJobsToAssign;
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 				 jobi != availableList[i].end(); ++jobi) {
 				if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
-					jobsToAssign.push_back(*jobi);
+					if ((*jobi)->Menial()) menialJobsToAssign.push_back(*jobi);
+					else expertJobsToAssign.push_back(*jobi);
 				}
 			}
-			if(!jobsToAssign.empty()) {
-				int matrixSize = std::max(jobsToAssign.size(), npcsWaiting.size());
-				boost::numeric::ublas::matrix<int> m(matrixSize, matrixSize);
-				for(int x = 0; x < matrixSize; x++) {
-					for(int y = 0; y < matrixSize; y++) {
-						if(x >= npcsWaiting.size() || y >= jobsToAssign.size()) {
-							m(x, y) = 1;
+			if(!menialJobsToAssign.empty() || !expertJobsToAssign.empty()) {
+				
+				int menialMatrixSize = std::max(menialJobsToAssign.size(), menialNPCsWaiting.size());
+				int expertMatrixSize = std::max(expertJobsToAssign.size(), expertNPCsWaiting.size());
+				boost::numeric::ublas::matrix<int> menialMatrix(menialMatrixSize, menialMatrixSize);
+				boost::numeric::ublas::matrix<int> expertMatrix(expertMatrixSize, expertMatrixSize);
+
+				for(int x = 0; x < menialMatrixSize; x++) {
+					for(int y = 0; y < menialMatrixSize; y++) {
+						if(x >= menialNPCsWaiting.size() || y >= menialJobsToAssign.size()) {
+							menialMatrix(x, y) = 1;
 						} else {
-							boost::shared_ptr<Job> job = jobsToAssign[y];
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcsWaiting[x]];
-							if(job->Menial() == npc->Expert() ||
-							   job->tasks.empty() ||
+							boost::shared_ptr<Job> job = menialJobsToAssign[y];
+							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[menialNPCsWaiting[x]];
+							if(job->tasks.empty() ||
 							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
-								m(x, y) = 1;
+								menialMatrix(x, y) = 1;
 							} else {
-								m(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+								menialMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
 							}
 						}
 					}
 				}
 				
-				std::vector<int> assignments = FindBestMatching(m);
+				for(int x = 0; x < expertMatrixSize; x++) {
+					for(int y = 0; y < expertMatrixSize; y++) {
+						if(x >= expertNPCsWaiting.size() || y >= expertJobsToAssign.size()) {
+							expertMatrix(x, y) = 1;
+						} else {
+							boost::shared_ptr<Job> job = expertJobsToAssign[y];
+							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[expertNPCsWaiting[x]];
+							if(job->tasks.empty() ||
+							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
+								expertMatrix(x, y) = 1;
+							} else {
+								expertMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+							}
+						}
+					}
+				}
+				std::vector<int> menialAssignments = FindBestMatching(menialMatrix);
+				std::vector<int> expertAssignments = FindBestMatching(expertMatrix);
 				
-				for(int i = 0, n = 0; n < npcsWaiting.size(); i++, n++) {
-					int jobNum = assignments[i];
-					if(jobNum < jobsToAssign.size()) {
-						int npcNum = npcsWaiting[n];
-						boost::shared_ptr<Job> job = jobsToAssign[jobNum];
+				for(int i = 0, n = 0; n < menialNPCsWaiting.size(); i++, n++) {
+					int jobNum = menialAssignments[i];
+					if(jobNum < menialJobsToAssign.size()) {
+						int npcNum = menialNPCsWaiting[n];
+						boost::shared_ptr<Job> job = menialJobsToAssign[jobNum];
 						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
 						job->Assign(npcNum);
 						npc->StartJob(job);
-						npcsWaiting.erase(npcsWaiting.begin() + n);
+						menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
 						n--;
 					}
 				}
+
+				for(int i = 0, n = 0; n < expertNPCsWaiting.size(); i++, n++) {
+					int jobNum = expertAssignments[i];
+					if(jobNum < expertJobsToAssign.size()) {
+						int npcNum = expertNPCsWaiting[n];
+						boost::shared_ptr<Job> job = expertJobsToAssign[jobNum];
+						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+						job->Assign(npcNum);
+						npc->StartJob(job);
+						expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
+						n--;
+					}
+				}
+
 			}
 		}
 	}
