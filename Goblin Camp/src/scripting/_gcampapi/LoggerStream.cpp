@@ -13,23 +13,21 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
 
-// Reworked logging module.
-// Less verbose in usage (uses macros, though) -- LOG(foo), LOG(foo << bar),
-// with more automatic formatting (file, line, function) and no more
-// explicit flushing.
+#include "scripting/_python.hpp"
 
-#include <fstream>
+#include "scripting/_gcampapi/LoggerStream.hpp"
+#include "Logger.hpp"
 
-namespace Logger {
-	extern std::ofstream log;
+namespace Script { namespace API {
+	void LoggerStream::write(const char *str) {
+		Logger::log << str;
+	}
 	
-	void OpenLogFile(const std::string&);
-	void CloseLogFile();
-	
-	std::ofstream& Prefix(const char* = NULL, int = 0, const char* = NULL);
-}
-
-#define LOG_FUNC(x, func) Logger::Prefix(__FILE__, __LINE__, func) << x << "\n"
-#define LOG(x) LOG_FUNC(x, __FUNCTION__)
+	void ExposeLoggerStream() {
+		py::class_<LoggerStream>("LoggerStream")
+			.def("write", &LoggerStream::write)
+		;
+	}
+}}

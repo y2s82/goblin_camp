@@ -15,21 +15,5 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/multi_array.hpp>
-#include <boost/thread/thread.hpp>
-
-#include "Tile.hpp"
-#include "Coordinate.hpp"
-
 #define UPDATES_PER_SECOND 50
-
-void StartNewGame();
-int MainMenu();
-void LoadMenu();
-void SaveMenu();
-void MainLoop();
-void SettingsMenu();
-void ModsMenu();
-void KeysMenu();
-int Distance(int,int,int,int);
-int Distance(Coordinate,Coordinate);
+int GCMain();

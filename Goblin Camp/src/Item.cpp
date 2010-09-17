@@ -348,7 +348,7 @@ private:
 		return true;
 	}
 	void error(const char *msg) {
-		Logger::Inst()->output<<"ItemListener: "<<msg<<"\n";
+		LOG("ItemListener: " << msg);
 		Game::Inst()->Exit();
 	}
 };

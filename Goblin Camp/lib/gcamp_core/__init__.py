@@ -14,27 +14,14 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-import logging, sys
-import _gcampapi
-from . import utils
 
-def _createLogger(name):
-	log = logging.getLogger(name)
-	
-	if not hasattr(log, '_init'):
-		handler = logging.StreamHandler(_gcampapi.LoggerStream())
-		handler.setFormatter(logging.Formatter(
-			'[%(name)s] [%(levelname)8s] [%(funcName)s] %(message)s'
-		))
-		
-		log.setLevel(logging.DEBUG)
-		log.handlers = [handler]
-		log._init = True
-	
-	return log
+'''
+	Package that pretends to be a mod.
+	For things that should be implemented in Python, but don't
+	belong in separate mods.
+'''
 
-def getLogger():
-	'Create and return mod logger'
-	
-	mod = utils._getModName(2)
-	return _createLogger('gcamp.{0}'.format(mod))
+import gcamp
+log = gcamp.log._createLogger('gcamp.__core__')
+
+log.info('Core mod loaded')

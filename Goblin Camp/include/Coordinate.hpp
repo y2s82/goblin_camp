@@ -41,3 +41,6 @@ public:
 	Coordinate operator-(int);
 	Coordinate operator+(Coordinate);
 };
+
+int Distance(int,int,int,int);
+int Distance(Coordinate,Coordinate);

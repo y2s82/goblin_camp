@@ -67,12 +67,12 @@ void SideBar::Draw(TCODConsole* console) {
 		}
 		
 		Game::Inst()->Draw(entity.lock()->Center()-5, &minimap, false);
-		console->setForegroundColor(TCODColor::white);
+		console->setDefaultForeground(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
 		minimap.flush();
 		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
 	}
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
@@ -153,15 +153,15 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 }
 
 void SideBar::DrawStatusEffect(StatusEffect effect, int i, int x, int y, int width, bool selected, TCODConsole *console) {
-	console->setForegroundColor(effect.color);
+	console->setDefaultForeground(effect.color);
 	console->print(x, y, "%c%s", effect.graphic, effect.name.c_str());
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 void SideBar::DrawSeed(std::pair<ItemType, bool> seed, int i, int x, int y, int width, bool selected, TCODConsole *console) {
-	console->setForegroundColor(seed.second ? TCODColor::green : TCODColor::red);
+	console->setDefaultForeground(seed.second ? TCODColor::green : TCODColor::red);
 	console->print(x, y, "%c %s", seed.second ? 225 : 224, Item::Presets[seed.first].name.substr(0, width-3).c_str());
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 }
 
 std::string SideBar::NPCSquadLabel(NPC *npc) {
