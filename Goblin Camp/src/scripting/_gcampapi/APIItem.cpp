@@ -41,6 +41,12 @@ namespace {
 		TCODColor color(h, s, v);
 		item->Color(color);
 	}
+	
+	std::string GetTypeString(Item *item) {
+		return Item::ItemTypeToString(item->Type());
+	}
+	
+	//ItemCat *
 }
 
 namespace Script { namespace API {
@@ -48,11 +54,16 @@ namespace Script { namespace API {
 		py::class_<Item>("Item", py::no_init)
 			//.def("setContainedIn", &Item::PutInContainer)
 			//.def("getContainedIn", &Item::ContainedIn)
-			.def("getPosition", &GetPosition)
-			.def("setPosition", &SetPosition)
-			.def("getGraphic",  &Item::Graphic)
-			.def("getType",     &Item::Type)
-			.def("getColor",    &GetColor)
+			.def("getPosition",   &GetPosition)
+			.def("setPosition",   &SetPosition)
+			.def("getGraphic",    &Item::Graphic)
+			.def("getType",       &Item::Type)
+			.def("getColor",      &GetColor)
+			.def("getTypeString", &GetTypeString)
+			
 		;
+		
+		//def("getCategory", &GetCategory);
+		//def("getPreset",   &GetPreset);
 	}
 }}
