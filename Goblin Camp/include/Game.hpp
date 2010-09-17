@@ -31,7 +31,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Events.hpp"
 #include "Job.hpp"
-#include "GCamp.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
