@@ -365,19 +365,24 @@ namespace Data {
 		LOG("Data::Load() finished.");
 	}
 	
-	void GetSavedGames(std::vector<std::string>& list) {
+	void GetSavedGames(SaveList& list) {
 		fs::directory_iterator end;
 		for (fs::directory_iterator it(globals::savesDir); it != end; ++it) {
 			fs::path save = it->path();
 			if (!boost::iequals(save.extension().string(), ".sav")) continue;
 			
 			save.replace_extension();
-			list.push_back(save.filename().string());
+			
+			std::string filename      = save.filename().string();
+			std::time_t timestamp     = fs::last_write_time(it->path());
+			boost::uintmax_t filesize = fs::file_size(it->path());
+			
+			list.push_back(SaveInfo(filename, filesize, timestamp));
 		}
 	}
 	
 	unsigned CountSavedGames() {
-		std::vector<std::string> saves;
+		SaveList saves;
 		GetSavedGames(saves);
 		return saves.size();
 	}

@@ -143,8 +143,11 @@ namespace {
 		return Game::Inst()->Running();
 	}
 	
+	int savesCount = -1;
+	
 	bool ActiveIfHasSaves() {
-		return Data::CountSavedGames() > 0;
+		if (savesCount == -1) savesCount = Data::CountSavedGames();
+		return savesCount > 0;
 	}
 }
 
@@ -162,7 +165,8 @@ int MainMenu() {
 
 	const unsigned int entryCount = sizeof(entries) / sizeof(MainMenuEntry);
 	void (*function)() = NULL;
-
+	
+	bool exit = false;
 	int width = 20;
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int height = (entryCount * 2) + 2;
@@ -173,7 +177,7 @@ int MainMenu() {
 	bool endCredits = false;
 	bool lButtonDown = false;
 
-	while (true) {
+	while (!exit) {
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
 		TCODConsole::root->clear();
@@ -206,7 +210,7 @@ int MainMenu() {
 			TCODConsole::root->print(edgex + width / 2, edgey + ((idx + 1) * 2), entry.label);
 
 			if (entry.shortcut != NULL && key.c == entry.shortcut && entry.isActive()) {
-				if (entry.function == NULL) break;
+				exit     = (entry.function == NULL);
 				function = entry.function;
 			}
 		}
@@ -225,8 +229,6 @@ int MainMenu() {
 		if (function != NULL) {
 			function();
 		} else {
-			function = NULL;
-
 			if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
 				selected = mouseStatus.cy - (edgey+2);
 			} else selected = -1;
@@ -236,8 +238,11 @@ int MainMenu() {
 				int entry = static_cast<int>(floor(selected / 2.));
 
 				if (entry < entryCount && entries[entry].isActive()) {
-					if (entries[entry].function == NULL) break;
-					entries[entry].function();
+					if (entries[entry].function == NULL) {
+						exit = true;
+					} else {
+						entries[entry].function();
+					}
 				}
 			}
 		}
@@ -246,19 +251,28 @@ int MainMenu() {
 	return 0;
 }
 
+namespace {
+	bool SortSaves(const Data::SaveInfo& a, const Data::SaveInfo& b) {
+		return a.get<2>() > b.get<2>();
+	}
+}
+
 void LoadMenu() {
-	int width = 30;
+	int width = 59; // 2 for borders, 20 for filename, 2 spacer, 20 for date, 2 spacer, 13 for filesize
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
 
-	std::vector<std::string> list;
+	Data::SaveList list;
 	Data::GetSavedGames(list);
+	
+	// sort by last modification, newest on top
+	std::sort(list.begin(), list.end(), &SortSaves);
 
 	int height = list.size() + 4;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 
-	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	bool lButtonDown = false;
 	TCOD_key_t key;
@@ -272,6 +286,10 @@ void LoadMenu() {
 		TCODConsole::root->clear();
 
 		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
+		
+		TCODConsole::root->setAlignment(TCOD_CENTER);
+		TCODConsole::root->print(edgex + (width / 2), edgey + 1, "ESC to cancel.");
+		TCODConsole::root->setAlignment(TCOD_LEFT);
 
 		for (int i = 0; i < list.size(); ++i) {
 			if (selected == i) {
@@ -281,7 +299,54 @@ void LoadMenu() {
 				TCODConsole::root->setDefaultForeground(TCODColor::white);
 				TCODConsole::root->setDefaultBackground(TCODColor::black);
 			}
-			TCODConsole::root->print(edgex+width/2, edgey+2+i, "%s", list[i].c_str());
+			
+			std::string label = list[i].get<0>();
+			if (label.size() > 20) {
+				label = label.substr(0, 17) + "...";
+			}
+			TCODConsole::root->print(edgex + 1, edgey + 3 + i, "%-20s", label.c_str());
+			TCODConsole::root->setDefaultForeground(TCODColor::azure);
+			
+			// last modification date
+			char date[21] = { "0000-00-00, 00:00:00" }; 
+			{
+				size_t dateLast = 0;
+				struct tm *dateTM;
+				time_t dateTime = 0;
+				
+				dateTime = list[i].get<2>();
+				dateTM   = localtime(&dateTime);
+				dateLast = strftime(date, 21, "%Y-%m-%d, %H:%M:%S", dateTM);
+				date[dateLast] = '\0';
+			}
+			
+			TCODConsole::root->print(edgex + 1 + 20 + 2, edgey + 3 + i, "%-20s", date);
+			
+			// filesize
+			{
+				boost::uintmax_t oneKB = 1024;
+				boost::uintmax_t oneMB = 1024 * 1024;
+				boost::uintmax_t oneGB = 1024 * 1024 * 1024;
+				boost::uintmax_t filesize = list[i].get<1>();
+				const char *format;
+				double filesizeF;
+				
+				if (filesize >= oneGB) {
+					format    = "%10.2f GB";
+					filesizeF = filesize / oneGB;
+				} else if (filesize >= oneMB) {
+					format    = "%10.2f MB";
+					filesizeF = filesize / oneMB;
+				} else if (filesize >= oneKB) {
+					format    = "%10.2f kB";
+					filesizeF = filesize / oneGB;
+				} else {
+					format    = "%10.0f  b";
+					filesizeF = (float)filesize;
+				}
+				
+				TCODConsole::root->print(edgex + 1 + 20 + 2 + 20 + 2, edgey + 3 + i, format, filesizeF);
+			}
 		}
 		
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -295,14 +360,14 @@ void LoadMenu() {
 		}
 
 		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
-			selected = mouseStatus.cy - (edgey+2);
+			selected = mouseStatus.cy - (edgey+3);
 		} else selected = -1;
 
 		if (!mouseStatus.lbutton && lButtonDown) {
 			lButtonDown = false;
 			
 			if (selected < list.size() && selected >= 0) {
-				Data::LoadGame(list[selected]);
+				Data::LoadGame(list[selected].get<0>());
 				MainLoop();
 				break;
 			}
@@ -329,7 +394,8 @@ void SaveMenu() {
 			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
 				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
-
+			
+			savesCount = -1;
 			Data::SaveGame(saveName);
 			break;
 		}

@@ -16,8 +16,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <string>
+#include <vector>
 #include <map>
+#include <ctime>
 #include <libtcod.hpp>
+#include <boost/cstdint.hpp>
+#include <boost/tuple/tuple.hpp>
 
 // Routines to find, load and save GC's data files.
 // Uses user personal directories to store saved games, config, local mods, etc.
@@ -57,13 +61,17 @@ namespace boost { namespace filesystem {
 }}
 
 namespace Data {
+	// filename, file size in bytes, last modification time
+	typedef boost::tuple<std::string, boost::uintmax_t, time_t> SaveInfo;
+	typedef std::vector<SaveInfo> SaveList;
+	
 	// Checks if required user directories are present, and creates them if not.
 	// Also loads user config file, creating it if necessary.
 	void Init();
 	// Loads global data and all local mods.
 	void Load();
 	// Populates the vector with the names of saved games.
-	void GetSavedGames(std::vector<std::string>&);
+	void GetSavedGames(SaveList&);
 	// Returns number of found saved games.
 	unsigned CountSavedGames();
 	// Loads saved game.
