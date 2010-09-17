@@ -376,6 +376,12 @@ namespace Data {
 		}
 	}
 	
+	unsigned CountSavedGames() {
+		std::vector<std::string> saves;
+		GetSavedGames(saves);
+		return saves.size();
+	}
+	
 	void LoadGame(const std::string& save) {
 		std::string file = (globals::savesDir / save).string() + ".sav";
 		LOG("Loading game from " << file);
