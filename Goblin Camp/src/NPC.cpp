@@ -574,7 +574,7 @@ MOVENEARend:
 				break;
 
 			case USE:
-				if (boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
+				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Use();
 					if (tmp >= 100) {
 						TaskFinished(TASKSUCCESS);
