@@ -132,8 +132,6 @@ void NPC::Position(Coordinate pos, bool firstTime) {
 
 void NPC::Position(Coordinate pos) { Position(pos, false); }
 
-bool *NPC::visArray() { return _visArray; }
-
 Task* NPC::currentTask() { return jobs.empty() ? 0 : &(jobs.front()->tasks[taskIndex]); }
 Task* NPC::nextTask() { 
 	if (!jobs.empty()) {
