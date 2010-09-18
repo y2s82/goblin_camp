@@ -285,8 +285,9 @@ void JobManager::AssignJobs() {
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 				 jobi != availableList[i].end(); ++jobi) {
 				if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
-					if ((*jobi)->Menial()) menialJobsToAssign.push_back(*jobi);
-					else expertJobsToAssign.push_back(*jobi);
+					//Limit assigning jobs to 20 at a time, large matrix sizes cause considerable slowdowns.
+					if ((*jobi)->Menial() && menialJobsToAssign.size() < 20) menialJobsToAssign.push_back(*jobi);
+					else if (!(*jobi)->Menial() && expertJobsToAssign.size() < 20) expertJobsToAssign.push_back(*jobi);
 				}
 			}
 			if(!menialJobsToAssign.empty() || !expertJobsToAssign.empty()) {
@@ -302,11 +303,12 @@ void JobManager::AssignJobs() {
 							menialMatrix(x, y) = 1;
 						} else {
 							boost::shared_ptr<Job> job = menialJobsToAssign[y];
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[menialNPCsWaiting[x]];
-							if(job->tasks.empty() ||
-							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
+							if(Game::Inst()->npcList.find(menialNPCsWaiting[x]) == Game::Inst()->npcList.end() ||
+								job->tasks.empty() ||
+								(job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
 								menialMatrix(x, y) = 1;
 							} else {
+								boost::shared_ptr<NPC> npc = Game::Inst()->npcList[menialNPCsWaiting[x]];
 								menialMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
 							}
 						}
@@ -319,11 +321,12 @@ void JobManager::AssignJobs() {
 							expertMatrix(x, y) = 1;
 						} else {
 							boost::shared_ptr<Job> job = expertJobsToAssign[y];
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[expertNPCsWaiting[x]];
-							if(job->tasks.empty() ||
+							if(Game::Inst()->npcList.find(expertNPCsWaiting[x]) == Game::Inst()->npcList.end() ||
+								job->tasks.empty() ||
 							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
 								expertMatrix(x, y) = 1;
 							} else {
+								boost::shared_ptr<NPC> npc = Game::Inst()->npcList[expertNPCsWaiting[x]];
 								expertMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
 							}
 						}
