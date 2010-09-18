@@ -33,8 +33,7 @@ struct FlightPath {
 	int height;
 };
 
-class Entity: public boost::enable_shared_from_this<Entity>
-{
+class Entity: public boost::enable_shared_from_this<Entity> {
 	friend class boost::serialization::access;
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;

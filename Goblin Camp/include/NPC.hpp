@@ -181,8 +181,6 @@ public:
 	void color(TCODColor,TCODColor=TCODColor::black);
 	void graphic(int);
 
-	bool *visArray();
-
 	Task* currentTask();
 	Task* nextTask();
 	boost::weak_ptr<Job> currentJob();
