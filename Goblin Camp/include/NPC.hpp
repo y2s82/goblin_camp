@@ -103,7 +103,6 @@ private:
 		boost::function<bool(boost::shared_ptr<NPC>)> findJob = boost::function<bool(boost::shared_ptr<NPC>)>(),
 		boost::function<void(boost::shared_ptr<NPC>)> react = boost::function<void(boost::shared_ptr<NPC>)>());
 	NPCType type;
-	bool _visArray[LOS_DISTANCE*2 * LOS_DISTANCE*2];
 	int timeCount;
 	std::deque<boost::shared_ptr<Job> > jobs;
 	int taskIndex;
