@@ -133,7 +133,7 @@ int Tile::MoveCost(void* ptr) const {
 int Tile::MoveCost() const {
 	if (!Walkable()) return 0;
 	int cost = _moveCost;
-	if (water) cost += std::min(WALKABLE_WATER_DEPTH, water->Depth());
+	if (water) cost += std::min(20, water->Depth());
 	if (construction >= 0) cost += 1;
 	return cost;
 }
