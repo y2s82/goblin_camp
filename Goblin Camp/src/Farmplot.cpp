@@ -107,7 +107,7 @@ int FarmPlot::Use() {
 		bool seedsLeft = true;
 		std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin();
 		while (seedsLeft && containerIt != containers.end()) {
-			while (!containerIt->second->empty() && !reserved[containerIt->first]) {
+			while (!containerIt->second->empty() || reserved[containerIt->first]) {
 				++containerIt;
 				if (containerIt == containers.end()) return 100;
 			}
@@ -126,8 +126,8 @@ int FarmPlot::Use() {
 							plantJob->tasks.push_back(Task(MOVE, containerIt->first));
 							plantJob->tasks.push_back(Task(PUTIN, containerIt->first, containerIt->second));
 							JobManager::Inst()->AddJob(plantJob);
-							++containerIt;
 							seedsLeft = true;
+							break; //Break out of for-loop, we found a seed to plant
 						}
 					}
 				}
