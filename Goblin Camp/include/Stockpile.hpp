@@ -66,5 +66,6 @@ public:
 	void ItemAdded(boost::weak_ptr<Item>);
 	void ItemRemoved(boost::weak_ptr<Item>);
 	Coordinate Center();
+	void TranslateInternalContainerListeners();
 };
 

@@ -357,3 +357,10 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 Coordinate Stockpile::Center() {
 	return Coordinate((a.X() + b.X() - 1) / 2, (a.Y() + b.Y() - 1) / 2);
 }
+
+void Stockpile::TranslateInternalContainerListeners() {
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator it = containers.begin();
+		it != containers.end(); ++it) {
+			it->second->TranslateContainerListeners();
+	}
+}
