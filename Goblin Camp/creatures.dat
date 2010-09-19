@@ -579,7 +579,7 @@ npc_type "raw golem" {
 
 npc_type "fired golem" {
 	name="Fired golem"
-	tags=["attacksRandomly", "hasHands"]
+	tags=["claypit", "hasHands"]
 	color="120,22,11"
 	graphic='G'
 	AI="HostileAnimal"
