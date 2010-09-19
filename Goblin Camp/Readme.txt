@@ -9,6 +9,29 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.12 --
+
+v0.12 brings a lot of internal improvements, improved mod support and
+features such as:
+
+*Armor
+*More naturally winding river
+*Bog for bog iron gathering (work in progress, as it is now gathering
+iron is too risk-free)
+*More informative tooltips (Stockpiles show what they contain, for ex.)
+*Ranged weapons
+*Creatures fly if hit hard enough
+*Animals with the Anger attribute now get properly angry
+*Items get stockpiled immediately when stockpile allowances are changed
+*The closest stockpile is chosen when stockpiling items
+*Constructions can be renamed
+*Settings and keybindings can be changed through an ingame menu
+*Creatures know how to swim
+*Constructions are damaged by projectiles
+*Job assignment now takes distance from the npc to the job into
+consideration.
+
+
 -- Version 0.111: ---
 
 Fixed stockmanager not scrolling
@@ -58,6 +81,7 @@ http://www.goblincamp.com/forum/
 *Press the 'h' key down (and keep it pressed down) to see keyboard help text. 
 	Basically there are keyboard shortcuts for most of the menus, and you can use
 	the numbers 0-9 to choose a menu item.
+*Keybindings can be changed from the main menu
 
 - Stock manager controls -
 
@@ -118,6 +142,9 @@ and can't move it later, so think before you place it!
 
 -- Configuration --
 
+The easiest way to change settings is through the main menu, but you can also
+change the settings through config.ini as described below:
+
 You can change the resolution and switch between windowed/full screen mode by
 editing config.ini which you'll find in your 
 /Documents/My Games/Goblin camp/ folder (or equivalent).
@@ -139,3 +166,6 @@ Licensing information is in COPYING.txt
 The libtcod license: LIBTCOD-LICENSE.txt
 
 Copyright 2010 Ilkka Halila
+
+E-Mail: gencontain@gmail.com
+Twitter: ihalila
