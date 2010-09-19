@@ -292,13 +292,13 @@ void JobManager::AssignJobs() {
 			}
 			if(!menialJobsToAssign.empty() || !expertJobsToAssign.empty()) {
 				
-				int menialMatrixSize = std::max(menialJobsToAssign.size(), menialNPCsWaiting.size());
-				int expertMatrixSize = std::max(expertJobsToAssign.size(), expertNPCsWaiting.size());
+				unsigned int menialMatrixSize = std::max(menialJobsToAssign.size(), menialNPCsWaiting.size());
+				unsigned int expertMatrixSize = std::max(expertJobsToAssign.size(), expertNPCsWaiting.size());
 				boost::numeric::ublas::matrix<int> menialMatrix(menialMatrixSize, menialMatrixSize);
 				boost::numeric::ublas::matrix<int> expertMatrix(expertMatrixSize, expertMatrixSize);
 
-				for(int x = 0; x < menialMatrixSize; x++) {
-					for(int y = 0; y < menialMatrixSize; y++) {
+				for(unsigned int x = 0; x < menialMatrixSize; x++) {
+					for(unsigned int y = 0; y < menialMatrixSize; y++) {
 						if(x >= menialNPCsWaiting.size() || y >= menialJobsToAssign.size()) {
 							menialMatrix(x, y) = 1;
 						} else {
@@ -315,8 +315,8 @@ void JobManager::AssignJobs() {
 					}
 				}
 				
-				for(int x = 0; x < expertMatrixSize; x++) {
-					for(int y = 0; y < expertMatrixSize; y++) {
+				for(unsigned int x = 0; x < expertMatrixSize; x++) {
+					for(unsigned int y = 0; y < expertMatrixSize; y++) {
 						if(x >= expertNPCsWaiting.size() || y >= expertJobsToAssign.size()) {
 							expertMatrix(x, y) = 1;
 						} else {
@@ -335,29 +335,37 @@ void JobManager::AssignJobs() {
 				std::vector<int> menialAssignments = FindBestMatching(menialMatrix);
 				std::vector<int> expertAssignments = FindBestMatching(expertMatrix);
 				
-				for(int i = 0, n = 0; n < menialNPCsWaiting.size(); i++, n++) {
-					int jobNum = menialAssignments[i];
+				for(unsigned int i = 0, n = 0; n < menialNPCsWaiting.size(); i++, n++) {
+					unsigned int jobNum = menialAssignments[i];
 					if(jobNum < menialJobsToAssign.size()) {
 						int npcNum = menialNPCsWaiting[n];
 						boost::shared_ptr<Job> job = menialJobsToAssign[jobNum];
-						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
-						job->Assign(npcNum);
-						npc->StartJob(job);
-						menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
-						n--;
+						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
+							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+							if (job && npc) {
+								job->Assign(npcNum);
+								npc->StartJob(job);
+								menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
+								n--;
+							}
+						}
 					}
 				}
 
-				for(int i = 0, n = 0; n < expertNPCsWaiting.size(); i++, n++) {
-					int jobNum = expertAssignments[i];
+				for(unsigned int i = 0, n = 0; n < expertNPCsWaiting.size(); i++, n++) {
+					unsigned int jobNum = expertAssignments[i];
 					if(jobNum < expertJobsToAssign.size()) {
 						int npcNum = expertNPCsWaiting[n];
 						boost::shared_ptr<Job> job = expertJobsToAssign[jobNum];
-						boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
-						job->Assign(npcNum);
-						npc->StartJob(job);
-						expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
-						n--;
+						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
+							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+							if (job && npc) {
+								job->Assign(npcNum);
+								npc->StartJob(job);
+								expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
+								n--;
+							}
+						}
 					}
 				}
 
