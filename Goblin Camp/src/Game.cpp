@@ -1282,3 +1282,23 @@ void Game::SetMark(int i) {
 void Game::ReturnToMark(int i) {
 	upleft = Coordinate(marks[i].X(), marks[i].Y());
 }
+
+void Game::TranslateContainerListeners() {
+	for (std::map<int,boost::shared_ptr<Item> >::iterator it = itemList.begin(); it != itemList.end(); ++it) {
+		if (boost::dynamic_pointer_cast<Container>(it->second)) {
+			boost::static_pointer_cast<Container>(it->second)->TranslateContainerListeners();
+		}
+	}
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator it = staticConstructionList.begin(); 
+		it != staticConstructionList.end(); ++it) {
+		if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
+			boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
+		}
+	}
+	for (std::map<int, boost::shared_ptr<Construction> >::iterator it = dynamicConstructionList.begin(); 
+		it != dynamicConstructionList.end(); ++it) {
+		if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
+			boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
+		}
+	}
+}

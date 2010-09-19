@@ -15,8 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "Entity.hpp"
 #include "Container.hpp"
 #include "Logger.hpp"
+#include "Construction.hpp"
+#include "Game.hpp"
 
 Container::Container(
 	Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components,
@@ -84,12 +87,17 @@ void Container::ReserveSpace(bool res) {
 
 void Container::AddListener(ContainerListener* listener) {
 	listeners.push_back(listener);
+	if (dynamic_cast<Stockpile*>(listener)) {
+		listenersAsUids.push_back(dynamic_cast<Stockpile*>(listener)->Uid());
+	}
 }
 
 void Container::RemoveListener(ContainerListener *listener) {
-  	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
+	unsigned int n = 0;
+  	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++, ++n) {
         if(*it == listener) {
             listeners.erase(it);
+			if (n < listenersAsUids.size()) listenersAsUids.erase(boost::next(listenersAsUids.begin(), n));
             return;
         }
 	}
@@ -97,4 +105,15 @@ void Container::RemoveListener(ContainerListener *listener) {
 
 void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
     tooltip->AddEntry(TooltipEntry((boost::format("%s (%d/%d)") % name % size() % (Capacity() + size())).str(), TCODColor::white));
+}
+
+void Container::TranslateContainerListeners() {
+	listeners.clear();
+	for (unsigned int i = 0; i < listenersAsUids.size(); ++i) {
+		boost::weak_ptr<Construction> cons = Game::Inst()->GetConstruction(listenersAsUids[i]);
+		if (cons.lock() && boost::dynamic_pointer_cast<Stockpile>(cons.lock())) {
+			listeners.push_back(boost::dynamic_pointer_cast<Stockpile>(cons.lock()).get());
+			Logger::Inst()->output<<"Translated conlistner "<<cons.lock()->Name()<<"\n";
+		}
+	}
 }

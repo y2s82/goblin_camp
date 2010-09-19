@@ -43,6 +43,7 @@ private:
 	int reservedSpace;
 	
 	std::vector<ContainerListener*> listeners;
+	std::vector<int> listenersAsUids;
 public:
 	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >(),
@@ -63,4 +64,5 @@ public:
 	void AddListener(ContainerListener* listener);
 	void RemoveListener(ContainerListener *listener);
 	void GetTooltip(int x, int y, Tooltip *tooltip);
+	void TranslateContainerListeners();
 };

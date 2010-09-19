@@ -382,7 +382,7 @@ void Container::save(Archive & ar, const unsigned int version) const {
 	ar & items;
 	ar & capacity;
 	ar & reservedSpace;
-	ar & listeners;
+	ar & listenersAsUids;
 }
 
 template<class Archive>
@@ -391,9 +391,8 @@ void Container::load(Archive & ar, const unsigned int version) {
 	ar & items;
 	ar & capacity;
 	ar & reservedSpace;
-	ar & listeners;
+	ar & listenersAsUids;
 }
-
 
 template<class Archive>
 void StatusEffect::save(Archive & ar, const unsigned int version) const {
@@ -822,6 +821,7 @@ void Game::LoadGame(std::string filename) {
 	iarch>>*Camp::Inst();
 	iarch>>*StockManager::Inst();
 	iarch>>*Map::Inst();
+	Game::Inst()->TranslateContainerListeners();
 }
 
 template<class Archive>
