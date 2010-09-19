@@ -463,15 +463,16 @@ namespace Data {
 	#pragma warning(disable : 4715)
 	fs::path& GetPath(Path::Path what) {
 		switch (what) {
-			case Path::Executable:  return globals::exec;
-			case Path::GlobalData:  return globals::dataDir;
-			case Path::Personal:    return globals::personalDir;
-			case Path::Mods:        return globals::modsDir;
-			case Path::Saves:       return globals::savesDir;
-			case Path::Screenshots: return globals::screensDir;
-			case Path::Font:        return globals::font;
-			case Path::Config:      return globals::config;
-			case Path::Keys:        return globals::keys;
+			case Path::Executable:    return globals::exec;
+			case Path::GlobalData:    return globals::dataDir;
+			case Path::Personal:      return globals::personalDir;
+			case Path::Mods:          return globals::modsDir;
+			case Path::Saves:         return globals::savesDir;
+			case Path::Screenshots:   return globals::screensDir;
+			case Path::Font:          return globals::font;
+			case Path::Config:        return globals::config;
+			case Path::Keys:          return globals::keys;
+			case Path::ExecutableDir: return globals::execDir;
 		}
 		
 		// If control reaches here, then someone added new value to the enum,

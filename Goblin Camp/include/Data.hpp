@@ -87,7 +87,7 @@ namespace Data {
 	
 	namespace Path {
 		enum Path {
-			Executable, GlobalData, Personal, Mods, Saves, Screenshots, Font, Config, Keys
+			Executable, GlobalData, Personal, Mods, Saves, Screenshots, Font, Config, Keys, ExecutableDir
 		};
 	}
 	

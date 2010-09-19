@@ -28,6 +28,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <ctime>
 #include <cstdlib>
 #include <cstdio>
+#include <string>
+#include <algorithm>
+
+#include "Data.hpp"
 
 namespace {
 	// Generates crash dump filename.
@@ -41,11 +45,11 @@ namespace {
 		
 		SHGetFolderPathAndSubDir(
 			NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL,
-			SHGFP_TYPE_CURRENT, "My Games\\Goblin Camp", dumpFilename
+			SHGFP_TYPE_CURRENT, "My Games\\Goblin Camp\\crashdumps", dumpFilename
 		);
 		
-		strftime(date, 20, "%d-%m-%Y-%H-%M-%S", timeStruct);
-		_snprintf(dumpFilename, MAX_PATH, "%s\\crash-%s.dmp", dumpFilename, date);
+		strftime(date, 20, "%d-%m-%Y_%H-%M-%S", timeStruct);
+		_snprintf(dumpFilename, MAX_PATH, "%s\\dump_%s.dmp", dumpFilename, date);
 		
 		char buffer[MAX_PATH + 200];
 		_snprintf(buffer, MAX_PATH + 200, "[Goblin Camp] Dump will be written to: %s", dumpFilename);
@@ -55,10 +59,7 @@ namespace {
 	BOOL CALLBACK DumpCallback(void*, MINIDUMP_CALLBACK_INPUT * const input, MINIDUMP_CALLBACK_OUTPUT *output);
 	
 	// Produces crash.dmp containing exception info and portions of process memory.
-	bool CreateDump(EXCEPTION_POINTERS *exception) {
-		char dumpFilename[MAX_PATH];
-		GetDumpFilename(dumpFilename);
-		
+	bool CreateDump(EXCEPTION_POINTERS *exception, char dumpFilename[MAX_PATH]) {
 		HANDLE dump = CreateFile(
 			dumpFilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
 			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL
@@ -127,7 +128,35 @@ namespace {
 	
 	LONG CALLBACK ExceptionHandler(EXCEPTION_POINTERS *exception) {
 		OutputDebugString(TEXT("[Goblin Camp] Unhandled exception occured."));
-		CreateDump(exception);
+		
+		char dumpFilename[MAX_PATH];
+		GetDumpFilename(dumpFilename);
+		CreateDump(exception, dumpFilename);
+		
+		// Try to invoke crash.exe.
+		// Use full path to avoid executable injection issues.
+		std::string crashExe = (Data::GetPath(Data::Path::ExecutableDir) / "crash.exe").string();
+		std::string cmdLine  = std::string("\"") + dumpFilename + "\"";
+		char cmdLineBuffer[MAX_PATH + 3];
+		int  cmdLineSize = std::max((unsigned)(MAX_PATH + 2), cmdLine.size());
+		
+		cmdLine.copy(cmdLineBuffer, cmdLineSize);
+		cmdLineBuffer[cmdLineSize] = '\0';
+		
+		PROCESS_INFORMATION procInfo;
+		STARTUPINFO startupInfo;
+		ZeroMemory(&startupInfo, sizeof(startupInfo));
+		startupInfo.cb = sizeof(startupInfo);
+		
+		// We don't really care whether this succeeds at all. We're very happy if it does, though.
+		if (CreateProcess(
+			crashExe.c_str(), cmdLineBuffer, NULL, NULL, FALSE,
+			DETACHED_PROCESS, NULL, NULL, &startupInfo, &procInfo
+		)) {
+			CloseHandle(procInfo.hProcess);
+			CloseHandle(procInfo.hThread);
+		}
+		
 		return EXCEPTION_CONTINUE_SEARCH;
 	}
 }
