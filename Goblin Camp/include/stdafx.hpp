@@ -68,3 +68,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // libtcod
 #	include <libtcod.hpp>
 #endif
+
+// Use with care.
+#if defined(_MSC_VER) && defined(DEBUG)
+#	define GC_DEBUG_INDUCE_CRASH() *((short*)0xDEADC0DE) = 0xDEAD
+#	define GC_DEBUG_BREAKPOINT()   __asm int 3
+#else
+#	define GC_DEBUG_INDUCE_CRASH()
+#	define GC_DEBUG_BREAKPOINT()
+#endif
