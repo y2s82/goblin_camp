@@ -349,6 +349,7 @@ item_type "Wine" {
 	nutrition = 72000
 	multiplier = 10
 	constructedin = "Brewery"
+	fitsin = "Liquid container"
 }
 
 item_type "Pie" {
@@ -396,6 +397,7 @@ item_type "Flour" {
 	components = ["Seed", "Seed"]
 	containIn = "Flour container"
 	constructedin = "Mill"
+	fitsin = "Flour container"
 }
 
 item_type "Flower" {
