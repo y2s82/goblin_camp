@@ -58,7 +58,14 @@ enum Skill {
 };
 
 class SkillSet {
+	friend class boost::serialization::access;
 private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 	int skills[SKILLAMOUNT];
 public:
 	SkillSet();
@@ -103,7 +110,6 @@ private:
 		boost::function<bool(boost::shared_ptr<NPC>)> findJob = boost::function<bool(boost::shared_ptr<NPC>)>(),
 		boost::function<void(boost::shared_ptr<NPC>)> react = boost::function<void(boost::shared_ptr<NPC>)>());
 	NPCType type;
-	bool _visArray[LOS_DISTANCE*2 * LOS_DISTANCE*2];
 	int timeCount;
 	std::deque<boost::shared_ptr<Job> > jobs;
 	int taskIndex;
@@ -181,8 +187,6 @@ public:
 	unsigned int speed();
 	void color(TCODColor,TCODColor=TCODColor::black);
 	void graphic(int);
-
-	bool *visArray();
 
 	Task* currentTask();
 	Task* nextTask();
