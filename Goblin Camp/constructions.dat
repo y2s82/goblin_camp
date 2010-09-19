@@ -110,7 +110,7 @@ construction_type "Door" {
 }
 
 construction_type "Stone quarry" {
-	category="Workshops"
+	category="Permanent"
 	graphicLength=10
 	graphic=[176,176,178, 44,177,176,177,178,178,176,
 			 177, 46, 46, 44, 44, 44, 46,177,176,177,
