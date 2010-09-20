@@ -105,7 +105,6 @@ category_type "Clay" {
 }
 
 category_type "Brick" {
-	parent="Clay"
 }
 
 category_type "Metal" {
