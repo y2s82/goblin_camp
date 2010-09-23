@@ -23,17 +23,10 @@ Except for C++ compiler, you will need several tools to be able to build Goblin 
 Here's list with known working versions:
 
 * `Python`_ **2.6.6** or newer (**not** 3.x).
-* `bjam`_ **03.1.19** — included with Goblin Camp.
+* `Boost.Jam`_ **03.1.18**.
 
 .. _Python: http://python.org/
-
-bjam
-++++
-
-You can build bjam using ``boost-build\jam_src\build.bat`` (Windows) or ``boost-build\jam_src\build.sh`` (\*nix) —
-``boost-build`` is in the same directory as this README.
-
-Before reporting any problems with the build, use included bjam first!
+.. _Boost.Jam:   http://sourceforge.net/projects/boost/files/boost-jam/3.1.18/
 
 Dependencies
 ~~~~~~~~~~~~
