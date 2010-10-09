@@ -18,8 +18,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #undef _UNICODE
 #undef UNICODE
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <dbghelp.h>
 #include <shlobj.h>
@@ -29,13 +27,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <cstdio>
 #include <string>
+#include <list>
 #include <algorithm>
 
 #include "Data.hpp"
+#include "Logger.hpp"
 
 namespace {
 	// Generates crash dump filename.
-	void GetDumpFilename(char dumpFilename[MAX_PATH]) {
+	void GetDumpFilename(char dumpPath[MAX_PATH], char dumpFilename[MAX_PATH]) {
 		char date[20]; // DD-MM-YYYY-HH-MM-SS
 		struct tm *timeStruct;
 		__int64 timestamp;
@@ -45,11 +45,12 @@ namespace {
 		
 		SHGetFolderPathAndSubDir(
 			NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL,
-			SHGFP_TYPE_CURRENT, "My Games\\Goblin Camp\\crashdumps", dumpFilename
+			SHGFP_TYPE_CURRENT, "My Games\\Goblin Camp\\crashes", dumpPath
 		);
 		
 		strftime(date, 20, "%d-%m-%Y_%H-%M-%S", timeStruct);
-		_snprintf(dumpFilename, MAX_PATH, "%s\\dump_%s.dmp", dumpFilename, date);
+		_snprintf(dumpFilename, MAX_PATH, "dump_%s.dmp", date);
+		_snprintf(dumpPath, MAX_PATH, "%s\\%s", dumpPath, dumpFilename);
 		
 		char buffer[MAX_PATH + 200];
 		_snprintf(buffer, MAX_PATH + 200, "[Goblin Camp] Dump will be written to: %s", dumpFilename);
@@ -59,9 +60,9 @@ namespace {
 	BOOL CALLBACK DumpCallback(void*, MINIDUMP_CALLBACK_INPUT * const input, MINIDUMP_CALLBACK_OUTPUT *output);
 	
 	// Produces crash.dmp containing exception info and portions of process memory.
-	bool CreateDump(EXCEPTION_POINTERS *exception, char dumpFilename[MAX_PATH]) {
+	bool CreateDump(EXCEPTION_POINTERS *exception, char dumpPath[MAX_PATH]) {
 		HANDLE dump = CreateFile(
-			dumpFilename, GENERIC_WRITE, FILE_SHARE_READ, NULL,
+			dumpPath, GENERIC_WRITE, FILE_SHARE_READ, NULL,
 			CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL
 		);
 		
@@ -99,6 +100,7 @@ namespace {
 			OutputDebugString(buffer);
 		}
 		
+		FlushFileBuffers(dump);
 		CloseHandle(dump);
 		return result;
 	}
@@ -129,35 +131,43 @@ namespace {
 	LONG CALLBACK ExceptionHandler(EXCEPTION_POINTERS *exception) {
 		OutputDebugString(TEXT("[Goblin Camp] Unhandled exception occured."));
 		
-		char dumpFilename[MAX_PATH];
-		GetDumpFilename(dumpFilename);
-		CreateDump(exception, dumpFilename);
+		char dumpPath[MAX_PATH], dumpFilename[MAX_PATH];
+		GetDumpFilename(dumpPath, dumpFilename);
+		CreateDump(exception, dumpPath);
 		
-		// Try to invoke crash.exe.
+		// Try to flush logfile.
+		try {
+			Logger::log.flush();
+		} catch (...) {
+			// Boom?
+		}
+		
+		// Try to invoke external crash reporter.
 		// Use full path to avoid executable injection issues.
-		std::string crashExe = (Data::GetPath(Data::Path::ExecutableDir) / "crash.exe").string();
-		std::string cmdLine  = std::string("\"") + dumpFilename + "\"";
-		char cmdLineBuffer[MAX_PATH + 3];
-		int  cmdLineSize = std::max((unsigned)(MAX_PATH + 2), cmdLine.size());
-		
-		cmdLine.copy(cmdLineBuffer, cmdLineSize);
-		cmdLineBuffer[cmdLineSize] = '\0';
+		std::string crashExe = (Data::GetPath(Data::Path::ExecutableDir) / "goblin-camp-crash.exe").string();
 		
 		PROCESS_INFORMATION procInfo;
 		STARTUPINFO startupInfo;
 		ZeroMemory(&startupInfo, sizeof(startupInfo));
 		startupInfo.cb = sizeof(startupInfo);
 		
+		std::string cmdLine = "\"" + crashExe + "\" " + dumpFilename;
+		char cmdLineBuffer[2048];
+		cmdLine.copy(cmdLineBuffer, 2048);
+		cmdLineBuffer[cmdLine.size()] = '\0';
+		
 		// We don't really care whether this succeeds at all. We're very happy if it does, though.
 		if (CreateProcess(
-			crashExe.c_str(), cmdLineBuffer, NULL, NULL, FALSE,
+			NULL, cmdLineBuffer, NULL, NULL, FALSE,
 			DETACHED_PROCESS, NULL, NULL, &startupInfo, &procInfo
 		)) {
 			CloseHandle(procInfo.hProcess);
 			CloseHandle(procInfo.hThread);
 		}
 		
-		return EXCEPTION_CONTINUE_SEARCH;
+		// Don't let the system keep the process running, or the crash reporter
+		// may not be able to access some files. 
+		return EXCEPTION_EXECUTE_HANDLER;
 	}
 }
 
