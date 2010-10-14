@@ -135,13 +135,6 @@ namespace {
 		GetDumpFilename(dumpPath, dumpFilename);
 		CreateDump(exception, dumpPath);
 		
-		// Try to flush logfile.
-		try {
-			Logger::log.flush();
-		} catch (...) {
-			// Boom?
-		}
-		
 		// Try to invoke external crash reporter.
 		// Use full path to avoid executable injection issues.
 		std::string crashExe = (Data::GetPath(Data::Path::ExecutableDir) / "goblin-camp-crash.exe").string();
@@ -166,7 +159,7 @@ namespace {
 		}
 		
 		// Don't let the system keep the process running, or the crash reporter
-		// may not be able to access some files. 
+		// may not be able to access some files.
 		return EXCEPTION_EXECUTE_HANDLER;
 	}
 }
