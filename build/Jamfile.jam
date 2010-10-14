@@ -12,6 +12,7 @@ import boost ;
 import libtcod ;
 import winsdk ;
 import python ;
+#import dotnet ;
 
 ##
 # Project definition
@@ -32,13 +33,14 @@ project goblin-camp
       <address-model>64:<define>X64
       # NT specific defines
       <os>NT:<define>WINDOWS
+      <os>NT:<define>WIN32_LEAN_AND_MEAN
+      <os>NT:<define>NOMINMAX
       <os>NT,<variant>release:<user-interface>gui
       <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
-      <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1
-      <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=1
+      <os>NT,<toolset>msvc:<define>STRICT
       # Linux specific defines
       <os>LINUX:<define>LINUX
       # OSX specific defines
@@ -59,6 +61,7 @@ boost.use-project ;
 winsdk.use-project ;
 libtcod.use-project ;
 python.use-project ;
+#dotnet.show-version ;
 
 ##
 # Local rules
@@ -121,10 +124,38 @@ explicit-alias common-deps
 if [ os.name ] = NT {
     ECHO ** Building for Windows ;
     
+    if --iterator-debugging in [ modules.peek : ARGV ] {
+        ECHO ** Building with iterator debugging. ;
+        ECHO ** If you're getting multi_array errors with Boost and MSVC2010, you should not enable this. ;
+        
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1 ;
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_SECURE_SCL=1 ;
+    } else {
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=0 ;
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_SECURE_SCL=0 ;
+    }
+    
     current-sources  += $(win32-sources) ;
     version-sources  += $(win32-ver-sources) ;
     additional-files += $(GC_BUILD_ROOT)/installer/redists/dbghelp.dll ;
     
+    additional-files += [ glob $(GC_BUILD_ROOT)/prebuilt/*.* ] ;
+    
+    #obj crash.CrashForm
+    #    : $(GC_SOURCE_ROOT)/crash/CrashForm.resx
+    #;
+    #exe goblin-camp-crash
+    #    : [ path.glob $(GC_SOURCE_ROOT)/crash : *.cs ]
+    #    : <resource>crash.CrashForm <implicit-dependency>crash.CrashForm
+    #;
+    
+    #exe goblin-camp-crash
+    #    : [ path.glob $(GC_SOURCE_ROOT)/crash : *.cpp ]
+    #      $(GC_WIN32_SOURCES)/CommandLine.cpp
+    #      /winsdk//user32 /winsdk//shell32 /winsdk//comctl32 /winsdk//gdi32
+    #      /boost//system /boost//filesystem
+    #    : <user-interface>gui <include>$(GC_SOURCE_ROOT)/crash <define>NOMINMAX <define>WIN32_LEAN_AND_MEAN
+    #;
     explicit-alias platform-deps : win32-deps ;
 } else if [ os.name ] = LINUX {
     ECHO ** Building for Linux ;

@@ -103,12 +103,16 @@ IMPORT modules : import : : import ;
       kernel        # only the most-intrinsic modules: modules, errors
       util          # low-level substrate: string/number handling, etc.
       build         # essential elements of the build system architecture
-      tools         # toolsets for handling specific build jobs and targets.
-      contrib       # user contributed (unreviewed) modules
+      goblin-camp   # Goblin Camp-specific components and tools
+      tools         # toolsets for handling specific build jobs and targets
       .             # build-system.jam lives here
       ;
     local whereami = [ NORMALIZE_PATH $(.bootstrap-file:DT) ] ;
-    BOOST_BUILD_PATH += $(whereami:D)/$(subdirs) ;
+    
+    for local subdir in $(subdirs) {
+        local path = $(whereami:D)/$(subdir) ;
+        BOOST_BUILD_PATH += $(path) ;
+    }
 
     modules.poke .ENVIRON : BOOST_BUILD_PATH : $(BOOST_BUILD_PATH) ;
     

@@ -33,7 +33,7 @@ rule use-project ( ) {
         : usage-requirements $(usage-reqs)
     ;
     
-    local libs = shell32 shlwapi dbghelp ;
+    local libs = shell32 shlwapi dbghelp user32 comctl32 gdi32 ;
     
     for local name in $(libs) {
         lib $(name) ;
