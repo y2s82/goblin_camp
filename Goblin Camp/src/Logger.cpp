@@ -40,10 +40,8 @@ namespace Logger {
 	
 	void OpenLogFile(const std::string& logFile) {
 		log.open(logFile.c_str());
-	#ifdef DEBUG
-		// no buffering in debug builds
+		// no buffering
 		log.rdbuf()->pubsetbuf(0, 0);
-	#endif
 		
 		LOG("Log opened " << boost::posix_time::second_clock::local_time());
 		// Instead of explicit closing: to ensure it's always flushed at the end, even when we bail out with exit().
