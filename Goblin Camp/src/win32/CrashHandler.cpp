@@ -31,7 +31,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <algorithm>
 
 #include "Data.hpp"
-#include "Logger.hpp"
 
 namespace {
 	// Generates crash dump filename.
