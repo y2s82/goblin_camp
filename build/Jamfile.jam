@@ -28,6 +28,7 @@ project goblin-camp
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
       <define>BOOST_LIB_DIAGNOSTIC
+      <define>BOOST_FILESYSTEM_VERSION=3
       # Architecture defines
       <address-model>32:<define>X86
       <address-model>64:<define>X64
