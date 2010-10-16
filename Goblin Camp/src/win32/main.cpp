@@ -26,7 +26,7 @@ int GCMain(std::vector<std::string>&);
 void InstallExceptionHandler();
 void GCCommandLine(std::vector<std::string>&);
 
-#ifdef DEBUG
+#ifndef DEBUG
 #	define GC_MAIN_FUNCTION()  WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #	define GC_GET_ARGUMENTS(A) GCCommandLine(A)
 #else
