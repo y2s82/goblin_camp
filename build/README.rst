@@ -100,7 +100,7 @@ libtcod
 
 Same as with Boost, but the format is::
 
-    using build/libtcod : properties ;
+    using libtcod : properties ;
 
 Available properties:
 
@@ -111,14 +111,14 @@ Available properties:
 
 Example::
 
-    using build/libtcod : <library>C:\dev\libs\libtcod\lib <include>C:\dev\libs\libtcod\include ;
+    using libtcod : <library>C:\dev\libs\libtcod\lib <include>C:\dev\libs\libtcod\include ;
 
 Windows SDK
 +++++++++++
 
 Format::
 
-    using build/winsdk : properties ;
+    using winsdk : properties ;
 
 Properties:
 
@@ -127,14 +127,14 @@ Properties:
 
 Example::
 
-    using build/winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
+    using winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
 
 Python
 ++++++
 
 Format::
 
-    using build/python : properties ;
+    using python : properties ;
 
 Properties:
 
@@ -146,7 +146,7 @@ Properties:
 
 Example::
 
-    using build/python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
+    using python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
 
 Building
 ~~~~~~~~
