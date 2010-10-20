@@ -425,7 +425,7 @@ using boost : 1.44 : &lt;layout&gt;tagged ;
 <h3><a class="toc-backref" href="#id11">libtcod</a></h3>
 <p>Same as with Boost, but the format is:</p>
 <pre class="literal-block">
-using build/libtcod : properties ;
+using libtcod : properties ;
 </pre>
 <p>Available properties:</p>
 <ul class="simple">
@@ -436,14 +436,14 @@ If you don't provide these, build system will attempt to guess them (it will pri
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using build/libtcod : &lt;library&gt;C:\dev\libs\libtcod\lib &lt;include&gt;C:\dev\libs\libtcod\include ;
+using libtcod : &lt;library&gt;C:\dev\libs\libtcod\lib &lt;include&gt;C:\dev\libs\libtcod\include ;
 </pre>
 </div>
 <div class="section" id="id3">
 <h3><a class="toc-backref" href="#id12">Windows SDK</a></h3>
 <p>Format:</p>
 <pre class="literal-block">
-using build/winsdk : properties ;
+using winsdk : properties ;
 </pre>
 <p>Properties:</p>
 <ul class="simple">
@@ -452,14 +452,14 @@ using build/winsdk : properties ;
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using build/winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\libs\WinSDK\v7.1\Include ;
+using winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\libs\WinSDK\v7.1\Include ;
 </pre>
 </div>
 <div class="section" id="id4">
 <h3><a class="toc-backref" href="#id13">Python</a></h3>
 <p>Format:</p>
 <pre class="literal-block">
-using build/python : properties ;
+using python : properties ;
 </pre>
 <p>Properties:</p>
 <ul class="simple">
@@ -471,7 +471,7 @@ using build/python : properties ;
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using build/python : &lt;version&gt;2.7 &lt;library&gt;C:\dev\apps\Python27\libs &lt;include&gt;C:\dev\apps\Python27\include ;
+using python : &lt;version&gt;2.7 &lt;library&gt;C:\dev\apps\Python27\libs &lt;include&gt;C:\dev\apps\Python27\include ;
 </pre>
 </div>
 </div>
