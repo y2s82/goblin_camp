@@ -65,9 +65,6 @@ private:
 	Game();
 	static Game* instance;
 	int screenWidth, screenHeight;
-	int resolutionWidth, resolutionHeight;
-	bool fullscreen;
-	TCOD_renderer_t renderer;
 	Season season;
 	int time;
 	int orcCount, goblinCount;

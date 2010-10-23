@@ -13,30 +13,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
-
-#include <sys/types.h>
-#include <unistd.h>
+#pragma once
 
 #include <boost/filesystem.hpp>
-#include <string>
-#include <cstring>
-#include <cstdlib>
 
-namespace fs = boost::filesystem;
-
-namespace PathsImpl {
-	void FindPersonalDirectory(fs::path& dir) {
-		dir = fs::path(std::string(getenv("HOME")) + "/.goblincamp");
-	}
+namespace Paths {
+	enum Path {
+		Executable, GlobalData, Personal, Mods, Saves,
+		Screenshots, Font, Config, ExecutableDir
+	};
 	
-	void FindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-		char buffer[1024];
-		ssize_t pos = readlink("/proc/self/exe", buffer, 1023);
-		buffer[pos] = '\0';
-		
-		exec    = fs::path(std::string(buffer));
-		execDir = exec.parent_path();
-		dataDir = fs::path(execDir.parent_path()) / "share/goblin-camp/";
-	}
+	void Init();
+	const boost::filesystem::path& Get(Path);
 }

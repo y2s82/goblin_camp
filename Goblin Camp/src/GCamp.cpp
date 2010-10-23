@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
+#include <functional>
 
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -31,7 +32,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
-#include "Data.hpp"
+#include "data/Paths.hpp"
+#include "data/Config.hpp"
+#include "data/Data.hpp"
+#include "data/Mods.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
 #include "scripting/Engine.hpp"
@@ -49,10 +53,29 @@ void ModsMenu();
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;
 	
-	Data::Init();
+	//
+	// Bootstrap phase.
+	//
+	Paths::Init();
+	Config::Init();
 	Script::Init(args);
-	Game::Inst()->Init();
 	
+	//
+	// Load phase.
+	//
+	Data::LoadConfig();
+	Data::LoadFont();
+	
+	Game::Inst()->Init();
+	#ifdef MACOSX
+	Data::LoadFont();
+	#endif
+	
+	Mods::Load();
+	
+	//
+	// Parse command line.
+	//
 	LOG("args.size() = " << args.size());
 	
 	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
@@ -61,6 +84,9 @@ int GCMain(std::vector<std::string>& args) {
 		LOG("Bootstrap test, going into shutdown.");
 	}
 	
+	//
+	// Shutdown.
+	//
 	Script::Shutdown();
 	return exitcode;
 }
@@ -251,23 +277,17 @@ int MainMenu() {
 	return 0;
 }
 
-namespace {
-	bool SortSaves(const Data::SaveInfo& a, const Data::SaveInfo& b) {
-		return a.get<2>() > b.get<2>();
-	}
-}
-
 void LoadMenu() {
 	int width = 59; // 2 for borders, 20 for filename, 2 spacer, 20 for date, 2 spacer, 13 for filesize
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
 	TCOD_mouse_t mouseStatus;
 
-	Data::SaveList list;
+	std::vector<Data::Save> list;
 	Data::GetSavedGames(list);
 	
 	// sort by last modification, newest on top
-	std::sort(list.begin(), list.end(), &SortSaves);
+	std::sort(list.begin(), list.end(), std::greater<Data::Save>());
 
 	int height = list.size() + 4;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
@@ -300,7 +320,7 @@ void LoadMenu() {
 				TCODConsole::root->setDefaultBackground(TCODColor::black);
 			}
 			
-			std::string label = list[i].get<0>();
+			std::string label = list[i].filename;
 			if (label.size() > 20) {
 				label = label.substr(0, 17) + "...";
 			}
@@ -308,45 +328,10 @@ void LoadMenu() {
 			TCODConsole::root->setDefaultForeground(TCODColor::azure);
 			
 			// last modification date
-			char date[21] = { "0000-00-00, 00:00:00" }; 
-			{
-				size_t dateLast = 0;
-				struct tm *dateTM;
-				time_t dateTime = 0;
-				
-				dateTime = list[i].get<2>();
-				dateTM   = localtime(&dateTime);
-				dateLast = strftime(date, 21, "%Y-%m-%d, %H:%M:%S", dateTM);
-				date[dateLast] = '\0';
-			}
-			
-			TCODConsole::root->print(edgex + 1 + 20 + 2, edgey + 3 + i, "%-20s", date);
+			TCODConsole::root->print(edgex + 1 + 20 + 2, edgey + 3 + i, "%-20s", list[i].date.c_str());
 			
 			// filesize
-			{
-				boost::uintmax_t oneKB = 1024;
-				boost::uintmax_t oneMB = 1024 * 1024;
-				boost::uintmax_t oneGB = 1024 * 1024 * 1024;
-				boost::uintmax_t filesize = list[i].get<1>();
-				const char *format;
-				double filesizeF;
-				
-				if (filesize >= oneGB) {
-					format    = "%10.2f GB";
-					filesizeF = filesize / oneGB;
-				} else if (filesize >= oneMB) {
-					format    = "%10.2f MB";
-					filesizeF = filesize / oneMB;
-				} else if (filesize >= oneKB) {
-					format    = "%10.2f kB";
-					filesizeF = filesize / oneGB;
-				} else {
-					format    = "%10.0f  b";
-					filesizeF = (float)filesize;
-				}
-				
-				TCODConsole::root->print(edgex + 1 + 20 + 2 + 20 + 2, edgey + 3 + i, format, filesizeF);
-			}
+			TCODConsole::root->print(edgex + 1 + 20 + 2 + 20 + 2, edgey + 3 + i, "%s", list[i].size.c_str());
 		}
 		
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -367,7 +352,7 @@ void LoadMenu() {
 			lButtonDown = false;
 			
 			if (selected < list.size() && selected >= 0) {
-				Data::LoadGame(list[selected].get<0>());
+				Data::LoadGame(list[selected].filename);
 				MainLoop();
 				break;
 			}
@@ -391,7 +376,7 @@ void SaveMenu() {
 		if (key.vk == TCODK_ESCAPE) return;
 		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
 			TCODConsole::root->clear();
-			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5, 
+			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5,
 				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
 			TCODConsole::root->flush();
 			
@@ -401,12 +386,12 @@ void SaveMenu() {
 		}
 
 		TCODConsole::root->clear();
-		TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15, 
+		TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15,
 			Game::Inst()->ScreenHeight()/2-3, 30, 3, true, TCOD_BKGND_SET, "Save name");
 		TCODConsole::root->setDefaultBackground(TCODColor::darkGrey);
 		TCODConsole::root->rect(Game::Inst()->ScreenWidth()/2-14, Game::Inst()->ScreenHeight()/2-2, 28, 1, true);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
-		TCODConsole::root->print(Game::Inst()->ScreenWidth()/2, 
+		TCODConsole::root->print(Game::Inst()->ScreenWidth()/2,
 			Game::Inst()->ScreenHeight()/2-2, "%s", saveName.c_str());
 		TCODConsole::root->flush();
 
@@ -428,10 +413,10 @@ namespace {
 }
 
 void SettingsMenu() {
-	std::string width        = boost::lexical_cast<std::string>(Game::Inst()->resolutionWidth);
-	std::string height       = boost::lexical_cast<std::string>(Game::Inst()->resolutionHeight);
-	TCOD_renderer_t renderer = Game::Inst()->renderer;
-	bool fullscreen          = Game::Inst()->fullscreen;
+	std::string width        = Config::GetStringCVar("resolutionX");
+	std::string height       = Config::GetStringCVar("resolutionY");
+	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
@@ -544,31 +529,17 @@ void SettingsMenu() {
 			}
 		}
 	}
-
-	unsigned int cfgWidth  = boost::lexical_cast<unsigned int>(width);
-	unsigned int cfgHeight = boost::lexical_cast<unsigned int>(height);
-	const char *cfgRenderer;
-	// it happens that TCOD_RENDERER_GLSL = 0, TCOD_RENDERER_OPENGL = 1 and TCOD_RENDERER_SDL = 2
-	// but I'd rather not rely on that
-	for (unsigned int idx = 0; idx < rendererCount; ++idx) {
-		if (renderers[idx].renderer == renderer) {
-			cfgRenderer = renderers[idx].label;
-		}
-	}
-
+	
+	Config::SetStringCVar("resolutionX", width);
+	Config::SetStringCVar("resolutionY", height);
+	Config::SetCVar("renderer", renderer);
+	Config::SetCVar("fullscreen", fullscreen);
+	
 	try {
-		Data::SaveConfig(cfgWidth, cfgHeight, cfgRenderer, fullscreen);
+		Config::Save();
 	} catch (const std::exception& e) {
 		LOG("Could not save configuration! " << e.what());
 	}
-
-	// remember new settings
-	// I tried to make it apply new settings immediately, but it didn't work reliably
-	// this is only so the settings dialog will display updated values next time
-	Game::Inst()->resolutionWidth  = cfgWidth;
-	Game::Inst()->resolutionHeight = cfgHeight;
-	Game::Inst()->renderer         = renderer;
-	Game::Inst()->fullscreen       = fullscreen;
 }
 
 // Possible TODO: toggle mods on and off.
@@ -579,26 +550,26 @@ void ModsMenu() {
 	const int h = 20;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
-
-	std::list<Data::Mod>& modList = Data::GetLoadedMods();
+	
+	const std::list<Mods::Metadata>& modList = Mods::GetLoaded();
 	const int subH = modList.size() * 5;
 	TCODConsole sub(w - 2, std::max(1, subH));
 
 	int currentY = 0;
-	for (std::list<Data::Mod>::iterator it = modList.begin(); it != modList.end(); ++it) {
+	
+	BOOST_FOREACH(Mods::Metadata mod, modList) {
 		sub.setDefaultBackground(TCODColor::black);
-		Data::Mod& mod = *it;
-
+		
 		sub.setAlignment(TCOD_CENTER);
 		sub.setDefaultForeground(TCODColor::azure);
 		sub.print(w / 2, currentY, "%s", mod.mod.c_str());
-
+		
 		sub.setAlignment(TCOD_LEFT);
 		sub.setDefaultForeground(TCODColor::white);
 		sub.print(3, currentY + 1, "Name:    %s", mod.name.c_str());
 		sub.print(3, currentY + 2, "Author:  %s", mod.author.c_str());
 		sub.print(3, currentY + 3, "Version: %s", mod.version.c_str());
-
+		
 		currentY += 5;
 	}
 
@@ -644,7 +615,7 @@ void ModsMenu() {
 }
 
 void KeysMenu() {
-	std::map<std::string, char>& keyMap = UI::GetKeys();
+	Config::KeyMap& keyMap = Config::GetKeyMap();
 	std::vector<std::string> labels;
 	labels.reserve(keyMap.size());
 	
@@ -653,10 +624,9 @@ void KeysMenu() {
 	int w = 40;
 	const int h = keyMap.size() + 4;
 	
-	typedef std::pair<std::string, char> KeyPair;
-	BOOST_FOREACH(KeyPair mapping, keyMap) {
-		w = std::max(w, (int)mapping.first.size() + 7); // 2 for borders, 5 for [ X ]
-		labels.push_back(mapping.first);
+	BOOST_FOREACH(Config::KeyMap::value_type pair, keyMap) {
+		w = std::max(w, (int)pair.first.size() + 7); // 2 for borders, 5 for [ X ]
+		labels.push_back(pair.first);
 	}
 	
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
@@ -706,7 +676,7 @@ void KeysMenu() {
 	}
 	
 	try {
-		Data::SaveKeys(keyMap);
+		Config::Save();
 	} catch (const std::exception& e) {
 		LOG("Could not save keymap! " << e.what());
 	}

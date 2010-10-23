@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "scripting/_python.hpp"
 
+#include <fstream>
 #include <cassert>
 #include <vector>
 #include <string>
@@ -28,7 +29,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
-#include "Data.hpp"
+#include "data/Paths.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/API.hpp"
 #include "scripting/_gcampapi/LoggerStream.hpp"
@@ -60,9 +61,11 @@ namespace Script {
 		#else
 			char pathsep = ':';
 		#endif
-			std::string path = (Data::GetPath(Data::Path::GlobalData) / "lib").string();
+			fs::path libDir = (Paths::Get(Paths::GlobalData) / "lib");
+			
+			std::string path = libDir.string();
 			path += pathsep;
-			path += (Data::GetPath(Data::Path::GlobalData) / "lib" / "stdlib.zip").string();
+			path += (libDir / "stdlib.zip").string();
 			
 			PySys_SetPath(const_cast<char*>(path.c_str()));
 		}
@@ -88,12 +91,13 @@ namespace Script {
 		globals::printExcFunc    = modTB.attr("print_exception");
 		globals::loadPackageFunc = modImp.attr("load_package");
 		
-		LOG("Exposing API.");
+		LOG("Exposing the API.");
 		ExposeAPI();
-		PyImport_AddModule("gcmods");
 		
-		LOG("Loading __core__ mod.");
-		LoadScript("__core__", (Data::GetPath(Data::Path::GlobalData) / "lib" / "gcamp_core").string());
+		LOG("Creating internal namespaces.");
+		PyImport_AddModule("__gcmods__");
+		PyImport_AddModule("__gcuserconfig__");
+		PyImport_AddModule("__gcautoexec__");
 	}
 	
 	void Shutdown() {
@@ -104,10 +108,10 @@ namespace Script {
 	}
 	
 	void LoadScript(const std::string& mod, const std::string& directory) {
-		LOG("Loading '" << directory << "' into 'gcmods." << mod << "'.");
+		LOG("Loading '" << directory << "' into '__gcmods__." << mod << "'.");
 		
 		try {
-			globals::loadPackageFunc("gcmods." + mod, directory);
+			globals::loadPackageFunc("__gcmods__." + mod, directory);
 		} catch (const py::error_already_set&) {
 			LogException();
 		}

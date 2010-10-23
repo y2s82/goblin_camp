@@ -30,7 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Job.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
-#include "Data.hpp"
+#include "data/Config.hpp"
+#include "data/Data.hpp"
 #include "Camp.hpp"
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
@@ -38,67 +39,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/AnnounceDialog.hpp"
 #include "UI/Tooltip.hpp"
 #include "UI/JobDialog.hpp"
-
-#pragma mark Keyboard command config parsing
-
-class KeyMap : public ITCODParserListener {
-public:
-	std::map<std::string, char> keyMap;
-
-	char operator[](std::string s) {
-		return keyMap[s];
-	}
-
-	KeyMap(): keyMap(std::map<std::string, char>()) {}
-
-	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		return true;
-	}
-
-	bool parserFlag(TCODParser *parser,const char *name) {
-		return true;
-	}
-
-	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		keyMap[name] = value.c;
-		return true;
-	}
-
-	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		return true;
-	}
-
-	void error(const char *msg) {
-		LOG("KeyConfigListener: " << msg);
-		Game::Inst()->Exit();
-	}
-};
-
-KeyMap keyMap = KeyMap();
-
-void UI::LoadKeys(std::string filename) {
-	TCODParser parser = TCODParser();
-	TCODParserStruct* keysTypeStruct = parser.newStructure("keys");
-	keysTypeStruct->addProperty("Exit", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Basics", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Workshops", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Orders", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Furniture", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("StockManager", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Squads", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Announcements", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Center", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Help", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Pause", TCOD_TYPE_CHAR, true);
-	keysTypeStruct->addProperty("Joblist", TCOD_TYPE_CHAR, true);
-
-	parser.run(filename.c_str(), &keyMap);
-
-}
-
-std::map<std::string, char>& UI::GetKeys() {
-	return keyMap.keyMap;
-}
 
 #pragma mark UI
 
@@ -143,6 +83,8 @@ void UI::Update() {
 }
 
 void UI::HandleKeyboard() {
+	Config::KeyMap& keyMap = Config::GetKeyMap();
+	
 	//TODO: This isn't pretty, but it works.
 	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
@@ -242,7 +184,7 @@ void UI::HandleKeyboard() {
 				mouseInput.cy -= addition;
 			} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
 				lbuttonPressed = true;
-			} else if (key.vk == TCODK_PRINTSCREEN) { 
+			} else if (key.vk == TCODK_PRINTSCREEN) {
 				Data::SaveScreenshot();
 			}
 
@@ -330,14 +272,14 @@ void UI::HandleMouse() {
 			menuResult = NOMENUHIT;
 			if(!draggingPlacement) {
 				menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, true);
-				if (menuResult & NOMENUHIT) {	
+				if (menuResult & NOMENUHIT) {
 					menuResult = Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, true);
 					if (menuResult & NOMENUHIT) {
 						if (menuOpen) {
 							menuResult = currentMenu->Update(mouseInput.cx, mouseInput.cy, true, NO_KEY); lbuttonPressed = false;
 						}
 					}
-				}                    
+				}
 			}
 			if (menuResult & NOMENUHIT) {
 				if (menuOpen && _state == UINORMAL) {
@@ -602,6 +544,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 }
 
 int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut) {
+	Config::KeyMap& keyMap = Config::GetKeyMap();
 	std::string out = "";
 	bool found = false;
 	for(std::string::iterator it = shortcut.begin(); it != shortcut.end(); it++) {
