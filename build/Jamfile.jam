@@ -7,6 +7,7 @@ import modules ;
 import os ;
 import path ;
 import property-set ;
+import common ;
 
 import boost ;
 import libtcod ;
@@ -81,8 +82,12 @@ local rule get-platform-sources ( tree ) {
     return [ path.glob-tree $(tree) : *.cc *.cpp *.cxx ] ;
 }
 
-actions make-nsis {
-    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION)
+actions make-nsis-32 {
+    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION) 32
+}
+
+actions make-nsis-64 {
+    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION) 64
 }
 
 ##
@@ -138,7 +143,12 @@ if [ os.name ] = NT {
     
     current-sources  += $(win32-sources) ;
     version-sources  += $(win32-ver-sources) ;
-    additional-files += $(GC_BUILD_ROOT)/installer/redists/dbghelp.dll ;
+    additional-files += dbghelp.dll ;
+    
+    explicit-alias dbghelp : $(GC_BUILD_ROOT)/installer/redists/dbghelp-x86.dll ;
+    explicit-alias dbghelp : $(GC_BUILD_ROOT)/installer/redists/dbghelp-x64.dll : <address-model>64 ;
+    
+    make dbghelp.dll : dbghelp : @common.copy ;
     
     additional-files += [ glob $(GC_BUILD_ROOT)/prebuilt/*.* ] ;
     
@@ -198,6 +208,7 @@ explicit-alias gc-deps
 #
 # Version information
 alias gc-version : $(version-sources) ;
+make mod.dat : $(GC_TEMPLATES)/mod.dat_in : @gc-version.generate ;
 
 #
 # Precompiled header
@@ -216,7 +227,7 @@ exe goblin-camp
 
 #
 # NSIS installer
-make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis ;
+make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis-32 ;
 
 #
 # dist targets
@@ -257,6 +268,11 @@ rule get-dist-data ( properties * ) {
     return [ get-dist-dir $(properties) : data ] ;
 }
 
+rule get-dist-gccore ( properties * ) {
+    dir = [ get-dist-dir $(properties) : data ] ;
+    return $(dir)lib/gcamp_core ;
+}
+
 install dist-additional
     : $(additional-files)
     : <conditional>@get-dist-additional
@@ -275,12 +291,17 @@ install dist-data
 
 install dist-pylib
     : $(GC_SOURCE_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp : *.py ]
-      [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp_core : *.py ]
+      [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp_core : *.py *.dat ]
     : <conditional>@get-dist-data
       <install-source-root>$(GC_SOURCE_ROOT)
 ;
 
-alias dist : dist-data dist-binaries dist-additional dist-pylib ;
+install dist-mod-version
+    : mod.dat
+    : <conditional>@get-dist-gccore
+;
+
+alias dist : dist-data dist-binaries dist-additional dist-pylib dist-mod-version ;
 
 #
 # Solution files
@@ -304,9 +325,9 @@ install sln2010
 
 #
 # Explicit targets
-explicit nsis dist dist-binaries dist-data dist-additional dist-pylib make-sln2008 make-sln2010 sln2008 sln2010 ;
+explicit nsis dist dist-binaries dist-data dist-additional dist-pylib dist-mod-version make-sln2008 make-sln2010 sln2008 sln2010 ;
 explicit goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
 
 #
 # Always build version information
-always gc-version ;
+always gc-version mod.dat ;
