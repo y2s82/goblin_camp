@@ -113,7 +113,7 @@ void Container::TranslateContainerListeners() {
 		boost::weak_ptr<Construction> cons = Game::Inst()->GetConstruction(listenersAsUids[i]);
 		if (cons.lock() && boost::dynamic_pointer_cast<Stockpile>(cons.lock())) {
 			listeners.push_back(boost::dynamic_pointer_cast<Stockpile>(cons.lock()).get());
-			Logger::Inst()->output<<"Translated conlistner "<<cons.lock()->Name()<<"\n";
+			LOG("Translated conlistner " << cons.lock()->Name());
 		}
 	}
 }
