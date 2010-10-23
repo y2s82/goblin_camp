@@ -15,17 +15,21 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+// Reworked logging module.
+// Less verbose in usage (uses macros, though) -- LOG(foo), LOG(foo << bar),
+// with more automatic formatting (file, line, function) and no more
+// explicit flushing.
+
 #include <fstream>
 
-class Logger {
-private:
-	Logger(const std::string&);
-	~Logger();
-	static Logger* instance;
-public:
-	static void Create(const std::string&);
-	static Logger* Inst();
-	std::ofstream output;
-	static void End();
-};
+namespace Logger {
+	extern std::ofstream log;
+	
+	void OpenLogFile(const std::string&);
+	void CloseLogFile();
+	
+	std::ofstream& Prefix(const char* = NULL, int = 0, const char* = NULL);
+}
 
+#define LOG_FUNC(x, func) Logger::Prefix(__FILE__, __LINE__, func) << x << "\n"
+#define LOG(x) LOG_FUNC(x, __FUNCTION__)

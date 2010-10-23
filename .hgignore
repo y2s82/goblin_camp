@@ -51,7 +51,6 @@ build\dist
 build\msvc
 user-config.jam
 *.exp
-data
 *.orig*
 *.cmd
 .DS_Store
@@ -66,3 +65,6 @@ build
 *.xcuserstate
 *.xcbkptlist
 xcuserdata
+docs.doxy
+docs\_build
+userdata

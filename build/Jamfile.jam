@@ -7,11 +7,13 @@ import modules ;
 import os ;
 import path ;
 import property-set ;
+import common ;
 
 import boost ;
 import libtcod ;
 import winsdk ;
 import python ;
+#import dotnet ;
 
 ##
 # Project definition
@@ -26,18 +28,21 @@ project goblin-camp
       <include>$(GC_HEADERS)
       <include>$(GC_SOURCE_ROOT)
       <define>GC_BOOST_BUILD
+      <define>BOOST_LIB_DIAGNOSTIC
+      <define>BOOST_FILESYSTEM_VERSION=3
       # Architecture defines
       <address-model>32:<define>X86
       <address-model>64:<define>X64
       # NT specific defines
       <os>NT:<define>WINDOWS
+      <os>NT:<define>WIN32_LEAN_AND_MEAN
+      <os>NT:<define>NOMINMAX
       <os>NT,<variant>release:<user-interface>gui
       <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
-      <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1
-      <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=1
+      <os>NT,<toolset>msvc:<define>STRICT
       # Linux specific defines
       <os>LINUX:<define>LINUX
       # OSX specific defines
@@ -54,10 +59,11 @@ import gc-sln ;
 modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
 modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
 
-boost.use-project 1.43 ;
+boost.use-project ;
 winsdk.use-project ;
 libtcod.use-project ;
 python.use-project ;
+#dotnet.show-version ;
 
 ##
 # Local rules
@@ -76,18 +82,22 @@ local rule get-platform-sources ( tree ) {
     return [ path.glob-tree $(tree) : *.cc *.cpp *.cxx ] ;
 }
 
-actions make-nsis {
-    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION)
+actions make-nsis-32 {
+    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION) 32
+}
+
+actions make-nsis-64 {
+    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION) 64
 }
 
 ##
 # Collect sources and dependencies
 ##
 data-files      = [ path.glob $(GC_SOURCE_ROOT) : *.dat *.ini *.png *.txt ] ;
-current-sources = [ path.glob-tree $(GC_SOURCES) : *.cpp : win32 linux osx ] ;
+current-sources = [ path.glob-tree $(GC_SOURCES) : *.cpp : win32 linux osx unix ] ;
 win32-sources   = [ get-platform-sources $(GC_WIN32_SOURCES) ] ;
-linux-sources   = [ get-platform-sources $(GC_LINUX_SOURCES) ] ;
-macosx-sources  = [ get-platform-sources $(GC_OSX_SOURCES) ] ;
+linux-sources   = [ get-platform-sources $(GC_LINUX_SOURCES) ] $(GC_SOURCES)/unix/main.cpp ;
+macosx-sources  = [ get-platform-sources $(GC_OSX_SOURCES) ] $(GC_SOURCES)/unix/main.cpp ;
 
 binaries-dist-dir   = ;
 data-dist-dir       = ;
@@ -120,10 +130,43 @@ explicit-alias common-deps
 if [ os.name ] = NT {
     ECHO ** Building for Windows ;
     
+    if --iterator-debugging in [ modules.peek : ARGV ] {
+        ECHO ** Building with iterator debugging. ;
+        ECHO ** If you're getting multi_array errors with Boost and MSVC2010, you should not enable this. ;
+        
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1 ;
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_SECURE_SCL=1 ;
+    } else {
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=0 ;
+        additional-reqs += <toolset>msvc,<variant>debug:<define>_SECURE_SCL=0 ;
+    }
+    
     current-sources  += $(win32-sources) ;
     version-sources  += $(win32-ver-sources) ;
-    additional-files += $(GC_BUILD_ROOT)/installer/redists/dbghelp.dll ;
+    additional-files += dbghelp.dll ;
     
+    explicit-alias dbghelp : $(GC_BUILD_ROOT)/installer/redists/dbghelp-x86.dll ;
+    explicit-alias dbghelp : $(GC_BUILD_ROOT)/installer/redists/dbghelp-x64.dll : <address-model>64 ;
+    
+    make dbghelp.dll : dbghelp : @common.copy ;
+    
+    additional-files += [ glob $(GC_BUILD_ROOT)/prebuilt/*.* ] ;
+    
+    #obj crash.CrashForm
+    #    : $(GC_SOURCE_ROOT)/crash/CrashForm.resx
+    #;
+    #exe goblin-camp-crash
+    #    : [ path.glob $(GC_SOURCE_ROOT)/crash : *.cs ]
+    #    : <resource>crash.CrashForm <implicit-dependency>crash.CrashForm
+    #;
+    
+    #exe goblin-camp-crash
+    #    : [ path.glob $(GC_SOURCE_ROOT)/crash : *.cpp ]
+    #      $(GC_WIN32_SOURCES)/CommandLine.cpp
+    #      /winsdk//user32 /winsdk//shell32 /winsdk//comctl32 /winsdk//gdi32
+    #      /boost//system /boost//filesystem
+    #    : <user-interface>gui <include>$(GC_SOURCE_ROOT)/crash <define>NOMINMAX <define>WIN32_LEAN_AND_MEAN
+    #;
     explicit-alias platform-deps : win32-deps ;
 } else if [ os.name ] = LINUX {
     ECHO ** Building for Linux ;
@@ -165,6 +208,7 @@ explicit-alias gc-deps
 #
 # Version information
 alias gc-version : $(version-sources) ;
+make mod.dat : $(GC_TEMPLATES)/mod.dat_in : @gc-version.generate ;
 
 #
 # Precompiled header
@@ -183,7 +227,7 @@ exe goblin-camp
 
 #
 # NSIS installer
-make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis ;
+make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis-32 ;
 
 #
 # dist targets
@@ -224,6 +268,11 @@ rule get-dist-data ( properties * ) {
     return [ get-dist-dir $(properties) : data ] ;
 }
 
+rule get-dist-gccore ( properties * ) {
+    dir = [ get-dist-dir $(properties) : data ] ;
+    return $(dir)lib/gcamp_core ;
+}
+
 install dist-additional
     : $(additional-files)
     : <conditional>@get-dist-additional
@@ -242,11 +291,17 @@ install dist-data
 
 install dist-pylib
     : $(GC_SOURCE_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp : *.py ]
+      [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp_core : *.py *.dat ]
     : <conditional>@get-dist-data
       <install-source-root>$(GC_SOURCE_ROOT)
 ;
 
-alias dist : dist-data dist-binaries dist-additional dist-pylib ;
+install dist-mod-version
+    : mod.dat
+    : <conditional>@get-dist-gccore
+;
+
+alias dist : dist-data dist-binaries dist-additional dist-pylib dist-mod-version ;
 
 #
 # Solution files
@@ -270,9 +325,9 @@ install sln2010
 
 #
 # Explicit targets
-explicit nsis dist dist-binaries dist-data dist-additional dist-pylib make-sln2008 make-sln2010 sln2008 sln2010 ;
+explicit nsis dist dist-binaries dist-data dist-additional dist-pylib dist-mod-version make-sln2008 make-sln2010 sln2008 sln2010 ;
 explicit goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
 
 #
 # Always build version information
-always gc-version ;
+always gc-version mod.dat ;

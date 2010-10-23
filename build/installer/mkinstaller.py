@@ -9,6 +9,10 @@
 # Assumes release variant was already built, because creating installer for end users
 # out of debug version doesn't make much sense.
 from __future__ import with_statement
+
+print 'This tool is broken and unusable at the moment, sorry.'
+raise SystemExit
+
 import os, sys, shutil, subprocess, codecs
 from contextlib import closing
 import pefile
@@ -44,13 +48,16 @@ def gatherDLLs(exe):
         elif lname not in SYSTEM_DLL:
             name = findDLL(name)
             DLLs.add(name)
-            gatherDLLs(pefile.PE(name))
+            if not lname.startswith('python'):
+                gatherDLLs(pefile.PE(name))
 
-assert len(sys.argv) == 2, 'Usage: mkinstaller <version>'
+assert len(sys.argv) == 3, 'Usage: mkinstaller <version> <32/64>'
+target  = 'x86' if sys.argv[2] == '32' else 'x64'
+distDir = 'release-%s' % target
 assert os.path.exists('build'), 'Run from project root.'
-assert os.path.exists(os.path.join('build', 'dist', 'release', 'goblin-camp.exe')), 'Run "bjam variant=release install" first.'
+assert os.path.exists(os.path.join('build', 'dist', distDir, 'goblin-camp.exe')), 'Run "bjam variant=release install" first.'
 
-exe  = pefile.PE(os.path.join('build', 'dist', 'release', 'goblin-camp.exe'))
+exe  = pefile.PE(os.path.join('build', 'dist', distDir, 'goblin-camp.exe'))
 DLLs = set()
 
 PATH = os.environ['PATH'].split(os.pathsep)
@@ -58,19 +65,14 @@ if sys.platform == 'win32':
     PATH.insert(0, os.path.join(os.environ['SystemRoot'], 'system32'))
 
 gatherDLLs(exe)
-files = set(os.listdir(os.path.join('build', 'dist', 'release')))
+#files = set(os.listdir(os.path.join('build', 'dist', distDir)))
 
 if os.path.exists(os.path.join('build', 'dist', 'installer')):
     shutil.rmtree(os.path.join('build', 'dist', 'installer'))
 
-os.makedirs(os.path.join('build', 'dist', 'installer', 'src'))
+os.makedirs(os.path.join('build', 'dist', 'installer'))
 
-for fn in files:
-    print '\tPREPARE %s' % fn
-    shutil.copy(
-        os.path.join('build', 'dist', 'release', fn),
-        os.path.join('build', 'dist', 'installer', 'src')
-    )
+shutil.copytree(os.path.join('build', 'dist', distDir), os.path.join('build', 'dist', 'installer', 'src'))
 
 for fn in DLLs:
     print '\tDLL %s' % fn
@@ -81,9 +83,9 @@ for fn in DLLs:
 
 files = set(os.listdir(os.path.join('build', 'dist', 'installer', 'src')))
 
-print '\tINCLUDE %s/vcredist_x86.exe' % redist
+print '\tINCLUDE %s/vcredist_%s.exe' % (redist, target)
 shutil.copy(
-    os.path.join('build', 'installer', 'redists', 'vc%s' % redist, 'vcredist_x86.exe'),
+    os.path.join('build', 'installer', 'redists', 'vc%s' % redist, 'vcredist_%s.exe' % target),
     os.path.join('build', 'dist', 'installer', 'src')
 )
 

@@ -31,7 +31,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Events.hpp"
 #include "Job.hpp"
-#include "GCamp.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -66,9 +65,6 @@ private:
 	Game();
 	static Game* instance;
 	int screenWidth, screenHeight;
-	int resolutionWidth, resolutionHeight;
-	bool fullscreen;
-	TCOD_renderer_t renderer;
 	Season season;
 	int time;
 	int orcCount, goblinCount;

@@ -1499,7 +1499,7 @@ class NPCListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		Logger::Inst()->output<<"NPCListener: "<<msg<<"\n";
+		LOG("NPCListener: " << msg);
 		Game::Inst()->Exit(false);
 	}
 };

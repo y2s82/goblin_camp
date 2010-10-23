@@ -35,44 +35,44 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 void Label::Draw(int x, int y, TCODConsole *console) {
 	console->setAlignment(align);
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 	console->print(x + _x, y + _y, text.c_str());
 }
 
 void LiveLabel::Draw(int x, int y, TCODConsole *console) {
 	console->setAlignment(align);
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultForeground(TCODColor::white);
 	console->print(x + _x, y + _y, text().c_str());
 }
 
 void Button::Draw(int x, int y, TCODConsole *console) {
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	if(selected) {
-		console->setForegroundColor(TCODColor::black);
-		console->setBackgroundColor(TCODColor::white);
+		console->setDefaultForeground(TCODColor::black);
+		console->setDefaultBackground(TCODColor::white);
 	} else {
-		console->setForegroundColor(TCODColor::white);
-		console->setBackgroundColor(TCODColor::black);
+		console->setDefaultForeground(TCODColor::white);
+		console->setDefaultBackground(TCODColor::black);
 	}
 	console->setAlignment(TCOD_CENTER);
 	console->printFrame(x + _x, y + _y, width, 3);
 	console->print(x + _x + width/2, y + _y + 1, text.c_str());
-	console->setForegroundColor(TCODColor::white);
-	console->setBackgroundColor(TCODColor::black);
+	console->setDefaultForeground(TCODColor::white);
+	console->setDefaultBackground(TCODColor::black);
 }
 
 void LiveButton::Draw(int x, int y, TCODConsole *console) {
 	Button::Draw(x, y, console);
 	if(selected) {
-		console->setForegroundColor(TCODColor::black);
-		console->setBackgroundColor(TCODColor::white);
+		console->setDefaultForeground(TCODColor::black);
+		console->setDefaultBackground(TCODColor::white);
 	} else {
-		console->setForegroundColor(TCODColor::white);
-		console->setBackgroundColor(TCODColor::black);
+		console->setDefaultForeground(TCODColor::white);
+		console->setDefaultBackground(TCODColor::black);
 	}
 	console->print(x + _x + width/2, y + _y + 1, textFunc().c_str());
-	console->setForegroundColor(TCODColor::white);
-	console->setBackgroundColor(TCODColor::black);
+	console->setDefaultForeground(TCODColor::white);
+	console->setDefaultBackground(TCODColor::black);
 }
 
 MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
@@ -98,17 +98,17 @@ MenuResult Button::Update(int x, int y, bool clicked, TCOD_key_t key) {
 void ToggleButton::Draw(int x, int y, TCODConsole *console) {
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	if(selected) {
-		console->setForegroundColor(TCODColor::black);
-		console->setBackgroundColor(TCODColor::white);
+		console->setDefaultForeground(TCODColor::black);
+		console->setDefaultBackground(TCODColor::white);
 	} else {
-		console->setForegroundColor(TCODColor::white);
-		console->setBackgroundColor(isOn() ? TCODColor::blue : TCODColor::black);
+		console->setDefaultForeground(TCODColor::white);
+		console->setDefaultBackground(isOn() ? TCODColor::blue : TCODColor::black);
 	}
 	console->setAlignment(TCOD_CENTER);
 	console->printFrame(x + _x, y + _y, width, 3);
 	console->print(x + _x + width/2, y + _y + 1, text.c_str());
-	console->setForegroundColor(TCODColor::white);
-	console->setBackgroundColor(TCODColor::black);
+	console->setDefaultForeground(TCODColor::white);
+	console->setDefaultBackground(TCODColor::black);
 }
 
 inline int numDigits(int num) {
@@ -158,9 +158,9 @@ MenuResult Spinner::Update(int x, int y, bool clicked, TCOD_key_t key) {
 
 void TextBox::Draw(int x, int y, TCODConsole *console) {
 	console->setAlignment(TCOD_CENTER);
-	console->setBackgroundColor(TCODColor::darkGrey);
+	console->setDefaultBackground(TCODColor::darkGrey);
 	console->rect(x + _x, y + _y, width, 1, true, TCOD_BKGND_SET);
-	console->setBackgroundColor(TCODColor::black);
+	console->setDefaultBackground(TCODColor::black);
 	if(value) {
 		console->print(x + _x + width / 2, y + _y, value->c_str());
 	} else {
@@ -371,8 +371,8 @@ void Panel::ShowModal() {
 
 	while (true) {
 		TCODConsole::root->clear();
-		TCODConsole::root->setForegroundColor(TCODColor::white);
-		TCODConsole::root->setBackgroundColor(TCODColor::black);
+		TCODConsole::root->setDefaultForeground(TCODColor::white);
+		TCODConsole::root->setDefaultBackground(TCODColor::black);
 		TCODConsole::blit(background, 0, 0, Game::Inst()->ScreenWidth(), Game::Inst()->ScreenHeight(),
 			TCODConsole::root, 0, 0, 0.7F, 1.0F);
 
