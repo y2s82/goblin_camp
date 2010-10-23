@@ -40,8 +40,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Door.hpp"
-#include "Data.hpp"
+#include "data/Config.hpp"
 #include "UI/YesNoDialog.hpp"
+#include "scripting/Event.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -51,10 +52,6 @@ Game* Game::instance = 0;
 Game::Game() :
 	screenWidth(0),
 	screenHeight(0),
-	resolutionWidth(0),
-	resolutionHeight(0),
-	fullscreen(false),
-	renderer(TCOD_RENDERER_SDL),
 	season(EarlySpring),
 	time(0),
 	orcCount(0),
@@ -338,97 +335,48 @@ void Game::Exit(bool confirm) {
 int Game::ScreenWidth() const {	return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
-class ConfigListener : public ITCODParserListener {
-
-	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<"config structure begun:\n";
-#endif
-		return true;
-	}
-
-	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name, "fullscreen")) {
-			Game::Inst()->fullscreen = true;
-		}
-		return true;
-	}
-
-	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name, "width")) {
-			Game::Inst()->resolutionWidth = value.i;
-		} else if (boost::iequals(name, "height")) {
-			Game::Inst()->resolutionHeight = value.i;
-		} else if (boost::iequals(name, "renderer")) {
-			if (boost::iequals(value.s, "SDL")) {
-				Game::Inst()->renderer = TCOD_RENDERER_SDL;
-			} else if (boost::iequals(value.s, "OpenGL")) {
-				Game::Inst()->renderer = TCOD_RENDERER_OPENGL;
-			} else if (boost::iequals(value.s, "GLSL")) {
-				Game::Inst()->renderer = TCOD_RENDERER_GLSL;
-			}
-		} 
-		return true;
-	}
-
-	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<"end of config structure\n";
-#endif
-		return true;
-	}
-	void error(const char *msg) {
-		Logger::Inst()->output<<"ConfigListener: "<<msg<<"\n";
-		Game::Inst()->Exit();
-	}
-};
-
-void Game::LoadConfig(std::string filename) {
-	TCODParser parser = TCODParser();
-	TCODParserStruct* configTypeStruct = parser.newStructure("config");
-	configTypeStruct->addProperty("width", TCOD_TYPE_INT, true);
-	configTypeStruct->addProperty("height", TCOD_TYPE_INT, true);
-	configTypeStruct->addFlag("fullscreen");
-	const char* renderers[] = { "GLSL", "SDL", "OpenGL", NULL }; 
-	configTypeStruct->addValueList("renderer", renderers, true);
-
-	parser.run(filename.c_str(), new ConfigListener());
-}
-
 void Game::Init() {
-	if (resolutionWidth <= 0 || resolutionHeight <= 0) {
+	int width  = Config::GetCVar<int>("resolutionX");
+	int height = Config::GetCVar<int>("resolutionY");
+	bool fullscreen = Config::GetCVar<bool>("fullscreen");
+	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	
+	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
-			TCODSystem::getCurrentResolution(&resolutionWidth, &resolutionHeight);
+			TCODSystem::getCurrentResolution(&width, &height);
 		} else {
-			resolutionWidth = 640;
-			resolutionHeight = 480;
+			width  = 640;
+			height = 480;
 		}
-	} 
-
+	}
+	
 	TCODSystem::getCharSize(&charWidth, &charHeight);
-	screenWidth = resolutionWidth / charWidth;
-	screenHeight = resolutionHeight / charHeight;
-
+	screenWidth  = width / charWidth;
+	screenHeight = height / charHeight;
+	
 	srand((unsigned int)std::time(0));
-
+	
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
 	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer);
-	TCODConsole::root->setAlignment(TCOD_LEFT);
-
 	TCODMouse::showCursor(true);
-
 	TCODConsole::setKeyboardRepeat(500, 10);
 	
-	Data::Load();
+	{
+		// "Loading..."
+		TCODConsole::root->setDefaultForeground(TCODColor::white);
+		TCODConsole::root->setDefaultBackground(TCODColor::black);
+		TCODConsole::root->setAlignment(TCOD_CENTER);
+		TCODConsole::root->clear();
+		
+		TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
+		
+		TCODConsole::root->flush();
+	}
+	
+	TCODConsole::root->setAlignment(TCOD_LEFT);
 	
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
-
+	
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
 	upleft = Coordinate(180,180);
@@ -497,7 +445,9 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		}
 		itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 		if (store) StockpileItem(newItem);
-
+		
+		Script::Event::ItemCreated(newItem.get(), NULL, NULL, pos.X(), pos.Y());
+		
 		return newItem->Uid();
 }
 

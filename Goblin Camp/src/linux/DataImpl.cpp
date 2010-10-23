@@ -25,17 +25,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
-void _ImplFindPersonalDirectory(std::string& dir) {
-	dir = getenv("HOME");
-	dir += "/.goblincamp";
-}
-
-void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-	char buffer[1024];
-	ssize_t pos = readlink("/proc/self/exe", buffer, 1023);
-	buffer[pos] = '\0';
+namespace PathsImpl {
+	void FindPersonalDirectory(fs::path& dir) {
+		dir = fs::path(std::string(getenv("HOME")) + "/.goblincamp");
+	}
 	
-	exec    = fs::path(std::string(buffer));
-	execDir = exec.parent_path();
-	dataDir = fs::path(execDir.parent_path()) / "share/goblin-camp/";
+	void FindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
+		char buffer[1024];
+		ssize_t pos = readlink("/proc/self/exe", buffer, 1023);
+		buffer[pos] = '\0';
+		
+		exec    = fs::path(std::string(buffer));
+		execDir = exec.parent_path();
+		dataDir = fs::path(execDir.parent_path()) / "share/goblin-camp/";
+	}
 }
