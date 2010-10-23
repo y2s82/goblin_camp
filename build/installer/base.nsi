@@ -21,7 +21,7 @@ SetCompressor /SOLID lzma
 
 ; Installer settings
 Name              "Goblin Camp ${GC_VERSION}"
-OutFile           "GoblinCamp-${GC_VERSION}.exe"
+OutFile           "GoblinCamp-${GC_VERSION}-Setup.exe"
 CRCCheck          force
 InstProgressFlags smooth
 XPStyle           on
