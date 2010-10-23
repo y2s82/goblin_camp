@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 #include <boost/foreach.hpp>
 
+#include "data/Config.hpp"
 #include "scripting/API.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/_gcampapi/LoggerStream.hpp"
@@ -46,11 +47,19 @@ namespace Script { namespace API {
 			expose[idx]();
 		}
 	}
+	
+	BOOST_PYTHON_MODULE(_gcampconfig) {
+		py::def("setCVar", &Config::SetStringCVar);
+		py::def("getCVar", &Config::GetStringCVar);
+		py::def("bindKey", &Config::SetKey);
+		py::def("getKey",  &Config::GetKey);
+	}
 }}
 
 namespace Script {
 	void ExposeAPI() {
 		API::init_gcampapi();
+		API::init_gcampconfig();
 	}
 	
 	void AppendListener(PyObject *listener) {

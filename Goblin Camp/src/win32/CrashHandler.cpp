@@ -30,7 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 #include <algorithm>
 
-#include "Data.hpp"
+#include "data/Paths.hpp"
 
 namespace {
 	// Generates crash dump filename.
@@ -134,9 +134,14 @@ namespace {
 		GetDumpFilename(dumpPath, dumpFilename);
 		CreateDump(exception, dumpPath);
 		
+	#ifdef DEBUG
+		// In debug builds, return to the top-level exception handler (which should bring up postmortem debugger).
+		// External crash handler is meant for end-users, and is kinda useless for developers.
+		return EXCEPTION_CONTINUE_SEARCH;
+	#else
 		// Try to invoke external crash reporter.
 		// Use full path to avoid executable injection issues.
-		std::string crashExe = (Data::GetPath(Data::Path::ExecutableDir) / "goblin-camp-crash.exe").string();
+		std::string crashExe = (Paths::Get(Paths::ExecutableDir) / "goblin-camp-crash.exe").string();
 		
 		PROCESS_INFORMATION procInfo;
 		STARTUPINFO startupInfo;
@@ -160,6 +165,7 @@ namespace {
 		// Don't let the system keep the process running, or the crash reporter
 		// may not be able to access some files.
 		return EXCEPTION_EXECUTE_HANDLER;
+	#endif
 	}
 }
 

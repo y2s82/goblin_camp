@@ -24,38 +24,40 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
-void _ImplFindPersonalDirectory(std::string& dir) {
-	char buffer[1024];
-	CFStringRef username, path;
-	username = CSCopyUserName(true);
-	path     = CFStringCreateWithFormat(NULL, NULL, CFSTR("/Users/%@/Library/Application Support/Goblin Camp"), username);
+namespace PathsImpl {
+	void FindPersonalDirectory(fs::path& dir) {
+		char buffer[1024];
+		CFStringRef username, path;
+		username = CSCopyUserName(true);
+		path     = CFStringCreateWithFormat(NULL, NULL, CFSTR("/Users/%@/Library/Application Support/Goblin Camp"), username);
+		
+		CFStringGetCString(path, buffer, sizeof(buffer), kCFStringEncodingUTF8);
+		dir = fs::path(std::string(buffer));
+		
+		CFRelease(username);
+		CFRelease(path);
+	}
 	
-	CFStringGetCString(path, buffer, sizeof(buffer), kCFStringEncodingUTF8);
-	dir = buffer;
-	
-	CFRelease(username);
-	CFRelease(path);
-}
-
-void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-	CFBundleRef bundle;
-	CFURLRef    execURL, resURL;
-	CFStringRef execStr;
-	char execPath[1024], resPath[1024];
-	
-	bundle  = CFBundleGetMainBundle();
-	execURL = CFBundleCopyExecutableURL(bundle);
-	resURL  = CFBundleCopyResourcesDirectoryURL(bundle);
-	execStr = CFURLCopyFileSystemPath(execURL, kCFURLPOSIXPathStyle);
-	
-	CFStringGetCString(execStr, execPath, sizeof(execPath), kCFStringEncodingUTF8);
-	CFURLGetFileSystemRepresentation(resURL, true, (UInt8*)resPath, 1024);
-	exec = execPath;
-	
-	CFRelease(execStr);
-	CFRelease(execURL);
-	CFRelease(resURL);
-	
-	execDir = exec;
-	dataDir = fs::path(std::string(resPath) + "/");
+	void FindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
+		CFBundleRef bundle;
+		CFURLRef    execURL, resURL;
+		CFStringRef execStr;
+		char execPath[1024], resPath[1024];
+		
+		bundle  = CFBundleGetMainBundle();
+		execURL = CFBundleCopyExecutableURL(bundle);
+		resURL  = CFBundleCopyResourcesDirectoryURL(bundle);
+		execStr = CFURLCopyFileSystemPath(execURL, kCFURLPOSIXPathStyle);
+		
+		CFStringGetCString(execStr, execPath, sizeof(execPath), kCFStringEncodingUTF8);
+		CFURLGetFileSystemRepresentation(resURL, true, (UInt8*)resPath, 1024);
+		exec = fs::path(std::string(execPath));
+		
+		CFRelease(execStr);
+		CFRelease(execURL);
+		CFRelease(resURL);
+		
+		execDir = fs::path(std::string(exec));
+		dataDir = fs::path(std::string(resPath) + "/");
+	}
 }
