@@ -13,7 +13,6 @@ import boost ;
 import libtcod ;
 import winsdk ;
 import python ;
-#import dotnet ;
 
 ##
 # Project definition
@@ -26,7 +25,7 @@ project goblin-camp
       <debug-symbols>on
       <variant>debug:<define>DEBUG
       <include>$(GC_HEADERS)
-      <include>$(GC_SOURCE_ROOT)
+      <include>$(GC_PROJECT_ROOT)
       <define>GC_BOOST_BUILD
       <define>BOOST_LIB_DIAGNOSTIC
       <define>BOOST_FILESYSTEM_VERSION=3
@@ -47,23 +46,17 @@ project goblin-camp
       <os>LINUX:<define>LINUX
       # OSX specific defines
       <os>MACOSX:<define>MACOSX
-    : source-location $(GC_SOURCE_ROOT)
+    : source-location $(GC_PROJECT_ROOT)
     : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
 
 import gc-version ;
-modules.poke gc-version : GC_TEMPLATES : $(GC_TEMPLATES) ;
-modules.poke gc-version : GC_VERSION   : $(GC_VERSION) ;
-
 import gc-sln ;
-modules.poke gc-sln : GC_TEMPLATES   : $(GC_TEMPLATES) ;
-modules.poke gc-sln : GC_SOURCE_ROOT : $(GC_SOURCE_ROOT) ;
 
 boost.use-project ;
 winsdk.use-project ;
 libtcod.use-project ;
 python.use-project ;
-#dotnet.show-version ;
 
 ##
 # Local rules
@@ -78,26 +71,46 @@ local rule explicit-install ( name : sources + : requirements * ) {
     explicit $(name) ;
 }
 
-local rule get-platform-sources ( tree ) {
-    return [ path.glob-tree $(tree) : *.cc *.cpp *.cxx ] ;
+local rule explicit-make ( name : sources + : generating-rule : requirements * ) {
+    make $(name) : $(sources) : $(generating-rule) : $(requirements) ;
+    explicit $(name) ;
 }
 
-actions make-nsis-32 {
-    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION) 32
+local rule get-platform-sources ( platform : generic-tree * : generic-files * ) {
+    local tree  = $(GC_$(platform)_SOURCES) ;
+    local files = [ path.glob-tree $(tree) : *.cc *.cpp *.cxx ] ;
+    
+    if $(generic-tree) {
+        for local file in $(generic-files) {
+            files += $(GC_$(generic-tree)_SOURCES)/$(file) ;
+        }
+    }
+    
+    return $(files) ;
 }
 
-actions make-nsis-64 {
-    python $(GC_BUILD_ROOT)/installer/mkinstaller.py $(GC_VERSION) 64
+rule make-nsis ( targets * : sources * : properties * ) {
+    local arch = x86 ;
+    
+    if <address-model>64 in $(properties) {
+        arch = x64 ;
+    }
+    
+    ARCH on $(targets) = $(arch) ;
+}
+
+actions make-nsis {
+    python $(GC_INSTALLER_DIR)/mkinstaller.py $(GC_VERSION) $(ARCH)
 }
 
 ##
 # Collect sources and dependencies
 ##
-data-files      = [ path.glob $(GC_SOURCE_ROOT) : *.dat *.ini *.png *.txt ] ;
+data-files      = [ path.glob $(GC_PROJECT_ROOT) : *.png *.txt ] ;
 current-sources = [ path.glob-tree $(GC_SOURCES) : *.cpp : win32 linux osx unix ] ;
-win32-sources   = [ get-platform-sources $(GC_WIN32_SOURCES) ] ;
-linux-sources   = [ get-platform-sources $(GC_LINUX_SOURCES) ] $(GC_SOURCES)/unix/main.cpp ;
-macosx-sources  = [ get-platform-sources $(GC_OSX_SOURCES) ] $(GC_SOURCES)/unix/main.cpp ;
+win32-sources   = [ get-platform-sources WIN32 ] ;
+linux-sources   = [ get-platform-sources LINUX : UNIX : main.cpp ] ;
+macosx-sources  = [ get-platform-sources OSX : UNIX : main.cpp ] ;
 
 binaries-dist-dir   = ;
 data-dist-dir       = ;
@@ -106,8 +119,8 @@ additional-files    = ;
 additional-reqs     = ;
 
 # Generated files
-win32-ver-sources += $(GC_TEMPLATES)/_version.rc_in ;
-version-sources   += $(GC_TEMPLATES)/_version.cpp_in ;
+win32-ver-sources += $(GC_TEMPLATES_DIR)/_version.rc_in ;
+version-sources   += $(GC_TEMPLATES_DIR)/_version.cpp_in ;
 
 # Platform dependencies
 explicit-alias win32-deps : /winsdk//dbghelp /winsdk//shell32 /winsdk//shlwapi ;
@@ -143,30 +156,11 @@ if [ os.name ] = NT {
     
     current-sources  += $(win32-sources) ;
     version-sources  += $(win32-ver-sources) ;
-    additional-files += dbghelp.dll ;
+    additional-files += dbghelp.dll [ glob $(GC_PREBUILT_DIR)/* ] ;
     
-    explicit-alias dbghelp : $(GC_BUILD_ROOT)/installer/redists/dbghelp-x86.dll ;
-    explicit-alias dbghelp : $(GC_BUILD_ROOT)/installer/redists/dbghelp-x64.dll : <address-model>64 ;
+    explicit-make dbghelp.dll : $(GC_REDIST_DIR)/dbghelp-x86.dll : @common.copy ;
+    explicit-make dbghelp.dll : $(GC_REDIST_DIR)/dbghelp-x86.dll : @common.copy : <address-model>64 ;
     
-    make dbghelp.dll : dbghelp : @common.copy ;
-    
-    additional-files += [ glob $(GC_BUILD_ROOT)/prebuilt/*.* ] ;
-    
-    #obj crash.CrashForm
-    #    : $(GC_SOURCE_ROOT)/crash/CrashForm.resx
-    #;
-    #exe goblin-camp-crash
-    #    : [ path.glob $(GC_SOURCE_ROOT)/crash : *.cs ]
-    #    : <resource>crash.CrashForm <implicit-dependency>crash.CrashForm
-    #;
-    
-    #exe goblin-camp-crash
-    #    : [ path.glob $(GC_SOURCE_ROOT)/crash : *.cpp ]
-    #      $(GC_WIN32_SOURCES)/CommandLine.cpp
-    #      /winsdk//user32 /winsdk//shell32 /winsdk//comctl32 /winsdk//gdi32
-    #      /boost//system /boost//filesystem
-    #    : <user-interface>gui <include>$(GC_SOURCE_ROOT)/crash <define>NOMINMAX <define>WIN32_LEAN_AND_MEAN
-    #;
     explicit-alias platform-deps : win32-deps ;
 } else if [ os.name ] = LINUX {
     ECHO ** Building for Linux ;
@@ -208,11 +202,12 @@ explicit-alias gc-deps
 #
 # Version information
 alias gc-version : $(version-sources) ;
-make mod.dat : $(GC_TEMPLATES)/mod.dat_in : @gc-version.generate ;
+make mod.dat : $(GC_TEMPLATES_DIR)/mod.dat_in : @gc-version.generate ;
+always gc-version mod.dat ;
 
 #
 # Precompiled header
-cpp-pch stdafx.hpp 
+cpp-pch stdafx.hpp
     : $(GC_HEADERS)/stdafx.hpp gc-deps
 ;
 
@@ -227,12 +222,12 @@ exe goblin-camp
 
 #
 # NSIS installer
-make nsis : $(GC_BUILD_ROOT)/installer/base.nsi : @make-nsis-32 ;
+explicit-make nsis : $(GC_INSTALLER_DIR)/base.nsi : @make-nsis ;
 
 #
 # dist targets
 local rule get-dist-dir ( properties * : what * ) {
-    local dir     = $(GC_DIST_ROOT)/ ;
+    local dir     = $(GC_DIST_DIR)/ ;
     local propset = [ property-set.create $(properties) ] ;
     local variant = [ $(propset).get <variant> ] ;
     local arch    = x86 ;
@@ -273,61 +268,52 @@ rule get-dist-gccore ( properties * ) {
     return $(dir)lib/gcamp_core ;
 }
 
-install dist-additional
+explicit-install dist-additional
     : $(additional-files)
     : <conditional>@get-dist-additional
 ;
 
-install dist-binaries
+explicit-install dist-binaries
     : goblin-camp
     : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
       <conditional>@get-dist-bin
 ;
 
-install dist-data
+explicit-install dist-data
     : $(data-files)
     : <conditional>@get-dist-data
 ;
 
-install dist-pylib
-    : $(GC_SOURCE_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp : *.py ]
-      [ path.glob-tree $(GC_SOURCE_ROOT)/lib/gcamp_core : *.py *.dat ]
+explicit-install dist-lib
+    : $(GC_PROJECT_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_PROJECT_ROOT)/lib/gcamp : *.py ]
+      [ path.glob-tree $(GC_PROJECT_ROOT)/lib/gcamp_core : *.py *.dat ]
     : <conditional>@get-dist-data
-      <install-source-root>$(GC_SOURCE_ROOT)
+      <install-source-root>$(GC_PROJECT_ROOT)
 ;
 
-install dist-mod-version
+explicit-install dist-mod-version
     : mod.dat
     : <conditional>@get-dist-gccore
 ;
 
-alias dist : dist-data dist-binaries dist-additional dist-pylib dist-mod-version ;
+explicit-alias dist : dist-data dist-binaries dist-additional dist-lib dist-mod-version ;
 
 #
 # Solution files
-make goblin-camp-msvc9.sln      : $(GC_TEMPLATES)/goblin-camp-msvc9.sln_in      : @gc-sln.generate-sln ;
-make goblin-camp-msvc9.vcproj   : $(GC_TEMPLATES)/goblin-camp-msvc9.vcproj_in   : @gc-sln.generate-2008 ;
-make goblin-camp-msvc10.sln     : $(GC_TEMPLATES)/goblin-camp-msvc10.sln_in     : @gc-sln.generate-sln ;
-make goblin-camp-msvc10.vcxproj : $(GC_TEMPLATES)/goblin-camp-msvc10.vcxproj_in : @gc-sln.generate-2010 ;
+explicit-make goblin-camp-msvc9.sln      : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9.sln_in      : @gc-sln.generate-sln ;
+explicit-make goblin-camp-msvc9.vcproj   : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9.vcproj_in   : @gc-sln.generate-2008 ;
+explicit-make goblin-camp-msvc10.sln     : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.sln_in     : @gc-sln.generate-sln ;
+explicit-make goblin-camp-msvc10.vcxproj : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.vcxproj_in : @gc-sln.generate-2010 ;
 
-alias make-sln2008 : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj ;
-alias make-sln2010 : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
+explicit-alias make-sln2008 : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj ;
+explicit-alias make-sln2010 : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
 
-install sln2008
+explicit-install sln2008
     : make-sln2008
     : <location>$(GC_MSVC_SLN_DIR)
 ;
 
-install sln2010
+explicit-install sln2010
     : make-sln2010
     : <location>$(GC_MSVC_SLN_DIR)
 ;
-
-#
-# Explicit targets
-explicit nsis dist dist-binaries dist-data dist-additional dist-pylib dist-mod-version make-sln2008 make-sln2010 sln2008 sln2010 ;
-explicit goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
-
-#
-# Always build version information
-always gc-version mod.dat ;

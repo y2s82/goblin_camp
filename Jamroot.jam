@@ -1,20 +1,44 @@
 # Goblin Camp build system.
 # See build/README.
 
-path-constant GC_ROOT          : . ;
-path-constant GC_BUILD_ROOT    : "$(GC_ROOT)/build" ;
-path-constant GC_TEMPLATES     : "$(GC_BUILD_ROOT)/templates" ;
-path-constant GC_DIST_ROOT     : "$(GC_BUILD_ROOT)/dist" ;
-path-constant GC_TMP_DIR       : "$(GC_BUILD_ROOT)/tmp" ;
-path-constant GC_MSVC_SLN_DIR  : "$(GC_BUILD_ROOT)/msvc" ;
-path-constant GC_SOURCE_ROOT   : "$(GC_ROOT)/Goblin Camp" ;
-path-constant GC_SOURCES       : "$(GC_SOURCE_ROOT)/src" ;
-path-constant GC_HEADERS       : "$(GC_SOURCE_ROOT)/include" ;
-path-constant GC_WIN32_SOURCES : "$(GC_SOURCES)/win32" ;
-path-constant GC_LINUX_SOURCES : "$(GC_SOURCES)/linux" ;
-path-constant GC_OSX_SOURCES   : "$(GC_SOURCES)/osx" ;
+import modules ;
 
-constant GC_VERSION : 0.12 ;
+local rule global-path-constant ( name : value ) {
+    path-constant $(name) : $(value) ;
+    modules.poke : $(name) : $($(name)) ;
+}
+
+local rule global-constant ( name : value ) {
+    constant $(name) : $(value) ;
+    modules.poke : $(name) : $($(name)) ;
+}
+
+# Root directories
+global-path-constant GC_ROOT          : . ;
+global-path-constant GC_BUILD_ROOT    : "$(GC_ROOT)/build" ;
+global-path-constant GC_PROJECT_ROOT  : "$(GC_ROOT)/Goblin Camp" ;
+
+# Build directories
+global-path-constant GC_TEMPLATES_DIR : "$(GC_BUILD_ROOT)/templates" ;
+global-path-constant GC_DIST_DIR      : "$(GC_BUILD_ROOT)/dist" ;
+global-path-constant GC_TMP_DIR       : "$(GC_BUILD_ROOT)/tmp" ;
+global-path-constant GC_MSVC_SLN_DIR  : "$(GC_BUILD_ROOT)/msvc" ;
+global-path-constant GC_INSTALLER_DIR : "$(GC_BUILD_ROOT)/installer" ;
+global-path-constant GC_REDIST_DIR    : "$(GC_INSTALLER_DIR)/redists" ;
+global-path-constant GC_PREBUILT_DIR  : "$(GC_BUILD_ROOT)/prebuilt" ;
+
+# Generic GC sources
+global-path-constant GC_SOURCES       : "$(GC_PROJECT_ROOT)/src" ;
+global-path-constant GC_HEADERS       : "$(GC_PROJECT_ROOT)/include" ;
+
+# Platform-specific GC sources
+global-path-constant GC_WIN32_SOURCES : "$(GC_SOURCES)/win32" ;
+global-path-constant GC_LINUX_SOURCES : "$(GC_SOURCES)/linux" ;
+global-path-constant GC_OSX_SOURCES   : "$(GC_SOURCES)/osx" ;
+global-path-constant GC_UNIX_SOURCES  : "$(GC_SOURCES)/unix" ;
+
+# Current GC version
+global-constant GC_VERSION : 0.13 ;
 
 import version ;
 

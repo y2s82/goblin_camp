@@ -4,6 +4,7 @@ import type ;
 import generators ;
 import toolset ;
 import os ;
+import modules ;
 
 type.register RC_IN    : rc_in ;
 type.register CPP_IN   : cpp_in ;
@@ -19,6 +20,9 @@ generators.register-standard gc-version.generate : PLIST_IN : PLIST ;
 toolset.flags gc-version.generate APPEND_HG <variant>debug   : yes ;
 toolset.flags gc-version.generate APPEND_HG <variant>release : no ;
 
+GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
+GC_VERSION       = [ modules.peek : GC_VERSION ] ;
+
 actions generate {
-    python "$(GC_TEMPLATES)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
+    python "$(GC_TEMPLATES_DIR)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
 }
