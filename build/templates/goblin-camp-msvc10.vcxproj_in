@@ -61,18 +61,18 @@
 	<PropertyGroup Label="UserMacros" />
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-		<NMakeBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug dist</NMakeBuildCommandLine>
-		<NMakeCleanCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug dist</NMakeCleanCommandLine>
-		<NMakeReBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug dist</NMakeReBuildCommandLine>
+		<NMakeBuildCommandLine>%GC_DEBUG_COMMAND% -q</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>%GC_DEBUG_COMMAND% --clean</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>%GC_DEBUG_COMMAND% -q -a</NMakeReBuildCommandLine>
 		
 		<NMakeOutput>..\dist\debug-x86\goblin-camp.exe</NMakeOutput>
 		
 		<NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-		<NMakeBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release dist</NMakeBuildCommandLine>
-		<NMakeCleanCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release dist</NMakeCleanCommandLine>
-		<NMakeReBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release dist</NMakeReBuildCommandLine>
+		<NMakeBuildCommandLine>%GC_RELEASE_COMMAND% -q</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>%GC_RELEASE_COMMAND% --clean</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>%GC_RELEASE_COMMAND% -q -a</NMakeReBuildCommandLine>
 		
 		<NMakeOutput>..\dist\release-x86\goblin-camp.exe</NMakeOutput>
 		
@@ -80,18 +80,18 @@
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-		<NMakeBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug address-model=64 dist</NMakeBuildCommandLine>
-		<NMakeCleanCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug address-model=64 dist</NMakeCleanCommandLine>
-		<NMakeReBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug address-model=64 dist</NMakeReBuildCommandLine>
+		<NMakeBuildCommandLine>%GC_DEBUG_COMMAND% -q address-model=64</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>%GC_DEBUG_COMMAND% --clean address-model=64</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>%GC_DEBUG_COMMAND% -q -a address-model=64</NMakeReBuildCommandLine>
 		
 		<NMakeOutput>..\dist\debug-x64\goblin-camp.exe</NMakeOutput>
 		
 		<NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-		<NMakeBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release address-model=64 dist</NMakeBuildCommandLine>
-		<NMakeCleanCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release address-model=64 dist</NMakeCleanCommandLine>
-		<NMakeReBuildCommandLine>..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release address-model=64 dist</NMakeReBuildCommandLine>
+		<NMakeBuildCommandLine>%GC_RELEASE_COMMAND% -q address-model=64</NMakeBuildCommandLine>
+		<NMakeCleanCommandLine>%GC_RELEASE_COMMAND% --clean address-model=64</NMakeCleanCommandLine>
+		<NMakeReBuildCommandLine>%GC_RELEASE_COMMAND% -q -a address-model=64</NMakeReBuildCommandLine>
 		
 		<NMakeOutput>..\dist\release-x64\goblin-camp.exe</NMakeOutput>
 		

@@ -23,9 +23,9 @@
 		>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug dist"
-				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug dist"
-				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug dist"
+				BuildCommandLine="%GC_DEBUG_COMMAND% -q"
+				ReBuildCommandLine="%GC_DEBUG_COMMAND% -q -a"
+				CleanCommandLine="%GC_DEBUG_COMMAND% --clean"
 				Output="..\dist\debug-x86\goblin-camp.exe"
 			/>
 		</Configuration>
@@ -37,9 +37,9 @@
 		>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release dist"
-				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release dist"
-				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release dist"
+				BuildCommandLine="%GC_RELEASE_COMMAND% -q"
+				ReBuildCommandLine="%GC_RELEASE_COMMAND% -q -a"
+				CleanCommandLine="%GC_RELEASE_COMMAND% --clean"
 				Output="..\dist\release-x86\goblin-camp.exe"
 			/>
 		</Configuration>
@@ -52,9 +52,9 @@
 		>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug address-model=64 dist"
-				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug address-model=64 dist"
-				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug address-model=64 dist"
+				BuildCommandLine="%GC_DEBUG_COMMAND% -q address-model=64"
+				ReBuildCommandLine="%GC_DEBUG_COMMAND% -q -a address-model=64"
+				CleanCommandLine="%GC_DEBUG_COMMAND% --clean address-model=64"
 				Output="..\dist\debug-x64\goblin-camp.exe"
 			/>
 		</Configuration>
@@ -66,9 +66,9 @@
 		>
 			<Tool
 				Name="VCNMakeTool"
-				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release address-model=64 dist"
-				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release address-model=64 dist"
-				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release address-model=64 dist"
+				BuildCommandLine="%GC_RELEASE_COMMAND% -q address-model=64"
+				ReBuildCommandLine="%GC_RELEASE_COMMAND% -q -a address-model=64"
+				CleanCommandLine="%GC_RELEASE_COMMAND% --clean address-model=64"
 				Output="..\dist\release-x64\goblin-camp.exe"
 			/>
 		</Configuration>
