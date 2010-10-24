@@ -206,11 +206,14 @@ Generating NSIS installer
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There is NSIS installer template included with sources. To build it, you need
-to build ``release`` variant, install it into dist, and then run::
+to run::
 
-    bjam --user-config=gc-config.jam nsis
+    bjam --user-config=gc-config.jam nsis variant=release
 
 Installer will be saved into ``build\dist\installer``.
+
+.. note::
+    You cannot build NSIS installer with ``variant=debug``.
 
 Automatic versioning
 ~~~~~~~~~~~~~~~~~~~~
