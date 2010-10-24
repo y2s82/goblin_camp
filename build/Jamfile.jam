@@ -103,6 +103,14 @@ actions make-nsis {
     python $(GC_INSTALLER_DIR)/mkinstaller.py $(GC_VERSION) $(ARCH)
 }
 
+rule cannot-make-nsis ( targets * : sources * : properties * ) {
+    ECHO ;
+    ECHO "!! NSIS installer is meant for end users, and therefore cannot be built from the debug variant." ;
+    ECHO "!! Append variant=release to your command line." ;
+    
+    EXIT ;
+}
+
 ##
 # Collect sources and dependencies
 ##
@@ -222,7 +230,11 @@ exe goblin-camp
 
 #
 # NSIS installer
-explicit-make nsis : $(GC_INSTALLER_DIR)/base.nsi : @make-nsis ;
+explicit-make setup.exe : $(GC_INSTALLER_DIR)/base.nsi : @cannot-make-nsis ;
+explicit-make setup.exe : $(GC_INSTALLER_DIR)/base.nsi : @make-nsis : <variant>release ;
+
+# <implicit-dependency> is here to forcibly build and dist goblin-camp *before* makensis is called.
+explicit-alias nsis : dist setup.exe : <implicit-dependency>dist ;
 
 #
 # dist targets
