@@ -28,16 +28,16 @@ namespace PathsImpl {
 	void FindExecutableDirectory(fs::path&, fs::path&, fs::path&);
 }
 
+namespace Globals {
+	fs::path personalDir, exec, execDir, dataDir;
+	fs::path savesDir, screensDir, modsDir;
+	fs::path config, keys, font;
+}
+
 namespace {
-	namespace globals {
-		fs::path personalDir, exec, execDir, dataDir;
-		fs::path savesDir, screensDir, modsDir;
-		fs::path config, keys, font;
-	}
-	
 	// Bootstrap to get logging up and running.
 	inline void Bootstrap() {
-		using namespace globals;
+		using namespace Globals;
 		
 		PathsImpl::FindPersonalDirectory(personalDir);
 		
@@ -60,23 +60,23 @@ namespace Paths {
 	void Init() {
 		Bootstrap();
 		
-		LOG("Personal directory: " << globals::personalDir);
-		LOG("Saves directory: " << globals::savesDir);
-		LOG("Screenshots directory: " << globals::screensDir);
-		LOG("Mods directory: " << globals::modsDir);
-		LOG("Executable directory: " << globals::execDir);
-		LOG("Global data directory: " << globals::dataDir);
+		LOG("Personal directory: " << Globals::personalDir);
+		LOG("Saves directory: " << Globals::savesDir);
+		LOG("Screenshots directory: " << Globals::screensDir);
+		LOG("Mods directory: " << Globals::modsDir);
+		LOG("Executable directory: " << Globals::execDir);
+		LOG("Global data directory: " << Globals::dataDir);
 		LOG("--------");
-		LOG("Executable: " << globals::exec);
-		LOG("Config: " << globals::config);
-		LOG("Font: " << globals::font);
+		LOG("Executable: " << Globals::exec);
+		LOG("Config: " << Globals::config);
+		LOG("Font: " << Globals::font);
 		
 		// try to create personal directory structure
 		// create_directory doesn't throw if directory already exist
 		try {
-			fs::create_directory(globals::savesDir);
-			fs::create_directory(globals::screensDir);
-			fs::create_directory(globals::modsDir);
+			fs::create_directory(Globals::savesDir);
+			fs::create_directory(Globals::screensDir);
+			fs::create_directory(Globals::modsDir);
 		} catch (const fs::filesystem_error& e) {
 			LOG("filesystem_error while creating directories: " << e.what());
 			exit(1);
@@ -88,15 +88,15 @@ namespace Paths {
 	#pragma warning(disable : 4715)
 	const fs::path& Get(Path what) {
 		switch (what) {
-			case Executable:    return globals::exec;
-			case GlobalData:    return globals::dataDir;
-			case Personal:      return globals::personalDir;
-			case Mods:          return globals::modsDir;
-			case Saves:         return globals::savesDir;
-			case Screenshots:   return globals::screensDir;
-			case Font:          return globals::font;
-			case Config:        return globals::config;
-			case ExecutableDir: return globals::execDir;
+			case Executable:    return Globals::exec;
+			case GlobalData:    return Globals::dataDir;
+			case Personal:      return Globals::personalDir;
+			case Mods:          return Globals::modsDir;
+			case Saves:         return Globals::savesDir;
+			case Screenshots:   return Globals::screensDir;
+			case Font:          return Globals::font;
+			case Config:        return Globals::config;
+			case ExecutableDir: return Globals::execDir;
 		}
 		
 		// If control reaches here, then someone added new value to the enum,

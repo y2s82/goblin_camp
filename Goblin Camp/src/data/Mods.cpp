@@ -31,11 +31,11 @@ namespace fs = boost::filesystem;
 #include "NPC.hpp"
 #include "scripting/Engine.hpp"
 
+namespace Globals {
+	std::list<Mods::Metadata> loadedMods;
+}
+
 namespace {
-	namespace globals {
-		std::list<Mods::Metadata> loadedMods;
-	}
-	
 	struct ModListener : public ITCODParserListener {
 		Mods::Metadata *ptr;
 		
@@ -128,7 +128,7 @@ namespace {
 			}
 		}
 		
-		globals::loadedMods.push_back(metadata);
+		Globals::loadedMods.push_back(metadata);
 	}
 }
 
@@ -138,13 +138,13 @@ namespace Mods {
 	}
 	
 	const std::list<Metadata>& GetLoaded() {
-		return globals::loadedMods;
+		return Globals::loadedMods;
 	}
 	
 	void Load() {
 		// load core data
 		LoadMod(Paths::Get(Paths::GlobalData) / "lib" / "gcamp_core", true);
-		globals::loadedMods.begin()->mod = "Goblin Camp";
+		Globals::loadedMods.begin()->mod = "Goblin Camp";
 		
 		// load user mods
 		for (fs::directory_iterator it(Paths::Get(Paths::Mods)), end; it != end; ++it) {
