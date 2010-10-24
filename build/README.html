@@ -527,11 +527,15 @@ bjam --user-config=gc-config.jam sln2008
 <div class="section" id="generating-nsis-installer">
 <h2><a class="toc-backref" href="#id20">Generating NSIS installer</a></h2>
 <p>There is NSIS installer template included with sources. To build it, you need
-to build <tt class="docutils literal">release</tt> variant, install it into dist, and then run:</p>
+to run:</p>
 <pre class="literal-block">
-bjam --user-config=gc-config.jam nsis
+bjam --user-config=gc-config.jam nsis variant=release
 </pre>
 <p>Installer will be saved into <tt class="docutils literal">build\dist\installer</tt>.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">You cannot build NSIS installer with <tt class="docutils literal">variant=debug</tt>.</p>
+</div>
 </div>
 <div class="section" id="automatic-versioning">
 <h2><a class="toc-backref" href="#id21">Automatic versioning</a></h2>
