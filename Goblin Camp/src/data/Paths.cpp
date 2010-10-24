@@ -22,41 +22,140 @@ namespace fs = boost::filesystem;
 #include "Logger.hpp"
 #include "data/Paths.hpp"
 
-// These functions are platform-specific, and are defined in <platform>/DataImpl.cpp.
+/**
+	\enum Paths::Path
+		\see Paths::Get
+		
+	\var Paths::Path::Executable
+		\see Globals::exec
+		
+	\var Paths::Path::GlobalData
+		\see Globals::dataDir
+	
+	\var Paths::Path::Personal
+		\see Globals::personalDir
+		
+	\var Paths::Path::Mods
+		\see Globals::modsDir
+		
+	\var Paths::Path::Saves
+		\see Globals::savesDir
+		
+	\var Paths::Path::Screenshots
+		\see Globals::screensDir
+		
+	\var Paths::Path::Font
+		\see Globals::font
+		
+	\var Paths::Path::Config
+		\see Globals::config
+		
+	\var Paths::Path::ExecutableDir
+		\see Globals::execDir
+*/
+
+/**
+	Platform-specific APIs required to implement Paths module.
+	
+	These functions are defined in <tt>\<platform\>/DataImpl.cpp</tt>.
+*/
 namespace PathsImpl {
-	void FindPersonalDirectory(fs::path&);
-	void FindExecutableDirectory(fs::path&, fs::path&, fs::path&);
+	/**
+		Finds current user's personal directory.
+		
+		On Windows, this is <tt>~/Documents/My Games/Goblin Camp</tt>.
+		On Linux, this is <tt>~/.goblincamp</tt>.
+		On MacOSX, this is <tt>~/Library/Application Support/Goblin Camp</tt>.
+		
+		\param[out] personalDir Must be set to the correct path by the implementation.
+	*/
+	void FindPersonalDirectory(fs::path& personalDir);
+	
+	/**
+		Finds Goblin %Camp executable and data directories.
+		
+		On Windows, executable and data directories are the same.
+		On Linux, executable will be located in <tt>bin/</tt>, and data in <tt>share/goblin-camp/</tt>.
+		On MacOSX, executable and data will be located in a bundle.
+		
+		\param[out] exec    Must be set to the correct path to the executable file by the implementation.
+		\param[out] execDir Must be set to the correct path to the executable directory by the implementation.
+		\param[out] dataDir Must be set to the correct path to the global data directory by the implementation.
+	*/
+	void FindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir);
 }
 
 namespace Globals {
+	/**
+		\var personalDir
+			Path to user's personal directory for Goblin %Camp.
+			\see PathsImpl::FindPersonalDirectory
+			
+		\var exec
+			Path to Goblin %Camp executable file.
+			\see PathsImpl::FindExecutableDirectory
+			
+		\var execDir
+			Path to Goblin %Camp executable directory.
+			\see PathsImpl::FindExecutableDirectory
+			
+		\var dataDir
+			Path to Goblin %Camp global data directory.
+			\see PathsImpl::FindExecutableDirectory
+			
+		\var savesDir
+			Path to user's save directory (subdir of personalDir).
+			
+		\var screensDir
+			Path to user's screenshot directory (subdir of personalDir).
+			
+		\var modsDir
+			Path to user's mods directory (subdir of personalDir).
+			
+		\var config
+			Path to user's configuration file.
+			
+		\var font
+			Path to user's bitmap font.
+	*/
 	fs::path personalDir, exec, execDir, dataDir;
 	fs::path savesDir, screensDir, modsDir;
-	fs::path config, keys, font;
+	fs::path config, font;
 }
 
-namespace {
-	// Bootstrap to get logging up and running.
+/**
+	Interface to manage platform-specific paths in a platform-agnostic way.
+	Basic building block of data handling code.
+*/
+namespace Paths {
+	/**
+		Finds platform-specific directories (see PathsImpl), creates personal directory
+		if doesn't exist, and opens log file.
+		
+		This has to be called before anything else, especially anything
+		that uses logging.
+	*/
 	inline void Bootstrap() {
 		using namespace Globals;
 		
 		PathsImpl::FindPersonalDirectory(personalDir);
 		
-		savesDir    = personalDir / "saves";
-		screensDir  = personalDir / "screenshots";
-		modsDir     = personalDir / "mods";
+		savesDir   = personalDir / "saves";
+		screensDir = personalDir / "screenshots";
+		modsDir    = personalDir / "mods";
 		
-		config      = personalDir / "config.py";
-		keys        = personalDir / "keys.ini";
-		font        = personalDir / "terminal.png";
+		config     = personalDir / "config.py";
+		font       = personalDir / "terminal.png";
 		
 		PathsImpl::FindExecutableDirectory(exec, execDir, dataDir);
 		
 		fs::create_directory(personalDir);
 		Logger::OpenLogFile((personalDir / "goblin-camp.log").string());
 	}
-}
-
-namespace Paths {
+	
+	/**
+		Calls Paths::Bootstrap and then tries to create user directory structure.
+	*/
 	void Init() {
 		Bootstrap();
 		
@@ -86,6 +185,13 @@ namespace Paths {
 	#pragma warning(push)
 	// "warning C4715: 'Data::GetPath' : not all control paths return a value"
 	#pragma warning(disable : 4715)
+	
+	/**
+		Retrieves reference to a given path. Exists to hide implementation details of path storage.
+		
+		\param[in] what What to return, a member of Path enumeration.
+		\returns        Constant reference to given path (a boost::filesystem::path object).
+	*/
 	const fs::path& Get(Path what) {
 		switch (what) {
 			case Executable:    return Globals::exec;
@@ -105,5 +211,6 @@ namespace Paths {
 		LOG("Impossible code path, crashing.");
 		assert(false);
 	}
+	
 	#pragma warning(pop)
 }

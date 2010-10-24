@@ -27,12 +27,22 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 
 namespace Globals {
+	/**
+		\var cvars
+		A map of configuration variables.
+		
+		\var keys
+		A map of key bindings.
+	*/
 	Config::CVarMap cvars;
 	Config::KeyMap  keys;
 }
 
 namespace {
-	void _SaveNoThrow() {
+	/**
+		Ensures that Config::Save won't throw at exit.
+	*/
+	void SaveNoThrow() {
 		try {
 			Config::Save();
 		} catch (...) {
@@ -41,7 +51,16 @@ namespace {
 	}
 }
 
+/**
+	Interface to manage game's configuration.
+*/
 namespace Config {
+	/**
+		Saves current configuration to user's configuration file.
+		
+		\see Paths
+		\throws std::exception Refer to std::ofstream documentation.
+	*/
 	void Save() {
 		std::ofstream config(Paths::Get(Paths::Config).string().c_str());
 		config << "##\n";
@@ -61,7 +80,9 @@ namespace Config {
 		config.close();
 	}
 	
-	// Set config defaults.
+	/**
+		Creates configuration variables, and default key bindings.
+	*/
 	void Init() {
 		using boost::assign::insert;
 		
@@ -87,34 +108,78 @@ namespace Config {
 			("Jobs",          'j')
 		;
 		
-		atexit(_SaveNoThrow);
+		atexit(SaveNoThrow);
 	}
 	
-	void SetStringCVar(const std::string& n, const std::string& v) {
-		LOG("Setting " << n << " to " << v);
-		Globals::cvars[n] = v;
+	/**
+		Changes value of a configuration variable.
+		
+		\param[in] name  Name of the variable.
+		\param[in] value New value for the variable.
+	*/
+	void SetStringCVar(const std::string& name, const std::string& value) {
+		LOG("Setting " << name << " to " << value);
+		Globals::cvars[name] = value;
 	}
 	
-	std::string GetStringCVar(const std::string& n) {
-		return Globals::cvars[n];
+	/**
+		Retrieves value of a configuration variable. If the variable doesn't exist,
+		it will be created, set to empty string and then returned.
+		
+		\param[in] name Name of the variable.
+		\returns        Value of the variable.
+	*/
+	std::string GetStringCVar(const std::string& name) {
+		return Globals::cvars[name];
 	}
 	
+	/**
+		Retrieves all defined configuration variables.
+		
+		\returns A constant reference to the configuration variables map.
+	*/
 	const CVarMap& GetCVarMap() {
 		return Globals::cvars;
 	}
 	
-	char GetKey(const std::string& n) {
-		return Globals::keys[n];
-	}
-	
-	void SetKey(const std::string& n, const char v) {
-		LOG("Setting " << n << " to " << v);
-		if (Globals::keys.find(n) == Globals::keys.end()) {
-			LOG("WARNING: Key " << n << " was not specified in the defaults -- it could mean the name has changed between releases.");
+	/**
+		Retrieves keycode bound to a named key. If the key doesn't exist,
+		NULL keycode (\c 0) will be returned and warning will be logged.
+		
+		\param[in] name Name of the key.
+		\returns        Currently bound keycode, or 0.
+	*/
+	char GetKey(const std::string& name) {
+		if (Globals::keys.find(name) == Globals::keys.end()) {
+			LOG("WARNING: Key " << name << " doesn't exist -- this may indicate outdated code.");
+			return '\0';
 		}
-		Globals::keys[n] = v;
+		
+		return Globals::keys[name];
 	}
 	
+	/**
+		Changes keycode bound to a named key. If the key doesn't exist,
+		a warning will be logged (but the binding will be saved).
+		
+		\param[in] name  Name of the key.
+		\param[in] value New keycode for the key.
+	*/
+	void SetKey(const std::string& name, const char value) {
+		LOG("Setting " << name << " to '" << value << "'");
+		
+		if (Globals::keys.find(name) == Globals::keys.end()) {
+			LOG("WARNING: Key " << name << " was not specified in the defaults -- it could mean the name has changed between releases.");
+		}
+		
+		Globals::keys[name] = value;
+	}
+	
+	/**
+		Retrieves all key bindings.
+		
+		\returns Non-constant reference to the key bindings map. Callers should be careful not to introduce new keys this way.
+	*/
 	KeyMap& GetKeyMap() {
 		return Globals::keys;
 	}
