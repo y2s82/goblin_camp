@@ -38,6 +38,12 @@ namespace fs = boost::filesystem;
 #include "scripting/Engine.hpp"
 
 namespace {
+	/**
+		Converts an UNIX timestamp to ISO8601 date string (YYYY-MM-DD, HH:MM:SS).
+		
+		\param[in]  timestamp A source UNIX timestamp.
+		\param[out] dest      A string buffer to receive formatted date.
+	*/
 	void FormatTimestamp(const time_t& timestamp, std::string& dest) {
 		char buffer[21] = { "0000-00-00, 00:00:00" }; 
 		
@@ -51,6 +57,13 @@ namespace {
 		dest = buffer;
 	}
 	
+	/**
+		Converts a file size in bytes into more human-readable larger units
+		(NB: uses kB/MB/GB as 1024-based units).
+		
+		\param[in]  filesize File size (in bytes).
+		\param[out] dest     A string buffer to receive formatted file size.
+	*/
 	void FormatFileSize(const boost::uintmax_t& filesize, std::string& dest) {
 		static const char* sizes[] = { "%10.0f b", "%10.2f kB", "%10.2f MB", "%10.2f GB" };
 		static unsigned maxSize = sizeof(sizes) / sizeof(sizes[0]);
@@ -66,6 +79,11 @@ namespace {
 		dest = (boost::format(sizes[idx]) % size).str();
 	}
 	
+	/**
+		Saves current game to a given file. Emits onGameSaved scripting event.
+		
+		\param[in] file Full path to the save.
+	*/
 	void DoSave(std::string file) {
 		LOG_FUNC("Saving game to " << file, "DoSave");
 		
@@ -73,6 +91,13 @@ namespace {
 		Script::Event::GameSaved(file);
 	}
 	
+	/**
+		Checks whether given file exists in the user's personal directory, and if not,
+		tries to copy it from the global data directory.
+		
+		\see Paths
+		\param[in] target File to check for (full path).
+	*/
 	void CopyDefault(const fs::path& target) {
 		if (fs::exists(target)) return;
 		
@@ -94,6 +119,14 @@ namespace {
 		}
 	}
 	
+	/**
+		Checks whether given file exists in the user's personal directory, and if not,
+		tries to create a new one.
+		
+		\see Paths
+		\param[in] target File to check for (full path).
+		\param[in] source Default content to use for the new file.
+	*/
 	void CreateDefault(const fs::path& target, const std::string& source) {
 		if (fs::exists(target)) return;
 		
@@ -115,6 +148,11 @@ namespace Data {
 		FormatTimestamp(timestamp, this->date);
 	}
 	
+	/**
+		Retrieves a list of saved games.
+		
+		\param[out] list Storage for the list.
+	*/
 	void GetSavedGames(std::vector<Save>& list) {
 		for (fs::directory_iterator it(Paths::Get(Paths::Saves)), end; it != end; ++it) {
 			fs::path save = it->path();
@@ -130,12 +168,22 @@ namespace Data {
 		}
 	}
 	
+	/**
+		Retrieves a count of saved games.
+		
+		\returns Number of saved games found.
+	*/
 	unsigned CountSavedGames() {
 		std::vector<Save> saves;
 		GetSavedGames(saves);
 		return saves.size();
 	}
 	
+	/**
+		Loads the game from given file.
+		
+		\param[in] save Save filename.
+	*/
 	void LoadGame(const std::string& save) {
 		std::string file = (Paths::Get(Paths::Saves) / save).string() + ".sav";
 		LOG("Loading game from " << file);
@@ -144,6 +192,12 @@ namespace Data {
 		Script::Event::GameLoaded(file);
 	}
 	
+	/**
+		Saves the game to given file. If it exists, prompts the user whether to override.
+		
+		\see DoSave
+		\param[in] save Save filename.
+	*/
 	void SaveGame(const std::string& save) {
 		std::string file = (Paths::Get(Paths::Saves) / save).string() + ".sav";
 		
@@ -154,6 +208,9 @@ namespace Data {
 		}
 	}
 	
+	/**
+		Executes the user's configuration file.
+	*/
 	void LoadConfig() {
 		LOG("Loading user config.");
 		const fs::path& config = Paths::Get(Paths::Config);
@@ -169,6 +226,9 @@ namespace Data {
 		}
 	}
 	
+	/**
+		Loads the user's bitmap font.
+	*/
 	void LoadFont() {
 		static bool again = false;
 		
@@ -180,6 +240,9 @@ namespace Data {
 		again = true;
 	}
 	
+	/**
+		Saves a screenshot of the game. Takes care of automatic numbering.
+	*/
 	void SaveScreenshot() {
 		// sadly, libtcod supports autonumbering only when saving to current dir
 		unsigned int largest = 0;

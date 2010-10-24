@@ -32,6 +32,9 @@ namespace fs = boost::filesystem;
 #include "scripting/Engine.hpp"
 
 namespace Globals {
+	/**
+		List of loaded mods. NB: removing an entry from this list does not unload the mod.
+	*/
 	std::list<Mods::Metadata> loadedMods;
 }
 
@@ -71,6 +74,14 @@ namespace {
 		TCODNamegen::parse(fn.c_str());
 	}
 	
+	/**
+		Loads given data file with given function.
+		
+		\param[in] filename Name of the file, without .dat extension.
+		\param[in] dir      Directory containing the file.
+		\param[in] loadFunc Function that loads the data file.
+		\param[in] required If true, and file doesn't exist, the game will exit completely.
+	*/
 	void LoadFile(std::string filename, const fs::path& dir, void (*loadFunc)(std::string), bool required = false) {
 		filename += ".dat";
 		
@@ -89,6 +100,12 @@ namespace {
 		loadFunc((dir / filename).string());
 	}
 	
+	/**
+		Loads mod metadata from given file. Doesn't modify loadedMods.
+		
+		\param[out] metadata     Mods::Metadata structure to fill.
+		\param[in]  metadataFile Full path to the metadata file.
+	*/
 	void LoadMetadata(Mods::Metadata& metadata, const fs::path& metadataFile) {
 		TCODParser parser;
 		TCODParserStruct *type = parser.newStructure("mod");
@@ -102,6 +119,13 @@ namespace {
 		delete listener;
 	}
 	
+	/**
+		Loads given mod and inserts it's metadata into loadedMods.
+		NB: Currently there is no way to unload a mod.
+		
+		\param[in] dir      Mod's directory.
+		\param[in] required Passed down to LoadFile for every data file of the mod.
+	*/
 	void LoadMod(const fs::path& dir, bool required = false) {
 		std::string mod = dir.filename().string();
 		
@@ -132,15 +156,26 @@ namespace {
 	}
 }
 
+/**
+	Interface to load and query mods.
+*/
 namespace Mods {
 	Metadata::Metadata(const std::string& mod, const std::string& name, const std::string& author, const std::string& version, short apiVersion)
 		: mod(mod), name(name), author(author), version(version), apiVersion(apiVersion) {
 	}
 	
+	/**
+		Retrieves the list of loaded mods.
+		
+		\returns Constant reference to list of mods metadata.
+	*/
 	const std::list<Metadata>& GetLoaded() {
 		return Globals::loadedMods;
 	}
 	
+	/**
+		Loads global mod and then tries to load user mods.
+	*/
 	void Load() {
 		// load core data
 		LoadMod(Paths::Get(Paths::GlobalData) / "lib" / "gcamp_core", true);
