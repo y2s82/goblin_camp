@@ -30,10 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/_gcampapi/APIItem.hpp"
 #include "Logger.hpp"
 
-namespace {
-	namespace globals {
-		std::list<py::object> listeners;
-	}
+namespace Globals {
+	std::list<py::object> listeners;
 }
 
 namespace Script { namespace API {
@@ -72,11 +70,11 @@ namespace Script {
 			LOG("New listener: " << py::extract<char*>(repr) << ".");
 		}
 		
-		globals::listeners.push_back(oListener);
+		Globals::listeners.push_back(oListener);
 	}
 	
 	void InvokeListeners(char *method, PyObject *args) {
-		BOOST_FOREACH(py::object listener, globals::listeners) {
+		BOOST_FOREACH(py::object listener, Globals::listeners) {
 			if (!PyObject_HasAttrString(listener.ptr(), method)) {
 				continue;
 			}
@@ -106,6 +104,6 @@ namespace Script {
 	}
 	
 	void ReleaseListeners() {
-		globals::listeners.clear();
+		Globals::listeners.clear();
 	}
 }

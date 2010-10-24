@@ -26,12 +26,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "data/Paths.hpp"
 #include "Logger.hpp"
 
+namespace Globals {
+	Config::CVarMap cvars;
+	Config::KeyMap  keys;
+}
+
 namespace {
-	namespace globals {
-		Config::CVarMap cvars;
-		Config::KeyMap  keys;
-	}
-	
 	void _SaveNoThrow() {
 		try {
 			Config::Save();
@@ -49,12 +49,12 @@ namespace Config {
 		config << "##\n";
 		
 		// dump cvars
-		BOOST_FOREACH(CVarMap::value_type pair, globals::cvars) {
+		BOOST_FOREACH(CVarMap::value_type pair, Globals::cvars) {
 			config << "setCVar('" << pair.first << "', '" << pair.second << "')\n";
 		}
 		
 		// dump keys
-		BOOST_FOREACH(KeyMap::value_type pair, globals::keys) {
+		BOOST_FOREACH(KeyMap::value_type pair, Globals::keys) {
 			config << "bindKey('" << pair.first << "', '" << pair.second << "')\n";
 		}
 		
@@ -65,14 +65,14 @@ namespace Config {
 	void Init() {
 		using boost::assign::insert;
 		
-		insert(globals::cvars)
+		insert(Globals::cvars)
 			("resolutionX", "800")
 			("resolutionY", "600")
 			("fullscreen",  "0")
 			("renderer",    "0")
 		;
 		
-		insert(globals::keys)
+		insert(Globals::keys)
 			("Exit",          'q')
 			("Basics",        'b')
 			("Workshops",     'w')
@@ -92,30 +92,30 @@ namespace Config {
 	
 	void SetStringCVar(const std::string& n, const std::string& v) {
 		LOG("Setting " << n << " to " << v);
-		globals::cvars[n] = v;
+		Globals::cvars[n] = v;
 	}
 	
 	std::string GetStringCVar(const std::string& n) {
-		return globals::cvars[n];
+		return Globals::cvars[n];
 	}
 	
 	const CVarMap& GetCVarMap() {
-		return globals::cvars;
+		return Globals::cvars;
 	}
 	
 	char GetKey(const std::string& n) {
-		return globals::keys[n];
+		return Globals::keys[n];
 	}
 	
 	void SetKey(const std::string& n, const char v) {
 		LOG("Setting " << n << " to " << v);
-		if (globals::keys.find(n) == globals::keys.end()) {
+		if (Globals::keys.find(n) == Globals::keys.end()) {
 			LOG("WARNING: Key " << n << " was not specified in the defaults -- it could mean the name has changed between releases.");
 		}
-		globals::keys[n] = v;
+		Globals::keys[n] = v;
 	}
 	
 	KeyMap& GetKeyMap() {
-		return globals::keys;
+		return Globals::keys;
 	}
 }

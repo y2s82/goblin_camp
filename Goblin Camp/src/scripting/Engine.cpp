@@ -35,11 +35,9 @@ namespace fs = boost::filesystem;
 #include "scripting/_gcampapi/LoggerStream.hpp"
 #include "Logger.hpp"
 
-namespace {
-	namespace globals {
-		py::object loadPackageFunc, printExcFunc;
-		Script::API::LoggerStream stream;
-	}
+namespace Globals {
+	py::object loadPackageFunc, printExcFunc;
+	Script::API::LoggerStream stream;
 }
 
 namespace Script {
@@ -88,8 +86,8 @@ namespace Script {
 		py::object modImp = py::import("imp");
 		py::object modTB  = py::import("traceback");
 		
-		globals::printExcFunc    = modTB.attr("print_exception");
-		globals::loadPackageFunc = modImp.attr("load_package");
+		Globals::printExcFunc    = modTB.attr("print_exception");
+		Globals::loadPackageFunc = modImp.attr("load_package");
 		
 		LOG("Exposing the API.");
 		ExposeAPI();
@@ -111,7 +109,7 @@ namespace Script {
 		LOG("Loading '" << directory << "' into '__gcmods__." << mod << "'.");
 		
 		try {
-			globals::loadPackageFunc("__gcmods__." + mod, directory);
+			Globals::loadPackageFunc("__gcmods__." + mod, directory);
 		} catch (const py::error_already_set&) {
 			LogException();
 		}
@@ -133,7 +131,7 @@ namespace Script {
 		
 		Logger::log << "**** Python exception occurred ****\n";
 		try {
-			globals::printExcFunc(hExcType, hExcVal, hExcTB, none, boost::ref(globals::stream));
+			Globals::printExcFunc(hExcType, hExcVal, hExcTB, none, boost::ref(Globals::stream));
 		} catch (const py::error_already_set&) {
 			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();
