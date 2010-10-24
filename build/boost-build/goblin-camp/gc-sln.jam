@@ -2,16 +2,18 @@
 
 import modules ;
 
-user-config = [ modules.peek : SLN_USE_CONFIG ] ;
+USER_CONFIG      = [ modules.peek user-config : __file__ ] ;
+GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
+GC_PROJECT_ROOT  = [ modules.peek : GC_PROJECT_ROOT ] ;
 
 actions generate-sln {
-    python "$(GC_TEMPLATES)/genvcproj.py" sln "$(GC_SOURCE_ROOT)" "$(>)" "$(<)" "$(user-config)"
+    python "$(GC_TEMPLATES_DIR)/genvcproj.py" sln "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
 }
 
 actions generate-2008 {
-    python "$(GC_TEMPLATES)/genvcproj.py" 2008 "$(GC_SOURCE_ROOT)" "$(>)" "$(<)" "$(user-config)"
+    python "$(GC_TEMPLATES_DIR)/genvcproj.py" 2008 "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
 }
 
 actions generate-2010 {
-    python "$(GC_TEMPLATES)/genvcproj.py" 2010 "$(GC_SOURCE_ROOT)" "$(>)" "$(<)" "$(user-config)"
+    python "$(GC_TEMPLATES_DIR)/genvcproj.py" 2010 "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
 }
