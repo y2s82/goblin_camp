@@ -1,73 +1,103 @@
 <?xml version="1.0" encoding="windows-1250"?>
 <VisualStudioProject
-    ProjectType="Visual C++"
-    Version="9,00"
-    Name="goblin-camp-msvc9"
-    ProjectGUID="{C372BB46-FA78-4FD4-8940-600735990118}"
-    RootNamespace="goblin-camp-msvc9"
-    Keyword="MakeFileProj"
-    TargetFrameworkVersion="196613"
+	ProjectType="Visual C++"
+	Version="9,00"
+	Name="goblin-camp-msvc9"
+	ProjectGUID="{C372BB46-FA78-4FD4-8940-600735990118}"
+	RootNamespace="goblin-camp-msvc9"
+	Keyword="MakeFileProj"
+	TargetFrameworkVersion="196613"
 >
-    <Platforms>
-        <Platform Name="Win32" />
-    </Platforms>
-    <ToolFiles>
-    </ToolFiles>
-    <Configurations>
-        <Configuration
-            Name="Debug|Win32"
-            OutputDirectory="$(ConfigurationName)"
-            IntermediateDirectory="$(ConfigurationName)"
-            ConfigurationType="0"
-        >
-            <Tool
-                Name="VCNMakeTool"
-                BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug dist"
-                ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug dist"
-                CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug dist"
-                Output="..\dist\debug\goblin-camp.exe"
-            />
-        </Configuration>
-        <Configuration
-            Name="Release|Win32"
-            OutputDirectory="$(ConfigurationName)"
-            IntermediateDirectory="$(ConfigurationName)"
-            ConfigurationType="0"
-        >
-            <Tool
-                Name="VCNMakeTool"
-                BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release dist"
-                ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release dist"
-                CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release dist"
-                Output="..\dist\release\goblin-camp.exe"
-            />
-        </Configuration>
-    </Configurations>
-    <References>
-    </References>
-    <Files>
-        <Filter
-            Name="Source Files"
-            Filter="cpp;cpp_in;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
-            UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-        >
-            %GC_SOURCE_FILES%
-        </Filter>
-        <Filter
-            Name="Header Files"
-            Filter="h;hpp;hxx;hm;inl;inc;xsd"
-            UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-        >
-            %GC_HEADER_FILES%
-        </Filter>
-        <Filter
-            Name="Data Files"
-            Filter="rc;rc_in;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
-            UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
-        >
-            %GC_RESOURCE_FILES%
-        </Filter>
-    </Files>
-    <Globals>
-    </Globals>
+	<Platforms>
+		<Platform Name="Win32" />
+		<Platform Name="x64" />
+	</Platforms>
+	<ToolFiles>
+	</ToolFiles>
+	<Configurations>
+		<Configuration
+			Name="Debug|Win32"
+			OutputDirectory="..\dist\debug-x86"
+			IntermediateDirectory="..\tmp\goblin-camp"
+			ConfigurationType="0"
+		>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug dist"
+				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug dist"
+				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug dist"
+				Output="..\dist\debug-x86\goblin-camp.exe"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|Win32"
+			OutputDirectory="..\dist\release-x86"
+			IntermediateDirectory="..\tmp\goblin-camp"
+			ConfigurationType="0"
+		>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release dist"
+				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release dist"
+				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release dist"
+				Output="..\dist\release-x86\goblin-camp.exe"
+			/>
+		</Configuration>
+		
+		<Configuration
+			Name="Debug|x64"
+			OutputDirectory="..\dist\debug-x64"
+			IntermediateDirectory="..\tmp\goblin-camp"
+			ConfigurationType="0"
+		>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=debug address-model=64 dist"
+				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=debug address-model=64 dist"
+				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=debug address-model=64 dist"
+				Output="..\dist\debug-x64\goblin-camp.exe"
+			/>
+		</Configuration>
+		<Configuration
+			Name="Release|x64"
+			OutputDirectory="..\dist\release-x64"
+			IntermediateDirectory="..\tmp\goblin-camp"
+			ConfigurationType="0"
+		>
+			<Tool
+				Name="VCNMakeTool"
+				BuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 variant=release address-model=64 dist"
+				ReBuildCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% -q -j2 -a variant=release address-model=64 dist"
+				CleanCommandLine="..\..\msvc_bjam.cmd %GC_USER_CONFIG% --clean variant=release address-model=64 dist"
+				Output="..\dist\release-x64\goblin-camp.exe"
+			/>
+		</Configuration>
+	</Configurations>
+	<References>
+	</References>
+	<Files>
+		<Filter
+			Name="Source Files"
+			Filter="cpp;cpp_in;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx"
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
+		>
+			%GC_SOURCE_FILES%
+		</Filter>
+		<Filter
+			Name="Header Files"
+			Filter="h;hpp;hxx;hm;inl;inc;xsd"
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
+		>
+			%GC_HEADER_FILES%
+		</Filter>
+		<Filter
+			Name="Data Files"
+			Filter="rc;rc_in;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav"
+			UniqueIdentifier="{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}"
+		>
+			%GC_RESOURCE_FILES%
+		</Filter>
+	</Files>
+	<Globals>
+	</Globals>
 </VisualStudioProject>

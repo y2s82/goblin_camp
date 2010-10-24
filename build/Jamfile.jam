@@ -317,15 +317,12 @@ explicit-make goblin-camp-msvc9.vcproj   : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9
 explicit-make goblin-camp-msvc10.sln     : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.sln_in     : @gc-sln.generate-sln ;
 explicit-make goblin-camp-msvc10.vcxproj : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.vcxproj_in : @gc-sln.generate-2010 ;
 
-explicit-alias make-sln2008 : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj ;
-explicit-alias make-sln2010 : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj ;
-
 explicit-install sln2008
-    : make-sln2008
+    : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj
     : <location>$(GC_MSVC_SLN_DIR)
 ;
 
 explicit-install sln2010
-    : make-sln2010
+    : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj
     : <location>$(GC_MSVC_SLN_DIR)
 ;

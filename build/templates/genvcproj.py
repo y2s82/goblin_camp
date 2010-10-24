@@ -63,13 +63,13 @@ if mode != 'sln':
     variables['GC_USER_CONFIG'] = '' if userconfig is None else '--user-config={0}'.format(userconfig)
     
     if mode == '2008':
-        variables['GC_SOURCE_FILES']   = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in sources)
-        variables['GC_HEADER_FILES']   = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in headers)
-        variables['GC_RESOURCE_FILES'] = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in resources)
+        variables['GC_SOURCE_FILES']   = '\r\n\t\t\t'.join(VS2008_FILE_TPL.format(fn) for fn in sources)
+        variables['GC_HEADER_FILES']   = '\r\n\t\t\t'.join(VS2008_FILE_TPL.format(fn) for fn in headers)
+        variables['GC_RESOURCE_FILES'] = '\r\n\t\t\t'.join(VS2008_FILE_TPL.format(fn) for fn in resources)
     elif mode == '2010':
-        variables['GC_SOURCE_FILES']   = '\r\n            '.join(VS2010_SRCFILE_TPL.format(fn) for fn in sources)
-        variables['GC_HEADER_FILES']   = '\r\n            '.join(VS2010_HDRFILE_TPL.format(fn) for fn in headers)
-        variables['GC_RESOURCE_FILES'] = '\r\n            '.join(VS2010_RESFILE_TPL.format(fn) for fn in resources)
+        variables['GC_SOURCE_FILES']   = '\r\n\t\t\t'.join(VS2010_SRCFILE_TPL.format(fn) for fn in sources)
+        variables['GC_HEADER_FILES']   = '\r\n\t\t\t'.join(VS2010_HDRFILE_TPL.format(fn) for fn in headers)
+        variables['GC_RESOURCE_FILES'] = '\r\n\t\t\t'.join(VS2010_RESFILE_TPL.format(fn) for fn in resources)
     else:
         print 'Invalid command line.'
         sys.exit(255)
