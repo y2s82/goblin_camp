@@ -1,38 +1,44 @@
-plant_type "Pine Tree" {
+plant_type "Pine" {
 	tree
 	graphic=6
 	color="0,200,14"
 	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
 				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
-	rarity=100
+	rarity=50
 	condition=150
+	minheight=0.1
+	maxheight=0.8
 }
 
 plant_type "Wild Bloodberry bush" {
 	graphic=35
 	color="140,0,0"
 	components=["Bloodberry"]
-	rarity=10
+	rarity=25
 	condition=10
 	cluster=5
 	harvestable
 	walkable
+	minheight=0.05
+	maxheight=0.15
 }
 
 plant_type "Wild Blueleaf" {
 	graphic=216
 	color="50,0,200"
 	components=["Blueleaf boll"]
-	rarity=10
+	rarity=40
 	condition=10
 	harvestable
+	minheight=0.03
+	maxheight=0.13
 }
 
 plant_type "Yellow Flower" {
 	graphic=12
 	color="255,242,0"
 	components=["Flower"]
-	rarity=10
+	rarity=1
 	cluster=3
 	condition=1
 	harvestable
@@ -43,7 +49,7 @@ plant_type "Red Flower" {
 	graphic=12
 	color="237,21,85"
 	components=["Flower"]
-	rarity=10
+	rarity=1
 	condition=1
 	harvestable
 	walkable
@@ -53,7 +59,7 @@ plant_type "Pink Flower" {
 	graphic=12
 	color="230,150,193"
 	components=["Flower"]
-	rarity=10
+	rarity=1
 	cluster=3
 	condition=1
 	harvestable
@@ -64,9 +70,44 @@ plant_type "Blue Flower" {
 	graphic=12
 	color="0,0,230"
 	components=["Flower"]
-	rarity=10
+	rarity=1
 	cluster=3
 	condition=1
 	harvestable
 	walkable
+}
+
+plant_type "Willow" {
+	tree
+	graphic=5
+	color="178,198,14"
+	components=["Wood log"]
+	rarity=300
+	condition=100
+	minheight=-1.0
+	maxheight=0.1
+}
+
+plant_type "Birch" {
+	tree
+	graphic=215
+	color="224,224,224"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
+				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=50
+	condition=150
+	minheight=0.1
+	maxheight=0.8
+}
+
+plant_type "Spruce" {
+	tree
+	graphic=6
+	color="0,136,14"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
+				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=50
+	condition=150
+	minheight=0.1
+	maxheight=0.8
 }

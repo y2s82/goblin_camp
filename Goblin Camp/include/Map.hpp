@@ -35,8 +35,10 @@ private:
 	static Map* instance;
 	boost::multi_array<Tile, 2> tileMap;
 	int width, height;
+	float waterlevel;
 
 public:
+	TCODHeightMap *heightMap;
 	static Map* Inst();
 	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
@@ -78,4 +80,5 @@ public:
 	void Mark(int,int);
 	void Unmark(int,int);
 	int GetMoveModifier(int,int);
+	float GetWaterlevel();
 };

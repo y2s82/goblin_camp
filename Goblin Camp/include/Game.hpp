@@ -97,7 +97,7 @@ public:
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
 	void Init();
-	void GenerateMap();
+	void GenerateMap(uint32 seed = 0);
 
 	void Update();
 	Coordinate upleft;
