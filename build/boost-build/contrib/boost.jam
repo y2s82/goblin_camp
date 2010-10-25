@@ -222,7 +222,7 @@ rule boost_std ( inc ? lib ? )
         <link>shared:<define>BOOST_MPI_DYN_LINK  ;    
     lib program_options  : : : : 
         <link>shared:<define>BOOST_PROGRAM_OPTIONS_DYN_LINK ;
-    lib python           : : : : 
+    lib python           : : <link>shared : : 
         <link>shared:<define>BOOST_PYTHON_DYN_LINK ;
     lib random           : : : :
         <link>shared:<define>BOOST_RANDOM_DYN_LINK ;

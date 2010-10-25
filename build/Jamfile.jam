@@ -36,8 +36,8 @@ project goblin-camp
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
-      <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1
-      <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=1
+      <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=0
+      <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=0
       # Linux specific defines
       <os>LINUX:<define>LINUX
       # OSX specific defines
