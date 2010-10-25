@@ -65,6 +65,6 @@ build
 *.xcuserstate
 *.xcbkptlist
 xcuserdata
-docs.doxy
-docs\_build
+docs\doxy
+docs\sphinx\_build
 userdata

@@ -61,7 +61,7 @@ if mode != 'sln':
     resources.sort()
     
     userconfig = '' if userconfig is None else '--user-config={0} '.format(userconfig)
-    command    = '..\..\msvc_bjam.cmd {0}-j2 dist'.format(userconfig)
+    command    = 'msvc_bjam.cmd {0}-j2 dist'.format(userconfig)
     
     variables['GC_DEBUG_COMMAND']   = '{0} variant=debug'.format(command)
     variables['GC_RELEASE_COMMAND'] = '{0} variant=release'.format(command)
