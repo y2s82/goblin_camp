@@ -173,6 +173,8 @@ int MainMenu() {
 	bool lButtonDown = false;
 
 	while (!exit) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 		TCODConsole::root->setBackgroundColor(TCODColor::black);
 		TCODConsole::root->clear();
@@ -186,7 +188,6 @@ int MainMenu() {
 		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
 		TCODConsole::root->setForegroundColor(TCODColor::white);
 
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
 		for (unsigned int idx = 0; idx < entryCount; ++idx) {
 			const MainMenuEntry& entry = entries[idx];
 
