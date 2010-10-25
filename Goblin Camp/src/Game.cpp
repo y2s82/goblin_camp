@@ -845,63 +845,170 @@ void Game::DeTillFarmPlots() {
 	}
 }
 
-//Placeholder, awaiting a real map generator
-void Game::GenerateMap() {
-	Map* map = Map::Inst();
+//First generates a heightmap, then translates that into the corresponding tiles
+//Third places plantlife according to heightmap, and some wildlife as well
+void Game::GenerateMap(uint32 seed) {
+	TCODRandom* random;
+	if (seed == 0) random = new TCODRandom();
+	else random = new TCODRandom(seed);
 
-	int basey = 260;
+	Map* map = Map::Inst();
+	map->heightMap->clear();
+
+	bool riverStartLeft = random->get(0,1) ? true : false;
+	bool riverEndRight = random->get(0,1) ? true : false;
+
+	int px[4];
+	int py[4];
+
+	do {
+		if (riverStartLeft) {
+			px[0] = 0; 
+			py[0] = random->get(0,map->Height()-1);
+		} else {
+			px[0] = random->get(0,map->Width()-1);
+			py[0] = 0;
+		}
+
+		px[1] = 10 + random->get(0,map->Width()-20);
+		py[1] = 10 + random->get(0,map->Height()-20);
+		px[2] = 10 + random->get(0,map->Width()-20);
+		py[2] = 10 + random->get(0,map->Height()-20);
+
+		if (riverEndRight) {
+			px[3] = map->Width()-1;
+			py[3] = random->get(0,map->Height()-1);
+		} else {
+			px[3] = random->get(0,map->Width()-1);
+			py[3] = map->Height()-1;
+		}
+		//This conditional ensures that the river's beginning and end are at least 100 units apart
+	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
+
+	map->heightMap->digBezier(px, py, 40, -0.5, 40, -0.5);
+	map->heightMap->normalize();
+
+	int hills = 0;
+	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
+	//in case no suitable hill sites are found
+	int infinityCheck = 0;
+	while (hills < map->Width()/66 && infinityCheck < 1000) {
+		int x = random->get(0,map->Width()-1);
+		int y = random->get(0,map->Height()-1);
+		int riverDistance;
+		int distance;
+		int lineX, lineY;
+
+		riverDistance = 70;
+
+		for (int i = 0; i < 4; ++i) {
+
+			//We draw four lines from our potential hill site and measure the least distance to a river
+			switch (i) {
+			case 0:
+				lineX = x - 70;
+				lineY = y;
+				break;
+
+			case 1:
+				lineX = x + 70;
+				lineY = y;
+				break;
+
+			case 2:
+				lineX = x;
+				lineY = y - 70;
+				break;
+
+			case 3:
+				lineX = x;
+				lineY = y + 70;
+				break;
+			}
+
+			distance = 70;
+			TCODLine::init(lineX, lineY, x, y);
+			do {
+				if (lineX >= 0 && lineX < map->Width() && lineY >= 0 && lineY < map->Height()) {
+					if (map->heightMap->getValue(lineX, lineY) < map->GetWaterlevel()) {
+						if (distance < riverDistance) riverDistance = distance;
+					}
+				}
+				--distance;
+			} while (!TCODLine::step(&lineX, &lineY));
+		}
+
+		if (riverDistance > 35) {
+			map->heightMap->addHill((float)x, (float)y,(float)35 + random->get(0,20), (float)3 + random->get(0,2));
+			++hills;
+		}
+
+		++infinityCheck;
+	}
+
+	map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.015f, 0.005f, random);
+
+	map->heightMap->normalize();
+
+	//This is a simple kernel transformation that does some horizontal smoothing (lifted straight from the libtcod docs)
+	int dx [] = {-1,1,0};
+	int dy[] = {0,0,0};
+	float weight[] = {0.33f,0.33f,0.33f};
+	map->heightMap->kernelTransform(3, dx, dy, weight, 0.0f, 1.0f);
+
+
+	//Now take the heightmap values and translate them into tiles
 	for (int x = 0; x < map->Width(); ++x) {
-		basey += ((rand() % 3) - 1);
-		for (int y = basey; y <= basey+10; ++y) {
-			if (y >= basey+4 && y <= basey+6 && rand() % 5 == 0) {
-				map->Type(x,y,TILERIVERBED);
+		for (int y = 0; y < map->Height(); ++y) {
+			if (map->heightMap->getValue(x,y) < map->GetWaterlevel()) {
+				if (random->get(0,1)) map->Type(x,y,TILERIVERBED);
+				else map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
-			} else if ((y == basey || y == basey+10) && rand() % 3 == 0) {
+			} else if (map->heightMap->getValue(x,y) < 0.8f) {
+				map->Type(x,y,TILEGRASS);
 			} else {
-				map->Type(x,y,TILEDITCH);
-				CreateWater(Coordinate(x,y));
+				map->Type(x,y,TILEROCK);
 			}
 		}
 	}
 
-	int basex = 125;
-	basey = 125;
-	int lo_offset = 0;
-	int hi_offset = 0;
-	for (int x = -25; x < 25; ++x) {
-		int range = int(std::sqrt((double)(25*25 - x*x)));
-		lo_offset = std::min(std::max(rand() % 3 - 1 + lo_offset, -5), 5);
-		hi_offset = std::min(std::max(rand() % 3 - 1 + hi_offset, -5), 5);
-		for (int y = -range-lo_offset; y < range+hi_offset; ++y) {
-			map->Type(basex+x,basey+y,TILEBOG);
-		}
-	}
-
-
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
-			if (map->Walkable(x,y) && map->Type(x,y) == TILEGRASS) {
-				if (rand() % 100 == 0) {
-					int r = rand() % 100;
-					for (int i = 0; i < (signed int)NatureObject::Presets.size(); ++i) {
-						int type = rand() % NatureObject::Presets.size();
-						if (NatureObject::Presets[type].rarity > r) {
-							for (int clus = 0; clus < NatureObject::Presets[type].cluster; ++clus) {
-								int ax = x + ((rand() % 5) - 2);
-								int ay = y + ((rand() % 5) - 2);
-								if (ax < 0) ax = 0; if (ax >= map->Width()) ax = map->Width()-1;
-								if (ay < 0) ay = 0; if (ay >= map->Height()) ay = map->Height()-1;
-								if (map->Walkable(ax,ay) && map->Type(ax,ay) == TILEGRASS
-									&& map->NatureObject(ax,ay) < 0) {
-										boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), type));
+			if (map->Walkable(x,y) && map->Type(x,y) == TILEGRASS && rand() % 5 < 2) {
+				std::priority_queue<std::pair<int, int> > natureObjectQueue;
+				float height = map->heightMap->getValue(x,y);
+
+				//Populate the priority queue with all possible plants and give each one a random
+				//value based on their rarity
+				for (unsigned int i = 0; i < NatureObject::Presets.size(); ++i) {
+					if (NatureObject::Presets[i].minHeight <= height &&
+						NatureObject::Presets[i].maxHeight >= height)
+						natureObjectQueue.push(std::pair<int,int>(rand() % NatureObject::Presets[i].rarity + rand() % 3, i));
+				}
+
+				if (natureObjectQueue.empty()) continue;
+				int chosen = natureObjectQueue.top().second;
+				int rarity = NatureObject::Presets[chosen].rarity;
+				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity *= 0.5;
+				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity *= 0.5;
+				
+				if (rand() % 100 < rarity) {
+
+					for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
+						int ax = x + ((rand() % 5) - 2);
+						int ay = y + ((rand() % 5) - 2);
+						if (ax < 0) ax = 0; if (ax >= map->Width()) ax = map->Width()-1;
+						if (ay < 0) ay = 0; if (ay >= map->Height()) ay = map->Height()-1;
+						if (map->Walkable(ax,ay) && map->Type(ax,ay) == TILEGRASS
+							&& map->NatureObject(ax,ay) < 0) {
+								boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
 										natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 										map->NatureObject(ax,ay,natObj->Uid());
 										map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 										map->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
-								}
-							}
-							break;
 						}
 					}
 				}

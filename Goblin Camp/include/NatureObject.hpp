@@ -37,6 +37,7 @@ public:
 	int cluster;
 	int condition;
 	bool tree, harvestable, walkable;
+	float minHeight, maxHeight;
 };
 
 class NatureObject : public Entity

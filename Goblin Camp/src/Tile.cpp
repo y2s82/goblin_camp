@@ -91,6 +91,14 @@ void Tile::type(TileType newType) {
 		foreColor = TCODColor(rand() % 185, 127, 70);
 		backColor = TCODColor(60,30,20);
 		_moveCost = rand() % 5 + 1;
+	} else if (_type == TILEROCK) {
+		vis = true; walkable = true; buildable = true; low = false;
+		switch (rand() % 2) {
+		case 0: graphic = '.'; break;
+		case 1: graphic = ','; break;
+		}
+		foreColor = TCODColor(rand() % 20 + 182, rand() % 20 + 182, rand() % 20 + 182);
+		backColor = TCODColor(0, 0, 0);
 	} else { vis = false; walkable = false; buildable = false; }
 }
 
