@@ -960,12 +960,22 @@ void Game::GenerateMap(uint32 seed) {
 	//Now take the heightmap values and translate them into tiles
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
-			if (map->heightMap->getValue(x,y) < map->GetWaterlevel()) {
+			float height = map->heightMap->getValue(x,y);
+			if (height < map->GetWaterlevel()) {
 				if (random->get(0,1)) map->Type(x,y,TILERIVERBED);
 				else map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
-			} else if (map->heightMap->getValue(x,y) < 0.8f) {
+			} else if (height < 0.8f) {
 				map->Type(x,y,TILEGRASS);
+				if (random->get(0,9) < 9) {
+					if (height < 0.07f) {
+						map->ForeColor(x,y, TCODColor(random->get(100,192),127,0));
+					} else if (height < 0.1f) {
+						map->ForeColor(x,y, TCODColor(random->get(50,192),127,0));
+					} else if (height > 0.6f) {
+						map->ForeColor(x,y, TCODColor(90, random->get(120,150), 90));
+					}
+				}
 			} else {
 				map->Type(x,y,TILEROCK);
 			}
@@ -1013,20 +1023,6 @@ void Game::GenerateMap(uint32 seed) {
 					}
 				}
 			}
-		}
-	}
- 
-	std::vector<NPCType> peacefulAnimals;
-	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
-			peacefulAnimals.push_back(i);
-	}
-
-	if (peacefulAnimals.size() > 0) {
-	//Generate benign fauna
-		for (int i = 0; i < 10; ++i) {
-			int type = rand() % peacefulAnimals.size();
-			Game::Inst()->CreateNPC(Coordinate(300+rand()%20, 100+rand()%20), peacefulAnimals[type]);
 		}
 	}
 }
