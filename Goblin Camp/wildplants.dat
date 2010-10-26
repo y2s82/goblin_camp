@@ -111,3 +111,12 @@ plant_type "Spruce" {
 	minheight=0.1
 	maxheight=0.8
 }
+
+plant_type "Silvervine" {
+	graphic=42
+	color="221,234,234"
+	rarity=275
+	condition=50
+	minheight=-1.0
+	maxheight=0.075
+}
