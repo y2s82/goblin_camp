@@ -18,16 +18,13 @@ import logging, sys
 import _gcampapi
 from . import utils
 
-def getLogger():
-	'Create and return mod logger'
-	
-	mod = utils._getModName(2)
-	log = logging.getLogger('gcamp.{0}'.format(mod))
+def _createLogger(name):
+	log = logging.getLogger(name)
 	
 	if not hasattr(log, '_init'):
 		handler = logging.StreamHandler(_gcampapi.LoggerStream())
 		handler.setFormatter(logging.Formatter(
-			'[Mod: {0}] [%(levelname)8s] [%(funcName)s] %(message)s'.format(mod)
+			'[%(name)s] [%(levelname)8s] [%(funcName)s] %(message)s'
 		))
 		
 		log.setLevel(logging.DEBUG)
@@ -35,3 +32,9 @@ def getLogger():
 		log._init = True
 	
 	return log
+
+def getLogger():
+	'Create and return mod logger'
+	
+	mod = utils._getModName(2)
+	return _createLogger('gcamp.{0}'.format(mod))

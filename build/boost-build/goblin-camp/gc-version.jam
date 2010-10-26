@@ -1,0 +1,28 @@
+# Generators for _version.cpp and _version.rc
+
+import type ;
+import generators ;
+import toolset ;
+import os ;
+import modules ;
+
+type.register RC_IN    : rc_in ;
+type.register CPP_IN   : cpp_in ;
+type.register PLIST_IN : plist_in ;
+type.register PLIST    : plist ;
+
+if [ os.name ] = NT {
+    generators.register-standard gc-version.generate : RC_IN : RC ;
+}
+generators.register-standard gc-version.generate : CPP_IN : CPP ;
+generators.register-standard gc-version.generate : PLIST_IN : PLIST ;
+
+toolset.flags gc-version.generate APPEND_HG <variant>debug   : yes ;
+toolset.flags gc-version.generate APPEND_HG <variant>release : no ;
+
+GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
+GC_VERSION       = [ modules.peek : GC_VERSION ] ;
+
+actions generate {
+    python "$(GC_TEMPLATES_DIR)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
+}

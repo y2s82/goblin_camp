@@ -15,98 +15,95 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <list>
-#include <boost/foreach.hpp>
 #include "scripting/_python.hpp"
 
 #include <cassert>
+#include <cstdarg>
+#include <list>
+#include <boost/foreach.hpp>
 
-namespace py = boost::python;
-
-#include "Announce.hpp"
-#include "Logger.hpp"
+#include "data/Config.hpp"
 #include "scripting/API.hpp"
 #include "scripting/Engine.hpp"
+#include "scripting/_gcampapi/LoggerStream.hpp"
+#include "scripting/_gcampapi/Functions.hpp"
+#include "scripting/_gcampapi/APIItem.hpp"
+#include "Logger.hpp"
 
-namespace {
-	namespace globals {
-		
-		std::list<PyObject*> listeners;
-	}
+namespace Globals {
+	std::list<py::object> listeners;
 }
 
 namespace Script { namespace API {
-	LoggerStream::LoggerStream() : logger(Logger::Inst()) { }
-	void LoggerStream::close() { }
-	
-	void LoggerStream::write(const char *str) {
-		logger->output << str;
-	}
-	
-	void LoggerStream::flush() {
-		logger->output.flush();
-	}
-	
-	void announce(const char *str) {
-		Announce::Inst()->AddMsg(str);
-	}
-	
-	py::object pyLoggerStream;
-	
 	BOOST_PYTHON_MODULE(_gcampapi) {
-		pyLoggerStream = py::class_<LoggerStream>("LoggerStream")
-			.def("close", &LoggerStream::close)
-			.def("write", &LoggerStream::write)
-			.def("flush", &LoggerStream::flush)
-		;
+		typedef void (*ExposeFunc)(void);
+		ExposeFunc expose[] = {
+			&ExposeLoggerStream, &ExposeFunctions, &ExposeItem
+		};
 		
-		py::def("announce", &announce);
-		py::def("appendListener", &Script::AppendListener);
+		for (unsigned idx = 0; idx < sizeof(expose) / sizeof(expose[0]); ++idx) {
+			expose[idx]();
+		}
+	}
+	
+	BOOST_PYTHON_MODULE(_gcampconfig) {
+		py::def("setCVar", &Config::SetStringCVar);
+		py::def("getCVar", &Config::GetStringCVar);
+		py::def("bindKey", &Config::SetKey);
+		py::def("getKey",  &Config::GetKey);
 	}
 }}
 
 namespace Script {
 	void ExposeAPI() {
 		API::init_gcampapi();
+		API::init_gcampconfig();
 	}
 	
 	void AppendListener(PyObject *listener) {
 		assert(listener);
-		Py_INCREF(listener);
+		py::handle<> hListener(py::borrowed(listener));
 		
-		PyObject *repr = PyObject_Repr(listener);
-		assert(repr);
-		Logger::Inst()->output << "[Script:API] New listener: " << PyString_AsString(repr) << ".\n";
-		Py_DECREF(repr);
+		py::object oListener(hListener);
+		{
+			py::object repr(py::handle<>(PyObject_Repr(listener)));
+			LOG("New listener: " << py::extract<char*>(repr) << ".");
+		}
 		
-		globals::listeners.push_back(listener);
+		Globals::listeners.push_back(oListener);
 	}
 	
 	void InvokeListeners(char *method, PyObject *args) {
-		BOOST_FOREACH(PyObject *listener, globals::listeners) {
-			if (!PyObject_HasAttrString(listener, method)) {
+		BOOST_FOREACH(py::object listener, Globals::listeners) {
+			if (!PyObject_HasAttrString(listener.ptr(), method)) {
 				continue;
 			}
 			
-			PyObject *callable = PyObject_GetAttrString(listener, method);
-			Py_DECREF(PyObject_CallObject(callable, args));
-			Py_DECREF(callable);
-			
-			LogException();
+			py::object callable = listener.attr(method);
+			try {
+				py::handle<> result(
+					PyObject_CallObject(callable.ptr(), args)
+				);
+			} catch (const py::error_already_set&) {
+				LogException();
+			}
 		}
-		// Caller is expected to do InvokeListeners("foo", Py_BuildValue("...")).
-		// That's why we DECREF the args tuple here.
-		Py_XDECREF(args);
+	}
+	
+	void InvokeListeners(char *method, char *format, ...) {
+		va_list argList;
+		va_start(argList, format);
+		
+		py::object args(py::handle<>(
+			Py_VaBuildValue(format, argList)
+		));
+		
+		va_end(argList);
+		
+		InvokeListeners(method, args.ptr());
 	}
 	
 	void ReleaseListeners() {
-		typedef std::list<PyObject*>::iterator Iterator;
-		
-		// Removing items, so can't use foreach.
-		for (Iterator it = globals::listeners.begin(); it != globals::listeners.end();) {
-			Py_DECREF(*it);
-			
-			it = globals::listeners.erase(it);
-		}
+		Globals::listeners.clear();
 	}
 }

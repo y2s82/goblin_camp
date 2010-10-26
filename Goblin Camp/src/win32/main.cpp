@@ -15,34 +15,29 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <vector>
 #include <string>
-#include <boost/foreach.hpp>
+#include <algorithm>
+#include <iterator>
 
 int GCMain(std::vector<std::string>&);
 void InstallExceptionHandler();
 void GCCommandLine(std::vector<std::string>&);
 
-#ifdef DEBUG
-int main(int argc, char **argv) {
-	InstallExceptionHandler();
-	
-	std::vector<std::string> args(argc);
-	for (int i = 0; i < argc; ++i) {
-		args[i] = argv[i];
-	}
-	return GCMain(args);
-}
+#ifndef DEBUG
+#	define GC_MAIN_FUNCTION()  WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
+#	define GC_GET_ARGUMENTS(A) GCCommandLine(A)
+#else
+#	define GC_MAIN_FUNCTION()  main(int argc, char **argv)
+#	define GC_GET_ARGUMENTS(A) std::copy(argv, argv + argc, std::back_inserter(A))
 #endif
 
-int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
+int GC_MAIN_FUNCTION() {
 	InstallExceptionHandler();
-	
 	std::vector<std::string> args;
-	GCCommandLine(args);
+	
+	GC_GET_ARGUMENTS(args);
 	return GCMain(args);
 }

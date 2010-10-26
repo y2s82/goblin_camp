@@ -23,25 +23,19 @@ Except for C++ compiler, you will need several tools to be able to build Goblin 
 Here's list with known working versions:
 
 * `Python`_ **2.6.6** or newer (**not** 3.x).
-* `bjam`_ **03.1.19** — included with Goblin Camp.
+* `Boost.Jam`_ **03.1.18**.
 
 .. _Python: http://python.org/
-
-bjam
-++++
-
-You can build bjam using ``boost-build\jam_src\build.bat`` (Windows) or ``boost-build\jam_src\build.sh`` (\*nix) —
-``boost-build`` is in the same directory as this README.
-
-Before reporting any problems with the build, use included bjam first!
+.. _Boost.Jam:   http://sourceforge.net/projects/boost/files/boost-jam/3.1.18/
 
 Dependencies
 ~~~~~~~~~~~~
 
 Goblin Camp requires several third party libraries to build and link:
 
-* `Boost`_ **1.43**.
-* `libtcod`_ **r474** (GC uses not-yet-released SVN version — listed here is a known working revision).
+* `Boost`_ **1.44**.
+* `libtcod`_ **r483** [must be later than **r477**: new API]
+  (GC uses not-yet-released SVN version — listed here is a known working revision).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
 * `Python`_ **2.6.6** or **2.7.x** (3.x will not work).
 
@@ -78,7 +72,7 @@ Boost
 If your Boost is not on standard compiler's search path (MSVC: and you don't have LIB/INCLUDE environment
 variables set properly), you will need to provide them in config, in format::
 
-    using boost : 1.43 : properties ;
+    using boost : 1.44 : properties ;
 
 In properties field you can put:
 
@@ -97,7 +91,7 @@ See `Boost documentation`_ for more information about tags.
 
 Example::
 
-    using boost : 1.43 : <layout>tagged ;
+    using boost : 1.44 : <layout>tagged ;
 
 .. _Boost documentation: http://boost.org/doc/libs/1_43_0/more/getting_started/unix-variants.html#library-naming
 
@@ -106,7 +100,7 @@ libtcod
 
 Same as with Boost, but the format is::
 
-    using build/libtcod : properties ;
+    using libtcod : properties ;
 
 Available properties:
 
@@ -117,14 +111,14 @@ Available properties:
 
 Example::
 
-    using build/libtcod : <library>C:\dev\libs\libtcod\lib <include>C:\dev\libs\libtcod\include ;
+    using libtcod : <library>C:\dev\libs\libtcod\lib <include>C:\dev\libs\libtcod\include ;
 
 Windows SDK
 +++++++++++
 
 Format::
 
-    using build/winsdk : properties ;
+    using winsdk : properties ;
 
 Properties:
 
@@ -133,14 +127,14 @@ Properties:
 
 Example::
 
-    using build/winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
+    using winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
 
 Python
 ++++++
 
 Format::
 
-    using build/python : properties ;
+    using python : properties ;
 
 Properties:
 
@@ -152,7 +146,7 @@ Properties:
 
 Example::
 
-    using build/python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
+    using python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
 
 Building
 ~~~~~~~~
@@ -204,7 +198,7 @@ Generating MSVC project files
 Build system can generate MSVC2008 and MSVC2010 solution and project.
 To do this, use::
 
-    bjam --user-config=gc-config.jam -sSLN_USE_CONFIG=gc-config.jam sln2008
+    bjam --user-config=gc-config.jam sln2008
 
 You can use ``sln2010`` instead to generate MSVC2010 project.
 
@@ -212,11 +206,14 @@ Generating NSIS installer
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 There is NSIS installer template included with sources. To build it, you need
-to build ``release`` variant, install it into dist, and then run::
+to run::
 
-    bjam --user-config=gc-config.jam nsis
+    bjam --user-config=gc-config.jam nsis variant=release
 
 Installer will be saved into ``build\dist\installer``.
+
+.. note::
+    You cannot build NSIS installer with ``variant=debug``.
 
 Automatic versioning
 ~~~~~~~~~~~~~~~~~~~~

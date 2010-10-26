@@ -36,7 +36,7 @@ void Tooltip::AddEntry(TooltipEntry entry) {
 }
 
 void Tooltip::Draw(int x, int y, TCODConsole *console) {
-	console->setBackgroundColor(TCODColor::darkestYellow);
+	console->setDefaultBackground(TCODColor::darkestYellow);
 	int width = 0;
 	for(std::vector<TooltipEntry>::iterator it = entries.begin(); it != entries.end(); it++) {
 		width = std::max(width, (int)it->text.length());
@@ -47,11 +47,11 @@ void Tooltip::Draw(int x, int y, TCODConsole *console) {
 		console->rect(x, y, width, (int)entries.size(), true, TCOD_BKGND_SET);
 		for(std::vector<TooltipEntry>::iterator it = entries.begin(); it != entries.end() && y < console->getHeight(); it++) {
 			TooltipEntry entry = *it;
-			console->setForegroundColor(entry.color);
+			console->setDefaultForeground(entry.color);
 			console->printEx(x, y, TCOD_BKGND_SET, TCOD_LEFT, entry.text.c_str());
 			y++;
 		}
 	}
-	console->setBackgroundColor(TCODColor::black);
-	console->setForegroundColor(TCODColor::white);
+	console->setDefaultBackground(TCODColor::black);
+	console->setDefaultForeground(TCODColor::white);
 }

@@ -17,42 +17,40 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "scripting/_python.hpp"
 
+#include <fstream>
 #include <cassert>
 #include <vector>
 #include <string>
 #include <list>
-#include <cstdlib>
-#include <ostream> // std::flush
 
+#define BOOST_FILESYSTEM_VERSION 3
 #include <boost/foreach.hpp>
 #include <boost/filesystem.hpp>
 
 namespace fs = boost::filesystem;
-namespace py = boost::python;
 
-#include "Data.hpp"
+#include "data/Paths.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/API.hpp"
+#include "scripting/_gcampapi/LoggerStream.hpp"
 #include "Logger.hpp"
 
-namespace {
-	namespace globals {
-		PyObject *loadPackageFunc, *printExcFunc;
-		py::object logger;
-	}
+namespace Globals {
+	py::object loadPackageFunc, printExcFunc;
+	Script::API::LoggerStream stream;
 }
 
 namespace Script {
 	const short version = 0;
 	
 	void Init(std::vector<std::string>& args) {
-		Logger::Inst()->output << "[Script] Initialising engine.\n";
+		LOG("Initialising engine.");
 		
 		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
 		
-		Logger::Inst()->output << "[Script] Python " << Py_GetVersion() << "\n";
+		LOG("Python " << Py_GetVersion());
 		
 		// Don't use default search path.
 		{
@@ -61,9 +59,11 @@ namespace Script {
 		#else
 			char pathsep = ':';
 		#endif
-			std::string path = (Data::GetPath(Data::Path::GlobalData) / "lib").string();
+			fs::path libDir = (Paths::Get(Paths::GlobalData) / "lib");
+			
+			std::string path = libDir.string();
 			path += pathsep;
-			path += (Data::GetPath(Data::Path::GlobalData) / "lib" / "stdlib.zip").string();
+			path += (libDir / "stdlib.zip").string();
 			
 			PySys_SetPath(const_cast<char*>(path.c_str()));
 		}
@@ -74,59 +74,45 @@ namespace Script {
 				"repr(__import__('sys').path)",
 				py::import("__builtin__").attr("__dict__")
 			);
-			Logger::Inst()->output << "[Script] sys.path = " << py::extract<char*>(res) << "\n";
+			LOG("sys.path = " << py::extract<char*>(res));
 		} catch (const py::error_already_set&) {
-			Logger::Inst()->output << "[Script] Bootstrap failed.\n";
+			LOG("Bootstrap failed.");
 			LogException();
-			Logger::Inst()->output.flush();
 			exit(20);
 		}
 		
 		// Get utility functions.
-		Logger::Inst()->output << "[Script] import imp.\n" << std::flush;
-		PyObject *modImp = PyImport_ImportModule("imp");
-		Logger::Inst()->output << "[Script] import traceback.\n" << std::flush;
-		PyObject *modTraceback = PyImport_ImportModule("traceback");
+		LOG("Importing utils.");
+		py::object modImp = py::import("imp");
+		py::object modTB  = py::import("traceback");
 		
-		assert(modImp);
-		assert(modTraceback);
+		Globals::printExcFunc    = modTB.attr("print_exception");
+		Globals::loadPackageFunc = modImp.attr("load_package");
 		
-		Logger::Inst()->output << "[Script] printExcFunc = traceback.print_exception.\n" << std::flush;
-		globals::printExcFunc = PyObject_GetAttrString(modTraceback, "print_exception");
-		Logger::Inst()->output << "[Script] loadPackageFunc = imp.load_package.\n" << std::flush;
-		globals::loadPackageFunc = PyObject_GetAttrString(modImp, "load_package");
-		
-		assert(globals::loadPackageFunc);
-		assert(globals::printExcFunc);
-		
-		Py_DECREF(modImp);
-		Py_DECREF(modTraceback);
-		
+		LOG("Exposing the API.");
 		ExposeAPI();
-		PyImport_AddModule("gcmods");
 		
-		globals::logger = API::pyLoggerStream();
-		Logger::Inst()->output.flush();
+		LOG("Creating internal namespaces.");
+		PyImport_AddModule("__gcmods__");
+		PyImport_AddModule("__gcuserconfig__");
+		PyImport_AddModule("__gcautoexec__");
 	}
 	
 	void Shutdown() {
-		Logger::Inst()->output << "[Script] Shutting down engine.\n";
-		
-		Py_DECREF(globals::loadPackageFunc);
+		LOG("Shutting down engine.");
 		
 		ReleaseListeners();
 		Py_Finalize();
 	}
 	
 	void LoadScript(const std::string& mod, const std::string& directory) {
-		Logger::Inst()->output << "[Script] Loading '" << directory << "' into 'gcmods." << mod << "'.\n" << std::flush;
+		LOG("Loading '" << directory << "' into '__gcmods__." << mod << "'.");
 		
 		try {
-			py::call<void>(globals::loadPackageFunc, "gcmods." + mod, directory);
+			Globals::loadPackageFunc("__gcmods__." + mod, directory);
 		} catch (const py::error_already_set&) {
 			LogException();
 		}
-		//PyObject_CallFunction(globals::loadPackageFunc, "ss", mod.c_str(), directory.c_str());
 	}
 	
 	void LogException(bool clear) {
@@ -136,26 +122,24 @@ namespace Script {
 		PyErr_Fetch(&excType, &excVal, &excTB);
 		PyErr_Clear();
 		
-		// Boost.Python's call cannot use raw PyObject*.
-		// And its documentation sucks.
-		Logger::Inst()->output << "**** Python exception occurred ****\n";
-		Py_DECREF(PyObject_CallFunction(
-			globals::printExcFunc, "OOOOO", excType, excVal, excTB, Py_None, globals::logger.ptr()
-		));
-		Logger::Inst()->output << "***********************************\n" << std::flush;
+		py::handle<> hExcType(excType);
+		// "The value and traceback object may be NULL even when the type object is not."
+		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
+		py::handle<> hExcVal(py::allow_null(excVal));
+		py::handle<> hExcTB(py::allow_null(excTB));
+		py::object none;
 		
-		if (PyErr_Occurred() != NULL) {
-			Logger::Inst()->output << "[Script] INTERNAL ERROR IN LOGEXCEPTION, SEE STDERR.\n";
+		Logger::log << "**** Python exception occurred ****\n";
+		try {
+			Globals::printExcFunc(hExcType, hExcVal, hExcTB, none, boost::ref(Globals::stream));
+		} catch (const py::error_already_set&) {
+			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();
-			PyErr_Clear();
 		}
+		Logger::log << "***********************************\n";
 		
 		if (!clear) {
 			PyErr_Restore(excType, excVal, excTB);
 		}
-		
-		Py_DECREF(excType);
-		Py_DECREF(excVal);
-		Py_DECREF(excTB);
 	}
 }

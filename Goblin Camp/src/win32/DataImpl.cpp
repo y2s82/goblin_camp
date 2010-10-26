@@ -15,8 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#define NOMINMAX
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
 #include <shlobj.h>
@@ -29,23 +27,26 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
-void _ImplFindPersonalDirectory(std::string& dir) {
-	char myGames[MAX_PATH];
-	// gotta love WinAPI
-	SHGetFolderPathAndSubDirA(
-		NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, "My Games", myGames
-	);
-	dir = myGames;
-	dir += "\\Goblin Camp";
-}
-
 void GCCommandLine(std::vector<std::string>&);
 
-void _ImplFindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
-	std::vector<std::string> args;
-	GCCommandLine(args);
+namespace PathsImpl {
+	void FindPersonalDirectory(fs::path& dir) {
+		char myGames[MAX_PATH];
+		ZeroMemory(&myGames, sizeof(myGames));
+		
+		SHGetFolderPathAndSubDirA(
+			NULL, CSIDL_PERSONAL | CSIDL_FLAG_CREATE, NULL, SHGFP_TYPE_CURRENT, "My Games", myGames
+		);
+		
+		dir = fs::path(std::string(myGames)) / "Goblin Camp";
+	}
 	
-	exec    = fs::path(std::string(args[0]));
-	execDir = exec.parent_path();
-	dataDir = execDir;
+	void FindExecutableDirectory(fs::path& exec, fs::path& execDir, fs::path& dataDir) {
+		std::vector<std::string> args;
+		GCCommandLine(args);
+		
+		exec    = fs::path(std::string(args[0]));
+		execDir = exec.parent_path();
+		dataDir = execDir;
+	}
 }

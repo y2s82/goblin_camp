@@ -21,7 +21,7 @@ SetCompressor /SOLID lzma
 
 ; Installer settings
 Name              "Goblin Camp ${GC_VERSION}"
-OutFile           "GoblinCamp-${GC_VERSION}.exe"
+OutFile           "build\dist\installer\GoblinCamp-${GC_VERSION}-Setup-%%_GC_PLATFORM_%%.exe"
 CRCCheck          force
 InstProgressFlags smooth
 XPStyle           on
@@ -40,7 +40,7 @@ var ICONS_GROUP
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.txt"
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "src\COPYING.txt"
+!insertmacro MUI_PAGE_LICENSE "Goblin Camp\COPYING.txt"
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_COMPONENTS
@@ -72,26 +72,39 @@ SectionEnd
 
 Section /o "Program Database" PDB_SEC
     SetOutPath "$INSTDIR"
-    File "src\goblin-camp.pdb"
+    
+    %%_GC_INSTALL_MANIFEST_PDB_%%
 SectionEnd
 
-Section "Visual C++ %%_GC_VCREDIST_VERSION_%% Runtime" VCREDIST_SEC
-    SetOutPath "$TEMP"
-    File       "src\vcredist_x86.exe"
-    ExecWait   '"$TEMP\vcredist_x86.exe" /q'
-    Delete     "$TEMP\vcredist_x86.exe"
-SectionEnd
+!macro VCRedist Version
+    !ifdef GC_BUNDLE_MSVC${Version}
+        Section "Visual C++ ${Version} Runtime (%%_GC_PLATFORM_%%)" VCRED${Version}_SEC
+            SetOutPath "$TEMP"
+            File       "build\installer\redists\vc${Version}\vcredist_%%_GC_PLATFORM_%%.exe"
+            ExecWait   '"$TEMP\vcredist_%%_GC_PLATFORM_%%.exe" /q'
+            Delete     "$TEMP\vcredist_%%_GC_PLATFORM_%%.exe"
+        SectionEnd
+    !endif
+!macroend
+
+!insertmacro VCRedist 2008
+!insertmacro VCRedist 2010
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${EXEC_SEC}     "Goblin Camp ${GC_VERSION}."
-    !insertmacro MUI_DESCRIPTION_TEXT ${PDB_SEC}      "Debugging symbols for the GC executable."
-    !insertmacro MUI_DESCRIPTION_TEXT ${VCREDIST_SEC} "Visual C++ Runtime redistributable package."
+    !insertmacro MUI_DESCRIPTION_TEXT ${EXEC_SEC} "Goblin Camp ${GC_VERSION}."
+    !insertmacro MUI_DESCRIPTION_TEXT ${PDB_SEC}  "Debugging symbols for the GC executables."
+    !ifdef GC_BUNDLE_MSVC2008
+        !insertmacro MUI_DESCRIPTION_TEXT ${VCRED2008_SEC} "Visual C++ 2008 Runtime redistributable package."
+    !endif
+    !ifdef GC_BUNDLE_MSVC2010
+        !insertmacro MUI_DESCRIPTION_TEXT ${VCRED2010_SEC} "Visual C++ 2010 Runtime redistributable package."
+    !endif
 !insertmacro MUI_FUNCTION_DESCRIPTION_END
 
 Section -AdditionalIcons
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
-        WriteIniStr    "$INSTDIR\website.url" "InternetShortcut" "URL" "http://goblincamp.com"
-        CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Website.lnk"   "$INSTDIR\website.url"
+        WriteIniStr    "$SMPROGRAMS\$ICONS_GROUP\Website.url"   "InternetShortcut" "URL" "http://www.goblincamp.com/"
+        WriteIniStr    "$SMPROGRAMS\$ICONS_GROUP\Forums.url"    "InternetShortcut" "URL" "http://www.goblincamp.com/forum/"
         CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
     !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
@@ -102,8 +115,8 @@ Section -Post
     WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "UninstallString" "$INSTDIR\uninst.exe"
     WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "DisplayIcon"     "$INSTDIR\goblin-camp.exe"
     WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "DisplayVersion"  "${GC_VERSION}"
-    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "URLInfoAbout"    "http://goblincamp.com"
-    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "URLUpdateAbout"  "http://goblincamp.com"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "URLInfoAbout"    "http://www.goblincamp.com"
+    WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "URLUpdateAbout"  "http://www.goblincamp.com"
     WriteRegStr SHCTX "${GC_UNINST_REGKEY}" "InstallLocation" "$INSTDIR"
     
     WriteRegDWORD SHCTX "${GC_UNINST_REGKEY}" "NoModify" 1
@@ -121,14 +134,14 @@ FunctionEnd
 Section Uninstall
     !insertmacro MUI_STARTMENU_GETFOLDER "Application" $ICONS_GROUP
     
-    Delete "$INSTDIR\goblin-camp.pdb"
     Delete "$INSTDIR\uninst.exe"
-    Delete "$INSTDIR\website.url"
     
     %%_GC_UNINSTALL_MANIFEST_%%
+    %%_GC_UNINSTALL_MANIFEST_DIRS_%%
     
     Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
-    Delete "$SMPROGRAMS\$ICONS_GROUP\Website.lnk"
+    Delete "$SMPROGRAMS\$ICONS_GROUP\Website.url"
+    Delete "$SMPROGRAMS\$ICONS_GROUP\Forums.url"
     Delete "$DESKTOP\Goblin Camp.lnk"
     Delete "$SMPROGRAMS\$ICONS_GROUP\Goblin Camp.lnk"
     

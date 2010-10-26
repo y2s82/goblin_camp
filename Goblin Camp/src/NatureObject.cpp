@@ -128,7 +128,7 @@ class NatureObjectListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		Logger::Inst()->output<<"NatureObjectListener: "<<msg<<"\n";
+		LOG("NatureObjectListener: " << msg);
 		Game::Inst()->Exit();
 	}
 };

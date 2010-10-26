@@ -9,12 +9,11 @@
 # Assumes release variant was already built, because creating installer for end users
 # out of debug version doesn't make much sense.
 from __future__ import with_statement
-import os, sys, shutil, subprocess, codecs
-from contextlib import closing
+import sys, os, shutil, subprocess
 import pefile
 
-VC2008_CRT = frozenset(('msvcp90.dll', 'msvcr90.dll'))
-VC2010_CRT = frozenset(('msvcp100.dll', 'msvcr100.dll'))
+VC2008_CRT = [frozenset(('msvcp90.dll', 'msvcr90.dll')), False]
+VC2010_CRT = [frozenset(('msvcp100.dll', 'msvcr100.dll')), False]
 SYSTEM_DLL = frozenset((
     'kernel32.dll', 'user32.dll', 'gdi32.dll', 'opengl32.dll', 'winmm32.dll',
     'advapi32.dll', 'ntdll.dll', 'winmm.dll', 'rpcrt4.dll', 'secur32.dll',
@@ -23,89 +22,82 @@ SYSTEM_DLL = frozenset((
 
 def findDLL(fn):
     for path in PATH:
-        if os.path.exists(os.path.join(path, fn)):
-            return os.path.join(path, fn)
+        path = os.path.join(path, fn)
+        if os.path.exists(path):
+            return path
 
-redist = None
-def setRedist(dll, target):
-    global redist
-    
-    assert redist is None or redist == target, 'Conflicting C++ runtimes: ' + dll
-    redist = target
-
-def gatherDLLs(exe):
+def gatherDLLs(dlls, exe):
     for entry in exe.DIRECTORY_ENTRY_IMPORT:
         lname = entry.dll.lower()
-        name  = entry.dll
-        if lname in VC2008_CRT:
-            setRedist(name, '2008')
-        elif lname in VC2010_CRT:
-            setRedist(name, '2010')
+        if lname in VC2008_CRT[0]:
+            VC2008_CRT[1] = True
+        elif lname in VC2010_CRT[0]:
+            VC2010_CRT[1] = True
         elif lname not in SYSTEM_DLL:
-            name = findDLL(name)
-            DLLs.add(name)
-            gatherDLLs(pefile.PE(name))
+            name = findDLL(entry.dll)
+            dlls.add(name)
+            gatherDLLs(dlls, pefile.PE(name))
 
-assert len(sys.argv) == 2, 'Usage: mkinstaller <version>'
-assert os.path.exists('build'), 'Run from project root.'
-assert os.path.exists(os.path.join('build', 'dist', 'release', 'goblin-camp.exe')), 'Run "bjam variant=release install" first.'
-
-exe  = pefile.PE(os.path.join('build', 'dist', 'release', 'goblin-camp.exe'))
-DLLs = set()
-
+version, platform = sys.argv[1:]
 PATH = os.environ['PATH'].split(os.pathsep)
 if sys.platform == 'win32':
     PATH.insert(0, os.path.join(os.environ['SystemRoot'], 'system32'))
 
-gatherDLLs(exe)
-files = set(os.listdir(os.path.join('build', 'dist', 'release')))
+DIST      = os.path.join('build', 'dist')
+SOURCE    = os.path.join(DIST, 'release-%s' % platform)
+INSTALLER = os.path.join(DIST, 'installer')
+EXEC      = os.path.join(SOURCE, 'goblin-camp.exe')
+BASENSI   = os.path.join('build', 'installer', 'base.nsi')
+OUTNSI    = os.path.join(INSTALLER, 'out.nsi')
 
-if os.path.exists(os.path.join('build', 'dist', 'installer')):
-    shutil.rmtree(os.path.join('build', 'dist', 'installer'))
+if not os.path.exists(SOURCE):
+    print 'Run "bjam variant=release dist" first.'
+    sys.exit(255)
 
-os.makedirs(os.path.join('build', 'dist', 'installer', 'src'))
+if os.path.exists(INSTALLER):
+    shutil.rmtree(INSTALLER)
 
-for fn in files:
-    print '\tPREPARE %s' % fn
-    shutil.copy(
-        os.path.join('build', 'dist', 'release', fn),
-        os.path.join('build', 'dist', 'installer', 'src')
-    )
+execDLLs = set()
+gatherDLLs(execDLLs, pefile.PE(EXEC))
+os.makedirs(INSTALLER)
 
-for fn in DLLs:
-    print '\tDLL %s' % fn
-    shutil.copy(
-        fn,
-        os.path.join('build', 'dist', 'installer', 'src')
-    )
+manifest = { 'install': [], 'install-pdb': [], 'uninstall': [], 'uninstall-dirs': [] }
+command  = ['makensis', '/V3', '/NOCD']
 
-files = set(os.listdir(os.path.join('build', 'dist', 'installer', 'src')))
+for root, dirs, files in os.walk(SOURCE):
+    root = root[len(SOURCE) + 1:].strip()
+    
+    manifest['install'].append('SetOutPath "$INSTDIR\\%s"' % root)
+    for dn in dirs:
+        manifest['uninstall-dirs'].insert(0, 'RMDir /r "$INSTDIR\\%s"' % os.path.join(root, dn))
+    
+    for fn in files:
+        m = manifest['install-pdb'] if fn.endswith('.pdb') else manifest['install']
+        m.append('File "%s\\%s"' % (SOURCE, os.path.join(root, fn)))
+        manifest['uninstall'].append('Delete "$INSTDIR\\%s"' % os.path.join(root, fn))
 
-print '\tINCLUDE %s/vcredist_x86.exe' % redist
-shutil.copy(
-    os.path.join('build', 'installer', 'redists', 'vc%s' % redist, 'vcredist_x86.exe'),
-    os.path.join('build', 'dist', 'installer', 'src')
-)
+manifest['install'].append('SetOutPath "$INSTDIR"')
+for dll in execDLLs:
+    manifest['install'].append('File "%s"' % dll)
+    manifest['uninstall'].append('Delete "$INSTDIR\\%s"' % os.path.basename(dll))
 
-manifest = [fn for fn in files if fn[-4:] != '.pdb']
+if VC2008_CRT[1]:
+    command.append('/DGC_BUNDLE_MSVC2008')
+if VC2010_CRT[1]:
+    command.append('/DGC_BUNDLE_MSVC2010')
 
-with closing(codecs.open(os.path.join('build', 'installer', 'base.nsi'), 'r', 'utf-8')) as fp:
-    template = fp.read()
+with open(BASENSI, 'r') as fp:
+    nsi = fp.read()
 
-template = template.replace(
-    u'%%_GC_INSTALL_MANIFEST_%%', u'\n    '.join(ur'File "src\%s"' % fn for fn in manifest)
-)
-template = template.replace(
-    u'%%_GC_UNINSTALL_MANIFEST_%%', u'\n    '.join(ur'Delete "$INSTDIR\%s"' % fn for fn in manifest)
-)
-template = template.replace(u'%%_GC_VCREDIST_VERSION_%%', unicode(redist))
-template = template.replace(u'%%_GC_VERSION_%%', unicode(sys.argv[1]))
+nsi = nsi.replace('%%_GC_PLATFORM_%%', platform)
+nsi = nsi.replace('%%_GC_VERSION_%%', version)
+nsi = nsi.replace('%%_GC_INSTALL_MANIFEST_%%', '\n'.join(manifest['install']))
+nsi = nsi.replace('%%_GC_INSTALL_MANIFEST_PDB_%%', '\n'.join(manifest['install-pdb']))
+nsi = nsi.replace('%%_GC_UNINSTALL_MANIFEST_%%', '\n'.join(manifest['uninstall']))
+nsi = nsi.replace('%%_GC_UNINSTALL_MANIFEST_DIRS_%%', '\n'.join(manifest['uninstall-dirs']))
 
-print '\tSCRIPT'
-with closing(codecs.open(os.path.join('build', 'dist', 'installer', 'installer.nsi'), 'w', 'utf-8')) as fp:
-    fp.write(template)
+with open(OUTNSI, 'w') as fp:
+    fp.write(nsi)
 
-cwd = os.getcwd()
-os.chdir(os.path.join('build', 'dist', 'installer'))
-print '\tMAKENSIS'
-subprocess.Popen('makensis /V3 installer.nsi', shell = True).communicate()
+command.append(OUTNSI)
+subprocess.Popen(command, shell = True).communicate()
