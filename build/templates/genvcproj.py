@@ -60,16 +60,20 @@ if mode != 'sln':
     headers.sort()
     resources.sort()
     
-    variables['GC_USER_CONFIG'] = '' if userconfig is None else '--user-config={0}'.format(userconfig)
+    userconfig = '' if userconfig is None else '--user-config={0} '.format(userconfig)
+    command    = 'msvc_bjam.cmd {0}-j2 dist'.format(userconfig)
+    
+    variables['GC_DEBUG_COMMAND']   = '{0} variant=debug'.format(command)
+    variables['GC_RELEASE_COMMAND'] = '{0} variant=release'.format(command)
     
     if mode == '2008':
-        variables['GC_SOURCE_FILES']   = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in sources)
-        variables['GC_HEADER_FILES']   = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in headers)
-        variables['GC_RESOURCE_FILES'] = '\r\n            '.join(VS2008_FILE_TPL.format(fn) for fn in resources)
+        variables['GC_SOURCE_FILES']   = '\n\t\t\t'.join(VS2008_FILE_TPL.format(fn) for fn in sources)
+        variables['GC_HEADER_FILES']   = '\n\t\t\t'.join(VS2008_FILE_TPL.format(fn) for fn in headers)
+        variables['GC_RESOURCE_FILES'] = '\n\t\t\t'.join(VS2008_FILE_TPL.format(fn) for fn in resources)
     elif mode == '2010':
-        variables['GC_SOURCE_FILES']   = '\r\n            '.join(VS2010_SRCFILE_TPL.format(fn) for fn in sources)
-        variables['GC_HEADER_FILES']   = '\r\n            '.join(VS2010_HDRFILE_TPL.format(fn) for fn in headers)
-        variables['GC_RESOURCE_FILES'] = '\r\n            '.join(VS2010_RESFILE_TPL.format(fn) for fn in resources)
+        variables['GC_SOURCE_FILES']   = '\n\t\t'.join(VS2010_SRCFILE_TPL.format(fn) for fn in sources)
+        variables['GC_HEADER_FILES']   = '\n\t\t'.join(VS2010_HDRFILE_TPL.format(fn) for fn in headers)
+        variables['GC_RESOURCE_FILES'] = '\n\t\t'.join(VS2010_RESFILE_TPL.format(fn) for fn in resources)
     else:
         print 'Invalid command line.'
         sys.exit(255)

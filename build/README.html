@@ -321,31 +321,28 @@ you should read the entire document.</p>
 <p class="topic-title first">Table of Contents</p>
 <ul class="simple">
 <li><a class="reference internal" href="#prerequisites" id="id5">Prerequisites</a><ul>
-<li><a class="reference internal" href="#tools" id="id6">Tools</a><ul>
-<li><a class="reference internal" href="#bjam" id="id7">bjam</a></li>
+<li><a class="reference internal" href="#tools" id="id6">Tools</a></li>
+<li><a class="reference internal" href="#dependencies" id="id7">Dependencies</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#dependencies" id="id8">Dependencies</a></li>
+<li><a class="reference internal" href="#goblin-camp-build-system" id="id8">Goblin Camp build system</a><ul>
+<li><a class="reference internal" href="#configuring-build" id="id9">Configuring build</a><ul>
+<li><a class="reference internal" href="#id1" id="id10">Boost</a></li>
+<li><a class="reference internal" href="#id2" id="id11">libtcod</a></li>
+<li><a class="reference internal" href="#id3" id="id12">Windows SDK</a></li>
+<li><a class="reference internal" href="#id4" id="id13">Python</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#goblin-camp-build-system" id="id9">Goblin Camp build system</a><ul>
-<li><a class="reference internal" href="#configuring-build" id="id10">Configuring build</a><ul>
-<li><a class="reference internal" href="#id1" id="id11">Boost</a></li>
-<li><a class="reference internal" href="#id2" id="id12">libtcod</a></li>
-<li><a class="reference internal" href="#id3" id="id13">Windows SDK</a></li>
-<li><a class="reference internal" href="#id4" id="id14">Python</a></li>
+<li><a class="reference internal" href="#building" id="id14">Building</a></li>
+<li><a class="reference internal" href="#variants" id="id15">Variants</a></li>
+<li><a class="reference internal" href="#parallel-builds" id="id16">Parallel builds</a></li>
+<li><a class="reference internal" href="#installing-to-dist" id="id17">Installing to dist</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#building" id="id15">Building</a></li>
-<li><a class="reference internal" href="#variants" id="id16">Variants</a></li>
-<li><a class="reference internal" href="#parallel-builds" id="id17">Parallel builds</a></li>
-<li><a class="reference internal" href="#installing-to-dist" id="id18">Installing to dist</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#additional-build-system-capabilities" id="id19">Additional build system capabilities</a><ul>
-<li><a class="reference internal" href="#generating-msvc-project-files" id="id20">Generating MSVC project files</a></li>
-<li><a class="reference internal" href="#generating-nsis-installer" id="id21">Generating NSIS installer</a></li>
-<li><a class="reference internal" href="#automatic-versioning" id="id22">Automatic versioning</a></li>
+<li><a class="reference internal" href="#additional-build-system-capabilities" id="id18">Additional build system capabilities</a><ul>
+<li><a class="reference internal" href="#generating-msvc-project-files" id="id19">Generating MSVC project files</a></li>
+<li><a class="reference internal" href="#generating-nsis-installer" id="id20">Generating NSIS installer</a></li>
+<li><a class="reference internal" href="#automatic-versioning" id="id21">Automatic versioning</a></li>
 </ul>
 </li>
 </ul>
@@ -358,30 +355,25 @@ you should read the entire document.</p>
 Here's list with known working versions:</p>
 <ul class="simple">
 <li><a class="reference external" href="http://python.org/">Python</a> <strong>2.6.6</strong> or newer (<strong>not</strong> 3.x).</li>
-<li><a class="reference internal" href="#bjam">bjam</a> <strong>03.1.19</strong> — included with Goblin Camp.</li>
+<li><a class="reference external" href="http://sourceforge.net/projects/boost/files/boost-jam/3.1.18/">Boost.Jam</a> <strong>03.1.18</strong>.</li>
 </ul>
-<div class="section" id="bjam">
-<h3><a class="toc-backref" href="#id7">bjam</a></h3>
-<p>You can build bjam using <tt class="docutils literal"><span class="pre">boost-build\jam_src\build.bat</span></tt> (Windows) or <tt class="docutils literal"><span class="pre">boost-build\jam_src\build.sh</span></tt> (*nix) —
-<tt class="docutils literal"><span class="pre">boost-build</span></tt> is in the same directory as this README.</p>
-<p>Before reporting any problems with the build, use included bjam first!</p>
-</div>
 </div>
 <div class="section" id="dependencies">
-<h2><a class="toc-backref" href="#id8">Dependencies</a></h2>
+<h2><a class="toc-backref" href="#id7">Dependencies</a></h2>
 <p>Goblin Camp requires several third party libraries to build and link:</p>
 <ul class="simple">
-<li><a class="reference external" href="http://boost.org">Boost</a> <strong>1.43</strong>.</li>
-<li><a class="reference external" href="http://doryen.eptalys.net/libtcod">libtcod</a> <strong>r474</strong> (GC uses not-yet-released SVN version — listed here is a known working revision).</li>
+<li><a class="reference external" href="http://boost.org">Boost</a> <strong>1.44</strong>.</li>
+<li><a class="reference external" href="http://doryen.eptalys.net/libtcod">libtcod</a> <strong>r483</strong> [must be later than <strong>r477</strong>: new API]
+(GC uses not-yet-released SVN version — listed here is a known working revision).</li>
 <li><a class="reference external" href="http://microsoft.com/downloads/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b">Windows SDK</a> <strong>7.1</strong> (or newer; 7.0 may work as well, but older are not supported).</li>
 <li><a class="reference external" href="http://python.org/">Python</a> <strong>2.6.6</strong> or <strong>2.7.x</strong> (3.x will not work).</li>
 </ul>
 </div>
 </div>
 <div class="section" id="goblin-camp-build-system">
-<h1><a class="toc-backref" href="#id9">Goblin Camp build system</a></h1>
+<h1><a class="toc-backref" href="#id8">Goblin Camp build system</a></h1>
 <div class="section" id="configuring-build">
-<h2><a class="toc-backref" href="#id10">Configuring build</a></h2>
+<h2><a class="toc-backref" href="#id9">Configuring build</a></h2>
 <p>Before you build GC, you'll need to create a configuration file for the build,
 so that compiler can find all needed headers and libraries.</p>
 <p>Minimal config file (let's call it <tt class="docutils literal"><span class="pre">gc-config.jam</span></tt>, put it into root directory of the source;
@@ -396,11 +388,11 @@ use e.g. <tt class="docutils literal">gcc</tt> (on Linux) or <tt class="docutils
 e.g. by giving it custom flags, but this is outside of this document's scope — see <a class="reference external" href="http://boost.org/doc/tools/build/doc/html/bbv2/reference/tools.html">Boost Build</a>
 documentation instead.</p>
 <div class="section" id="id1">
-<h3><a class="toc-backref" href="#id11">Boost</a></h3>
+<h3><a class="toc-backref" href="#id10">Boost</a></h3>
 <p>If your Boost is not on standard compiler's search path (MSVC: and you don't have LIB/INCLUDE environment
 variables set properly), you will need to provide them in config, in format:</p>
 <pre class="literal-block">
-using boost : 1.43 : properties ;
+using boost : 1.44 : properties ;
 </pre>
 <p>In properties field you can put:</p>
 <ul>
@@ -426,14 +418,14 @@ without compiler and version information (e.g. <tt class="docutils literal"><spa
 <p>See <a class="reference external" href="http://boost.org/doc/libs/1_43_0/more/getting_started/unix-variants.html#library-naming">Boost documentation</a> for more information about tags.</p>
 <p>Example:</p>
 <pre class="literal-block">
-using boost : 1.43 : &lt;layout&gt;tagged ;
+using boost : 1.44 : &lt;layout&gt;tagged ;
 </pre>
 </div>
 <div class="section" id="id2">
-<h3><a class="toc-backref" href="#id12">libtcod</a></h3>
+<h3><a class="toc-backref" href="#id11">libtcod</a></h3>
 <p>Same as with Boost, but the format is:</p>
 <pre class="literal-block">
-using build/libtcod : properties ;
+using libtcod : properties ;
 </pre>
 <p>Available properties:</p>
 <ul class="simple">
@@ -444,14 +436,14 @@ If you don't provide these, build system will attempt to guess them (it will pri
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using build/libtcod : &lt;library&gt;C:\dev\libs\libtcod\lib &lt;include&gt;C:\dev\libs\libtcod\include ;
+using libtcod : &lt;library&gt;C:\dev\libs\libtcod\lib &lt;include&gt;C:\dev\libs\libtcod\include ;
 </pre>
 </div>
 <div class="section" id="id3">
-<h3><a class="toc-backref" href="#id13">Windows SDK</a></h3>
+<h3><a class="toc-backref" href="#id12">Windows SDK</a></h3>
 <p>Format:</p>
 <pre class="literal-block">
-using build/winsdk : properties ;
+using winsdk : properties ;
 </pre>
 <p>Properties:</p>
 <ul class="simple">
@@ -460,14 +452,14 @@ using build/winsdk : properties ;
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using build/winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\libs\WinSDK\v7.1\Include ;
+using winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\libs\WinSDK\v7.1\Include ;
 </pre>
 </div>
 <div class="section" id="id4">
-<h3><a class="toc-backref" href="#id14">Python</a></h3>
+<h3><a class="toc-backref" href="#id13">Python</a></h3>
 <p>Format:</p>
 <pre class="literal-block">
-using build/python : properties ;
+using python : properties ;
 </pre>
 <p>Properties:</p>
 <ul class="simple">
@@ -479,12 +471,12 @@ using build/python : properties ;
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using build/python : &lt;version&gt;2.7 &lt;library&gt;C:\dev\apps\Python27\libs &lt;include&gt;C:\dev\apps\Python27\include ;
+using python : &lt;version&gt;2.7 &lt;library&gt;C:\dev\apps\Python27\libs &lt;include&gt;C:\dev\apps\Python27\include ;
 </pre>
 </div>
 </div>
 <div class="section" id="building">
-<h2><a class="toc-backref" href="#id15">Building</a></h2>
+<h2><a class="toc-backref" href="#id14">Building</a></h2>
 <p>To build you need to run bjam:</p>
 <pre class="literal-block">
 bjam --user-config=gc-config.jam
@@ -492,7 +484,7 @@ bjam --user-config=gc-config.jam
 <p>This will build the default variant (debug), and <strong>not</strong> copy files into <tt class="docutils literal">dist</tt>.</p>
 </div>
 <div class="section" id="variants">
-<h2><a class="toc-backref" href="#id16">Variants</a></h2>
+<h2><a class="toc-backref" href="#id15">Variants</a></h2>
 <p>Goblin Camp can be built in two variants:</p>
 <ul class="simple">
 <li><tt class="docutils literal">debug</tt> — much slower, but more suitable for testing newest revisions.</li>
@@ -502,13 +494,13 @@ bjam --user-config=gc-config.jam
 same time with <tt class="docutils literal">variant=release,debug</tt>.</p>
 </div>
 <div class="section" id="parallel-builds">
-<h2><a class="toc-backref" href="#id17">Parallel builds</a></h2>
+<h2><a class="toc-backref" href="#id16">Parallel builds</a></h2>
 <p>If you have multicore CPU, you can run more than one compiler instance at the same time, to speed
 the compilation up. To use this append <tt class="docutils literal"><span class="pre">-jN</span></tt> to bjam invocation, where N is number of parallel
 processes.</p>
 </div>
 <div class="section" id="installing-to-dist">
-<h2><a class="toc-backref" href="#id18">Installing to dist</a></h2>
+<h2><a class="toc-backref" href="#id17">Installing to dist</a></h2>
 <p>To run compiled game, you should install to dist first. To do this, append <tt class="docutils literal">dist</tt> to bjam invocation.
 This will copy all data files and executables into <tt class="docutils literal"><span class="pre">build\dist\&lt;variant&gt;</span></tt> directory.</p>
 <div class="warning">
@@ -522,27 +514,31 @@ crash handler depends on new version, and cannot run with OS-provided one).</p>
 </div>
 </div>
 <div class="section" id="additional-build-system-capabilities">
-<h1><a class="toc-backref" href="#id19">Additional build system capabilities</a></h1>
+<h1><a class="toc-backref" href="#id18">Additional build system capabilities</a></h1>
 <div class="section" id="generating-msvc-project-files">
-<h2><a class="toc-backref" href="#id20">Generating MSVC project files</a></h2>
+<h2><a class="toc-backref" href="#id19">Generating MSVC project files</a></h2>
 <p>Build system can generate MSVC2008 and MSVC2010 solution and project.
 To do this, use:</p>
 <pre class="literal-block">
-bjam --user-config=gc-config.jam -sSLN_USE_CONFIG=gc-config.jam sln2008
+bjam --user-config=gc-config.jam sln2008
 </pre>
 <p>You can use <tt class="docutils literal">sln2010</tt> instead to generate MSVC2010 project.</p>
 </div>
 <div class="section" id="generating-nsis-installer">
-<h2><a class="toc-backref" href="#id21">Generating NSIS installer</a></h2>
+<h2><a class="toc-backref" href="#id20">Generating NSIS installer</a></h2>
 <p>There is NSIS installer template included with sources. To build it, you need
-to build <tt class="docutils literal">release</tt> variant, install it into dist, and then run:</p>
+to run:</p>
 <pre class="literal-block">
-bjam --user-config=gc-config.jam nsis
+bjam --user-config=gc-config.jam nsis variant=release
 </pre>
 <p>Installer will be saved into <tt class="docutils literal">build\dist\installer</tt>.</p>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">You cannot build NSIS installer with <tt class="docutils literal">variant=debug</tt>.</p>
+</div>
 </div>
 <div class="section" id="automatic-versioning">
-<h2><a class="toc-backref" href="#id22">Automatic versioning</a></h2>
+<h2><a class="toc-backref" href="#id21">Automatic versioning</a></h2>
 <p>Build system generates _version.rc (on Windows) and _version.cpp from <tt class="docutils literal">GC_VERSION</tt>
 constant defined in <tt class="docutils literal">Jamroot.jam</tt> and Mercurial revision ID (if it can be obtained).</p>
 <p>This is done to reduce maintenance effort in bumping the GC version.</p>

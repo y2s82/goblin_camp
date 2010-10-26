@@ -51,7 +51,6 @@ build\dist
 build\msvc
 user-config.jam
 *.exp
-data
 *.orig*
 *.cmd
 .DS_Store
@@ -67,3 +66,6 @@ build
 *.xcbkptlist
 xcuserdata
 gc-config.jam
+docs\doxy
+docs\sphinx\_build
+userdata

@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <cmath>
 #include "Coordinate.hpp"
 
 Coordinate::Coordinate(int valuex, int valuey) { x = valuex; y = valuey; }
@@ -59,4 +60,12 @@ template<class Archive>
 void Coordinate::load(Archive & ar, unsigned int version) {
 	ar & x;
 	ar & y;
+}
+
+int Distance(int x0, int y0, int x1, int y1) {
+	return (abs(y1 - y0) + abs(x1 - x0));
+}
+
+int Distance(Coordinate a, Coordinate b) {
+	return Distance(a.X(), a.Y(), b.X(), b.Y());
 }
