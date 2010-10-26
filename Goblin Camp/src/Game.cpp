@@ -938,7 +938,7 @@ void Game::GenerateMap(uint32 seed) {
 			} while (!TCODLine::step(&lineX, &lineY));
 		}
 
-		if (riverDistance > 35) {
+		if (riverDistance > 55) {
 			map->heightMap->addHill((float)x, (float)y,(float)35 + random->get(0,20), (float)3 + random->get(0,2));
 			++hills;
 		}
