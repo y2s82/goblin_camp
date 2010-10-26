@@ -98,6 +98,9 @@
     <ClInclude Include="include\Map.hpp" />
     <ClInclude Include="include\NatureObject.hpp" />
     <ClInclude Include="include\NPC.hpp" />
+    <ClInclude Include="include\scripting\API.hpp" />
+    <ClInclude Include="include\scripting\Event.hpp" />
+    <ClInclude Include="include\scripting\_python.hpp" />
     <ClInclude Include="include\Squad.hpp" />
     <ClInclude Include="include\StatusEffect.hpp" />
     <ClInclude Include="include\stdafx.hpp" />
