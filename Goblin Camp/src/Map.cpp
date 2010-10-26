@@ -172,6 +172,11 @@ TCODColor Map::ForeColor(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor(); 
 	return TCODColor::pink;
 }
+
+void Map::ForeColor(int x, int y, TCODColor color) {
+	tileMap[x][y].foreColor = color;
+}
+
 TCODColor Map::BackColor(int x, int y) const { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BackColor(); 
 	return TCODColor::yellow;
