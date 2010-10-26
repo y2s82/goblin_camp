@@ -56,6 +56,7 @@ Game::Game() :
 	time(0),
 	orcCount(0),
 	goblinCount(0),
+	peacefulFaunaCount(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
@@ -242,6 +243,16 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 }
 
 int Game::CreateNPC(Coordinate target, NPCType type) {
+
+	int tries = 0;
+	int radius = 1;
+	Coordinate originalTarget = target;
+	while (!Map::Inst()->Walkable(target.X(), target.Y()) && tries < 20) {
+		target.X(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
+		target.Y(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
+		if (++tries % 3 == 0) ++radius;
+	}
+
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
 	npc->InitializeAIFunctions();
@@ -268,6 +279,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
+	else if (NPC::Presets[type].tags.find("localwildlife") != NPC::Presets[type].tags.end()) ++peacefulFaunaCount;
 
 	if (NPC::Presets[type].tags.find("flying") != NPC::Presets[type].tags.end()) {
 		npc->AddEffect(FLYING);
@@ -286,9 +298,9 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	return npc->Uid();
 }
 
-int Game::OrcCount() { return orcCount; }
+int Game::OrcCount() const { return orcCount; }
 void Game::OrcCount(int add) { orcCount += add; }
-int Game::GoblinCount() { return goblinCount; }
+int Game::GoblinCount() const { return goblinCount; }
 void Game::GoblinCount(int add) { goblinCount += add; }
 
 
@@ -672,7 +684,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
 
-	if (safeMonths <= 0) events->Update();
+	events->Update(safeMonths > 0);
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
@@ -1248,7 +1260,7 @@ void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
 	
 	for (int npcs = 0; npcs < quantity; ++npcs) {
-		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
+		Coordinate location((rand() % areaWidth) + std::min(corner1.X(),corner2.X()), (rand() % areaLength) + std::min(corner1.Y(),corner2.Y()));
 
 		Game::Inst()->CreateNPC(location, type);
 	}
@@ -1355,3 +1367,6 @@ void Game::TranslateContainerListeners() {
 		}
 	}
 }
+
+unsigned int Game::PeacefulFaunaCount() const { return peacefulFaunaCount; }
+void Game::PeacefulFaunaCount(int add) { peacefulFaunaCount += add; }
