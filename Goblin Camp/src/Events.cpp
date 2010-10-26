@@ -22,30 +22,94 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Events.hpp"
 #include "Game.hpp"
 #include "GCamp.hpp"
+#include "Camp.hpp"
 
 Events::Events(Map* vmap) :
+map(vmap),
 	hostileSpawningMonsters(std::vector<int>()),
-	map(vmap)
+	timeSinceHostileSpawn(0),
+	peacefulAnimals(std::vector<int>())
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].tags.find("attacksrandomly") != NPC::Presets[i].tags.end())
 			hostileSpawningMonsters.push_back(i);
+		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
+			peacefulAnimals.push_back(i);
 	}
 }
 
-//Pretty much just placeholder stuff until I get a proper events system in place
+void Events::Update(bool safe) {
+	if (!safe) ++timeSinceHostileSpawn;
+	if (!safe && (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0 || timeSinceHostileSpawn > UPDATES_PER_SECOND * 60 * 25)) {
+		SpawnHostileMonsters();
+	}
 
-void Events::Update() {
-	if (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0) {
-		int hostileID = rand() % hostileSpawningMonsters.size();
-		NPCType monsterType = hostileSpawningMonsters[hostileID];
-		int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+	if (rand() % (UPDATES_PER_SECOND * 60 * 2) == 0) {
+		SpawnBenignFauna();
+	}
+}
 
-		std::string msg = (boost::format("%s have been sighted outside your settlement!") 
-			% NPC::Presets[monsterType].plural).str();
-		Coordinate a(std::min(0, (rand() % map->Width())-20), 0);
-		Coordinate b = a + Coordinate(20, 1);
-		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
-		Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+void Events::SpawnHostileMonsters() {
+	int hostileID = rand() % hostileSpawningMonsters.size();
+	NPCType monsterType = hostileSpawningMonsters[hostileID];
+	int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+
+	std::string msg;
+	if (hostileSpawnCount > 1) 
+		msg = (boost::format("%s have been sighted outside your settlement!") 
+		% NPC::Presets[monsterType].plural).str();
+	else msg = (boost::format("A %s has been sighted outside your settlement!")
+		% NPC::Presets[monsterType].name).str();
+
+	Coordinate a,b;
+
+	switch (rand() % 4) {
+	case 0:
+		a.X(0);
+		a.Y(rand() % map->Height() - 20);
+		b.X(1);
+		b.Y(a.Y() + 20);
+		break;
+
+	case 1: 
+		a.X(rand() % map->Width() - 20);
+		a.Y(0);
+		b.X(a.X() + 20);
+		b.Y(1);
+		break;
+
+	case 2:
+		a.X(map->Width() - 2);
+		a.Y(rand() % map->Height() - 20);
+		b.X(map->Width() - 1);
+		b.Y(a.Y() + 20);
+		break;
+
+	case 3:
+		a.X(rand() % map->Width() - 20);
+		a.Y(map->Height() - 2);
+		b.X(a.X() + 20);
+		b.Y(map->Height() - 1);
+		break;
+	}
+
+	Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
+	Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+	timeSinceHostileSpawn = 0;
+}
+
+void Events::SpawnBenignFauna() {
+	if (peacefulAnimals.size() > 0 && Game::Inst()->PeacefulFaunaCount() < 20) {
+		//Generate benign fauna
+		for (int i = 0; i < (rand() % 10) + 1; ++i) {
+			int type = rand() % peacefulAnimals.size();
+			Coordinate target;
+			do {
+				target.X(rand() % map->Width());
+				target.Y(rand() % map->Height());
+			} while (!map->Walkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
+				|| map->Type(target.X(), target.Y()) != TILEGRASS);
+			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);
+		}
 	}
 }
