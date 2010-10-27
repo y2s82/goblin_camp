@@ -966,9 +966,9 @@ void Game::GenerateMap(uint32 seed) {
 				int chosen = natureObjectQueue.top().second;
 				int rarity = NatureObject::Presets[chosen].rarity;
 				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity *= 0.5;
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity /= 2;
 				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity *= 0.5;
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity /= 2;
 				
 				if (rand() % 100 < rarity) {
 
