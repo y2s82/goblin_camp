@@ -6,32 +6,32 @@ plant_type "Pine" {
 				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
-	minheight=0.1
-	maxheight=0.8
+	minheight=-0.07
+	maxheight=4.0
 }
 
 plant_type "Wild Bloodberry bush" {
 	graphic=35
 	color="140,0,0"
 	components=["Bloodberry"]
-	rarity=25
+	rarity=15
 	condition=10
 	cluster=5
 	harvestable
 	walkable
-	minheight=0.05
-	maxheight=0.15
+	minheight=0.0
+	maxheight=2
 }
 
 plant_type "Wild Blueleaf" {
 	graphic=216
 	color="50,0,200"
 	components=["Blueleaf boll"]
-	rarity=40
+	rarity=10
 	condition=10
 	harvestable
-	minheight=0.03
-	maxheight=0.13
+	minheight=-0.5
+	maxheight=0.3
 }
 
 plant_type "Yellow Flower" {
@@ -84,8 +84,8 @@ plant_type "Willow" {
 	components=["Wood log"]
 	rarity=300
 	condition=100
-	minheight=-1.0
-	maxheight=0.1
+	minheight=-5.0
+	maxheight=-0.01
 }
 
 plant_type "Birch" {
@@ -96,8 +96,8 @@ plant_type "Birch" {
 				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
-	minheight=0.1
-	maxheight=0.8
+	minheight=-0.07
+	maxheight=4.0
 }
 
 plant_type "Spruce" {
@@ -108,8 +108,8 @@ plant_type "Spruce" {
 				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
-	minheight=0.1
-	maxheight=0.8
+	minheight=-0.07
+	maxheight=4.0
 }
 
 plant_type "Silvervine" {
@@ -117,6 +117,15 @@ plant_type "Silvervine" {
 	color="221,234,234"
 	rarity=275
 	condition=50
-	minheight=-1.0
-	maxheight=0.075
+	minheight=-1
+	maxheight=-0.01
+}
+
+plant_type "Thornbush" {
+	graphic=35
+	color="213,232,83"
+	rarity=300
+	condition=50
+	minheight=-1
+	maxheight=-0.01
 }
