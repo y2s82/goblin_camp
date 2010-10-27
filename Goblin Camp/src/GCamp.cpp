@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <algorithm>
 #include <functional>
 
+#include "Camp.hpp"
 #include "GCamp.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
@@ -137,18 +138,68 @@ void StartNewGame() {
 	Script::Event::GameStart();
 	game->GenerateMap();
 
-	Coordinate spawnTopCorner(200,200);
-	Coordinate middleCorner(220,220);
-	Coordinate itemBottomCorner(230,230);
+	std::priority_queue<std::pair<int, Coordinate> > spawnCenterCandidates;
 
-	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, middleCorner);
-	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, middleCorner);
+	for (unsigned int i = 0; i < 20; ++i) {
+		std::pair<int,Coordinate> candidate(0, 
+			Coordinate(100 + rand() % (Map::Inst()->Width()-200), 
+			100 + rand() % (Map::Inst()->Height()-200)));
 
-	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), middleCorner, itemBottomCorner);
-	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), middleCorner, itemBottomCorner);
-	game->CreateItems(20, Item::StringToItemType("Bread"), middleCorner, itemBottomCorner);
-	game->CreateItems(3, Item::StringToItemType("Leather armor"), middleCorner, itemBottomCorner);
-	game->CreateItems(3, Item::StringToItemType("Chainmail"), middleCorner, itemBottomCorner);
+		int riverDistance = 1000, hillDistance = 1000;
+		int lineX, lineY;
+
+		for (int i = 0; i < 4; ++i) {
+			switch (i) {
+			case 0:
+				lineX = candidate.second.X() - 200;
+				lineY = candidate.second.Y();
+				break;
+			case 1:
+				lineX = candidate.second.X() + 200;
+				lineY = candidate.second.Y();
+				break;
+			case 2:
+				lineX = candidate.second.X();
+				lineY = candidate.second.Y() - 200;
+				break;
+			case 3:
+				lineX = candidate.second.X();
+				lineY = candidate.second.Y() + 200;
+				break;
+			}
+			int distance = 200;
+			TCODLine::init(lineX, lineY, candidate.second.X(), candidate.second.Y());
+			do {
+				if (lineX >= 0 && lineX < Map::Inst()->Width() && lineY >= 0 && lineY < Map::Inst()->Height()) {
+					if (Map::Inst()->Type(lineX, lineY) == TILEDITCH || Map::Inst()->Type(lineX, lineY) == TILERIVERBED) {
+						if (distance < riverDistance) riverDistance = distance;
+						if (distance < 25) riverDistance = 2000;
+					} else if (Map::Inst()->Type(lineX, lineY) == TILEROCK) {
+						if (distance < hillDistance) hillDistance = distance;
+					}
+				}
+				--distance;
+			} while (!TCODLine::step(&lineX, &lineY));
+		}
+
+		candidate.first = -hillDistance - riverDistance;
+		if (Map::Inst()->Type(candidate.second.X(), candidate.second.Y()) != TILEGRASS) candidate.first -= 10000;
+		spawnCenterCandidates.push(candidate);
+	}
+
+	Coordinate spawnTopCorner(spawnCenterCandidates.top().second.X()-20,spawnCenterCandidates.top().second.Y()-20);
+	Coordinate spawnBottomCorner(spawnCenterCandidates.top().second.X()+20,spawnCenterCandidates.top().second.Y()+20);
+
+	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, spawnBottomCorner);
+	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
+
+	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
+
+	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
+	game->CenterOn(spawnCenterCandidates.top().second);
+
 	MainLoop();
 }
 
