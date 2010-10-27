@@ -31,6 +31,8 @@ Map::Map() {
 	}
 	width = tileMap.size();
 	height = tileMap[0].size();
+	heightMap = new TCODHeightMap(500,500);
+	waterlevel = 0.03f;
 };
 
 Map* Map::instance = 0;
@@ -170,6 +172,11 @@ TCODColor Map::ForeColor(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor(); 
 	return TCODColor::pink;
 }
+
+void Map::ForeColor(int x, int y, TCODColor color) {
+	tileMap[x][y].foreColor = color;
+}
+
 TCODColor Map::BackColor(int x, int y) const { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BackColor(); 
 	return TCODColor::yellow;
@@ -235,6 +242,8 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].npcList.clear();
 	tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
 	tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
+	heightMap->setValue(x,y,0.5f);
+	waterlevel = 0.03f;
 }
 
 void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
@@ -248,3 +257,5 @@ int Map::GetMoveModifier(int x, int y) {
 	}
 	return modifier;
 }
+
+float Map::GetWaterlevel() { return waterlevel; }

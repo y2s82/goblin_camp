@@ -68,6 +68,7 @@ private:
 	Season season;
 	int time;
 	int orcCount, goblinCount;
+	unsigned int peacefulFaunaCount;
 	bool paused;
 	int charWidth, charHeight;
 	bool toMainMenu, running;
@@ -93,7 +94,7 @@ public:
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
 	void Init();
-	void GenerateMap();
+	void GenerateMap(uint32 seed = 0);
 
 	void Update();
 	Coordinate upleft;
@@ -120,7 +121,7 @@ public:
 	int CreateNPC(Coordinate, NPCType);
 	void BumpEntity(int);
 	int DistanceNPCToCoordinate(int, Coordinate);
-	int OrcCount(); int GoblinCount();
+	int OrcCount() const; int GoblinCount() const;
 	void OrcCount(int); void GoblinCount(int);
 	void FindNearbyNPCs(boost::shared_ptr<NPC>, bool onlyHostiles = false);
 	void RemoveNPC(boost::weak_ptr<NPC>);
@@ -132,6 +133,8 @@ public:
 	static void SetSquadTargetEntity(Coordinate, boost::shared_ptr<Squad>);
 	NPCType GetRandomNPCTypeByTag(std::string tag);
 	void CreateNPCs(int,NPCType,Coordinate,Coordinate);
+	unsigned int PeacefulFaunaCount() const;
+	void PeacefulFaunaCount(int);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate);

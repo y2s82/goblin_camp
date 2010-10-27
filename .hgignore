@@ -65,6 +65,7 @@ build
 *.xcuserstate
 *.xcbkptlist
 xcuserdata
+gc-config.jam
 docs\doxy
 docs\sphinx\_build
 userdata
