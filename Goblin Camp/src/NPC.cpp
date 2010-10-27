@@ -412,10 +412,10 @@ AiThink NPC::Think() {
 				to our current target. Near means max 5 tiles away, visible and
 				walkable. Once we have our target we can actually switch over
 				to a normal MOVE task. In case we can't find a visible tile,
-				we'll allow a non LOS one*/
-				tmp = 0;
+				we'll allow a non LOS one*/				
 				{bool checkLOS = true;
 				for (int i = 0; i < 2; ++i) {
+					tmp = 0;
 					while (tmp++ < 10) {
 						int tarX = ((rand() % 11) - 5) + currentTarget().X();
 						int tarY = ((rand() % 11) - 5) + currentTarget().Y();
