@@ -284,3 +284,15 @@ construction_type "Brick Wall" {
 	maxCondition=50
 	materials=["Brick"]
 }
+
+construction_type "Totem Pole" {
+	category="Basics"
+	unique
+	centersCamp
+	maxCondition=100
+	materials=["Log"]
+	graphicLength=3
+	graphic=[201, 205, 187,
+			 186,  10, 186,
+			 200, 205, 188]
+}
