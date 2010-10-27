@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <list>
 #include <string>
+#include <boost/shared_ptr.hpp>
 
 #include "NPC.hpp"
 #include "Construction.hpp"
@@ -26,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Engine.hpp"
 #include "scripting/Event.hpp"
 #include "scripting/API.hpp"
+#include "scripting/_gcampapi/PyItem.hpp"
 
 namespace Script { namespace Event {
 	void GameStart() {
@@ -44,19 +46,22 @@ namespace Script { namespace Event {
 		Script::InvokeListeners("onGameLoaded", "(s)", filename.c_str());
 	}
 	
-	void BuildingCreated(Construction*, int, int) {
+	/*void BuildingCreated(Construction*, int, int) {
 	
 	}
 	
 	void BuildingDestroyed(Construction*, int, int) {
 	
+	}*/
+	
+	void ItemCreated(boost::weak_ptr<Item> item, int x, int y) {
+		Script::API::PyItem pyitem(item);
+		
+		py::object obj(boost::ref(pyitem));
+		Script::InvokeListeners("onItemCreated", "(Oii)", obj.ptr(), x, y);
 	}
 	
-	void ItemCreated(Item *item, Construction*, NPC*, int x, int y) {
-		Script::InvokeListeners("onItemCreated", "(Oii)", py::object(item).ptr(), x, y);
-	}
-	
-	void ItemDestroyed(Item*, int, int) {
+	/*void ItemDestroyed(Item*, int, int) {
 	
 	}
 	
@@ -66,5 +71,5 @@ namespace Script { namespace Event {
 	
 	void NPCKilled(NPC*, NPC*, int, int) {
 	
-	}
+	}*/
 }}

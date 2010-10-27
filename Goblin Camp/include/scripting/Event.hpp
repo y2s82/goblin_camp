@@ -21,11 +21,11 @@ namespace Script {
 		void GameEnd();
 		void GameSaved(const std::string&);
 		void GameLoaded(const std::string&);
-		void BuildingCreated(Construction*, int, int);
-		void BuildingDestroyed(Construction*, int, int);
-		void ItemCreated(Item*, Construction*, NPC*, int, int);
-		void ItemDestroyed(Item*, int, int);
+		/*void BuildingCreated(Construction*, int, int);
+		void BuildingDestroyed(Construction*, int, int);*/
+		void ItemCreated(boost::weak_ptr<Item>, int, int);
+		/*void ItemDestroyed(Item*, int, int);
 		void NPCSpawned(NPC*, Construction*, int, int);
-		void NPCKilled(NPC*, NPC*, int, int);
+		void NPCKilled(NPC*, NPC*, int, int);*/
 	}
 }
