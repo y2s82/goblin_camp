@@ -904,9 +904,9 @@ void Game::GenerateMap(uint32 seed) {
 		}
 
 		if (riverDistance > 35) {
-			map->heightMap->addHill(x, y, random->get(15,35), random->get(1,3));
-			map->heightMap->addHill(x+random->get(-7,7), y+random->get(-7,7), random->get(15,25), random->get(1,3));
-			map->heightMap->addHill(x+random->get(-7,7), y+random->get(-7,7), random->get(15,25), random->get(1,3));
+			map->heightMap->addHill((float)x, (float)y, (float)random->get(15,35), (float)random->get(1,3));
+			map->heightMap->addHill((float)x+random->get(-7,7), (float)y+random->get(-7,7), (float)random->get(15,25), (float)random->get(1,3));
+			map->heightMap->addHill((float)x+random->get(-7,7), (float)y+random->get(-7,7), (float)random->get(15,25), (float)random->get(1,3));
 			++hills;
 		}
 
@@ -964,10 +964,10 @@ void Game::GenerateMap(uint32 seed) {
 				if (natureObjectQueue.empty()) continue;
 				int chosen = natureObjectQueue.top().second;
 				int rarity = NatureObject::Presets[chosen].rarity;
-				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity /= 2;
-				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity /= 2;
+				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.01f ||
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.5f) rarity = rarity - rarity / 5;
+				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
 				
 				if (rand() % 100 < rarity) {
 
