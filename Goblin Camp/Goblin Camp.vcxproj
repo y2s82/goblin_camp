@@ -12,16 +12,16 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="config.ini" />
-    <None Include="constructions.dat" />
     <None Include="COPYING.txt" />
-    <None Include="creatures.dat" />
     <None Include="GoblinCamp.ico" />
-    <None Include="items.dat" />
     <None Include="keys.ini" />
     <None Include="LIBTCOD-LICENSE.txt" />
-    <None Include="names.dat" />
+    <None Include="lib\gcamp_core\constructions.dat" />
+    <None Include="lib\gcamp_core\creatures.dat" />
+    <None Include="lib\gcamp_core\items.dat" />
+    <None Include="lib\gcamp_core\names.dat" />
+    <None Include="lib\gcamp_core\wildplants.dat" />
     <None Include="Readme.txt" />
-    <None Include="wildplants.dat" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp" />
