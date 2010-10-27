@@ -51,3 +51,8 @@ void Camp::UpdateCenter(Coordinate newBuilding, bool add) {
 		--buildingCount;
 	}
 }
+
+void Camp::SetCenter(Coordinate newCenter) {
+	centerX = newCenter.X();
+	centerY = newCenter.Y();
+}

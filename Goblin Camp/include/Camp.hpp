@@ -35,4 +35,5 @@ public:
 	static Camp* Inst();
 	Coordinate Center();
 	void UpdateCenter(Coordinate, bool);
+	void SetCenter(Coordinate);
 };
