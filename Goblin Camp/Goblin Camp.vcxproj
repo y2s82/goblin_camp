@@ -49,6 +49,9 @@
     <ClCompile Include="src\NPC.cpp" />
     <ClCompile Include="src\scripting\API.cpp" />
     <ClCompile Include="src\scripting\Event.cpp" />
+    <ClCompile Include="src\scripting\_gcampapi\APIItem.cpp" />
+    <ClCompile Include="src\scripting\_gcampapi\Functions.cpp" />
+    <ClCompile Include="src\scripting\_gcampapi\LoggerStream.cpp" />
     <ClCompile Include="src\Serialization.cpp" />
     <ClCompile Include="src\Squad.cpp" />
     <ClCompile Include="src\StatusEffect.cpp" />
