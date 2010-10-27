@@ -460,6 +460,10 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		
 		Script::Event::ItemCreated(newItem.get(), NULL, NULL, pos.X(), pos.Y());
 		
+#ifdef DEBUG
+		std::cout<<newItem->name<<"("<<newItem->Uid()<<") created\n";
+#endif
+
 		return newItem->Uid();
 }
 
