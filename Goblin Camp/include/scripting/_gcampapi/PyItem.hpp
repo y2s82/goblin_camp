@@ -15,6 +15,22 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+class Item;
+
+
 namespace Script { namespace API {
-	void ExposeItem();
+	struct PyItem {
+		PyItem(boost::weak_ptr<Item>);
+		py::tuple GetPosition();
+		bool SetPosition(int x, int y);
+		py::tuple GetColor();
+		bool SetColor(float h, float s, float v);
+		std::string GetTypeString();
+		int GetGraphic();
+		int GetType();
+		
+		static void Expose();
+	private:
+		boost::weak_ptr<Item> item;
+	};
 }}
