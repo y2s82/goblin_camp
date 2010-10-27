@@ -103,7 +103,10 @@ Construction::~Construction() {
 		++Construction::AllowedAmount[type];
 	}
 	
-	if (built) Camp::Inst()->UpdateCenter(Center(), false);
+	if (built) {
+		if (!HasTag(CENTERSCAMP)) Camp::Inst()->UpdateCenter(Center(), false);
+		else Camp::Inst()->UnlockCenter();
+	}
 }
 
 
@@ -168,7 +171,8 @@ int Construction::Build() {
 			}
 		}
 		built = true;
-		Camp::Inst()->UpdateCenter(Center(), true);
+		if (!HasTag(CENTERSCAMP)) Camp::Inst()->UpdateCenter(Center(), true);
+		else Camp::Inst()->LockCenter(Center());
 	}
 	return condition;
 }
@@ -329,6 +333,8 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().blocksLight = true;
 		} else if (boost::iequals(name, "unique")) {
 			Construction::AllowedAmount.back() = 1;
+		} else if (boost::iequals(name, "centersCamp")) {
+			Construction::Presets.back().tags[CENTERSCAMP] = true;
 		}
 		return true;
 	}
@@ -413,6 +419,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("blocksLight");
 	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
 	constructionTypeStruct->addFlag("unique");
+	constructionTypeStruct->addFlag("centersCamp");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }

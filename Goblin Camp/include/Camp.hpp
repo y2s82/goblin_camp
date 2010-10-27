@@ -30,10 +30,14 @@ private:
 	static Camp* instance;
 	double centerX, centerY;
 	unsigned int buildingCount;
+	bool locked;
+	Coordinate lockedCenter;
 
 public:
 	static Camp* Inst();
 	Coordinate Center();
 	void UpdateCenter(Coordinate, bool);
 	void SetCenter(Coordinate);
+	void LockCenter(Coordinate);
+	void UnlockCenter();
 };
