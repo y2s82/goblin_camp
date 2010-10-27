@@ -17,11 +17,21 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Map.hpp"
 
+/*Events will include all the hardcoded events. Once Python is figured
+out events will be able to be defined in py code, and the hardcoded ones
+should be possible to turn off if desired.
+I want to have the basic ones coded in c++, python will necessarily be
+a bit slower, and it might make a crucial difference on low-end machines. */
+
 class Events {
 private:
-	std::vector<int> hostileSpawningMonsters;
 	Map *map;
+	std::vector<int> hostileSpawningMonsters;
+	int timeSinceHostileSpawn;
+	std::vector<int> peacefulAnimals;
 public:
 	Events(Map*);
-	void Update();
+	void Update(bool safe = false);
+	void SpawnHostileMonsters();
+	void SpawnBenignFauna();
 };

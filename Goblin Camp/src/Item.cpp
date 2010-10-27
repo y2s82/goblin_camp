@@ -56,7 +56,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 
 	for (int i = 0; i < (signed int)components.size(); ++i) {
 		if (components[i].lock()) 
-			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.5f);
+			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
 	}
 
 	attack = Item::Presets[type].attack;

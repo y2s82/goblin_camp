@@ -114,6 +114,7 @@ NPC::~NPC() {
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Game::Inst()->OrcCount(-1);
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Game::Inst()->GoblinCount(-1);
+	else if (NPC::Presets[type].tags.find("localwildlife") != NPC::Presets[type].tags.end()) Game::Inst()->PeacefulFaunaCount(-1);
 }
 
 void NPC::Position(Coordinate pos, bool firstTime) {

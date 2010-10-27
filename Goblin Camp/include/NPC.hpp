@@ -53,7 +53,7 @@ enum AiThink {
 
 enum Skill {
 	MASONRY,
-	CARPENTTY,
+	CARPENTRY,
 	SKILLAMOUNT
 };
 

@@ -35,8 +35,10 @@ private:
 	static Map* instance;
 	boost::multi_array<Tile, 2> tileMap;
 	int width, height;
+	float waterlevel;
 
 public:
+	TCODHeightMap *heightMap;
 	static Map* Inst();
 	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
@@ -63,6 +65,7 @@ public:
 	std::set<int>* NPCList(int,int);
 	int Graphic(int,int) const;
 	TCODColor ForeColor(int,int) const;
+	void ForeColor(int,int,TCODColor);
 	TCODColor BackColor(int,int) const;
 	void NatureObject(int,int,int);
 	int NatureObject(int,int) const;
@@ -78,4 +81,5 @@ public:
 	void Mark(int,int);
 	void Unmark(int,int);
 	int GetMoveModifier(int,int);
+	float GetWaterlevel();
 };

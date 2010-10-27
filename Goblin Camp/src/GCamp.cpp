@@ -204,6 +204,8 @@ int MainMenu() {
 	bool lButtonDown = false;
 
 	while (!exit) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
 		TCODConsole::root->clear();
@@ -217,7 +219,6 @@ int MainMenu() {
 		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
 		for (unsigned int idx = 0; idx < entryCount; ++idx) {
 			const MainMenuEntry& entry = entries[idx];
 
@@ -311,7 +312,7 @@ void LoadMenu() {
 		TCODConsole::root->print(edgex + (width / 2), edgey + 1, "ESC to cancel.");
 		TCODConsole::root->setAlignment(TCOD_LEFT);
 
-		for (int i = 0; i < list.size(); ++i) {
+		for (unsigned int i = 0; i < list.size(); ++i) {
 			if (selected == i) {
 				TCODConsole::root->setDefaultForeground(TCODColor::black);
 				TCODConsole::root->setDefaultBackground(TCODColor::white);
@@ -351,7 +352,7 @@ void LoadMenu() {
 		if (!mouseStatus.lbutton && lButtonDown) {
 			lButtonDown = false;
 			
-			if (selected < list.size() && selected >= 0) {
+			if (selected < (signed int)list.size() && selected >= 0) {
 				Data::LoadGame(list[selected].filename);
 				MainLoop();
 				break;

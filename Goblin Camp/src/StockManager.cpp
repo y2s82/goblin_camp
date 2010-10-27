@@ -135,16 +135,28 @@ void StockManager::Update() {
 					//Pick a designated tree and go chop it
 					for (std::list<boost::weak_ptr<NatureObject> >::iterator treei = designatedTrees.begin();
 						treei != designatedTrees.end() && difference > 0; ++treei) {
-							boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
-							fellJob->ConnectToEntity(*treei);
-							fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
-							fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
-							fellJob->tasks.push_back(Task(STOCKPILEITEM));
-							JobManager::Inst()->AddJob(fellJob);
-							--difference;
-							treeFellingJobs.push_back(
-								std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> >(fellJob, *treei));
-							treei = designatedTrees.erase(treei);
+							if (!treei->lock()) continue;
+
+							bool componentInTree = false;
+							for (std::list<ItemType>::iterator compi = NatureObject::Presets[treei->lock()->Type()].components.begin(); 
+								compi != NatureObject::Presets[treei->lock()->Type()].components.end(); ++compi) {
+									if (*compi==*prodi) {
+										componentInTree = true;
+										break;
+									}
+							}
+							if (componentInTree) {
+								boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
+								fellJob->ConnectToEntity(*treei);
+								fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
+								fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
+								fellJob->tasks.push_back(Task(STOCKPILEITEM));
+								JobManager::Inst()->AddJob(fellJob);
+								--difference;
+								treeFellingJobs.push_back(
+									std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> >(fellJob, *treei));
+								treei = designatedTrees.erase(treei);
+							}
 					}
 				} else if (fromEarth.find(*prodi) != fromEarth.end()) {
 					difference -= bogIronJobs.size();
