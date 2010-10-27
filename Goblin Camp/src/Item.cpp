@@ -68,7 +68,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 
 Item::~Item() {
 #ifdef DEBUG
-	std::cout<<"Item destroyed\n";
+	std::cout<<name<<"("<<uid<<") destroyed\n";
 #endif
 	if (faction == 0) {
 		StockManager::Inst()->UpdateQuantity(type, -1);
