@@ -157,9 +157,6 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	buildJob->ConnectToEntity(newCons);
 
 	JobManager::Inst()->AddJob(buildJob);
-	if (Construction::AllowedAmount[construct] >= 0) {
-		--Construction::AllowedAmount[construct];
-	}
 
 	return newCons->Uid();
 }
