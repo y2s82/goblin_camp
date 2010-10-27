@@ -851,8 +851,7 @@ void Game::GenerateMap(uint32 seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, 40, -0.5, 40, -0.5);
-	map->heightMap->normalize();
+	map->heightMap->digBezier(px, py, 50, -5, 50, -5);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
@@ -904,17 +903,17 @@ void Game::GenerateMap(uint32 seed) {
 			} while (!TCODLine::step(&lineX, &lineY));
 		}
 
-		if (riverDistance > 55) {
-			map->heightMap->addHill((float)x, (float)y,(float)35 + random->get(0,20), (float)3 + random->get(0,2));
+		if (riverDistance > 35) {
+			map->heightMap->addHill(x, y, random->get(15,35), random->get(1,3));
+			map->heightMap->addHill(x+random->get(-7,7), y+random->get(-7,7), random->get(15,25), random->get(1,3));
+			map->heightMap->addHill(x+random->get(-7,7), y+random->get(-7,7), random->get(15,25), random->get(1,3));
 			++hills;
 		}
 
 		++infinityCheck;
 	}
 
-	map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.015f, 0.005f, random);
-
-	map->heightMap->normalize();
+	map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.005f, 0.30f, random);
 
 	//This is a simple kernel transformation that does some horizontal smoothing (lifted straight from the libtcod docs)
 	int dx [] = {-1,1,0};
@@ -931,14 +930,14 @@ void Game::GenerateMap(uint32 seed) {
 				if (random->get(0,1)) map->Type(x,y,TILERIVERBED);
 				else map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
-			} else if (height < 0.8f) {
+			} else if (height < 4.5f) {
 				map->Type(x,y,TILEGRASS);
 				if (random->get(0,9) < 9) {
-					if (height < 0.07f) {
+					if (height < -0.01f) {
 						map->ForeColor(x,y, TCODColor(random->get(100,192),127,0));
-					} else if (height < 0.1f) {
+					} else if (height < -0.1f) {
 						map->ForeColor(x,y, TCODColor(random->get(50,192),127,0));
-					} else if (height > 0.6f) {
+					} else if (height > 4.0f) {
 						map->ForeColor(x,y, TCODColor(90, random->get(120,150), 90));
 					}
 				}
