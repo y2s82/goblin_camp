@@ -246,7 +246,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	Coordinate originalTarget = target;
 	while (!Map::Inst()->Walkable(target.X(), target.Y()) && tries < 20) {
 		target.X(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
-		target.Y(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
+		target.Y(originalTarget.Y() + TCODRandom::getInstance()->get(-radius, radius));
 		if (++tries % 3 == 0) ++radius;
 	}
 
