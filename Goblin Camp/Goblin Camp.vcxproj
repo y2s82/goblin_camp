@@ -11,10 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.ini" />
     <None Include="COPYING.txt" />
     <None Include="GoblinCamp.ico" />
-    <None Include="keys.ini" />
     <None Include="LIBTCOD-LICENSE.txt" />
     <None Include="lib\gcamp_core\constructions.dat" />
     <None Include="lib\gcamp_core\creatures.dat" />
@@ -85,7 +83,10 @@
     <ClInclude Include="include\Construction.hpp" />
     <ClInclude Include="include\Container.hpp" />
     <ClInclude Include="include\Coordinate.hpp" />
-    <ClInclude Include="include\Data.hpp" />
+    <ClInclude Include="include\data\Config.hpp" />
+    <ClInclude Include="include\data\Data.hpp" />
+    <ClInclude Include="include\data\Mods.hpp" />
+    <ClInclude Include="include\data\Paths.hpp" />
     <ClInclude Include="include\Door.hpp" />
     <ClInclude Include="include\Events.hpp" />
     <ClInclude Include="include\Farmplot.hpp" />
