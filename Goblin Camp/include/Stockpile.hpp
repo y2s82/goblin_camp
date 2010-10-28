@@ -19,7 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Construction.hpp"
 
-
 #define NOTFULL (1 << 0)
 #define BETTERTHAN (1 << 1)
 #define APPLYMINIMUMS (1 << 2)

@@ -43,6 +43,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "data/Config.hpp"
 #include "UI/YesNoDialog.hpp"
 #include "scripting/Event.hpp"
+#include "SpawningPool.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -121,6 +122,8 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	boost::shared_ptr<Construction> newCons;
 	if (Construction::Presets[construct].tags[DOOR]) {
 		newCons = boost::shared_ptr<Construction>(new Door(construct, target));
+	} else if (Construction::Presets[construct].tags[SPAWNINGPOOL]) {
+		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}

@@ -335,6 +335,9 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::AllowedAmount.back() = 1;
 		} else if (boost::iequals(name, "centersCamp")) {
 			Construction::Presets.back().tags[CENTERSCAMP] = true;
+		} else if (boost::iequals(name, "spawningPool")) {
+			Construction::Presets.back().tags[SPAWNINGPOOL] = true;
+			Construction::Presets.back().dynamic = true;
 		}
 		return true;
 	}
@@ -420,6 +423,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
 	constructionTypeStruct->addFlag("unique");
 	constructionTypeStruct->addFlag("centersCamp");
+	constructionTypeStruct->addFlag("spawningPool");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
