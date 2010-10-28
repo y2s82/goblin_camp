@@ -38,8 +38,8 @@ NatureObjectPreset::NatureObjectPreset() :
 	tree(false),
 	harvestable(false),
 	walkable(false),
-	minHeight(0.04f),
-	maxHeight(0.8f)
+	minHeight(0.0f),
+	maxHeight(2.0f)
 {}
 
 std::vector<NatureObjectPreset> NatureObject::Presets = std::vector<NatureObjectPreset>();

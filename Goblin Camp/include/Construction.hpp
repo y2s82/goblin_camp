@@ -42,6 +42,8 @@ enum ConstructionTag {
 	BED,
 	WORKSHOP,
 	FURNITURE,
+	CENTERSCAMP,
+	SPAWNINGPOOL,
 	TAGCOUNT
 };
 

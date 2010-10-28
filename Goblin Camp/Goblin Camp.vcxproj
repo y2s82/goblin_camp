@@ -11,17 +11,15 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <None Include="config.ini" />
-    <None Include="constructions.dat" />
     <None Include="COPYING.txt" />
-    <None Include="creatures.dat" />
     <None Include="GoblinCamp.ico" />
-    <None Include="items.dat" />
-    <None Include="keys.ini" />
     <None Include="LIBTCOD-LICENSE.txt" />
-    <None Include="names.dat" />
+    <None Include="lib\gcamp_core\constructions.dat" />
+    <None Include="lib\gcamp_core\creatures.dat" />
+    <None Include="lib\gcamp_core\items.dat" />
+    <None Include="lib\gcamp_core\names.dat" />
+    <None Include="lib\gcamp_core\wildplants.dat" />
     <None Include="Readme.txt" />
-    <None Include="wildplants.dat" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Announce.cpp" />
@@ -49,7 +47,11 @@
     <ClCompile Include="src\NPC.cpp" />
     <ClCompile Include="src\scripting\API.cpp" />
     <ClCompile Include="src\scripting\Event.cpp" />
+    <ClCompile Include="src\scripting\_gcampapi\APIItem.cpp" />
+    <ClCompile Include="src\scripting\_gcampapi\Functions.cpp" />
+    <ClCompile Include="src\scripting\_gcampapi\LoggerStream.cpp" />
     <ClCompile Include="src\Serialization.cpp" />
+    <ClCompile Include="src\SpawningPool.cpp" />
     <ClCompile Include="src\Squad.cpp" />
     <ClCompile Include="src\StatusEffect.cpp" />
     <ClCompile Include="src\StockManager.cpp" />
@@ -82,7 +84,10 @@
     <ClInclude Include="include\Construction.hpp" />
     <ClInclude Include="include\Container.hpp" />
     <ClInclude Include="include\Coordinate.hpp" />
-    <ClInclude Include="include\Data.hpp" />
+    <ClInclude Include="include\data\Config.hpp" />
+    <ClInclude Include="include\data\Data.hpp" />
+    <ClInclude Include="include\data\Mods.hpp" />
+    <ClInclude Include="include\data\Paths.hpp" />
     <ClInclude Include="include\Door.hpp" />
     <ClInclude Include="include\Events.hpp" />
     <ClInclude Include="include\Farmplot.hpp" />
@@ -101,6 +106,7 @@
     <ClInclude Include="include\scripting\API.hpp" />
     <ClInclude Include="include\scripting\Event.hpp" />
     <ClInclude Include="include\scripting\_python.hpp" />
+    <ClInclude Include="include\SpawningPool.hpp" />
     <ClInclude Include="include\Squad.hpp" />
     <ClInclude Include="include\StatusEffect.hpp" />
     <ClInclude Include="include\stdafx.hpp" />

@@ -15,9 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Coordinate.hpp"
+#include "Construction.hpp"
+#include "UI\Dialog.hpp"
+#include "UI\UIComponents.hpp"
 
-class Camp {
+class SpawningPool : public Construction {
 	friend class boost::serialization::access;
 private:
 	template<class Archive>
@@ -26,18 +28,20 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-	Camp();
-	static Camp* instance;
-	double centerX, centerY;
-	unsigned int buildingCount;
-	bool locked;
-	Coordinate lockedCenter;
-
+	Dialog* dialog;
+	UIContainer* container;
+	bool dumpFilth, dumpCorpses;
+	Coordinate a, b;
+	unsigned int expansion, filth;
+	boost::shared_ptr<Container> corpseContainer;
 public:
-	static Camp* Inst();
-	Coordinate Center();
-	void UpdateCenter(Coordinate, bool);
-	void SetCenter(Coordinate);
-	void LockCenter(Coordinate);
-	void UnlockCenter();
+	SpawningPool(ConstructionType = 0, Coordinate = Coordinate(0,0));
+	Panel* GetContextMenu();
+	static bool DumpFilth(SpawningPool*);
+	static void ToggleDumpFilth(SpawningPool*);
+	static bool DumpCorpses(SpawningPool*);
+	static void ToggleDumpCorpses(SpawningPool*);
+	void Update();
+	void Draw(Coordinate, TCODConsole*);
+	void Expand();
 };

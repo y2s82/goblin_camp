@@ -210,27 +210,16 @@ construction_type "Statue" {
 
 construction_type "Spawning pool" {
 	category="Permanent"
-	graphicLength=10
-	graphic=[ 46, 44, 46, 94,126,126,126, 44, 44, 46,
-		 	  46, 46,126,126,126,126,126,126, 46, 44,
-			  44,126,126,126,126,126,126,126,126, 46,
-			 126,126,136,126,176,126,199,126,126,126,
-			 126,126,126,126,126,126,126,126,126,126,
-			 126,126,126,126,126,126,126,126,147,126,
-			  94,126,126,237,126,126,126,126,126,126,
-			  46,126,126,126,126,136,126,126,126, 44,
-			  44, 46,126,126,126,126,126, 94, 44, 44,
-			  44, 46, 44,126,126,126,126, 46, 46, 44]
-	walkable
-	maxCondition=1000
-	productionx=5
-	productiony=5
-	spawnsCreatures="friendly"
-	//Spawn creatures every x seconds
-	spawnFrequency=300
-	permanent
+	graphicLength=1
+	graphic=[ 126 ]
 	color="0,255,128"
+	walkable
+	maxCondition=30
+	productionx=0
+	productiony=0
+	permanent
 	unique
+	spawningPool
 }
 
 construction_type "Bloomery" {
@@ -283,4 +272,16 @@ construction_type "Brick Wall" {
 	wall
 	maxCondition=50
 	materials=["Brick"]
+}
+
+construction_type "Totem Pole" {
+	category="Basics"
+	unique
+	centersCamp
+	maxCondition=100
+	materials=["Log"]
+	graphicLength=3
+	graphic=[201, 205, 187,
+			 186,  10, 186,
+			 200, 205, 188]
 }

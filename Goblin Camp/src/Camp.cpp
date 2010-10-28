@@ -23,7 +23,9 @@ Camp* Camp::instance = 0;
 Camp::Camp() :
 	centerX(220.0),
 	centerY(220.0),
-	buildingCount(0)
+	buildingCount(0),
+	locked(false),
+	lockedCenter(0,0)
 {}
 
 Camp* Camp::Inst() {
@@ -32,7 +34,7 @@ Camp* Camp::Inst() {
 }
 
 Coordinate Camp::Center() {
-	return Coordinate((int)centerX, (int)centerY);
+	return locked ? lockedCenter : Coordinate((int)centerX, (int)centerY);
 }
 
 void Camp::UpdateCenter(Coordinate newBuilding, bool add) {
@@ -51,3 +53,15 @@ void Camp::UpdateCenter(Coordinate newBuilding, bool add) {
 		--buildingCount;
 	}
 }
+
+void Camp::SetCenter(Coordinate newCenter) {
+	centerX = newCenter.X();
+	centerY = newCenter.Y();
+}
+
+void Camp::LockCenter(Coordinate newCenter) {
+	lockedCenter = newCenter;
+	locked = true;
+}
+
+void Camp::UnlockCenter() { locked = false; }

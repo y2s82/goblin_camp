@@ -43,6 +43,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "data/Config.hpp"
 #include "UI/YesNoDialog.hpp"
 #include "scripting/Event.hpp"
+#include "SpawningPool.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -121,6 +122,8 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	boost::shared_ptr<Construction> newCons;
 	if (Construction::Presets[construct].tags[DOOR]) {
 		newCons = boost::shared_ptr<Construction>(new Door(construct, target));
+	} else if (Construction::Presets[construct].tags[SPAWNINGPOOL]) {
+		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
@@ -157,9 +160,6 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	buildJob->ConnectToEntity(newCons);
 
 	JobManager::Inst()->AddJob(buildJob);
-	if (Construction::AllowedAmount[construct] >= 0) {
-		--Construction::AllowedAmount[construct];
-	}
 
 	return newCons->Uid();
 }
@@ -249,7 +249,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	Coordinate originalTarget = target;
 	while (!Map::Inst()->Walkable(target.X(), target.Y()) && tries < 20) {
 		target.X(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
-		target.Y(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
+		target.Y(originalTarget.Y() + TCODRandom::getInstance()->get(-radius, radius));
 		if (++tries % 3 == 0) ++radius;
 	}
 
@@ -460,6 +460,10 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		
 		Script::Event::ItemCreated(newItem, pos.X(), pos.Y());
 		
+#ifdef DEBUG
+		std::cout<<newItem->name<<"("<<newItem->Uid()<<") created\n";
+#endif
+
 		return newItem->Uid();
 }
 
@@ -847,8 +851,7 @@ void Game::GenerateMap(uint32 seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, 40, -0.5, 40, -0.5);
-	map->heightMap->normalize();
+	map->heightMap->digBezier(px, py, 50, -5, 50, -5);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
@@ -900,17 +903,17 @@ void Game::GenerateMap(uint32 seed) {
 			} while (!TCODLine::step(&lineX, &lineY));
 		}
 
-		if (riverDistance > 55) {
-			map->heightMap->addHill((float)x, (float)y,(float)35 + random->get(0,20), (float)3 + random->get(0,2));
+		if (riverDistance > 35) {
+			map->heightMap->addHill((float)x, (float)y, (float)random->get(15,35), (float)random->get(1,3));
+			map->heightMap->addHill((float)x+random->get(-7,7), (float)y+random->get(-7,7), (float)random->get(15,25), (float)random->get(1,3));
+			map->heightMap->addHill((float)x+random->get(-7,7), (float)y+random->get(-7,7), (float)random->get(15,25), (float)random->get(1,3));
 			++hills;
 		}
 
 		++infinityCheck;
 	}
 
-	map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.015f, 0.005f, random);
-
-	map->heightMap->normalize();
+	map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.005f, 0.30f, random);
 
 	//This is a simple kernel transformation that does some horizontal smoothing (lifted straight from the libtcod docs)
 	int dx [] = {-1,1,0};
@@ -927,14 +930,14 @@ void Game::GenerateMap(uint32 seed) {
 				if (random->get(0,1)) map->Type(x,y,TILERIVERBED);
 				else map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
-			} else if (height < 0.8f) {
+			} else if (height < 4.5f) {
 				map->Type(x,y,TILEGRASS);
 				if (random->get(0,9) < 9) {
-					if (height < 0.07f) {
+					if (height < -0.01f) {
 						map->ForeColor(x,y, TCODColor(random->get(100,192),127,0));
-					} else if (height < 0.1f) {
+					} else if (height < -0.1f) {
 						map->ForeColor(x,y, TCODColor(random->get(50,192),127,0));
-					} else if (height > 0.6f) {
+					} else if (height > 4.0f) {
 						map->ForeColor(x,y, TCODColor(90, random->get(120,150), 90));
 					}
 				}
@@ -961,10 +964,10 @@ void Game::GenerateMap(uint32 seed) {
 				if (natureObjectQueue.empty()) continue;
 				int chosen = natureObjectQueue.top().second;
 				int rarity = NatureObject::Presets[chosen].rarity;
-				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity *= 0.5;
-				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.05f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.2f) rarity *= 0.5;
+				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.01f ||
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.5f) rarity = rarity - rarity / 5;
+				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
+					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
 				
 				if (rand() % 100 < rarity) {
 
