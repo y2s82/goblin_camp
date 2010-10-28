@@ -190,6 +190,15 @@ void StartNewGame() {
 	Coordinate spawnTopCorner(spawnCenterCandidates.top().second.X()-20,spawnCenterCandidates.top().second.Y()-20);
 	Coordinate spawnBottomCorner(spawnCenterCandidates.top().second.X()+20,spawnCenterCandidates.top().second.Y()+20);
 
+	//Clear starting area
+	for (int x = spawnTopCorner.X(); x < spawnBottomCorner.X(); ++x) {
+		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
+			if (Map::Inst()->NatureObject(x,y) >= 0 && rand() % 3 < 2) {
+				game->RemoveNatureObject(game->natureList[Map::Inst()->NatureObject(x,y)]);
+			}
+		}
+	}
+
 	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, spawnBottomCorner);
 	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
 
