@@ -901,30 +901,31 @@ MOVENEARend:
 					TaskFinished(TASKFAILFATAL);
 					break;
 				}
+				{
+					boost::shared_ptr<Container> sourceContainer(boost::static_pointer_cast<Container>(carried.lock()));
 
-				boost::shared_ptr<Container> sourceContainer(boost::static_pointer_cast<Container>(carried.lock()));
-
-				if (currentEntity().lock() && boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
-					boost::shared_ptr<Container> targetContainer(boost::static_pointer_cast<Container>(currentEntity().lock()));
-					if (sourceContainer->ContainsWater() > 0) {
-						targetContainer->AddWater(sourceContainer->ContainsWater());
-						sourceContainer->RemoveWater(sourceContainer->ContainsWater());
-					} else {
-						targetContainer->AddFilth(sourceContainer->ContainsFilth());
-						sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+					if (currentEntity().lock() && boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
+						boost::shared_ptr<Container> targetContainer(boost::static_pointer_cast<Container>(currentEntity().lock()));
+						if (sourceContainer->ContainsWater() > 0) {
+							targetContainer->AddWater(sourceContainer->ContainsWater());
+							sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+						} else {
+							targetContainer->AddFilth(sourceContainer->ContainsFilth());
+							sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+						}
+						TaskFinished(TASKSUCCESS);
+						break;
+					} else if (currentTarget().X() >= 0 && currentTarget().Y() >= 0 && 
+						currentTarget().X() < Map::Inst()->Width() && currentTarget().Y() < Map::Inst()->Height()) {
+							if (sourceContainer->ContainsWater() > 0) {
+								Game::Inst()->CreateWater(currentTarget(), sourceContainer->ContainsWater());
+								sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+							} else {
+								Game::Inst()->CreateFilth(currentTarget(), sourceContainer->ContainsFilth());
+								sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+							}
+							TaskFinished(TASKSUCCESS);
 					}
-					TaskFinished(TASKSUCCESS);
-					break;
-				} else if (currentTarget().X() >= 0 && currentTarget().Y() >= 0 && 
-					currentTarget().X() < Map::Inst()->Width() && currentTarget().Y() < Map::Inst()->Height()) {
-					if (sourceContainer->ContainsWater() > 0) {
-						Game::Inst()->CreateWater(currentTarget(), sourceContainer->ContainsWater());
-						sourceContainer->RemoveWater(sourceContainer->ContainsWater());
-					} else {
-						Game::Inst()->CreateFilth(currentTarget(), sourceContainer->ContainsFilth());
-						sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
-					}
-					TaskFinished(TASKSUCCESS);
 				}
 				TaskFinished(TASKFAILFATAL);
 				break;
