@@ -64,7 +64,9 @@ enum Action {
 	WEAR,
 	BOGIRON,
 	STOCKPILEITEM,
-	QUIVER
+	QUIVER,
+	FILL,
+	POUR
 };
 
 enum TaskResult {
