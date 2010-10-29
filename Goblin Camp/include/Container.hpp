@@ -44,6 +44,8 @@ private:
 	
 	std::vector<ContainerListener*> listeners;
 	std::vector<int> listenersAsUids;
+
+	int water, filth; //Special cases for real liquids
 public:
 	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >(),
@@ -65,4 +67,10 @@ public:
 	void RemoveListener(ContainerListener *listener);
 	void GetTooltip(int x, int y, Tooltip *tooltip);
 	void TranslateContainerListeners();
+	void AddWater(int);
+	void RemoveWater(int);
+	int ContainsWater();
+	void AddFilth(int);
+	void RemoveFilth(int);
+	int ContainsFilth();
 };

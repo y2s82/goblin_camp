@@ -859,6 +859,76 @@ MOVENEARend:
 				TaskFinished(TASKFAILFATAL);
 				break;
 
+			case FILL:
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Liquid container"))) {
+					boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(carried.lock()));
+					
+					if (!cont->empty() && cont->ContainsWater() == 0 && cont->ContainsFilth() == 0) {
+						//Not empty, but doesn't have water/filth, so it has items in it
+						TaskFinished(TASKFAILFATAL);
+#ifdef DEBUG
+						std::cout<<"Attempted to fill non-empty container with liquid\n";
+#endif
+						break;
+					}
+					
+					boost::weak_ptr<WaterNode> wnode = Map::Inst()->GetWater(currentTarget().X(), 
+						currentTarget().Y());
+					if (wnode.lock() && wnode.lock()->Depth() > 0 && cont->ContainsFilth() == 0) {
+						int waterAmount = std::min(10, wnode.lock()->Depth());
+						wnode.lock()->Depth(wnode.lock()->Depth()-waterAmount);
+						cont->AddWater(waterAmount);
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
+
+					boost::weak_ptr<FilthNode> fnode = Map::Inst()->GetFilth(currentTarget().X(),
+						currentTarget().Y());
+					if (fnode.lock() && fnode.lock()->Depth() > 0 && cont->ContainsWater() == 0) {
+						int filthAmount = std::min(10, fnode.lock()->Depth());
+						fnode.lock()->Depth(fnode.lock()->Depth()-filthAmount);
+						cont->AddFilth(filthAmount);
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
+				} 
+
+				TaskFinished(TASKFAILFATAL);
+				break;
+
+			case POUR:
+				if (!carried.lock() || !boost::dynamic_pointer_cast<Container>(carried.lock())) {
+					TaskFinished(TASKFAILFATAL);
+					break;
+				}
+
+				boost::shared_ptr<Container> sourceContainer(boost::static_pointer_cast<Container>(carried.lock()));
+
+				if (currentEntity().lock() && boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
+					boost::shared_ptr<Container> targetContainer(boost::static_pointer_cast<Container>(currentEntity().lock()));
+					if (sourceContainer->ContainsWater() > 0) {
+						targetContainer->AddWater(sourceContainer->ContainsWater());
+						sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+					} else {
+						targetContainer->AddFilth(sourceContainer->ContainsFilth());
+						sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+					}
+					TaskFinished(TASKSUCCESS);
+					break;
+				} else if (currentTarget().X() >= 0 && currentTarget().Y() >= 0 && 
+					currentTarget().X() < Map::Inst()->Width() && currentTarget().Y() < Map::Inst()->Height()) {
+					if (sourceContainer->ContainsWater() > 0) {
+						Game::Inst()->CreateWater(currentTarget(), sourceContainer->ContainsWater());
+						sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+					} else {
+						Game::Inst()->CreateFilth(currentTarget(), sourceContainer->ContainsFilth());
+						sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+					}
+					TaskFinished(TASKSUCCESS);
+				}
+				TaskFinished(TASKFAILFATAL);
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -1003,6 +1073,18 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 		inventory->RemoveItem(item);
 		item.lock()->Position(Position());
 		item.lock()->PutInContainer(boost::weak_ptr<Item>());
+
+		//If the item is a container with water/filth in it, spill it on the ground
+		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
+			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item.lock()));
+			if (cont->ContainsWater() > 0) {
+				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
+				cont->RemoveWater(cont->ContainsWater());
+			} else if (cont->ContainsFilth() > 0) {
+				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
+				cont->RemoveFilth(cont->ContainsFilth());
+			}
+		}
 	}
 }
 
