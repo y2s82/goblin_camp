@@ -563,7 +563,16 @@ void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordina
 	}
 }
 
-
+Coordinate Game::FindFilth(Coordinate pos) {
+	if (filthList.size() == 0) return Coordinate(-1,-1);
+	//Choose random filth
+	std::priority_queue<std::pair<int, int> > potentialFilth;
+	for (unsigned int i = 0; i < std::min((unsigned int)10, filthList.size()); ++i) {
+		int filth = rand() % filthList.size();
+		potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
+	}
+	return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
+}
 
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
 Coordinate Game::FindWater(Coordinate pos) {

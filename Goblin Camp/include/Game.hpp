@@ -176,6 +176,7 @@ public:
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
 	Coordinate FindWater(Coordinate);
+	Coordinate FindFilth(Coordinate);
 	static bool CheckTree(Coordinate, Coordinate);
 	static void FellTree(Coordinate, Coordinate);
 	static void DesignateTree(Coordinate, Coordinate);
