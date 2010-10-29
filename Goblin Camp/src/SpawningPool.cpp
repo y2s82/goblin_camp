@@ -55,7 +55,38 @@ void SpawningPool::Update() {
 
 		if (dumpFilth) {
 			if (Game::Inst()->filthList.size() > 0) {
+				boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
+				filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Liquid container"), EMPTY));
+				Coordinate filthLocation = Game::Inst()->FindFilth(Position());
+				filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
+				filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
+				Coordinate target(-1,-1);
+				for (int x = a.X(); x <= b.X(); ++x) {
+					for (int y = a.Y(); y <= b.Y(); ++y) {
+						if (Map::Inst()->GetConstruction(x,y) == uid) {
+							if (Map::Inst()->Walkable(x-1,y)) {
+								target = Coordinate(x-1,y);
+								break;
+							} else if (Map::Inst()->Walkable(x+1,y)) {
+								target = Coordinate(x+1,y);
+								break;
+							} else if (Map::Inst()->Walkable(x,y+1)) {
+								target = Coordinate(x,y+1);
+								break;
+							} else if (Map::Inst()->Walkable(x,y-1)) {
+								target = Coordinate(x,y-1);
+								break;
+							}
+						}
+					}
+				}
 
+				if (target.X() != -1 && target.Y() != -1) {
+					filthDumpJob->tasks.push_back(Task(MOVE, target));
+					filthDumpJob->tasks.push_back(Task(POUR, Position()));
+					filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
+					JobManager::Inst()->AddJob(filthDumpJob);
+				}
 			}
 		}
 		if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0) {
