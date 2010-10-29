@@ -75,13 +75,13 @@ void StockManager::Init() {
 			for (unsigned int prod = 0; prod < Construction::Presets[cons].products.size(); ++prod) { //Products
 				if (Construction::Presets[cons].products[prod] == item) {
 					//This construction has this itemtype as a product
-						producables.insert(item);
-						producers.insert(std::pair<ItemType, ConstructionType>(item, cons));
-						producerFound = true;
+					producables.insert(item);
+					producers.insert(std::pair<ItemType, ConstructionType>(item, cons));
+					producerFound = true;
 #ifdef DEBUG
-						std::cout<<"Found producer for "<<Item::Presets[item].name<<": "<<Construction::Presets[cons].name<<"\n";
+					std::cout<<"Found producer for "<<Item::Presets[item].name<<": "<<Construction::Presets[cons].name<<"\n";
 #endif
-						break;
+					break;
 				}
 			}
 		}
