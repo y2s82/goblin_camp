@@ -102,13 +102,15 @@ namespace {
 	/**
 		Saves current game to a given file. Emits onGameSaved scripting event.
 		
-		\param[in] file Full path to the save.
+		\param[in]  file   Full path to the save.
+		\param[out] result Boolean indicating success or failure.
 	*/
-	void DoSave(std::string file) {
+	void DoSave(std::string file, bool& result) {
 		LOG_FUNC("Saving game to " << file, "DoSave");
 		
-		Game::Inst()->SaveGame(file);
-		Script::Event::GameSaved(file);
+		if (result = Game::Inst()->SaveGame(file)) {
+			Script::Event::GameSaved(file);
+		}
 	}
 	
 	/**
@@ -203,13 +205,16 @@ namespace Data {
 		Loads the game from given file.
 		
 		\param[in] save Save filename.
+		\returns        Boolean indicating success or failure.
 	*/
-	void LoadGame(const std::string& save) {
+	bool LoadGame(const std::string& save) {
 		std::string file = (Paths::Get(Paths::Saves) / save).string() + ".sav";
 		LOG("Loading game from " << file);
 		
-		Game::Inst()->LoadGame(file);
+		if (!Game::Inst()->LoadGame(file)) return false;
 		Script::Event::GameLoaded(file);
+		
+		return true;
 	}
 	
 	/**
@@ -219,8 +224,9 @@ namespace Data {
 		\bug If sanitized filename is empty, will use @c _ instead. Should tell the user.
 		
 		\param[in] save Save filename.
+		\returns        Boolean indicating success or failure.
 	*/
-	void SaveGame(const std::string& save) {
+	bool SaveGame(const std::string& save) {
 		std::string file = SanitizeFilename(save);
 		
 		if (file.size() == 0) {
@@ -229,11 +235,17 @@ namespace Data {
 		
 		file = (Paths::Get(Paths::Saves) / file).string() + ".sav";
 		
+		bool result = false;
+		
 		if (!fs::exists(file)) {
-			DoSave(file);
+			DoSave(file, result);
 		} else {
-			YesNoDialog::ShowYesNoDialog("Save game exists, overwrite?", boost::bind(DoSave, file), NULL);
+			YesNoDialog::ShowYesNoDialog(
+				"Save game exists, overwrite?", boost::bind(DoSave, file, boost::ref(result)), NULL
+			);
 		}
+		
+		return result;
 	}
 	
 	/**
