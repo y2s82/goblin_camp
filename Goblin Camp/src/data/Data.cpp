@@ -21,6 +21,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <algorithm>
+#include <functional>
+#include <cctype>
 #include <boost/format.hpp>
 #include <libtcod.hpp>
 #include <boost/filesystem.hpp>
@@ -77,6 +80,23 @@ namespace {
 		}
 		
 		dest = (boost::format(sizes[idx]) % size).str();
+	}
+	
+	/**
+		Removes non-alphanumeric (using ctype's @c isalnum) characters from the filename.
+		
+		\param[in] filename Filename as supplied by the user.
+		\returns            Sanitized filename.
+	*/
+	std::string SanitizeFilename(const std::string& filename) {
+		std::string sanitized;
+		std::remove_copy_if(
+			filename.begin(), filename.end(),
+			std::back_inserter(sanitized),
+			std::not1(std::ptr_fun(isalnum))
+		);
+		
+		return sanitized;
 	}
 	
 	/**
@@ -196,10 +216,18 @@ namespace Data {
 		Saves the game to given file. If it exists, prompts the user whether to override.
 		
 		\see DoSave
+		\bug If sanitized filename is empty, will use @c _ instead. Should tell the user.
+		
 		\param[in] save Save filename.
 	*/
 	void SaveGame(const std::string& save) {
-		std::string file = (Paths::Get(Paths::Saves) / save).string() + ".sav";
+		std::string file = SanitizeFilename(save);
+		
+		if (file.size() == 0) {
+			file = "_";
+		}
+		
+		file = (Paths::Get(Paths::Saves) / file).string() + ".sav";
 		
 		if (!fs::exists(file)) {
 			DoSave(file);
