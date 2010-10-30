@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "JobManager.hpp"
+#include "Announce.hpp"
 
 SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construction(type, target),
 	dumpFilth(false),
@@ -28,6 +29,8 @@ SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construct
 	b(target),
 	expansion(0),
 	filth(0),
+	corpses(0),
+	spawns(0),
 	corpseContainer(boost::shared_ptr<Container>())
 {
 	container = new UIContainer(std::vector<Drawable*>(), 0, 0, 16, 11);
@@ -53,46 +56,147 @@ void SpawningPool::Update() {
 
 		//Generate jobs
 
-		if (dumpFilth) {
+		if (dumpFilth && rand() % (UPDATES_PER_SECOND * 5) == 0) {
 			if (Game::Inst()->filthList.size() > 0) {
+				boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
+				filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Liquid container"), EMPTY));
+				Coordinate filthLocation = Game::Inst()->FindFilth(Position());
+				filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
+				filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
+				Coordinate target(-1,-1);
+				for (int x = a.X(); x <= b.X(); ++x) {
+					for (int y = a.Y(); y <= b.Y(); ++y) {
+						if (Map::Inst()->GetConstruction(x,y) == uid) {
+							if (Map::Inst()->Walkable(x-1,y)) {
+								target = Coordinate(x-1,y);
+								break;
+							} else if (Map::Inst()->Walkable(x+1,y)) {
+								target = Coordinate(x+1,y);
+								break;
+							} else if (Map::Inst()->Walkable(x,y+1)) {
+								target = Coordinate(x,y+1);
+								break;
+							} else if (Map::Inst()->Walkable(x,y-1)) {
+								target = Coordinate(x,y-1);
+								break;
+							}
+						}
+					}
+				}
 
+				if (target.X() != -1 && target.Y() != -1) {
+					filthDumpJob->tasks.push_back(Task(MOVE, target));
+					filthDumpJob->tasks.push_back(Task(POUR, Position()));
+					filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
+					JobManager::Inst()->AddJob(filthDumpJob);
+				}
 			}
 		}
-		if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0) {
-			boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
-			corpseDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
-			corpseDumpJob->tasks.push_back(Task(MOVE));
-			corpseDumpJob->tasks.push_back(Task(TAKE));
+		if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
+			rand() % (UPDATES_PER_SECOND * 5) == 0) {
+				boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
+				corpseDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
+				corpseDumpJob->tasks.push_back(Task(MOVE));
+				corpseDumpJob->tasks.push_back(Task(TAKE));
 
-			Coordinate target(-1,-1);
+				Coordinate target(-1,-1);
+				for (int x = a.X(); x <= b.X(); ++x) {
+					for (int y = a.Y(); y <= b.Y(); ++y) {
+						if (Map::Inst()->GetConstruction(x,y) == uid) {
+							if (Map::Inst()->Walkable(x-1,y)) {
+								target = Coordinate(x-1,y);
+								break;
+							} else if (Map::Inst()->Walkable(x+1,y)) {
+								target = Coordinate(x+1,y);
+								break;
+							} else if (Map::Inst()->Walkable(x,y+1)) {
+								target = Coordinate(x,y+1);
+								break;
+							} else if (Map::Inst()->Walkable(x,y-1)) {
+								target = Coordinate(x,y-1);
+								break;
+							}
+						}
+					}
+				}
+
+				if (target.X() != -1 && target.Y() != -1) {
+					corpseDumpJob->tasks.push_back(Task(MOVE, target));
+					corpseDumpJob->tasks.push_back(Task(PUTIN, target, corpseContainer));
+					JobManager::Inst()->AddJob(corpseDumpJob);
+				}
+		}
+
+		//Spawn / Expand
+		if (Map::Inst()->GetFilth(x, y).lock()) {
+			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
+			filth += filthNode->Depth();
+			filthNode->Depth(0);
+		}
+		while (!corpseContainer->empty()) {
+			++corpses;
+			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
+			corpseContainer->RemoveItem(corpse);
+			Game::Inst()->RemoveItem(corpse);
+		}
+
+		if (corpses + filth > std::min(2 + 2*spawns, (unsigned int)10)) {
+			Coordinate spawnLocation(-1,-1);
 			for (int x = a.X(); x <= b.X(); ++x) {
 				for (int y = a.Y(); y <= b.Y(); ++y) {
 					if (Map::Inst()->GetConstruction(x,y) == uid) {
 						if (Map::Inst()->Walkable(x-1,y)) {
-							target = Coordinate(x-1,y);
+							spawnLocation = Coordinate(x-1,y);
 							break;
 						} else if (Map::Inst()->Walkable(x+1,y)) {
-							target = Coordinate(x+1,y);
+							spawnLocation = Coordinate(x+1,y);
 							break;
 						} else if (Map::Inst()->Walkable(x,y+1)) {
-							target = Coordinate(x,y+1);
+							spawnLocation = Coordinate(x,y+1);
 							break;
 						} else if (Map::Inst()->Walkable(x,y-1)) {
-							target = Coordinate(x,y-1);
+							spawnLocation = Coordinate(x,y-1);
 							break;
 						}
 					}
 				}
 			}
 
-			if (target.X() != -1 && target.Y() != -1) {
-				corpseDumpJob->tasks.push_back(Task(MOVE, target));
-				corpseDumpJob->tasks.push_back(Task(PUTIN, target, corpseContainer));
-				JobManager::Inst()->AddJob(corpseDumpJob);
+			if (spawnLocation.X() != -1 && spawnLocation.Y() != -1) {
+				++spawns;
+				if (filth >= corpses*2) {
+					filth -= 2;
+					if (rand() % 3 < 2) {
+						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
+						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
+					} else {
+						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
+						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
+					}
+				} else if (filth >= corpses) {
+					--filth;
+					--corpses;
+					if (rand() % 2) {
+						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
+						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
+					} else {
+						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
+						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
+					}
+				} else {
+					corpses -= 2;
+					if (rand() % 3 < 2) {
+						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
+						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
+					} else {
+						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
+						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
+					}
+				}
+
+				if (rand() % int(std::sqrt((double)spawns)) == 0) Expand();
 			}
 		}
-
-		//Spawn / Expand
 	}
 }
 
@@ -108,6 +212,7 @@ void SpawningPool::Expand() {
 
 	if (location.X() != -1 && location.Y() != -1) {
 		++expansion;
+		Announce::Inst()->AddMsg("The spawning pool expands", TCODColor::darkGreen, location);
 		if (location.X() < a.X()) a.X(location.X());
 		if (location.Y() < a.Y()) a.Y(location.Y());
 		if (location.X() > b.X()) b.X(location.X());
@@ -119,6 +224,7 @@ void SpawningPool::Expand() {
 			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->NatureObject(location.X(), location.Y())]);
 		}
 	} else {
+		Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
 	}
 }
 

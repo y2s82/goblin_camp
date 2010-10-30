@@ -59,7 +59,7 @@ Orders Squad::Order() {return order;}
 
 //Setting an order resets the target of the order
 void Squad::Order(Orders newOrder) {
-	targetCoordinate = Coordinate(-1,-1);
+	if (order != newOrder) targetCoordinate = Coordinate(-1,-1);
 	targetEntity = boost::weak_ptr<Entity>();
 	order = newOrder;
 }

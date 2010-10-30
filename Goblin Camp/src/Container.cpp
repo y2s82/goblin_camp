@@ -117,3 +117,25 @@ void Container::TranslateContainerListeners() {
 		}
 	}
 }
+
+void Container::AddWater(int amount) {
+	if (empty() && filth == 0) water += amount;
+}
+
+void Container::RemoveWater(int amount) {
+	water -= amount;
+	if (water < 0) water = 0;
+}
+
+int Container::ContainsWater() { return water; }
+
+void Container::AddFilth(int amount) {
+	if (empty() && water == 0) filth += amount;
+}
+
+void Container::RemoveFilth(int amount) {
+	filth -= amount;
+	if (filth < 0) filth = 0;
+}
+
+int Container::ContainsFilth() { return filth; }

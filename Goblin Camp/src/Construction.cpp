@@ -498,7 +498,7 @@ bool Construction::SpawnProductionJob() {
 
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
 			boost::shared_ptr<Job> newPickupJob(new Job("Pickup " + Item::ItemCategoryToString(Item::Components(jobList.front(), compi)) + " for " + Presets[Type()].name));
-			newPickupJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS));
+			newPickupJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS | EMPTY));
 			newPickupJob->tasks.push_back(Task(MOVE));
 			newPickupJob->tasks.push_back(Task(TAKE));
 			newPickupJob->tasks.push_back(Task(MOVE, container->Position(), container));
