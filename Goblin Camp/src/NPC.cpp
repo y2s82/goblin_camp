@@ -434,6 +434,9 @@ AiThink NPC::Think() {
 					checkLOS = !checkLOS;
 				}}
 				//If we got here we couldn't find a near coordinate
+#ifdef DEBUG
+				std::cout<<name<<" couldn't find NEAR coordinate\n";
+#endif
 				TaskFinished(TASKFAILFATAL);
 MOVENEARend:
 				break;
@@ -983,7 +986,12 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 
 TaskResult NPC::Move(TaskResult oldResult) {
 	int moveX,moveY;
-	nextMove += run ? effectiveStats[MOVESPEED] : effectiveStats[MOVESPEED]/3;
+	if (run)
+		nextMove += effectiveStats[MOVESPEED];
+	else {
+		if (effectiveStats[MOVESPEED]/3 == 0 && effectiveStats[MOVESPEED] != 0) ++nextMove;
+		else nextMove += effectiveStats[MOVESPEED]/3;
+	}
 	while (nextMove > 100) {
 		nextMove -= 100;
 		boost::mutex::scoped_try_lock pathLock(pathMutex);
