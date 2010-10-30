@@ -32,7 +32,7 @@ private:
 	UIContainer* container;
 	bool dumpFilth, dumpCorpses;
 	Coordinate a, b;
-	unsigned int expansion, filth;
+	unsigned int expansion, filth, corpses, spawns;
 	boost::shared_ptr<Container> corpseContainer;
 public:
 	SpawningPool(ConstructionType = 0, Coordinate = Coordinate(0,0));
