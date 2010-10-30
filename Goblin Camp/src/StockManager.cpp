@@ -148,9 +148,9 @@ void StockManager::Update() {
 							if (componentInTree) {
 								boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
 								fellJob->ConnectToEntity(*treei);
+								fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
 								fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
 								fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
-								fellJob->tasks.push_back(Task(STOCKPILEITEM));
 								JobManager::Inst()->AddJob(fellJob);
 								--difference;
 								treeFellingJobs.push_back(
