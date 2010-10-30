@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <boost/function.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/lambda/lambda.hpp>
 
 #include "UI.hpp"
 #include "Announce.hpp"
@@ -792,3 +793,41 @@ void UI::SetCursor(int value) { cursorChar = value; }
 
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
 TCOD_key_t UI::getKey() { return key; }
+
+void UI::ChooseCreateNPC() {
+	int npc;
+	Menu *NPCChoiceMenu = new Menu(std::vector<MenuChoice>(), "NPC");
+	NPCChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(npc) = -1));
+	for (int i = 0; i < NPC::Presets.size(); ++i) {
+		NPCChoiceMenu->AddChoice(MenuChoice(NPC::Presets[i].name, boost::lambda::var(npc) = i));
+	}
+	NPCChoiceMenu->ShowModal();
+
+	if (npc >= 0) {
+		UI::Inst()->state(UIPLACEMENT);
+		UI::Inst()->SetCallback(boost::bind(&Game::CreateNPC, Game::Inst(), _1, NPCType(npc)));
+		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+		UI::Inst()->blueprint(Coordinate(1,1));
+		UI::Inst()->SetCursor(NPC::Presets[npc].graphic);
+	}
+}
+
+void UI::ChooseCreateItem() {
+	int item;
+	Menu *ItemChoiceMenu = new Menu(std::vector<MenuChoice>(), "Item");
+	ItemChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(item) = -1));
+	for (int i = 0; i < Item::Presets.size(); ++i) {
+		ItemChoiceMenu->AddChoice(MenuChoice(Item::Presets[i].name, boost::lambda::var(item) = i));
+	}
+	ItemChoiceMenu->ShowModal();
+
+	if (item >= 0) {
+		UI::Inst()->state(UIPLACEMENT);
+		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), false,
+			0, std::vector<boost::weak_ptr<Item> >(), boost::shared_ptr<Container>()));
+		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+		UI::Inst()->blueprint(Coordinate(1,1));
+		UI::Inst()->SetCursor(Item::Presets[item].graphic);
+	}
+
+}
