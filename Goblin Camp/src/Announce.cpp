@@ -100,7 +100,7 @@ void Announce::AnnouncementClicked(int i) {
 
 MenuResult Announce::Update(int x, int y, bool clicked) {
 	if(x < (signed int)length + 4 && y >= (signed int)top) {
-		if(clicked && y > (signed int)top) {
+		if(clicked && y > (signed int)top && (y- top - 1) < messageQueue.size()) {
 			AnnouncementClicked(messageQueue[y - top - 1]);
 		}
 		return MENUHIT;
