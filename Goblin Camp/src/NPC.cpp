@@ -274,7 +274,8 @@ void NPC::Update() {
 		}
 	}
 
-	if (!HasEffect(FLYING)) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+	
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
