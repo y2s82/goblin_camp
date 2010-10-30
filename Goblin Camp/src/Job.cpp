@@ -196,5 +196,5 @@ boost::weak_ptr<Entity> Job::ConnectedEntity() { return connectedEntity; }
 
 bool Job::RequiresTool() { return tool != -1; }
 
-void Job::SetRequiredTool(ItemType item) { tool = item; }
+void Job::SetRequiredTool(ItemCategory item) { tool = item; }
 ItemCategory Job::GetRequiredTool() { return tool; }
