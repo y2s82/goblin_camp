@@ -74,7 +74,7 @@ private:
 	bool toMainMenu, running;
 	int safeMonths;
 	bool refreshStockpiles;
-	
+	bool devMode;
 	Coordinate marks[12];
 
 	boost::shared_ptr<Events> events;
@@ -115,6 +115,8 @@ public:
 	static int DiceToInt(TCOD_dice_t);
 
 	static void Undesignate(Coordinate, Coordinate);
+	bool DevMode();
+	void EnableDevMode();
 
 	/*      NPCS        NPCS        NPCS        */
 	std::map<int,boost::shared_ptr<NPC> > npcList;
@@ -176,6 +178,7 @@ public:
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
 	Coordinate FindWater(Coordinate);
+	Coordinate FindFilth(Coordinate);
 	static bool CheckTree(Coordinate, Coordinate);
 	static void FellTree(Coordinate, Coordinate);
 	static void DesignateTree(Coordinate, Coordinate);

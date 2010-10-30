@@ -80,6 +80,7 @@ int GCMain(std::vector<std::string>& args) {
 	LOG("args.size() = " << args.size());
 	
 	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
+		if (std::find(args.begin(), args.end(), "-dev") != args.end()) Game::Inst()->EnableDevMode();
 		exitcode = MainMenu();
 	} else {
 		LOG("Bootstrap test, going into shutdown.");
@@ -205,7 +206,7 @@ void StartNewGame() {
 	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
 
 	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
-	game->CreateItems(20, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(10, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);

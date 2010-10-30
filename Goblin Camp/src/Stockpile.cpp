@@ -62,6 +62,7 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 			boost::weak_ptr<Item> item = *conti->second->begin();
 			if (item.lock()) {
 				if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
+					//The item is the one we want
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
 						if (!boost::static_pointer_cast<Container>(item.lock())->Full()) return item;
 					} else if (flags & BETTERTHAN) {
@@ -75,6 +76,8 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 									return item;
 							}
 						} else return item;
+					} else if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item.lock())) {
+						if (boost::static_pointer_cast<Container>(item.lock())->empty()) return item;
 					} else return item;
 				}
 				if (boost::dynamic_pointer_cast<Container>(item.lock())) {
@@ -119,6 +122,8 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 								return item;
 						}
 					} else return item;
+				} else if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item.lock())) {
+					if (boost::static_pointer_cast<Container>(item.lock())->empty()) return item;
 				} else return item;
 			}
 			if (boost::dynamic_pointer_cast<Container>(item.lock())) {

@@ -29,7 +29,10 @@
     <ClCompile Include="src\Construction.cpp" />
     <ClCompile Include="src\Container.cpp" />
     <ClCompile Include="src\Coordinate.cpp" />
-    <ClCompile Include="src\Data.cpp" />
+    <ClCompile Include="src\data\Config.cpp" />
+    <ClCompile Include="src\data\Data.cpp" />
+    <ClCompile Include="src\data\Mods.cpp" />
+    <ClCompile Include="src\data\Paths.cpp" />
     <ClCompile Include="src\Door.cpp" />
     <ClCompile Include="src\Events.cpp" />
     <ClCompile Include="src\Farmplot.cpp" />
