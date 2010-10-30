@@ -161,7 +161,7 @@ public:
 	bool Attempt();
 
 	bool RequiresTool();
-	void SetRequiredTool(ItemType);
+	void SetRequiredTool(ItemCategory);
 	ItemCategory GetRequiredTool();
 
 	static std::string ActionToString(Action);
