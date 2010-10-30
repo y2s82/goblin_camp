@@ -194,7 +194,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (rand() % spawns == 0) Expand();
+				if (rand() % int(std::sqrt((double)spawns)) == 0) Expand();
 			}
 		}
 	}
