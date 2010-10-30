@@ -49,6 +49,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	attemptMax(5),
 	connectedEntity(boost::weak_ptr<Entity>()),
 	reservedSpace(boost::weak_ptr<Container>()),
+	tool(-1),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
@@ -192,3 +193,8 @@ void Job::ReserveSpace(boost::weak_ptr<Container> cont) {
 }
 
 boost::weak_ptr<Entity> Job::ConnectedEntity() { return connectedEntity; }
+
+bool Job::RequiresTool() { return tool != -1; }
+
+void Job::SetRequiredTool(ItemType item) { tool = item; }
+ItemCategory Job::GetRequiredTool() { return tool; }

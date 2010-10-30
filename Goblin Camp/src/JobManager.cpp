@@ -304,13 +304,20 @@ void JobManager::AssignJobs() {
 							menialMatrix(x, y) = 1;
 						} else {
 							boost::shared_ptr<Job> job = menialJobsToAssign[y];
-							if(Game::Inst()->npcList.find(menialNPCsWaiting[x]) == Game::Inst()->npcList.end() ||
-								job->tasks.empty() ||
+							boost::shared_ptr<NPC> npc;
+							if (Game::Inst()->npcList.find(menialNPCsWaiting[x]) != Game::Inst()->npcList.end()) {
+								npc = Game::Inst()->npcList[menialNPCsWaiting[x]];
+							}
+							if(!npc || job->tasks.empty() ||
 								(job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
 								menialMatrix(x, y) = 1;
-							} else {
-								boost::shared_ptr<NPC> npc = Game::Inst()->npcList[menialNPCsWaiting[x]];
+							} else if (npc) {
 								menialMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+							}
+							if (npc && job->RequiresTool()) {
+								if (!npc->Wielding().lock() || !npc->Wielding().lock()->IsCategory(job->GetRequiredTool())) {
+									menialMatrix(x, y) -= 2000;
+								}
 							}
 						}
 					}
@@ -322,13 +329,20 @@ void JobManager::AssignJobs() {
 							expertMatrix(x, y) = 1;
 						} else {
 							boost::shared_ptr<Job> job = expertJobsToAssign[y];
-							if(Game::Inst()->npcList.find(expertNPCsWaiting[x]) == Game::Inst()->npcList.end() ||
-								job->tasks.empty() ||
+							boost::shared_ptr<NPC> npc;
+							if (Game::Inst()->npcList.find(expertNPCsWaiting[x]) != Game::Inst()->npcList.end()) {
+								npc = Game::Inst()->npcList[expertNPCsWaiting[x]];
+							}
+							if(!npc || job->tasks.empty() ||
 							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
 								expertMatrix(x, y) = 1;
 							} else {
-								boost::shared_ptr<NPC> npc = Game::Inst()->npcList[expertNPCsWaiting[x]];
 								expertMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+							}
+							if (npc && job->RequiresTool()) {
+								if (!npc->Wielding().lock() || !npc->Wielding().lock()->IsCategory(job->GetRequiredTool())) {
+									expertMatrix(x, y) -= 2000;
+								}
 							}
 						}
 					}

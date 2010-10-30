@@ -87,6 +87,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	dead(false),
 	squad(boost::weak_ptr<Squad>()),
 	attacks(std::list<Attack>()),
+	addedTasksToCurrentJob(0),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -160,6 +161,10 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 				foundItem = boost::weak_ptr<Item>();
 			}
 		} else {
+			//Remove any tasks this NPC added onto the front before sending it back to the JobManager
+			for (int i = 0; i < addedTasksToCurrentJob; ++i) {
+				jobs.front()->tasks.erase(jobs.front()->tasks.begin());
+			}
 			if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
 			jobs.pop_front();
 			taskIndex = 0;
@@ -169,6 +174,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		}
 	}
 	taskBegun = false;
+	addedTasksToCurrentJob = 0;
 }
 
 void NPC::HandleThirst() {
@@ -981,6 +987,16 @@ MOVENEARend:
 
 void NPC::StartJob(boost::shared_ptr<Job> job) {
 	TaskFinished(TASKOWNDONE, "");
+
+	if (job->RequiresTool() && (!mainHand.lock() || !mainHand.lock()->IsCategory(job->GetRequiredTool()))) {
+		//We insert each one into the beginning, so these are inserted in reverse order
+		job->tasks.insert(job->tasks.begin(), Task(WIELD));
+		job->tasks.insert(job->tasks.begin(), Task(TAKE));
+		job->tasks.insert(job->tasks.begin(), Task(MOVE));
+		job->tasks.insert(job->tasks.begin(), Task(FIND, Position(), boost::weak_ptr<Entity>(), job->GetRequiredTool()));
+		addedTasksToCurrentJob = 4;
+	}
+
 	jobs.push_back(job);
 	run = true;
 }
