@@ -51,7 +51,7 @@ int Game::ItemCatCount = 0;
 Game* Game::instance = 0;
 
 Game::Game() :
-	screenWidth(0),
+screenWidth(0),
 	screenHeight(0),
 	season(EarlySpring),
 	time(0),
@@ -62,8 +62,9 @@ Game::Game() :
 	toMainMenu(false),
 	running(false),
 	safeMonths(9),
-	upleft(Coordinate(0,0)),
-	events(boost::shared_ptr<Events>())
+	devMode(false),
+	events(boost::shared_ptr<Events>()),
+	upleft(Coordinate(0,0))
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
@@ -112,7 +113,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		}
 		--Construction::AllowedAmount[construct];
 	}
-	
+
 	for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
 		compi != componentList.end(); ++compi) {
 			compi->lock()->Reserve(false);
@@ -177,7 +178,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	} else {
 		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
 	}
-	
+
 	Game::Inst()->RefreshStockpiles();
 
 	//Spawning a BUILD job is not required because stockpiles are created "built"
@@ -336,7 +337,7 @@ void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
 	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
-	
+
 	if (confirm) {
 		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
@@ -352,7 +353,7 @@ void Game::Init() {
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
 	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
-	
+
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
 			TCODSystem::getCurrentResolution(&width, &height);
@@ -361,34 +362,34 @@ void Game::Init() {
 			height = 480;
 		}
 	}
-	
+
 	TCODSystem::getCharSize(&charWidth, &charHeight);
 	screenWidth  = width / charWidth;
 	screenHeight = height / charHeight;
-	
+
 	srand((unsigned int)std::time(0));
-	
+
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
 	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer);
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
-	
+
 	{
 		// "Loading..."
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
 		TCODConsole::root->setAlignment(TCOD_CENTER);
 		TCODConsole::root->clear();
-		
+
 		TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
-		
+
 		TCODConsole::root->flush();
 	}
-	
+
 	TCODConsole::root->setAlignment(TCOD_LEFT);
-	
+
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
-	
+
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	season = LateWinter;
 	upleft = Coordinate(180,180);
@@ -457,9 +458,9 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		}
 		itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
 		if (store) StockpileItem(newItem);
-		
+
 		Script::Event::ItemCreated(newItem, pos.X(), pos.Y());
-		
+
 #ifdef DEBUG
 		std::cout<<newItem->name<<"("<<newItem->Uid()<<") created\n";
 #endif
@@ -556,7 +557,7 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordina
 void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = std::max(abs(corner1.X()-corner2.X()),1);
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()),1);
-	
+
 	for (int items = 0; items < quantity; ++items) {
 		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
 		Game::Inst()->CreateItem(location, type, true);
@@ -717,15 +718,15 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 			}
 		}
 	}
-	
+
 	if(nearest) {
 		//Check if the item can be contained, and if so if any containers are in the stockpile
-		
+
 		boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item.lock()->Type()) + " in stockpile", LOW));
 		stockJob->Attempts(1);
 		Coordinate target = Coordinate(-1,-1);
 		boost::weak_ptr<Item> container;
-		
+
 		if (Item::Presets[item.lock()->Type()].fitsin >= 0) {
 			container = nearest->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL);
 			if (container.lock()) {
@@ -733,9 +734,9 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 				stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()));
 			}
 		}
-		
+
 		if (target.X() == -1) target = nearest->FreePosition();
-		
+
 		if (target.X() != -1) {
 			stockJob->ReserveSpot(nearest, target);
 			stockJob->ReserveEntity(item);
@@ -746,13 +747,13 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 				stockJob->tasks.push_back(Task(PUTIN, target, nearest->Storage(target)));
 			else
 				stockJob->tasks.push_back(Task(PUTIN, target, container));
-			
+
 			if (!returnJob) JobManager::Inst()->AddJob(stockJob);
 			else return stockJob;
-			
+
 			return boost::shared_ptr<Job>();
 		}
-		
+
 	}
 
 	return boost::shared_ptr<Job>();
@@ -763,14 +764,14 @@ namespace {
 	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
 		for (typename MapT::iterator it = map.begin(); it != map.end(); ) {
 			typename MapT::mapped_type ptr = it->second;
-			
+
 			if (ptr.get() != NULL) {
 				ptr->Draw(upleft, buffer);
 				++it;
 			} else {
-		#ifdef DEBUG
+#ifdef DEBUG
 				std::cout << "!!! NULL POINTER !!! " << name << " ; id " << it->first << std::endl;
-		#endif
+#endif
 				typename MapT::iterator tmp = it;
 				++it;
 				map.erase(tmp);
@@ -781,13 +782,13 @@ namespace {
 
 void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 	Map::Inst()->Draw(upleft, buffer);
-	
+
 	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, buffer);
 	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, buffer);
 	InternalDrawMapItems("items",                 itemList, upleft, buffer);
 	InternalDrawMapItems("nature objects",        natureList, upleft, buffer);
 	InternalDrawMapItems("NPCs",                  npcList, upleft, buffer);
-	
+
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, buffer);
 	}
@@ -977,7 +978,7 @@ void Game::GenerateMap(uint32 seed) {
 					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.5f) rarity = rarity - rarity / 5;
 				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
 					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
-				
+
 				if (rand() % 100 < rarity) {
 
 					for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
@@ -988,11 +989,11 @@ void Game::GenerateMap(uint32 seed) {
 						if (map->Walkable(ax,ay) && map->Type(ax,ay) == TILEGRASS
 							&& map->NatureObject(ax,ay) < 0) {
 								boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
-										natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-										map->NatureObject(ax,ay,natObj->Uid());
-										map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-										map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-										map->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
+								natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
+								map->NatureObject(ax,ay,natObj->Uid());
+								map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+								map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+								map->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 						}
 					}
 				}
@@ -1270,7 +1271,7 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
-	
+
 	for (int npcs = 0; npcs < quantity; ++npcs) {
 		Coordinate location((rand() % areaWidth) + std::min(corner1.X(),corner2.X()), (rand() % areaLength) + std::min(corner1.Y(),corner2.Y()));
 
@@ -1368,17 +1369,20 @@ void Game::TranslateContainerListeners() {
 	}
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator it = staticConstructionList.begin(); 
 		it != staticConstructionList.end(); ++it) {
-		if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
-			boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
-		}
+			if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
+				boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
+			}
 	}
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator it = dynamicConstructionList.begin(); 
 		it != dynamicConstructionList.end(); ++it) {
-		if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
-			boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
-		}
+			if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
+				boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
+			}
 	}
 }
 
 unsigned int Game::PeacefulFaunaCount() const { return peacefulFaunaCount; }
 void Game::PeacefulFaunaCount(int add) { peacefulFaunaCount += add; }
+
+bool Game::DevMode() { return devMode; }
+void Game::EnableDevMode() { devMode = true; }

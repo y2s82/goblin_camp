@@ -122,6 +122,7 @@ Menu* Menu::mainMenu = 0;
 Menu* Menu::MainMenu() {
 	if (!mainMenu) {
 		mainMenu = new Menu(std::vector<MenuChoice>());
+		if (Game::Inst()->DevMode()) mainMenu->AddChoice(MenuChoice("Dev", boost::bind(UI::ChangeMenu, Menu::DevMenu())));
 		mainMenu->AddChoice(MenuChoice("Build", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
 		mainMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));		
 		mainMenu->AddChoice(MenuChoice("Orders", boost::bind(UI::ChangeMenu, Menu::OrdersMenu())));
@@ -206,3 +207,12 @@ Menu* Menu::OrdersMenu() {
 	return ordersMenu;
 }
 
+Menu* Menu::devMenu = 0;
+Menu* Menu::DevMenu() {
+	if (!devMenu) {
+		devMenu = new Menu(std::vector<MenuChoice>());
+		devMenu->AddChoice(MenuChoice("Create NPC", boost::bind(UI::ChooseCreateNPC)));
+		devMenu->AddChoice(MenuChoice("Create item", boost::bind(UI::ChooseCreateItem)));
+	}
+	return devMenu;
+}

@@ -90,6 +90,8 @@ public:
 	static void ChooseDismantle();
 	static void ChooseUndesignate();
 	static void ChooseDesignateBog();
+	static void ChooseCreateNPC();
+	static void ChooseCreateItem();
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);

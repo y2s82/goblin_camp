@@ -65,6 +65,8 @@ public:
 	static Menu* OrdersMenu();
 	static Menu* FurnitureMenu();
 	static Menu* ConstructionCategoryMenu(std::string);
+	static Menu* devMenu;
+	static Menu* DevMenu();
 
 	static ItemCategory WeaponChoiceDialog();
 };
