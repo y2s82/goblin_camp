@@ -168,29 +168,29 @@ void SpawningPool::Update() {
 					filth -= 2;
 					if (rand() % 3 < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool.", TCODColor::green, spawnLocation);
+						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool.", TCODColor::green, spawnLocation);
+						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 					}
 				} else if (filth >= corpses) {
 					--filth;
 					--corpses;
 					if (rand() % 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool.", TCODColor::green, spawnLocation);
+						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool.", TCODColor::green, spawnLocation);
+						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 					}
 				} else {
 					corpses -= 2;
 					if (rand() % 3 < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool.", TCODColor::green, spawnLocation);
+						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool.", TCODColor::green, spawnLocation);
+						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					}
 				}
 
