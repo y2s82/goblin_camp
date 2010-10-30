@@ -813,11 +813,19 @@ void UI::ChooseCreateNPC() {
 }
 
 void UI::ChooseCreateItem() {
-	int item;
+	int item, category;
+	Menu *ItemCategoryMenu = new Menu(std::vector<MenuChoice>(), "Categories");
+	for (int i = 0; i < Item::Categories.size(); ++i) {
+		if (!Item::Categories[i].parent)
+			ItemCategoryMenu->AddChoice(MenuChoice(Item::Categories[i].name, boost::lambda::var(category) = i));
+	}
+	ItemCategoryMenu->ShowModal();
+
 	Menu *ItemChoiceMenu = new Menu(std::vector<MenuChoice>(), "Item");
 	ItemChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(item) = -1));
 	for (int i = 0; i < Item::Presets.size(); ++i) {
-		ItemChoiceMenu->AddChoice(MenuChoice(Item::Presets[i].name, boost::lambda::var(item) = i));
+		if (Item::Presets[i].categories.find(category) != Item::Presets[i].categories.end())
+			ItemChoiceMenu->AddChoice(MenuChoice(Item::Presets[i].name, boost::lambda::var(item) = i));
 	}
 	ItemChoiceMenu->ShowModal();
 
