@@ -416,7 +416,26 @@ void LoadMenu() {
 			lButtonDown = false;
 			
 			if (selected < (signed int)list.size() && selected >= 0) {
-				Data::LoadGame(list[selected].filename);
+				if (!Data::LoadGame(list[selected].filename)) {
+					TCODConsole::root->setDefaultForeground(TCODColor::white);
+					TCODConsole::root->setDefaultBackground(TCODColor::black);
+					TCODConsole::root->setAlignment(TCOD_CENTER);
+					TCODConsole::root->clear();
+					
+					TCODConsole::root->print(
+						Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2,
+						"Could not load the game. Refer to the logfile."
+					);
+					
+					TCODConsole::root->print(
+						Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2 + 1,
+						"Press any key to return to the main menu."
+					);
+					
+					TCODConsole::root->flush();
+					TCODConsole::waitForKeypress(true);
+					return;
+				}
 				MainLoop();
 				break;
 			}
@@ -445,7 +464,26 @@ void SaveMenu() {
 			TCODConsole::root->flush();
 			
 			savesCount = -1;
-			Data::SaveGame(saveName);
+			if (!Data::SaveGame(saveName)) {
+				TCODConsole::root->setDefaultForeground(TCODColor::white);
+				TCODConsole::root->setDefaultBackground(TCODColor::black);
+				TCODConsole::root->setAlignment(TCOD_CENTER);
+				TCODConsole::root->clear();
+				
+				TCODConsole::root->print(
+					Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2,
+					"Could not save the game. Refer to the logfile."
+				);
+				
+				TCODConsole::root->print(
+					Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2 + 1,
+					"Press any key to return to the main menu."
+				);
+				
+				TCODConsole::root->flush();
+				TCODConsole::waitForKeypress(true);
+				return;
+			}
 			break;
 		}
 
