@@ -671,6 +671,8 @@ bool Construction::CheckMaterialsPresent() {
 	return true;
 }
 
+bool Construction::DismantlingOrdered() { return dismantle; }
+
 ConstructionPreset::ConstructionPreset() :
 	maxCondition(0),
 	graphic(std::vector<int>()),
@@ -691,3 +693,4 @@ ConstructionPreset::ConstructionPreset() :
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
+	
