@@ -883,10 +883,7 @@ MOVENEARend:
 					
 					if (!cont->empty() && cont->ContainsWater() == 0 && cont->ContainsFilth() == 0) {
 						//Not empty, but doesn't have water/filth, so it has items in it
-						TaskFinished(TASKFAILFATAL);
-#ifdef DEBUG
-						std::cout<<"Attempted to fill non-empty container with liquid\n";
-#endif
+						TaskFinished(TASKFAILFATAL, "Attempting to fill non-empty container");
 						break;
 					}
 					
@@ -909,14 +906,16 @@ MOVENEARend:
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
+					TaskFinished(TASKFAILFATAL, "(FILL FAIL)Nothing to fill container with");
+					break;
 				} 
 
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(FILL FAIL)Not carrying a liquid container");
 				break;
 
 			case POUR:
 				if (!carried.lock() || !boost::dynamic_pointer_cast<Container>(carried.lock())) {
-					TaskFinished(TASKFAILFATAL);
+					TaskFinished(TASKFAILFATAL, "(POUR FAIL)Not carrying a liquid container");
 					break;
 				}
 				{
@@ -943,9 +942,10 @@ MOVENEARend:
 								sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
 							}
 							TaskFinished(TASKSUCCESS);
+							break;
 					}
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(POUR FAIL) No valid target");
 				break;
 
 			case DIG:
