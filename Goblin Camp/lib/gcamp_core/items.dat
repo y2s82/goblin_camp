@@ -162,6 +162,13 @@ category_type "Heavy armor" {
 	parent="Armor"
 }
 
+category_type "Tools" {
+}
+
+category_type "Digging tool" {
+	parent="Tools"
+}
+
 category_type "Garbage" {
 }
 
@@ -674,4 +681,11 @@ item_type "Red brick" {
 	color = "120,22,11"
 	components = [ "Clay", "Clay", "Clay", "Wood" ]
 	constructedin = "Clay kiln"
+}
+
+item_type "Shovel" {
+	category = ["Digging tool"]
+	graphic = 93
+	color = "155,128,128"
+	components = [ "Plank", "Metal bar" ]
 }

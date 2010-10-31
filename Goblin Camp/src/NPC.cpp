@@ -450,12 +450,20 @@ MOVENEARend:
 
 
 			case MOVEADJACENT:
-				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
-					TaskFinished(TASKSUCCESS);
-					break;
+				if (currentEntity().lock()) {
+					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
+				} else {
+					if (Game::Inst()->Adjacent(Position(), currentTarget())) {
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
 				}
 				if (!taskBegun) {
-					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					if (currentEntity().lock()) tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					else tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentTarget());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
 					} else { TaskFinished(TASKFAILFATAL, std::string("No walkable adjacent tiles")); break; }
@@ -940,6 +948,24 @@ MOVENEARend:
 				TaskFinished(TASKFAILFATAL);
 				break;
 
+			case DIG:
+				if (!taskBegun) {
+					timer = 0;
+					taskBegun = true;
+				} else {
+					if (++timer >= 50) {
+						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
+						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						TaskFinished(TASKSUCCESS);
+					}
+				}
+				break;
+
+			case FORGET:
+				foundItem.reset();
+				TaskFinished(TASKSUCCESS);
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -990,6 +1016,8 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 
 	if (job->RequiresTool() && (!mainHand.lock() || !mainHand.lock()->IsCategory(job->GetRequiredTool()))) {
 		//We insert each one into the beginning, so these are inserted in reverse order
+		job->tasks.insert(job->tasks.begin(), Task(FORGET)); /*"forget" the item we found, otherwise later tasks might
+															 incorrectly refer to it */
 		job->tasks.insert(job->tasks.begin(), Task(WIELD));
 		job->tasks.insert(job->tasks.begin(), Task(TAKE));
 		job->tasks.insert(job->tasks.begin(), Task(MOVE));
