@@ -293,9 +293,9 @@ void JobManager::AssignJobs() {
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 				 jobi != availableList[i].end(); ++jobi) {
 				if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
-					//Limit assigning jobs to 20 at a time, large matrix sizes cause considerable slowdowns.
-					//Also, if the job requires a tool only add it to assignables if there are potentially enough
-					//tools for each job
+					/*Limit assigning jobs to 20 at a time, large matrix sizes cause considerable slowdowns.
+					Also, if the job requires a tool only add it to assignables if there are potentially enough
+					tools for each job*/
 					if (!(*jobi)->RequiresTool() || 
 						((*jobi)->RequiresTool() && maxToolJobs[(*jobi)->GetRequiredTool()] > 0)) {
 						if ((*jobi)->RequiresTool()) --maxToolJobs[(*jobi)->GetRequiredTool()];
@@ -369,7 +369,9 @@ void JobManager::AssignJobs() {
 						int npcNum = menialNPCsWaiting[n];
 						boost::shared_ptr<Job> job = menialJobsToAssign[jobNum];
 						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+							boost::shared_ptr<NPC> npc;
+							if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) 
+								npc = Game::Inst()->npcList[npcNum];
 							if (job && npc) {
 								job->Assign(npcNum);
 								npc->StartJob(job);
@@ -386,7 +388,9 @@ void JobManager::AssignJobs() {
 						int npcNum = expertNPCsWaiting[n];
 						boost::shared_ptr<Job> job = expertJobsToAssign[jobNum];
 						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+							boost::shared_ptr<NPC> npc;
+							if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) 
+								npc = Game::Inst()->npcList[npcNum];
 							if (job && npc) {
 								job->Assign(npcNum);
 								npc->StartJob(job);
