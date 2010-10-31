@@ -60,6 +60,9 @@ void SpawningPool::Update() {
 			if (Game::Inst()->filthList.size() > 0) {
 				boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
 				filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Liquid container"), EMPTY));
+				filthDumpJob->tasks.push_back(Task(MOVE));
+				filthDumpJob->tasks.push_back(Task(TAKE));
+				filthDumpJob->tasks.push_back(Task(FORGET)); //Otherwise MOVEADJACENT will try to move adjacent to the container
 				Coordinate filthLocation = Game::Inst()->FindFilth(Position());
 				filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
 				filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
