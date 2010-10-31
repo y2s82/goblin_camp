@@ -242,6 +242,9 @@ void StockManager::UpdateQuantity(ItemType type, int quantity) {
 	if (typeQuantities[type] == -1) typeQuantities[type] = 0;
 
 	typeQuantities[type] += quantity;
+#ifdef DEBUG
+	std::cout<<"Type "<<type<<" quantity now "<<typeQuantities[type]<<"\n";
+#endif
 	for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
 		if (categoryQuantities[*cati] == -1) categoryQuantities[*cati] = 0;
 		categoryQuantities[*cati] += quantity;
