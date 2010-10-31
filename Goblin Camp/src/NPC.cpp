@@ -1829,6 +1829,19 @@ void NPC::UpdateVelocity() {
 				flightPath.pop_back();
 			} else SetVelocity(0);
 		}
+	} else { //We're not hurtling through air so let's tumble around if we're stuck on unwalkable terrain
+		if (!Map::Inst()->Walkable(x, y, (void*)this)) {
+			for (int radius = 1; radius < 10; ++radius) {
+				for (int xi = x - radius; xi <= x + radius; ++xi) {
+					for (int yi = y - radius; yi <= y + radius; ++yi) {
+						if (Map::Inst()->Walkable(xi, yi, (void*)this)) {
+							Position(Coordinate(xi, yi));
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
