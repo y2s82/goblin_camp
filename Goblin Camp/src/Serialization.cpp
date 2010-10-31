@@ -1193,6 +1193,7 @@ bool Game::LoadGame(const std::string& filename) {
 		ReadUInt<boost::uint64_t>(ifs);
 		
 		Game::Inst()->Reset();
+		Game::Inst()->LoadingScreen();
 		
 		// Read the payload
 		boost::archive::binary_iarchive iarch(ifs);
