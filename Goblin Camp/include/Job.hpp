@@ -118,6 +118,7 @@ private:
 	int attempts, attemptMax;
 	boost::weak_ptr<Entity> connectedEntity;
 	boost::weak_ptr<Container> reservedSpace;
+	ItemCategory tool;
 public:
 	static boost::shared_ptr<Job> MoveJob(Coordinate);
 	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
@@ -158,6 +159,10 @@ public:
 	int Attempts();
 	void Attempts(int);
 	bool Attempt();
+
+	bool RequiresTool();
+	void SetRequiredTool(ItemCategory);
+	ItemCategory GetRequiredTool();
 
 	static std::string ActionToString(Action);
 };

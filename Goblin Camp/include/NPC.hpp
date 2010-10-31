@@ -173,6 +173,7 @@ private:
 	static std::map<std::string, NPCType> NPCTypeNames;
 
 	void UpdateVelocity();
+	int addedTasksToCurrentJob;
 public:
 	~NPC();
 	SkillSet Skills;

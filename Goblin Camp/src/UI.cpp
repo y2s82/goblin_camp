@@ -85,7 +85,7 @@ void UI::Update() {
 
 void UI::HandleKeyboard() {
 	Config::KeyMap& keyMap = Config::GetKeyMap();
-	
+
 	//TODO: This isn't pretty, but it works.
 	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
@@ -558,7 +558,7 @@ int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcu
 			out.push_back(*it);
 		}
 	}
-	
+
 	if(!found) {
 		if(keyMap[shortcut] == ' ') {
 			out.insert(0, (boost::format("%cSpace%c-") % (char)TCOD_COLCTRL_1 % (char)TCOD_COLCTRL_STOP).str());
@@ -566,7 +566,7 @@ int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcu
 			out.insert(0, (boost::format("%c%c%c-") % (char)TCOD_COLCTRL_1 % (char)toupper(keyMap[shortcut]) % (char)TCOD_COLCTRL_STOP).str());
 		}
 	}
-	
+
 	out.push_back(' ');
 	console->print(x, y, out.c_str());
 	return out.length() - 2;

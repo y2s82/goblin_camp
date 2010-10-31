@@ -1016,9 +1016,9 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					natObj.lock()->Mark();
 					boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
 					fellJob->ConnectToEntity(natObj);
+					fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj.lock()->Position(), natObj));
-					fellJob->tasks.push_back(Task(STOCKPILEITEM));
 					JobManager::Inst()->AddJob(fellJob);
 				}
 			}
