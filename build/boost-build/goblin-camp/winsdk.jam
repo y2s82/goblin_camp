@@ -1,0 +1,43 @@
+# Windows SDK tool
+#
+# To configure:
+#   using winsdk : <include>path-to-includes <library>path-to-libraries ;
+
+import property-set ;
+import project ;
+import "class" : new ;
+import modules ;
+
+rule init ( options * ) {
+    modules.poke winsdk : .winsdk-options : [ property-set.create $(options) ] ;
+}
+
+rule use-project ( ) {
+    project.push-current [ project.current ] ;
+    
+    local reqs = ;
+    local usage-reqs = ;
+    
+    if $(.winsdk-options) {
+        local inc = [ $(.winsdk-options).get <include> ] ;
+        local lib = [ $(.winsdk-options).get <library> ] ;
+        
+        reqs = <include>$(inc) <search>$(lib) ;
+        usage-reqs = <include>$(inc) ;
+    }
+    
+    project.initialize $(__name__) ;
+    project = [ project.current ] ;
+    project winsdk
+        : requirements $(reqs)
+        : usage-requirements $(usage-reqs)
+    ;
+    
+    local libs = shell32 shlwapi dbghelp user32 comctl32 gdi32 ;
+    
+    for local name in $(libs) {
+        lib $(name) ;
+    }
+    
+    project.pop-current ;
+}
