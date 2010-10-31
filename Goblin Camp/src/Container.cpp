@@ -28,7 +28,9 @@ Container::Container(
 	Item(pos, type, faction, components),
 	capacity(capValue),
 	reservedSpace(0),
-	listeners(nlisteners)
+	listeners(nlisteners),
+	water(0),
+	filth(0)
 {
 }
 
