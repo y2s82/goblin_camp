@@ -185,6 +185,7 @@ std::string Job::ActionToString(Action action) {
 		case FILL: return std::string("Fill");
 		case POUR: return std::string("Pour");
 		case DIG: return std::string("Dig");
+		case FORGET: return std::string("Huh?");
 		default: return std::string("???");
 	}
 }

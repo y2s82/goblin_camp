@@ -67,7 +67,8 @@ enum Action {
 	QUIVER,
 	FILL,
 	POUR,
-	DIG
+	DIG,
+	FORGET
 };
 
 enum TaskResult {

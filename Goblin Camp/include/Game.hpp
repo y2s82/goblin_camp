@@ -187,6 +187,8 @@ public:
 	static void DesignateBog(Coordinate, Coordinate);
 	static bool CheckTileType(TileType, Coordinate, Coordinate);
 	static void Dig(Coordinate, Coordinate);
+	Coordinate FindClosestAdjacent(Coordinate, Coordinate);
+	bool Adjacent(Coordinate, Coordinate);
 
 	Season CurrentSeason();
 	std::string SeasonToString(Season);
