@@ -838,7 +838,7 @@ void UI::ChooseCreateItem() {
 
 	if (item >= 0) {
 		UI::Inst()->state(UIPLACEMENT);
-		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), false,
+		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), true,
 			0, std::vector<boost::weak_ptr<Item> >(), boost::shared_ptr<Container>()));
 		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 		UI::Inst()->blueprint(Coordinate(1,1));
