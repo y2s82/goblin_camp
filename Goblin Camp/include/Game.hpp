@@ -94,6 +94,7 @@ public:
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
 	void Init();
+	void LoadingScreen();
 	void GenerateMap(uint32 seed = 0);
 
 	void Update();
