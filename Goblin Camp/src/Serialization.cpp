@@ -110,7 +110,7 @@ const boost::uint8_t fileFormatConst = 0x00;
 //
 BOOST_CLASS_VERSION(Coordinate, 0)
 
-template<class Archive>
+	template<class Archive>
 void Coordinate::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
@@ -129,7 +129,7 @@ void Coordinate::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Game, 0)
 
-template<class Archive>
+	template<class Archive>
 void Game::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
@@ -200,7 +200,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(NPC, 0)
 
-template<class Archive>
+	template<class Archive>
 void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
@@ -309,10 +309,10 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar & squad;
 		ar & attacks;
 		ar & escaped;
-	ar & addedTasksToCurrentJob;
+		ar & addedTasksToCurrentJob;
 		ar & Skills;
 	}
-	
+
 	InitializeAIFunctions();
 }
 
@@ -321,7 +321,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Item, 0)
 
-template<class Archive>
+	template<class Archive>
 void Item::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & graphic;
@@ -364,7 +364,7 @@ void Item::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(OrganicItem, 0)
 
-template<class Archive>
+	template<class Archive>
 void OrganicItem::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Item>(*this);
 	ar & nutrition;
@@ -385,7 +385,7 @@ void OrganicItem::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Entity, 0)
 
-template<class Archive>
+	template<class Archive>
 void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
@@ -422,7 +422,7 @@ void Entity::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Job, 0)
 
-template<class Archive>
+	template<class Archive>
 void Job::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
@@ -477,7 +477,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 		ar & attemptMax;
 		ar & connectedEntity;
 		ar & reservedSpace;
-	ar & tool;
+		ar & tool;
 		ar & name;
 		ar & tasks;
 		ar & internal;
@@ -489,7 +489,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(::Container, 0)
 
-template<class Archive>
+	template<class Archive>
 void Container::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Item>(*this);
 	ar & items;
@@ -508,8 +508,8 @@ void Container::load(Archive & ar, const unsigned int version) {
 		ar & capacity;
 		ar & reservedSpace;
 		ar & listenersAsUids;
-	ar & water;
-	ar & filth;
+		ar & water;
+		ar & filth;
 	}
 }
 
@@ -518,7 +518,7 @@ void Container::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(StatusEffect, 0)
 
-template<class Archive>
+	template<class Archive>
 void StatusEffect::save(Archive & ar, const unsigned int version) const {
 	ar & graphic;
 	ar & color.r;
@@ -557,7 +557,7 @@ void StatusEffect::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Squad, 0)
 
-template<class Archive>
+	template<class Archive>
 void Squad::save(Archive & ar, const unsigned int version) const {
 	ar & name;
 	ar & memberReq;
@@ -590,7 +590,7 @@ void Squad::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Task, 0)
 
-template<class Archive>
+	template<class Archive>
 void Task::save(Archive & ar, const unsigned int version) const {
 	ar & target;
 	ar & entity;
@@ -615,7 +615,7 @@ void Task::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Stockpile, 0)
 
-template<class Archive>
+	template<class Archive>
 void Stockpile::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Construction>(*this);
 	ar & symbol;
@@ -650,7 +650,7 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Construction, 0)
 
-template<class Archive>
+	template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & condition;
@@ -709,7 +709,7 @@ void Construction::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Door, 0)
 
-template<class Archive>
+	template<class Archive>
 void Door::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Construction>(*this);
 	ar & closedGraphic;
@@ -728,7 +728,7 @@ void Door::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(WaterNode, 0)
 
-template<class Archive>
+	template<class Archive>
 void WaterNode::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
@@ -763,7 +763,7 @@ void WaterNode::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(FilthNode, 0)
 
-template<class Archive>
+	template<class Archive>
 void FilthNode::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
@@ -792,7 +792,7 @@ void FilthNode::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(BloodNode, 0)
 
-template<class Archive>
+	template<class Archive>
 void BloodNode::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
@@ -821,7 +821,7 @@ void BloodNode::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(NatureObject, 0)
 
-template<class Archive>
+	template<class Archive>
 void NatureObject::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & type;
@@ -856,7 +856,7 @@ void NatureObject::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(JobManager, 0)
 
-template<class Archive>
+	template<class Archive>
 void JobManager::save(Archive & ar, const unsigned int version) const {
 	ar & availableList;
 	ar & waitingList;
@@ -879,7 +879,7 @@ void JobManager::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Camp, 0)
 
-template<class Archive>
+	template<class Archive>
 void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & centerX;
 	ar & centerY;
@@ -904,7 +904,7 @@ void Camp::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(StockManager, 0)
 
-template<class Archive>
+	template<class Archive>
 void StockManager::save(Archive & ar, const unsigned int version) const {
 	ar & categoryQuantities;
 	ar & typeQuantities;
@@ -943,7 +943,7 @@ void StockManager::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Map, 0)
 
-template<class Archive>
+	template<class Archive>
 void Map::save(Archive & ar, const unsigned int version) const {
 	for (int x = 0; x < tileMap.size(); ++x) {
 		for (int y = 0; y < tileMap[x].size(); ++y) {
@@ -972,7 +972,7 @@ void Map::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Tile, 0)
 
-template<class Archive>
+	template<class Archive>
 void Tile::save(Archive & ar, const unsigned int version) const {
 	ar & _type;
 	ar & vis;
@@ -1031,7 +1031,7 @@ void Tile::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(FarmPlot, 0)
 
-template<class Archive>
+	template<class Archive>
 void FarmPlot::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Stockpile>(*this);
 	ar & tilled;
@@ -1054,7 +1054,7 @@ void FarmPlot::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(Attack, 0)
 
-template<class Archive>
+	template<class Archive>
 void Attack::save(Archive & ar, const unsigned int version) const {
 	ar & damageType;
 	ar & damageAmount.addsub;
@@ -1087,7 +1087,7 @@ void Attack::load(Archive & ar, const unsigned int version) {
 //
 BOOST_CLASS_VERSION(SkillSet, 0)
 
-template<class Archive>
+	template<class Archive>
 void SkillSet::save(Archive & ar, const unsigned int version) const {
 	ar & skills;
 }
@@ -1109,53 +1109,53 @@ namespace {
 	// These exist to determine two smaller types that can compose a bigger type.
 	// N is type size in bytes.
 	template <size_t N> struct type { };
-	
-	#define DEFINE_TYPE(T) template <> struct type<sizeof(T)> { typedef T uint; }
+
+#define DEFINE_TYPE(T) template <> struct type<sizeof(T)> { typedef T uint; }
 	DEFINE_TYPE(boost::uint8_t);
 	DEFINE_TYPE(boost::uint16_t);
 	DEFINE_TYPE(boost::uint32_t);
 	DEFINE_TYPE(boost::uint64_t);
-	#undef DEFINE_TYPE
-	
+#undef DEFINE_TYPE
+
 	// ReadUInt<boost::uint64_t> calls ReadUInt<boost::uint32_t> and ReadUInt<boost::uint32_t>
 	// ReadUInt<boost::uint32_t> calls ReadUInt<boost::uint16_t> and ReadUInt<boost::uint16_t>
 	// ReadUInt<boost::uint16_t> calls ReadUInt<boost::uint8_t>  and ReadUInt<boost::uint8_t>
 	// ReadUInt<boost::uint8_t> reads single byte from the stream
 	//
 	// The result is then bitshifted and ORed to reconstruct the value.
-	
+
 	template <typename T>
 	T ReadUInt(std::ifstream& stream) {
 		typedef type<sizeof(T) / 2>::uint smaller;
-		
+
 		const boost::uint32_t smallerBits = sizeof(smaller) * 8;
-		
+
 		smaller a, b;
 		a = ReadUInt<smaller>(stream);
 		b = ReadUInt<smaller>(stream);
-		
+
 		return ((T)a << smallerBits) | (T)b;
 	}
-	
+
 	template <>
 	boost::uint8_t ReadUInt<boost::uint8_t>(std::ifstream& stream) {
 		return (boost::uint8_t)stream.get();
 	}
-	
+
 	// WriteUInt is a recursive call, just like ReadUInt.
-	
+
 	template <typename T>
 	void WriteUInt(std::ofstream& stream, typename type<sizeof(T)>::uint value) {
 		typedef typename type<sizeof(T) / 2>::uint smaller;
-		
+
 		const boost::uint32_t smallerBits = sizeof(smaller) * 8;
 		// All types here are unsigned.
 		const smaller maxValue = (smaller)-1;
-		
+
 		WriteUInt<smaller>(stream, (value >> smallerBits) & maxValue);
 		WriteUInt<smaller>(stream, value & maxValue);
 	}
-	
+
 	template <>
 	void WriteUInt<boost::uint8_t>(std::ofstream& stream, boost::uint8_t value) {
 		stream.put((char)value);
@@ -1165,7 +1165,7 @@ namespace {
 bool Game::SaveGame(const std::string& filename) {
 	try {
 		std::ofstream ofs(filename.c_str(), std::ios::binary);
-		
+
 		// Write the file header
 		WriteUInt<boost::uint32_t>(ofs, saveMagicConst);
 		WriteUInt<boost::uint8_t> (ofs, fileFormatConst);
@@ -1173,7 +1173,7 @@ bool Game::SaveGame(const std::string& filename) {
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
-		
+
 		// Write the payload
 		boost::archive::binary_oarchive oarch(ofs);
 		oarch << *instance;
@@ -1181,7 +1181,7 @@ bool Game::SaveGame(const std::string& filename) {
 		oarch << *Camp::Inst();
 		oarch << *StockManager::Inst();
 		oarch << *Map::Inst();
-		
+
 		return true;
 	} catch (const std::exception& e) {
 		LOG("std::exception while trying to save the game: " << e.what());
@@ -1192,24 +1192,24 @@ bool Game::SaveGame(const std::string& filename) {
 bool Game::LoadGame(const std::string& filename) {
 	try {
 		std::ifstream ifs(filename.c_str(), std::ios::binary);
-		
+
 		// Read and verify the file header
 		if (ReadUInt<boost::uint32_t>(ifs) != saveMagicConst) {
 			throw std::exception("Invalid magic value.");
 		}
-		
+
 		if (ReadUInt<boost::uint8_t>(ifs) != fileFormatConst) {
 			throw std::exception("Invalid file format value.");
 		}
-		
+
 		// reserved values
 		ReadUInt<boost::uint64_t>(ifs);
 		ReadUInt<boost::uint64_t>(ifs);
 		ReadUInt<boost::uint64_t>(ifs);
 		ReadUInt<boost::uint64_t>(ifs);
-		
+
 		Game::Inst()->Reset();
-		
+
 		// Read the payload
 		boost::archive::binary_iarchive iarch(ifs);
 		iarch >> *instance;
@@ -1217,9 +1217,9 @@ bool Game::LoadGame(const std::string& filename) {
 		iarch >> *Camp::Inst();
 		iarch >> *StockManager::Inst();
 		iarch >> *Map::Inst();
-		
+
 		Game::Inst()->TranslateContainerListeners();
-		
+
 		return true;
 	} catch (const std::exception& e) {
 		LOG("std::exception while trying to load the game: " << e.what());
