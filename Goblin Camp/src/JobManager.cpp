@@ -26,7 +26,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "KuhnMunkres.hpp"
 #include "StockManager.hpp"
 
-JobManager::JobManager() {}
+JobManager::JobManager() {
+	for (int i = 0; i < Item::Categories.size(); ++i) {
+		toolJobs.push_back(std::vector<boost::weak_ptr<Job> >());
+	}
+}
 JobManager *JobManager::instance = 0;
 
 JobManager *JobManager::Inst() {
@@ -190,6 +194,15 @@ void JobManager::Update() {
 				}
 		}
 	}
+
+	//Check tool jobs, remove them if they no longer point to existing jobs
+	for (int i = 0; i < Item::Categories.size(); ++i) {
+		for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[i].begin();
+			jobi != toolJobs[i].end();) {
+				if (!jobi->lock()) jobi = toolJobs[i].erase(jobi);
+				else ++jobi;
+		}
+	}
 }
 
 int JobManager::JobAmount() { 
@@ -280,10 +293,10 @@ void JobManager::ClearWaitingNpcs() {
 }
 
 void JobManager::AssignJobs() {
-	//It's useless to attempt to assing more tool-required jobs than there are tools
+	//It's useless to attempt to assing more tool-required jobs than there are tools 
 	std::vector<int> maxToolJobs(Item::Categories.size());
 	for (int i = 0; i < Item::Categories.size(); ++i) {
-		maxToolJobs[i] = StockManager::Inst()->CategoryQuantity(ItemCategory(i));
+		maxToolJobs[i] = StockManager::Inst()->CategoryQuantity(ItemCategory(i)) - toolJobs[i].size();
 	}
 
 	for (int i = 0; i < PRIORITY_COUNT && (!expertNPCsWaiting.empty() || !menialNPCsWaiting.empty()); i++) {
@@ -377,6 +390,8 @@ void JobManager::AssignJobs() {
 								npc->StartJob(job);
 								menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
 								n--;
+								if (job->RequiresTool())
+									toolJobs[job->GetRequiredTool()].push_back(job);
 							}
 						}
 					}
@@ -396,6 +411,8 @@ void JobManager::AssignJobs() {
 								npc->StartJob(job);
 								expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
 								n--;
+								if (job->RequiresTool())
+									toolJobs[job->GetRequiredTool()].push_back(job);
 							}
 						}
 					}
