@@ -138,6 +138,7 @@ void Game::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<OrganicItem>();
 	ar.template register_type<FarmPlot>();
 	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -171,6 +172,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar.template register_type<OrganicItem>();
 		ar.template register_type<FarmPlot>();
 		ar.template register_type<Door>();
+		ar.template register_type<SpawningPool>();
 		ar & season;
 		ar & time;
 		ar & orcCount;
@@ -1111,7 +1113,7 @@ BOOST_CLASS_VERSION(SpawningPool, 0)
 
 	template<class Archive>
 void SpawningPool::save(Archive & ar, const unsigned int version) const {
-	ar & container;
+	ar & boost::serialization::base_object<Construction>(*this);
 	ar & dumpFilth;
 	ar & dumpCorpses;
 	ar & a;
@@ -1126,7 +1128,7 @@ void SpawningPool::save(Archive & ar, const unsigned int version) const {
 template<class Archive>
 void SpawningPool::load(Archive & ar, const unsigned int version) {
 	if (version == 0) {
-		ar & container;
+		ar & boost::serialization::base_object<Construction>(*this);
 		ar & dumpFilth;
 		ar & dumpCorpses;
 		ar & a;
