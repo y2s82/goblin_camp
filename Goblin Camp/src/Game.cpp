@@ -570,7 +570,8 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	std::priority_queue<std::pair<int, int> > potentialFilth;
 	for (unsigned int i = 0; i < std::min((unsigned int)10, filthList.size()); ++i) {
 		int filth = rand() % filthList.size();
-		potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
+		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
+			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
 	}
 	return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
 }
