@@ -415,6 +415,7 @@ void Item::ResolveContainers() {
 		preset.containInRaw.clear();
 	}
 }
+
 void Item::SetFaction(int val) {
 	if (val == 0 && faction != 0) { //Transferred to player
 		StockManager::Inst()->UpdateQuantity(type, 1);
