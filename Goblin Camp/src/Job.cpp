@@ -50,6 +50,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	connectedEntity(boost::weak_ptr<Entity>()),
 	reservedSpace(boost::weak_ptr<Container>()),
 	tool(-1),
+	markedGround(Coordinate(-1,-1)),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
@@ -64,6 +65,10 @@ Job::~Job() {
 	if (reservedSpace.lock()) {
 		reservedSpace.lock()->ReserveSpace(false);
 		reservedSpace = boost::weak_ptr<Container>();
+	}
+	if (markedGround.X() >= 0 && markedGround.X() < Map::Inst()->Width() &&
+		markedGround.Y() >= 0 && markedGround.Y() < Map::Inst()->Height()) {
+			Map::Inst()->Unmark(markedGround.X(), markedGround.Y());
 	}
 }
 
@@ -175,8 +180,12 @@ std::string Job::ActionToString(Action action) {
 		case DISMANTLE: return std::string("Dismantle");
 		case WIELD: return std::string("Wield");
 		case BOGIRON: return std::string("Collect bog iron");
-		case STOCKPILEITEM: return std::string("Stockpiling production");
+		case STOCKPILEITEM: return std::string("Stockpile item");
 		case QUIVER: return std::string("Quiver");
+		case FILL: return std::string("Fill");
+		case POUR: return std::string("Pour");
+		case DIG: return std::string("Dig");
+		case FORGET: return std::string("Huh?");
 		default: return std::string("???");
 	}
 }
@@ -198,3 +207,11 @@ bool Job::RequiresTool() { return tool != -1; }
 
 void Job::SetRequiredTool(ItemCategory item) { tool = item; }
 ItemCategory Job::GetRequiredTool() { return tool; }
+
+void Job::MarkGround(Coordinate ground) {
+	if (ground.X() >= 0 && ground.X() < Map::Inst()->Width() &&
+		ground.Y() >= 0 && ground.Y() < Map::Inst()->Height()) {
+			markedGround = ground;
+			Map::Inst()->Mark(ground.X(), ground.Y());
+	}
+}

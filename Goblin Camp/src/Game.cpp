@@ -569,7 +569,8 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	std::priority_queue<std::pair<int, int> > potentialFilth;
 	for (unsigned int i = 0; i < std::min((unsigned int)10, filthList.size()); ++i) {
 		int filth = rand() % filthList.size();
-		potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
+		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
+			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
 	}
 	return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
 }
@@ -1385,3 +1386,40 @@ void Game::PeacefulFaunaCount(int add) { peacefulFaunaCount += add; }
 
 bool Game::DevMode() { return devMode; }
 void Game::EnableDevMode() { devMode = true; }
+
+void Game::Dig(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (CheckPlacement(Coordinate(x,y), 1)) {
+				boost::shared_ptr<Job> digJob(new Job("Dig"));
+				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
+				digJob->MarkGround(Coordinate(x,y));
+				digJob->Attempts(1000);
+				digJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
+				digJob->tasks.push_back(Task(DIG, Coordinate(x,y)));
+				JobManager::Inst()->AddJob(digJob);
+			}
+		}
+	}
+}
+
+Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target) {
+	Coordinate closest = Coordinate(-9999, -9999);
+	for (int ix = target.X()-1; ix <= target.X()+1; ++ix) {
+		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
+			if (ix == target.X()-1 || ix == target.X()+1 ||
+				iy == target.Y()-1 || iy == target.Y()+1) {
+					if (Map::Inst()->Walkable(ix,iy)) {
+						if (Distance(from.X(), from.Y(), ix, iy) < Distance(from.X(), from.Y(), closest.X(), closest.Y()))
+							closest = Coordinate(ix,iy);
+					}
+			}
+		}
+	}
+	return closest;
+}
+
+bool Game::Adjacent(Coordinate a, Coordinate b) {
+	if (std::abs(a.X() - b.X()) < 2 && std::abs(a.Y() - b.Y()) < 2) return true;
+	return false;
+}

@@ -133,7 +133,7 @@ void Coordinate::load(Archive & ar, const unsigned int version) {
 BOOST_CLASS_VERSION(Game, 0)
 
 template<class Archive>
-void Game::save(Archive & ar, const unsigned int version) const {
+void Game::save(Archive & ar, const unsigned int version) const  {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
@@ -144,7 +144,9 @@ void Game::save(Archive & ar, const unsigned int version) const {
 	ar & time;
 	ar & orcCount;
 	ar & goblinCount;
+	ar & peacefulFaunaCount;
 	ar & safeMonths;
+	ar & devMode;
 	ar & marks;
 	ar & upleft;
 	ar & npcList;
@@ -175,7 +177,9 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar & time;
 		ar & orcCount;
 		ar & goblinCount;
+		ar & peacefulFaunaCount;
 		ar & safeMonths;
+		ar & devMode;
 		ar & marks;
 		ar & upleft;
 		ar & npcList;
@@ -307,6 +311,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar & squad;
 		ar & attacks;
 		ar & escaped;
+		ar & addedTasksToCurrentJob;
 		ar & Skills;
 	}
 	
@@ -367,7 +372,6 @@ void OrganicItem::save(Archive & ar, const unsigned int version) const {
 	ar & nutrition;
 	ar & growth;
 }
-
 template<class Archive>
 void OrganicItem::load(Archive & ar, const unsigned int version) {
 	if (version == 0) {
@@ -443,6 +447,7 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & attemptMax;
 	ar & connectedEntity;
 	ar & reservedSpace;
+	ar & tool;
 	ar & name;
 	ar & tasks;
 	ar & internal;
@@ -473,6 +478,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 		ar & attemptMax;
 		ar & connectedEntity;
 		ar & reservedSpace;
+		ar & tool;
 		ar & name;
 		ar & tasks;
 		ar & internal;
@@ -491,6 +497,8 @@ void Container::save(Archive & ar, const unsigned int version) const {
 	ar & capacity;
 	ar & reservedSpace;
 	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
 }
 
 template<class Archive>
@@ -501,6 +509,8 @@ void Container::load(Archive & ar, const unsigned int version) {
 		ar & capacity;
 		ar & reservedSpace;
 		ar & listenersAsUids;
+		ar & water;
+		ar & filth;
 	}
 }
 
@@ -589,7 +599,6 @@ void Task::save(Archive & ar, const unsigned int version) const {
 	ar & item;
 	ar & flags;
 }
-
 template<class Archive>
 void Task::load(Archive & ar, const unsigned int version) {
 	if (version == 0) {
@@ -636,10 +645,6 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 	}
 }
 
-//
-// class Construction
-//
-BOOST_CLASS_VERSION(Construction, 0)
 
 template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {
@@ -702,7 +707,7 @@ BOOST_CLASS_VERSION(Door, 0)
 
 template<class Archive>
 void Door::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Construction>(*this);
+	ar & boost::serialization::base_object <Construction>(*this);
 	ar & closedGraphic;
 }
 
@@ -875,6 +880,8 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & centerX;
 	ar & centerY;
 	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
 }
 
 template<class Archive>
@@ -883,6 +890,8 @@ void Camp::load(Archive & ar, const unsigned int version) {
 		ar & centerX;
 		ar & centerY;
 		ar & buildingCount;
+		ar & locked;
+		ar & lockedCenter;
 	}
 }
 

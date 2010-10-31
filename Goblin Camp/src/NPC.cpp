@@ -450,12 +450,20 @@ MOVENEARend:
 
 
 			case MOVEADJACENT:
-				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
-					TaskFinished(TASKSUCCESS);
-					break;
+				if (currentEntity().lock()) {
+					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
+				} else {
+					if (Game::Inst()->Adjacent(Position(), currentTarget())) {
+						TaskFinished(TASKSUCCESS);
+						break;
+					}
 				}
 				if (!taskBegun) {
-					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					if (currentEntity().lock()) tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					else tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentTarget());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
 					} else { TaskFinished(TASKFAILFATAL, std::string("No walkable adjacent tiles")); break; }
@@ -875,10 +883,7 @@ MOVENEARend:
 					
 					if (!cont->empty() && cont->ContainsWater() == 0 && cont->ContainsFilth() == 0) {
 						//Not empty, but doesn't have water/filth, so it has items in it
-						TaskFinished(TASKFAILFATAL);
-#ifdef DEBUG
-						std::cout<<"Attempted to fill non-empty container with liquid\n";
-#endif
+						TaskFinished(TASKFAILFATAL, "Attempting to fill non-empty container");
 						break;
 					}
 					
@@ -901,14 +906,16 @@ MOVENEARend:
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
+					TaskFinished(TASKFAILFATAL, "(FILL FAIL)Nothing to fill container with");
+					break;
 				} 
 
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(FILL FAIL)Not carrying a liquid container");
 				break;
 
 			case POUR:
 				if (!carried.lock() || !boost::dynamic_pointer_cast<Container>(carried.lock())) {
-					TaskFinished(TASKFAILFATAL);
+					TaskFinished(TASKFAILFATAL, "(POUR FAIL)Not carrying a liquid container");
 					break;
 				}
 				{
@@ -935,9 +942,28 @@ MOVENEARend:
 								sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
 							}
 							TaskFinished(TASKSUCCESS);
+							break;
 					}
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(POUR FAIL) No valid target");
+				break;
+
+			case DIG:
+				if (!taskBegun) {
+					timer = 0;
+					taskBegun = true;
+				} else {
+					if (++timer >= 50) {
+						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
+						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						TaskFinished(TASKSUCCESS);
+					}
+				}
+				break;
+
+			case FORGET:
+				foundItem.reset();
+				TaskFinished(TASKSUCCESS);
 				break;
 
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
@@ -990,6 +1016,8 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 
 	if (job->RequiresTool() && (!mainHand.lock() || !mainHand.lock()->IsCategory(job->GetRequiredTool()))) {
 		//We insert each one into the beginning, so these are inserted in reverse order
+		job->tasks.insert(job->tasks.begin(), Task(FORGET)); /*"forget" the item we found, otherwise later tasks might
+															 incorrectly refer to it */
 		job->tasks.insert(job->tasks.begin(), Task(WIELD));
 		job->tasks.insert(job->tasks.begin(), Task(TAKE));
 		job->tasks.insert(job->tasks.begin(), Task(MOVE));

@@ -66,7 +66,9 @@ enum Action {
 	STOCKPILEITEM,
 	QUIVER,
 	FILL,
-	POUR
+	POUR,
+	DIG,
+	FORGET
 };
 
 enum TaskResult {
@@ -119,6 +121,7 @@ private:
 	boost::weak_ptr<Entity> connectedEntity;
 	boost::weak_ptr<Container> reservedSpace;
 	ItemCategory tool;
+	Coordinate markedGround;
 public:
 	static boost::shared_ptr<Job> MoveJob(Coordinate);
 	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
@@ -163,6 +166,8 @@ public:
 	bool RequiresTool();
 	void SetRequiredTool(ItemCategory);
 	ItemCategory GetRequiredTool();
+
+	void MarkGround(Coordinate);
 
 	static std::string ActionToString(Action);
 };

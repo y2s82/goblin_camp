@@ -24,8 +24,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Announce.hpp"
 #include "Game.hpp"
 #include "KuhnMunkres.hpp"
+#include "StockManager.hpp"
 
-JobManager::JobManager() {}
+JobManager::JobManager() {
+	for (int i = 0; i < Item::Categories.size(); ++i) {
+		toolJobs.push_back(std::vector<boost::weak_ptr<Job> >());
+	}
+}
 JobManager *JobManager::instance = 0;
 
 JobManager *JobManager::Inst() {
@@ -189,6 +194,15 @@ void JobManager::Update() {
 				}
 		}
 	}
+
+	//Check tool jobs, remove them if they no longer point to existing jobs
+	for (int i = 0; i < Item::Categories.size(); ++i) {
+		for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[i].begin();
+			jobi != toolJobs[i].end();) {
+				if (!jobi->lock()) jobi = toolJobs[i].erase(jobi);
+				else ++jobi;
+		}
+	}
 }
 
 int JobManager::JobAmount() { 
@@ -279,6 +293,12 @@ void JobManager::ClearWaitingNpcs() {
 }
 
 void JobManager::AssignJobs() {
+	//It's useless to attempt to assing more tool-required jobs than there are tools 
+	std::vector<int> maxToolJobs(Item::Categories.size());
+	for (int i = 0; i < Item::Categories.size(); ++i) {
+		maxToolJobs[i] = StockManager::Inst()->CategoryQuantity(ItemCategory(i)) - toolJobs[i].size();
+	}
+
 	for (int i = 0; i < PRIORITY_COUNT && (!expertNPCsWaiting.empty() || !menialNPCsWaiting.empty()); i++) {
 		if(!availableList[i].empty()) {
 			std::vector<boost::shared_ptr<Job> > menialJobsToAssign;
@@ -286,9 +306,15 @@ void JobManager::AssignJobs() {
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 				 jobi != availableList[i].end(); ++jobi) {
 				if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
-					//Limit assigning jobs to 20 at a time, large matrix sizes cause considerable slowdowns.
-					if ((*jobi)->Menial() && menialJobsToAssign.size() < 20) menialJobsToAssign.push_back(*jobi);
-					else if (!(*jobi)->Menial() && expertJobsToAssign.size() < 20) expertJobsToAssign.push_back(*jobi);
+					/*Limit assigning jobs to 20 at a time, large matrix sizes cause considerable slowdowns.
+					Also, if the job requires a tool only add it to assignables if there are potentially enough
+					tools for each job*/
+					if (!(*jobi)->RequiresTool() || 
+						((*jobi)->RequiresTool() && maxToolJobs[(*jobi)->GetRequiredTool()] > 0)) {
+						if ((*jobi)->RequiresTool()) --maxToolJobs[(*jobi)->GetRequiredTool()];
+						if ((*jobi)->Menial() && menialJobsToAssign.size() < 20) menialJobsToAssign.push_back(*jobi);
+						else if (!(*jobi)->Menial() && expertJobsToAssign.size() < 20) expertJobsToAssign.push_back(*jobi);
+					}
 				}
 			}
 			if(!menialJobsToAssign.empty() || !expertJobsToAssign.empty()) {
@@ -356,12 +382,16 @@ void JobManager::AssignJobs() {
 						int npcNum = menialNPCsWaiting[n];
 						boost::shared_ptr<Job> job = menialJobsToAssign[jobNum];
 						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+							boost::shared_ptr<NPC> npc;
+							if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) 
+								npc = Game::Inst()->npcList[npcNum];
 							if (job && npc) {
 								job->Assign(npcNum);
 								npc->StartJob(job);
 								menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
 								n--;
+								if (job->RequiresTool())
+									toolJobs[job->GetRequiredTool()].push_back(job);
 							}
 						}
 					}
@@ -373,12 +403,16 @@ void JobManager::AssignJobs() {
 						int npcNum = expertNPCsWaiting[n];
 						boost::shared_ptr<Job> job = expertJobsToAssign[jobNum];
 						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[npcNum];
+							boost::shared_ptr<NPC> npc;
+							if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) 
+								npc = Game::Inst()->npcList[npcNum];
 							if (job && npc) {
 								job->Assign(npcNum);
 								npc->StartJob(job);
 								expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
 								n--;
+								if (job->RequiresTool())
+									toolJobs[job->GetRequiredTool()].push_back(job);
 							}
 						}
 					}

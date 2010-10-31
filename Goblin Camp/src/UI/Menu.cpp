@@ -201,6 +201,7 @@ Menu* Menu::OrdersMenu() {
 		ordersMenu->AddChoice(MenuChoice("Fell trees", boost::bind(UI::ChooseTreeFelling)));
 		ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
 		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
+		ordersMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseDig)));
 		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", boost::bind(UI::ChooseDesignateBog)));
 		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
 	}
@@ -213,6 +214,8 @@ Menu* Menu::DevMenu() {
 		devMenu = new Menu(std::vector<MenuChoice>());
 		devMenu->AddChoice(MenuChoice("Create NPC", boost::bind(UI::ChooseCreateNPC)));
 		devMenu->AddChoice(MenuChoice("Create item", boost::bind(UI::ChooseCreateItem)));
+		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseCreateFilth)));
+		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseCreateWater)));
 	}
 	return devMenu;
 }
