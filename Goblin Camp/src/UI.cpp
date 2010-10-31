@@ -846,3 +846,11 @@ void UI::ChooseCreateItem() {
 	}
 
 }
+
+void UI::ChooseDig() {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(Game::Dig, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('_');
+}

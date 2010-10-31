@@ -1386,3 +1386,17 @@ void Game::PeacefulFaunaCount(int add) { peacefulFaunaCount += add; }
 
 bool Game::DevMode() { return devMode; }
 void Game::EnableDevMode() { devMode = true; }
+
+void Game::Dig(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (CheckPlacement(Coordinate(x,y), 1)) {
+				boost::shared_ptr<Job> digJob(new Job("Dig"));
+				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
+				digJob->MarkGround(Coordinate(x,y));
+				digJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
+				digJob->tasks.push_back(Task(DIG, Coordinate(x,y)));
+			}
+		}
+	}
+}

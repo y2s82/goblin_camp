@@ -92,6 +92,7 @@ public:
 	static void ChooseDesignateBog();
 	static void ChooseCreateNPC();
 	static void ChooseCreateItem();
+	static void ChooseDig();
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);
