@@ -21,6 +21,7 @@ using System.Threading;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.IO;
+using System.Management;
 
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
@@ -33,6 +34,7 @@ namespace crash
         static string dataDir;
         static string zipFile;
         static string dumpFile;
+        static ManagementScope wmiScope;
 
         /// <summary>
         /// The main entry point for the application.
@@ -50,6 +52,8 @@ namespace crash
             }
 
             dumpFile = args[0];
+
+            wmiScope = new ManagementScope();
 
             form = new CrashForm();
             GetGCDataDir();
@@ -126,6 +130,14 @@ namespace crash
             zip.Write(data, 0, length);
         }
 
+        static ManagementObjectCollection QueryWMI(string query)
+        {
+            WqlObjectQuery wmiQuery = new WqlObjectQuery(query);
+            ManagementObjectSearcher wmiSearch = new ManagementObjectSearcher(wmiScope, wmiQuery);
+
+            return wmiSearch.Get();
+        }
+
         delegate void UIUpdateDelegate();
         static void CreateArchive()
         {
@@ -137,8 +149,77 @@ namespace crash
                     zip.SetLevel(6);
 
                     AddToZip(zip, dumpFile);
-                    AddToZip(zip, "config.ini", "..\\config.ini");
+                    AddToZip(zip, "config.py", "..\\config.py");
+                    AddToZip(zip, "terminal.png", "..\\terminal.png");
                     AddToZip(zip, "goblin-camp.log", "..\\goblin-camp.log");
+
+                    DirectoryInfo modsDir = new DirectoryInfo(dataDir + "mods");
+                    StringBuilder modsList = new StringBuilder(1024);
+                    modsList.Append("=========[ Installed mods ]=========\n");
+                    foreach (DirectoryInfo subdir in modsDir.GetDirectories())
+                    {
+                        modsList.AppendFormat(" * {0}\n", subdir.Name);
+
+                        if (File.Exists(subdir.FullName + "\\mod.dat"))
+                        {
+                            AddToZip(zip, "mods\\" + subdir.Name + ".dat", subdir.FullName + "\\mod.dat");
+                        }
+                    }
+
+                    UTF8Encoding utf8 = new UTF8Encoding();
+                    AddToZip(zip, "mods.txt", utf8.GetBytes(modsList.ToString()));
+
+                    StringBuilder wmiCollectedData = new StringBuilder(8192);
+
+                    // We are querying local WMI to get following data:
+                    //  - video cards, along with drivers' info
+                    wmiCollectedData.Append("=========[ Installed video controllers ]=========\n");
+
+                    foreach (ManagementObject obj in QueryWMI("SELECT * FROM Win32_VideoController"))
+                    {
+                        wmiCollectedData.AppendFormat(" * {0} [{1}]\n", obj.GetPropertyValue("Description"), obj.GetPropertyValue("VideoProcessor"));
+                        wmiCollectedData.AppendFormat("   VRAM: {0}MB\n", (UInt32)(obj.GetPropertyValue("AdapterRAM")) / (1024 * 1024));
+                        wmiCollectedData.AppendFormat("   BPP: {0}\n", obj.GetPropertyValue("CurrentBitsPerPixel"));
+                        wmiCollectedData.AppendFormat(
+                            "   Driver: {0} ({1})\n",
+                            obj.GetPropertyValue("DriverVersion"), obj.GetPropertyValue("DriverDate")
+                        );
+                        foreach (string driver in obj.GetPropertyValue("InstalledDisplayDrivers").ToString().Split(','))
+                        {
+                            wmiCollectedData.AppendFormat("      {0}\n", driver);
+                        }
+                        wmiCollectedData.AppendFormat("   Current video mode: {0}\n", obj.GetPropertyValue("VideoModeDescription"));
+                    }
+
+                    //  - attached monitors
+                    wmiCollectedData.Append("\n=========[ Attached monitors ]=========\n");
+
+                    foreach (ManagementObject obj in QueryWMI("SELECT * FROM Win32_DesktopMonitor"))
+                    {
+                        wmiCollectedData.AppendFormat(" * {0}\n", obj.GetPropertyValue("Description"));
+                        wmiCollectedData.AppendFormat(
+                            "   Resolution: {0} x {1}\n",
+                            obj.GetPropertyValue("ScreenWidth"), obj.GetPropertyValue("ScreenHeight")
+                        );
+                    }
+
+                    //  - operating system info
+                    wmiCollectedData.Append("\n=========[ Operating system ]=========\n");
+                    
+                    foreach (ManagementObject obj in QueryWMI("SELECT * FROM Win32_OperatingSystem WHERE Primary = TRUE"))
+                    {
+                        wmiCollectedData.AppendFormat("{0}\n", obj.GetPropertyValue("Caption"));
+                        wmiCollectedData.AppendFormat(
+                            "Physical memory (free/total): {0}MB / {1}MB\n",
+                            (UInt64)(obj.GetPropertyValue("FreePhysicalMemory")) / 1024,
+                            (UInt64)(obj.GetPropertyValue("TotalVisibleMemorySize")) / 1024
+                        );
+                        wmiCollectedData.AppendFormat("Architecture: {0}\n", obj.GetPropertyValue("OSArchitecture"));
+
+                        break; // I'm lazy
+                    }
+
+                    AddToZip(zip, "wmi.txt", utf8.GetBytes(wmiCollectedData.ToString()));
                 }
             }
             catch (Exception e)

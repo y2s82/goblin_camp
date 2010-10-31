@@ -80,8 +80,8 @@ private:
 	boost::shared_ptr<Events> events;
 public:
 	static Game* Inst();
-	static void LoadGame(std::string);
-	static void SaveGame(std::string);
+	static bool LoadGame(const std::string&);
+	static bool SaveGame(const std::string&);
 	static void ToMainMenu(bool);
 	static bool ToMainMenu();
 	void Running(bool);
