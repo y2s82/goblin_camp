@@ -209,7 +209,12 @@ explicit-alias gc-deps
 ##
 #
 # Version information
-alias gc-version : $(version-sources) ;
+version-reqs = ;
+if --with-revid in [ modules.peek : ARGV ] {
+    version-reqs = <define>WITH_REVID ;
+}
+
+alias gc-version : $(version-sources) : : : $(version-reqs) ;
 make mod.dat : $(GC_TEMPLATES_DIR)/mod.dat_in : @gc-version.generate ;
 always gc-version mod.dat ;
 
