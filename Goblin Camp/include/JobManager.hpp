@@ -31,6 +31,7 @@ private:
 	std::list<boost::shared_ptr<Job> > waitingList;
 	std::vector<int> menialNPCsWaiting;
 	std::vector<int> expertNPCsWaiting;
+	std::vector<std::vector<boost::weak_ptr<Job> > > toolJobs;
 public:
 	static JobManager* Inst();
 	void Reset();
