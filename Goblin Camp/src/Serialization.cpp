@@ -90,6 +90,9 @@ and I couldn't come up with a coherent answer just by googling. */
 //        It should be incremented when file format changes so much that maintaining backward 
 //        compatibility is not possible or feasible. Parser MUST NOT attempt any further decoding
 //        if file format version is different than build's fileFormatConst.
+//        
+//        File format version of 0xFF is reserved for experimental file formats,
+//        and should never be used in production branches.
 //
 //  These fields are specific to current file format version:
 //    - 0x00 (uint64_t, reserved, little endian)
