@@ -135,6 +135,7 @@ void MainLoop() {
 void StartNewGame() {
 	Game* game = Game::Inst();
 	game->Reset();
+	game->LoadingScreen();
 	
 	Script::Event::GameStart();
 	game->GenerateMap();
