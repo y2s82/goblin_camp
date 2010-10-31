@@ -81,7 +81,9 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & time;
 	ar & orcCount;
 	ar & goblinCount;
+	ar & peacefulFaunaCount;
 	ar & safeMonths;
+	ar & devMode;
 	ar & marks;
 	ar & upleft;
 	ar & npcList;
@@ -111,7 +113,9 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & time;
 	ar & orcCount;
 	ar & goblinCount;
+	ar & peacefulFaunaCount;
 	ar & safeMonths;
+	ar & devMode;
 	ar & marks;
 	ar & upleft;
 	ar & npcList;
@@ -181,6 +185,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & addedTasksToCurrentJob;
 	ar & Skills;
 }
 
@@ -236,6 +241,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & addedTasksToCurrentJob;
 	ar & Skills;
 	InitializeAIFunctions();
 }
@@ -342,6 +348,7 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & attemptMax;
 	ar & connectedEntity;
 	ar & reservedSpace;
+	ar & tool;
 	ar & name;
 	ar & tasks;
 	ar & internal;
@@ -371,6 +378,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 	ar & attemptMax;
 	ar & connectedEntity;
 	ar & reservedSpace;
+	ar & tool;
 	ar & name;
 	ar & tasks;
 	ar & internal;
@@ -383,6 +391,8 @@ void Container::save(Archive & ar, const unsigned int version) const {
 	ar & capacity;
 	ar & reservedSpace;
 	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
 }
 
 template<class Archive>
@@ -392,6 +402,8 @@ void Container::load(Archive & ar, const unsigned int version) {
 	ar & capacity;
 	ar & reservedSpace;
 	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
 }
 
 template<class Archive>
@@ -686,6 +698,8 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & centerX;
 	ar & centerY;
 	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
 }
 
 template<class Archive>
@@ -693,6 +707,8 @@ void Camp::load(Archive & ar, const unsigned int version) {
 	ar & centerX;
 	ar & centerY;
 	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
 }
 
 template<class Archive>
