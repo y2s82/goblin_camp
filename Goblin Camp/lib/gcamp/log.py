@@ -24,7 +24,9 @@ def _createLogger(name):
 	if not hasattr(log, '_init'):
 		handler = logging.StreamHandler(_gcampapi.LoggerStream())
 		handler.setFormatter(logging.Formatter(
-			'[%(name)s] [%(levelname)8s] [%(funcName)s] %(message)s'
+			'Python (`%(name)s` @ `%(lineno)d`), `%(funcName)s`, `%(levelname)s`:\n\t'
+			'%(message)s'
+			'\n================================'
 		))
 		
 		log.setLevel(logging.DEBUG)

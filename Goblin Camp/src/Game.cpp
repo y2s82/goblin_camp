@@ -348,6 +348,15 @@ void Game::Exit(bool confirm) {
 int Game::ScreenWidth() const {	return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
+void Game::LoadingScreen() {
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->clear();
+	TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
+	TCODConsole::root->flush();
+}
+
 void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
@@ -374,17 +383,7 @@ void Game::Init() {
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
 
-	{
-		// "Loading..."
-		TCODConsole::root->setDefaultForeground(TCODColor::white);
-		TCODConsole::root->setDefaultBackground(TCODColor::black);
-		TCODConsole::root->setAlignment(TCOD_CENTER);
-		TCODConsole::root->clear();
-
-		TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
-
-		TCODConsole::root->flush();
-	}
+	LoadingScreen();
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 

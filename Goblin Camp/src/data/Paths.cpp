@@ -165,7 +165,6 @@ namespace Paths {
 		LOG("Mods directory: " << Globals::modsDir);
 		LOG("Executable directory: " << Globals::execDir);
 		LOG("Global data directory: " << Globals::dataDir);
-		LOG("--------");
 		LOG("Executable: " << Globals::exec);
 		LOG("Config: " << Globals::config);
 		LOG("Font: " << Globals::font);
