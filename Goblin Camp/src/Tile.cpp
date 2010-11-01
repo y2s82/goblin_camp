@@ -39,13 +39,16 @@ Tile::Tile(TileType newType, int newCost) :
 	water(boost::shared_ptr<WaterNode>()),
 	graphic('.'),
 	foreColor(TCODColor::white),
+	originalForeColor(TCODColor::white),
 	backColor(TCODColor::black),
 	natureObject(-1),
 	npcList(std::set<int>()),
 	itemList(std::set<int>()),
 	filth(boost::shared_ptr<FilthNode>()),
 	blood(boost::shared_ptr<BloodNode>()),
-	marked(false)
+	marked(false),
+	walkedOver(0),
+	corruption(0)
 {
 	type(newType);
 }
@@ -56,7 +59,7 @@ void Tile::type(TileType newType) {
 	_type = newType;
 	if (_type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true;
-		foreColor = TCODColor(rand() % 190, 127, 0);
+		originalForeColor = TCODColor(rand() % 50, 127, 0);
 		backColor = TCODColor(0, 0, 0);
 		switch ((rand() % 10)) {
 		case 0:
@@ -73,7 +76,8 @@ void Tile::type(TileType newType) {
 	} else if (_type == TILEDITCH || _type == TILERIVERBED) {
 		vis = true; walkable = true; buildable = false; low = true;
 		graphic = '_';
-		foreColor = TCODColor(125,50,0);
+		originalForeColor = TCODColor(125,50,0);
+		_moveCost = rand() % 3 + 1;
 	} else if (_type == TILEBOG) {
 		vis = true; walkable = true; buildable = false; low = false;
 		switch ((rand() % 10)) {
@@ -88,7 +92,7 @@ void Tile::type(TileType newType) {
 		case 8: graphic = ':'; break;
 		case 9: graphic = '\''; break;
 		}
-		foreColor = TCODColor(rand() % 185, 127, 70);
+		originalForeColor = TCODColor(rand() % 185, 127, 70);
 		backColor = TCODColor(60,30,20);
 		_moveCost = rand() % 5 + 1;
 	} else if (_type == TILEROCK) {
@@ -97,9 +101,10 @@ void Tile::type(TileType newType) {
 		case 0: graphic = '.'; break;
 		case 1: graphic = ','; break;
 		}
-		foreColor = TCODColor(rand() % 20 + 182, rand() % 20 + 182, rand() % 20 + 182);
+		originalForeColor = TCODColor(rand() % 20 + 182, rand() % 20 + 182, rand() % 20 + 182);
 		backColor = TCODColor(0, 0, 0);
 	} else { vis = false; walkable = false; buildable = false; }
+	foreColor = originalForeColor;
 }
 
 bool Tile::BlocksLight() const { return !vis; }
@@ -200,3 +205,16 @@ void Tile::SetBlood(boost::shared_ptr<BloodNode> value) {blood = value;}
 
 void Tile::Mark() { marked = true; }
 void Tile::Unmark() { marked = false; }
+
+void Tile::WalkOver() {
+	++walkedOver;
+	if (_type == TILEGRASS) {
+		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0);
+		if (walkedOver > 100) graphic = '.';
+	}
+}
+
+void Tile::Corrupt(int magnitude) {
+	corruption += magnitude;
+	if (corruption < 0) corruption = 0;
+}

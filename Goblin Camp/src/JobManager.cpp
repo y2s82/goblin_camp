@@ -69,6 +69,16 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 					break;
 				}
 		}
+
+		if (job->RequiresTool()) {
+			for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[job->GetRequiredTool()].begin(); 
+				jobi != toolJobs[job->GetRequiredTool()].end(); ++jobi) {
+				if (jobi->lock() == job) {
+					toolJobs[job->GetRequiredTool()].erase(jobi);
+					break;
+				}
+			}
+		}
 	}
 }
 

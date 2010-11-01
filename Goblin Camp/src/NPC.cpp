@@ -1046,6 +1046,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 				path->get(pathIndex, &moveX, &moveY);
 				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) {
 					Position(Coordinate(moveX,moveY));
+					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
 				} else {
 					return TASKFAILNONFATAL;
@@ -1828,6 +1829,19 @@ void NPC::UpdateVelocity() {
 				
 				flightPath.pop_back();
 			} else SetVelocity(0);
+		}
+	} else { //We're not hurtling through air so let's tumble around if we're stuck on unwalkable terrain
+		if (!Map::Inst()->Walkable(x, y, (void*)this)) {
+			for (int radius = 1; radius < 10; ++radius) {
+				for (int xi = x - radius; xi <= x + radius; ++xi) {
+					for (int yi = y - radius; yi <= y + radius; ++yi) {
+						if (Map::Inst()->Walkable(xi, yi, (void*)this)) {
+							Position(Coordinate(xi, yi));
+							return;
+						}
+					}
+				}
+			}
 		}
 	}
 }
