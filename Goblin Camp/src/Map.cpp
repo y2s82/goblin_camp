@@ -174,7 +174,10 @@ TCODColor Map::ForeColor(int x, int y) const {
 }
 
 void Map::ForeColor(int x, int y, TCODColor color) {
-	tileMap[x][y].foreColor = color;
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].originalForeColor = color;
+		tileMap[x][y].foreColor = color;
+	}
 }
 
 TCODColor Map::BackColor(int x, int y) const { 
@@ -252,6 +255,7 @@ void Map::Unmark(int x, int y) { tileMap[x][y].Unmark(); }
 int Map::GetMoveModifier(int x, int y) {
 	int modifier = 0;
 	if (tileMap[x][y].type() == TILEBOG) modifier += 10;
+	else if (tileMap[x][y].type() == TILEDITCH) modifier += 4;
 	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) {
 		modifier += water->Depth();
 	}
@@ -259,3 +263,29 @@ int Map::GetMoveModifier(int x, int y) {
 }
 
 float Map::GetWaterlevel() { return waterlevel; }
+
+bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
+
+void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); }
+void Map::Corrupt(int x, int y, int magnitude) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Corrupt(magnitude); }
+
+void Map::Naturify(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		if (tileMap[x][y].walkedOver > 0) --tileMap[x][y].walkedOver;
+		if (tileMap[x][y].walkedOver == 0 && tileMap[x][y].natureObject < 0) {
+			int natureObjects = 0;
+			int beginx = std::max(0, x-1);
+			int endx = std::min(width-1, x+1);
+			int beginy = std::max(0, y-1);
+			int endy = std::min(height-1, y+1);
+			for (int ix = beginx; ix <= endx; ++ix) {
+				for (int iy = beginy; iy <= endy; ++iy) {
+					if (tileMap[ix][iy].natureObject >= 0) ++natureObjects;
+				}
+			}
+			if (natureObjects < 2) {
+				Game::Inst()->CreateNatureObject(Coordinate(x,y));
+			}
+		}
+	}
+}

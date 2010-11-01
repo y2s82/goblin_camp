@@ -442,6 +442,18 @@ void Item::SetVelocity(int speed) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
 	} else {
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
+		if (!Map::Inst()->Walkable(x, y)) {
+			for (int radius = 1; radius < 10; ++radius) {
+				for (int xi = x - radius; xi <= x + radius; ++xi) {
+					for (int yi = y - radius; yi <= y + radius; ++yi) {
+						if (Map::Inst()->Walkable(xi, yi)) {
+							Position(Coordinate(xi, yi));
+							return;
+						}
+					}
+				}
+			}
+		}
 	}
 }
 
@@ -472,21 +484,21 @@ void Item::UpdateVelocity() {
 							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
 							npc->Damage(&attack);
 
-							SetVelocity(0);
 							Position(flightPath.back().coord);
+							SetVelocity(0);
 							flightPath.clear();
 							return;
 						}
 					}
 				}
+				Position(flightPath.back().coord);
 				if (flightPath.back().height == 0) {
 					SetVelocity(0);
 				}
-				Position(flightPath.back().coord);
 				flightPath.pop_back();
 			} else SetVelocity(0);
 		}
-	}
+	} 
 }
 
 void Item::SetInternal() { internal = true; }

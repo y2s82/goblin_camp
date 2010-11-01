@@ -190,6 +190,7 @@ public:
 	static void Dig(Coordinate, Coordinate);
 	Coordinate FindClosestAdjacent(Coordinate, Coordinate);
 	bool Adjacent(Coordinate, Coordinate);
+	void CreateNatureObject(Coordinate);
 
 	Season CurrentSeason();
 	std::string SeasonToString(Season);

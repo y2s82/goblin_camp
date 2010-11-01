@@ -59,6 +59,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Blood.hpp"
 #include "Entity.hpp"
 #include "Attack.hpp"
+#include "SpawningPool.hpp"
 
 // IMPORTANT
 // Implementing class versioning properly is an effort towards backward compatibility for saves,
@@ -140,6 +141,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar.template register_type<OrganicItem>();
 	ar.template register_type<FarmPlot>();
 	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -173,6 +175,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar.template register_type<OrganicItem>();
 		ar.template register_type<FarmPlot>();
 		ar.template register_type<Door>();
+		ar.template register_type<SpawningPool>();
 		ar & season;
 		ar & time;
 		ar & orcCount;
@@ -208,6 +211,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Container>();
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
+	ar.template register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & type;
 	ar & timeCount;
@@ -264,6 +268,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar.template register_type<Container>();
 		ar.template register_type<Item>();
 		ar.template register_type<Entity>();
+		ar.template register_type<SkillSet>();
 		ar & boost::serialization::base_object<Entity>(*this);
 		ar & type;
 		ar & timeCount;
@@ -877,6 +882,7 @@ BOOST_CLASS_VERSION(Camp, 0)
 
 template<class Archive>
 void Camp::save(Archive & ar, const unsigned int version) const {
+	ar.template register_type<Coordinate>();
 	ar & centerX;
 	ar & centerY;
 	ar & buildingCount;
@@ -886,6 +892,7 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Camp::load(Archive & ar, const unsigned int version) {
+	ar.template register_type<Container>();
 	if (version == 0) {
 		ar & centerX;
 		ar & centerY;
@@ -1092,6 +1099,41 @@ template<class Archive>
 void SkillSet::load(Archive & ar, const unsigned int version) {
 	if (version == 0) {
 		ar & skills;
+	}
+}
+
+//
+// class SpawningPool
+//
+BOOST_CLASS_VERSION(SpawningPool, 0)
+
+	template<class Archive>
+void SpawningPool::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & dumpFilth;
+	ar & dumpCorpses;
+	ar & a;
+	ar & b;
+	ar & expansion;
+	ar & filth;
+	ar & corpses;
+	ar & spawns;
+	ar & corpseContainer;
+}
+
+template<class Archive>
+void SpawningPool::load(Archive & ar, const unsigned int version) {
+	if (version == 0) {
+		ar & boost::serialization::base_object<Construction>(*this);
+		ar & dumpFilth;
+		ar & dumpCorpses;
+		ar & a;
+		ar & b;
+		ar & expansion;
+		ar & filth;
+		ar & corpses;
+		ar & spawns;
+		ar & corpseContainer;
 	}
 }
 

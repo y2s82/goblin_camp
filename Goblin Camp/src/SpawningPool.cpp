@@ -87,7 +87,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (target.X() != -1 && target.Y() != -1) {
+				if (filthLocation.X() != -1 && filthLocation.Y() != -1 && target.X() != -1 && target.Y() != -1) {
 					filthDumpJob->tasks.push_back(Task(MOVE, target));
 					filthDumpJob->tasks.push_back(Task(POUR, Position()));
 					filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
@@ -207,10 +207,13 @@ void SpawningPool::Expand() {
 	Coordinate location(-1,-1);
 	for (int i = 0; i < 10; ++i) {
 		location = Coordinate((a.X()-1) + rand() % ((b.X()-a.X())+3), (a.Y()-1) + rand() % ((b.Y()-a.Y())+3));
-		if (Map::Inst()->GetConstruction(location.X()-1, location.Y()) == uid) break;
-		if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;		
-		if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;		
-		if (Map::Inst()->GetConstruction(location.X(), location.Y()+1) == uid) break;		
+		if (Map::Inst()->GetConstruction(location.X(), location.Y()) != uid) {
+			if (Map::Inst()->GetConstruction(location.X()-1, location.Y()) == uid) break;
+			if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;		
+			if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;		
+			if (Map::Inst()->GetConstruction(location.X(), location.Y()+1) == uid) break;
+		}
+		location = Coordinate(-1,-1);
 	}
 
 	if (location.X() != -1 && location.Y() != -1) {

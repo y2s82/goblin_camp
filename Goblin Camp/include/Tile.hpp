@@ -53,7 +53,7 @@ private:
 	bool low, blocksWater;
 	boost::shared_ptr<WaterNode> water;
 	int graphic;
-	TCODColor foreColor;
+	TCODColor foreColor, originalForeColor;
 	TCODColor backColor;
 	int natureObject;
 	std::set<int> npcList; //Set of NPC uid's
@@ -61,7 +61,8 @@ private:
 	boost::shared_ptr<FilthNode> filth;
 	boost::shared_ptr<BloodNode> blood;
 	bool marked;
-
+	int walkedOver, corruption;
+	
 public:
 	Tile(TileType = TILEGRASS, int = 1);
 	TileType type();
@@ -96,4 +97,6 @@ public:
 	void SetBlood(boost::shared_ptr<BloodNode>);
 	void Mark();
 	void Unmark();
+	void WalkOver();
+	void Corrupt(int magnitude);
 };
