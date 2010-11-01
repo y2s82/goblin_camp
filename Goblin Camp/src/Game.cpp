@@ -573,7 +573,10 @@ Coordinate Game::FindFilth(Coordinate pos) {
 		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
 	}
-	return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
+	if (potentialFilth.size() > 0)
+		return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
+	else
+		return Coordinate(-1,-1);
 }
 
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
