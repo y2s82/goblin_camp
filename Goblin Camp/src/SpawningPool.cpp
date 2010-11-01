@@ -87,7 +87,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (target.X() != -1 && target.Y() != -1) {
+				if (filthLocation.X() != -1 && filthLocation.Y() != -1 && target.X() != -1 && target.Y() != -1) {
 					filthDumpJob->tasks.push_back(Task(MOVE, target));
 					filthDumpJob->tasks.push_back(Task(POUR, Position()));
 					filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
