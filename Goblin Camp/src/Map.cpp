@@ -267,7 +267,18 @@ float Map::GetWaterlevel() { return waterlevel; }
 bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
 
 void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); }
-void Map::Corrupt(int x, int y, int magnitude) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Corrupt(magnitude); }
+void Map::Corrupt(int x, int y, int magnitude) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].Corrupt(magnitude);
+		if (tileMap[x][y].corruption > 300) {
+			tileMap[x][y].Corrupt(-40);
+			Corrupt(x-1, y, 10);
+			Corrupt(x+1, y, 10);
+			Corrupt(x, y-1, 10);
+			Corrupt(x, y+1, 10);
+		}
+	}
+}
 
 void Map::Naturify(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {

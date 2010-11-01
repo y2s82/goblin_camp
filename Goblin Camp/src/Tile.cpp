@@ -209,7 +209,7 @@ void Tile::Unmark() { marked = false; }
 void Tile::WalkOver() {
 	++walkedOver;
 	if (_type == TILEGRASS) {
-		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0);
+		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (walkedOver > 100) graphic = '.';
 	}
 }
@@ -217,4 +217,7 @@ void Tile::WalkOver() {
 void Tile::Corrupt(int magnitude) {
 	corruption += magnitude;
 	if (corruption < 0) corruption = 0;
+	if (_type == TILEGRASS) {
+		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);;
+	}
 }
