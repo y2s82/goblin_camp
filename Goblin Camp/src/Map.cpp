@@ -174,7 +174,7 @@ TCODColor Map::ForeColor(int x, int y) const {
 }
 
 void Map::ForeColor(int x, int y, TCODColor color) {
-	tileMap[x][y].foreColor = color;
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].originalForeColor = color;
 }
 
 TCODColor Map::BackColor(int x, int y) const { 
