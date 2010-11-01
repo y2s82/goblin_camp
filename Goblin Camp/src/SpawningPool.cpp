@@ -131,9 +131,10 @@ void SpawningPool::Update() {
 		}
 
 		//Spawn / Expand
-		if (Map::Inst()->GetFilth(x, y).lock()) {
+		if (Map::Inst()->GetFilth(x, y).lock() && Map::Inst()->GetFilth(x, y).lock()->Depth() > 0) {
 			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
 			filth += filthNode->Depth();
+			for (int i = 0; i < 1 + rand() % filthNode->Depth(); ++i) Map::Inst()->Corrupt(x, y);
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
@@ -141,6 +142,7 @@ void SpawningPool::Update() {
 			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
+			for (int i = 0; i < 1 + rand() % 10; ++i) Map::Inst()->Corrupt(x, y);
 		}
 
 		if (corpses + filth > std::min(2 + 2*spawns, (unsigned int)10)) {
@@ -229,9 +231,13 @@ void SpawningPool::Expand() {
 		if (Map::Inst()->NatureObject(location.X(), location.Y()) > 0) {
 			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->NatureObject(location.X(), location.Y())]);
 		}
+		for (int i = 0; i < 5 + rand() % 5; ++i) Map::Inst()->Corrupt(location.X(), location.Y());
+
 	} else {
 		Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
+		for (int i = 0; i < 5; ++i) Map::Inst()->Corrupt(x, y);
 	}
+
 }
 
 void SpawningPool::Draw(Coordinate upleft, TCODConsole* console) {
