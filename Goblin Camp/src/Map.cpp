@@ -259,3 +259,5 @@ int Map::GetMoveModifier(int x, int y) {
 }
 
 float Map::GetWaterlevel() { return waterlevel; }
+
+bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
