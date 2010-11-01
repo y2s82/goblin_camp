@@ -1396,7 +1396,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
-			if (CheckPlacement(Coordinate(x,y), 1) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
+			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
 				digJob->MarkGround(Coordinate(x,y));
