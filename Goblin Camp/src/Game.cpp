@@ -949,8 +949,8 @@ void Game::GenerateMap(uint32 seed) {
 				if (random->get(0,9) < 9) {
 					if (height < -0.01f) {
 						map->ForeColor(x,y, TCODColor(random->get(100,192),127,0));
-					} else if (height < -0.1f) {
-						map->ForeColor(x,y, TCODColor(random->get(50,192),127,0));
+					} else if (height < 0.0f) {
+						map->ForeColor(x,y, TCODColor(random->get(20,170),127,0));
 					} else if (height > 4.0f) {
 						map->ForeColor(x,y, TCODColor(90, random->get(120,150), 90));
 					}
