@@ -965,7 +965,7 @@ void Game::GenerateMap(uint32 seed) {
 
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
-			CreateNatureObject(Coordinate(x,y));
+			map->Naturify(x,y);
 		}
 	}
 }
