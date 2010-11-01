@@ -272,7 +272,7 @@ void Map::Corrupt(int x, int y, int magnitude) { if (x >= 0 && x < width && y >=
 void Map::Naturify(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		if (tileMap[x][y].walkedOver > 0) --tileMap[x][y].walkedOver;
-		if (tileMap[x][y].natureObject < 0) {
+		if (tileMap[x][y].walkedOver == 0 && tileMap[x][y].natureObject < 0) {
 			int natureObjects = 0;
 			int beginx = std::max(0, x-1);
 			int endx = std::min(width-1, x+1);
@@ -283,7 +283,7 @@ void Map::Naturify(int x, int y) {
 					if (tileMap[ix][iy].natureObject >= 0) ++natureObjects;
 				}
 			}
-			if (natureObjects < 3) {
+			if (natureObjects < 2) {
 				Game::Inst()->CreateNatureObject(Coordinate(x,y));
 			}
 		}
