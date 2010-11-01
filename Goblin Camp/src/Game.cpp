@@ -703,6 +703,8 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
 
 	events->Update(safeMonths > 0);
+
+	Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
@@ -963,45 +965,7 @@ void Game::GenerateMap(uint32 seed) {
 
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
-			if (map->Walkable(x,y) && map->Type(x,y) == TILEGRASS && rand() % 5 < 2) {
-				std::priority_queue<std::pair<int, int> > natureObjectQueue;
-				float height = map->heightMap->getValue(x,y);
-
-				//Populate the priority queue with all possible plants and give each one a random
-				//value based on their rarity
-				for (unsigned int i = 0; i < NatureObject::Presets.size(); ++i) {
-					if (NatureObject::Presets[i].minHeight <= height &&
-						NatureObject::Presets[i].maxHeight >= height)
-						natureObjectQueue.push(std::pair<int,int>(rand() % NatureObject::Presets[i].rarity + rand() % 3, i));
-				}
-
-				if (natureObjectQueue.empty()) continue;
-				int chosen = natureObjectQueue.top().second;
-				int rarity = NatureObject::Presets[chosen].rarity;
-				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.01f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.5f) rarity = rarity - rarity / 5;
-				if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
-					std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
-
-				if (rand() % 100 < rarity) {
-
-					for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
-						int ax = x + ((rand() % 5) - 2);
-						int ay = y + ((rand() % 5) - 2);
-						if (ax < 0) ax = 0; if (ax >= map->Width()) ax = map->Width()-1;
-						if (ay < 0) ay = 0; if (ay >= map->Height()) ay = map->Height()-1;
-						if (map->Walkable(ax,ay) && map->Type(ax,ay) == TILEGRASS
-							&& map->NatureObject(ax,ay) < 0) {
-								boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
-								natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-								map->NatureObject(ax,ay,natObj->Uid());
-								map->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-								map->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-								map->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
-						}
-					}
-				}
-			}
+			CreateNatureObject(Coordinate(x,y));
 		}
 	}
 }
@@ -1428,4 +1392,46 @@ Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target) {
 bool Game::Adjacent(Coordinate a, Coordinate b) {
 	if (std::abs(a.X() - b.X()) < 2 && std::abs(a.Y() - b.Y()) < 2) return true;
 	return false;
+}
+
+void Game::CreateNatureObject(Coordinate location) {
+	if (Map::Inst()->Walkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && rand() % 5 < 2) {
+		std::priority_queue<std::pair<int, int> > natureObjectQueue;
+		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
+
+		//Populate the priority queue with all possible plants and give each one a random
+		//value based on their rarity
+		for (unsigned int i = 0; i < NatureObject::Presets.size(); ++i) {
+			if (NatureObject::Presets[i].minHeight <= height &&
+				NatureObject::Presets[i].maxHeight >= height)
+				natureObjectQueue.push(std::pair<int,int>(rand() % NatureObject::Presets[i].rarity + rand() % 3, i));
+		}
+
+		if (natureObjectQueue.empty()) return;
+		int chosen = natureObjectQueue.top().second;
+		int rarity = NatureObject::Presets[chosen].rarity;
+		if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.01f ||
+			std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.5f) rarity = rarity - rarity / 5;
+		if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
+			std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
+
+		if (rand() % 100 < rarity) {
+
+			for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
+				int ax = location.X() + ((rand() % NatureObject::Presets[chosen].cluster) - std::max(1, NatureObject::Presets[chosen].cluster/2));
+				int ay = location.Y() + ((rand() % NatureObject::Presets[chosen].cluster) - std::max(1, NatureObject::Presets[chosen].cluster/2));
+				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
+				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
+				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS
+					&& Map::Inst()->NatureObject(ax,ay) < 0) {
+						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
+						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
+						Map::Inst()->NatureObject(ax,ay,natObj->Uid());
+						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
+				}
+			}
+		}
+	}
 }
