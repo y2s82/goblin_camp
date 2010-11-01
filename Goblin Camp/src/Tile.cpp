@@ -77,6 +77,7 @@ void Tile::type(TileType newType) {
 		vis = true; walkable = true; buildable = false; low = true;
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
+		_moveCost = rand() % 3 + 1;
 	} else if (_type == TILEBOG) {
 		vis = true; walkable = true; buildable = false; low = false;
 		switch ((rand() % 10)) {
