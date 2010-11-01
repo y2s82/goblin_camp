@@ -83,4 +83,6 @@ public:
 	bool GroundMarked(int,int);
 	int GetMoveModifier(int,int);
 	float GetWaterlevel();
+	void WalkOver(int,int);
+	void Corrupt(int x, int y, int magnitude);
 };

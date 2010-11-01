@@ -1046,6 +1046,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 				path->get(pathIndex, &moveX, &moveY);
 				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) {
 					Position(Coordinate(moveX,moveY));
+					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
 				} else {
 					return TASKFAILNONFATAL;

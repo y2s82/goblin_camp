@@ -59,7 +59,7 @@ void Tile::type(TileType newType) {
 	_type = newType;
 	if (_type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true;
-		originalForeColor = TCODColor(rand() % 190, 127, 0);
+		originalForeColor = TCODColor(rand() % 50, 127, 0);
 		backColor = TCODColor(0, 0, 0);
 		switch ((rand() % 10)) {
 		case 0:
@@ -210,6 +210,7 @@ void Tile::WalkOver() {
 	++walkedOver;
 	if (_type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0);
+		if (walkedOver > 100) graphic = '.';
 	}
 }
 

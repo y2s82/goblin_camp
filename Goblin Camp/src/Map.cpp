@@ -174,7 +174,10 @@ TCODColor Map::ForeColor(int x, int y) const {
 }
 
 void Map::ForeColor(int x, int y, TCODColor color) {
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].originalForeColor = color;
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].originalForeColor = color;
+		tileMap[x][y].foreColor = color;
+	}
 }
 
 TCODColor Map::BackColor(int x, int y) const { 
@@ -262,3 +265,6 @@ int Map::GetMoveModifier(int x, int y) {
 float Map::GetWaterlevel() { return waterlevel; }
 
 bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
+
+void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); }
+void Map::Corrupt(int x, int y, int magnitude) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Corrupt(magnitude); }
