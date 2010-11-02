@@ -663,7 +663,6 @@ void Construction::Explode() {
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
-
 }
 
 bool Construction::CheckMaterialsPresent() { 
