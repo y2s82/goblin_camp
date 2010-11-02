@@ -270,11 +270,13 @@ void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < heig
 void Map::Corrupt(int x, int y, int magnitude) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		tileMap[x][y].Corrupt(magnitude);
-		if (tileMap[x][y].corruption > 100) {
-			if (tileMap[x][y].natureObject >= 0) {
+		if (tileMap[x][y].corruption >= 100) {
+			if (tileMap[x][y].natureObject >= 0 && 
+				!NatureObject::Presets[Game::Inst()->natureList[tileMap[x][y].natureObject]->Type()].evil &&
+				!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
 				bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
 				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-				if (createTree && rand() % 1000 < 999) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+				if (createTree && rand() % 4 < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 			}
 		}
 		if (tileMap[x][y].corruption > 300) {
@@ -292,20 +294,28 @@ void Map::Naturify(int x, int y) {
 		if (tileMap[x][y].walkedOver > 0) --tileMap[x][y].walkedOver;
 		if (tileMap[x][y].walkedOver == 0 && tileMap[x][y].natureObject < 0) {
 			int natureObjects = 0;
-			int beginx = std::max(0, x-1);
-			int endx = std::min(width-1, x+1);
-			int beginy = std::max(0, y-1);
-			int endy = std::min(height-1, y+1);
+			int beginx = std::max(0, x-2);
+			int endx = std::min(width-2, x+2);
+			int beginy = std::max(0, y-2);
+			int endy = std::min(height-2, y+2);
 			for (int ix = beginx; ix <= endx; ++ix) {
 				for (int iy = beginy; iy <= endy; ++iy) {
 					if (tileMap[ix][iy].natureObject >= 0) ++natureObjects;
 				}
 			}
-			if (natureObjects < 2) {
+			if (natureObjects < (tileMap[x][y].corruption < 100 ? 5 : 1)) { //Corrupted areas have less flora
 				Game::Inst()->CreateNatureObject(Coordinate(x,y));
 			}
+		} else if (tileMap[x][y].natureObject >= 0) {
+			if (boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(), "Withering tree"))
+				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
 		}
 	}
 }
 
 void Map::Corrupt(Coordinate location, int magnitude) { Corrupt(location.X(), location.Y(), magnitude); }
+
+int Map::GetCorruption(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].corruption;
+	return 0;
+}

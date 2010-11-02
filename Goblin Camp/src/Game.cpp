@@ -1401,9 +1401,11 @@ void Game::CreateNatureObject(Coordinate location) {
 
 		//Populate the priority queue with all possible plants and give each one a random
 		//value based on their rarity
+		bool evil = Map::Inst()->GetCorruption(location.X(), location.Y()) >= 100;
 		for (unsigned int i = 0; i < NatureObject::Presets.size(); ++i) {
 			if (NatureObject::Presets[i].minHeight <= height &&
-				NatureObject::Presets[i].maxHeight >= height)
+				NatureObject::Presets[i].maxHeight >= height &&
+				NatureObject::Presets[i].evil == evil)
 				natureObjectQueue.push(std::pair<int,int>(rand() % NatureObject::Presets[i].rarity + rand() % 3, i));
 		}
 
