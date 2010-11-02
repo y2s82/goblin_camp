@@ -1437,14 +1437,14 @@ void Game::CreateNatureObject(Coordinate location) {
 }
 
 void Game::CreateNatureObject(Coordinate location, std::string name) {
-	int natureObjectIndex = 0;
+	unsigned int natureObjectIndex = 0;
 	for (std::vector<NatureObjectPreset>::iterator preseti = NatureObject::Presets.begin(); preseti != NatureObject::Presets.end();
 		++preseti) {
 			if (boost::iequals(preseti->name, name)) break;
 			++natureObjectIndex;
 	}
 
-	if (natureObjectIndex >= 0 && natureObjectIndex < NatureObject::Presets.size() && 
+	if (natureObjectIndex < NatureObject::Presets.size() && 
 		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
 		if (location.X() >= 0 && location.X() < Map::Inst()->Width() && 
 			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
