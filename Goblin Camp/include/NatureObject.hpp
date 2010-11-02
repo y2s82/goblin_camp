@@ -38,6 +38,7 @@ public:
 	int condition;
 	bool tree, harvestable, walkable;
 	float minHeight, maxHeight;
+	bool evil;
 };
 
 class NatureObject : public Entity

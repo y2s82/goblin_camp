@@ -39,7 +39,8 @@ NatureObjectPreset::NatureObjectPreset() :
 	harvestable(false),
 	walkable(false),
 	minHeight(0.0f),
-	maxHeight(2.0f)
+	maxHeight(2.0f),
+	evil(false)
 {}
 
 std::vector<NatureObjectPreset> NatureObject::Presets = std::vector<NatureObjectPreset>();
@@ -91,6 +92,8 @@ class NatureObjectListener : public ITCODParserListener {
 			NatureObject::Presets.back().harvestable = true;
 		} else if (boost::iequals(name, "tree")) {
 			NatureObject::Presets.back().tree = true;
+		} else if (boost::iequals(name, "evil")) {
+			NatureObject::Presets.back().evil = true;
 		}
 		return true;
 	}
@@ -147,6 +150,7 @@ void NatureObject::LoadPresets(std::string filename) {
 	natureObjectTypeStruct->addFlag("walkable");
 	natureObjectTypeStruct->addProperty("minheight", TCOD_TYPE_FLOAT, false);
 	natureObjectTypeStruct->addProperty("maxheight", TCOD_TYPE_FLOAT, false);
+	natureObjectTypeStruct->addFlag("evil");
 
 	parser.run(filename.c_str(), new NatureObjectListener());
 }
