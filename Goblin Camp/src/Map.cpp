@@ -270,6 +270,13 @@ void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < heig
 void Map::Corrupt(int x, int y, int magnitude) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		tileMap[x][y].Corrupt(magnitude);
+		if (tileMap[x][y].corruption > 100) {
+			if (tileMap[x][y].natureObject >= 0) {
+				bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
+				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
+				if (createTree) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+			}
+		}
 		if (tileMap[x][y].corruption > 300) {
 			tileMap[x][y].Corrupt(-40);
 			Corrupt(x-1, y, 10);
