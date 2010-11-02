@@ -1435,3 +1435,27 @@ void Game::CreateNatureObject(Coordinate location) {
 		}
 	}
 }
+
+void Game::CreateNatureObject(Coordinate location, std::string name) {
+	int natureObjectIndex = 0;
+	for (std::vector<NatureObjectPreset>::iterator preseti = NatureObject::Presets.begin(); preseti != NatureObject::Presets.end();
+		++preseti) {
+			if (boost::iequals(preseti->name, name)) break;
+			++natureObjectIndex;
+	}
+
+	if (natureObjectIndex >= 0 && natureObjectIndex < NatureObject::Presets.size() && 
+		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
+		if (location.X() >= 0 && location.X() < Map::Inst()->Width() && 
+			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
+			Map::Inst()->NatureObject(location.X(),location.Y()) < 0) {
+				boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
+				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
+				Map::Inst()->NatureObject(location.X(),location.Y(),natObj->Uid());
+				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->Buildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->BlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
+		}
+
+	}
+}

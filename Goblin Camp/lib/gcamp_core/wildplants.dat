@@ -129,3 +129,13 @@ plant_type "Thornbush" {
 	minheight=-1
 	maxheight=-0.01
 }
+
+plant_type "Withering tree" {
+	tree
+	graphic=214
+	color="127,50,0"
+	rarity=0
+	condition=30
+	minheight=-100.0
+	maxheight=-100.0
+}
