@@ -27,7 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StockManager.hpp"
 
 JobManager::JobManager() {
-	for (int i = 0; i < Item::Categories.size(); ++i) {
+	for (std::vector<ItemCat>::iterator i = Item::Categories.begin(); i != Item::Categories.end(); ++i) {
 		toolJobs.push_back(std::vector<boost::weak_ptr<Job> >());
 	}
 }
@@ -206,7 +206,7 @@ void JobManager::Update() {
 	}
 
 	//Check tool jobs, remove them if they no longer point to existing jobs
-	for (int i = 0; i < Item::Categories.size(); ++i) {
+	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[i].begin();
 			jobi != toolJobs[i].end();) {
 				if (!jobi->lock()) jobi = toolJobs[i].erase(jobi);
@@ -305,7 +305,7 @@ void JobManager::ClearWaitingNpcs() {
 void JobManager::AssignJobs() {
 	//It's useless to attempt to assing more tool-required jobs than there are tools 
 	std::vector<int> maxToolJobs(Item::Categories.size());
-	for (int i = 0; i < Item::Categories.size(); ++i) {
+	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		maxToolJobs[i] = StockManager::Inst()->CategoryQuantity(ItemCategory(i)) - toolJobs[i].size();
 	}
 

@@ -382,7 +382,7 @@ void Panel::ShowModal() {
 		key = TCODConsole::checkForKeypress();
 		mouseStatus = TCODMouse::getStatus();
 
-		MenuResult result = Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed, key);
+		MenuResult result = Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed!=0, key);
 		if((result & DISMISS) || key.vk == TCODK_ESCAPE) {
 				delete this;
 				return;

@@ -805,7 +805,7 @@ void UI::ChooseCreateNPC() {
 	int npc;
 	Menu *NPCChoiceMenu = new Menu(std::vector<MenuChoice>(), "NPC");
 	NPCChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(npc) = -1));
-	for (int i = 0; i < NPC::Presets.size(); ++i) {
+	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		NPCChoiceMenu->AddChoice(MenuChoice(NPC::Presets[i].name, boost::lambda::var(npc) = i));
 	}
 	NPCChoiceMenu->ShowModal();
@@ -822,7 +822,7 @@ void UI::ChooseCreateNPC() {
 void UI::ChooseCreateItem() {
 	int item, category;
 	Menu *ItemCategoryMenu = new Menu(std::vector<MenuChoice>(), "Categories");
-	for (int i = 0; i < Item::Categories.size(); ++i) {
+	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		if (!Item::Categories[i].parent)
 			ItemCategoryMenu->AddChoice(MenuChoice(Item::Categories[i].name, boost::lambda::var(category) = i));
 	}
@@ -830,7 +830,7 @@ void UI::ChooseCreateItem() {
 
 	Menu *ItemChoiceMenu = new Menu(std::vector<MenuChoice>(), "Item");
 	ItemChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(item) = -1));
-	for (int i = 0; i < Item::Presets.size(); ++i) {
+	for (unsigned int i = 0; i < Item::Presets.size(); ++i) {
 		if (Item::Presets[i].categories.find(category) != Item::Presets[i].categories.end())
 			ItemChoiceMenu->AddChoice(MenuChoice(Item::Presets[i].name, boost::lambda::var(item) = i));
 	}
