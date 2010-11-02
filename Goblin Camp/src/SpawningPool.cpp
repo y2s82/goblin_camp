@@ -226,11 +226,27 @@ void SpawningPool::Expand() {
 		if (location.X() > b.X()) b.X(location.X());
 		if (location.Y() > b.Y()) b.Y(location.Y());
 
-		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
-
-		if (Map::Inst()->NatureObject(location.X(), location.Y()) > 0) {
+		//Swallow nature objects
+		if (Map::Inst()->NatureObject(location.X(), location.Y()) >= 0) {
 			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->NatureObject(location.X(), location.Y())]);
 		}
+		//Destroy buildings
+		if (Map::Inst()->GetConstruction(location.X(), location.Y()) >= 0) {
+			Attack attack;
+			attack.Type(DAMAGE_MAGIC);
+			TCOD_dice_t damage;
+			damage.nb_dices = 100;
+			damage.nb_faces = 100;
+			damage.multiplier = 100;
+			damage.addsub = 1000;
+			attack.Amount(damage);
+			if (Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) 
+				Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()->Damage(&attack);
+
+		}
+
+		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
+
 		for (int i = 0; i < 5 + rand() % 5; ++i) Map::Inst()->Corrupt(location.X(), location.Y());
 
 	} else {
