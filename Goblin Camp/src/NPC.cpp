@@ -659,7 +659,7 @@ MOVENEARend:
 					//Job underway
 					break;
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(FELL FAIL) No NatureObject to fell");
 				break;
 
 			case HARVESTWILDPLANT:
