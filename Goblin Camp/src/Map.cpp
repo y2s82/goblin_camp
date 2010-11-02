@@ -274,7 +274,7 @@ void Map::Corrupt(int x, int y, int magnitude) {
 			if (tileMap[x][y].natureObject >= 0) {
 				bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
 				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-				if (createTree) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+				if (createTree && rand() % 1000 < 999) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 			}
 		}
 		if (tileMap[x][y].corruption > 300) {
@@ -307,3 +307,5 @@ void Map::Naturify(int x, int y) {
 		}
 	}
 }
+
+void Map::Corrupt(Coordinate location, int magnitude) { Corrupt(location.X(), location.Y(), magnitude); }
