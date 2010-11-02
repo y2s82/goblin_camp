@@ -216,6 +216,7 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Create item", boost::bind(UI::ChooseCreateItem)));
 		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseCreateFilth)));
 		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseCreateWater)));
+		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseCorrupt)));
 	}
 	return devMenu;
 }

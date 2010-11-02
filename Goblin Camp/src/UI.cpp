@@ -870,3 +870,11 @@ void UI::ChooseCreateWater() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('~');
 }
+
+void UI::ChooseCorrupt() {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(boost::bind(&Map::Corrupt, Map::Inst(), _1, 200));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('c');
+}
