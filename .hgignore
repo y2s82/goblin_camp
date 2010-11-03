@@ -69,3 +69,5 @@ gc-config.jam
 docs\doxy
 docs\sphinx\_build
 userdata
+*.sln
+*.vcxproj
