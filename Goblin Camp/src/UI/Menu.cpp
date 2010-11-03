@@ -217,6 +217,8 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseCreateFilth)));
 		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseCreateWater)));
 		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseCorrupt)));
+		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
+		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRemoveNatureObjects)));
 	}
 	return devMenu;
 }
