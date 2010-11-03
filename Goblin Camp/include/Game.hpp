@@ -183,6 +183,7 @@ public:
 	static void FellTree(Coordinate, Coordinate);
 	static void DesignateTree(Coordinate, Coordinate);
 	void RemoveNatureObject(boost::weak_ptr<NatureObject>);
+	void RemoveNatureObject(Coordinate, Coordinate);
 	static void HarvestWildPlant(Coordinate, Coordinate);
 	static void DesignateBog(Coordinate, Coordinate);
 	static bool CheckTileType(TileType, Coordinate, Coordinate);

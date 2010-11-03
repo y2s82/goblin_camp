@@ -878,3 +878,17 @@ void UI::ChooseCorrupt() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('c');
 }
+
+void UI::ChooseNaturify() {
+	for (int i = 0; i < 10000; ++i) {
+		Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
+	}
+}
+
+void UI::ChooseRemoveNatureObjects() {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('R');
+}
