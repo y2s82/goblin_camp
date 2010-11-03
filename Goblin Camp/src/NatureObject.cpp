@@ -59,7 +59,10 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 	harvestable = Presets[type].harvestable;
 }
 
-NatureObject::~NatureObject() {}
+NatureObject::~NatureObject() {
+	Map::Inst()->SetWalkable(x, y, true);
+	Map::Inst()->Buildable(x, y, true);
+}
 
 void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = x - upleft.X();

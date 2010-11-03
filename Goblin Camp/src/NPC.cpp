@@ -650,8 +650,6 @@ MOVENEARend:
 								Game::Inst()->CreateItem(tree->Position(), *iti, true);
 							}
 						}
-						Map::Inst()->SetWalkable(tree->X(), tree->Y(), true);
-						Map::Inst()->Buildable(tree->X(), tree->Y(), true);
 						Game::Inst()->RemoveNatureObject(tree);
 						TaskFinished(TASKSUCCESS);
 						break;
@@ -679,8 +677,6 @@ MOVENEARend:
 								Game::Inst()->CreateItem(plant->Position(), *iti, true);
 							}
 						}
-						Map::Inst()->SetWalkable(plant->X(), plant->Y(), true);
-						Map::Inst()->Buildable(plant->X(), plant->Y(), true);
 						Game::Inst()->RemoveNatureObject(plant);
 						TaskFinished(TASKSUCCESS);
 						break;
