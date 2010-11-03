@@ -704,7 +704,7 @@ void Game::Update() {
 
 	events->Update(safeMonths > 0);
 
-	Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
+	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
