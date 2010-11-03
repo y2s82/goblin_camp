@@ -1424,8 +1424,9 @@ void Game::CreateNatureObject(Coordinate location) {
 				int ay = location.Y() + ((rand() % NatureObject::Presets[chosen].cluster) - std::max(1, NatureObject::Presets[chosen].cluster/2));
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS
-					&& Map::Inst()->NatureObject(ax,ay) < 0) {
+				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
+					Map::Inst()->NatureObject(ax,ay) < 0 &&
+					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
 						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 						Map::Inst()->NatureObject(ax,ay,natObj->Uid());
@@ -1450,7 +1451,8 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
 		if (location.X() >= 0 && location.X() < Map::Inst()->Width() && 
 			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
-			Map::Inst()->NatureObject(location.X(),location.Y()) < 0) {
+			Map::Inst()->NatureObject(location.X(),location.Y()) < 0 &&
+			Map::Inst()->GetConstruction(location.X(), location.Y()) < 0) {
 				boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 				Map::Inst()->NatureObject(location.X(),location.Y(),natObj->Uid());
@@ -1459,5 +1461,17 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 				Map::Inst()->BlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
 		}
 
+	}
+}
+
+void Game::RemoveNatureObject(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			int uid = Map::Inst()->NatureObject(x,y);
+			if (uid >= 0) {
+				Map::Inst()->NatureObject(x,y,-1);
+				natureList.erase(uid);
+			}
+		}
 	}
 }

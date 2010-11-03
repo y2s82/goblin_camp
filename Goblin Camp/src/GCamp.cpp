@@ -196,8 +196,6 @@ void StartNewGame() {
 		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
 			if (Map::Inst()->NatureObject(x,y) >= 0 && rand() % 3 < 2) {
 				game->RemoveNatureObject(game->natureList[Map::Inst()->NatureObject(x,y)]);
-				Map::Inst()->SetWalkable(x, y, true);
-				Map::Inst()->Buildable(x, y, true);
 			}
 		}
 	}
