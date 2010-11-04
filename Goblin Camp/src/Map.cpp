@@ -274,9 +274,9 @@ void Map::Corrupt(int x, int y, int magnitude) {
 			if (tileMap[x][y].natureObject >= 0 && 
 				!NatureObject::Presets[Game::Inst()->natureList[tileMap[x][y].natureObject]->Type()].evil &&
 				!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
-				bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
-				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-				if (createTree && rand() % 4 < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+					bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
+					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
+					if (createTree && rand() % 4 < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 			}
 		}
 		if (tileMap[x][y].corruption > 300) {
@@ -306,10 +306,7 @@ void Map::Naturify(int x, int y) {
 			if (natureObjects < (tileMap[x][y].corruption < 100 ? 5 : 1)) { //Corrupted areas have less flora
 				Game::Inst()->CreateNatureObject(Coordinate(x,y));
 			}
-		} else if (tileMap[x][y].natureObject >= 0) {
-			if (boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(), "Withering tree"))
-				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-		}
+		} 
 	}
 }
 

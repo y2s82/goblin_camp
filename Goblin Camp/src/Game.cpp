@@ -700,7 +700,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == 0) StockManager::Inst()->Update();
 
-	if (time % (UPDATES_PER_SECOND * 1) == UPDATES_PER_SECOND/2) JobManager::Inst()->Update();
+	if (time % (UPDATES_PER_SECOND * 1) == 0) JobManager::Inst()->Update();
 
 	events->Update(safeMonths > 0);
 
