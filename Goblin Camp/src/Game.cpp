@@ -1420,8 +1420,8 @@ void Game::CreateNatureObject(Coordinate location) {
 		if (rand() % 100 < rarity) {
 
 			for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
-				int ax = location.X() + ((rand() % NatureObject::Presets[chosen].cluster) - std::max(1, NatureObject::Presets[chosen].cluster/2));
-				int ay = location.Y() + ((rand() % NatureObject::Presets[chosen].cluster) - std::max(1, NatureObject::Presets[chosen].cluster/2));
+				int ax = location.X() + ((rand() % NatureObject::Presets[chosen].cluster) - NatureObject::Presets[chosen].cluster/2);
+				int ay = location.Y() + ((rand() % NatureObject::Presets[chosen].cluster) - NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
 				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
