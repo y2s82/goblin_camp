@@ -33,7 +33,7 @@ Dependencies
 
 Goblin Camp requires several third party libraries to build and link:
 
-* `Boost`_ **1.44**.
+* `Boost`_ **1.44** (or newer, but not earlier).
 * `libtcod`_ **r483** [must be later than **r477**: new API]
   (GC uses not-yet-released SVN version — listed here is a known working revision).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
@@ -53,11 +53,9 @@ Before you build GC, you'll need to create a configuration file for the build,
 so that compiler can find all needed headers and libraries.
 
 Minimal config file (let's call it ``gc-config.jam``, put it into root directory of the source;
-i.e. the one with Jamroot.jam) must have at least two ``using`` directives: for Boost and for
-the compiler::
+i.e. the one with Jamroot.jam) must have at least one ``using`` directive: for the compiler::
 
     using msvc ;
-    using boost : 1.43 ;
 
 Build system requests specific Boost version to avoid breakages. In place of ``msvc`` you can
 use e.g. ``gcc`` (on Linux) or ``darwin`` (on OSX). You can further configure the compiler,
