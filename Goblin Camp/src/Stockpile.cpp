@@ -42,6 +42,20 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 }
 
 Stockpile::~Stockpile() {
+	//Loop through all the containers
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
+		//Loop through all the items in the containers
+		for (std::set<boost::weak_ptr<Item> >::iterator itemi = conti->second->begin(); itemi != conti->second->end(); ++itemi) {
+			//If the item is also a container, remove 'this' as a listener
+			if (itemi->lock() && itemi->lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				if (boost::dynamic_pointer_cast<Container>(itemi->lock())) {
+					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(itemi->lock());
+					container->RemoveListener(this);
+				}
+			}
+		}
+	}
+
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->GetConstruction(x,y) == uid) {
