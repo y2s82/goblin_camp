@@ -62,15 +62,11 @@ category_type "Flour" {
 category_type "Container" {
 }
 
-category_type "Plank container" {
+category_type "Crate" {
 	parent="Container"
 }
 
 category_type "Barrel" {
-	parent="Container"
-}
-
-category_type "Bone container" {
 	parent="Container"
 }
 
@@ -193,7 +189,7 @@ item_type "Wood plank" {
 	graphic = 124
 	color = "255,73,7"
 	components = ["Log"]
-	fitsin = "Plank container"
+	fitsin = "Crate"
 	multiplier = 10
 	constructedin = "Carpenter"
 }
@@ -224,7 +220,7 @@ item_type "Wooden barrel" {
 }
 
 item_type "Crate" {
-	category = ["Plank container"]
+	category = ["Crate"]
 	containerSize = 10
 	graphic = 230
 	color = "255,186,0"
@@ -324,12 +320,14 @@ item_type "Bones" {
 	color = "192,192,192"
 	decay = [ "Filth" ]
 	decaySpeed = 18
+	fitsin = "Crate"
 }
 
 item_type "Leather" {
 	category = ["Leather"]
 	graphic = 245
 	color = "127,51,0"
+	fitsin = "Crate"
 }
 
 item_type "Corpse" {
@@ -423,6 +421,7 @@ item_type "Wooden club" {
 		effectChances=[     20     ]
 	}
 	constructedin = "Carpenter"
+	fitsin = "Crate"
 }
 
 item_type "Stone maul" {
@@ -438,6 +437,7 @@ item_type "Stone maul" {
 		effectChances=[    33    ]
 	}
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Stone axe" {
@@ -453,6 +453,7 @@ item_type "Stone axe" {
 		effectChances=[    33    ]
 	}
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Stone spear" {
@@ -468,6 +469,7 @@ item_type "Stone spear" {
 		effectChances=[    10    ]
 	}
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Bone Dagger" {
@@ -483,6 +485,7 @@ item_type "Bone Dagger" {
 		effectChances=[    10    ]
 	}
 	constructedin = "Bone carver"
+	fitsin = "Crate"
 }
 
 item_type "Wooden arrow" {
@@ -499,6 +502,7 @@ item_type "Wooden arrow" {
 		effectChances=[    20    ]
 	}
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Stone-tipped arrow" {
@@ -515,6 +519,7 @@ item_type "Stone-tipped arrow" {
 		effectChances=[    25    ]
 	}
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Wooden bow" {
@@ -528,6 +533,7 @@ item_type "Wooden bow" {
 		cooldown=50
 	}
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Quiver" {
@@ -537,6 +543,7 @@ item_type "Quiver" {
 	components = ["Leather"]
 	containerSize = 100
 	constructedin = "Weapon crafter"
+	fitsin = "Crate"
 }
 
 item_type "Rough stone" {
@@ -562,6 +569,7 @@ item_type "Blueleaf boll" {
 	fruits = [ "Blueleaf seed" ]
 	decay = [ "Blueleaf seed", "Filth" ]
 	decaySpeed = 12
+	fitsin = "Crate"
 }
 
 item_type "Cloth" {
@@ -570,6 +578,7 @@ item_type "Cloth" {
 	color = "255,255,255"
 	components = ["Fiber", "Fiber"]
 	constructedin = "Weaver"
+	fitsin = "Crate"
 }
 
 item_type "Bone statue" {
@@ -665,4 +674,5 @@ item_type "Shovel" {
 	graphic = 93
 	color = "155,128,128"
 	components = [ "Plank", "Metal bar" ]
+	fitsin = "Crate"
 }
