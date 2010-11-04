@@ -164,13 +164,6 @@ category_type "Digging tool" {
 	parent="Tools"
 }
 
-category_type "Components" {
-}
-
-category_type "Pontoon bridge pieces" {
-	parent="Components"
-}
-
 category_type "Garbage" {
 }
 
