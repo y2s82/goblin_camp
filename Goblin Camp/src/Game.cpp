@@ -77,10 +77,10 @@ Game* Game::Inst() {
 }
 
 //Checks whether all the tiles under the rectangle (target is the up-left corner) are buildable
-bool Game::CheckPlacement(Coordinate target, Coordinate size) {
+bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType> tileReqs) {
 	for (int x = target.X(); x < target.X() + size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + size.Y(); ++y) {
-			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->Buildable(x,y)) return false;
+			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->Buildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
 		}
 	}
 	return true;

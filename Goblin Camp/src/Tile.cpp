@@ -221,3 +221,16 @@ void Tile::Corrupt(int magnitude) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);;
 	}
 }
+
+TileType Tile::StringToTileType(std::string string) {
+	if (boost::iequals(string, "grass")) {
+		return TILEGRASS;
+	} else if (boost::iequals(string, "river")) {
+		return TILERIVERBED;
+	} else if (boost::iequals(string, "ditch")) {
+		return TILEDITCH;
+	} else if (boost::iequals(string, "rock")) {
+		return TILEROCK;
+	}
+	return TILENONE;
+}

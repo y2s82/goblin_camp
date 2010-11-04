@@ -130,6 +130,7 @@ construction_type "Stone quarry" {
 	//Spawn creatures every x seconds
 	spawnFrequency=600
 	permanent
+	tileReqs=["rock"]
 }
 
 construction_type "Stone mason" {
