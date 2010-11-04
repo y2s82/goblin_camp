@@ -66,7 +66,7 @@ category_type "Plank container" {
 	parent="Container"
 }
 
-category_type "Liquid container" {
+category_type "Barrel" {
 	parent="Container"
 }
 
@@ -74,14 +74,9 @@ category_type "Bone container" {
 	parent="Container"
 }
 
-category_type "Seed container" {
+category_type "Sack" {
 	parent="Container"
 }
-
-category_type "Flour container" {
-	parent="Container"
-}
-
 
 category_type "Furniture" {
 }
@@ -169,6 +164,13 @@ category_type "Digging tool" {
 	parent="Tools"
 }
 
+category_type "Components" {
+}
+
+category_type "Pontoon bridge pieces" {
+	parent="Components"
+}
+
 category_type "Garbage" {
 }
 
@@ -220,7 +222,7 @@ item_type "Bone door" {
 }
 
 item_type "Wooden barrel" {
-	category = ["Liquid container"]
+	category = ["Barrel"]
 	containerSize = 20
 	graphic = 155
 	color = "255,73,7"
@@ -268,7 +270,7 @@ item_type "Bloodberry seed" {
 	graphic = 250
 	color = "175,128,128"
 	growth = "Young Bloodberry shrub"
-	fitsin = "Seed container"
+	fitsin = "Sack"
 }
 
 item_type "Young Bloodberry shrub" {
@@ -294,7 +296,7 @@ item_type "Blueleaf seed" {
 	graphic = 250
 	color = "128,128,175"
 	growth = "Blueleaf sapling"
-	fitsin = "Seed container"
+	fitsin = "Sack"
 }
 
 item_type "Blueleaf sapling" {
@@ -351,11 +353,11 @@ item_type "Wine" {
 	graphic = 33
 	color = "127,0,0"
 	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
-	containIn = "Liquid container"
+	containIn = "Barrel"
 	nutrition = 72000
 	multiplier = 10
 	constructedin = "Brewery"
-	fitsin = "Liquid container"
+	fitsin = "Barrel"
 }
 
 item_type "Pie" {
@@ -401,9 +403,9 @@ item_type "Flour" {
 	graphic = 44
 	color = "255,233,177"
 	components = ["Seed", "Seed"]
-	containIn = "Flour container"
+	containIn = "Sack"
 	constructedin = "Mill"
-	fitsin = "Flour container"
+	fitsin = "Sack"
 }
 
 item_type "Flower" {
@@ -593,17 +595,8 @@ item_type "Stone statue" {
 	constructedin = "Stone mason"
 }
 
-item_type "Seed sack" {
-	category = ["Seed container"]
-	containerSize = 50
-	graphic = 208
-	color = "255,255,255"
-	components = [ "Cloth", "Cloth" ]
-	constructedin = "Weaver"
-}
-
-item_type "Flour sack" {
-	category = ["Flour container"]
+item_type "Cloth sack" {
+	category = ["Sack"]
 	containerSize = 50
 	graphic = 208
 	color = "255,255,255"
@@ -664,15 +657,6 @@ item_type "Red clay" {
 	color = "220,80,70"
 	multiplier = 5
 	constructedin = "Clay pit"
-}
-
-item_type "Amphora" {
-	category = ["Liquid container"]
-	containerSize = 10
-	graphic = 173
-	color = "220,40,32"
-	components = [ "Clay", "Clay", "Wood" ]
-	constructedin = "Clay kiln"
 }
 
 item_type "Red brick" {

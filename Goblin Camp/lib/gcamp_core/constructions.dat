@@ -286,3 +286,15 @@ construction_type "Totem Pole" {
 			 186,  10, 186,
 			 200, 205, 188]
 }
+
+construction_type "Pontoon bridge" {
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=50
+	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank"]
+	graphicLength=2
+	graphic=[157, 157,
+			 157, 157]
+	tileReqs=["grass", "rock", "ditch", "river"]
+}
