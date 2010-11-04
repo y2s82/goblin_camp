@@ -74,7 +74,7 @@ void Tile::type(TileType newType) {
 		case 9: graphic = '\''; break;
 		}
 	} else if (_type == TILEDITCH || _type == TILERIVERBED) {
-		vis = true; walkable = true; buildable = false; low = true;
+		vis = true; walkable = true; buildable = true; low = true;
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
 		_moveCost = rand() % 3 + 1;
@@ -146,8 +146,9 @@ int Tile::MoveCost(void* ptr) const {
 int Tile::MoveCost() const {
 	if (!Walkable()) return 0;
 	int cost = _moveCost;
-	if (water) cost += std::min(20, water->Depth());
 	if (construction >= 0) cost += 1;
+	if (water && (construction < 0 || (Game::Inst()->GetConstruction(construction).lock() && 
+		!Game::Inst()->GetConstruction(construction).lock()->HasTag(BRIDGE)))) cost += std::min(20, water->Depth());
 	return cost;
 }
 void Tile::SetMoveCost(int value) { _moveCost = value; }

@@ -309,7 +309,8 @@ void NPC::Update() {
 	}
 
 	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
-		if (water->Depth() > WALKABLE_WATER_DEPTH) {
+		boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
+		if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
 			AddEffect(SWIM);
 		} else { RemoveEffect(SWIM); }
 	} else { RemoveEffect(SWIM); }
@@ -874,7 +875,7 @@ MOVENEARend:
 				break;
 
 			case FILL:
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Liquid container"))) {
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Barrel"))) {
 					boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(carried.lock()));
 					
 					if (!cont->empty() && cont->ContainsWater() == 0 && cont->ContainsFilth() == 0) {

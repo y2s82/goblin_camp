@@ -46,6 +46,7 @@ enum ConstructionTag {
 	FURNITURE,
 	CENTERSCAMP,
 	SPAWNINGPOOL,
+	BRIDGE,
 	TAGCOUNT
 };
 
@@ -139,4 +140,5 @@ public:
 	Coordinate Center();
 	void Damage(Attack*);
 	void Explode();
+	bool Built();
 };

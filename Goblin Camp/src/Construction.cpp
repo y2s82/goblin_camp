@@ -338,6 +338,8 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "spawningPool")) {
 			Construction::Presets.back().tags[SPAWNINGPOOL] = true;
 			Construction::Presets.back().dynamic = true;
+		} else if (boost::iequals(name, "bridge")) {
+			Construction::Presets.back().tags[BRIDGE] = true;
 		}
 		return true;
 	}
@@ -382,6 +384,9 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "tileReqs")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets.back().tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
+#ifdef DEBUG
+				std::cout<<"("<<Construction::Presets.back().name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
+#endif
 			}
 		}
 
@@ -433,6 +438,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("centersCamp");
 	constructionTypeStruct->addFlag("spawningPool");
 	constructionTypeStruct->addListProperty("tileReqs", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addFlag("bridge");
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -680,6 +686,8 @@ bool Construction::CheckMaterialsPresent() {
 }
 
 bool Construction::DismantlingOrdered() { return dismantle; }
+
+bool Construction::Built() { return built; }
 
 ConstructionPreset::ConstructionPreset() :
 	maxCondition(0),
