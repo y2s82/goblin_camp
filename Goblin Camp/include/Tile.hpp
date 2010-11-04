@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <set>
 #include <vector>
+#include <string>
 
 #include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
@@ -99,4 +100,5 @@ public:
 	void Unmark();
 	void WalkOver();
 	void Corrupt(int magnitude);
+	static TileType StringToTileType(std::string);
 };

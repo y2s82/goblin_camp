@@ -379,6 +379,10 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
 		} else if (boost::iequals(name, "color")) {
 			Construction::Presets.back().color = value.col;
+		} else if (boost::iequals(name, "tileReqs")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets.back().tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
+			}
 		}
 
 		return true;
@@ -390,6 +394,10 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
 			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
+		if (Construction::Presets.back().tileReqs.empty()) {
+			Construction::Presets.back().tileReqs.insert(TILEGRASS);
+			Construction::Presets.back().tileReqs.insert(TILEROCK);
+		}
 		return true;
 	}
 	void error(const char *msg) {
@@ -424,6 +432,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("unique");
 	constructionTypeStruct->addFlag("centersCamp");
 	constructionTypeStruct->addFlag("spawningPool");
+	constructionTypeStruct->addListProperty("tileReqs", TCOD_TYPE_STRING, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -688,7 +697,8 @@ ConstructionPreset::ConstructionPreset() :
 	placementType(UIPLACEMENT),
 	blocksLight(true),
 	permanent(false),
-	color(TCODColor::black)
+	color(TCODColor::black),
+	tileReqs(std::set<TileType>())
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

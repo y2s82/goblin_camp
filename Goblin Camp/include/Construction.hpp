@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <deque>
 #include <map>
 #include <list>
+#include <set>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
 #include <boost/serialization/split_member.hpp>
@@ -27,6 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Item.hpp"
 #include "Container.hpp"
 #include "UI/UIComponents.hpp"
+#include "Tile.hpp"
 
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
@@ -67,6 +69,7 @@ struct ConstructionPreset {
 	bool blocksLight;
 	bool permanent;
 	TCODColor color;
+	std::set<TileType> tileReqs;
 };
 
 class Construction : public Entity {

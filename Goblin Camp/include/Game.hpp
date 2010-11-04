@@ -139,7 +139,7 @@ public:
 	void PeacefulFaunaCount(int);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
-	static bool CheckPlacement(Coordinate, Coordinate);
+	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());
 	static int PlaceConstruction(Coordinate, ConstructionType);
 	static void DismantleConstruction(Coordinate, Coordinate);
 	void RemoveConstruction(boost::weak_ptr<Construction>);

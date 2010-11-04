@@ -64,7 +64,7 @@ menuOpen(false),
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
-	placementCallback = boost::bind(Game::CheckPlacement, _1, _2);
+	placementCallback = boost::bind(Game::CheckPlacement, _1, _2, std::set<TileType>());
 	callback = boost::bind(Game::PlaceConstruction, _1, 0);
 	rectCallback = boost::bind(Game::PlaceStockpile, _1, _2, 0, 0);
 	mouseInput = TCODMouse::getStatus();
@@ -640,7 +640,7 @@ void UI::SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)> newCa
 
 void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 	UI::Inst()->SetCallback(boost::bind(Game::PlaceConstruction, _1, construct));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, Construction::Presets[construct].tileReqs));
 	UI::Inst()->blueprint(Construction::Blueprint(construct));
 	UI::Inst()->state(state);
 	UI::Inst()->SetCursor('C');
@@ -649,7 +649,7 @@ void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 void UI::ChooseStockpile(ConstructionType stockpile) {
 	int stockpileSymbol = '%';
 	UI::Inst()->SetRectCallback(boost::bind(Game::PlaceStockpile, _1, _2, stockpile, stockpileSymbol));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, Construction::Presets[stockpile].tileReqs));
 	UI::Inst()->blueprint(Construction::Blueprint(stockpile));
 	UI::Inst()->state(UIRECTPLACEMENT);
 	UI::Inst()->SetCursor('=');
@@ -674,7 +674,7 @@ void UI::ChoosePlantHarvest() {
 void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
 	UI::Inst()->state(UIPLACEMENT);
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetCoordinate, _1, squad));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, Coordinate(1,1)));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('X');
 }
@@ -682,7 +682,7 @@ void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
 void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad) {
 	UI::Inst()->state(UIPLACEMENT);
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, _1, squad));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, Coordinate(1,1)));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('X');
 }
@@ -850,7 +850,7 @@ void UI::ChooseCreateItem() {
 void UI::ChooseDig() {
 	UI::Inst()->state(UIRECTPLACEMENT);
 	UI::Inst()->SetRectCallback(boost::bind(Game::Dig, _1, _2));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, std::set<TileType>()));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('_');
 }
