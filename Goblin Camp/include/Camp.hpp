@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <string>
+
 #include "Coordinate.hpp"
 
 class Camp {
@@ -32,6 +34,8 @@ private:
 	unsigned int buildingCount;
 	bool locked;
 	Coordinate lockedCenter;
+	int tier;
+	std::string name;
 
 public:
 	static Camp* Inst();
@@ -40,4 +44,7 @@ public:
 	void SetCenter(Coordinate);
 	void LockCenter(Coordinate);
 	void UnlockCenter();
+	int GetTier();
+	void UpdateTier();
+	std::string GetName();
 };

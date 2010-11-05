@@ -44,6 +44,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/YesNoDialog.hpp"
 #include "scripting/Event.hpp"
 #include "SpawningPool.hpp"
+#include "Camp.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -705,6 +706,8 @@ void Game::Update() {
 	events->Update(safeMonths > 0);
 
 	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
+
+	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {

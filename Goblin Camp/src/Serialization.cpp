@@ -892,6 +892,8 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & buildingCount;
 	ar & locked;
 	ar & lockedCenter;
+	ar & tier;
+	ar & name;
 }
 
 template<class Archive>
@@ -903,6 +905,8 @@ void Camp::load(Archive & ar, const unsigned int version) {
 		ar & buildingCount;
 		ar & locked;
 		ar & lockedCenter;
+		ar & tier;
+		ar & name;
 	}
 }
 
