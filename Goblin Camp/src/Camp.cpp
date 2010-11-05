@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Camp.hpp"
 #include "Coordinate.hpp"
+#include "Game.hpp"
 
 Camp* Camp::instance = 0;
 
@@ -25,7 +26,9 @@ Camp::Camp() :
 	centerY(220.0),
 	buildingCount(0),
 	locked(false),
-	lockedCenter(0,0)
+	lockedCenter(0,0),
+	tier(0),
+	name("Clearing")
 {}
 
 Camp* Camp::Inst() {
@@ -65,3 +68,36 @@ void Camp::LockCenter(Coordinate newCenter) {
 }
 
 void Camp::UnlockCenter() { locked = false; }
+
+int Camp::GetTier() { return tier; }
+
+void Camp::UpdateTier() {
+	switch (tier) {
+	case 0:
+		if (Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 30 && Game::Inst()->staticConstructionList.size() > 10)
+			++tier;
+		break;
+
+	case 1:
+		if (Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 60 && Game::Inst()->staticConstructionList.size() > 30)
+			++tier;
+		break;
+	case 2: break;
+	case 3: break;
+	case 4: break;
+	case 5: break;
+	case 6: break;
+	default: tier = 0; break;
+	}
+
+	if (tier == 0) name = "Clearing";
+	else if (tier == 1) name = "Camp";
+	else if (tier == 2) name = "Settlement";
+	else if (tier == 3) name = "Outpost";
+	else if (tier == 4) name = "Fort";
+	else if (tier == 5) name = "Stronghold";
+	else if (tier == 6) name = "Citadel";
+
+}
+
+std::string Camp::GetName() { return name; }
