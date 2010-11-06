@@ -66,12 +66,12 @@ local rule explicit-alias ( name : sources * : requirements * : default-build * 
     explicit $(name) ;
 }
 
-local rule explicit-install ( name : sources + : requirements * ) {
+local rule explicit-install ( name : sources * : requirements * ) {
     install $(name) : $(sources) : $(requirements) ;
     explicit $(name) ;
 }
 
-local rule explicit-make ( name : sources + : generating-rule : requirements * ) {
+local rule explicit-make ( name : sources * : generating-rule : requirements * ) {
     make $(name) : $(sources) : $(generating-rule) : $(requirements) ;
     explicit $(name) ;
 }
