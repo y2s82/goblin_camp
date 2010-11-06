@@ -794,7 +794,10 @@ void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
 
 	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, buffer);
 	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, buffer);
-	InternalDrawMapItems("items",                 itemList, upleft, buffer);
+	//TODO: Make this consistent
+	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
+		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, buffer);
+	}
 	InternalDrawMapItems("nature objects",        natureList, upleft, buffer);
 	InternalDrawMapItems("NPCs",                  npcList, upleft, buffer);
 

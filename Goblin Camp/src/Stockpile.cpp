@@ -216,7 +216,7 @@ void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
 						if (!containers[Coordinate(x,y)]->empty()) {
 							boost::weak_ptr<Item> item = *containers[Coordinate(x,y)]->begin();
 							if (item.lock()) {
-								console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), dismantle ? TCODColor::darkGrey : TCODColor::black);
+								item.lock()->Draw(upleft, console);
 							}
 						}
 				}
@@ -242,7 +242,7 @@ bool Stockpile::Full(ItemType type) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				//If theres a free space then it obviously is not full
-				if (containers[Coordinate(ix,iy)]->empty()) return false;
+				if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return false;
 
 				//Check if a container exists for this ItemCategory that isn't full
 				boost::weak_ptr<Item> item = containers[Coordinate(ix,iy)]->GetFirstItem();

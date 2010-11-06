@@ -78,9 +78,7 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-	int graphic;
 	ItemType type;
-	TCODColor color;
 	std::set<ItemCategory> categories;
 	bool flammable;
 	bool attemptedStore;
@@ -93,6 +91,8 @@ private:
 	int resistances[RES_COUNT];
 
 protected:
+	TCODColor color;
+	int graphic;
 	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 	boost::weak_ptr<Item> container;
@@ -115,7 +115,7 @@ public:
 
 	virtual ~Item();
 
-	void Draw(Coordinate, TCODConsole*);
+	virtual void Draw(Coordinate, TCODConsole*);
 	void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 	boost::weak_ptr<Item> ContainedIn();
 	virtual void Position(Coordinate);
