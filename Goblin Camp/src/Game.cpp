@@ -337,7 +337,7 @@ void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
 	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
-
+	
 	if (confirm) {
 		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
@@ -355,6 +355,22 @@ void Game::LoadingScreen() {
 	TCODConsole::root->clear();
 	TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
 	TCODConsole::root->flush();
+}
+
+void Game::ErrorScreen() {
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->clear();
+	TCODConsole::root->print(
+		screenWidth / 2, screenHeight / 2,
+		"There was an error loading the data files, refer to the logfile for more information."
+	);
+	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
+	TCODConsole::root->flush();
+	
+	TCODConsole::waitForKeypress(true);
+	exit(255);
 }
 
 void Game::Init() {
@@ -567,7 +583,7 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	if (filthList.size() == 0) return Coordinate(-1,-1);
 	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
-	for (unsigned int i = 0; i < std::min((unsigned int)10, filthList.size()); ++i) {
+	for (size_t i = 0; i < std::min((size_t)10, filthList.size()); ++i) {
 		int filth = rand() % filthList.size();
 		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
