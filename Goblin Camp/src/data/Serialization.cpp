@@ -1164,7 +1164,7 @@ namespace {
 	
 	template <typename T>
 	T ReadUInt(std::ifstream& stream) {
-		typedef type<sizeof(T) / 2>::uint smaller;
+		typedef typename type<sizeof(T) / 2>::uint smaller;
 		
 		const boost::uint32_t smallerBits = sizeof(smaller) * 8;
 		

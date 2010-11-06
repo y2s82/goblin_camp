@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "SpawningPool.hpp"
-#include "UI\Button.hpp"
+#include "UI/Button.hpp"
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "JobManager.hpp"
