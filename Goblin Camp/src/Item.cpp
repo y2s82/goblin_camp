@@ -78,7 +78,7 @@ Item::~Item() {
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = x - upleft.X();
 	int screeny = y - upleft.Y();
-	if (!container.lock() && screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
+	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
 	}
 }

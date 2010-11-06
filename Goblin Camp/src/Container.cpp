@@ -141,3 +141,14 @@ void Container::RemoveFilth(int amount) {
 }
 
 int Container::ContainsFilth() { return filth; }
+
+void Container::Draw(Coordinate upleft, TCODConsole* console) {
+	int screenx = x - upleft.X();
+	int screeny = y - upleft.Y();
+	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
+		if (!items.empty() && items.begin()->lock())
+			console->putCharEx(screenx, screeny, items.begin()->lock()->Graphic(), items.begin()->lock()->Color(), color);
+		else
+			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
+	}
+}
