@@ -26,6 +26,10 @@ using System.Management;
 using ICSharpCode.SharpZipLib.Zip;
 using ICSharpCode.SharpZipLib.Core;
 
+//
+// Warning: poor quality C# ahead.
+//
+
 namespace crash
 {
     static class Program
@@ -138,6 +142,35 @@ namespace crash
             return wmiSearch.Get();
         }
 
+        static string GetWMIProperty(ManagementObject obj, string property)
+        {
+            if (obj == null)
+            {
+                return "<null>";
+            }
+
+            try
+            {
+                return obj.GetPropertyValue(property).ToString();
+            }
+            catch (Exception e)
+            {
+                return "[Exception occured: " + e.ToString() + "]";
+            }
+        }
+
+        static UInt64 GetWMIIntProperty(ManagementObject obj, string property)
+        {
+            try
+            {
+                return UInt64.Parse(GetWMIProperty(obj, property));
+            }
+            catch (Exception)
+            {
+                return 0;
+            }
+        }
+
         delegate void UIUpdateDelegate();
         static void CreateArchive()
         {
@@ -177,18 +210,18 @@ namespace crash
 
                     foreach (ManagementObject obj in QueryWMI("SELECT * FROM Win32_VideoController"))
                     {
-                        wmiCollectedData.AppendFormat(" * {0} [{1}]\n", obj.GetPropertyValue("Description"), obj.GetPropertyValue("VideoProcessor"));
-                        wmiCollectedData.AppendFormat("   VRAM: {0}MB\n", (UInt32)(obj.GetPropertyValue("AdapterRAM")) / (1024 * 1024));
-                        wmiCollectedData.AppendFormat("   BPP: {0}\n", obj.GetPropertyValue("CurrentBitsPerPixel"));
+                        wmiCollectedData.AppendFormat(" * {0} [{1}]\n", GetWMIProperty(obj, "Description"), GetWMIProperty(obj, "VideoProcessor"));
+                        wmiCollectedData.AppendFormat("   VRAM: {0}MB\n", GetWMIIntProperty(obj, "AdapterRAM") / (1024 * 1024));
+                        wmiCollectedData.AppendFormat("   BPP: {0}\n", GetWMIProperty(obj, "CurrentBitsPerPixel"));
                         wmiCollectedData.AppendFormat(
                             "   Driver: {0} ({1})\n",
-                            obj.GetPropertyValue("DriverVersion"), obj.GetPropertyValue("DriverDate")
+                            GetWMIProperty(obj, "DriverVersion"), GetWMIProperty(obj, "DriverDate")
                         );
-                        foreach (string driver in obj.GetPropertyValue("InstalledDisplayDrivers").ToString().Split(','))
+                        foreach (string driver in GetWMIProperty(obj, "InstalledDisplayDrivers").ToString().Split(','))
                         {
                             wmiCollectedData.AppendFormat("      {0}\n", driver);
                         }
-                        wmiCollectedData.AppendFormat("   Current video mode: {0}\n", obj.GetPropertyValue("VideoModeDescription"));
+                        wmiCollectedData.AppendFormat("   Current video mode: {0}\n", GetWMIProperty(obj, "VideoModeDescription"));
                     }
 
                     //  - attached monitors
@@ -196,10 +229,10 @@ namespace crash
 
                     foreach (ManagementObject obj in QueryWMI("SELECT * FROM Win32_DesktopMonitor"))
                     {
-                        wmiCollectedData.AppendFormat(" * {0}\n", obj.GetPropertyValue("Description"));
+                        wmiCollectedData.AppendFormat(" * {0}\n", GetWMIProperty(obj, "Description"));
                         wmiCollectedData.AppendFormat(
                             "   Resolution: {0} x {1}\n",
-                            obj.GetPropertyValue("ScreenWidth"), obj.GetPropertyValue("ScreenHeight")
+                            GetWMIProperty(obj, "ScreenWidth"), GetWMIProperty(obj, "ScreenHeight")
                         );
                     }
 
@@ -208,13 +241,13 @@ namespace crash
                     
                     foreach (ManagementObject obj in QueryWMI("SELECT * FROM Win32_OperatingSystem WHERE Primary = TRUE"))
                     {
-                        wmiCollectedData.AppendFormat("{0}\n", obj.GetPropertyValue("Caption"));
+                        wmiCollectedData.AppendFormat("{0}\n", GetWMIProperty(obj, "Caption"));
                         wmiCollectedData.AppendFormat(
                             "Physical memory (free/total): {0}MB / {1}MB\n",
-                            (UInt64)(obj.GetPropertyValue("FreePhysicalMemory")) / 1024,
-                            (UInt64)(obj.GetPropertyValue("TotalVisibleMemorySize")) / 1024
+                            GetWMIIntProperty(obj, "FreePhysicalMemory") / 1024,
+                            GetWMIIntProperty(obj, "TotalVisibleMemorySize") / 1024
                         );
-                        wmiCollectedData.AppendFormat("Architecture: {0}\n", obj.GetPropertyValue("OSArchitecture"));
+                        wmiCollectedData.AppendFormat("Architecture: {0}\n", GetWMIProperty(obj, "OSArchitecture"));
 
                         break; // I'm lazy
                     }
