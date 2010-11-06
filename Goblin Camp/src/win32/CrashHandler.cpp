@@ -127,20 +127,7 @@ namespace {
 		}
 	}
 	
-	LONG CALLBACK ExceptionHandler(EXCEPTION_POINTERS *exception) {
-		OutputDebugString(TEXT("[Goblin Camp] Unhandled exception occured."));
-		
-		char dumpPath[MAX_PATH], dumpFilename[MAX_PATH];
-		GetDumpFilename(dumpPath, dumpFilename);
-		CreateDump(exception, dumpPath);
-		
-	#ifdef DEBUG
-		// In debug builds, return to the top-level exception handler (which should bring up postmortem debugger).
-		// External crash handler is meant for end-users, and is kinda useless for developers.
-		return EXCEPTION_CONTINUE_SEARCH;
-	#else
-		// Try to invoke external crash reporter.
-		// Use full path to avoid executable injection issues.
+	LONG ExecuteCrashReporter(char dumpFilename[MAX_PATH]) {
 		std::string crashExe = (Paths::Get(Paths::ExecutableDir) / "goblin-camp-crash.exe").string();
 		
 		PROCESS_INFORMATION procInfo;
@@ -165,7 +152,31 @@ namespace {
 		// Don't let the system keep the process running, or the crash reporter
 		// may not be able to access some files.
 		return EXCEPTION_EXECUTE_HANDLER;
+	}
+	
+	// Debug builds:
+	//   - dumps are created only when there is no debugger attached, otherwise the exception is simply propagated upwards
+	//   - external crash handler is never called (as it's meant for end-users, developers are assumed to know the details of their work environment)
+	//
+	// Release builds:
+	//   - dumps are always created, and exceptions are never propagated upwards (process is always terminated immediately after the exception has been caught)
+	//   - external crash handler is called, if it's possible
+	#ifdef DEBUG
+	#	define GC_CREATE_DUMP(E, P) do { if (!IsDebuggerPresent()) CreateDump((E), (P)); } while (0)
+	#	define GC_REPORT_CRASH()    EXCEPTION_CONTINUE_SEARCH
+	#else
+	#	define GC_CREATE_DUMP(E, P) CreateDump((E), (P))
+	#	define GC_REPORT_CRASH()    ExecuteCrashReporter()
 	#endif
+	
+	LONG CALLBACK ExceptionHandler(EXCEPTION_POINTERS *exception) {
+		OutputDebugString(TEXT("[Goblin Camp] Unhandled exception occured."));
+		
+		char dumpPath[MAX_PATH], dumpFilename[MAX_PATH];
+		GetDumpFilename(dumpPath, dumpFilename);
+		
+		GC_CREATE_DUMP(exception, dumpPath);
+		return GC_REPORT_CRASH();
 	}
 }
 
