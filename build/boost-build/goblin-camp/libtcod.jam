@@ -10,36 +10,45 @@
 
 import property-set ;
 import project ;
-import "class" : new ;
 import modules ;
 
 rule init ( options * ) {
-    modules.poke libtcod : .libtcod-options : [ property-set.create $(options) ] ;
+    modules.poke $(__name__) : .options : [ property-set.create $(options) ] ;
 }
 
-rule use-project ( ) {
-    project.push-current [ project.current ] ;
-    
-    local reqs = ;
-    local usage-reqs = ;
-    local debug-name = ;
-    local release-name = ;
-    
-    if $(.libtcod-options) {
-        local inc    = [ $(.libtcod-options).get <include> ] ;
-        local lib    = [ $(.libtcod-options).get <library> ] ;
-        debug-name   = [ $(.libtcod-options).get <debug-name> ] ;
-        release-name = [ $(.libtcod-options).get <release-name> ] ;
+local rule create-project ( requirements * : usage-requirements * ) {
+    # Common options
+    if $(.options) {
+        local inc = [ $(.options).get <include> ] ;
+        local lib = [ $(.options).get <library> ] ;
         
-        reqs = <include>$(inc) <search>$(lib) ;
-        usage-reqs = <include>$(inc) ;
+        requirements       += <include>$(inc) <search>$(lib) ;
+        usage-requirements += <include>$(inc) ;
     }
     
+    project.push-current [ project.current ] ;
     project.initialize $(__name__) ;
-    project libtcod
-        : requirements $(reqs)
-        : usage-requirements $(usage-reqs)
-    ;
+    project $(__name__) : requirements $(requirements) : usage-requirements $(usage-requirements) ;
+    
+    define-targets ;
+    
+    project.pop-current ;
+}
+
+#################
+
+rule use-project ( ) {
+    create-project ;
+}
+
+local rule define-targets ( ) {
+    local name-dbg = ;
+    local name-rls = ;
+    
+    if $(.options) {
+        name-dbg = [ $(.options).get <debug-name>   ] ;
+        name-rls = [ $(.options).get <release-name> ] ;
+    }
     
     if $(debug-name) && $(release-name) {
         lib libtcod : : <variant>release <name>$(release-name) ;
@@ -47,8 +56,6 @@ rule use-project ( ) {
     } else {
         lib libtcod : : <tag>@libtcod-tag ;
     }
-    
-    project.pop-current ;
 }
 
 rule libtcod-tag ( name : type ? : property-set ) {

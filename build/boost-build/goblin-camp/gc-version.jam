@@ -18,7 +18,12 @@ generators.register-standard gc-version.generate : CPP_IN : CPP ;
 generators.register-standard gc-version.generate : PLIST_IN : PLIST ;
 
 toolset.flags gc-version.generate APPEND_HG <variant>debug   : yes ;
-toolset.flags gc-version.generate APPEND_HG <variant>release : no ;
+
+if --with-revid in [ modules.peek : ARGV ] {
+    toolset.flags gc-version.generate APPEND_HG <variant>release : yes ;
+} else {
+    toolset.flags gc-version.generate APPEND_HG <variant>release : no ;
+}
 
 GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
 GC_VERSION       = [ modules.peek : GC_VERSION ] ;

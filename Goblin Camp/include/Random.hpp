@@ -15,22 +15,35 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-// Reworked logging module.
-// Less verbose in usage (uses macros, though) -- LOG(foo), LOG(foo << bar),
-// with more automatic formatting (file, line, function) and no more
-// explicit flushing.
+#include <boost/random/mersenne_twister.hpp>
+#include <libtcod.hpp>
 
-#include <fstream>
-
-namespace Logger {
-	extern std::ofstream log;
+namespace Random {
+	struct Dice {
+		Dice(unsigned int, unsigned int = 1, float = 1.f, float = 0.f);
+		Dice(const TCOD_dice_t&);
+		int Roll();
+		int Max();
+		int Min();
+	private:
+		unsigned int dices;
+		unsigned int faces;
+		float multiplier;
+		float offset;
+	};
 	
-	void OpenLogFile(const std::string&);
-	void CloseLogFile();
+	struct Generator {
+		Generator(unsigned int = 0);
+		void SetSeed(unsigned int = 0);
+		unsigned int GetSeed() const;
+		int Generate(int, int);
+		double Generate();
+	private:
+		boost::mt19937 generator;
+		unsigned int seed;
+	};
 	
-	std::ofstream& Prefix(const char* = NULL, int = 0, const char* = NULL);
-	const char* Suffix();
+	void Init();
+	int Generate(int, int);
+	double Generate();
 }
-
-#define LOG_FUNC(x, func) Logger::Prefix(__FILE__, __LINE__, func) << x << Logger::Suffix()
-#define LOG(x) LOG_FUNC(x, __FUNCTION__)
