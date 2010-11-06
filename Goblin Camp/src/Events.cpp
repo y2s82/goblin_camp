@@ -18,7 +18,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
-#include "Random.hpp"
 #include "Announce.hpp"
 #include "Events.hpp"
 #include "Game.hpp"
@@ -41,17 +40,17 @@ map(vmap),
 
 void Events::Update(bool safe) {
 	if (!safe) ++timeSinceHostileSpawn;
-	if (!safe && (Random::Generate(0, UPDATES_PER_SECOND * 60 * 15) == 0 || timeSinceHostileSpawn > UPDATES_PER_SECOND * 60 * 25)) {
+	if (!safe && (rand() % (UPDATES_PER_SECOND * 60 * 15) == 0 || timeSinceHostileSpawn > UPDATES_PER_SECOND * 60 * 25)) {
 		SpawnHostileMonsters();
 	}
 
-	if (Random::Generate(0, UPDATES_PER_SECOND * 60 * 2) == 0) {
+	if (rand() % (UPDATES_PER_SECOND * 60 * 2) == 0) {
 		SpawnBenignFauna();
 	}
 }
 
 void Events::SpawnHostileMonsters() {
-	int hostileID = Random::Generate(0, hostileSpawningMonsters.size() - 1);
+	int hostileID = rand() % hostileSpawningMonsters.size();
 	NPCType monsterType = hostileSpawningMonsters[hostileID];
 	int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
 
@@ -64,16 +63,16 @@ void Events::SpawnHostileMonsters() {
 
 	Coordinate a,b;
 
-	switch (Random::Generate(0, 3)) {
+	switch (rand() % 4) {
 	case 0:
 		a.X(0);
-		a.Y(Random::Generate(0, map->Height() - 1) - 20);
+		a.Y(rand() % map->Height() - 20);
 		b.X(1);
 		b.Y(a.Y() + 20);
 		break;
 
-	case 1:
-		a.X(Random::Generate(0, map->Width() - 1) - 20);
+	case 1: 
+		a.X(rand() % map->Width() - 20);
 		a.Y(0);
 		b.X(a.X() + 20);
 		b.Y(1);
@@ -81,13 +80,13 @@ void Events::SpawnHostileMonsters() {
 
 	case 2:
 		a.X(map->Width() - 2);
-		a.Y(Random::Generate(0, map->Height() - 1) - 20);
+		a.Y(rand() % map->Height() - 20);
 		b.X(map->Width() - 1);
 		b.Y(a.Y() + 20);
 		break;
 
 	case 3:
-		a.X(Random::Generate(0, map->Width() - 1) - 20);
+		a.X(rand() % map->Width() - 20);
 		a.Y(map->Height() - 2);
 		b.X(a.X() + 20);
 		b.Y(map->Height() - 1);
@@ -102,12 +101,12 @@ void Events::SpawnHostileMonsters() {
 void Events::SpawnBenignFauna() {
 	if (peacefulAnimals.size() > 0 && Game::Inst()->PeacefulFaunaCount() < 20) {
 		//Generate benign fauna
-		for (int i = 0; i < Random::Generate(0, 10); ++i) {
-			int type = Random::Generate(0, peacefulAnimals.size() - 1);
+		for (int i = 0; i < (rand() % 10) + 1; ++i) {
+			int type = rand() % peacefulAnimals.size();
 			Coordinate target;
 			do {
-				target.X(Random::Generate(0, map->Width() - 1));
-				target.Y(Random::Generate(0, map->Height() - 1));
+				target.X(rand() % map->Width());
+				target.Y(rand() % map->Height());
 			} while (!map->Walkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
 				|| map->Type(target.X(), target.Y()) != TILEGRASS);
 			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);

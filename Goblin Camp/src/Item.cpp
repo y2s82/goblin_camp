@@ -23,7 +23,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #endif
 
-#include "Random.hpp"
 #include "Item.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
@@ -213,7 +212,7 @@ void Item::UpdateVelocity() {
 						return;
 					}
 					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {
-						if (Random::Generate(0, std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+						if (rand() % std::max(1, flightPath.back().height) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
 							Attack attack = GetAttack();
 							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
