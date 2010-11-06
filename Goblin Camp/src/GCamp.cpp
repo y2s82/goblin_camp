@@ -655,7 +655,7 @@ void ModsMenu() {
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 	
 	const std::list<Mods::Metadata>& modList = Mods::GetLoaded();
-	const int subH = modList.size() * 5;
+	const int subH = modList.size() * 9;
 	TCODConsole sub(w - 2, std::max(1, subH));
 
 	int currentY = 0;
@@ -669,11 +669,11 @@ void ModsMenu() {
 		
 		sub.setAlignment(TCOD_LEFT);
 		sub.setDefaultForeground(TCODColor::white);
-		sub.print(3, currentY + 1, "Name:    %s", mod.name.c_str());
-		sub.print(3, currentY + 2, "Author:  %s", mod.author.c_str());
-		sub.print(3, currentY + 3, "Version: %s", mod.version.c_str());
+		sub.print(3, currentY + 2, "Name:    %s", mod.name.c_str());
+		sub.print(3, currentY + 4, "Author:  %s", mod.author.c_str());
+		sub.print(3, currentY + 6, "Version: %s", mod.version.c_str());
 		
-		currentY += 5;
+		currentY += 9;
 	}
 
 	TCOD_key_t   key;
