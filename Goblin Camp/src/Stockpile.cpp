@@ -241,12 +241,13 @@ bool Stockpile::Full(ItemType type) {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
+				Coordinate location(ix,iy);
 				//If theres a free space then it obviously is not full
-				if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return false;
+				if (containers[location]->empty() && !reserved[location]) return false;
 
 				//Check if a container exists for this ItemCategory that isn't full
-				boost::weak_ptr<Item> item = containers[Coordinate(ix,iy)]->GetFirstItem();
-				if (item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				boost::weak_ptr<Item> item = containers[location]->GetFirstItem();
+				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
 					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && !container->Full()) return false;
 				}
