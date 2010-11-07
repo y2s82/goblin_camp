@@ -16,8 +16,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 // precompiled header
-#ifdef BOOST_BUILD_PCH_ENABLED
-// STL/CRT
+#if defined(BOOST_BUILD_PCH_ENABLED) && !defined(GC_SKIP_PCH)
+// Python
+#	include "scripting/_python.hpp"
+// STL
 #	include <vector>
 #	include <deque>
 #	include <map>
@@ -27,9 +29,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <string>
 #	include <sstream>
 #	include <fstream>
-#	include <iostream>
+#	include <algorithm>
+#	include <functional>
+#	include <numeric>
+#	include <memory>
+#	include <limits>
+#	include <iterator>
+// CRT
+#	include <ctime>
 #	include <cmath>
 #	include <cstdlib>
+#	include <cstring>
+#	include <cstdarg>
 // Boost
 #	pragma warning(push, 2)
 #		include <boost/thread/thread.hpp>
@@ -62,6 +73,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/lexical_cast.hpp>
 #		include <boost/date_time/local_time/local_time.hpp>
 #		include <boost/foreach.hpp>
+#		include <boost/assign/list_inserter.hpp>
+#		include <boost/assert.hpp>
+#		include <boost/unordered_map.hpp>
+#		include <boost/cstdint.hpp>
+#		include <boost/numeric/ublas/matrix.hpp>
+#		include <boost/random/mersenne_twister.hpp>
+#		include <boost/random/uniform_int.hpp>
+#		include <boost/random/uniform_01.hpp>
+#		include <boost/random/variate_generator.hpp>
 #		include <boost/filesystem.hpp>
 #	pragma warning(pop)
 // libtcod
