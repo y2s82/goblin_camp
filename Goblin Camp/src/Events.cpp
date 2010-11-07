@@ -66,13 +66,13 @@ void Events::SpawnHostileMonsters() {
 	switch (rand() % 4) {
 	case 0:
 		a.X(0);
-		a.Y(rand() % map->Height() - 20);
+		a.Y(rand() % (map->Height() - 20));
 		b.X(1);
 		b.Y(a.Y() + 20);
 		break;
 
 	case 1: 
-		a.X(rand() % map->Width() - 20);
+		a.X(rand() % (map->Width() - 20));
 		a.Y(0);
 		b.X(a.X() + 20);
 		b.Y(1);
@@ -80,13 +80,13 @@ void Events::SpawnHostileMonsters() {
 
 	case 2:
 		a.X(map->Width() - 2);
-		a.Y(rand() % map->Height() - 20);
+		a.Y(rand() % (map->Height() - 20));
 		b.X(map->Width() - 1);
 		b.Y(a.Y() + 20);
 		break;
 
 	case 3:
-		a.X(rand() % map->Width() - 20);
+		a.X(rand() % (map->Width() - 20));
 		a.Y(map->Height() - 2);
 		b.X(a.X() + 20);
 		b.Y(map->Height() - 1);
