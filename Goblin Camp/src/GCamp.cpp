@@ -278,7 +278,7 @@ int MainMenu() {
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
 
 		TCODConsole::root->setDefaultForeground(TCODColor::celadon);
-		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
+		TCODConsole::root->print(edgex+width/2, edgey-3, Globals::gameVersion);
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 
 		for (unsigned int idx = 0; idx < entryCount; ++idx) {
