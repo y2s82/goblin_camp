@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/algorithm/string.hpp>
 
+#include "Random.hpp"
 #include "StockManager.hpp"
 #include "Item.hpp"
 #include "Construction.hpp"
@@ -163,7 +164,7 @@ void StockManager::Update() {
 					difference -= bogIronJobs.size();
 					if (designatedBog.size() > 0) {
 						for (int i = bogIronJobs.size(); i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
-							int cIndex = rand() % designatedBog.size();
+							int cIndex = Random::Generate(0, designatedBog.size() - 1);
 							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
 							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
 							ironJob->tasks.push_back(Task(MOVE, coord));
@@ -196,8 +197,8 @@ void StockManager::Update() {
 								}
 								if (jobsFound < jobCount) {
 									for (int i = 0; i < jobCount - jobsFound; ++i) {
-										worki->second.lock()->AddJob(*prodi);									
-										if (rand() % 10 < 8) --difference; //Adds a bit of inexactness (see orcyness) to production
+										worki->second.lock()->AddJob(*prodi);
+										if (Random::Generate(0, 9) < 8) --difference; //Adds a bit of inexactness (see orcyness) to production
 									}
 								}
 						}
