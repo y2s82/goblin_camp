@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include "Random.hpp"
 #include "NPC.hpp"
 #include "Coordinate.hpp"
 #include "JobManager.hpp"
@@ -99,9 +100,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	inventory->SetInternal();
 	Position(pos,true);
 
-	thirst = thirst - (THIRST_THRESHOLD / 2) + rand() % (THIRST_THRESHOLD);
-	hunger = hunger - (HUNGER_THRESHOLD / 2) + rand() % (HUNGER_THRESHOLD);
-	weariness = weariness - (WEARY_THRESHOLD / 2) + rand() % (WEARY_THRESHOLD);
+	thirst = thirst - (THIRST_THRESHOLD / 2) + Random::Generate(0, THIRST_THRESHOLD - 1);
+	hunger = hunger - (HUNGER_THRESHOLD / 2) + Random::Generate(0, HUNGER_THRESHOLD - 1);
+	weariness = weariness - (WEARY_THRESHOLD / 2) + Random::Generate(0, WEARY_THRESHOLD - 1);
 
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
@@ -291,10 +292,10 @@ void NPC::Update() {
 		if (hunger >= HUNGER_THRESHOLD) AddEffect(HUNGER);
 		else RemoveEffect(HUNGER);
 
-		if (thirst > THIRST_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
+		if (thirst > THIRST_THRESHOLD && Random::Generate(0, UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleThirst();
 		} else if (thirst > THIRST_THRESHOLD * 5) Kill();
-		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
+		if (hunger > HUNGER_THRESHOLD && Random::Generate(0, UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleHunger();
 		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
 	}
@@ -319,7 +320,7 @@ void NPC::Update() {
 		attacki->Update();
 	}
 
-	if (rand() % UPDATES_PER_SECOND == 0 && health < maxHealth) ++health;
+	if (Random::Generate(0, UPDATES_PER_SECOND - 1) == 0 && health < maxHealth) ++health;
 }
 
 void NPC::UpdateStatusEffects() {
@@ -381,12 +382,12 @@ AiThink NPC::Think() {
 	} 
 	while (timeCount > UPDATES_PER_SECOND) {
 
-		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
+		if (Random::Generate(0, 1) == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock()) {
 			JobManager::Inst()->NPCNotWaiting(uid);
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
-			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
+			if (Random::Generate(0, 9) <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
 				aggressor.reset();
 				TaskFinished(TASKFAILFATAL);
 			}
@@ -420,13 +421,13 @@ AiThink NPC::Think() {
 				to our current target. Near means max 5 tiles away, visible and
 				walkable. Once we have our target we can actually switch over
 				to a normal MOVE task. In case we can't find a visible tile,
-				we'll allow a non LOS one*/				
+				we'll allow a non LOS one*/
 				{bool checkLOS = true;
 				for (int i = 0; i < 2; ++i) {
 					tmp = 0;
 					while (tmp++ < 10) {
-						int tarX = ((rand() % 11) - 5) + currentTarget().X();
-						int tarY = ((rand() % 11) - 5) + currentTarget().Y();
+						int tarX = Random::Generate(-5, 5) + currentTarget().X();
+						int tarY = Random::Generate(-5, 5) + currentTarget().Y();
 						if (tarX < 0) tarX = 0;
 						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 						if (tarY < 0) tarY = 0;
@@ -704,7 +705,7 @@ MOVENEARend:
 					break;
 				}
 
-				if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
+				if (!taskBegun || Random::Generate(0, UPDATES_PER_SECOND * 2 - 1) == 0) { //Repath every ~2 seconds
 					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
@@ -815,7 +816,7 @@ MOVENEARend:
 
 			case BOGIRON:
 				if (Map::Inst()->Type(x, y) == TILEBOG) {
-					if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+					if (Random::Generate(0, UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
 
@@ -997,7 +998,7 @@ MOVENEARend:
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
 				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
-				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
+				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(0, 9), 0)));
 				jobs.push_back(idleJob);
 				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
 				else run = true;
@@ -1414,7 +1415,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 				if (attacki->Cooldown() <= 0) {
 					attacki->ResetCooldown();
 					//First check if the target dodges the attack
-					if (rand() % 100 < npc->effectiveStats[DODGE]) {
+					if (Random::Generate(0, 99) < npc->effectiveStats[DODGE]) {
 #ifdef DEBUG
 						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
 #endif
@@ -1436,11 +1437,11 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
 #endif
 					if (effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
-						if (attack.Type() == DAMAGE_BLUNT || rand() % 2 == 0) {
+						if (attack.Type() == DAMAGE_BLUNT || Random::Generate(0, 1) == 0) {
 							Coordinate tar;
 							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
 							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-							npc->CalculateFlightPath(npc->Position()+tar, rand() % 20 + 25);
+							npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
 							npc->pathIndex = -1;
 						}
 					}
@@ -1500,7 +1501,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	#endif
 
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
-		if (rand() % 100 < attack->StatusEffects()->at(effecti).second) {
+		if (Random::Generate(0, 99) < attack->StatusEffects()->at(effecti).second) {
 			AddEffect(attack->StatusEffects()->at(effecti).first);
 		}
 	}
@@ -1508,8 +1509,10 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	if (health <= 0) Kill();
 
 	if (damage > 0) {
-		Game::Inst()->CreateBlood(Coordinate(Position().X() + ((rand() % 3) - 1), 
-			Position().Y() + ((rand() % 3) - 1)));
+		Game::Inst()->CreateBlood(Coordinate(
+			Position().X() + Random::Generate(-1, 1),
+			Position().Y() + Random::Generate(-1, 1)
+		));
 		if (aggr.lock()) aggressor = aggr;
 	}
 }
@@ -1662,7 +1665,7 @@ void NPC::UpdateVelocity() {
 						flightPath.clear();
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && Random::Generate(0, 9) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 						health -= velocity/5;
 						AddEffect(CONCUSSION);
 						SetVelocity(0);

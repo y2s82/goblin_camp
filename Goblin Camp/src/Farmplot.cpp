@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "Random.hpp"
 #include "Farmplot.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
@@ -67,10 +68,10 @@ void FarmPlot::Update() {
 		++growth[containerIt->first];
 		//Normal plants ought to grow seed -> young plant -> mature plant -> fruits, which means 3
 		//growths before giving fruit. 3 * 2 months means 6 months from seed to fruits
-		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && rand() % 5 == 0) {
+		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && Random::Generate(0, 4) == 0) {
 			boost::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
 			if (plant.lock() && !plant.lock()->Reserved()) {
-				if (rand() % 10 == 0) { //Chance for the plant to die
+				if (Random::Generate(0, 9) == 0) { //Chance for the plant to die
 					containerIt->second->RemoveItem(plant);
 					Game::Inst()->CreateItem(plant.lock()->Position(), Item::StringToItemType("Dead plant"), true);
 					Game::Inst()->RemoveItem(plant);
@@ -114,7 +115,7 @@ int FarmPlot::Use() {
 			seedsLeft = false;
 			if (containerIt->first.X() >= 0 && containerIt->first.Y() >= 0 && containerIt->second) {
 				for (std::map<ItemType, bool>::iterator seedi = allowedSeeds.begin(); seedi != allowedSeeds.end(); ++seedi) {
-					growth[containerIt->first] = -(MONTH_LENGTH / 2) + rand() % (MONTH_LENGTH);
+					growth[containerIt->first] = -(MONTH_LENGTH / 2) + Random::Generate(0, MONTH_LENGTH - 1);
 					if (seedi->second) {
 						boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first, Center());
 						if (seed.lock()) {
