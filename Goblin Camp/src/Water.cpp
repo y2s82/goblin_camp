@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include "Random.hpp"
 #include "Logger.hpp"
 #include "Water.hpp"
 #include "Game.hpp"
@@ -99,7 +100,7 @@ void WaterNode::Update() {
 				}
 			}
 
-		} else if (rand() % 100 == 0) {
+		} else if (Random::Generate(0, 99) == 0) {
 			if (depth > 0) --depth;
 		}
 	}
@@ -130,8 +131,8 @@ void WaterNode::UpdateGraphic() {
 	if (color.b < col) ++color.b;
 	if (color.g > col/2) --color.g;
 	if (color.b > col) --color.b;
-	if (rand() % 5 == 0 && color.b < 247) color.b += 8;
-	if (rand() % 10000 == 0) color.g += rand() % 25;
+	if (Random::Generate(0, 4) == 0 && color.b < 247) color.b += 8;
+	if (Random::Generate(0, 9999) == 0) color.g += Random::Generate(0, 24);
 }
 
 Coordinate WaterNode::Position() {return Coordinate(x,y);}
