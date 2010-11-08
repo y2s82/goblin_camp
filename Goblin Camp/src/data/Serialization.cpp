@@ -1247,11 +1247,11 @@ bool Game::LoadGame(const std::string& filename) {
 		
 		// Read and verify the file header
 		if (ReadUInt<boost::uint32_t>(ifs) != saveMagicConst) {
-			throw std::exception("Invalid magic value.");
+			throw std::runtime_error("Invalid magic value.");
 		}
 		
 		if (ReadUInt<boost::uint8_t>(ifs) != fileFormatConst) {
-			throw std::exception("Invalid file format value.");
+			throw std::runtime_error("Invalid file format value.");
 		}
 		
 		// reserved values

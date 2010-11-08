@@ -33,6 +33,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <memory>
 #	include <limits>
 #	include <iterator>
+#	include <exception>
+#	include <stdexcept>
 // CRT
 #	include <ctime>
 #	include <cmath>
