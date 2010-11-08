@@ -166,7 +166,7 @@ namespace {
 	#	define GC_REPORT_CRASH()    EXCEPTION_CONTINUE_SEARCH
 	#else
 	#	define GC_CREATE_DUMP(E, P) CreateDump((E), (P))
-	#	define GC_REPORT_CRASH()    ExecuteCrashReporter()
+	#	define GC_REPORT_CRASH()    ExecuteCrashReporter(dumpFilename)
 	#endif
 	
 	LONG CALLBACK ExceptionHandler(EXCEPTION_POINTERS *exception) {

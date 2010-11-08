@@ -17,8 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 // precompiled header
 #if defined(BOOST_BUILD_PCH_ENABLED) && !defined(GC_SKIP_PCH)
-// Python
-#	include "scripting/_python.hpp"
 // STL
 #	include <vector>
 #	include <deque>
