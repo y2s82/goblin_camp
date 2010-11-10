@@ -42,18 +42,18 @@ map(vmap),
 void Events::Update(bool safe) {
 	if (!safe) {
 		++timeSinceHostileSpawn;
-		if (Random::Generate(0, UPDATES_PER_SECOND * 60 * 15 - 1) == 0 || timeSinceHostileSpawn > (UPDATES_PER_SECOND * 60 * 25)) {
+		if (Random::Generate(UPDATES_PER_SECOND * 60 * 15 - 1) == 0 || timeSinceHostileSpawn > (UPDATES_PER_SECOND * 60 * 25)) {
 			SpawnHostileMonsters();
 		}
 	}
 
-	if (Random::Generate(0, UPDATES_PER_SECOND * 60 * 2 - 1) == 0) {
+	if (Random::Generate(UPDATES_PER_SECOND * 60 * 2 - 1) == 0) {
 		SpawnBenignFauna();
 	}
 }
 
 void Events::SpawnHostileMonsters() {
-	int hostileID = Random::Generate(0, hostileSpawningMonsters.size() - 1);
+	unsigned hostileID = Random::Choose(hostileSpawningMonsters);
 	NPCType monsterType = hostileSpawningMonsters[hostileID];
 	int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
 
@@ -66,16 +66,16 @@ void Events::SpawnHostileMonsters() {
 
 	Coordinate a,b;
 
-	switch (Random::Generate(0, 3)) {
+	switch (Random::Generate(3)) {
 	case 0:
 		a.X(0);
-		a.Y(Random::Generate(0, map->Height() - 21));
+		a.Y(Random::Generate(map->Height() - 21));
 		b.X(1);
 		b.Y(a.Y() + 20);
 		break;
 
 	case 1:
-		a.X(Random::Generate(0, map->Width() - 21));
+		a.X(Random::Generate(map->Width() - 21));
 		a.Y(0);
 		b.X(a.X() + 20);
 		b.Y(1);
@@ -83,13 +83,13 @@ void Events::SpawnHostileMonsters() {
 
 	case 2:
 		a.X(map->Width() - 2);
-		a.Y(Random::Generate(0, map->Height() - 21));
+		a.Y(Random::Generate(map->Height() - 21));
 		b.X(map->Width() - 1);
 		b.Y(a.Y() + 20);
 		break;
 
 	case 3:
-		a.X(Random::Generate(0, map->Width() - 21));
+		a.X(Random::Generate(map->Width() - 21));
 		a.Y(map->Height() - 2);
 		b.X(a.X() + 20);
 		b.Y(map->Height() - 1);
@@ -105,11 +105,11 @@ void Events::SpawnBenignFauna() {
 	if (peacefulAnimals.size() > 0 && Game::Inst()->PeacefulFaunaCount() < 20) {
 		//Generate benign fauna
 		for (int i = 0; i < Random::Generate(1, 10); ++i) {
-			int type = Random::Generate(0, peacefulAnimals.size() - 1);
+			unsigned type = Random::Choose(peacefulAnimals);
 			Coordinate target;
 			do {
-				target.X(Random::Generate(0, map->Width() - 1));
-				target.Y(Random::Generate(0, map->Height() - 1));
+				target.X(Random::Generate(map->Width() - 1));
+				target.Y(Random::Generate(map->Height() - 1));
 			} while (!map->Walkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
 				|| map->Type(target.X(), target.Y()) != TILEGRASS);
 			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);

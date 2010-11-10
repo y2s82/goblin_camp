@@ -57,7 +57,7 @@ void SpawningPool::Update() {
 
 		//Generate jobs
 
-		if (dumpFilth && Random::Generate(0, UPDATES_PER_SECOND * 5 - 1) == 0) {
+		if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			if (Game::Inst()->filthList.size() > 0) {
 				boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
 				filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
@@ -97,7 +97,7 @@ void SpawningPool::Update() {
 			}
 		}
 		if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
-			Random::Generate(0, UPDATES_PER_SECOND * 5 - 1) == 0) {
+			Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 				boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
 				corpseDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 				corpseDumpJob->tasks.push_back(Task(MOVE));
@@ -172,7 +172,7 @@ void SpawningPool::Update() {
 				++spawns;
 				if (filth >= corpses*2) {
 					filth -= 2;
-					if (Random::Generate(0, 2) < 2) {
+					if (Random::Generate(2) < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
 						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -182,7 +182,7 @@ void SpawningPool::Update() {
 				} else if (filth >= corpses) {
 					--filth;
 					--corpses;
-					if (Random::Generate(0, 1)) {
+					if (Random::GenerateBool()) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
 						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -191,7 +191,7 @@ void SpawningPool::Update() {
 					}
 				} else {
 					corpses -= 2;
-					if (Random::Generate(0, 2) < 2) {
+					if (Random::Generate(2) < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
 						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -200,7 +200,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (Random::Generate(0, int(std::sqrt((double)spawns))) == 0) Expand();
+				if (Random::Generate(int(std::sqrt((double)spawns))) == 0) Expand();
 			}
 		}
 	}
@@ -209,11 +209,11 @@ void SpawningPool::Update() {
 void SpawningPool::Expand() {
 	Coordinate location(-1,-1);
 	for (int i = 0; i < 10; ++i) {
-		location = Coordinate((a.X()-1) + Random::Generate(0, ((b.X()-a.X())+3)), (a.Y()-1) + Random::Generate(0, ((b.Y()-a.Y())+3)));
+		location = Coordinate((a.X()-1) + Random::Generate(((b.X()-a.X())+3)), (a.Y()-1) + Random::Generate(((b.Y()-a.Y())+3)));
 		if (Map::Inst()->GetConstruction(location.X(), location.Y()) != uid) {
 			if (Map::Inst()->GetConstruction(location.X()-1, location.Y()) == uid) break;
-			if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;		
-			if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;		
+			if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;
+			if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;
 			if (Map::Inst()->GetConstruction(location.X(), location.Y()+1) == uid) break;
 		}
 		location = Coordinate(-1,-1);

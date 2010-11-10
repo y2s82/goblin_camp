@@ -60,9 +60,9 @@ void Tile::type(TileType newType) {
 	_type = newType;
 	if (_type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true;
-		originalForeColor = TCODColor(Random::Generate(0, 49), 127, 0);
+		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
 		backColor = TCODColor(0, 0, 0);
-		switch (Random::Generate(0, 9)) {
+		switch (Random::Generate(9)) {
 		case 0:
 		case 1:
 		case 2:
@@ -81,7 +81,7 @@ void Tile::type(TileType newType) {
 		_moveCost = Random::Generate(1, 3);
 	} else if (_type == TILEBOG) {
 		vis = true; walkable = true; buildable = false; low = false;
-		switch (Random::Generate(0, 9)) {
+		switch (Random::Generate(9)) {
 		case 0:
 		case 1:
 		case 2:
@@ -93,15 +93,12 @@ void Tile::type(TileType newType) {
 		case 8: graphic = ':'; break;
 		case 9: graphic = '\''; break;
 		}
-		originalForeColor = TCODColor(Random::Generate(0, 184), 127, 70);
+		originalForeColor = TCODColor(Random::Generate(184), 127, 70);
 		backColor = TCODColor(60,30,20);
 		_moveCost = Random::Generate(1, 5);
 	} else if (_type == TILEROCK) {
 		vis = true; walkable = true; buildable = true; low = false;
-		switch (Random::Generate(0, 1)) {
-		case 0: graphic = '.'; break;
-		case 1: graphic = ','; break;
-		}
+		graphic = (Random::GenerateBool() ? ',' : '.');
 		originalForeColor = TCODColor(Random::Generate(182, 182 + 19), Random::Generate(182, 182 + 19), Random::Generate(182, 182 + 19));
 		backColor = TCODColor(0, 0, 0);
 	} else { vis = false; walkable = false; buildable = false; }

@@ -166,21 +166,50 @@ namespace Random {
 	/**
 		Generates a random integer from range [start, end] using uniform distribution.
 		
-		\param[in] start Start of the range.
-		\param[in] end   End of the range.
-		\returns         Random number from specified range.
+		\todo            Use half-open interval?
+		\param[in] start The start of the range.
+		\param[in] end   The end of the range.
+		\returns         A random number from specified range.
 	*/
 	int Generator::Generate(int start, int end) {
 		return InternalGenerate(generator, boost::uniform_int<>(start, end));
 	}
-
+	
+	/**
+		Generates a random integer from range [0, end] using uniform distribution.
+		
+		\param[in] end   The end of the range.
+		\returns         A random number from specified range.
+	*/
+	int Generator::Generate(int end) {
+		return Generate(0, end);
+	}
+	
 	/**
 		Generates a random float from range [0, 1] using uniform distribution.
 		
-		\returns Random number from range [0, 1].
+		\returns A random number from range [0, 1].
 	*/
 	double Generator::Generate() {
 		return InternalGenerate(generator, boost::uniform_01<>());
+	}
+	
+	/**
+		Generates a random boolean.
+		
+		\returns A random boolean.
+	*/
+	bool Generator::GenerateBool() {
+		return Generate(0, 1) ? true : false;
+	}
+	
+	/**
+		Generates a random sign.
+		
+		\returns Either 1 or -1.
+	*/
+	short Generator::Sign() {
+		return GenerateBool() ? 1 : -1;
 	}
 	
 	/**
@@ -197,8 +226,42 @@ namespace Random {
 		return Globals::generator.Generate(start, end);
 	}
 	
+	/** \copydoc Generator::Generate(int) */
+	int Generate(int end) {
+		return Globals::generator.Generate(end);
+	}
+	
 	/** \copydoc Generator::Generate() */
 	double Generate() {
 		return Globals::generator.Generate();
 	}
+	
+	/** \copydoc Generator::GenerateBool */
+	bool GenerateBool() {
+		return Globals::generator.GenerateBool();
+	}
+	
+	/** \copydoc Generator::Sign */
+	short Sign() {
+		return Globals::generator.Sign();
+	}
+	
+	/**
+		\fn T Sign(const T&)
+			Multiplies the expression by a random sign.
+			
+			\see Generator::Sign
+			\tparam    T    The expression type.
+			\param[in] expr The expression value.
+			\returns        The expression value multiplied by either 1 or -1.
+	*/
+	
+	/**
+		\fn unsigned Choose(const T&)
+			Chooses a random element from given STL container.
+			
+			\tparam T            The container type (must implement the <tt>Random Access Container</tt> concept).
+			\param[in] container The container.
+			\returns             The index of the chosen element.
+	*/
 }
