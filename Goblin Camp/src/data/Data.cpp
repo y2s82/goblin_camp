@@ -31,6 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
+#include "data/Config.hpp"
 #include "data/Data.hpp"
 #include "data/Paths.hpp"
 #include "Logger.hpp"
@@ -167,6 +168,17 @@ namespace {
 			LOG_FUNC("Error while writing to file: " << e.what(), "CreateDefault");
 		}
 	}
+	
+	/**
+		Ensures that \ref Config::Save won't throw at exit.
+	*/
+	void SaveConfig() {
+		try {
+			Config::Save();
+		} catch (...) {
+			// pass
+		}
+	}
 }
 
 namespace Data {
@@ -268,7 +280,10 @@ namespace Data {
 		} catch (const py::error_already_set&) {
 			LOG("Cannot load user config.");
 			Script::LogException();
+			return;
 		}
+		
+		atexit(SaveConfig);
 	}
 	
 	/**
