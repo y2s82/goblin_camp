@@ -40,11 +40,51 @@ namespace Globals {
 	Script::API::LoggerStream stream;
 }
 
+namespace {
+	void ExtractException(py::object& excType, py::object& excValue, py::object& excTB) {
+		PyObject *rawExcType, *rawExcValue, *rawExcTB;
+		PyErr_Fetch(&rawExcType, &rawExcValue, &rawExcTB);
+		
+		excType  = py::object(py::handle<>(rawExcType));
+		
+		// "The value and traceback object may be NULL even when the type object is not."
+		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
+		
+		// So, set them to None initially.
+		excValue = py::object();
+		excTB    = py::object();
+		
+		// And convert to py::objects when they're not NULL.
+		if (rawExcValue) {
+			excValue = py::object(py::handle<>(rawExcValue));
+		}
+		
+		if (rawExcTB) {
+			excTB    = py::object(py::handle<>(rawExcTB));
+		}
+	}
+	
+	void LogBootstrapException() {
+		py::object excType, excValue, excTB;
+		ExtractException(excType, excValue, excTB);
+		
+		try {
+			py::object strExcType  = py::object(py::handle<>(PyObject_Str(excType.ptr())));
+			py::object strExcValue = py::object(py::handle<>(PyObject_Str(excValue.ptr())));
+			
+			LOG_FUNC("Python bootstrap error: [" << py::extract<char*>(strExcType) << "] " << py::extract<char*>(strExcValue), "LogBootstrapException");
+		} catch (const py::error_already_set&) {
+			LOG_FUNC("< INTERNAL ERROR >", "LogBootstrapException");
+			PyErr_Print();
+		}
+	}
+}
+
 namespace Script {
 	const short version = 0;
 	
 	void Init(std::vector<std::string>& args) {
-		LOG("Initialising engine.");
+		LOG("Initialising the engine.");
 		
 		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
@@ -75,27 +115,28 @@ namespace Script {
 				py::import("__builtin__").attr("__dict__")
 			);
 			LOG("sys.path = " << py::extract<char*>(res));
+			
+			// Get utility functions.
+			LOG("Importing utils.");
+			py::object modImp = py::import("imp");
+			py::object modTB  = py::import("traceback");
+			
+			Globals::printExcFunc    = modTB.attr("print_exception");
+			Globals::loadPackageFunc = modImp.attr("load_package");
+			
+			LOG("Exposing the API.");
+			ExposeAPI();
+			
+			LOG("Creating internal namespaces.");
+			PyImport_AddModule("__gcmods__");
+			PyImport_AddModule("__gcuserconfig__");
+			PyImport_AddModule("__gcautoexec__");
 		} catch (const py::error_already_set&) {
-			LOG("Bootstrap failed.");
-			LogException();
+			LogBootstrapException();
+			
+			LOG("Bootstrap has failed, exiting.");
 			exit(20);
 		}
-		
-		// Get utility functions.
-		LOG("Importing utils.");
-		py::object modImp = py::import("imp");
-		py::object modTB  = py::import("traceback");
-		
-		Globals::printExcFunc    = modTB.attr("print_exception");
-		Globals::loadPackageFunc = modImp.attr("load_package");
-		
-		LOG("Exposing the API.");
-		ExposeAPI();
-		
-		LOG("Creating internal namespaces.");
-		PyImport_AddModule("__gcmods__");
-		PyImport_AddModule("__gcuserconfig__");
-		PyImport_AddModule("__gcautoexec__");
 	}
 	
 	void Shutdown() {
@@ -118,28 +159,21 @@ namespace Script {
 	void LogException(bool clear) {
 		if (PyErr_Occurred() == NULL) return;
 		
-		PyObject *excType, *excVal, *excTB;
-		PyErr_Fetch(&excType, &excVal, &excTB);
+		py::object none, excType, excVal, excTB;
+		ExtractException(excType, excVal, excTB);
 		PyErr_Clear();
-		
-		py::handle<> hExcType(excType);
-		// "The value and traceback object may be NULL even when the type object is not."
-		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
-		py::handle<> hExcVal(py::allow_null(excVal));
-		py::handle<> hExcTB(py::allow_null(excTB));
-		py::object none;
 		
 		Logger::log << "**** Python exception occurred ****\n";
 		try {
-			Globals::printExcFunc(hExcType, hExcVal, hExcTB, none, boost::ref(Globals::stream));
+			Globals::printExcFunc(excType, excVal, excTB, none, boost::ref(Globals::stream));
 		} catch (const py::error_already_set&) {
 			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();
 		}
-		Logger::log << "***********************************\n";
+		Logger::log << Logger::Suffix();
 		
 		if (!clear) {
-			PyErr_Restore(excType, excVal, excTB);
+			PyErr_Restore(excType.ptr(), excVal.ptr(), excTB.ptr());
 		}
 	}
 }
