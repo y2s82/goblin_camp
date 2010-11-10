@@ -100,7 +100,7 @@ void WaterNode::Update() {
 				}
 			}
 
-		} else if (Random::Generate(0, 99) == 0) {
+		} else if (Random::Generate(99) == 0) {
 			if (depth > 0) --depth;
 		}
 	}
@@ -131,8 +131,8 @@ void WaterNode::UpdateGraphic() {
 	if (color.b < col) ++color.b;
 	if (color.g > col/2) --color.g;
 	if (color.b > col) --color.b;
-	if (Random::Generate(0, 4) == 0 && color.b < 247) color.b += 8;
-	if (Random::Generate(0, 9999) == 0) color.g += Random::Generate(0, 24);
+	if (Random::Generate(4) == 0 && color.b < 247) color.b += 8;
+	if (Random::Generate(9999) == 0) color.g += Random::Generate(24);
 }
 
 Coordinate WaterNode::Position() {return Coordinate(x,y);}

@@ -37,7 +37,10 @@ namespace Random {
 		void SetSeed(unsigned int = 0);
 		unsigned int GetSeed() const;
 		int Generate(int, int);
+		int Generate(int);
 		double Generate();
+		short Sign();
+		bool GenerateBool();
 	private:
 		boost::mt19937 generator;
 		unsigned int seed;
@@ -45,5 +48,18 @@ namespace Random {
 	
 	void Init();
 	int Generate(int, int);
+	int Generate(int);
 	double Generate();
+	short Sign();
+	bool GenerateBool();
+	
+	template <typename T>
+	inline unsigned Choose(const T& container) {
+		return static_cast<unsigned>(Generate(0, container.size() - 1));
+	}
+	
+	template <typename T>
+	inline T Sign(const T& expr) {
+		return expr * Sign();
+	}
 }

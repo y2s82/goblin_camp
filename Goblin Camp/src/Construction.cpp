@@ -407,7 +407,7 @@ bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[ty
 
 void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
-		if (Random::Generate(0, Construction::Presets[type].spawnFrequency - 1) == 0) {
+		if (Random::Generate(Construction::Presets[type].spawnFrequency - 1) == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
 			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
