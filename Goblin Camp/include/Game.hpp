@@ -206,4 +206,6 @@ public:
 	std::list<boost::weak_ptr<BloodNode> > bloodList;
 	void CreateBlood(Coordinate);
 	void CreateBlood(Coordinate,int);
+
+	void TriggerAttack();
 };
