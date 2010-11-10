@@ -50,8 +50,19 @@ void Events::Update(bool safe) {
 }
 
 void Events::SpawnHostileMonsters() {
-	int hostileID = rand() % hostileSpawningMonsters.size();
-	NPCType monsterType = hostileSpawningMonsters[hostileID];
+	std::vector<NPCType> possibleMonsters;
+	for (std::vector<int>::iterator hosti = hostileSpawningMonsters.begin(); hosti != hostileSpawningMonsters.end(); ++hosti) {
+		if (NPC::Presets[*hosti].tier <= Camp::Inst()->GetTier() - 2) {
+			possibleMonsters.push_back((NPCType)*hosti);
+		} else if (NPC::Presets[*hosti].tier <= Camp::Inst()->GetTier()) {
+			possibleMonsters.push_back((NPCType)*hosti); // This is intentional, it raises the odds that monsters at or lower
+			possibleMonsters.push_back((NPCType)*hosti); // than this tier are spawned vs. one tier higher.
+		} else if (NPC::Presets[*hosti].tier == Camp::Inst()->GetTier() + 1) {
+			possibleMonsters.push_back((NPCType)*hosti);
+		}
+	}
+
+	NPCType monsterType = possibleMonsters[rand() % possibleMonsters.size()];
 	int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
 
 	std::string msg;
