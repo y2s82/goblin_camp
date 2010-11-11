@@ -80,6 +80,8 @@ namespace {
 	}
 }
 
+PyMODINIT_FUNC initzlib();
+
 namespace Script {
 	const short version = 0;
 	
@@ -89,6 +91,7 @@ namespace Script {
 		Py_NoSiteFlag = 1;
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
+		initzlib();
 		
 		LOG("Python " << Py_GetVersion());
 		
