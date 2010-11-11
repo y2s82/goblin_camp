@@ -74,7 +74,10 @@ int Container::size() { return items.size(); }
 
 int Container::Capacity() { return capacity; }
 
-boost::weak_ptr<Item> Container::GetFirstItem() { return *items.begin(); }
+boost::weak_ptr<Item> Container::GetFirstItem() { 
+	if (items.empty()) return boost::weak_ptr<Item>();
+	return *items.begin(); 
+}
 
 std::set<boost::weak_ptr<Item> >::iterator Container::begin() { return items.begin(); }
 std::set<boost::weak_ptr<Item> >::iterator Container::end() { return items.end(); }

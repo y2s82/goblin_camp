@@ -1507,3 +1507,5 @@ void Game::RemoveNatureObject(Coordinate a, Coordinate b) {
 		}
 	}
 }
+
+void Game::TriggerAttack() { events->SpawnHostileMonsters(); }

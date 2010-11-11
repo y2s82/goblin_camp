@@ -1714,7 +1714,8 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	spawnAsGroup(false),
 	group(TCOD_dice_t()),
 	attacks(std::list<Attack>()),
-	tags(std::set<std::string>())
+	tags(std::set<std::string>()),
+	tier(0)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;

@@ -316,6 +316,8 @@ class NPCListener : public ITCODParserListener {
 		} else if (boost::iequals(name,"size")) {
 			NPC::Presets.back().stats[SIZE] = value.i;
 			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
+		} else if (boost::iequals(name,"tier")) {
+			NPC::Presets.back().tier = value.i;
 		}
 		return true;
 	}
@@ -347,6 +349,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addFlag("generateName");
 	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
 	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };

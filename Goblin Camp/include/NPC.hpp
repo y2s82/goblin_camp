@@ -92,6 +92,7 @@ struct NPCPreset {
 	TCOD_dice_t group;
 	std::list<Attack> attacks;
 	std::set<std::string> tags;
+	int tier;
 };
 
 class NPC : public Entity {
