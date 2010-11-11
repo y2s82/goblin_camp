@@ -388,6 +388,8 @@ class ConstructionListener : public ITCODParserListener {
 				std::cout<<"("<<Construction::Presets.back().name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
 #endif
 			}
+		} else if (boost::iequals(name, "tier")) {
+			Construction::Presets.back().tier = value.i;
 		}
 
 		return true;
@@ -439,6 +441,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("spawningPool");
 	constructionTypeStruct->addListProperty("tileReqs", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addFlag("bridge");
+	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -706,7 +709,8 @@ ConstructionPreset::ConstructionPreset() :
 	blocksLight(true),
 	permanent(false),
 	color(TCODColor::black),
-	tileReqs(std::set<TileType>())
+	tileReqs(std::set<TileType>()),
+	tier(0)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

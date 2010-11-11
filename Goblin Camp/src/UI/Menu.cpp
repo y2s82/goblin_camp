@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/StockManagerDialog.hpp"
 #include "UI/SquadsDialog.hpp"
 #include "UI/NPCDialog.hpp"
+#include "Camp.hpp"
 
 MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
 	label = ntext;
@@ -163,7 +164,7 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
 		menu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
 			ConstructionPreset preset = Construction::Presets[i];
-			if (boost::iequals(preset.category, category)) {
+			if (boost::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier()) {
 				if(preset.tags[STOCKPILE] || preset.tags[FARMPLOT]) {
 					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i)));
 				} else {
