@@ -6,7 +6,7 @@ construction_type "Stockpile" {
 	graphicLength=1
 	graphic=[61]
 	maxCondition=10
-	description="Stockpiles are required  to store items. Orcs in  workshops can only use   items from stockpiles."
+	description="Stockpiles are required to store items. Orcs in workshops can only use items from stockpiles."
 }
 
 construction_type "Farm plot" {
@@ -179,7 +179,7 @@ construction_type "Totem Pole" {
 	graphic=[201, 205, 187,
 			 186,  10, 186,
 			 200, 205, 188]
-	description="The Totem Pole representsthe center of your camp"
+	description="The Totem Pole represents the center of your camp"
 }
 
 construction_type "Wooden palisade" {
@@ -189,7 +189,7 @@ construction_type "Wooden palisade" {
 	maxCondition=30
 	materials=["Log","Log","Log","Log","Log"]
 	placementType=2
-	description="A palisade will stop mostmonsters from gaining    free access to your camp"
+	description="A palisade will stop most monsters from gaining free access to your camp"
 }
 
 construction_type "Pontoon bridge" {
@@ -203,7 +203,7 @@ construction_type "Pontoon bridge" {
 	graphic=[157, 157,
 			 157, 157]
 	tileReqs=["grass", "rock", "ditch", "river"]
-	description="A bridge composed of     barrels and planks"
+	description="A bridge composed of barrels and planks"
 }
 
 construction_type "Stone quarry" {

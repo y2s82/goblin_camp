@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lambda/bind.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/tokenizer.hpp>
 #include <libtcod.hpp>
 #ifdef DEBUG
 #	include <iostream>
@@ -391,7 +392,36 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "tier")) {
 			Construction::Presets.back().tier = value.i;
 		} else if (boost::iequals(name, "description")) {
-			Construction::Presets.back().description = value.s;
+			/*Tokenize the description string and add/remove spaces to make it fit nicely
+			into the 25-width tooltip*/
+			/*I was going to use boost::tokenizer but hey it starts giving me assertion failures
+			in debug. So let's just do it ourselves then, wouldn't want to use a readymade wheel
+			or anything, that'd be dumb*/
+			std::string desc(value.s);
+			std::vector<std::string> tokens;
+			while (desc.length() > 0) {
+				tokens.push_back(desc.substr(0, desc.find_first_of(" ")));
+				if (desc.find_first_of(" ") != std::string::npos) desc = desc.substr(desc.find_first_of(" ")+1);
+				else desc.clear();
+			}
+
+			int width = 0;
+			for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+				if (width > 0 && width < 25 && width + it->length() >= 25) {
+					Construction::Presets.back().description += std::string(25 - width, ' ');
+					width = 0;
+				} 
+
+				while (width >= 25) width -= 25;
+				if (width > 0) {
+					Construction::Presets.back().description += " ";
+					++width;
+				}
+
+				Construction::Presets.back().description += *it;
+				width += it->length();
+			}
+
 		}
 
 		return true;
@@ -409,8 +439,10 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().tileReqs.insert(TILEROCK);
 		}
 
+		//Add material information to the description
 		if (Construction::Presets.back().materials.size() > 0) {
-			Construction::Presets.back().description += " -";
+			if (Construction::Presets.back().description.length() > 0 && Construction::Presets.back().description.length() % 25 != 0)
+				Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
 			ItemCategory item = -1;
 			int multiplier = 0;
 
@@ -419,15 +451,17 @@ class ConstructionListener : public ITCODParserListener {
 					if (item == *mati) ++multiplier;
 					else { 
 						if (multiplier > 0) {
-						Construction::Presets.back().description += 
-							(boost::format(" (%s)x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+							Construction::Presets.back().description += 
+								(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+							if (Construction::Presets.back().description.length() % 25 != 0)
+								Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
 						}
 						item = *mati;
 						multiplier = 1;
 					}
 			}
 			Construction::Presets.back().description += 
-				(boost::format(" (%s)x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+				(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
 			
 		}
 		return true;
