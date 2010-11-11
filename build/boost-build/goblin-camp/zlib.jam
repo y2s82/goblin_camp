@@ -46,8 +46,22 @@ local rule define-targets ( ) {
         name = [ $(.options).get <name> ] ;
     }
     
-    name ?= zlib ;
+    if $(name) {
+        lib zlib : : <name>$(name) ;
+    } else {
+        lib zlib : : <tag>@zlib-tag ;
+    }
+}
+
+rule zlib-tag ( name : type ? : property-set ) {
+    local name = ;
+    
+    if [ $(property-set).get <os> ] = NT {
+        name = zdll ;
+    } else {
+        name = z ;
+    }
     
     ECHO ** Using zlib: $(name) ;
-    lib zlib : : <name>$(name) ;
+    return $(name) ;
 }
