@@ -29,7 +29,8 @@ namespace Logger {
 	void CloseLogFile();
 	
 	std::ofstream& Prefix(const char* = NULL, int = 0, const char* = NULL);
+	const char* Suffix();
 }
 
-#define LOG_FUNC(x, func) Logger::Prefix(__FILE__, __LINE__, func) << x << "\n"
+#define LOG_FUNC(x, func) Logger::Prefix(__FILE__, __LINE__, func) << x << Logger::Suffix()
 #define LOG(x) LOG_FUNC(x, __FUNCTION__)

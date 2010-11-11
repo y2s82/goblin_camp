@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 #include <algorithm>
 
+#include "Random.hpp"
 #include "Construction.hpp"
 #include "Announce.hpp"
 #include "Logger.hpp"
@@ -48,6 +49,8 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 }
 
 std::vector<int> Construction::AllowedAmount = std::vector<int>();
+std::set<std::string> Construction::Categories = std::set<std::string>();
+std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
 
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
 	color(TCODColor::white),
@@ -287,200 +290,6 @@ int Construction::Use() {
 	return -1;
 }
 
-std::set<std::string> Construction::Categories = std::set<std::string>();
-std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
-
-class ConstructionListener : public ITCODParserListener {
-
-	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
-#endif
-		Construction::Presets.push_back(ConstructionPreset());
-		Construction::Presets.back().name = name;
-		Construction::AllowedAmount.push_back(-1);
-		return true;
-	}
-
-	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name, "walkable")) {
-			Construction::Presets.back().walkable = true;
-			Construction::Presets.back().blocksLight = false;
-		} else if (boost::iequals(name, "wall")) {
-			Construction::Presets.back().graphic.push_back(1);
-			Construction::Presets.back().graphic.push_back('W');
-			Construction::Presets.back().tags[WALL] = true;
-		} else if (boost::iequals(name, "stockpile")) {
-			Construction::Presets.back().tags[STOCKPILE] = true;
-		} else if (boost::iequals(name, "farmplot")) {
-			Construction::Presets.back().tags[FARMPLOT] = true;
-			Construction::Presets.back().dynamic = true;
-		} else if (boost::iequals(name, "door")) {
-			Construction::Presets.back().tags[DOOR] = true;
-			Construction::Presets.back().tags[FURNITURE] = true;
-			Construction::Presets.back().dynamic = true;
-		} else if (boost::iequals(name, "bed")) {
-			Construction::Presets.back().tags[BED] = true;
-			Construction::Presets.back().tags[FURNITURE] = true;
-		} else if (boost::iequals(name, "furniture")) {
-			Construction::Presets.back().tags[FURNITURE] = true;
-		} else if (boost::iequals(name, "permanent")) {
-			Construction::Presets.back().permanent = true;
-		} else if (boost::iequals(name, "blocksLight")) {
-			Construction::Presets.back().blocksLight = true;
-		} else if (boost::iequals(name, "unique")) {
-			Construction::AllowedAmount.back() = 1;
-		} else if (boost::iequals(name, "centersCamp")) {
-			Construction::Presets.back().tags[CENTERSCAMP] = true;
-		} else if (boost::iequals(name, "spawningPool")) {
-			Construction::Presets.back().tags[SPAWNINGPOOL] = true;
-			Construction::Presets.back().dynamic = true;
-		} else if (boost::iequals(name, "bridge")) {
-			Construction::Presets.back().tags[BRIDGE] = true;
-		}
-		return true;
-	}
-
-	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name, "graphicLength")) {
-			if (Construction::Presets.back().graphic.size() == 0)
-				Construction::Presets.back().graphic.push_back(value.i);
-			else
-				Construction::Presets.back().graphic[0] = value.i;
-		} else if (boost::iequals(name, "graphic")) {
-			if (Construction::Presets.back().graphic.size() == 0) //In case graphicLength hasn't been parsed yet
-				Construction::Presets.back().graphic.push_back(1);
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
-			}
-		} else if (boost::iequals(name, "category")) {
-			Construction::Presets.back().category = value.s;
-			Construction::Categories.insert(value.s);
-		} else if (boost::iequals(name, "placementType")) {
-			Construction::Presets.back().placementType = value.i;
-		} else if (boost::iequals(name, "materials")) {
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
-			}
-		} else if (boost::iequals(name, "maxCondition")) {
-			Construction::Presets.back().maxCondition = value.i;
-		} else if (boost::iequals(name, "productionx")) {
-			Construction::Presets.back().productionSpot.X(value.i);
-		} else if (boost::iequals(name, "productiony")) {
-			Construction::Presets.back().productionSpot.Y(value.i);
-		} else if (boost::iequals(name, "spawnsCreatures")) {
-			Construction::Presets.back().spawnCreaturesTag = value.s;
-			Construction::Presets.back().dynamic = true;
-		} else if (boost::iequals(name, "spawnFrequency")) {
-			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
-		} else if (boost::iequals(name, "color")) {
-			Construction::Presets.back().color = value.col;
-		} else if (boost::iequals(name, "tileReqs")) {
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
-#ifdef DEBUG
-				std::cout<<"("<<Construction::Presets.back().name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
-#endif
-			}
-		}
-
-		return true;
-	}
-
-	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
-#endif
-		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
-			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
-		if (Construction::Presets.back().tileReqs.empty()) {
-			Construction::Presets.back().tileReqs.insert(TILEGRASS);
-			Construction::Presets.back().tileReqs.insert(TILEROCK);
-		}
-		return true;
-	}
-	void error(const char *msg) {
-		LOG("ItemListener: " << msg);
-		Game::Inst()->Exit();
-	}
-};
-
-void Construction::LoadPresets(std::string filename) {
-	TCODParser parser = TCODParser();
-	TCODParserStruct* constructionTypeStruct = parser.newStructure("construction_type");
-	constructionTypeStruct->addProperty("graphicLength", TCOD_TYPE_INT, true);
-	constructionTypeStruct->addListProperty("graphic", TCOD_TYPE_INT, true);
-	constructionTypeStruct->addFlag("walkable");
-	constructionTypeStruct->addListProperty("materials", TCOD_TYPE_STRING, true);
-	constructionTypeStruct->addProperty("productionx", TCOD_TYPE_INT, false);
-	constructionTypeStruct->addProperty("productiony", TCOD_TYPE_INT, false);
-	constructionTypeStruct->addProperty("maxCondition", TCOD_TYPE_INT, true);
-	constructionTypeStruct->addFlag("stockpile");
-	constructionTypeStruct->addFlag("farmplot");
-	constructionTypeStruct->addFlag("wall");
-	constructionTypeStruct->addFlag("door");
-	constructionTypeStruct->addFlag("bed");
-	constructionTypeStruct->addFlag("permanent");
-	constructionTypeStruct->addFlag("furniture");
-	constructionTypeStruct->addProperty("spawnsCreatures", TCOD_TYPE_STRING, false);
-	constructionTypeStruct->addProperty("spawnFrequency", TCOD_TYPE_INT, false);
-	constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
-	constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
-	constructionTypeStruct->addFlag("blocksLight");
-	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
-	constructionTypeStruct->addFlag("unique");
-	constructionTypeStruct->addFlag("centersCamp");
-	constructionTypeStruct->addFlag("spawningPool");
-	constructionTypeStruct->addListProperty("tileReqs", TCOD_TYPE_STRING, false);
-	constructionTypeStruct->addFlag("bridge");
-
-	parser.run(filename.c_str(), new ConstructionListener());
-}
-
-bool _ResolveProductsPredicate(const ConstructionPreset& preset, const std::string& name) {
-	return boost::iequals(preset.name, name);
-}
-
-void Construction::ResolveProducts() {
-	typedef std::vector<ConstructionPreset>::iterator conIterator;
-	typedef std::vector<ItemPreset>::iterator itmIterator;
-	using boost::lambda::_1;
-	
-	for (itmIterator it = Item::Presets.begin(); it != Item::Presets.end(); ++it) {
-		ItemPreset& itemPreset = *it;
-		
-		if (!itemPreset.constructedInRaw.empty()) {
-			conIterator conIt = std::find_if(
-				Construction::Presets.begin(), Construction::Presets.end(),
-				// Could use bit more complicated lambda expression to eliminate
-				// separate predicate function entirely, but I think this is more
-				// clear to people not used to Boost.Lambda
-				boost::bind(_ResolveProductsPredicate, _1, itemPreset.constructedInRaw)
-			);
-			
-			if (conIt != Construction::Presets.end()) {
-				ConstructionPreset& conPreset = *conIt;
-				
-				conPreset.producer = conPreset.tags[WORKSHOP] = true;
-				conPreset.products.push_back(Item::StringToItemType(itemPreset.name));
-				
-				itemPreset.constructedInRaw.clear();
-			} else {
-				LOG(
-					"Item " << itemPreset.name <<
-					" refers to nonexistant construction " << itemPreset.constructedInRaw << "."
-				);
-			}
-		}
-	}
-}
-
 bool Construction::SpawnProductionJob() {
 	//Only spawn a job if the construction isn't already reserved
 	if (!reserved) {
@@ -598,7 +407,7 @@ bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[ty
 
 void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
-		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
+		if (Random::Generate(Construction::Presets[type].spawnFrequency - 1) == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
 			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
@@ -672,12 +481,13 @@ void Construction::Explode() {
 			item->SetFaction(0); //Return item to player faction
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget;
-			randomTarget.X(Position().X() + ((rand() % 11) - 5));
-			randomTarget.Y(Position().Y() + ((rand() % 11) - 5));
+			randomTarget.X(Position().X() + Random::Generate(-5, 5));
+			randomTarget.Y(Position().Y() + Random::Generate(-5, 5));
 			item->CalculateFlightPath(randomTarget, 50, GetHeight());
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
+
 }
 
 bool Construction::CheckMaterialsPresent() { 

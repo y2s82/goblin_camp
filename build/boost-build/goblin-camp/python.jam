@@ -10,12 +10,32 @@ import path ;
 import os ;
 import property-set ;
 import project ;
-import "class" : new ;
 import modules ;
 
 rule init ( options * ) {
-    modules.poke python : .python-options : [ property-set.create $(options) ] ;
+    modules.poke $(__name__) : .options : [ property-set.create $(options) ] ;
 }
+
+local rule create-project ( requirements * : usage-requirements * ) {
+    # Common options
+    if $(.options) {
+        local inc = [ $(.options).get <include> ] ;
+        local lib = [ $(.options).get <library> ] ;
+        
+        requirements       += <include>$(inc) <search>$(lib) ;
+        usage-requirements += <include>$(inc) ;
+    }
+    
+    project.push-current [ project.current ] ;
+    project.initialize $(__name__) ;
+    project $(__name__) : requirements $(requirements) : usage-requirements $(usage-requirements) ;
+    
+    define-targets ;
+    
+    project.pop-current ;
+}
+
+#################
 
 # Validate the version string and extract the major/minor part we care about.
 # <from original python.jam>
@@ -32,41 +52,25 @@ local rule split-version ( version ) {
 }
 
 rule use-project ( ) {
-    project.push-current [ project.current ] ;
+    local usage = ;
     
-    local reqs        = ;
-    local usage-reqs  = ;
-    
-    .py-debug   = ;
-    .py-version = 2.7 ;
-    
-    if $(.python-options) {
-        local inc     = [ $(.python-options).get <include> ] ;
-        local lib     = [ $(.python-options).get <library> ] ;
-        local version = [ $(.python-options).get <version> ] ;
-        local debug   = [ $(.python-options).get <pydebug> ] ;
-        local suffix  = [ $(.python-options).get <suffix> ] ;
+    if $(.options) {
+        .py-version = [ $(.options).get <version> ] ;
         
-        reqs = <include>$(inc) <search>$(lib) ;
-        usage-reqs = <include>$(inc) ;
-        
-        if $(version) {
-            .py-version = $(version) ;
-        }
-        
-        if $(debug) = "on" {
-            .py-debug = $(suffix:E=_d) ;
-            usage-reqs += <define>Py_DEBUG ;
+        if [ $(.options).get <pydebug> ] = "on" {
+            .py-debug  = [ $(.options).get <suffix> ] ;
+            .py-debug ?= _d ;
+            usage      = <define>Py_DEBUG ;
         }
     }
     
-    project.initialize $(__name__) ;
-    project = [ project.current ] ;
-    project python
-        : requirements $(reqs)
-        : usage-requirements $(usage-reqs)
-    ;
+    .py-version ?= 2.7 ;
+    .py-debug   ?=     ;
     
+    create-project : $(usage) ;
+}
+
+local rule define-targets ( ) {
     local namever = [ split-version $(.py-version) ] ;
     if [ os.name ] = NT {
         namever = $(namever:J="") ;
@@ -77,6 +81,4 @@ rule use-project ( ) {
     
     ECHO ** Using Python: $(name) ;
     lib python : : <name>$(name) ;
-    
-    project.pop-current ;
 }

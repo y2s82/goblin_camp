@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include "Random.hpp"
 #include "NPC.hpp"
 #include "Coordinate.hpp"
 #include "JobManager.hpp"
@@ -99,9 +100,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	inventory->SetInternal();
 	Position(pos,true);
 
-	thirst = thirst - (THIRST_THRESHOLD / 2) + rand() % (THIRST_THRESHOLD);
-	hunger = hunger - (HUNGER_THRESHOLD / 2) + rand() % (HUNGER_THRESHOLD);
-	weariness = weariness - (WEARY_THRESHOLD / 2) + rand() % (WEARY_THRESHOLD);
+	thirst = thirst - (THIRST_THRESHOLD / 2) + Random::Generate(THIRST_THRESHOLD - 1);
+	hunger = hunger - (HUNGER_THRESHOLD / 2) + Random::Generate(HUNGER_THRESHOLD - 1);
+	weariness = weariness - (WEARY_THRESHOLD / 2) + Random::Generate(WEARY_THRESHOLD - 1);
 
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
@@ -291,10 +292,10 @@ void NPC::Update() {
 		if (hunger >= HUNGER_THRESHOLD) AddEffect(HUNGER);
 		else RemoveEffect(HUNGER);
 
-		if (thirst > THIRST_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
+		if (thirst > THIRST_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleThirst();
 		} else if (thirst > THIRST_THRESHOLD * 5) Kill();
-		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
+		if (hunger > HUNGER_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleHunger();
 		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
 	}
@@ -319,7 +320,7 @@ void NPC::Update() {
 		attacki->Update();
 	}
 
-	if (rand() % UPDATES_PER_SECOND == 0 && health < maxHealth) ++health;
+	if (Random::Generate(UPDATES_PER_SECOND - 1) == 0 && health < maxHealth) ++health;
 }
 
 void NPC::UpdateStatusEffects() {
@@ -381,12 +382,12 @@ AiThink NPC::Think() {
 	} 
 	while (timeCount > UPDATES_PER_SECOND) {
 
-		if (rand() % 2 == 0) React(boost::static_pointer_cast<NPC>(shared_from_this()));
+		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock()) {
 			JobManager::Inst()->NPCNotWaiting(uid);
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
-			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
+			if (Random::Generate(9) <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
 				aggressor.reset();
 				TaskFinished(TASKFAILFATAL);
 			}
@@ -420,13 +421,13 @@ AiThink NPC::Think() {
 				to our current target. Near means max 5 tiles away, visible and
 				walkable. Once we have our target we can actually switch over
 				to a normal MOVE task. In case we can't find a visible tile,
-				we'll allow a non LOS one*/				
+				we'll allow a non LOS one*/
 				{bool checkLOS = true;
 				for (int i = 0; i < 2; ++i) {
 					tmp = 0;
 					while (tmp++ < 10) {
-						int tarX = ((rand() % 11) - 5) + currentTarget().X();
-						int tarY = ((rand() % 11) - 5) + currentTarget().Y();
+						int tarX = Random::Generate(-5, 5) + currentTarget().X();
+						int tarY = Random::Generate(-5, 5) + currentTarget().Y();
 						if (tarX < 0) tarX = 0;
 						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 						if (tarY < 0) tarY = 0;
@@ -704,7 +705,7 @@ MOVENEARend:
 					break;
 				}
 
-				if (!taskBegun || rand() % (UPDATES_PER_SECOND * 2) == 0) { //Repath every ~2 seconds
+				if (!taskBegun || Random::Generate(UPDATES_PER_SECOND * 2 - 1) == 0) { //Repath every ~2 seconds
 					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
@@ -815,7 +816,7 @@ MOVENEARend:
 
 			case BOGIRON:
 				if (Map::Inst()->Type(x, y) == TILEBOG) {
-					if (rand() % (UPDATES_PER_SECOND * 15) == 0) {
+					if (Random::Generate(UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
 
@@ -997,7 +998,7 @@ MOVENEARend:
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
 				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
-				idleJob->tasks.push_back(Task(WAIT, Coordinate(rand() % 10, 0)));
+				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(9), 0)));
 				jobs.push_back(idleJob);
 				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
 				else run = true;
@@ -1414,7 +1415,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 				if (attacki->Cooldown() <= 0) {
 					attacki->ResetCooldown();
 					//First check if the target dodges the attack
-					if (rand() % 100 < npc->effectiveStats[DODGE]) {
+					if (Random::Generate(99) < npc->effectiveStats[DODGE]) {
 #ifdef DEBUG
 						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
 #endif
@@ -1436,11 +1437,11 @@ void NPC::Hit(boost::weak_ptr<Entity> target) {
 					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
 #endif
 					if (effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
-						if (attack.Type() == DAMAGE_BLUNT || rand() % 2 == 0) {
+						if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
 							Coordinate tar;
 							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
 							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-							npc->CalculateFlightPath(npc->Position()+tar, rand() % 20 + 25);
+							npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
 							npc->pathIndex = -1;
 						}
 					}
@@ -1500,7 +1501,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	#endif
 
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
-		if (rand() % 100 < attack->StatusEffects()->at(effecti).second) {
+		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
 			AddEffect(attack->StatusEffects()->at(effecti).first);
 		}
 	}
@@ -1508,8 +1509,10 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	if (health <= 0) Kill();
 
 	if (damage > 0) {
-		Game::Inst()->CreateBlood(Coordinate(Position().X() + ((rand() % 3) - 1), 
-			Position().Y() + ((rand() % 3) - 1)));
+		Game::Inst()->CreateBlood(Coordinate(
+			Position().X() + Random::Generate(-1, 1),
+			Position().Y() + Random::Generate(-1, 1)
+		));
 		if (aggr.lock()) aggressor = aggr;
 	}
 }
@@ -1538,156 +1541,6 @@ void NPC::DestroyAllItems() {
 }
 
 bool NPC::Escaped() { return escaped; }
-
-class NPCListener : public ITCODParserListener {
-	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<boost::format("new %s structure: ") % str->getName();
-#endif
-		if (boost::iequals(str->getName(), "npc_type")) {
-			NPC::Presets.push_back(NPCPreset(name));
-			NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
-#ifdef DEBUG
-			std::cout<<name<<"\n";
-#endif
-		} else if (boost::iequals(str->getName(), "attack")) {
-			NPC::Presets.back().attacks.push_back(Attack());
-#ifdef DEBUG
-			std::cout<<name<<"\n";
-#endif
-		} else if (boost::iequals(str->getName(), "resistances")) {
-#ifdef DEBUG
-			std::cout<<"\n";
-#endif
-		}
-		return true;
-	}
-	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name,"generateName")) { NPC::Presets.back().generateName = true; }
-		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
-		else if (boost::iequals(name,"needsSleep")) { NPC::Presets.back().needsSleep = true; }
-		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
-		return true;
-	}
-	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
-		else if (boost::iequals(name,"plural")) { NPC::Presets.back().plural = value.s; }
-		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.i; }
-		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
-		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
-		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
-		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
-		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
-		else if (boost::iequals(name,"spawnAsGroup")) { 
-			NPC::Presets.back().spawnAsGroup = true;
-			NPC::Presets.back().group = value.dice;
-		} else if (boost::iequals(name,"type")) {
-			NPC::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
-		} else if (boost::iequals(name,"damage")) {
-			NPC::Presets.back().attacks.back().Amount(value.dice);
-		} else if (boost::iequals(name,"cooldown")) {
-			NPC::Presets.back().attacks.back().CooldownMax(value.i);
-		} else if (boost::iequals(name,"statusEffects")) {
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				NPC::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
-			}
-		} else if (boost::iequals(name,"effectChances")) {
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				NPC::Presets.back().attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
-			}
-		} else if (boost::iequals(name,"projectile")) {
-			NPC::Presets.back().attacks.back().Projectile(Item::StringToItemType(value.s));
-		} else if (boost::iequals(name,"physical")) {
-			NPC::Presets.back().resistances[PHYSICAL_RES] = value.i;
-		} else if (boost::iequals(name,"magic")) {
-			NPC::Presets.back().resistances[MAGIC_RES] = value.i;
-		} else if (boost::iequals(name,"cold")) {
-			NPC::Presets.back().resistances[COLD_RES] = value.i;
-		} else if (boost::iequals(name,"fire")) {
-			NPC::Presets.back().resistances[FIRE_RES] = value.i;
-		} else if (boost::iequals(name,"poison")) {
-			NPC::Presets.back().resistances[POISON_RES] = value.i;
-		} else if (boost::iequals(name,"tags")) {
-			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				std::string tag = (char*)TCOD_list_get(value.list,i);
-				NPC::Presets.back().tags.insert(boost::to_lower_copy(tag));
-			}
-		} else if (boost::iequals(name,"strength")) {
-			NPC::Presets.back().stats[STRENGTH] = value.i;
-		} else if (boost::iequals(name,"size")) {
-			NPC::Presets.back().stats[SIZE] = value.i;
-			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
-		} else if (boost::iequals(name,"tier")) {
-			NPC::Presets.back().tier = value.i;
-		}
-		return true;
-	}
-	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<boost::format("end of %s\n") % str->getName();
-#endif
-		if (NPC::Presets.back().plural == "") NPC::Presets.back().plural = NPC::Presets.back().name + "s";
-		return true;
-	}
-	void error(const char *msg) {
-		LOG("NPCListener: " << msg);
-		Game::Inst()->Exit(false);
-	}
-};
-
-void NPC::LoadPresets(std::string filename) {
-	TCODParser parser = TCODParser();
-	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
-	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
-	npcTypeStruct->addProperty("plural", TCOD_TYPE_STRING, false);
-	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
-	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
-	npcTypeStruct->addFlag("expert");
-	const char* aiTypes[] = { "PlayerNPC", "PeacefulAnimal", "HungryAnimal", "HostileAnimal", NULL }; 
-	npcTypeStruct->addValueList("AI", aiTypes, true);
-	npcTypeStruct->addFlag("needsNutrition");
-	npcTypeStruct->addFlag("needsSleep");
-	npcTypeStruct->addFlag("generateName");
-	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
-	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
-	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
-	
-	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
-	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
-	attackTypeStruct->addValueList("type", damageTypes, true);
-	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
-	attackTypeStruct->addProperty("cooldown", TCOD_TYPE_INT, false);
-	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
-	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);
-	attackTypeStruct->addFlag("ranged");
-	attackTypeStruct->addProperty("projectile", TCOD_TYPE_STRING, false);
-
-	TCODParserStruct *resistancesStruct = parser.newStructure("resistances");
-	resistancesStruct->addProperty("physical", TCOD_TYPE_INT, false);
-	resistancesStruct->addProperty("magic", TCOD_TYPE_INT, false);
-	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
-	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
-	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
-
-	TCODParserStruct *statsStruct = parser.newStructure("stats");
-	statsStruct->addProperty("health", TCOD_TYPE_INT, true);
-	statsStruct->addProperty("speed", TCOD_TYPE_INT, true);
-	statsStruct->addProperty("dodge", TCOD_TYPE_INT, true);
-	statsStruct->addProperty("size", TCOD_TYPE_INT, true);
-	statsStruct->addProperty("strength", TCOD_TYPE_INT, false);
-
-	npcTypeStruct->addStructure(attackTypeStruct);
-	npcTypeStruct->addStructure(resistancesStruct);
-	npcTypeStruct->addStructure(statsStruct);
-
-	parser.run(filename.c_str(), new NPCListener());
-}
 
 std::string NPC::NPCTypeToString(NPCType type) {
 	return Presets[type].typeName;
@@ -1812,7 +1665,7 @@ void NPC::UpdateVelocity() {
 						flightPath.clear();
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && rand() % 10 < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && Random::Generate(9) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 						health -= velocity/5;
 						AddEffect(CONCUSSION);
 						SetVelocity(0);

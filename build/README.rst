@@ -33,15 +33,17 @@ Dependencies
 
 Goblin Camp requires several third party libraries to build and link:
 
-* `Boost`_ **1.44**.
-* `libtcod`_ **r483** [must be later than **r477**: new API]
-  (GC uses not-yet-released SVN version — listed here is a known working revision).
+* `Boost`_ **1.44** (or newer, but not earlier).
+* `libtcod`_ **r494** [must be later than **r477**: new API]
+  (the game uses not-yet-released SVN version, which tends to break the API a lot — listed here is a known working revision, stick to it if you're not experienced in handling build errors).
 * `Windows SDK`_ **7.1** (or newer; 7.0 may work as well, but older are not supported).
 * `Python`_ **2.6.6** or **2.7.x** (3.x will not work).
+* `zlib`_.
 
 .. _Boost:       http://boost.org
 .. _libtcod:     http://doryen.eptalys.net/libtcod
 .. _Windows SDK: http://microsoft.com/downloads/details.aspx?FamilyID=6b6c21d2-2006-4afa-9702-529fa782d63b
+.. _zlib:        http://zlib.net
 
 Goblin Camp build system
 ------------------------
@@ -53,11 +55,9 @@ Before you build GC, you'll need to create a configuration file for the build,
 so that compiler can find all needed headers and libraries.
 
 Minimal config file (let's call it ``gc-config.jam``, put it into root directory of the source;
-i.e. the one with Jamroot.jam) must have at least two ``using`` directives: for Boost and for
-the compiler::
+i.e. the one with Jamroot.jam) must have at least one ``using`` directive: for the compiler::
 
     using msvc ;
-    using boost : 1.43 ;
 
 Build system requests specific Boost version to avoid breakages. In place of ``msvc`` you can
 use e.g. ``gcc`` (on Linux) or ``darwin`` (on OSX). You can further configure the compiler,
@@ -148,6 +148,23 @@ Example::
 
     using python : <version>2.7 <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include ;
 
+zlib
+++++
+
+Format::
+
+    using zlib : properties ;
+
+Properties:
+
+* ``<library>path`` — path to libraries
+* ``<include>path`` — path to headers
+* ``<name>name`` — name of the library
+
+Example::
+
+    using zlib : <name>zlib1 <library>C:\dev\libs\zlib-1.2.5\lib <include>C:\dev\libs\zlib-1.2.5\include ;
+
 Building
 ~~~~~~~~
 
@@ -179,7 +196,7 @@ Installing to dist
 ~~~~~~~~~~~~~~~~~~
 
 To run compiled game, you should install to dist first. To do this, append ``dist`` to bjam invocation.
-This will copy all data files and executables into ``build\dist\<variant>`` directory.
+This will copy all data files and executables into ``build\dist\<variant>-<x86/x64>`` directory.
 
 .. warning::
     Windows:

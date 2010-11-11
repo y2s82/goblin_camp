@@ -67,7 +67,9 @@
 		
 		<NMakeOutput>..\dist\debug-x86\goblin-camp.exe</NMakeOutput>
 		
-		<NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+		<NMakePreprocessorDefinitions>DEBUG,WINDOWS,X86,GC_BOOST_BUILD,BOOST_FILESYSTEM_VERSION=3,BOOST_BUILD_PCH_ENABLED</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>..\..\Goblin Camp\include</NMakeIncludeSearchPath>
+		<NMakeForcedIncludes>stdafx.hpp</NMakeForcedIncludes>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
 		<NMakeBuildCommandLine>%GC_RELEASE_COMMAND% -q</NMakeBuildCommandLine>
@@ -76,7 +78,9 @@
 		
 		<NMakeOutput>..\dist\release-x86\goblin-camp.exe</NMakeOutput>
 		
-		<NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+		<NMakePreprocessorDefinitions>RELEASE,WINDOWS,X86,GC_BOOST_BUILD,BOOST_FILESYSTEM_VERSION=3,BOOST_BUILD_PCH_ENABLED</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>..\..\Goblin Camp\include</NMakeIncludeSearchPath>
+		<NMakeForcedIncludes>stdafx.hpp</NMakeForcedIncludes>
 	</PropertyGroup>
 	
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -86,7 +90,9 @@
 		
 		<NMakeOutput>..\dist\debug-x64\goblin-camp.exe</NMakeOutput>
 		
-		<NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+		<NMakePreprocessorDefinitions>DEBUG,WINDOWS,X64,GC_BOOST_BUILD,BOOST_FILESYSTEM_VERSION=3,BOOST_BUILD_PCH_ENABLED</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>..\..\Goblin Camp\include</NMakeIncludeSearchPath>
+		<NMakeForcedIncludes>stdafx.hpp</NMakeForcedIncludes>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
 		<NMakeBuildCommandLine>%GC_RELEASE_COMMAND% -q address-model=64</NMakeBuildCommandLine>
@@ -95,7 +101,9 @@
 		
 		<NMakeOutput>..\dist\release-x64\goblin-camp.exe</NMakeOutput>
 		
-		<NMakePreprocessorDefinitions></NMakePreprocessorDefinitions>
+		<NMakePreprocessorDefinitions>RELEASE,WINDOWS,X64,GC_BOOST_BUILD,BOOST_FILESYSTEM_VERSION=3,BOOST_BUILD_PCH_ENABLED</NMakePreprocessorDefinitions>
+		<NMakeIncludeSearchPath>..\..\Goblin Camp\include</NMakeIncludeSearchPath>
+		<NMakeForcedIncludes>stdafx.hpp</NMakeForcedIncludes>
 	</PropertyGroup>
 	
 	<Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

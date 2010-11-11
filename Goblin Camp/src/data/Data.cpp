@@ -21,9 +21,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <cstring>
 #include <algorithm>
-#include <functional>
-#include <cctype>
 #include <boost/format.hpp>
 #include <libtcod.hpp>
 #include <boost/filesystem.hpp>
@@ -32,6 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
+#include "data/Config.hpp"
 #include "data/Data.hpp"
 #include "data/Paths.hpp"
 #include "Logger.hpp"
@@ -83,17 +83,23 @@ namespace {
 	}
 	
 	/**
-		Removes non-alphanumeric (using ctype's @c isalnum) characters from the filename.
+		Removes invalid (<tt>\\/:*?"\<\>|</tt>) characters from the
+		filename (removes characters that are rejected by Windows,
+		but allowed by *nixes for consistency).
 		
 		\param[in] filename Filename as supplied by the user.
 		\returns            Sanitized filename.
 	*/
 	std::string SanitizeFilename(const std::string& filename) {
 		std::string sanitized;
+		
 		std::remove_copy_if(
 			filename.begin(), filename.end(),
 			std::back_inserter(sanitized),
-			std::not1(std::ptr_fun(isalnum))
+			boost::bind(
+				static_cast<const char*(*)(const char*, int)>(&strchr),
+				"\\/:*?\"<>|", _1
+			)
 		);
 		
 		return sanitized;
@@ -160,6 +166,17 @@ namespace {
 			file.close();
 		} catch (const std::exception& e) {
 			LOG_FUNC("Error while writing to file: " << e.what(), "CreateDefault");
+		}
+	}
+	
+	/**
+		Ensures that \ref Config::Save won't throw at exit.
+	*/
+	void SaveConfig() {
+		try {
+			Config::Save();
+		} catch (...) {
+			// pass
 		}
 	}
 }
@@ -263,7 +280,10 @@ namespace Data {
 		} catch (const py::error_already_set&) {
 			LOG("Cannot load user config.");
 			Script::LogException();
+			return;
 		}
+		
+		atexit(SaveConfig);
 	}
 	
 	/**

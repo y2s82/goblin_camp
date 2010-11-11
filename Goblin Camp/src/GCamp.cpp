@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <algorithm>
 #include <functional>
 
+#include "Random.hpp"
 #include "Camp.hpp"
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -58,6 +59,7 @@ int GCMain(std::vector<std::string>& args) {
 	// Bootstrap phase.
 	//
 	Paths::Init();
+	Random::Init();
 	Config::Init();
 	Script::Init(args);
 	
@@ -135,6 +137,7 @@ void MainLoop() {
 void StartNewGame() {
 	Game* game = Game::Inst();
 	game->Reset();
+	game->LoadingScreen();
 	
 	Script::Event::GameStart();
 	game->GenerateMap();
@@ -143,8 +146,11 @@ void StartNewGame() {
 
 	for (unsigned int i = 0; i < 20; ++i) {
 		std::pair<int,Coordinate> candidate(0, 
-			Coordinate(100 + rand() % (Map::Inst()->Width()-200), 
-			100 + rand() % (Map::Inst()->Height()-200)));
+			Coordinate(
+				Random::Generate(100, Map::Inst()->Width()  - 101),
+				Random::Generate(100, Map::Inst()->Height() - 101)
+			)
+		);
 
 		int riverDistance = 1000, hillDistance = 1000;
 		int lineX, lineY;
@@ -194,7 +200,7 @@ void StartNewGame() {
 	//Clear starting area
 	for (int x = spawnTopCorner.X(); x < spawnBottomCorner.X(); ++x) {
 		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
-			if (Map::Inst()->NatureObject(x,y) >= 0 && rand() % 3 < 2) {
+			if (Map::Inst()->NatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
 				game->RemoveNatureObject(game->natureList[Map::Inst()->NatureObject(x,y)]);
 			}
 		}
@@ -277,7 +283,7 @@ int MainMenu() {
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
 
 		TCODConsole::root->setDefaultForeground(TCODColor::celadon);
-		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
+		TCODConsole::root->print(edgex+width/2, edgey-3, Globals::gameVersion);
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 
 		for (unsigned int idx = 0; idx < entryCount; ++idx) {
@@ -652,7 +658,7 @@ void ModsMenu() {
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 	
 	const std::list<Mods::Metadata>& modList = Mods::GetLoaded();
-	const int subH = modList.size() * 5;
+	const int subH = modList.size() * 9;
 	TCODConsole sub(w - 2, std::max(1, subH));
 
 	int currentY = 0;
@@ -666,11 +672,11 @@ void ModsMenu() {
 		
 		sub.setAlignment(TCOD_LEFT);
 		sub.setDefaultForeground(TCODColor::white);
-		sub.print(3, currentY + 1, "Name:    %s", mod.name.c_str());
-		sub.print(3, currentY + 2, "Author:  %s", mod.author.c_str());
-		sub.print(3, currentY + 3, "Version: %s", mod.version.c_str());
+		sub.print(3, currentY + 2, "Name:    %s", mod.name.c_str());
+		sub.print(3, currentY + 4, "Author:  %s", mod.author.c_str());
+		sub.print(3, currentY + 6, "Version: %s", mod.version.c_str());
 		
-		currentY += 5;
+		currentY += 9;
 	}
 
 	TCOD_key_t   key;
