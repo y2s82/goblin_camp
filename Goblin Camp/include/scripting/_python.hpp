@@ -32,8 +32,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 
 #include <Python.h>
-#include <boost/python.hpp>
+
+#ifdef __cplusplus
+#	include <boost/python.hpp>
 namespace py = boost::python;
+#endif
 
 #ifdef _SAVE_DEBUG
 #	define _DEBUG

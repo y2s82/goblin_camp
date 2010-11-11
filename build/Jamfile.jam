@@ -13,6 +13,7 @@ import boost ;
 import libtcod ;
 import winsdk ;
 import python ;
+import zlib ;
 
 ##
 # Project definition
@@ -56,6 +57,7 @@ import gc-sln ;
 boost.use-project ;
 winsdk.use-project ;
 libtcod.use-project ;
+zlib.use-project ;
 python.use-project ;
 
 ##
@@ -119,6 +121,7 @@ current-sources = [ path.glob-tree $(GC_SOURCES) : *.cpp : win32 linux osx unix 
 win32-sources   = [ get-platform-sources WIN32 ] ;
 linux-sources   = [ get-platform-sources LINUX : UNIX : main.cpp ] ;
 macosx-sources  = [ get-platform-sources OSX : UNIX : main.cpp ] ;
+python-sources  = [ path.glob $(GC_PY_SOURCES) : *.c ] ;
 
 binaries-dist-dir   = ;
 data-dist-dir       = ;
@@ -225,12 +228,21 @@ cpp-pch stdafx.hpp
 ;
 
 #
+# Python support
+lib pysupport
+    : $(python-sources)
+      /zlib//zlib
+    : <link>static
+;
+
+#
 # goblin-camp executable
 exe goblin-camp
     : $(current-sources)
       gc-deps
       gc-version
       stdafx.hpp
+      pysupport
 ;
 
 #
