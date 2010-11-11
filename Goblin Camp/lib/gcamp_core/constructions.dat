@@ -6,6 +6,7 @@ construction_type "Stockpile" {
 	graphicLength=1
 	graphic=[61]
 	maxCondition=10
+	description="Stockpiles are required  to store items. Orcs in  workshops can only use   items from stockpiles."
 }
 
 construction_type "Farm plot" {
@@ -17,6 +18,7 @@ construction_type "Farm plot" {
 	graphic=[126]
 	maxCondition=10
 	tileReqs=["grass"]
+	description="Designates an area to be used for agriculture"
 }
 
 construction_type "Spawning pool" {
@@ -32,6 +34,7 @@ construction_type "Spawning pool" {
 	permanent
 	unique
 	spawningPool
+	description="A pit of slime, it will spawn new goblins and orcs as long as it is provided with filth and corpses"
 }
 
 construction_type "Carpenter" {
@@ -46,6 +49,7 @@ construction_type "Carpenter" {
 	materials=["Log","Log","Log"]
 	productionx=1
 	productiony=1
+	description="A carpenter's workshop allows your orcs to create planks and basic wooden items"
 }
 
 construction_type "Brewery" {
@@ -175,15 +179,17 @@ construction_type "Totem Pole" {
 	graphic=[201, 205, 187,
 			 186,  10, 186,
 			 200, 205, 188]
+	description="The Totem Pole representsthe center of your camp"
 }
 
-construction_type "Wooden Palisade" {
+construction_type "Wooden palisade" {
 	tier=1
 	category="Basics"
 	wall
 	maxCondition=30
 	materials=["Log","Log","Log","Log","Log"]
 	placementType=2
+	description="A palisade will stop mostmonsters from gaining    free access to your camp"
 }
 
 construction_type "Pontoon bridge" {
@@ -197,6 +203,7 @@ construction_type "Pontoon bridge" {
 	graphic=[157, 157,
 			 157, 157]
 	tileReqs=["grass", "rock", "ditch", "river"]
+	description="A bridge composed of     barrels and planks"
 }
 
 construction_type "Stone quarry" {

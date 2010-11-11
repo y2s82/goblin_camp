@@ -32,10 +32,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class MenuChoice {
 public:
-	MenuChoice(std::string = "", boost::function<void()> = boost::bind(Game::DoNothing), bool = true);
+	MenuChoice(std::string label = "", boost::function<void()> = boost::bind(Game::DoNothing), bool = true,
+		std::string tooltip = "");
 	std::string label;
 	boost::function<void()> callback;
 	bool enabled;
+	std::string tooltip;
 };
 
 class Menu: public Panel {
@@ -71,4 +73,5 @@ public:
 	static Menu* DevMenu();
 
 	static ItemCategory WeaponChoiceDialog();
+	void GetTooltip(int, int, Tooltip *);
 };

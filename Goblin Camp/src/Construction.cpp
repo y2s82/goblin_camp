@@ -390,6 +390,8 @@ class ConstructionListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name, "tier")) {
 			Construction::Presets.back().tier = value.i;
+		} else if (boost::iequals(name, "description")) {
+			Construction::Presets.back().description = value.s;
 		}
 
 		return true;
@@ -401,9 +403,32 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
 			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
+		
 		if (Construction::Presets.back().tileReqs.empty()) {
 			Construction::Presets.back().tileReqs.insert(TILEGRASS);
 			Construction::Presets.back().tileReqs.insert(TILEROCK);
+		}
+
+		if (Construction::Presets.back().materials.size() > 0) {
+			Construction::Presets.back().description += " -";
+			ItemCategory item = -1;
+			int multiplier = 0;
+
+			for (std::list<ItemCategory>::iterator mati = Construction::Presets.back().materials.begin(); 
+				mati != Construction::Presets.back().materials.end(); ++mati) {
+					if (item == *mati) ++multiplier;
+					else { 
+						if (multiplier > 0) {
+						Construction::Presets.back().description += 
+							(boost::format(" (%s)x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+						}
+						item = *mati;
+						multiplier = 1;
+					}
+			}
+			Construction::Presets.back().description += 
+				(boost::format(" (%s)x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+			
 		}
 		return true;
 	}
@@ -442,6 +467,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addListProperty("tileReqs", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addFlag("bridge");
 	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("description", TCOD_TYPE_STRING, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -710,7 +736,8 @@ ConstructionPreset::ConstructionPreset() :
 	permanent(false),
 	color(TCODColor::black),
 	tileReqs(std::set<TileType>()),
-	tier(0)
+	tier(0),
+	description("")
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
