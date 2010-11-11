@@ -32,9 +32,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/NPCDialog.hpp"
 #include "Camp.hpp"
 
-MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb) {
+MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb, bool nenabled) {
 	label = ntext;
 	callback = cb;
+	enabled = nenabled;
 }
 
 Menu::Menu(std::vector<MenuChoice> newChoices, std::string ntitle): Panel(0, 0) {
@@ -70,7 +71,8 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 			console->setDefaultForeground(TCODColor(0,std::min(255, UI::Inst()->KeyHelpTextColor()),0));
 			console->print(x, y+1+(i*2), boost::lexical_cast<std::string>(i+1).c_str());
 		}
-		console->setDefaultForeground(TCODColor::white);
+		if (choices[i].enabled) console->setDefaultForeground(TCODColor::white);
+		else console->setDefaultForeground(TCODColor::grey);
 		if (_selected == i) {
 			console->setDefaultBackground(TCODColor::white);
 			console->setDefaultForeground(TCODColor::darkerGrey);
@@ -93,7 +95,7 @@ MenuResult Menu::Update(int x, int y, bool clicked, TCOD_key_t key) {
 				--y;
 				if (y > 0) y /= 2;
 				_selected = y;
-				if (clicked) {
+				if (clicked && choices[y].enabled) {
 					choices[y].callback();
 					return (MenuResult) (DISMISS | MENUHIT);
 				} 
@@ -119,9 +121,22 @@ void Menu::Callback(unsigned int choice) {
 	}
 }
 
+int Menu::menuTier = 0;
 Menu* Menu::mainMenu = 0;
 Menu* Menu::MainMenu() {
-	if (!mainMenu) {
+	if (!mainMenu || menuTier != Camp::Inst()->GetTier()) {
+		if (mainMenu) { //Tier has changed
+			delete mainMenu;
+			mainMenu = 0;
+			if (constructionMenu) { delete constructionMenu; constructionMenu = 0; }
+			if (!constructionCategoryMenus.empty()) {
+				for (std::map<std::string, Menu *>::iterator iterator = constructionCategoryMenus.begin();
+					iterator != constructionCategoryMenus.end(); ++iterator) {
+						if (iterator->second) delete iterator->second;
+				}
+				constructionCategoryMenus.clear();
+			}
+		}
 		mainMenu = new Menu(std::vector<MenuChoice>());
 		if (Game::Inst()->DevMode()) mainMenu->AddChoice(MenuChoice("Dev", boost::bind(UI::ChangeMenu, Menu::DevMenu())));
 		mainMenu->AddChoice(MenuChoice("Build", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
@@ -136,6 +151,7 @@ Menu* Menu::MainMenu() {
 		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
 		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
 		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));
+		menuTier = Camp::Inst()->GetTier();
 	}
 	return mainMenu;
 }
@@ -146,10 +162,6 @@ Menu* Menu::ConstructionMenu() {
 		constructionMenu = new Menu(std::vector<MenuChoice>());
 		for(std::set<std::string>::iterator it = Construction::Categories.begin(); it != Construction::Categories.end(); it++) {
 			constructionMenu->AddChoice(MenuChoice(*it, boost::bind(UI::ChangeMenu, Menu::ConstructionCategoryMenu(*it))));
-		}
-		Menu *basicsMenu = ConstructionCategoryMenu("Basics");
-		if(basicsMenu) {
-			
 		}
 	}
 	return constructionMenu;
@@ -164,15 +176,15 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
 		menu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
 			ConstructionPreset preset = Construction::Presets[i];
-			if (boost::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier()) {
+			if (boost::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier() + 1) {
 				if(preset.tags[STOCKPILE] || preset.tags[FARMPLOT]) {
-					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i)));
+					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i), preset.tier <= Camp::Inst()->GetTier()));
 				} else {
 					UIState placementType = UIPLACEMENT;
 					if(preset.placementType > 0 && preset.placementType < UICOUNT) {
 						placementType = (UIState)preset.placementType;
 					}
-					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseConstruct, i, placementType)));
+					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseConstruct, i, placementType), preset.tier <= Camp::Inst()->GetTier()));
 				}
 			}
 		}

@@ -32,14 +32,16 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class MenuChoice {
 public:
-	MenuChoice(std::string = "", boost::function<void()> = boost::bind(Game::DoNothing));
+	MenuChoice(std::string = "", boost::function<void()> = boost::bind(Game::DoNothing), bool = true);
 	std::string label;
 	boost::function<void()> callback;
+	bool enabled;
 };
 
 class Menu: public Panel {
 private:
 	static std::map<std::string, Menu *> constructionCategoryMenus;
+	static int menuTier;
 protected:
 	std::vector<MenuChoice> choices;
 	int _selected;
