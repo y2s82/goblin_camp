@@ -232,7 +232,7 @@ cpp-pch stdafx.hpp
 lib pysupport
     : $(python-sources)
       /zlib//zlib
-    : <link>static
+    : <link>static <implicit-dependency>/python//python
 ;
 
 #
