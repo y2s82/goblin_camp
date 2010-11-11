@@ -19,13 +19,19 @@ construction_type "Farm plot" {
 	tileReqs=["grass"]
 }
 
-construction_type "Wooden Palisade" {
-	tier=1
-	category="Basics"
-	wall
+construction_type "Spawning pool" {
+	tier=0
+	category="Permanent"
+	graphicLength=1
+	graphic=[ 126 ]
+	color="0,255,128"
+	walkable
 	maxCondition=30
-	materials=["Log","Log","Log","Log","Log"]
-	placementType=2
+	productionx=0
+	productiony=0
+	permanent
+	unique
+	spawningPool
 }
 
 construction_type "Carpenter" {
@@ -69,6 +75,57 @@ construction_type "Kitchen" {
 	productiony=2
 }
 
+construction_type "Bed" {
+	tier=0
+	category="Furniture"
+	bed
+	graphicLength=1
+	graphic=[220]
+	walkable
+	maxCondition=10
+	materials=["Bed"]
+}
+
+construction_type "Door" {
+	tier=0
+	category="Furniture"
+	door
+	graphicLength=1
+	graphic=[43]
+	walkable
+	blocksLight
+	maxCondition=10
+	materials=["Door"]
+}
+
+construction_type "Mill" {
+	tier=1
+	category="Workshops"
+	graphicLength=3
+	graphic=[157, 46,157,
+			  46, 46, 46,
+			 157, 46,157]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weaver" {
+	tier=1
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 21, 30, 30,
+			  46, 46, 46,
+			  30, 30, 21]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
 construction_type "Bone Carver" {
 	tier=1
 	category="Workshops"
@@ -97,27 +154,49 @@ construction_type "Butcher" {
 	productiony=2
 }
 
-construction_type "Bed" {
-	tier=0
+construction_type "Statue" {
+	tier=1
 	category="Furniture"
-	bed
+	furniture
 	graphicLength=1
-	graphic=[220]
-	walkable
-	maxCondition=10
-	materials=["Bed"]
+	graphic=[190]
+	maxCondition=20
+	materials=["Statue"]
 }
 
-construction_type "Door" {
-	tier=0
-	category="Furniture"
-	door
-	graphicLength=1
-	graphic=[43]
+construction_type "Totem Pole" {
+	tier=1
+	category="Basics"
+	unique
+	centersCamp
+	maxCondition=100
+	materials=["Log", "Log", "Log", "Log", "Log"]
+	graphicLength=3
+	graphic=[201, 205, 187,
+			 186,  10, 186,
+			 200, 205, 188]
+}
+
+construction_type "Wooden Palisade" {
+	tier=1
+	category="Basics"
+	wall
+	maxCondition=30
+	materials=["Log","Log","Log","Log","Log"]
+	placementType=2
+}
+
+construction_type "Pontoon bridge" {
+	tier=1
+	category="Basics"
+	bridge
 	walkable
-	blocksLight
-	maxCondition=10
-	materials=["Door"]
+	maxCondition=50
+	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank"]
+	graphicLength=2
+	graphic=[157, 157,
+			 157, 157]
+	tileReqs=["grass", "rock", "ditch", "river"]
 }
 
 construction_type "Stone quarry" {
@@ -189,73 +268,6 @@ construction_type "Armor Crafter" {
 	materials=["Plank","Plank","Plank","Rough stone", "Rough stone"]
 }
 
-construction_type "Mill" {
-	tier=1
-	category="Workshops"
-	graphicLength=3
-	graphic=[157, 46,157,
-			  46, 46, 46,
-			 157, 46,157]
-	walkable
-	maxCondition=90
-	productionx=1
-	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank"]
-}
-
-construction_type "Weaver" {
-	tier=1
-	category="Workshops"
-	graphicLength=3
-	graphic=[ 21, 30, 30,
-			  46, 46, 46,
-			  30, 30, 21]
-	walkable
-	maxCondition=90
-	productionx=1
-	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank"]
-}
-
-construction_type "Statue" {
-	tier=1
-	category="Furniture"
-	furniture
-	graphicLength=1
-	graphic=[190]
-	maxCondition=20
-	materials=["Statue"]
-}
-
-construction_type "Spawning pool" {
-	tier=0
-	category="Permanent"
-	graphicLength=1
-	graphic=[ 126 ]
-	color="0,255,128"
-	walkable
-	maxCondition=30
-	productionx=0
-	productiony=0
-	permanent
-	unique
-	spawningPool
-}
-
-construction_type "Bloomery" {
-	tier=3
-	category="Workshops"
-	graphicLength=4
-	graphic=[ 40, 46,176,191,
-			  40, 10, 46, 10,
-			 170,157,176,217]
-	walkable
-	maxCondition=90
-	productionx=2
-	productiony=1
-	materials=["Brick","Brick","Brick","Brick","Brick"]
-}
-
 construction_type "Clay pit" {
 	tier=3
 	category="Permanent"
@@ -273,6 +285,20 @@ construction_type "Clay pit" {
 	spawnFrequency=600
 	permanent
 	color="220,80,70"
+}
+
+construction_type "Bloomery" {
+	tier=3
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,176,191,
+			  40, 10, 46, 10,
+			 170,157,176,217]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Brick","Brick","Brick","Brick","Brick"]
 }
 
 construction_type "Clay kiln" {
@@ -296,30 +322,4 @@ construction_type "Brick Wall" {
 	wall
 	maxCondition=50
 	materials=["Brick"]
-}
-
-construction_type "Totem Pole" {
-	tier=1
-	category="Basics"
-	unique
-	centersCamp
-	maxCondition=100
-	materials=["Log"]
-	graphicLength=3
-	graphic=[201, 205, 187,
-			 186,  10, 186,
-			 200, 205, 188]
-}
-
-construction_type "Pontoon bridge" {
-	tier=1
-	category="Basics"
-	bridge
-	walkable
-	maxCondition=50
-	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank"]
-	graphicLength=2
-	graphic=[157, 157,
-			 157, 157]
-	tileReqs=["grass", "rock", "ditch", "river"]
 }
