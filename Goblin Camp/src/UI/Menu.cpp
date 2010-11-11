@@ -32,10 +32,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/NPCDialog.hpp"
 #include "Camp.hpp"
 
-MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb, bool nenabled) {
+MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb, bool nenabled, std::string ntooltip) {
 	label = ntext;
 	callback = cb;
 	enabled = nenabled;
+	tooltip = ntooltip;
 }
 
 Menu::Menu(std::vector<MenuChoice> newChoices, std::string ntitle): Panel(0, 0) {
@@ -178,13 +179,13 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
 			ConstructionPreset preset = Construction::Presets[i];
 			if (boost::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier() + 1) {
 				if(preset.tags[STOCKPILE] || preset.tags[FARMPLOT]) {
-					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i), preset.tier <= Camp::Inst()->GetTier()));
+					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i), preset.tier <= Camp::Inst()->GetTier(), preset.description));
 				} else {
 					UIState placementType = UIPLACEMENT;
 					if(preset.placementType > 0 && preset.placementType < UICOUNT) {
 						placementType = (UIState)preset.placementType;
 					}
-					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseConstruct, i, placementType), preset.tier <= Camp::Inst()->GetTier()));
+					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseConstruct, i, placementType), preset.tier <= Camp::Inst()->GetTier(), preset.description));
 				}
 			}
 		}
@@ -235,4 +236,23 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
 	}
 	return devMenu;
+}
+
+void Menu::GetTooltip(int x, int y, Tooltip *tooltip) {
+	if (x > 0 && y > 0) {
+		if (x > _x && x < _x + width) {
+			y -= _y;
+			if (y > 0 && y < height) {
+				--y;
+				if (y > 0) y /= 2;
+				_selected = y;
+				if (y < (signed int)choices.size() && choices[y].tooltip != "") {
+					tooltip->OffsetPosition((_x + width) - x - 1, 0);
+					for (unsigned int i = 0; i < choices[y].tooltip.length(); i += 25) {
+						tooltip->AddEntry(TooltipEntry(choices[y].tooltip.substr(i, 25), TCODColor::white));
+					}
+				}
+			}
+		}
+	}
 }

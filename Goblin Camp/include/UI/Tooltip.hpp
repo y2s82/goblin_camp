@@ -29,9 +29,11 @@ private:
 	std::vector<TooltipEntry> entries;
 	Tooltip(): entries(std::vector<TooltipEntry>()) {}
 	static Tooltip* instance;
+	int offsetX, offsetY;
 public:
 	static Tooltip* Inst();
 	void Clear();
 	void AddEntry(TooltipEntry entry);
 	void Draw(int x, int y, TCODConsole *console);
+	void OffsetPosition(int x, int y);
 };

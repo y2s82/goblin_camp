@@ -29,6 +29,8 @@ Tooltip* Tooltip::Inst() {
 
 void Tooltip::Clear() {
 	entries.clear();
+	offsetX = 0;
+	offsetY = 0;
 }
 
 void Tooltip::AddEntry(TooltipEntry entry) {
@@ -36,6 +38,8 @@ void Tooltip::AddEntry(TooltipEntry entry) {
 }
 
 void Tooltip::Draw(int x, int y, TCODConsole *console) {
+	x += offsetX;
+	y += offsetY;
 	console->setDefaultBackground(TCODColor::darkestYellow);
 	int width = 0;
 	for(std::vector<TooltipEntry>::iterator it = entries.begin(); it != entries.end(); it++) {
@@ -55,3 +59,5 @@ void Tooltip::Draw(int x, int y, TCODConsole *console) {
 	console->setDefaultBackground(TCODColor::black);
 	console->setDefaultForeground(TCODColor::white);
 }
+
+void Tooltip::OffsetPosition(int x, int y) { offsetX = x; offsetY = y; }
