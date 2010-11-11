@@ -1,4 +1,5 @@
 construction_type "Stockpile" {
+	tier=0
 	category="Basics"
 	stockpile
 	walkable
@@ -8,6 +9,7 @@ construction_type "Stockpile" {
 }
 
 construction_type "Farm plot" {
+	tier=0
 	category="Basics"
 	farmplot
 	walkable
@@ -17,15 +19,17 @@ construction_type "Farm plot" {
 	tileReqs=["grass"]
 }
 
-construction_type "Wooden Wall" {
+construction_type "Wooden Palisade" {
+	tier=1
 	category="Basics"
 	wall
 	maxCondition=30
-	materials=["Log"]
+	materials=["Log","Log","Log","Log","Log"]
 	placementType=2
 }
 
 construction_type "Carpenter" {
+	tier=0
 	category="Workshops"
 	graphicLength=3
 	graphic=[ 35, 46,177,
@@ -39,6 +43,7 @@ construction_type "Carpenter" {
 }
 
 construction_type "Brewery" {
+	tier=0
 	category="Workshops"
 	graphicLength=4
 	graphic=[ 10, 46, 46,231,
@@ -51,6 +56,7 @@ construction_type "Brewery" {
 }
 
 construction_type "Kitchen" {
+	tier=0
 	category="Workshops"
 	graphicLength=4
 	graphic=[  9, 179,178, 127, 
@@ -64,6 +70,7 @@ construction_type "Kitchen" {
 }
 
 construction_type "Bone Carver" {
+	tier=1
 	category="Workshops"
 	graphicLength=4
 	graphic=[  9, 179,179,  9, 
@@ -77,6 +84,7 @@ construction_type "Bone Carver" {
 }
 
 construction_type "Butcher" {
+	tier=1
 	category="Workshops"
 	graphicLength=4
 	graphic=[ 37,179,179, 37, 
@@ -90,6 +98,7 @@ construction_type "Butcher" {
 }
 
 construction_type "Bed" {
+	tier=0
 	category="Furniture"
 	bed
 	graphicLength=1
@@ -100,6 +109,7 @@ construction_type "Bed" {
 }
 
 construction_type "Door" {
+	tier=0
 	category="Furniture"
 	door
 	graphicLength=1
@@ -111,6 +121,7 @@ construction_type "Door" {
 }
 
 construction_type "Stone quarry" {
+	tier=2
 	category="Permanent"
 	graphicLength=10
 	graphic=[176,176,178, 44,177,176,177,178,178,176,
@@ -135,6 +146,7 @@ construction_type "Stone quarry" {
 }
 
 construction_type "Stone mason" {
+	tier=2
 	category="Workshops"
 	graphicLength=4
 	graphic=[ 40, 46,157,178,
@@ -148,6 +160,7 @@ construction_type "Stone mason" {
 }
 
 construction_type "Weapon crafter" {
+	tier=2
 	category="Workshops"
 	graphicLength=2
 	graphic=[ 91, 92,
@@ -162,6 +175,7 @@ construction_type "Weapon crafter" {
 }
 
 construction_type "Armor Crafter" {
+	tier=2
 	category="Workshops"
 	graphicLength=2
 	graphic=[16, 124,
@@ -176,6 +190,7 @@ construction_type "Armor Crafter" {
 }
 
 construction_type "Mill" {
+	tier=1
 	category="Workshops"
 	graphicLength=3
 	graphic=[157, 46,157,
@@ -189,6 +204,7 @@ construction_type "Mill" {
 }
 
 construction_type "Weaver" {
+	tier=1
 	category="Workshops"
 	graphicLength=3
 	graphic=[ 21, 30, 30,
@@ -202,6 +218,7 @@ construction_type "Weaver" {
 }
 
 construction_type "Statue" {
+	tier=1
 	category="Furniture"
 	furniture
 	graphicLength=1
@@ -211,6 +228,7 @@ construction_type "Statue" {
 }
 
 construction_type "Spawning pool" {
+	tier=0
 	category="Permanent"
 	graphicLength=1
 	graphic=[ 126 ]
@@ -225,6 +243,7 @@ construction_type "Spawning pool" {
 }
 
 construction_type "Bloomery" {
+	tier=3
 	category="Workshops"
 	graphicLength=4
 	graphic=[ 40, 46,176,191,
@@ -238,6 +257,7 @@ construction_type "Bloomery" {
 }
 
 construction_type "Clay pit" {
+	tier=3
 	category="Permanent"
 	graphicLength=5
 	graphic=[201, 203, 203, 203, 187,
@@ -256,6 +276,7 @@ construction_type "Clay pit" {
 }
 
 construction_type "Clay kiln" {
+	tier=3
 	category="Workshops"
 	graphicLength=2
 	graphic=[ 10, 35,
@@ -270,6 +291,7 @@ construction_type "Clay kiln" {
 }
 
 construction_type "Brick Wall" {
+	tier=3
 	category="Basics"
 	wall
 	maxCondition=50
@@ -277,6 +299,7 @@ construction_type "Brick Wall" {
 }
 
 construction_type "Totem Pole" {
+	tier=1
 	category="Basics"
 	unique
 	centersCamp
@@ -289,6 +312,7 @@ construction_type "Totem Pole" {
 }
 
 construction_type "Pontoon bridge" {
+	tier=1
 	category="Basics"
 	bridge
 	walkable
