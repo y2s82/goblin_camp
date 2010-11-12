@@ -1250,7 +1250,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			}
 			break;
 
-		case ESCORT:
+		case FOLLOW:
 			if (squad->TargetEntity().lock()) {
 				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity().lock()->Position(), squad->TargetEntity()));
 				npc->jobs.push_back(newJob);
