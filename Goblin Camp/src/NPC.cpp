@@ -251,18 +251,17 @@ void NPC::HandleWeariness() {
 	}
 	if (!found) {
 		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
+		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
+		sleepJob->internal = true;
+		if (!expert) sleepJob->tasks.push_back(Task(UNWIELD));
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
 			run = true;
-			boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
-			sleepJob->internal = true;
 			sleepJob->ReserveEntity(bed);
 			sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
 			sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
 			jobs.push_back(sleepJob);
 			return;
 		}
-		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
-		sleepJob->internal = true;
 		sleepJob->tasks.push_back(Task(SLEEP, Position()));
 		jobs.push_back(sleepJob);
 	}
@@ -960,6 +959,14 @@ MOVENEARend:
 
 			case FORGET:
 				foundItem.reset();
+				TaskFinished(TASKSUCCESS);
+				break;
+
+			case UNWIELD:
+				if (mainHand.lock()) {
+					DropItem(mainHand);
+					mainHand.reset();
+				}
 				TaskFinished(TASKSUCCESS);
 				break;
 

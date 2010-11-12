@@ -68,7 +68,8 @@ enum Action {
 	FILL,
 	POUR,
 	DIG,
-	FORGET
+	FORGET,
+	UNWIELD
 };
 
 enum TaskResult {
