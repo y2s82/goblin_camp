@@ -1056,10 +1056,19 @@ TaskResult NPC::Move(TaskResult oldResult) {
 	return oldResult;
 }
 
+unsigned int NPC::pathingThreadCount = 0;
+boost::mutex NPC::threadCountMutex;
 void NPC::findPath(Coordinate target) {
 	findPathWorking = true;
 	pathIndex = 0;
-	boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking));
+	if (pathingThreadCount < 12) {
+		threadCountMutex.lock();
+		++pathingThreadCount;
+		threadCountMutex.unlock();
+		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, true));
+	} else {
+		tFindPath(path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, false);
+	}
 }
 
 void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
@@ -1154,10 +1163,15 @@ boost::weak_ptr<Entity> NPC::currentEntity() {
 }
 
 
-void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex *pathMutex, bool *nopath, bool *findPathWorking) {
+void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex *pathMutex, bool *nopath, bool *findPathWorking, bool threaded) {
 	boost::mutex::scoped_lock pathLock(*pathMutex);
 	*nopath = !path->compute(x0, y0, x1, y1);
 	*findPathWorking = false;
+	if (threaded) {
+		NPC::threadCountMutex.lock();
+		--NPC::pathingThreadCount;
+		NPC::threadCountMutex.unlock();
+	}
 }
 
 bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
