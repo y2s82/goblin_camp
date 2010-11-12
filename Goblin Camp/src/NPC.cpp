@@ -295,7 +295,7 @@ void NPC::Update() {
 		} else if (thirst > THIRST_THRESHOLD * 2) Kill();
 		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
 			HandleHunger();
-		} else if (hunger > HUNGER_THRESHOLD * 3) Kill();
+		} else if (hunger > HUNGER_THRESHOLD * 2) Kill();
 	}
 
 	if (needsSleep) {
