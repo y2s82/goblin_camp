@@ -39,6 +39,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
+	Camp::Inst()->ConstructionBuilt(type);
 }
 
 Stockpile::~Stockpile() {

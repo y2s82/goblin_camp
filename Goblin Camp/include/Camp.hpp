@@ -38,6 +38,7 @@ private:
 	Coordinate lockedCenter;
 	int tier;
 	std::string name;
+	int workshops, farmplots, production;
 
 public:
 	static Camp* Inst();
@@ -49,4 +50,6 @@ public:
 	int GetTier();
 	void UpdateTier();
 	std::string GetName();
+	void ConstructionBuilt(int type);
+	void ItemProduced();
 };
