@@ -65,20 +65,6 @@ construction_type "Brewery" {
 	productiony=0
 }
 
-construction_type "Kitchen" {
-	tier=0
-	category="Workshops"
-	graphicLength=4
-	graphic=[  9, 179,178, 127, 
-			  10, 179,178, 16,
-			 127,  95, 95, 127]
-	walkable
-	maxCondition=90
-	materials=["Plank","Plank","Plank","Plank"]
-	productionx=1
-	productiony=2
-}
-
 construction_type "Bed" {
 	tier=0
 	category="Furniture"
@@ -100,6 +86,20 @@ construction_type "Door" {
 	blocksLight
 	maxCondition=10
 	materials=["Door"]
+}
+
+construction_type "Kitchen" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  95, 95, 127]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
 }
 
 construction_type "Mill" {
