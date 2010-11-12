@@ -118,7 +118,7 @@ for your military is also a very good idea.
 You can create your first military squad by opening the Squads menu. Type in a
 name for the squad, set how many orcs you wish to be in it and click Create. 
 Note that military orcs will not work in workshops! You can then set them to 
-guard a specific spot, escort an npc, and choose which category of weapon they 
+guard a specific spot, follow an npc, and choose which category of weapon they 
 should use. If they are wielding nothing and you specify a weapon category, 
 they'll automatically pick up weapons. If you later change the category, or 
 make better weapons of the same category, click Rearm to order that squad to 
