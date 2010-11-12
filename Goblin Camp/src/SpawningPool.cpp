@@ -134,7 +134,7 @@ void SpawningPool::Update() {
 		if (Map::Inst()->GetFilth(x, y).lock() && Map::Inst()->GetFilth(x, y).lock()->Depth() > 0) {
 			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
 			filth += filthNode->Depth();
-			for (int i = 0; i < 1 + rand() % filthNode->Depth(); ++i) Map::Inst()->Corrupt(x, y);
+			for (int i = 0; i < filthNode->Depth(); ++i) Map::Inst()->Corrupt(x, y);
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
@@ -170,7 +170,7 @@ void SpawningPool::Update() {
 			if (spawnLocation.X() != -1 && spawnLocation.Y() != -1) {
 				++spawns;
 				if (filth >= corpses*2) {
-					filth -= 2;
+					for (int i = 0; i < 10 && filth > 0; ++i) --filth;
 					if (rand() % 3 < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
 						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
@@ -179,7 +179,7 @@ void SpawningPool::Update() {
 						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 					}
 				} else if (filth >= corpses) {
-					--filth;
+					for (int i = 0; i < 5 && filth > 0; ++i) --filth;
 					--corpses;
 					if (rand() % 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
