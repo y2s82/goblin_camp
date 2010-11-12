@@ -167,7 +167,16 @@ void SquadsDialog::DeleteSquad() {
 
 void SquadsDialog::SelectOrder(Orders order) {
     GetSquad(squadList->Selected())->Order(order);
-    UI::ChooseOrderTargetCoordinate(GetSquad(squadList->Selected()));
+	switch (order) {
+	case GUARD:
+	default:
+		UI::ChooseOrderTargetCoordinate(GetSquad(squadList->Selected()));
+		break;
+
+	case ESCORT:
+		UI::ChooseOrderTargetEntity(GetSquad(squadList->Selected()));
+		break;
+	}
     UI::Inst()->HideMenu();
 }
 
