@@ -174,6 +174,7 @@ int Construction::Build() {
 		built = true;
 		if (!HasTag(CENTERSCAMP)) Camp::Inst()->UpdateCenter(Center(), true);
 		else Camp::Inst()->LockCenter(Center());
+		Camp::Inst()->ConstructionBuilt(type);
 	}
 	return condition;
 }
@@ -270,6 +271,7 @@ int Construction::Use() {
 			for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
 				if (itemContainer) Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], false, 0, components, itemContainer);
 				else Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], true, 0, components);
+				Camp::Inst()->ItemProduced();
 			}
 
 			//Destroy the components

@@ -28,7 +28,10 @@ Camp::Camp() :
 	locked(false),
 	lockedCenter(0,0),
 	tier(0),
-	name("Clearing")
+	name("Clearing"),
+	workshops(0),
+	farmplots(0),
+	production(0)
 {}
 
 Camp* Camp::Inst() {
@@ -74,15 +77,18 @@ int Camp::GetTier() { return tier; }
 void Camp::UpdateTier() {
 	switch (tier) {
 	case 0:
-		if (Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 30 && Game::Inst()->staticConstructionList.size() > 10)
+		if (farmplots > 0 && workshops > 1 && production > 20 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 20)
 			++tier;
 		break;
 
 	case 1:
-		if (Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 60 && Game::Inst()->staticConstructionList.size() > 30)
+		if (workshops > 5 && production > 100 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 30)
 			++tier;
 		break;
-	case 2: break;
+	case 2: 
+		if (workshops > 10 && production > 500 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 40)
+			++tier;
+		break;
 	case 3: break;
 	case 4: break;
 	case 5: break;
@@ -101,3 +107,10 @@ void Camp::UpdateTier() {
 }
 
 std::string Camp::GetName() { return name; }
+
+void Camp::ConstructionBuilt(int type) {
+	if (Construction::Presets[type].tags[WORKSHOP]) ++workshops;
+	if (Construction::Presets[type].tags[FARMPLOT]) ++farmplots;
+}
+
+void Camp::ItemProduced() { ++production; }
