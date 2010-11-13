@@ -737,10 +737,10 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 		boost::weak_ptr<Item> container;
 
 		if (Item::Presets[item.lock()->Type()].fitsin >= 0) {
-			container = nearest->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL);
+			container = nearest->FindItemByCategory(Item::Presets[item.lock()->Type()].fitsin, NOTFULL, item.lock()->GetBulk());
 			if (container.lock()) {
 				target = container.lock()->Position();
-				stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()));
+				stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()), item.lock()->GetBulk());
 			}
 		}
 

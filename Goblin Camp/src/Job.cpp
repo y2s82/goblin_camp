@@ -48,7 +48,8 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	attempts(0),
 	attemptMax(5),
 	connectedEntity(boost::weak_ptr<Entity>()),
-	reservedSpace(boost::weak_ptr<Container>()),
+	reservedContainer(boost::weak_ptr<Container>()),
+	reservedSpace(0),
 	tool(-1),
 	markedGround(Coordinate(-1,-1)),
 	name(value),
@@ -62,9 +63,10 @@ Job::~Job() {
 	UnreserveEntities();
 	UnreserveSpot();
 	if (connectedEntity.lock()) connectedEntity.lock()->CancelJob();
-	if (reservedSpace.lock()) {
-		reservedSpace.lock()->ReserveSpace(false);
-		reservedSpace = boost::weak_ptr<Container>();
+	if (reservedContainer.lock()) {
+		reservedContainer.lock()->ReserveSpace(false, reservedSpace);
+		reservedContainer = boost::weak_ptr<Container>();
+		reservedSpace = 0;
 	}
 	if (markedGround.X() >= 0 && markedGround.X() < Map::Inst()->Width() &&
 		markedGround.Y() >= 0 && markedGround.Y() < Map::Inst()->Height()) {
@@ -194,10 +196,11 @@ void Job::ConnectToEntity(boost::weak_ptr<Entity> ent) {
 	connectedEntity = ent;
 }
 
-void Job::ReserveSpace(boost::weak_ptr<Container> cont) {
+void Job::ReserveSpace(boost::weak_ptr<Container> cont, int bulk) {
 	if (cont.lock()) {
-		cont.lock()->ReserveSpace(true);
-		reservedSpace = cont;
+		cont.lock()->ReserveSpace(true, bulk);
+		reservedContainer = cont;
+		reservedSpace = bulk;
 	}
 }
 
