@@ -403,6 +403,7 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & velocity;
 	ar & nextVelocityMove;
 	ar & velocityTarget;
+	ar & bulk;
 }
 
 template<class Archive>
@@ -419,6 +420,7 @@ void Entity::load(Archive & ar, const unsigned int version) {
 		ar & velocity;
 		ar & nextVelocityMove;
 		ar & velocityTarget;
+		ar & bulk;
 	}
 }
 
