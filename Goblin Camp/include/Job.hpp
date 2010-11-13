@@ -120,7 +120,8 @@ private:
 	std::pair<boost::weak_ptr<Stockpile>, Coordinate> reservedSpot;
 	int attempts, attemptMax;
 	boost::weak_ptr<Entity> connectedEntity;
-	boost::weak_ptr<Container> reservedSpace;
+	boost::weak_ptr<Container> reservedContainer;
+	int reservedSpace;
 	ItemCategory tool;
 	Coordinate markedGround;
 public:
@@ -157,7 +158,7 @@ public:
 	void UnreserveSpot();
 	void ConnectToEntity(boost::weak_ptr<Entity>);
 	boost::weak_ptr<Entity> ConnectedEntity();
-	void ReserveSpace(boost::weak_ptr<Container>);
+	void ReserveSpace(boost::weak_ptr<Container>, int bulk = 1);
 
 	bool internal;
 	int Attempts();

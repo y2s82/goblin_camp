@@ -53,7 +53,7 @@ public:
 	virtual ~Container();
 	virtual bool AddItem(boost::weak_ptr<Item>);
 	virtual void RemoveItem(boost::weak_ptr<Item>);
-	void ReserveSpace(bool);
+	void ReserveSpace(bool, int bulk = 1);
 	boost::weak_ptr<Item> GetItem(boost::weak_ptr<Item>);
 	std::set<boost::weak_ptr<Item> >* GetItems();
 	boost::weak_ptr<Item> GetFirstItem();

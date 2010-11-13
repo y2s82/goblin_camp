@@ -46,7 +46,7 @@ bool Container::AddItem(boost::weak_ptr<Item> item) {
 	if (capacity > 0 && item.lock()) {
 		item.lock()->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
-		--capacity;
+		capacity -= item.lock()->GetBulk();
 		for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
 			(*it)->ItemAdded(item);
 		}
@@ -57,7 +57,7 @@ bool Container::AddItem(boost::weak_ptr<Item> item) {
 
 void Container::RemoveItem(boost::weak_ptr<Item> item) {
 	items.erase(item);
-	++capacity;
+	if (item.lock()) capacity += item.lock()->GetBulk();
 	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
 		(*it)->ItemRemoved(item);
 	}
@@ -72,7 +72,7 @@ std::set<boost::weak_ptr<Item> >* Container::GetItems() { return &items; }
 bool Container::empty() { return items.empty(); }
 int Container::size() { return items.size(); }
 
-int Container::Capacity() { return capacity; }
+int Container::Capacity() { return capacity-reservedSpace; }
 
 boost::weak_ptr<Item> Container::GetFirstItem() { 
 	if (items.empty()) return boost::weak_ptr<Item>();
@@ -85,9 +85,9 @@ bool Container::Full() {
 	return (capacity-reservedSpace <= 0);
 }
 
-void Container::ReserveSpace(bool res) {
-	if (res) ++reservedSpace;
-	else --reservedSpace;
+void Container::ReserveSpace(bool res, int bulk) {
+	if (res) reservedSpace += bulk;
+	else reservedSpace -= bulk;
 }
 
 void Container::AddListener(ContainerListener* listener) {
