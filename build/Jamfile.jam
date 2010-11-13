@@ -314,8 +314,7 @@ explicit-install dist-data
 ;
 
 explicit-install dist-lib
-    : $(GC_PROJECT_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_PROJECT_ROOT)/lib/gcamp : *.py ]
-      [ path.glob-tree $(GC_PROJECT_ROOT)/lib/gcamp_core : *.py *.dat ]
+    : [ path.glob-tree $(GC_PROJECT_ROOT)/lib : *.py *.zip *.dat ]
     : <conditional>@get-dist-data
       <install-source-root>$(GC_PROJECT_ROOT)
 ;

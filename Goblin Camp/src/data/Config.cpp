@@ -93,6 +93,7 @@ namespace Config {
 			("Help",          'h')
 			("Pause",         ' ')
 			("Jobs",          'j')
+			("DevConsole",    '`')
 		;
 	}
 	
