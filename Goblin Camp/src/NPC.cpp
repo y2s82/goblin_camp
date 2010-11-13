@@ -280,6 +280,7 @@ void NPC::Update() {
 	}
 
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 	
 
 	if (needsNutrition) {
@@ -1871,7 +1872,7 @@ void NPC::UpdateVelocity() {
 
 void NPC::PickupItem(boost::weak_ptr<Item> item) {
 	if (item.lock()) {
-		carried = boost::static_pointer_cast<Item>(item);
+		carried = boost::static_pointer_cast<Item>(item.lock());
 		bulk += item.lock()->GetBulk();
 		if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
 	}
