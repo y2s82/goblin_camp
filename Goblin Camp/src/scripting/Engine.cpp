@@ -134,6 +134,14 @@ namespace Script {
 			PyImport_AddModule("__gcmods__");
 			PyImport_AddModule("__gcuserconfig__");
 			PyImport_AddModule("__gcautoexec__");
+			PyImport_AddModule("__gcdevconsole__");
+			
+			LOG("Setting up console namespace.");
+			modImp.attr("load_source")("__gcdevconsole__", (Paths::Get(Paths::GlobalData) / "lib" / "__gcdevconsole__.py").string());
+			
+			py::exec(
+				"log.info('Console ready.')", py::import("__gcdevconsole__").attr("__dict__")
+			);
 		} catch (const py::error_already_set&) {
 			LogBootstrapException();
 			
