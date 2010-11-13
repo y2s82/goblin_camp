@@ -301,10 +301,10 @@ void NPC::Update() {
 	if (needsSleep) {
 		++weariness;
 
-		if (weariness >= WEARY_THRESHOLD) { 
+		if (weariness >= WEARY_THRESHOLD) {
 			AddEffect(DROWSY);
 			HandleWeariness();
-		} else RemoveEffect(DROWSY);		
+		} else RemoveEffect(DROWSY);
 	}
 
 	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
@@ -505,8 +505,7 @@ MOVENEARend:
 						cont.lock()->RemoveItem(
 							boost::static_pointer_cast<Item>(currentEntity().lock()));
 					}
-					carried = boost::static_pointer_cast<Item>(currentEntity().lock());
-					if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
+					PickupItem(boost::static_pointer_cast<Item>(currentEntity().lock()));
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else { TaskFinished(TASKFAILFATAL, "Item not found"); break; }
@@ -524,7 +523,14 @@ MOVENEARend:
 					carried.lock()->Position(Position());
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
-						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!", TCODColor::white, cont->Position());
+						if (!cont->AddItem(carried)) {
+							Announce::Inst()->AddMsg("Container full!", TCODColor::white, cont->Position());
+							DropItem(carried);
+							carried.reset();
+							TaskFinished(TASKFAILFATAL);
+							break;
+						}
+						bulk -= carried.lock()->GetBulk();
 					} else {
 						DropItem(carried); 
 						carried.reset();
@@ -541,6 +547,7 @@ MOVENEARend:
 					thirst -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
 					Game::Inst()->RemoveItem(carried);
+					bulk -= carried.lock()->GetBulk();
 					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKSUCCESS);
 					break;
@@ -563,6 +570,7 @@ MOVENEARend:
 				if (carried.lock()) {
 					hunger -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
+					bulk -= carried.lock()->GetBulk();
 
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
 						Game::Inst()->CreateItem(Position(), *fruiti, true);
@@ -608,14 +616,13 @@ MOVENEARend:
 
 					boost::shared_ptr<Item> plant = carried.lock();
 					inventory->RemoveItem(carried);
+					bulk -= plant->GetBulk();
 					carried = boost::weak_ptr<Item>();
 
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[plant->Type()].fruits.begin(); fruiti != Item::Presets[plant->Type()].fruits.end(); ++fruiti) {
 						if (stockpile) {
 							int item = Game::Inst()->CreateItem(Position(), *fruiti, false);
-							DropItem(carried);
-							carried = Game::Inst()->GetItem(item);
-							inventory->AddItem(carried);
+							PickupItem(Game::Inst()->GetItem(item));
 							stockpile = false;
 						} else {
 							Game::Inst()->CreateItem(Position(), *fruiti, true);
@@ -643,8 +650,7 @@ MOVENEARend:
 							if (stockpile) {
 								int item = Game::Inst()->CreateItem(tree->Position(), *iti, false);
 								DropItem(carried);
-								carried = Game::Inst()->GetItem(item);
-								inventory->AddItem(carried);
+								PickupItem(Game::Inst()->GetItem(item));
 								stockpile = false;
 							} else {
 								Game::Inst()->CreateItem(tree->Position(), *iti, true);
@@ -670,8 +676,7 @@ MOVENEARend:
 							if (stockpile) {
 								int item = Game::Inst()->CreateItem(plant->Position(), *iti, false);
 								DropItem(carried);
-								carried = Game::Inst()->GetItem(item);
-								inventory->AddItem(carried);
+								PickupItem(Game::Inst()->GetItem(item));			
 								stockpile = false;
 							} else {
 								Game::Inst()->CreateItem(plant->Position(), *iti, true);
@@ -821,8 +826,7 @@ MOVENEARend:
 						if (stockpile) {
 							int item = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Bog iron"), false);
 							DropItem(carried);
-							carried = Game::Inst()->GetItem(item);
-							inventory->AddItem(carried);
+							PickupItem(Game::Inst()->GetItem(item));
 							stockpile = false;
 						} else {
 							Game::Inst()->CreateItem(Position(), Item::StringToItemType("Bog iron"), true);
@@ -1864,6 +1868,14 @@ void NPC::UpdateVelocity() {
 				}
 			}
 		}
+	}
+}
+
+void NPC::PickupItem(boost::weak_ptr<Item> item) {
+	if (item.lock()) {
+		carried = boost::static_pointer_cast<Item>(item);
+		bulk += item.lock()->GetBulk();
+		if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
 	}
 }
 
