@@ -56,7 +56,7 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	producer(false),
 	progress(0),
 	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
-	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, Construction::Presets[type].materials.size(), -1))),
+	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
 	dismantle(false),
 	time(0),
 	built(false)
