@@ -209,7 +209,7 @@ void Tile::WalkOver() {
 	++walkedOver;
 	if (_type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
-		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = rand() % 2 ? '.' : ',';
+		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
 	}
 }
 

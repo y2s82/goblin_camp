@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
 
+#include "Random.hpp"
 #include "UI.hpp"
 #include "Announce.hpp"
 #include "Game.hpp"
@@ -882,7 +883,7 @@ void UI::ChooseCorrupt() {
 
 void UI::ChooseNaturify() {
 	for (int i = 0; i < 10000; ++i) {
-		Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
+		Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 	}
 }
 

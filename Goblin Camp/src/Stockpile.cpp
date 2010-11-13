@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/format.hpp>
 
+#include "Random.hpp"
 #include "Stockpile.hpp"
 #include "Game.hpp"
 #include "Map.hpp"
@@ -284,7 +285,7 @@ bool Stockpile::Full(ItemType type) {
 Coordinate Stockpile::FreePosition() {
 	//First attempt to find a random position
 	for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
-		std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), rand() % containers.size());
+		std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::Choose(containers));
 		if (conti->second->empty() && !reserved[conti->first]) return conti->first;
 	}
 	//If that fails still iterate through each position because a free position _should_ exist

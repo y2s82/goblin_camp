@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "Random.hpp"
 #include "Map.hpp"
 #include "Game.hpp"
 #include "NPC.hpp"
@@ -278,7 +279,7 @@ void Map::Corrupt(int x, int y, int magnitude) {
 				!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
 					bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
 					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-					if (createTree && rand() % 4 < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+					if (createTree && Random::Generate(3) < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 			}
 		}
 		if (tileMap[x][y].corruption > 300) {
