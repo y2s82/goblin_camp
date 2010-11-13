@@ -207,6 +207,28 @@ void StartNewGame() {
 	game->CreateItems(10, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
+	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
+		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
+	Coordinate corpseLoc2 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
+		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
+	while (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y()) || !Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) {
+		if (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
+		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
+		if (!Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
+		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
+	}
+
+	game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
+	game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
+	int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
+	boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
+	corpse->Name("Human corpse");
+	corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
+	corpse = game->itemList[corpseuid];
+	corpse->Name("Human corpse");
+	for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + rand() % 3, corpseLoc1.Y() - 1 + rand() % 3));
+	for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + rand() % 3, corpseLoc2.Y() - 1 + rand() % 3));
+
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
 	game->CenterOn(spawnCenterCandidates.top().second);
 
