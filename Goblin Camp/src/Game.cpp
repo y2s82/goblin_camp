@@ -682,13 +682,22 @@ void Game::Update() {
 		if (boost::shared_ptr<Item> item = itemi->lock()) item->UpdateVelocity();
 	}
 
-	//Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
-	//15 seconds, on average, or immediately if a new stockpile is built or a stockpile's allowed items are changed.
-	if (rand() % (UPDATES_PER_SECOND * 15) == 0 || refreshStockpiles) {
+	/*Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
+	5 seconds, on average, or immediately if a new stockpile is built or a stockpile's allowed items are changed.
+	To further reduce load when very many free items exist, only a quarter of them will be checked*/
+	if (rand() % (UPDATES_PER_SECOND * 5) == 0 || refreshStockpiles) {
 		refreshStockpiles = false;
-		for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
-			if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
-				StockpileItem(*itemi);
+		if (freeItems.size() < 100) {
+			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
+				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
+					StockpileItem(*itemi);
+			}
+		} else {
+			for (unsigned int i = 0; i < std::max((unsigned int)100, freeItems.size()/4); ++i) {
+				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), rand() % freeItems.size());
+				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
+					StockpileItem(*itemi);
+			}
 		}
 	}
 
