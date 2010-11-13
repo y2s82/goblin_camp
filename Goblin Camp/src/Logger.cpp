@@ -45,6 +45,7 @@ namespace Logger {
 		// no buffering
 		log.rdbuf()->pubsetbuf(0, 0);
 		log.open(logFile.c_str());
+		log.rdbuf()->pubsetbuf(0, 0);
 		
 		LOG("Log opened " << boost::posix_time::second_clock::local_time());
 		// Instead of explicit closing: to ensure it's always flushed at the end, even when we bail out with exit().
