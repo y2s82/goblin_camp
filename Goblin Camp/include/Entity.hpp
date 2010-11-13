@@ -50,6 +50,7 @@ protected:
 	int velocity, nextVelocityMove;
 	Coordinate velocityTarget;
 	std::list<FlightPath> flightPath;
+	int bulk;
 public:
 	Entity();
 	virtual ~Entity();
@@ -79,5 +80,10 @@ public:
 	int GetHeight();
 	void SetVelocityTarget(Coordinate);
 	void CalculateFlightPath(Coordinate, int speed, int initialHeight=0);
+
+	void SetBulk(int);
+	int GetBulk();
+	void AddBulk(int);
+	void RemoveBulk(int);
 };
 

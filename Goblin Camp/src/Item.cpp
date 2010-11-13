@@ -64,6 +64,8 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	for (int i = 0; i < RES_COUNT; ++i) {
 		resistances[i] = Item::Presets[type].resistances[i];
 	}
+
+	bulk = Item::Presets[type].bulk;
 }
 
 Item::~Item() {
@@ -337,6 +339,8 @@ private:
 			Item::Presets.back().resistances[FIRE_RES] = value.i;
 		} else if (boost::iequals(name,"poison")) {
 			Item::Presets.back().resistances[POISON_RES] = value.i;
+		} else if (boost::iequals(name,"bulk")) {
+			Item::Presets.back().bulk = value.i;
 		}
 		return true;
 	}
@@ -373,6 +377,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addListProperty("decay", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("decaySpeed", TCOD_TYPE_INT, false);
 	itemTypeStruct->addProperty("constructedin", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addProperty("bulk", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
@@ -527,7 +532,8 @@ ItemPreset::ItemPreset() : graphic('?'),
 	decays(false),
 	decaySpeed(0),
 	decayList(std::vector<ItemType>()),
-	attack(Attack())
+	attack(Attack()),
+	bulk(1)
 {
 	for (int i = 0; i < RES_COUNT; ++i) {
 		resistances[i] = 0;

@@ -27,7 +27,8 @@ FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
 
 Entity::Entity() :
 	zone(0), reserved(0), name("NONAME"), faction(-1),
-	velocity(0), nextVelocityMove(0), velocityTarget(Coordinate(0,0))
+	velocity(0), nextVelocityMove(0), velocityTarget(Coordinate(0,0)),
+	bulk(0)
 {
 	uid = uids++; //FIXME: Entity should keep track of freed uids
 }
@@ -105,3 +106,8 @@ void Entity::CalculateFlightPath(Coordinate target, int speed, int initialHeight
 	}
 	SetVelocity(speed);
 }
+
+void Entity::SetBulk(int amount) { bulk = amount; }
+int Entity::GetBulk() { return bulk; }
+void Entity::AddBulk(int amount) { bulk += amount; }
+void Entity::RemoveBulk(int amount) { bulk -= amount; }

@@ -211,6 +211,7 @@ public:
 
 	bool Dead();
 	void Kill();
+	void PickupItem(boost::weak_ptr<Item>);
 	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>);
 	void FireProjectile(boost::weak_ptr<Entity>);
