@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "scripting/_python.hpp"
+
 #include <libtcod.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -52,6 +54,10 @@ void SettingsMenu();
 void KeysMenu();
 void ModsMenu();
 
+namespace Globals {
+	bool noDumpMode;
+}
+
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;
 	
@@ -81,8 +87,20 @@ int GCMain(std::vector<std::string>& args) {
 	//
 	LOG("args.size() = " << args.size());
 	
-	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
-		if (std::find(args.begin(), args.end(), "-dev") != args.end()) Game::Inst()->EnableDevMode();
+	bool bootTest = false;
+	Globals::noDumpMode = false;
+	
+	BOOST_FOREACH(std::string arg, args) {
+		if (arg == "-boottest") {
+			bootTest = true;
+		} else if (arg == "-dev") {
+			Game::Inst()->EnableDevMode();
+		} else if (arg == "-nodumps") {
+			Globals::noDumpMode = true;
+		}
+	}
+	
+	if (!bootTest) {
 		exitcode = MainMenu();
 	} else {
 		LOG("Bootstrap test, going into shutdown.");

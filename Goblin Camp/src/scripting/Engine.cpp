@@ -41,36 +41,13 @@ namespace Globals {
 }
 
 namespace {
-	void ExtractException(py::object& excType, py::object& excValue, py::object& excTB) {
-		PyObject *rawExcType, *rawExcValue, *rawExcTB;
-		PyErr_Fetch(&rawExcType, &rawExcValue, &rawExcTB);
-		
-		excType  = py::object(py::handle<>(rawExcType));
-		
-		// "The value and traceback object may be NULL even when the type object is not."
-		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
-		
-		// So, set them to None initially.
-		excValue = py::object();
-		excTB    = py::object();
-		
-		// And convert to py::objects when they're not NULL.
-		if (rawExcValue) {
-			excValue = py::object(py::handle<>(rawExcValue));
-		}
-		
-		if (rawExcTB) {
-			excTB    = py::object(py::handle<>(rawExcTB));
-		}
-	}
-	
 	void LogBootstrapException() {
 		py::object excType, excValue, excTB;
-		ExtractException(excType, excValue, excTB);
+		Script::ExtractException(excType, excValue, excTB);
 		
 		try {
-			py::object strExcType  = py::object(py::handle<>(PyObject_Str(excType.ptr())));
-			py::object strExcValue = py::object(py::handle<>(PyObject_Str(excValue.ptr())));
+			py::str strExcType  = py::str(excType);
+			py::str strExcValue = py::str(excValue);
 			
 			LOG_FUNC("Python bootstrap error: [" << py::extract<char*>(strExcType) << "] " << py::extract<char*>(strExcValue), "LogBootstrapException");
 		} catch (const py::error_already_set&) {
@@ -164,6 +141,29 @@ namespace Script {
 			Globals::loadPackageFunc("__gcmods__." + mod, directory);
 		} catch (const py::error_already_set&) {
 			LogException();
+		}
+	}
+	
+	void ExtractException(py::object& excType, py::object& excValue, py::object& excTB) {
+		PyObject *rawExcType, *rawExcValue, *rawExcTB;
+		PyErr_Fetch(&rawExcType, &rawExcValue, &rawExcTB);
+		
+		excType  = py::object(py::handle<>(rawExcType));
+		
+		// "The value and traceback object may be NULL even when the type object is not."
+		// http://docs.python.org/c-api/exceptions.html#PyErr_Fetch
+		
+		// So, set them to None initially.
+		excValue = py::object();
+		excTB    = py::object();
+		
+		// And convert to py::objects when they're not NULL.
+		if (rawExcValue) {
+			excValue = py::object(py::handle<>(rawExcValue));
+		}
+		
+		if (rawExcTB) {
+			excTB    = py::object(py::handle<>(rawExcTB));
 		}
 	}
 	

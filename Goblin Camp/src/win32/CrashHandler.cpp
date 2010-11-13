@@ -32,6 +32,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "data/Paths.hpp"
 
+namespace Globals {
+	extern bool noDumpMode;
+}
+
 namespace {
 	// Generates crash dump filename.
 	void GetDumpFilename(char dumpPath[MAX_PATH], char dumpFilename[MAX_PATH]) {
@@ -161,8 +165,10 @@ namespace {
 	// Release builds:
 	//   - dumps are always created, and exceptions are never propagated upwards (process is always terminated immediately after the exception has been caught)
 	//   - external crash handler is called, if it's possible
+	//
+	// It's also possible to disable the dumping with -nodumps CLI argument in debug builds.
 	#ifdef DEBUG
-	#	define GC_CREATE_DUMP(E, P) do { if (!IsDebuggerPresent()) CreateDump((E), (P)); } while (0)
+	#	define GC_CREATE_DUMP(E, P) do { if (!IsDebuggerPresent() && !Globals::noDumpMode) CreateDump((E), (P)); } while (0)
 	#	define GC_REPORT_CRASH()    EXCEPTION_CONTINUE_SEARCH
 	#else
 	#	define GC_CREATE_DUMP(E, P) CreateDump((E), (P))
