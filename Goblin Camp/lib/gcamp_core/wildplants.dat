@@ -80,8 +80,9 @@ plant_type "Blue Flower" {
 plant_type "Willow" {
 	tree
 	graphic=5
-	color="178,198,14"
-	components=["Wood log"]
+	color="140,198,14"
+	components=["Wicker", "Wicker", "Wicker", "Wicker", "Wicker",
+                "Wicker", "Wicker", "Wicker", "Wicker", "Wicker"]
 	rarity=300
 	condition=100
 	minheight=-5.0
@@ -94,7 +95,7 @@ plant_type "Birch" {
 	color="224,224,224"
 	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
 				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
-	rarity=50
+	rarity=30
 	condition=150
 	minheight=-0.07
 	maxheight=4.0

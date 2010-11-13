@@ -37,6 +37,21 @@ construction_type "Spawning pool" {
 	description="A pit of slime, it will spawn new goblins and orcs as long as it is provided with filth and corpses"
 }
 
+construction_type "Saw pit" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  95, 95, 95,
+			 178, 46, 44]
+	walkable
+	maxCondition=90
+	materials=["Log","Log","Log"]
+	productionx=1
+	productiony=1
+	description="Planks are created in saw pits"
+}
+
 construction_type "Carpenter" {
 	tier=0
 	category="Workshops"
@@ -46,13 +61,27 @@ construction_type "Carpenter" {
 			 178, 46,177]
 	walkable
 	maxCondition=90
-	materials=["Log","Log","Log"]
+	materials=["Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=1
-	description="A carpenter's workshop allows your orcs to create planks and basic wooden items"
+	description="A carpenter's workshop allows your orcs to create basic wooden items"
 }
 
-construction_type "Brewery" {
+construction_type "Basket Weaver" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 30, 30, 157,
+			  46, 46, 46,
+			  35, 30, 30]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Winery" {
 	tier=0
 	category="Workshops"
 	graphicLength=4
@@ -100,20 +129,6 @@ construction_type "Kitchen" {
 	materials=["Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
-}
-
-construction_type "Mill" {
-	tier=1
-	category="Workshops"
-	graphicLength=3
-	graphic=[157, 46,157,
-			  46, 46, 46,
-			 157, 46,157]
-	walkable
-	maxCondition=90
-	productionx=1
-	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Weaver" {
@@ -182,11 +197,11 @@ construction_type "Totem Pole" {
 	description="The Totem Pole represents the center of your camp"
 }
 
-construction_type "Wooden palisade" {
+construction_type "Palisade" {
 	tier=1
 	category="Basics"
 	wall
-	maxCondition=30
+	maxCondition=50
 	materials=["Log","Log","Log","Log","Log"]
 	placementType=2
 	description="A palisade will stop most monsters from gaining free access to your camp"
@@ -275,6 +290,36 @@ construction_type "Armor Crafter" {
 	materials=["Plank","Plank","Plank","Rough stone", "Rough stone"]
 }
 
+construction_type "Tanner" {
+	tier=2
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10,  9, 46,231,
+			  35, 35,  9,231]
+	walkable
+	maxCondition=120
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=1
+}
+
+construction_type "Mill" {
+	tier=2
+	category="Workshops"
+	graphicLength=5
+	graphic=[157,177, 30, 46, 46,
+			 157,177, 46, 92, 46,
+			  17, 46, 10,205, 16,
+			  46, 92, 46, 47, 46,
+			  46, 46, 31, 46, 46]
+	walkable
+	maxCondition=250
+	productionx=2
+	productiony=1
+	materials=["Rough stone","Rough stone","Log","Plank","Plank","Plank","Plank","Plank"]
+}
+
 construction_type "Clay pit" {
 	tier=3
 	category="Permanent"
@@ -328,5 +373,5 @@ construction_type "Brick Wall" {
 	category="Basics"
 	wall
 	maxCondition=50
-	materials=["Brick"]
+	materials=["Brick","Brick","Brick","Brick","Brick"]
 }
