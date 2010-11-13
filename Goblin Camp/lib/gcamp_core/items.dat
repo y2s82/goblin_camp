@@ -201,10 +201,11 @@ category_type "Misc." {
 /* Item types begin here */
 
 item_type "Wood log" {
-	category=["Log"]
+	category = ["Log"]
 	graphic = 22
 	color = "153,87,38"
 	multiplier = 10
+	bulk = 3
 }
 
 item_type "Wood plank" {
@@ -241,6 +242,7 @@ item_type "Wooden door" {
 	color = "255,73,7"
 	components = ["Plank", "Plank", "Plank"]
 	constructedin = "Carpenter"
+	bulk = 5
 }
 
 item_type "Bone door" {
@@ -249,6 +251,7 @@ item_type "Bone door" {
 	color = "255,255,255"
 	components = ["Bone", "Bone", "Bone"]
 	constructedin = "Bone carver"
+	bulk = 5
 }
 
 item_type "Wooden barrel" {
@@ -258,6 +261,7 @@ item_type "Wooden barrel" {
 	color = "255,73,7"
 	components = [ "Plank", "Plank" ]
 	constructedin = "Carpenter"
+	bulk = 5
 }
 
 item_type "Crate" {
@@ -267,6 +271,7 @@ item_type "Crate" {
 	color = "255,186,0"
 	components = [ "Plank", "Plank", "Plank" ]
 	constructedin = "Carpenter"
+	bulk = 5
 }
 
 item_type "Wicker basket" {
@@ -284,6 +289,7 @@ item_type "Wooden bed" {
 	color = "127,106,0"
 	components = [ "Plank", "Plank", "Plank" ]
 	constructedin = "Carpenter"
+	bulk = 5
 }
 
 item_type "Bone bed" {
@@ -292,6 +298,7 @@ item_type "Bone bed" {
 	color = "225,225,225"
 	components = [ "Bone", "Bone", "Bone" ]
 	constructedin = "Bone carver"
+	bulk = 5
 }
 
 item_type "Bloodberry" {
@@ -301,7 +308,7 @@ item_type "Bloodberry" {
 	nutrition = 6000
 	fruits = [ "Bloodberry seed" ]
 	decay = [ "Bloodberry seed", "Filth" ]
-	decaySpeed = 12
+	decaySpeed = 6
 	fitsin = "Basket"
 }
 
@@ -311,6 +318,7 @@ item_type "Bloodberry seed" {
 	color = "175,128,128"
 	growth = "Young Bloodberry shrub"
 	fitsin = "Sack"
+	bulk = 0
 }
 
 item_type "Young Bloodberry shrub" {
@@ -337,6 +345,7 @@ item_type "Blueleaf seed" {
 	color = "128,128,175"
 	growth = "Blueleaf sapling"
 	fitsin = "Sack"
+	bulk = 0
 }
 
 item_type "Blueleaf sapling" {
@@ -406,6 +415,7 @@ item_type "Corpse" {
 	decay = [ "Bones", "Filth" ]
 	decaySpeed = 4
 	fruits = [ "Bones", "Hide" ]
+	bulk = 6
 }
 
 item_type "Wine" {
@@ -509,6 +519,7 @@ item_type "Stone maul" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	bulk = 2
 }
 
 item_type "Stone axe" {
@@ -525,6 +536,7 @@ item_type "Stone axe" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	bulk = 2
 }
 
 item_type "Stone spear" {
@@ -574,6 +586,7 @@ item_type "Wooden arrow" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	bulk = 0
 }
 
 item_type "Stone-tipped arrow" {
@@ -591,6 +604,7 @@ item_type "Stone-tipped arrow" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	bulk = 0
 }
 
 item_type "Wooden bow" {
@@ -623,6 +637,7 @@ item_type "Rough stone" {
 	color = "192,192,192"
 	multiplier = 3
 	constructedin = "Stone quarry"
+	bulk = 3
 }
 
 item_type "Sharpened stone" {
@@ -631,6 +646,7 @@ item_type "Sharpened stone" {
 	color = "192,192,192"
 	components = ["Rough stone"]
 	constructedin = "Stone mason"
+	bulk = 2
 }
 
 item_type "Blueleaf boll" {
@@ -658,6 +674,7 @@ item_type "Bone statue" {
 	components = ["Bone", "Bone", "Bone", "Bone", "Bone"]
 	color = "255,255,255"
 	constructedin = "Bone carver"
+	bulk = 6
 }
 
 item_type "Stone statue" {
@@ -666,6 +683,7 @@ item_type "Stone statue" {
 	components = ["Rough stone", "Rough stone"]
 	color = "255,255,255"
 	constructedin = "Stone mason"
+	bulk = 8
 }
 
 item_type "Cloth sack" {
@@ -686,6 +704,7 @@ item_type "Leather armor" {
 		physical = 10
 	}
 	constructedin = "Armor Crafter"
+	bulk = 2
 }
 
 item_type "Chainmail" {
@@ -697,6 +716,7 @@ item_type "Chainmail" {
 		physical = 20
 	}
 	constructedin = "Armor Crafter"
+	bulk = 4
 }
 
 item_type "Platemail" {
@@ -708,6 +728,7 @@ item_type "Platemail" {
 		physical = 30
 	}
 	constructedin = "Armor Crafter"
+	bulk = 6
 }
 
 item_type "Bog iron" {
@@ -722,6 +743,7 @@ item_type "Wrought iron" {
 	color = "110,110,110"
 	components = ["Impure metal", "Impure metal", "Impure metal", "Wood", "Wood"]
 	constructedin = "Bloomery"
+	bulk = 3
 }
 
 item_type "Red clay" {
