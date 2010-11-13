@@ -1421,13 +1421,9 @@ std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 /*TODO: Calling jobs.clear() isn't a good idea as the NPC can have more than one job queued up, should use
 TaskFinished(TASKFAILFATAL) or just remove the job we want aborted*/
 void NPC::AbortCurrentJob(bool remove_job) {
-	jobs.clear();
-	if (carried.lock()) {
-		carried.lock()->Reserve(false);
-		DropItem(carried);
-		carried.reset();
-	}
-	if (remove_job) { JobManager::Inst()->RemoveJobByNPC(uid); }
+	boost::shared_ptr<Job> job = jobs.front();
+	TaskFinished(TASKFAILFATAL, "Job aborted");
+	if (remove_job) { JobManager::Inst()->RemoveJob(job); }
 }
 
 void NPC::Hit(boost::weak_ptr<Entity> target) {
@@ -1559,7 +1555,9 @@ void NPC::Escape() {
 }
 
 void NPC::DestroyAllItems() {
-	if (carried.lock()) Game::Inst()->RemoveItem(carried);
+	for (std::set<boost::weak_ptr<Item> >::iterator it = inventory->begin(); it != inventory->end(); ++it) {
+		if (it->lock()) Game::Inst()->RemoveItem(*it);
+	}
 }
 
 bool NPC::Escaped() { return escaped; }

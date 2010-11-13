@@ -241,11 +241,19 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	return boost::weak_ptr<Job>();
 }
 
-void JobManager::RemoveJobByNPC(int uid) {
-	for (int i = 0; i < PRIORITY_COUNT; ++i) {
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
-			if ((*jobi)->Assigned() == uid) {
-				jobi = availableList[i].erase(jobi);
+void JobManager::RemoveJob(boost::weak_ptr<Job> wjob) {
+	if (boost::shared_ptr<Job> job = wjob.lock()) {
+		for (int i = 0; i < PRIORITY_COUNT; ++i) {
+			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
+				if (*jobi == job) {
+					jobi = availableList[i].erase(jobi);
+					return;
+				}
+			}
+		}
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = waitingList.begin(); jobi != waitingList.end(); ++jobi) {
+			if (*jobi == job) {
+				jobi = waitingList.erase(jobi);
 				return;
 			}
 		}
