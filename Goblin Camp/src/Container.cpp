@@ -109,7 +109,11 @@ void Container::RemoveListener(ContainerListener *listener) {
 }
 
 void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
-    tooltip->AddEntry(TooltipEntry((boost::format("%s (%d/%d)") % name % size() % (Capacity() + size())).str(), TCODColor::white));
+	int capacityUsed = 0;
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+		if (itemi->lock()) capacityUsed += std::max(1, itemi->lock()->GetBulk());
+	}
+    tooltip->AddEntry(TooltipEntry((boost::format("%s -  %d items (%d/%d)") % name % size() % capacityUsed % (Capacity() + capacityUsed)).str(), TCODColor::white));
 }
 
 void Container::TranslateContainerListeners() {
