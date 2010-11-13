@@ -41,7 +41,7 @@ public:
 	void CancelJob(boost::weak_ptr<Entity>);
 	boost::weak_ptr<Job> GetJob(int);
 	boost::weak_ptr<Job> GetJobByListIndex(int);
-	void RemoveJobByNPC(int uid);
+	void RemoveJob(boost::weak_ptr<Job>);
 	void Update();
 	int JobAmount();
 	void NPCWaiting(int);
