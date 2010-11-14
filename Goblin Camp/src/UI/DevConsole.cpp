@@ -37,58 +37,138 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // | >>> input                                      |
 // +------------------------------------------------+
 
-unsigned Render(unsigned& inID, std::string& input, const std::string& output, TCODConsole& canvas, bool error) {
-	boost::tokenizer< boost::char_separator<char> > tok(output, boost::char_separator<char>("\n"));
-	
-	canvas.clear();
-	canvas.setAlignment(TCOD_LEFT);
-	canvas.setDefaultBackground(TCODColor::black);
-	canvas.setDefaultForeground(TCODColor::white);
-	
-	canvas.print(0, 0, "[In  %d]: %s", inID, input.c_str());
-	canvas.print(0, 1, "[Out %d]", inID);
-	canvas.setDefaultForeground(error ? TCODColor::amber : TCODColor::chartreuse);
-	
-	unsigned y = 3;
-	BOOST_FOREACH(std::string token, tok) {
-		canvas.print(0, y, "%s", token.c_str());
-		++y;
-	}
-	
-	++inID;
-	input.clear();
-	return y;
-}
+#include <cStringIO.h>
 
-unsigned Eval(unsigned& inID, std::string& input, TCODConsole& canvas) {
-	bool error = false;
+struct DevConsole {
+	unsigned inputID;
+	std::string input;
 	std::string output;
-	output.reserve(1024);
+	TCODConsole canvas;
 	
-	try {
-		py::object ns  = py::import("__gcdevconsole__").attr("__dict__");
-		py::object ret = py::eval(input.c_str(), ns, ns);
+	PyCompilerFlags cf;
+	PyObject *newStdOut, *newStdIn;
+	PyObject *oldStdOut, *oldStdErr, *oldStdIn;
+	
+	DevConsole(unsigned width) : inputID(0), input(""), output(""), canvas(TCODConsole(width - 2, 256)) {
+		output.reserve(2048);
+		input.reserve(256);
+		canvas.clear();
 		
-		py::object retRepr = py::object(py::handle<>(PyObject_Repr(ret.ptr())));
-		output = py::extract<char*>(retRepr);
-	} catch (const py::error_already_set&) {
-		py::object excType, excVal, excTB;
-		Script::ExtractException(excType, excVal, excTB);
-		Script::LogException();
+		cf.cf_flags = (CO_FUTURE_DIVISION | CO_FUTURE_ABSOLUTE_IMPORT | CO_FUTURE_PRINT_FUNCTION);
 		
-		error = true;
-		if (!excType.is_none()) {
-			output = py::extract<char*>(py::str(excType));
-			if (!excVal.is_none()) {
-				output += std::string(": ") + std::string(py::extract<char*>(py::str(excVal)));
-			}
-		} else {
-			output = "Internal error: exception with None type.";
-		}
+		PycString_IMPORT;
+		newStdIn  = PycStringIO->NewInput(PyString_FromString(""));
+		oldStdOut = PySys_GetObject("stdout");
+		oldStdErr = PySys_GetObject("stderr");
+		oldStdIn  = PySys_GetObject("stdin");
 	}
 	
-	return Render(inID, input, output, canvas, error);
-}
+	std::string GetStreamValue() {
+		PyObject *str = PycStringIO->cgetvalue(newStdOut);
+		return std::string(py::extract<char*>(py::object(py::handle<>(str))));
+	}
+	
+	void RedirectStreams() {
+		newStdOut = PycStringIO->NewOutput(2048);
+		
+		PySys_SetObject("stdout", newStdOut);
+		PySys_SetObject("stderr", newStdOut);
+		PySys_SetObject("stdin",  newStdIn);
+	}
+	
+	void RestoreStreams() {
+		PySys_SetObject("stdout", oldStdOut);
+		PySys_SetObject("stderr", oldStdErr);
+		PySys_SetObject("stdin",  oldStdIn);
+		
+		Py_DECREF(newStdOut);
+	}
+	
+	unsigned Render(bool error) {
+		typedef boost::char_separator<char> SepT;
+		typedef boost::tokenizer<SepT> TokT;
+		
+		SepT sep("\n");
+		TokT inTok(input, sep);
+		TokT outTok(output, sep);
+		
+		canvas.clear();
+		canvas.setAlignment(TCOD_LEFT);
+		canvas.setDefaultBackground(TCODColor::black);
+		canvas.setDefaultForeground(TCODColor::white);
+		
+		canvas.print(0, 0, "[In  %d]", inputID);
+		canvas.setDefaultForeground(TCODColor::sky);
+		
+		unsigned y = 1;
+		BOOST_FOREACH(std::string token, inTok) {
+			canvas.print(0, y, "%s", token.c_str());
+			++y;
+		}
+		
+		++y;
+		
+		canvas.setDefaultForeground(TCODColor::white);
+		canvas.print(0, y, "[Out %d]", inputID);
+		canvas.setDefaultForeground(error ? TCODColor::amber : TCODColor::chartreuse);
+		
+		++y;
+		BOOST_FOREACH(std::string token, outTok) {
+			canvas.print(0, y, "%s", token.c_str());
+			++y;
+		}
+		
+		++inputID;
+		input.clear();
+		return y;
+	}
+	
+	unsigned Eval() {
+		bool error = false;
+		RedirectStreams();
+		output.clear();
+		
+		try {
+			PyCodeObject *co = (PyCodeObject*)Py_CompileStringFlags(
+				input.c_str(), "<console>", Py_single_input, &cf
+			);
+			
+			if (co == NULL) {
+				py::throw_error_already_set();
+			}
+			
+			py::object ns = py::import("__gcdevconsole__").attr("__dict__");
+			PyObject *ret = PyEval_EvalCode(co, ns.ptr(), ns.ptr());
+			
+			if (ret == NULL) {
+				py::throw_error_already_set();
+			}
+			
+			Py_DECREF(ret);
+			//py::handle<> retH(ret);
+			//py::object repr = py::object(py::handle<>(PyObject_Repr(ret)));
+			
+			output = GetStreamValue();// + "\n" + std::string(py::extract<char*>(repr));
+		} catch (const py::error_already_set&) {
+			py::object excType, excVal, excTB;
+			Script::ExtractException(excType, excVal, excTB);
+			Script::LogException();
+			
+			error = true;
+			if (!excType.is_none()) {
+				output = py::extract<char*>(py::str(excType));
+				if (!excVal.is_none()) {
+					output += std::string(": ") + std::string(py::extract<char*>(py::str(excVal)));
+				}
+			} else {
+				output = "Internal error: exception with None type.";
+			}
+		}
+		
+		RestoreStreams();
+		return Render(error);
+	}
+};
 
 void ShowDevConsole() {
 	int w = Game::Inst()->ScreenWidth() - 4;
@@ -96,7 +176,6 @@ void ShowDevConsole() {
 	int x = 2;
 	int y = Game::Inst()->ScreenHeight() - h - 2;
 	
-	std::string input("");
 	TCOD_key_t key;
 	TCOD_mouse_t mouse;
 	TCODConsole *c = TCODConsole::root;
@@ -104,10 +183,8 @@ void ShowDevConsole() {
 	bool clicked = false;
 	int scroll = 0;
 	unsigned maxScroll = 0;
-	TCODConsole output(w - 2, 200);
-	output.clear();
 	
-	unsigned inID = 0;
+	DevConsole console(w - 2);
 	
 	// I tried to use the UI code. Really. I can't wrap my head around it.
 	while (true) {
@@ -115,11 +192,11 @@ void ShowDevConsole() {
 		if (key.vk == TCODK_ESCAPE) {
 			return;
 		} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
-			maxScroll = Eval(inID, input, output);
-		} else if (key.vk == TCODK_BACKSPACE && input.size() > 0) {
-			input.erase(input.end() - 1);
+			maxScroll = console.Eval();
+		} else if (key.vk == TCODK_BACKSPACE && console.input.size() > 0) {
+			console.input.erase(console.input.end() - 1);
 		} else if (key.c >= ' ' && key.c <= '~') {
-			input.push_back(key.c);
+			console.input.push_back(key.c);
 		}
 		
 		c->setDefaultForeground(TCODColor::white);
@@ -127,7 +204,7 @@ void ShowDevConsole() {
 		c->printFrame(x, y, w, h, true, TCOD_BKGND_SET, "Developer console");
 		c->setAlignment(TCOD_LEFT);
 		
-		TCODConsole::blit(&output, 0, scroll, w - 2, h - 5, c, x + 1, y + 1);
+		TCODConsole::blit(&console.canvas, 0, scroll, w - 2, h - 5, c, x + 1, y + 1);
 		
 		c->putChar(x + w - 2, y + 1,     TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
 		c->putChar(x + w - 2, y + h - 4, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
@@ -139,7 +216,7 @@ void ShowDevConsole() {
 		c->putChar(x,         y + h - 3, TCOD_CHAR_TEEE, TCOD_BKGND_SET);
 		c->putChar(x + w - 1, y + h - 3, TCOD_CHAR_TEEW, TCOD_BKGND_SET);
 		
-		c->print(x + 1, y + h - 2, "[In %d]: %s", inID, input.c_str());
+		c->print(x + 1, y + h - 2, "[In %d]: %s", console.inputID, console.input.c_str());
 		
 		c->flush();
 		
