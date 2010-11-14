@@ -141,10 +141,12 @@ struct DevConsole {
 			PyObject *ret = PyEval_EvalCode(co, ns.ptr(), ns.ptr());
 			
 			if (ret == NULL) {
+				Py_DECREF(co);
 				py::throw_error_already_set();
 			}
 			
 			Py_DECREF(ret);
+			Py_DECREF(co);
 			//py::handle<> retH(ret);
 			//py::object repr = py::object(py::handle<>(PyObject_Repr(ret)));
 			
