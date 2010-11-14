@@ -23,8 +23,8 @@
 	Still, it can't be a bad thing to be able to change it without recompiling
 	the game.
 '''
-
-import os, sys, time, pprint
+from __future__ import print_function
+import os, time, pprint, sys, functools, __builtin__, cStringIO as StringIO, textwrap
 import gcamp
 
 log = gcamp.log._createLogger('<< console >>')
