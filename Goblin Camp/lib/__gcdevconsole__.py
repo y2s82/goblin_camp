@@ -28,3 +28,12 @@ import os, time, pprint, sys, functools, __builtin__, cStringIO as StringIO, tex
 import gcamp
 
 log = gcamp.log._createLogger('<< console >>')
+
+def out(expr):
+	'''
+		Pretty prints the value of the expression.
+	'''
+	expr = pprint.pformat(expr)
+	
+	# TODO: expose console width (cvars expose only absolute width)
+	print(textwrap.fill(expr, 80))
