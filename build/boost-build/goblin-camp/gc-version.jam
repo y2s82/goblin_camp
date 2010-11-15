@@ -19,10 +19,18 @@ generators.register-standard gc-version.generate : PLIST_IN : PLIST ;
 
 toolset.flags gc-version.generate APPEND_HG <variant>debug   : yes ;
 
+local rule set-appendhg-flag ( what ) {
+    local variants = release profile ;
+    
+    for local variant in $(variants) {
+        toolset.flags gc-version.generate APPEND_HG <variant>$(variant) : $(what) ;
+    }
+}
+
 if --with-revid in [ modules.peek : ARGV ] {
-    toolset.flags gc-version.generate APPEND_HG <variant>release : yes ;
+    set-appendhg-flag yes ;
 } else {
-    toolset.flags gc-version.generate APPEND_HG <variant>release : no ;
+    set-appendhg-flag no  ;
 }
 
 GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;

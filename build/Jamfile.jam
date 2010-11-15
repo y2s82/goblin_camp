@@ -22,9 +22,6 @@ project goblin-camp
     : default-build debug
     : requirements
       <threading>multi
-      <strip>off
-      <debug-symbols>on
-      <variant>debug:<define>DEBUG
       <include>$(GC_HEADERS)
       <include>$(GC_PROJECT_ROOT)
       <define>GC_BOOST_BUILD
@@ -38,6 +35,7 @@ project goblin-camp
       <os>NT:<define>WIN32_LEAN_AND_MEAN
       <os>NT:<define>NOMINMAX
       <os>NT,<variant>release:<user-interface>gui
+      <os>NT,<variant>profile:<user-interface>gui
       <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
