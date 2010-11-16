@@ -547,8 +547,8 @@ MOVENEARend:
 				if (carried.lock()) { //Drink from an item
 					thirst -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
-					Game::Inst()->RemoveItem(carried);
 					bulk -= carried.lock()->GetBulk();
+					Game::Inst()->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKSUCCESS);
 					break;
