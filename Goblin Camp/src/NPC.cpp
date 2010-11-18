@@ -1146,6 +1146,7 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 		inventory->RemoveItem(item);
 		item.lock()->Position(Position());
 		item.lock()->PutInContainer(boost::weak_ptr<Item>());
+		bulk -= item.lock()->GetBulk();
 
 		//If the item is a container with water/filth in it, spill it on the ground
 		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
