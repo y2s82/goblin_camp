@@ -1551,6 +1551,10 @@ void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
 boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}
 
 void NPC::Escape() {
+	if (carried.lock()) {
+		Announce::Inst()->AddMsg((boost::format("%s has escaped with [%s]!") % name % carried.lock()->Name()).str(), 
+			TCODColor::yellow, Position());
+	}
 	DestroyAllItems();
 	escaped = true;
 }
