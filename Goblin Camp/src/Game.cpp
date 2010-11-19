@@ -1039,7 +1039,8 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 					harvestJob->ConnectToEntity(natObj);
 					harvestJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
 					harvestJob->tasks.push_back(Task(HARVESTWILDPLANT, natObj.lock()->Position(), natObj));
-					harvestJob->tasks.push_back(Task(STOCKPILEITEM));
+					if (NatureObject::Presets[natObj.lock()->Type()].components.size() > 0)
+						harvestJob->tasks.push_back(Task(STOCKPILEITEM));
 					JobManager::Inst()->AddJob(harvestJob);
 				}
 			}
