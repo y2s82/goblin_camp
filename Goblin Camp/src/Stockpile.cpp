@@ -80,8 +80,8 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 					//The item is the one we want, check that it fullfills all the requisite flags
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
 						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
-						//value represents bulk in this case
-						if (container->Capacity() < value) continue;
+						//value represents bulk in this case. Needs to check Full() because bulk=value=0 is a possibility
+						if (container->Full() || container->Capacity() < value) continue;
 					}
 
 					if (flags & BETTERTHAN) {
@@ -142,7 +142,7 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 				if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
 					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
 					//value represents bulk in this case
-					if (container->Capacity() < value) continue;
+					if (container->Full() || container->Capacity() < value) continue;
 				}
 				
 				if (flags & BETTERTHAN) {
