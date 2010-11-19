@@ -118,6 +118,7 @@ plant_type "Silvervine" {
 	color="221,234,234"
 	rarity=275
 	condition=50
+	harvestable
 	minheight=-1
 	maxheight=-0.01
 }
@@ -127,6 +128,7 @@ plant_type "Thornbush" {
 	color="213,232,83"
 	rarity=300
 	condition=50
+	harvestable
 	minheight=-1
 	maxheight=-0.01
 }
