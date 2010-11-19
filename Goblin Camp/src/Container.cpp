@@ -43,7 +43,7 @@ Container::~Container() {
 }
 
 bool Container::AddItem(boost::weak_ptr<Item> item) {
-	if (capacity > 0 && item.lock()) {
+	if (item.lock() && capacity >= std::max(item.lock()->GetBulk(), 1)) {
 		item.lock()->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
 		capacity -= std::max(item.lock()->GetBulk(), 1); //<- so that bulk=0 items take space
@@ -113,7 +113,7 @@ void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 		if (itemi->lock()) capacityUsed += std::max(1, itemi->lock()->GetBulk());
 	}
-    tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (Capacity() + capacityUsed)).str(), TCODColor::white));
+    tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (capacity + capacityUsed)).str(), TCODColor::white));
 }
 
 void Container::TranslateContainerListeners() {
