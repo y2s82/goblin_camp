@@ -689,7 +689,7 @@ MOVENEARend:
 					//Job underway
 					break;
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "Harvest target doesn't exist");
 				break;
 
 			case KILL:
