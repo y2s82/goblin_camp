@@ -31,7 +31,8 @@ SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construct
 	filth(0),
 	corpses(0),
 	spawns(0),
-	corpseContainer(boost::shared_ptr<Container>())
+	corpseContainer(boost::shared_ptr<Container>()),
+	jobCount(0)
 {
 	container = new UIContainer(std::vector<Drawable*>(), 0, 0, 16, 11);
 	dialog = new Dialog(container, "Spawning Pool", 16, 10);
@@ -56,78 +57,84 @@ void SpawningPool::Update() {
 
 		//Generate jobs
 
-		if (dumpFilth && rand() % (UPDATES_PER_SECOND * 5) == 0) {
-			if (Game::Inst()->filthList.size() > 0) {
-				boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
-				filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
-				filthDumpJob->tasks.push_back(Task(MOVE));
-				filthDumpJob->tasks.push_back(Task(TAKE));
-				filthDumpJob->tasks.push_back(Task(FORGET)); //Otherwise MOVEADJACENT will try to move adjacent to the container
-				Coordinate filthLocation = Game::Inst()->FindFilth(Position());
-				filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
-				filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
-				Coordinate target(-1,-1);
-				for (int x = a.X(); x <= b.X(); ++x) {
-					for (int y = a.Y(); y <= b.Y(); ++y) {
-						if (Map::Inst()->GetConstruction(x,y) == uid) {
-							if (Map::Inst()->Walkable(x-1,y)) {
-								target = Coordinate(x-1,y);
-								break;
-							} else if (Map::Inst()->Walkable(x+1,y)) {
-								target = Coordinate(x+1,y);
-								break;
-							} else if (Map::Inst()->Walkable(x,y+1)) {
-								target = Coordinate(x,y+1);
-								break;
-							} else if (Map::Inst()->Walkable(x,y-1)) {
-								target = Coordinate(x,y-1);
-								break;
+		if (jobCount < 4) {
+			if (dumpFilth && rand() % (UPDATES_PER_SECOND * 5) == 0) {
+				if (Game::Inst()->filthList.size() > 0) {
+					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
+					filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
+					filthDumpJob->tasks.push_back(Task(MOVE));
+					filthDumpJob->tasks.push_back(Task(TAKE));
+					filthDumpJob->tasks.push_back(Task(FORGET)); //Otherwise MOVEADJACENT will try to move adjacent to the container
+					Coordinate filthLocation = Game::Inst()->FindFilth(Position());
+					filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
+					filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
+					Coordinate target(-1,-1);
+					for (int x = a.X(); x <= b.X(); ++x) {
+						for (int y = a.Y(); y <= b.Y(); ++y) {
+							if (Map::Inst()->GetConstruction(x,y) == uid) {
+								if (Map::Inst()->Walkable(x-1,y)) {
+									target = Coordinate(x-1,y);
+									break;
+								} else if (Map::Inst()->Walkable(x+1,y)) {
+									target = Coordinate(x+1,y);
+									break;
+								} else if (Map::Inst()->Walkable(x,y+1)) {
+									target = Coordinate(x,y+1);
+									break;
+								} else if (Map::Inst()->Walkable(x,y-1)) {
+									target = Coordinate(x,y-1);
+									break;
+								}
 							}
 						}
 					}
-				}
 
-				if (filthLocation.X() != -1 && filthLocation.Y() != -1 && target.X() != -1 && target.Y() != -1) {
-					filthDumpJob->tasks.push_back(Task(MOVE, target));
-					filthDumpJob->tasks.push_back(Task(POUR, Position()));
-					filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
-					JobManager::Inst()->AddJob(filthDumpJob);
+					if (filthLocation.X() != -1 && filthLocation.Y() != -1 && target.X() != -1 && target.Y() != -1) {
+						filthDumpJob->tasks.push_back(Task(MOVE, target));
+						filthDumpJob->tasks.push_back(Task(POUR, Position()));
+						filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
+						filthDumpJob->ConnectToEntity(shared_from_this());
+						++jobCount;
+						JobManager::Inst()->AddJob(filthDumpJob);
+					}
 				}
 			}
-		}
-		if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
-			rand() % (UPDATES_PER_SECOND * 5) == 0) {
-				boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
-				corpseDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
-				corpseDumpJob->tasks.push_back(Task(MOVE));
-				corpseDumpJob->tasks.push_back(Task(TAKE));
+			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
+				rand() % (UPDATES_PER_SECOND * 5) == 0) {
+					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
+					corpseDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
+					corpseDumpJob->tasks.push_back(Task(MOVE));
+					corpseDumpJob->tasks.push_back(Task(TAKE));
 
-				Coordinate target(-1,-1);
-				for (int x = a.X(); x <= b.X(); ++x) {
-					for (int y = a.Y(); y <= b.Y(); ++y) {
-						if (Map::Inst()->GetConstruction(x,y) == uid) {
-							if (Map::Inst()->Walkable(x-1,y)) {
-								target = Coordinate(x-1,y);
-								break;
-							} else if (Map::Inst()->Walkable(x+1,y)) {
-								target = Coordinate(x+1,y);
-								break;
-							} else if (Map::Inst()->Walkable(x,y+1)) {
-								target = Coordinate(x,y+1);
-								break;
-							} else if (Map::Inst()->Walkable(x,y-1)) {
-								target = Coordinate(x,y-1);
-								break;
+					Coordinate target(-1,-1);
+					for (int x = a.X(); x <= b.X(); ++x) {
+						for (int y = a.Y(); y <= b.Y(); ++y) {
+							if (Map::Inst()->GetConstruction(x,y) == uid) {
+								if (Map::Inst()->Walkable(x-1,y)) {
+									target = Coordinate(x-1,y);
+									break;
+								} else if (Map::Inst()->Walkable(x+1,y)) {
+									target = Coordinate(x+1,y);
+									break;
+								} else if (Map::Inst()->Walkable(x,y+1)) {
+									target = Coordinate(x,y+1);
+									break;
+								} else if (Map::Inst()->Walkable(x,y-1)) {
+									target = Coordinate(x,y-1);
+									break;
+								}
 							}
 						}
 					}
-				}
 
-				if (target.X() != -1 && target.Y() != -1) {
-					corpseDumpJob->tasks.push_back(Task(MOVE, target));
-					corpseDumpJob->tasks.push_back(Task(PUTIN, target, corpseContainer));
-					JobManager::Inst()->AddJob(corpseDumpJob);
-				}
+					if (target.X() != -1 && target.Y() != -1) {
+						corpseDumpJob->tasks.push_back(Task(MOVE, target));
+						corpseDumpJob->tasks.push_back(Task(PUTIN, target, corpseContainer));
+						corpseDumpJob->ConnectToEntity(shared_from_this());
+						++jobCount;
+						JobManager::Inst()->AddJob(corpseDumpJob);
+					}
+			}
 		}
 
 		//Spawn / Expand
@@ -273,4 +280,8 @@ void SpawningPool::Draw(Coordinate upleft, TCODConsole* console) {
 			}
 		}
 	}
+}
+
+void SpawningPool::CancelJob(int) {
+	if (jobCount > 0) --jobCount;
 }
