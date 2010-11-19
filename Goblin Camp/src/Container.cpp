@@ -86,8 +86,8 @@ bool Container::Full() {
 }
 
 void Container::ReserveSpace(bool res, int bulk) {
-	if (res) reservedSpace += bulk;
-	else reservedSpace -= bulk;
+	if (res) reservedSpace += std::max(1, bulk);
+	else reservedSpace -= std::max(1,bulk);
 }
 
 void Container::AddListener(ContainerListener* listener) {
@@ -113,7 +113,7 @@ void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 		if (itemi->lock()) capacityUsed += std::max(1, itemi->lock()->GetBulk());
 	}
-    tooltip->AddEntry(TooltipEntry((boost::format("%s -  %d items (%d/%d)") % name % size() % capacityUsed % (Capacity() + capacityUsed)).str(), TCODColor::white));
+    tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (Capacity() + capacityUsed)).str(), TCODColor::white));
 }
 
 void Container::TranslateContainerListeners() {
