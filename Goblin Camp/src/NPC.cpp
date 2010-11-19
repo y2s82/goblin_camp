@@ -522,20 +522,19 @@ MOVENEARend:
 				if (carried.lock()) {
 					inventory->RemoveItem(carried);
 					carried.lock()->Position(Position());
+					if (!Game::Inst()->Adjacent(Position(), currentEntity().lock()->Position())) {
+						TaskFinished(TASKFAILFATAL, "Not adjacent to container");
+						break;
+					}
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
 						if (!cont->AddItem(carried)) {
-							Announce::Inst()->AddMsg("Container full!", TCODColor::white, cont->Position());
-							DropItem(carried);
-							carried.reset();
-							TaskFinished(TASKFAILFATAL);
+							TaskFinished(TASKFAILFATAL, "Container full");
 							break;
 						}
 						bulk -= carried.lock()->GetBulk();
 					} else {
-						DropItem(carried); 
-						carried.reset();
-						TaskFinished(TASKFAILFATAL);
+						TaskFinished(TASKFAILFATAL, "Target not a container");
 						break;
 					}
 				}
