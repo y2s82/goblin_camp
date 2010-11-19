@@ -31,7 +31,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 {
 	condition = maxCondition;
 	reserved.insert(std::pair<Coordinate,bool>(target,false));
-	Container *container = new Container(target, 0, 1, -1);
+	Container *container = new Container(target, 0, 1000, -1);
 	container->AddListener(this);
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
@@ -218,7 +218,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							if (iy < a.Y()) a.Y(iy);
 							if (iy > b.Y()) b.Y(iy);
 							reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-							Container *container = new Container(Coordinate(ix,iy), 0, 1, -1);
+							Container *container = new Container(Coordinate(ix,iy), 0, 1000, -1);
 							container->AddListener(this);
 							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
 					}
