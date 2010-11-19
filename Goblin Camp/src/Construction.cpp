@@ -607,25 +607,25 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 	if (Map::Inst()->GetConstruction(x - 1, y) > -1) {
 		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x - 1, y)).lock();
-		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			w = true;
 		}
 	}
 	if (Map::Inst()->GetConstruction(x + 1, y) > -1) {
 		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x + 1, y)).lock();
-		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			e = true;
 		}
 	}
 	if (Map::Inst()->GetConstruction(x, y-1) > -1) {
 		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y-1)).lock();
-		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			n = true;
 		}
 	}
 	if (Map::Inst()->GetConstruction(x, y+1) > -1) {
 		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y+1)).lock();
-		if (cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
+		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
 			s = true;
 		}
 	}
