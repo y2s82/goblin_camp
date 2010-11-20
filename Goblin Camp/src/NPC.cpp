@@ -320,6 +320,7 @@ void NPC::Update() {
 	}
 
 	if (rand() % UPDATES_PER_SECOND == 0 && health < maxHealth) ++health;
+	if (faction == 0 && rand() % MONTH_LENGTH == 0) Game::Inst()->CreateFilth(Position());
 }
 
 void NPC::UpdateStatusEffects() {
