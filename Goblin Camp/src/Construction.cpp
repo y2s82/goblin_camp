@@ -686,12 +686,17 @@ void Construction::Dismantle() {
 		if (producer) {
 			jobList.clear();
 		}
+		JobManager::Inst()->RemoveJob(shared_from_this()); //Remove jobs connected to this construction
 
-		boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
-		dismantleJob->ConnectToEntity(shared_from_this());
-		dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
-		dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
-		JobManager::Inst()->AddJob(dismantleJob);
+		if (built) {
+			boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
+			dismantleJob->ConnectToEntity(shared_from_this());
+			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
+			JobManager::Inst()->AddJob(dismantleJob);
+		} else {
+			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		}
 	}
 }
 
