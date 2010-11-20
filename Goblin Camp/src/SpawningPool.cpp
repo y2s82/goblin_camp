@@ -61,7 +61,7 @@ void SpawningPool::Update() {
 			if (dumpFilth && rand() % (UPDATES_PER_SECOND * 5) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
 					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
-					filthDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
+					filthDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
 					filthDumpJob->tasks.push_back(Task(MOVE));
 					filthDumpJob->tasks.push_back(Task(TAKE));
 					filthDumpJob->tasks.push_back(Task(FORGET)); //Otherwise MOVEADJACENT will try to move adjacent to the container
@@ -102,7 +102,7 @@ void SpawningPool::Update() {
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
 				rand() % (UPDATES_PER_SECOND * 5) == 0) {
 					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
-					corpseDumpJob->tasks.push_back(Task(FIND, Coordinate(0,0), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
+					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
 					corpseDumpJob->tasks.push_back(Task(TAKE));
 

@@ -39,7 +39,7 @@ JobManager *JobManager::Inst() {
 }
 
 void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
-	if (!newJob->Attempt()) {
+	if (!newJob->Attempt() || newJob->OutsideTerritory()) {
 		newJob->Fail();
 		return;
 	}

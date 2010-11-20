@@ -52,6 +52,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	reservedSpace(0),
 	tool(-1),
 	markedGround(Coordinate(-1,-1)),
+	obeyTerritory(true),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
@@ -217,4 +218,24 @@ void Job::MarkGround(Coordinate ground) {
 			markedGround = ground;
 			Map::Inst()->Mark(ground.X(), ground.Y());
 	}
+}
+
+void Job::DisregardTerritory() { obeyTerritory = false; }
+
+bool Job::OutsideTerritory() {
+	if (obeyTerritory) {
+		for (std::vector<Task>::iterator task = tasks.begin(); task != tasks.end(); ++task) {
+			Coordinate coord = task->target;
+			if (coord.X() < 0 || coord.X() >= Map::Inst()->Width() || coord.Y() < 0 || coord.Y() >= Map::Inst()->Height()) {
+				if (task->entity.lock()) {
+					coord = task->entity.lock()->Position();
+				}
+			}
+
+			if (coord.X() >= 0 && coord.X() < Map::Inst()->Width() && coord.Y() >= 0 && coord.Y() < Map::Inst()->Height()) {
+				if (!Map::Inst()->IsTerritory(coord.X(), coord.Y())) return true;
+			}
+		}
+	}
+	return false;
 }

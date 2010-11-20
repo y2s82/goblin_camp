@@ -458,7 +458,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			container->AddItem(newItem);
 		}
 		itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
-		if (store) StockpileItem(newItem);
+		if (store) StockpileItem(newItem, false, true);
 
 		Script::Event::ItemCreated(newItem, pos.X(), pos.Y());
 
@@ -561,7 +561,7 @@ void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordina
 
 	for (int items = 0; items < quantity; ++items) {
 		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
-		Game::Inst()->CreateItem(location, type, true);
+		Game::Inst()->CreateItem(location, type);
 	}
 }
 
@@ -719,7 +719,7 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 }
 
-boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob) {
+boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool returnJob, bool disregardTerritory) {
 	boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 	int nearestDistance = INT_MAX;
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -766,12 +766,11 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> item, bool retu
 			else
 				stockJob->tasks.push_back(Task(PUTIN, target, container));
 
+			if (disregardTerritory) stockJob->DisregardTerritory();
+
 			if (!returnJob) JobManager::Inst()->AddJob(stockJob);
 			else return stockJob;
-
-			return boost::shared_ptr<Job>();
 		}
-
 	}
 
 	return boost::shared_ptr<Job>();
@@ -1001,6 +1000,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
 					fellJob->Attempts(50);
 					fellJob->ConnectToEntity(natObj);
+					fellJob->DisregardTerritory();
 					fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj->Position(), natObj));
@@ -1037,6 +1037,7 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 					natObj->Mark();
 					boost::shared_ptr<Job> harvestJob(new Job("Harvest wild plant"));
 					harvestJob->ConnectToEntity(natObj);
+					harvestJob->DisregardTerritory();
 					harvestJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
 					harvestJob->tasks.push_back(Task(HARVESTWILDPLANT, natObj->Position(), natObj));
 					if (NatureObject::Presets[natObj->Type()].components.size() > 0)
@@ -1403,6 +1404,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
 				digJob->MarkGround(Coordinate(x,y));
 				digJob->Attempts(1000);
+				digJob->DisregardTerritory();
 				digJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
 				digJob->tasks.push_back(Task(DIG, Coordinate(x,y)));
 				JobManager::Inst()->AddJob(digJob);

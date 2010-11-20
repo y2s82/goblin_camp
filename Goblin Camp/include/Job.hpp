@@ -90,7 +90,7 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 public:
-	Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
+	Task(Action = NOACTION, Coordinate = Coordinate(-1,-1), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
 	Coordinate target;
 	boost::weak_ptr<Entity> entity;
 	Action action;
@@ -124,6 +124,7 @@ private:
 	int reservedSpace;
 	ItemCategory tool;
 	Coordinate markedGround;
+	bool obeyTerritory;
 public:
 	static boost::shared_ptr<Job> MoveJob(Coordinate);
 	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
@@ -172,4 +173,6 @@ public:
 	void MarkGround(Coordinate);
 
 	static std::string ActionToString(Action);
+	void DisregardTerritory();
+	bool OutsideTerritory();
 };
