@@ -1159,11 +1159,25 @@ void Game::CreateFilth(Coordinate pos) {
 
 void Game::CreateFilth(Coordinate pos, int amount) {
 	boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.X(), pos.Y()));
-	if (!filth.lock()) {
-		boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), amount));
+	if (!filth.lock()) { //No existing filth node so create one
+		boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), std::min(5, amount)));
+		amount -= 5;
 		filthList.push_back(boost::weak_ptr<FilthNode>(newFilth));
 		Map::Inst()->SetFilth(pos.X(), pos.Y(), newFilth);
-	} else {filth.lock()->Depth(filth.lock()->Depth()+amount);}
+	} else {
+		int originalDepth = filth.lock()->Depth();
+		filth.lock()->Depth(std::min(5, filth.lock()->Depth() + amount));
+		amount -= 5 - originalDepth;
+	}
+	//If theres still remaining filth, it'll spill over into the surrounding tiles
+	while (amount > 0) {
+		Coordinate randomAdjacent = pos;
+		while (randomAdjacent == pos) {
+			randomAdjacent = Coordinate(pos.X() - 1 + rand() % 3, pos.Y() - 1 + rand() % 3);
+		}
+		Game::CreateFilth(randomAdjacent, 1);
+		--amount;
+	}
 }
 
 void Game::CreateBlood(Coordinate pos) {
