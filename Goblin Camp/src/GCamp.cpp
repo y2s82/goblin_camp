@@ -232,6 +232,8 @@ void StartNewGame() {
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
 	game->CenterOn(spawnCenterCandidates.top().second);
 
+	Map::Inst()->SetTerritoryRectangle(spawnTopCorner, spawnBottomCorner, true);
+
 	MainLoop();
 }
 

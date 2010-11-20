@@ -171,6 +171,7 @@ public:
 	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, Coordinate, int flags = 0, int value = 0);
 	void CreateItems(int,ItemType,Coordinate,Coordinate);
 	void TranslateContainerListeners();
+	void GatherItems(Coordinate a, Coordinate b);
 
 	/*      NATURE      NATURE      NATURE      */
 	std::map<int, boost::shared_ptr<NatureObject> > natureList;

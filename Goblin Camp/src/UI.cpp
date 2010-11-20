@@ -839,7 +839,7 @@ void UI::ChooseCreateItem() {
 
 	if (item >= 0) {
 		UI::Inst()->state(UIPLACEMENT);
-		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), true,
+		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), false,
 			0, std::vector<boost::weak_ptr<Item> >(), boost::shared_ptr<Container>()));
 		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 		UI::Inst()->blueprint(Coordinate(1,1));
@@ -900,4 +900,12 @@ void UI::ChooseChangeTerritory(bool add) {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor(add ? '+' : '-');
+}
+
+void UI::ChooseGatherItems() {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(&Game::GatherItems, Game::Inst(), _1, _2));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('G');
 }

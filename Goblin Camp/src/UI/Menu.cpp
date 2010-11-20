@@ -219,6 +219,7 @@ Menu* Menu::OrdersMenu() {
 		ordersMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseDig)));
 		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", boost::bind(UI::ChooseDesignateBog)));
 		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
+		ordersMenu->AddChoice(MenuChoice("Gather items", boost::bind(UI::ChooseGatherItems)));
 	}
 	return ordersMenu;
 }
