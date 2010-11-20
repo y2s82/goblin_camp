@@ -60,8 +60,11 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 		*/
 		job->Assign(-1);
 		job->Paused(true);
+
+		//Push job onto waiting list
 		waitingList.push_back(job);
 
+		//Remove job from availabe list
 		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[job->priority()].begin(); 
 			jobi != availableList[job->priority()].end(); ++jobi) {
 				if ((*jobi) == job) {
@@ -70,6 +73,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 				}
 		}
 
+		//If the job requires a tool, remove it from the toolJobs list
 		if (job->RequiresTool()) {
 			for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[job->GetRequiredTool()].begin(); 
 				jobi != toolJobs[job->GetRequiredTool()].end(); ++jobi) {
@@ -82,7 +86,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 	}
 }
 
-void JobManager::CancelJob(boost::weak_ptr<Entity> entity) {
+void JobManager::RemoveJob(boost::weak_ptr<Entity> entity) {
 	if (boost::shared_ptr<Entity> cancelledEntity = entity.lock()) {
 		for (int i=0; i<PRIORITY_COUNT; i++) {
 			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
@@ -93,12 +97,15 @@ void JobManager::CancelJob(boost::weak_ptr<Entity> entity) {
 				}
 				// Cancel the job if the job or its parent is connected to the entity requesting cancellation
 				if ((jobEntity && jobEntity->Uid() == cancelledEntity->Uid()) ||
-					(jobParentEntity && jobParentEntity->Uid() == cancelledEntity->Uid())) { 
+					(jobParentEntity && jobParentEntity->Uid() == cancelledEntity->Uid())) {
 						std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
+						(*jobi)->Attempts(0); //Set attempts to 0 so the job gets removed
+						jobi = availableList[i].erase(jobi); /*Move iterator forward, it'll get invalidated by
+															 AbortCurrentJob() otherwise*/
 						if (npc != Game::Inst()->npcList.end()) { 
-							npc->second->AbortCurrentJob(false); 
+							npc->second->AbortCurrentJob(false); /*When an NPC aborts a job it cancels it through
+																 JobManager::CancelJob()*/
 						}
-						jobi = availableList[i].erase(jobi);
 				} else {
 					++jobi;
 				}
