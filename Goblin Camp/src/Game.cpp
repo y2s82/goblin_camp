@@ -152,7 +152,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter));
 		pickupJob->tasks.push_back(Task(MOVE));
 		pickupJob->tasks.push_back(Task(TAKE));
-		pickupJob->tasks.push_back(Task(MOVE, newCons->Position(), newCons));
+		pickupJob->tasks.push_back(Task(MOVE, newCons->Storage().lock()->Position(), newCons));
 		pickupJob->tasks.push_back(Task(PUTIN, newCons->Storage().lock()->Position(), newCons->Storage()));
 		JobManager::Inst()->AddJob(pickupJob);
 	}
