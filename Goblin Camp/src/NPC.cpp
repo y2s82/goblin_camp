@@ -1539,12 +1539,27 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
 	squad = newSquad;
 	if (!squad.lock()) { //NPC was removed from a squad
-		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
-			inventory->RemoveItem(weapon);
-			weapon->Position(Position());
-			weapon->PutInContainer();
+		//Drop weapon, quiver and armor
+		std::list<boost::shared_ptr<Item> > equipment;
+		if (mainHand.lock()) {
+			equipment.push_back(mainHand.lock());
 			mainHand.reset();
 		}
+		if (armor.lock()) { 
+			equipment.push_back(armor.lock());
+			armor.reset();
+		}
+		if (quiver.lock()) {
+			equipment.push_back(quiver.lock());
+			quiver.reset();
+		}
+
+		for (std::list<boost::shared_ptr<Item> >::iterator eqit = equipment.begin(); eqit != equipment.end(); ++eqit) {
+			inventory->RemoveItem(*eqit);
+			(*eqit)->Position(Position());
+			(*eqit)->PutInContainer();
+		}
+
 		aggressive = false;
 	}
 }
