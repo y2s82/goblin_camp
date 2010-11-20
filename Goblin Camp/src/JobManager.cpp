@@ -82,23 +82,26 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 	}
 }
 
-void JobManager::CancelJob(boost::weak_ptr<Entity> construction) {
-	boost::shared_ptr<Entity> construction_ptr, job_ptr, job_parent_ptr;
-	for (int i=0; i<PRIORITY_COUNT; i++) {
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
-			job_parent_ptr.reset();
-			job_ptr = (*jobi)->ConnectedEntity().lock();
-			construction_ptr = construction.lock();
-			if ((*jobi)->Parent().lock()) { job_parent_ptr = (*jobi)->Parent().lock()->ConnectedEntity().lock(); }
-			// If a job is connected to a contruction task which is cancelled or parent is such a task then remove them
-			if (construction_ptr && 
-				( (job_ptr && job_ptr->Uid() == construction_ptr->Uid()) || 
-				(job_parent_ptr && job_parent_ptr->Uid() == construction_ptr->Uid()) ) ) { 
-				std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
-				if (npc != Game::Inst()->npcList.end())  { npc->second->AbortCurrentJob(false); }
-				jobi = availableList[i].erase(jobi);
-			} else {
-				++jobi;
+void JobManager::CancelJob(boost::weak_ptr<Entity> entity) {
+	if (boost::shared_ptr<Entity> cancelledEntity = entity.lock()) {
+		for (int i=0; i<PRIORITY_COUNT; i++) {
+			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
+				boost::shared_ptr<Entity> jobEntity = (*jobi)->ConnectedEntity().lock();
+				boost::shared_ptr<Entity> jobParentEntity;
+				if ((*jobi)->Parent().lock()) { 
+					jobParentEntity = (*jobi)->Parent().lock()->ConnectedEntity().lock(); 
+				}
+				// Cancel the job if the job or its parent is connected to the entity requesting cancellation
+				if ((jobEntity && jobEntity->Uid() == cancelledEntity->Uid()) ||
+					(jobParentEntity && jobParentEntity->Uid() == cancelledEntity->Uid())) { 
+						std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
+						if (npc != Game::Inst()->npcList.end()) { 
+							npc->second->AbortCurrentJob(false); 
+						}
+						jobi = availableList[i].erase(jobi);
+				} else {
+					++jobi;
+				}
 			}
 		}
 	}
