@@ -900,7 +900,7 @@ MOVENEARend:
 					boost::weak_ptr<FilthNode> fnode = Map::Inst()->GetFilth(currentTarget().X(),
 						currentTarget().Y());
 					if (fnode.lock() && fnode.lock()->Depth() > 0 && cont->ContainsWater() == 0) {
-						int filthAmount = std::min(10, fnode.lock()->Depth());
+						int filthAmount = std::min(3, fnode.lock()->Depth());
 						fnode.lock()->Depth(fnode.lock()->Depth()-filthAmount);
 						cont->AddFilth(filthAmount);
 						TaskFinished(TASKSUCCESS);
