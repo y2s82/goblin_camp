@@ -586,18 +586,13 @@ MOVENEARend:
 			case FIND:
 				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->target, currentTask()->flags);
 				if (!foundItem.lock()) {
-					TaskFinished(TASKFAILFATAL); 
-#ifdef DEBUG
-					std::cout<<"Can't FIND required item\n";
-#endif
+					TaskFinished(TASKFAILFATAL, "Can't FIND item"); 
 					break;
-				}
-				else {
+				} else {
 					if (faction == 0) currentJob().lock()->ReserveEntity(foundItem);
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
-				break;
 
 			case USE:
 				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
@@ -1163,7 +1158,7 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 }
 
 Coordinate NPC::currentTarget() {
-	if (currentTask()->target == Coordinate(0,0) && foundItem.lock()) {
+	if (currentTask()->target == Coordinate(-1,-1) && foundItem.lock()) {
 		return foundItem.lock()->Position();
 	}
 	return currentTask()->target;
