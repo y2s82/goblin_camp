@@ -1287,8 +1287,8 @@ int Game::DiceToInt(TCOD_dice_t dice) {
 	for (; dice.nb_dices > 0; --dice.nb_dices) {
 		result += (1 + rand() % dice.nb_faces);
 	}
-	result *= dice.multiplier;
-	result += dice.addsub;
+	result *= (int)dice.multiplier;
+	result += (int)dice.addsub;
 	return result;
 }
 
