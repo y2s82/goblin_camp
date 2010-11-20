@@ -48,7 +48,8 @@ Tile::Tile(TileType newType, int newCost) :
 	blood(boost::shared_ptr<BloodNode>()),
 	marked(false),
 	walkedOver(0),
-	corruption(0)
+	corruption(0),
+	territory(false)
 {
 	type(newType);
 }

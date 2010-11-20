@@ -22,7 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Construction.hpp"
 #include "Door.hpp"
 
-Map::Map() {
+Map::Map() :
+overlayFlags(0) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
@@ -123,6 +124,9 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 					filth.lock()->Draw(upleft, console);
 				}
 
+				if (overlayFlags & TERRITORY_OVERLAY) {
+					console->setCharBackground(x-screenDeltaX,y-screenDeltaY, tileMap[x][y].territory ? TCODColor::green : TCODColor::red);
+				}
 			}
 			else {
 				console->putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
@@ -322,3 +326,27 @@ int Map::GetCorruption(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].corruption;
 	return 0;
 }
+
+bool Map::IsTerritory(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].territory;
+	return false;
+}
+
+void Map::SetTerritory(int x, int y, bool value) {
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].territory = value;
+}
+
+void Map::SetTerritoryRectangle(Coordinate a, Coordinate b, bool value) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			SetTerritory(x, y, value);
+		}
+	}
+}
+
+int Map::GetOverlayFlags() { return overlayFlags; }
+
+void Map::AddOverlay(int flags) { overlayFlags |= flags; }
+void Map::RemoveOverlay(int flags) { overlayFlags = overlayFlags & ~flags; }
+
+void Map::ToggleOverlay(int flags) { overlayFlags ^= flags; }

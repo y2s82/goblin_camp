@@ -63,6 +63,7 @@ private:
 	boost::shared_ptr<BloodNode> blood;
 	bool marked;
 	int walkedOver, corruption;
+	bool territory;
 	
 public:
 	Tile(TileType = TILEGRASS, int = 1);

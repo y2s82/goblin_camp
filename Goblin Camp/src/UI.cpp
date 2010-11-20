@@ -893,3 +893,11 @@ void UI::ChooseRemoveNatureObjects() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('R');
 }
+
+void UI::ChooseChangeTerritory(bool add) {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(boost::bind(&Map::SetTerritoryRectangle, Map::Inst(), _1, _2, add));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor(add ? '+' : '-');
+}

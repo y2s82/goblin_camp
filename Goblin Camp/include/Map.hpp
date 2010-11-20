@@ -22,6 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 
+#define TERRITORY_OVERLAY (1 << 0)
+
 class Map : public ITCODPathCallback {
 	friend class boost::serialization::access;
 private:
@@ -36,6 +38,7 @@ private:
 	boost::multi_array<Tile, 2> tileMap;
 	int width, height;
 	float waterlevel;
+	int overlayFlags;
 
 public:
 	TCODHeightMap *heightMap;
@@ -88,4 +91,11 @@ public:
 	void Corrupt(int x, int y, int magnitude=200);
 	void Corrupt(Coordinate, int magnitude=200);
 	int GetCorruption(int x, int y);
+	bool IsTerritory(int x, int y);
+	void SetTerritory(int x, int y, bool);
+	void SetTerritoryRectangle(Coordinate a, Coordinate b, bool);
+	int GetOverlayFlags();
+	void AddOverlay(int flags);
+	void RemoveOverlay(int flags);
+	void ToggleOverlay(int flags);
 };
