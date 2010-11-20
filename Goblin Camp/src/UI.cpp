@@ -858,7 +858,7 @@ void UI::ChooseDig() {
 
 void UI::ChooseCreateFilth() {
 	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::CreateFilth, Game::Inst(), _1));
+	UI::Inst()->SetCallback(boost::bind(&Game::CreateFilth, Game::Inst(), _1, 10));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('~');
