@@ -995,15 +995,15 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			int natUid = Map::Inst()->NatureObject(x,y);
 			if (natUid >= 0) {
-				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
-				if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
-					natObj.lock()->Mark();
+				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+				if (natObj && natObj->Tree() && !natObj->Marked()) {
+					natObj->Mark();
 					boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
 					fellJob->Attempts(50);
 					fellJob->ConnectToEntity(natObj);
 					fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
-					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
-					fellJob->tasks.push_back(Task(FELL, natObj.lock()->Position(), natObj));
+					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
+					fellJob->tasks.push_back(Task(FELL, natObj->Position(), natObj));
 					JobManager::Inst()->AddJob(fellJob);
 				}
 			}
@@ -1016,10 +1016,10 @@ void Game::DesignateTree(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			int natUid = Map::Inst()->NatureObject(x,y);
 			if (natUid >= 0) {
-				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
-				if (natObj.lock() && natObj.lock()->Tree() && !natObj.lock()->Marked()) {
+				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+				if (natObj && natObj->Tree() && !natObj->Marked()) {
 					//TODO: Implement proper map marker system and change this to use that
-					natObj.lock()->Mark();
+					natObj->Mark();
 					StockManager::Inst()->UpdateTreeDesignations(natObj, true);
 				}
 			}
@@ -1032,14 +1032,14 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			int natUid = Map::Inst()->NatureObject(x,y);
 			if (natUid >= 0) {
-				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
-				if (natObj.lock() && natObj.lock()->Harvestable() && !natObj.lock()->Marked()) {
-					natObj.lock()->Mark();
+				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+				if (natObj && natObj->Harvestable() && !natObj->Marked()) {
+					natObj->Mark();
 					boost::shared_ptr<Job> harvestJob(new Job("Harvest wild plant"));
 					harvestJob->ConnectToEntity(natObj);
-					harvestJob->tasks.push_back(Task(MOVEADJACENT, natObj.lock()->Position(), natObj));
-					harvestJob->tasks.push_back(Task(HARVESTWILDPLANT, natObj.lock()->Position(), natObj));
-					if (NatureObject::Presets[natObj.lock()->Type()].components.size() > 0)
+					harvestJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
+					harvestJob->tasks.push_back(Task(HARVESTWILDPLANT, natObj->Position(), natObj));
+					if (NatureObject::Presets[natObj->Type()].components.size() > 0)
 						harvestJob->tasks.push_back(Task(STOCKPILEITEM));
 					JobManager::Inst()->AddJob(harvestJob);
 				}
@@ -1050,8 +1050,10 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 
 
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
-	Map::Inst()->NatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
-	natureList.erase(natObj.lock()->Uid());
+	if (natObj.lock()) {
+		Map::Inst()->NatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
+		natureList.erase(natObj.lock()->Uid());
+	}
 }
 
 bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
@@ -1267,8 +1269,13 @@ void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate
 int Game::DiceToInt(TCOD_dice_t dice) {
 	if (dice.nb_faces == 0) 
 		dice.nb_faces = 1;
-	return (int)(((dice.nb_dices * ((rand() % dice.nb_faces) + 1)) *
-		dice.multiplier) + dice.addsub);
+	int result = 0;
+	for (; dice.nb_dices > 0; --dice.nb_dices) {
+		result += (1 + rand() % dice.nb_faces);
+	}
+	result *= dice.multiplier;
+	result += dice.addsub;
+	return result;
 }
 
 void Game::ToMainMenu(bool value) { Game::Inst()->toMainMenu = value; }
