@@ -212,6 +212,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							//Current tile is walkable, buildable, and adjacent to the current stockpile
 							Map::Inst()->SetConstruction(ix,iy,uid);
 							Map::Inst()->Buildable(ix,iy,false);
+							Map::Inst()->SetTerritory(ix,iy,true);
 							//Update corner values
 							if (ix < a.X()) a.X(ix);
 							if (ix > b.X()) b.X(ix);

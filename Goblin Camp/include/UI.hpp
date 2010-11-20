@@ -99,6 +99,7 @@ public:
 	static void ChooseNaturify();
 	static void ChooseRemoveNatureObjects();
 	static void ChooseChangeTerritory(bool add);
+	static void ChooseGatherItems();
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);
