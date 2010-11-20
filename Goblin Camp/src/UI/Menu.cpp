@@ -150,6 +150,7 @@ Menu* Menu::MainMenu() {
 #endif
 		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceDialog::AnnouncementsDialog())));
 		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
+		mainMenu->AddChoice(MenuChoice("Territory", boost::bind(UI::ChangeMenu, Menu::TerritoryMenu())));
 		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
 		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));
 		menuTier = Camp::Inst()->GetTier();
@@ -255,4 +256,15 @@ void Menu::GetTooltip(int x, int y, Tooltip *tooltip) {
 			}
 		}
 	}
+}
+
+Menu* Menu::territoryMenu = 0;
+Menu* Menu::TerritoryMenu() {
+	if (!territoryMenu) {
+		territoryMenu = new Menu(std::vector<MenuChoice>());
+		territoryMenu->AddChoice(MenuChoice("Toggle territory overlay", boost::bind(&Map::ToggleOverlay, Map::Inst(), TERRITORY_OVERLAY)));
+		territoryMenu->AddChoice(MenuChoice("Expand territory", boost::bind(UI::ChooseChangeTerritory, true)));
+		territoryMenu->AddChoice(MenuChoice("Shrink territory", boost::bind(UI::ChooseChangeTerritory, false)));
+	}
+	return territoryMenu;
 }

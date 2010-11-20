@@ -71,6 +71,8 @@ public:
 	static Menu* ConstructionCategoryMenu(std::string);
 	static Menu* devMenu;
 	static Menu* DevMenu();
+	static Menu* territoryMenu;
+	static Menu* TerritoryMenu();
 
 	static ItemCategory WeaponChoiceDialog();
 	void GetTooltip(int, int, Tooltip *);
