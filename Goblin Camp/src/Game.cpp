@@ -598,7 +598,10 @@ Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest(-9999,-9999);
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (wati->lock()->Depth() > DRINKABLE_WATER_DEPTH) {
-			if (Distance(wati->lock()->Position(), pos) < Distance(closest, pos)) closest = wati->lock()->Position();
+			int waterDistance = Distance(wati->lock()->Position(), pos);
+			//Favor water inside territory
+			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 2;
+			if (waterDistance < Distance(closest, pos)) closest = wati->lock()->Position();
 		}
 	}
 	if (closest.X() == -9999) return Coordinate(-1,-1);
