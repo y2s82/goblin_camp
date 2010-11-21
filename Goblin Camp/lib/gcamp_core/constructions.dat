@@ -17,7 +17,7 @@ construction_type "Farm plot" {
 	graphicLength=1
 	graphic=[126]
 	maxCondition=10
-	tileReqs=["grass"]
+	tileReqs=["grass", "mud"]
 	description="Designates an area to be used for agriculture"
 }
 
@@ -217,7 +217,7 @@ construction_type "Pontoon bridge" {
 	graphicLength=2
 	graphic=[157, 157,
 			 157, 157]
-	tileReqs=["grass", "rock", "ditch", "river"]
+	tileReqs=["grass", "rock", "ditch", "mud", "river"]
 	description="A bridge composed of barrels and planks"
 }
 
@@ -375,3 +375,18 @@ construction_type "Brick Wall" {
 	maxCondition=50
 	materials=["Brick","Brick","Brick","Brick","Brick"]
 }
+
+construction_type "Duckboard" {
+	tier=3
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=30
+	materials=["Plank","Plank","Plank","Plank"]
+	graphicLength=1
+	graphic=[19]
+	tileReqs=["grass", "rock", "mud"]
+	placementType=2
+	description="A wooden platform for easier travel over muddy terrain"
+}
+
