@@ -39,6 +39,8 @@ private:
 	int tier;
 	std::string name;
 	int workshops, farmplots, production;
+	Coordinate upperCorner, lowerCorner;
+	bool autoTerritory;
 
 public:
 	static Camp* Inst();
@@ -52,4 +54,7 @@ public:
 	std::string GetName();
 	void ConstructionBuilt(int type);
 	void ItemProduced();
+	void DisableAutoTerritory();
+	void ToggleAutoTerritory();
+	bool IsAutoTerritoryEnabled();
 };

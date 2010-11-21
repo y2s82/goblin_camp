@@ -266,6 +266,7 @@ Menu* Menu::TerritoryMenu() {
 		territoryMenu->AddChoice(MenuChoice("Toggle territory overlay", boost::bind(&Map::ToggleOverlay, Map::Inst(), TERRITORY_OVERLAY)));
 		territoryMenu->AddChoice(MenuChoice("Expand territory", boost::bind(UI::ChooseChangeTerritory, true)));
 		territoryMenu->AddChoice(MenuChoice("Shrink territory", boost::bind(UI::ChooseChangeTerritory, false)));
+		territoryMenu->AddChoice(MenuChoice("Toggle automatic territory", boost::bind(&Camp::ToggleAutoTerritory, Camp::Inst())));
 	}
 	return territoryMenu;
 }

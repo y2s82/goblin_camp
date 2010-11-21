@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "Coordinate.hpp"
 #include "Game.hpp"
+#include "Announce.hpp"
 
 Camp* Camp::instance = 0;
 
@@ -31,7 +32,10 @@ Camp::Camp() :
 	name("Clearing"),
 	workshops(0),
 	farmplots(0),
-	production(0)
+	production(0),
+	upperCorner(Coordinate()),
+	lowerCorner(Coordinate()),
+	autoTerritory(true)
 {}
 
 Camp* Camp::Inst() {
@@ -45,6 +49,18 @@ Coordinate Camp::Center() {
 
 void Camp::UpdateCenter(Coordinate newBuilding, bool add) {
 	if(add) {
+
+		if (buildingCount == 0) {
+			upperCorner = newBuilding;
+			lowerCorner = newBuilding;
+		} else {
+			if (newBuilding.X() < upperCorner.X()) upperCorner.X(newBuilding.X());
+			if (newBuilding.X() > lowerCorner.X()) lowerCorner.X(newBuilding.X());
+			if (newBuilding.Y() < upperCorner.Y()) upperCorner.Y(newBuilding.Y());
+			if (newBuilding.Y() > lowerCorner.Y()) lowerCorner.Y(newBuilding.Y());
+			if (autoTerritory) Map::Inst()->SetTerritoryRectangle(upperCorner, lowerCorner, true);
+		}
+
 		centerX = (centerX * buildingCount + newBuilding.X()) / (buildingCount + 1);
 		centerY = (centerY * buildingCount + newBuilding.Y()) / (buildingCount + 1);
 		++buildingCount;
@@ -114,3 +130,11 @@ void Camp::ConstructionBuilt(int type) {
 }
 
 void Camp::ItemProduced() { ++production; }
+
+void Camp::DisableAutoTerritory() { autoTerritory = false; }
+void Camp::ToggleAutoTerritory() {
+	autoTerritory = !autoTerritory;
+	Announce::Inst()->AddMsg((boost::format("Automatic territory handling %s") % (autoTerritory ? "enabled" : "disabled")).str(), TCODColor::cyan);
+}
+
+bool Camp::IsAutoTerritoryEnabled() { return autoTerritory; }
