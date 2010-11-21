@@ -32,7 +32,8 @@ enum TileType {
 	TILEDITCH,
 	TILERIVERBED,
 	TILEBOG,
-	TILEROCK
+	TILEROCK,
+	TILEMUD
 };
 
 class Tile {

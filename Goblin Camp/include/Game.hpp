@@ -168,7 +168,7 @@ public:
 	std::list<boost::weak_ptr<Item> > stoppedItems; //These need to be removed from flyingItems
 	static int ItemTypeCount;
 	static int ItemCatCount;
-	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false, bool disregardTerritory = false);
+	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false, bool disregardTerritory = false, bool reserveItem = true);
 	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, Coordinate, int flags = 0, int value = 0);
 	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, Coordinate, int flags = 0, int value = 0);
 	void CreateItems(int,ItemType,Coordinate,Coordinate);
@@ -180,6 +180,7 @@ public:
 	std::list<boost::weak_ptr<WaterNode> > waterList;
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
+	void RemoveWater(Coordinate);
 	Coordinate FindWater(Coordinate);
 	Coordinate FindFilth(Coordinate);
 	static bool CheckTree(Coordinate, Coordinate);
@@ -205,6 +206,7 @@ public:
 	std::list<boost::weak_ptr<FilthNode> > filthList;
 	void CreateFilth(Coordinate);
 	void CreateFilth(Coordinate,int);
+	void RemoveFilth(Coordinate);
 
 	std::list<boost::weak_ptr<BloodNode> > bloodList;
 	void CreateBlood(Coordinate);

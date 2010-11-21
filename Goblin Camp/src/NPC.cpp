@@ -390,7 +390,7 @@ AiThink NPC::Think() {
 			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
 			if (Random::Generate(9) <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
 				aggressor.reset();
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "Target lost");
 			}
 		}
 
@@ -399,7 +399,7 @@ AiThink NPC::Think() {
 			switch(currentTask()->action) {
 			case MOVE:
 				if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
-					TaskFinished(TASKFAILFATAL, "MOVE target unwalkable");
+					TaskFinished(TASKFAILFATAL, "(MOVE)Target unwalkable");
 					break;
 				}
 				if ((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y()) {
@@ -409,10 +409,10 @@ AiThink NPC::Think() {
 				if (!taskBegun) { findPath(currentTarget()); taskBegun = true; lastMoveResult = TASKCONTINUE;}
 
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) {
-					TaskFinished(lastMoveResult, std::string("Could not find path to target")); break;
+					TaskFinished(lastMoveResult, std::string("(MOVE)Could not find path to target")); break;
 				} else if (lastMoveResult == PATHEMPTY) {
 					if (!((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y())) {
-						TaskFinished(TASKFAILFATAL, std::string("No path to target")); break;
+						TaskFinished(TASKFAILFATAL, std::string("(MOVE)No path to target")); break;
 					}
 				}
 				break;
@@ -444,10 +444,7 @@ AiThink NPC::Think() {
 					checkLOS = !checkLOS;
 				}}
 				//If we got here we couldn't find a near coordinate
-#ifdef DEBUG
-				std::cout<<name<<" couldn't find NEAR coordinate\n";
-#endif
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(MOVENEAR)Couldn't find NEAR coordinate");
 MOVENEARend:
 				break;
 
@@ -469,13 +466,13 @@ MOVENEARend:
 					else tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentTarget());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
-					} else { TaskFinished(TASKFAILFATAL, std::string("No walkable adjacent tiles")); break; }
+					} else { TaskFinished(TASKFAILFATAL, std::string("(MOVEADJACENT)No walkable adjacent tiles")); break; }
 					taskBegun = true;
 					lastMoveResult = TASKCONTINUE;
 				}
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
 				else if (lastMoveResult == PATHEMPTY) {
-					TaskFinished(TASKFAILFATAL);
+					TaskFinished(TASKFAILFATAL, "(MOVEADJACENT)PATHEMPTY");
 				}
 				break;
 
@@ -491,17 +488,17 @@ MOVENEARend:
 						TaskFinished(TASKSUCCESS);
 						break;
 					} else if (tmp == BUILD_NOMATERIAL) {
-						TaskFinished(TASKFAILFATAL, "Missing materials");
+						TaskFinished(TASKFAILFATAL, "(BUILD)Missing materials");
 						break;
 					}
 				} else {
-					TaskFinished(TASKFAILFATAL);
+					TaskFinished(TASKFAILFATAL, "(BUILD)Not adjacent to target");
 					break;
 				}
 				break;
 
 			case TAKE:
-				if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL, "No target entity for TAKE"); break; }
+				if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL, "(TAKE)No target entity"); break; }
 				if (Position() == currentEntity().lock()->Position()) {
 					if (boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()) {
 						boost::weak_ptr<Container> cont(boost::static_pointer_cast<Container>(boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));
@@ -511,7 +508,7 @@ MOVENEARend:
 					PickupItem(boost::static_pointer_cast<Item>(currentEntity().lock()));
 					TaskFinished(TASKSUCCESS);
 					break;
-				} else { TaskFinished(TASKFAILFATAL, "Item not found"); break; }
+				} else { TaskFinished(TASKFAILFATAL, "(TAKE)Item not found"); break; }
 				break;
 
 			case DROP:
@@ -524,19 +521,23 @@ MOVENEARend:
 				if (carried.lock()) {
 					inventory->RemoveItem(carried);
 					carried.lock()->Position(Position());
+					if (!currentEntity().lock()) {
+						TaskFinished(TASKFAILFATAL, "(PUTIN)Target does not exist");
+						break;
+					}
 					if (!Game::Inst()->Adjacent(Position(), currentEntity().lock()->Position())) {
-						TaskFinished(TASKFAILFATAL, "Not adjacent to container");
+						TaskFinished(TASKFAILFATAL, "(PUTIN)Not adjacent to container");
 						break;
 					}
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
 						if (!cont->AddItem(carried)) {
-							TaskFinished(TASKFAILFATAL, "Container full");
+							TaskFinished(TASKFAILFATAL, "(PUTIN)Container full");
 							break;
 						}
 						bulk -= carried.lock()->GetBulk();
 					} else {
-						TaskFinished(TASKFAILFATAL, "Target not a container");
+						TaskFinished(TASKFAILFATAL, "(PUTIN)Target not a container");
 						break;
 					}
 				}
@@ -564,7 +565,7 @@ MOVENEARend:
 								}
 							}
 					}
-					TaskFinished(TASKFAILFATAL);
+					TaskFinished(TASKFAILFATAL, "(DRINK)Not enough water");
 				}
 				break;
 
@@ -601,9 +602,9 @@ MOVENEARend:
 					if (tmp >= 100) {
 						TaskFinished(TASKSUCCESS);
 					} else if (tmp < 0) {
-						TaskFinished(TASKFAILFATAL); break;
+						TaskFinished(TASKFAILFATAL, "(USE)Can not use (tmp<0)"); break;
 					}
-				} else { TaskFinished(TASKFAILFATAL, "Attempted to use non-construct"); break; }
+				} else { TaskFinished(TASKFAILFATAL, "(USE)Attempted to use non-construct"); break; }
 				break;
 
 			case HARVEST:
@@ -633,7 +634,7 @@ MOVENEARend:
 				} else {
 					inventory->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
-					TaskFinished(TASKFAILFATAL, "Carrying nonexistant item");
+					TaskFinished(TASKFAILFATAL, "(HARVEST)Carrying nonexistant item");
 					break;
 				}
 
@@ -660,7 +661,7 @@ MOVENEARend:
 					//Job underway
 					break;
 				}
-				TaskFinished(TASKFAILFATAL, "(FELL FAIL) No NatureObject to fell");
+				TaskFinished(TASKFAILFATAL, "(FELL) No NatureObject to fell");
 				break;
 
 			case HARVESTWILDPLANT:
@@ -686,7 +687,7 @@ MOVENEARend:
 					//Job underway
 					break;
 				}
-				TaskFinished(TASKFAILFATAL, "Harvest target doesn't exist");
+				TaskFinished(TASKFAILFATAL, "(HARVESTWILDPLANT)Harvest target doesn't exist");
 				break;
 
 			case KILL:
@@ -714,7 +715,7 @@ MOVENEARend:
 					lastMoveResult = TASKCONTINUE;
 				}
 
-				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("Could not find path to target")); break; }
+				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("(KILL)Could not find path to target")); break; }
 				else if (lastMoveResult == PATHEMPTY) {
 					findPath(currentEntity().lock()->Position());
 				}
@@ -783,7 +784,7 @@ MOVENEARend:
 #endif
 					break;
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(WIELD)Not carrying an item");
 				break;
 
 			case WEAR:
@@ -811,7 +812,7 @@ MOVENEARend:
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(WEAR)Not carrying an item");
 				break;
 
 			case BOGIRON:
@@ -834,12 +835,12 @@ MOVENEARend:
 						break;
 					}
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(BOGIRON)Not on a bog tile");
 				break;
 
 			case STOCKPILEITEM:
 				if (carried.lock()) {
-					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true);
+					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true, true, false);
 					if (stockJob) {
 						stockJob->internal = true;
 						jobs.push_back(stockJob);
@@ -849,7 +850,7 @@ MOVENEARend:
 						break;
 					}
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(STOCKPILEITEM)Not carrying an item");
 				break;
 
 			case QUIVER:
@@ -857,21 +858,21 @@ MOVENEARend:
 					if (!quiver.lock()) {
 						DropItem(carried);
 						carried.reset();
-						TaskFinished(TASKFAILFATAL, "No quiver!");
+						TaskFinished(TASKFAILFATAL, "(QUIVER)No quiver");
 						break;
 					}
 					inventory->RemoveItem(carried);
 					if (!quiver.lock()->AddItem(carried)) {
 						DropItem(carried);
 						carried.reset();
-						TaskFinished(TASKFAILFATAL, "Quiver full!");
+						TaskFinished(TASKFAILFATAL, "(QUIVER)Quiver full");
 						break;
 					}
 					carried.reset();
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "(QUIVER)Not carrying an item");
 				break;
 
 			case FILL:
@@ -880,7 +881,7 @@ MOVENEARend:
 					
 					if (!cont->empty() && cont->ContainsWater() == 0 && cont->ContainsFilth() == 0) {
 						//Not empty, but doesn't have water/filth, so it has items in it
-						TaskFinished(TASKFAILFATAL, "Attempting to fill non-empty container");
+						TaskFinished(TASKFAILFATAL, "(FILL)Attempting to fill non-empty container");
 						break;
 					}
 					
@@ -903,16 +904,16 @@ MOVENEARend:
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
-					TaskFinished(TASKFAILFATAL, "(FILL FAIL)Nothing to fill container with");
+					TaskFinished(TASKFAILFATAL, "(FILL)Nothing to fill container with");
 					break;
 				} 
 
-				TaskFinished(TASKFAILFATAL, "(FILL FAIL)Not carrying a liquid container");
+				TaskFinished(TASKFAILFATAL, "(FILL)Not carrying a liquid container");
 				break;
 
 			case POUR:
 				if (!carried.lock() || !boost::dynamic_pointer_cast<Container>(carried.lock())) {
-					TaskFinished(TASKFAILFATAL, "(POUR FAIL)Not carrying a liquid container");
+					TaskFinished(TASKFAILFATAL, "(POUR)Not carrying a liquid container");
 					break;
 				}
 				{
@@ -942,7 +943,7 @@ MOVENEARend:
 							break;
 					}
 				}
-				TaskFinished(TASKFAILFATAL, "(POUR FAIL) No valid target");
+				TaskFinished(TASKFAILFATAL, "(POUR)No valid target");
 				break;
 
 			case DIG:

@@ -897,6 +897,10 @@ void UI::ChooseRemoveNatureObjects() {
 }
 
 void UI::ChooseChangeTerritory(bool add) {
+	if (Camp::Inst()->IsAutoTerritoryEnabled()) {
+		Camp::Inst()->DisableAutoTerritory();
+		Announce::Inst()->AddMsg("Automatic territory handling disabled", TCODColor::cyan);
+	}
 	UI::Inst()->state(UIRECTPLACEMENT);
 	UI::Inst()->SetRectCallback(boost::bind(&Map::SetTerritoryRectangle, Map::Inst(), _1, _2, add));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));

@@ -93,7 +93,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
 		mati != Construction::Presets[construct].materials.end(); ++mati) {
-			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target);
+			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target, EMPTY);
 			if (boost::shared_ptr<Item> item = material.lock()) {
 				item->Reserve(true);
 				componentList.push_back(item);
@@ -151,7 +151,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		pickupJob->Parent(buildJob);
 		buildJob->PreReqs()->push_back(pickupJob);
 
-		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter));
+		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter, EMPTY));
 		pickupJob->tasks.push_back(Task(MOVE));
 		pickupJob->tasks.push_back(Task(TAKE));
 		pickupJob->tasks.push_back(Task(MOVE, newCons->Storage().lock()->Position(), newCons));
@@ -341,7 +341,7 @@ void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
 	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
-	
+
 	if (confirm) {
 		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
 	} else {
@@ -521,12 +521,22 @@ void Game::CreateWater(Coordinate pos) {
 }
 
 void Game::CreateWater(Coordinate pos, int amount, int time) {
+
+	//If there is filth here mix it with the water
+	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X(), pos.Y()).lock();
+
 	boost::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos.X(), pos.Y()));
 	if (!water.lock()) {
 		boost::shared_ptr<WaterNode> newWater(new WaterNode(pos.X(), pos.Y(), amount, time));
 		waterList.push_back(boost::weak_ptr<WaterNode>(newWater));
 		Map::Inst()->SetWater(pos.X(), pos.Y(), newWater);
-	} else {water.lock()->Depth(water.lock()->Depth()+amount);}
+		if (filth) newWater->AddFilth(filth->Depth());
+	} else {
+		water.lock()->Depth(water.lock()->Depth()+amount);
+		if (filth) water.lock()->AddFilth(filth->Depth());
+	}
+
+	if (filth) RemoveFilth(pos);
 }
 
 int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
@@ -609,7 +619,10 @@ Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest(-9999,-9999);
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (wati->lock()->Depth() > DRINKABLE_WATER_DEPTH) {
-			if (Distance(wati->lock()->Position(), pos) < Distance(closest, pos)) closest = wati->lock()->Position();
+			int waterDistance = Distance(wati->lock()->Position(), pos);
+			//Favor water inside territory
+			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 2;
+			if (waterDistance < Distance(closest, pos)) closest = wati->lock()->Position();
 		}
 	}
 	if (closest.X() == -9999) return Coordinate(-1,-1);
@@ -665,19 +678,27 @@ void Game::Update() {
 	//updates all its neighbours. Also, by updating only every 50th one, the load on the cpu is less, but you need to
 	//remember that Update gets called 25 times a second, and given the nature of rand() this means that each waternode
 	//will be updated once every 2 seconds. It turns out that from the player's viewpoint this is just fine
-	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
-		if (wati->lock() && Random::Generate(49) == 0) wati->lock()->Update();
-		else if (!wati->lock()) wati = waterList.erase(wati);
+	{
+		std::list<boost::weak_ptr<WaterNode> >::iterator nextWati = ++waterList.begin();
+		for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end();) {
+			if (wati->lock() && Random::Generate(49) == 0) wati->lock()->Update();
+			else if (!wati->lock()) wati = waterList.erase(wati);
+			wati = nextWati;
+			++nextWati;
+		}
 	}
-
 	//Updating the last 10 waternodes each time means that recently created water moves faster.
 	//This has the effect of making water rush to new places such as a moat very quickly, which is the
 	//expected behaviour of water.
 	if (waterList.size() > 0) {
+		//We have to use two iterators, because wati may be invalidated if the water evaporates and is removed
 		std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.end();
+		std::list<boost::weak_ptr<WaterNode> >::iterator nextwati = --wati;
 		while (std::distance(wati, waterList.end()) < 10) {
-			--wati;
+			--nextwati;
+			if (wati == waterList.end()) break;
 			if (wati->lock()) wati->lock()->Update();
+			wati = nextwati;
 		}
 	}
 
@@ -743,9 +764,9 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 }
 
-boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory) {
+boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		if (!item->Reserved()) {
+		if (!reserveItem || !item->Reserved()) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -783,7 +804,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 
 				if (target.X() != -1) {
 					stockJob->ReserveSpot(nearest, target);
-					stockJob->ReserveEntity(item);
+					if (reserveItem) stockJob->ReserveEntity(item);
 					stockJob->tasks.push_back(Task(MOVE, item->Position()));
 					stockJob->tasks.push_back(Task(TAKE, item->Position(), item));
 					stockJob->tasks.push_back(Task(MOVE, target));
@@ -870,7 +891,7 @@ void Game::DeTillFarmPlots() {
 
 //First generates a heightmap, then translates that into the corresponding tiles
 //Third places plantlife according to heightmap, and some wildlife as well
-void Game::GenerateMap(boost::uint32_t seed) {
+void Game::GenerateMap(uint32_t seed) {
 	Random::Generator random(seed);
 	
 	Map* map = Map::Inst();
@@ -1187,6 +1208,13 @@ void Game::CreateFilth(Coordinate pos) {
 }
 
 void Game::CreateFilth(Coordinate pos, int amount) {
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+
+	if (water) { //If water exists here just add the filth there, no need for filthnodes
+		water->AddFilth(amount);
+		return;
+	}
+
 	boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.X(), pos.Y()));
 	if (!filth.lock()) { //No existing filth node so create one
 		boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), std::min(5, amount)));
@@ -1553,5 +1581,33 @@ void Game::GatherItems(Coordinate a, Coordinate b) {
 				}
 			}
 		}
+	}
+}
+
+void Game::RemoveFilth(Coordinate pos) {
+	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X(), pos.Y()).lock();
+	if (filth) {
+		for (std::list<boost::weak_ptr<FilthNode> >::iterator filthi = filthList.begin(); filthi != filthList.end(); ++filthi) {
+			if (filthi->lock() == filth) {
+				filthList.erase(filthi);
+				break;
+			}
+		}
+		Map::Inst()->SetFilth(pos.X(), pos.Y(), boost::shared_ptr<FilthNode>());
+	}
+}
+
+void Game::RemoveWater(Coordinate pos) {
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	if (water) {
+		for (std::list<boost::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
+			if (wateri->lock() == water) {
+				waterList.erase(wateri);
+				break;
+			}
+		}
+		int filth = water->GetFilth();
+		Map::Inst()->SetWater(pos.X(), pos.Y(), boost::shared_ptr<WaterNode>());
+		if (filth > 0) CreateFilth(pos, filth);
 	}
 }
