@@ -138,52 +138,54 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
 		if (!conti->second->empty()) {
 			boost::weak_ptr<Item> item = *conti->second->begin();
-			if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
-				if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
-					//value represents bulk in this case
-					if (container->Full() || container->Capacity() < value) continue;
-				}
-				
-				if (flags & BETTERTHAN) {
-					if (item.lock()->RelativeValue() <= value) continue;
-				} 
-				
-				if (flags & APPLYMINIMUMS) {
-					/*For now this only affects seeds. With this flag set don't return
-					seeds if at or below the set minimum for them*/
-					if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
-						if (StockManager::Inst()->TypeQuantity(item.lock()->Type()) <=
-							StockManager::Inst()->Minimum(item.lock()->Type()))
-							continue;
+			if (item.lock()) {
+				if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
+					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
+						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+						//value represents bulk in this case
+						if (container->Full() || container->Capacity() < value) continue;
 					}
-				} 
-				
-				if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item.lock())) {
-					if (!boost::static_pointer_cast<Container>(item.lock())->empty()) continue;
-				}
 
-				return item;
-			} else if (boost::dynamic_pointer_cast<Container>(item.lock())) {
-				boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
-					boost::shared_ptr<Item> innerItem(itemi->lock());
-					if (innerItem && innerItem->Type() == typeValue && !innerItem->Reserved()) {
-						if (flags & BETTERTHAN) {
-							if (innerItem->RelativeValue() <= value) continue;
-						}
-						
-						if (flags & APPLYMINIMUMS) {
-							/*For now this only affects seeds. With this flag set don't return
-							seeds if at or below the set minimum for them*/
-							if (innerItem->IsCategory(Item::StringToItemCategory("Seed"))) {
-								if (StockManager::Inst()->TypeQuantity(innerItem->Type()) <=
-									StockManager::Inst()->Minimum(innerItem->Type())) 
-									continue;
-							} 
-						}
+					if (flags & BETTERTHAN) {
+						if (item.lock()->RelativeValue() <= value) continue;
+					} 
 
-						return innerItem;
+					if (flags & APPLYMINIMUMS) {
+						/*For now this only affects seeds. With this flag set don't return
+						seeds if at or below the set minimum for them*/
+						if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
+							if (StockManager::Inst()->TypeQuantity(item.lock()->Type()) <=
+								StockManager::Inst()->Minimum(item.lock()->Type()))
+								continue;
+						}
+					} 
+
+					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item.lock())) {
+						if (!boost::static_pointer_cast<Container>(item.lock())->empty()) continue;
+					}
+
+					return item;
+				} else if (boost::dynamic_pointer_cast<Container>(item.lock())) {
+					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
+					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
+						boost::shared_ptr<Item> innerItem(itemi->lock());
+						if (innerItem && innerItem->Type() == typeValue && !innerItem->Reserved()) {
+							if (flags & BETTERTHAN) {
+								if (innerItem->RelativeValue() <= value) continue;
+							}
+
+							if (flags & APPLYMINIMUMS) {
+								/*For now this only affects seeds. With this flag set don't return
+								seeds if at or below the set minimum for them*/
+								if (innerItem->IsCategory(Item::StringToItemCategory("Seed"))) {
+									if (StockManager::Inst()->TypeQuantity(innerItem->Type()) <=
+										StockManager::Inst()->Minimum(innerItem->Type())) 
+										continue;
+								} 
+							}
+
+							return innerItem;
+						}
 					}
 				}
 			}
