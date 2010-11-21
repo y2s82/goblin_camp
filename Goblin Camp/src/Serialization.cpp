@@ -901,6 +901,9 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & workshops;
 	ar & farmplots;
 	ar & production;
+	ar & upperCorner;
+	ar & lowerCorner;
+	ar & autoTerritory;
 }
 
 template<class Archive>
@@ -917,6 +920,9 @@ void Camp::load(Archive & ar, const unsigned int version) {
 		ar & workshops;
 		ar & farmplots;
 		ar & production;
+		ar & upperCorner;
+		ar & lowerCorner;
+		ar & autoTerritory;
 	}
 }
 
