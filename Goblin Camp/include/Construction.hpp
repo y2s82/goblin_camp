@@ -71,6 +71,8 @@ struct ConstructionPreset {
 	bool permanent;
 	TCODColor color;
 	std::set<TileType> tileReqs;
+	int tier;
+	std::string description;
 };
 
 class Construction : public Entity {

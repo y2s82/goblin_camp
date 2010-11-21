@@ -231,8 +231,32 @@ void StartNewGame() {
 	game->CreateItems(10, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
+	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+	Coordinate corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+	while (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y()) || !Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) {
+		if (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+		if (!Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+	}
+
+	game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
+	game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
+	int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
+	boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
+	corpse->Name("Human corpse");
+	corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
+	corpse = game->itemList[corpseuid];
+	corpse->Name("Human corpse");
+	for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + Random::Generate(2), corpseLoc1.Y() - 1 + Random::Generate(2)));
+	for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + Random::Generate(2), corpseLoc2.Y() - 1 + Random::Generate(2)));
+
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
 	game->CenterOn(spawnCenterCandidates.top().second);
+
+	Map::Inst()->SetTerritoryRectangle(spawnTopCorner, spawnBottomCorner, true);
 
 	MainLoop();
 }

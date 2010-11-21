@@ -404,6 +404,7 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & velocity;
 	ar & nextVelocityMove;
 	ar & velocityTarget;
+	ar & bulk;
 }
 
 template<class Archive>
@@ -420,6 +421,7 @@ void Entity::load(Archive & ar, const unsigned int version) {
 		ar & velocity;
 		ar & nextVelocityMove;
 		ar & velocityTarget;
+		ar & bulk;
 	}
 }
 
@@ -863,6 +865,7 @@ void JobManager::save(Archive & ar, const unsigned int version) const {
 	ar & waitingList;
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
+	ar & toolJobs;
 }
 
 template<class Archive>
@@ -872,6 +875,7 @@ void JobManager::load(Archive & ar, const unsigned int version) {
 		ar & waitingList;
 		ar & menialNPCsWaiting;
 		ar & expertNPCsWaiting;
+		ar & toolJobs;
 	}
 }
 
@@ -890,6 +894,9 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & lockedCenter;
 	ar & tier;
 	ar & name;
+	ar & workshops;
+	ar & farmplots;
+	ar & production;
 }
 
 template<class Archive>
@@ -903,6 +910,9 @@ void Camp::load(Archive & ar, const unsigned int version) {
 		ar & lockedCenter;
 		ar & tier;
 		ar & name;
+		ar & workshops;
+		ar & farmplots;
+		ar & production;
 	}
 }
 
@@ -1008,6 +1018,7 @@ void Tile::save(Archive & ar, const unsigned int version) const {
 	ar & marked;
 	ar & walkedOver;
 	ar & corruption;
+	ar & territory;
 }
 
 template<class Archive>
@@ -1040,6 +1051,7 @@ void Tile::load(Archive & ar, const unsigned int version) {
 		ar & marked;
 		ar & walkedOver;
 		ar & corruption;
+		ar & territory;
 	}
 }
 
@@ -1133,6 +1145,7 @@ void SpawningPool::save(Archive & ar, const unsigned int version) const {
 	ar & corpses;
 	ar & spawns;
 	ar & corpseContainer;
+	ar & jobCount;
 }
 
 template<class Archive>
@@ -1148,6 +1161,7 @@ void SpawningPool::load(Archive & ar, const unsigned int version) {
 		ar & corpses;
 		ar & spawns;
 		ar & corpseContainer;
+		ar & jobCount;
 	}
 }
 

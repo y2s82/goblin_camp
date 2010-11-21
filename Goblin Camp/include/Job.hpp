@@ -68,7 +68,8 @@ enum Action {
 	FILL,
 	POUR,
 	DIG,
-	FORGET
+	FORGET,
+	UNWIELD
 };
 
 enum TaskResult {
@@ -89,7 +90,7 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 public:
-	Task(Action = NOACTION, Coordinate = Coordinate(0,0), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
+	Task(Action = NOACTION, Coordinate = Coordinate(-1,-1), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
 	Coordinate target;
 	boost::weak_ptr<Entity> entity;
 	Action action;
@@ -119,9 +120,11 @@ private:
 	std::pair<boost::weak_ptr<Stockpile>, Coordinate> reservedSpot;
 	int attempts, attemptMax;
 	boost::weak_ptr<Entity> connectedEntity;
-	boost::weak_ptr<Container> reservedSpace;
+	boost::weak_ptr<Container> reservedContainer;
+	int reservedSpace;
 	ItemCategory tool;
 	Coordinate markedGround;
+	bool obeyTerritory;
 public:
 	static boost::shared_ptr<Job> MoveJob(Coordinate);
 	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
@@ -156,7 +159,7 @@ public:
 	void UnreserveSpot();
 	void ConnectToEntity(boost::weak_ptr<Entity>);
 	boost::weak_ptr<Entity> ConnectedEntity();
-	void ReserveSpace(boost::weak_ptr<Container>);
+	void ReserveSpace(boost::weak_ptr<Container>, int bulk = 1);
 
 	bool internal;
 	int Attempts();
@@ -170,4 +173,6 @@ public:
 	void MarkGround(Coordinate);
 
 	static std::string ActionToString(Action);
+	void DisregardTerritory();
+	bool OutsideTerritory();
 };

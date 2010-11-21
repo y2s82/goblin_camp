@@ -252,18 +252,17 @@ void NPC::HandleWeariness() {
 	}
 	if (!found) {
 		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
+		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
+		sleepJob->internal = true;
+		if (!expert) sleepJob->tasks.push_back(Task(UNWIELD));
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
 			run = true;
-			boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
-			sleepJob->internal = true;
 			sleepJob->ReserveEntity(bed);
 			sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
 			sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
 			jobs.push_back(sleepJob);
 			return;
 		}
-		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
-		sleepJob->internal = true;
 		sleepJob->tasks.push_back(Task(SLEEP, Position()));
 		jobs.push_back(sleepJob);
 	}
@@ -282,6 +281,7 @@ void NPC::Update() {
 	}
 
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 	
 
 	if (needsNutrition) {
@@ -294,10 +294,10 @@ void NPC::Update() {
 
 		if (thirst > THIRST_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleThirst();
-		} else if (thirst > THIRST_THRESHOLD * 5) Kill();
+		} else if (thirst > THIRST_THRESHOLD * 2) Kill();
 		if (hunger > HUNGER_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleHunger();
-		} else if (hunger > HUNGER_THRESHOLD * 10) Kill();
+		} else if (hunger > HUNGER_THRESHOLD * 2) Kill();
 	}
 
 	if (needsSleep) {
@@ -306,7 +306,7 @@ void NPC::Update() {
 		if (weariness >= WEARY_THRESHOLD) { 
 			AddEffect(DROWSY);
 			HandleWeariness();
-		} else RemoveEffect(DROWSY);		
+		} else RemoveEffect(DROWSY);
 	}
 
 	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
@@ -321,6 +321,7 @@ void NPC::Update() {
 	}
 
 	if (Random::Generate(UPDATES_PER_SECOND - 1) == 0 && health < maxHealth) ++health;
+	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 }
 
 void NPC::UpdateStatusEffects() {
@@ -507,8 +508,7 @@ MOVENEARend:
 						cont.lock()->RemoveItem(
 							boost::static_pointer_cast<Item>(currentEntity().lock()));
 					}
-					carried = boost::static_pointer_cast<Item>(currentEntity().lock());
-					if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
+					PickupItem(boost::static_pointer_cast<Item>(currentEntity().lock()));
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else { TaskFinished(TASKFAILFATAL, "Item not found"); break; }
@@ -524,13 +524,19 @@ MOVENEARend:
 				if (carried.lock()) {
 					inventory->RemoveItem(carried);
 					carried.lock()->Position(Position());
+					if (!Game::Inst()->Adjacent(Position(), currentEntity().lock()->Position())) {
+						TaskFinished(TASKFAILFATAL, "Not adjacent to container");
+						break;
+					}
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
-						if (!cont->AddItem(carried)) Announce::Inst()->AddMsg("Container full!", TCODColor::white, cont->Position());
+						if (!cont->AddItem(carried)) {
+							TaskFinished(TASKFAILFATAL, "Container full");
+							break;
+						}
+						bulk -= carried.lock()->GetBulk();
 					} else {
-						DropItem(carried); 
-						carried.reset();
-						TaskFinished(TASKFAILFATAL);
+						TaskFinished(TASKFAILFATAL, "Target not a container");
 						break;
 					}
 				}
@@ -542,6 +548,7 @@ MOVENEARend:
 				if (carried.lock()) { //Drink from an item
 					thirst -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
+					bulk -= carried.lock()->GetBulk();
 					Game::Inst()->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
 					TaskFinished(TASKSUCCESS);
@@ -565,6 +572,7 @@ MOVENEARend:
 				if (carried.lock()) {
 					hunger -= boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
+					bulk -= carried.lock()->GetBulk();
 
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
 						Game::Inst()->CreateItem(Position(), *fruiti, true);
@@ -579,18 +587,13 @@ MOVENEARend:
 			case FIND:
 				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->target, currentTask()->flags);
 				if (!foundItem.lock()) {
-					TaskFinished(TASKFAILFATAL); 
-#ifdef DEBUG
-					std::cout<<"Can't FIND required item\n";
-#endif
+					TaskFinished(TASKFAILFATAL, "Can't FIND item"); 
 					break;
-				}
-				else {
+				} else {
 					if (faction == 0) currentJob().lock()->ReserveEntity(foundItem);
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
-				break;
 
 			case USE:
 				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
@@ -610,14 +613,13 @@ MOVENEARend:
 
 					boost::shared_ptr<Item> plant = carried.lock();
 					inventory->RemoveItem(carried);
+					bulk -= plant->GetBulk();
 					carried = boost::weak_ptr<Item>();
 
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[plant->Type()].fruits.begin(); fruiti != Item::Presets[plant->Type()].fruits.end(); ++fruiti) {
 						if (stockpile) {
 							int item = Game::Inst()->CreateItem(Position(), *fruiti, false);
-							DropItem(carried);
-							carried = Game::Inst()->GetItem(item);
-							inventory->AddItem(carried);
+							PickupItem(Game::Inst()->GetItem(item));
 							stockpile = false;
 						} else {
 							Game::Inst()->CreateItem(Position(), *fruiti, true);
@@ -645,8 +647,7 @@ MOVENEARend:
 							if (stockpile) {
 								int item = Game::Inst()->CreateItem(tree->Position(), *iti, false);
 								DropItem(carried);
-								carried = Game::Inst()->GetItem(item);
-								inventory->AddItem(carried);
+								PickupItem(Game::Inst()->GetItem(item));
 								stockpile = false;
 							} else {
 								Game::Inst()->CreateItem(tree->Position(), *iti, true);
@@ -672,8 +673,7 @@ MOVENEARend:
 							if (stockpile) {
 								int item = Game::Inst()->CreateItem(plant->Position(), *iti, false);
 								DropItem(carried);
-								carried = Game::Inst()->GetItem(item);
-								inventory->AddItem(carried);
+								PickupItem(Game::Inst()->GetItem(item));			
 								stockpile = false;
 							} else {
 								Game::Inst()->CreateItem(plant->Position(), *iti, true);
@@ -686,7 +686,7 @@ MOVENEARend:
 					//Job underway
 					break;
 				}
-				TaskFinished(TASKFAILFATAL);
+				TaskFinished(TASKFAILFATAL, "Harvest target doesn't exist");
 				break;
 
 			case KILL:
@@ -823,8 +823,7 @@ MOVENEARend:
 						if (stockpile) {
 							int item = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Bog iron"), false);
 							DropItem(carried);
-							carried = Game::Inst()->GetItem(item);
-							inventory->AddItem(carried);
+							PickupItem(Game::Inst()->GetItem(item));
 							stockpile = false;
 						} else {
 							Game::Inst()->CreateItem(Position(), Item::StringToItemType("Bog iron"), true);
@@ -898,7 +897,7 @@ MOVENEARend:
 					boost::weak_ptr<FilthNode> fnode = Map::Inst()->GetFilth(currentTarget().X(),
 						currentTarget().Y());
 					if (fnode.lock() && fnode.lock()->Depth() > 0 && cont->ContainsWater() == 0) {
-						int filthAmount = std::min(10, fnode.lock()->Depth());
+						int filthAmount = std::min(3, fnode.lock()->Depth());
 						fnode.lock()->Depth(fnode.lock()->Depth()-filthAmount);
 						cont->AddFilth(filthAmount);
 						TaskFinished(TASKSUCCESS);
@@ -961,6 +960,14 @@ MOVENEARend:
 
 			case FORGET:
 				foundItem.reset();
+				TaskFinished(TASKSUCCESS);
+				break;
+
+			case UNWIELD:
+				if (mainHand.lock()) {
+					DropItem(mainHand);
+					mainHand.reset();
+				}
 				TaskFinished(TASKSUCCESS);
 				break;
 
@@ -1057,10 +1064,19 @@ TaskResult NPC::Move(TaskResult oldResult) {
 	return oldResult;
 }
 
+unsigned int NPC::pathingThreadCount = 0;
+boost::mutex NPC::threadCountMutex;
 void NPC::findPath(Coordinate target) {
 	findPathWorking = true;
 	pathIndex = 0;
-	boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking));
+	if (pathingThreadCount < 12) {
+		threadCountMutex.lock();
+		++pathingThreadCount;
+		threadCountMutex.unlock();
+		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, true));
+	} else {
+		tFindPath(path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, false);
+	}
 }
 
 void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
@@ -1126,6 +1142,7 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 		inventory->RemoveItem(item);
 		item.lock()->Position(Position());
 		item.lock()->PutInContainer(boost::weak_ptr<Item>());
+		bulk -= item.lock()->GetBulk();
 
 		//If the item is a container with water/filth in it, spill it on the ground
 		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
@@ -1142,7 +1159,7 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 }
 
 Coordinate NPC::currentTarget() {
-	if (currentTask()->target == Coordinate(0,0) && foundItem.lock()) {
+	if (currentTask()->target == Coordinate(-1,-1) && foundItem.lock()) {
 		return foundItem.lock()->Position();
 	}
 	return currentTask()->target;
@@ -1155,10 +1172,15 @@ boost::weak_ptr<Entity> NPC::currentEntity() {
 }
 
 
-void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex *pathMutex, bool *nopath, bool *findPathWorking) {
+void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex *pathMutex, bool *nopath, bool *findPathWorking, bool threaded) {
 	boost::mutex::scoped_lock pathLock(*pathMutex);
 	*nopath = !path->compute(x0, y0, x1, y1);
 	*findPathWorking = false;
+	if (threaded) {
+		NPC::threadCountMutex.lock();
+		--NPC::pathingThreadCount;
+		NPC::threadCountMutex.unlock();
+	}
 }
 
 bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
@@ -1237,7 +1259,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			}
 			break;
 
-		case ESCORT:
+		case FOLLOW:
 			if (squad->TargetEntity().lock()) {
 				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity().lock()->Position(), squad->TargetEntity()));
 				npc->jobs.push_back(newJob);
@@ -1397,13 +1419,9 @@ std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 /*TODO: Calling jobs.clear() isn't a good idea as the NPC can have more than one job queued up, should use
 TaskFinished(TASKFAILFATAL) or just remove the job we want aborted*/
 void NPC::AbortCurrentJob(bool remove_job) {
-	jobs.clear();
-	if (carried.lock()) {
-		carried.lock()->Reserve(false);
-		DropItem(carried);
-		carried.reset();
-	}
-	if (remove_job) { JobManager::Inst()->RemoveJobByNPC(uid); }
+	boost::shared_ptr<Job> job = jobs.front();
+	TaskFinished(TASKFAILFATAL, "Job aborted");
+	if (remove_job) { JobManager::Inst()->RemoveJob(job); }
 }
 
 void NPC::Hit(boost::weak_ptr<Entity> target) {
@@ -1520,27 +1538,198 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
 	squad = newSquad;
 	if (!squad.lock()) { //NPC was removed from a squad
-		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
-			inventory->RemoveItem(weapon);
-			weapon->Position(Position());
-			weapon->PutInContainer();
+		//Drop weapon, quiver and armor
+		std::list<boost::shared_ptr<Item> > equipment;
+		if (mainHand.lock()) {
+			equipment.push_back(mainHand.lock());
 			mainHand.reset();
 		}
+		if (armor.lock()) { 
+			equipment.push_back(armor.lock());
+			armor.reset();
+		}
+		if (quiver.lock()) {
+			equipment.push_back(quiver.lock());
+			quiver.reset();
+		}
+
+		for (std::list<boost::shared_ptr<Item> >::iterator eqit = equipment.begin(); eqit != equipment.end(); ++eqit) {
+			inventory->RemoveItem(*eqit);
+			(*eqit)->Position(Position());
+			(*eqit)->PutInContainer();
+		}
+
 		aggressive = false;
 	}
 }
 boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}
 
 void NPC::Escape() {
+	if (carried.lock()) {
+		Announce::Inst()->AddMsg((boost::format("%s has escaped with [%s]!") % name % carried.lock()->Name()).str(), 
+			TCODColor::yellow, Position());
+	}
 	DestroyAllItems();
 	escaped = true;
 }
 
 void NPC::DestroyAllItems() {
-	if (carried.lock()) Game::Inst()->RemoveItem(carried);
+	for (std::set<boost::weak_ptr<Item> >::iterator it = inventory->begin(); it != inventory->end(); ++it) {
+		if (it->lock()) Game::Inst()->RemoveItem(*it);
+	}
 }
 
 bool NPC::Escaped() { return escaped; }
+
+class NPCListener : public ITCODParserListener {
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<boost::format("new %s structure: ") % str->getName();
+#endif
+		if (boost::iequals(str->getName(), "npc_type")) {
+			NPC::Presets.push_back(NPCPreset(name));
+			NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
+#ifdef DEBUG
+			std::cout<<name<<"\n";
+#endif
+		} else if (boost::iequals(str->getName(), "attack")) {
+			NPC::Presets.back().attacks.push_back(Attack());
+#ifdef DEBUG
+			std::cout<<name<<"\n";
+#endif
+		} else if (boost::iequals(str->getName(), "resistances")) {
+#ifdef DEBUG
+			std::cout<<"\n";
+#endif
+		}
+		return true;
+	}
+	bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name,"generateName")) { NPC::Presets.back().generateName = true; }
+		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
+		else if (boost::iequals(name,"needsSleep")) { NPC::Presets.back().needsSleep = true; }
+		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
+		return true;
+	}
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
+		else if (boost::iequals(name,"plural")) { NPC::Presets.back().plural = value.s; }
+		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.i; }
+		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
+		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
+		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
+		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
+		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
+		else if (boost::iequals(name,"spawnAsGroup")) { 
+			NPC::Presets.back().spawnAsGroup = true;
+			NPC::Presets.back().group = value.dice;
+		} else if (boost::iequals(name,"type")) {
+			NPC::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
+		} else if (boost::iequals(name,"damage")) {
+			NPC::Presets.back().attacks.back().Amount(value.dice);
+		} else if (boost::iequals(name,"cooldown")) {
+			NPC::Presets.back().attacks.back().CooldownMax(value.i);
+		} else if (boost::iequals(name,"statusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				NPC::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"effectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				NPC::Presets.back().attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+			}
+		} else if (boost::iequals(name,"projectile")) {
+			NPC::Presets.back().attacks.back().Projectile(Item::StringToItemType(value.s));
+		} else if (boost::iequals(name,"physical")) {
+			NPC::Presets.back().resistances[PHYSICAL_RES] = value.i;
+		} else if (boost::iequals(name,"magic")) {
+			NPC::Presets.back().resistances[MAGIC_RES] = value.i;
+		} else if (boost::iequals(name,"cold")) {
+			NPC::Presets.back().resistances[COLD_RES] = value.i;
+		} else if (boost::iequals(name,"fire")) {
+			NPC::Presets.back().resistances[FIRE_RES] = value.i;
+		} else if (boost::iequals(name,"poison")) {
+			NPC::Presets.back().resistances[POISON_RES] = value.i;
+		} else if (boost::iequals(name,"tags")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				std::string tag = (char*)TCOD_list_get(value.list,i);
+				NPC::Presets.back().tags.insert(boost::to_lower_copy(tag));
+			}
+		} else if (boost::iequals(name,"strength")) {
+			NPC::Presets.back().stats[STRENGTH] = value.i;
+		} else if (boost::iequals(name,"size")) {
+			NPC::Presets.back().stats[SIZE] = value.i;
+			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
+		} else if (boost::iequals(name,"tier")) {
+			NPC::Presets.back().tier = value.i;
+		}
+		return true;
+	}
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<boost::format("end of %s\n") % str->getName();
+#endif
+		if (NPC::Presets.back().plural == "") NPC::Presets.back().plural = NPC::Presets.back().name + "s";
+		return true;
+	}
+	void error(const char *msg) {
+		LOG("NPCListener: " << msg);
+		Game::Inst()->Exit(false);
+	}
+};
+
+void NPC::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
+	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
+	npcTypeStruct->addProperty("plural", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
+	npcTypeStruct->addFlag("expert");
+	const char* aiTypes[] = { "PlayerNPC", "PeacefulAnimal", "HungryAnimal", "HostileAnimal", NULL }; 
+	npcTypeStruct->addValueList("AI", aiTypes, true);
+	npcTypeStruct->addFlag("needsNutrition");
+	npcTypeStruct->addFlag("needsSleep");
+	npcTypeStruct->addFlag("generateName");
+	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
+	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
+	
+	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
+	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
+	attackTypeStruct->addValueList("type", damageTypes, true);
+	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
+	attackTypeStruct->addProperty("cooldown", TCOD_TYPE_INT, false);
+	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
+	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);
+	attackTypeStruct->addFlag("ranged");
+	attackTypeStruct->addProperty("projectile", TCOD_TYPE_STRING, false);
+
+	TCODParserStruct *resistancesStruct = parser.newStructure("resistances");
+	resistancesStruct->addProperty("physical", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("magic", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
+
+	TCODParserStruct *statsStruct = parser.newStructure("stats");
+	statsStruct->addProperty("health", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("speed", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("dodge", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("size", TCOD_TYPE_INT, true);
+	statsStruct->addProperty("strength", TCOD_TYPE_INT, false);
+
+	npcTypeStruct->addStructure(attackTypeStruct);
+	npcTypeStruct->addStructure(resistancesStruct);
+	npcTypeStruct->addStructure(statsStruct);
+
+	parser.run(filename.c_str(), new NPCListener());
+}
 
 std::string NPC::NPCTypeToString(NPCType type) {
 	return Presets[type].typeName;
@@ -1696,6 +1885,14 @@ void NPC::UpdateVelocity() {
 				}
 			}
 		}
+	}
+}
+
+void NPC::PickupItem(boost::weak_ptr<Item> item) {
+	if (item.lock()) {
+		carried = boost::static_pointer_cast<Item>(item.lock());
+		bulk += item.lock()->GetBulk();
+		if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
 	}
 }
 

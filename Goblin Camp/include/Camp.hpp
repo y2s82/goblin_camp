@@ -17,6 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 
+#include <boost\serialization\serialization.hpp>
+
 #include "Coordinate.hpp"
 
 class Camp {
@@ -36,6 +38,7 @@ private:
 	Coordinate lockedCenter;
 	int tier;
 	std::string name;
+	int workshops, farmplots, production;
 
 public:
 	static Camp* Inst();
@@ -47,4 +50,6 @@ public:
 	int GetTier();
 	void UpdateTier();
 	std::string GetName();
+	void ConstructionBuilt(int type);
+	void ItemProduced();
 };

@@ -34,6 +34,7 @@ private:
 	Coordinate a, b;
 	unsigned int expansion, filth, corpses, spawns;
 	boost::shared_ptr<Container> corpseContainer;
+	int jobCount;
 public:
 	SpawningPool(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	Panel* GetContextMenu();
@@ -44,4 +45,5 @@ public:
 	void Update();
 	void Draw(Coordinate, TCODConsole*);
 	void Expand();
+	virtual void CancelJob(int=0);
 };

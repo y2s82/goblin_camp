@@ -64,6 +64,7 @@ struct ItemPreset {
 	std::vector<ItemType> decayList;
 	Attack attack;
 	int resistances[RES_COUNT];
+	int bulk;
 };
 
 class Item : public Entity {

@@ -32,7 +32,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 {
 	condition = maxCondition;
 	reserved.insert(std::pair<Coordinate,bool>(target,false));
-	Container *container = new Container(target, 0, 1, -1);
+	Container *container = new Container(target, 0, 1000, -1);
 	container->AddListener(this);
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
@@ -40,6 +40,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
+	Camp::Inst()->ConstructionBuilt(type);
 }
 
 Stockpile::~Stockpile() {
@@ -79,7 +80,9 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 				if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
 					//The item is the one we want, check that it fullfills all the requisite flags
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-						if (boost::static_pointer_cast<Container>(item.lock())->Full()) continue;
+						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+						//value represents bulk in this case. Needs to check Full() because bulk=value=0 is a possibility
+						if (container->Full() || container->Capacity() < value) continue;
 					}
 
 					if (flags & BETTERTHAN) {
@@ -138,7 +141,9 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 			boost::weak_ptr<Item> item = *conti->second->begin();
 			if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
 				if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-					if (boost::static_pointer_cast<Container>(item.lock())->Full()) continue;
+					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					//value represents bulk in this case
+					if (container->Full() || container->Capacity() < value) continue;
 				}
 				
 				if (flags & BETTERTHAN) {
@@ -208,13 +213,14 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							//Current tile is walkable, buildable, and adjacent to the current stockpile
 							Map::Inst()->SetConstruction(ix,iy,uid);
 							Map::Inst()->Buildable(ix,iy,false);
+							Map::Inst()->SetTerritory(ix,iy,true);
 							//Update corner values
 							if (ix < a.X()) a.X(ix);
 							if (ix > b.X()) b.X(ix);
 							if (iy < a.Y()) a.Y(iy);
 							if (iy > b.Y()) b.Y(iy);
 							reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-							Container *container = new Container(Coordinate(ix,iy), 0, 1, -1);
+							Container *container = new Container(Coordinate(ix,iy), 0, 1000, -1);
 							container->AddListener(this);
 							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
 					}
@@ -274,7 +280,8 @@ bool Stockpile::Full(ItemType type) {
 				boost::weak_ptr<Item> item = containers[location]->GetFirstItem();
 				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
-					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && !container->Full()) return false;
+					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 
+						container->Capacity() >= Item::Presets[type].bulk) return false;
 				}
 			}
 		}

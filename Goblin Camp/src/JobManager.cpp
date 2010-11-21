@@ -39,7 +39,7 @@ JobManager *JobManager::Inst() {
 }
 
 void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
-	if (!newJob->Attempt()) {
+	if (!newJob->Attempt() || newJob->OutsideTerritory()) {
 		newJob->Fail();
 		return;
 	}
@@ -60,8 +60,11 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 		*/
 		job->Assign(-1);
 		job->Paused(true);
+
+		//Push job onto waiting list
 		waitingList.push_back(job);
 
+		//Remove job from availabe list
 		for(std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[job->priority()].begin(); 
 			jobi != availableList[job->priority()].end(); ++jobi) {
 				if ((*jobi) == job) {
@@ -70,6 +73,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 				}
 		}
 
+		//If the job requires a tool, remove it from the toolJobs list
 		if (job->RequiresTool()) {
 			for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[job->GetRequiredTool()].begin(); 
 				jobi != toolJobs[job->GetRequiredTool()].end(); ++jobi) {
@@ -82,23 +86,29 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 	}
 }
 
-void JobManager::CancelJob(boost::weak_ptr<Entity> construction) {
-	boost::shared_ptr<Entity> construction_ptr, job_ptr, job_parent_ptr;
-	for (int i=0; i<PRIORITY_COUNT; i++) {
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
-			job_parent_ptr.reset();
-			job_ptr = (*jobi)->ConnectedEntity().lock();
-			construction_ptr = construction.lock();
-			if ((*jobi)->Parent().lock()) { job_parent_ptr = (*jobi)->Parent().lock()->ConnectedEntity().lock(); }
-			// If a job is connected to a contruction task which is cancelled or parent is such a task then remove them
-			if (construction_ptr && 
-				( (job_ptr && job_ptr->Uid() == construction_ptr->Uid()) || 
-				(job_parent_ptr && job_parent_ptr->Uid() == construction_ptr->Uid()) ) ) { 
-				std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
-				if (npc != Game::Inst()->npcList.end())  { npc->second->AbortCurrentJob(false); }
-				jobi = availableList[i].erase(jobi);
-			} else {
-				++jobi;
+void JobManager::RemoveJob(boost::weak_ptr<Entity> entity) {
+	if (boost::shared_ptr<Entity> cancelledEntity = entity.lock()) {
+		for (int i=0; i<PRIORITY_COUNT; i++) {
+			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
+				boost::shared_ptr<Entity> jobEntity = (*jobi)->ConnectedEntity().lock();
+				boost::shared_ptr<Entity> jobParentEntity;
+				if ((*jobi)->Parent().lock()) { 
+					jobParentEntity = (*jobi)->Parent().lock()->ConnectedEntity().lock(); 
+				}
+				// Cancel the job if the job or its parent is connected to the entity requesting cancellation
+				if ((jobEntity && jobEntity->Uid() == cancelledEntity->Uid()) ||
+					(jobParentEntity && jobParentEntity->Uid() == cancelledEntity->Uid())) {
+						std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
+						(*jobi)->Attempts(0); //Set attempts to 0 so the job gets removed
+						jobi = availableList[i].erase(jobi); /*Move iterator forward, it'll get invalidated by
+															 AbortCurrentJob() otherwise*/
+						if (npc != Game::Inst()->npcList.end()) { 
+							npc->second->AbortCurrentJob(false); /*When an NPC aborts a job it cancels it through
+																 JobManager::CancelJob()*/
+						}
+				} else {
+					++jobi;
+				}
 			}
 		}
 	}
@@ -241,11 +251,19 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	return boost::weak_ptr<Job>();
 }
 
-void JobManager::RemoveJobByNPC(int uid) {
-	for (int i = 0; i < PRIORITY_COUNT; ++i) {
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
-			if ((*jobi)->Assigned() == uid) {
-				jobi = availableList[i].erase(jobi);
+void JobManager::RemoveJob(boost::weak_ptr<Job> wjob) {
+	if (boost::shared_ptr<Job> job = wjob.lock()) {
+		for (int i = 0; i < PRIORITY_COUNT; ++i) {
+			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
+				if (*jobi == job) {
+					jobi = availableList[i].erase(jobi);
+					return;
+				}
+			}
+		}
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = waitingList.begin(); jobi != waitingList.end(); ++jobi) {
+			if (*jobi == job) {
+				jobi = waitingList.erase(jobi);
 				return;
 			}
 		}

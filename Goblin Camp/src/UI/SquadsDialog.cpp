@@ -63,7 +63,7 @@ SquadsDialog* SquadsDialog::SquadDialog() {
         squadDialog->orders->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, true));
         contents->AddComponent(squadDialog->orders);
         squadDialog->orders->AddComponent(new ToggleButton("Guard", boost::bind(&SquadsDialog::SelectOrder, squadDialog, GUARD), boost::bind(&SquadsDialog::OrderSelected, squadDialog, GUARD), 2, 1, 9));
-        squadDialog->orders->AddComponent(new ToggleButton("Escort", boost::bind(&SquadsDialog::SelectOrder, squadDialog, ESCORT), boost::bind(&SquadsDialog::OrderSelected, squadDialog, ESCORT), 14, 1, 10));
+        squadDialog->orders->AddComponent(new ToggleButton("Follow", boost::bind(&SquadsDialog::SelectOrder, squadDialog, FOLLOW), boost::bind(&SquadsDialog::OrderSelected, squadDialog, FOLLOW), 14, 1, 10));
         Frame *weapons = new Frame("Weapons", std::vector<Drawable *>(), 0, 25, 23, 5);
         weapons->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, true));
         contents->AddComponent(weapons);
@@ -103,8 +103,8 @@ void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squa
 			case PATROL:
 				order = "Patrol";
 				break;
-			case ESCORT:
-				order = "Escort";
+			case FOLLOW:
+				order = "Follow";
 				break;
 		}
 		tooltip->AddEntry(TooltipEntry((boost::format(" Orders: %s") % order).str(), TCODColor::grey));
@@ -167,7 +167,16 @@ void SquadsDialog::DeleteSquad() {
 
 void SquadsDialog::SelectOrder(Orders order) {
     GetSquad(squadList->Selected())->Order(order);
-    UI::ChooseOrderTargetCoordinate(GetSquad(squadList->Selected()));
+	switch (order) {
+	case GUARD:
+	default:
+		UI::ChooseOrderTargetCoordinate(GetSquad(squadList->Selected()));
+		break;
+
+	case FOLLOW:
+		UI::ChooseOrderTargetEntity(GetSquad(squadList->Selected()));
+		break;
+	}
     UI::Inst()->HideMenu();
 }
 

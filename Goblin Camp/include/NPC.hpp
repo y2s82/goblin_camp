@@ -114,7 +114,7 @@ private:
 	int timeCount;
 	std::deque<boost::shared_ptr<Job> > jobs;
 	int taskIndex;
-	boost::try_mutex pathMutex;
+	boost::mutex pathMutex;
 	TCODPath *path;
 	int pathIndex;
 	bool nopath;
@@ -175,6 +175,7 @@ private:
 
 	void UpdateVelocity();
 	int addedTasksToCurrentJob;
+
 public:
 	~NPC();
 	SkillSet Skills;
@@ -210,6 +211,7 @@ public:
 
 	bool Dead();
 	void Kill();
+	void PickupItem(boost::weak_ptr<Item>);
 	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>);
 	void FireProjectile(boost::weak_ptr<Entity>);
@@ -241,6 +243,9 @@ public:
 	static void HostileAnimalReact(boost::shared_ptr<NPC>);
 	static bool HostileAnimalFindJob(boost::shared_ptr<NPC>);
 	static bool HungryAnimalFindJob(boost::shared_ptr<NPC>);
+
+	static unsigned int pathingThreadCount;
+	static boost::mutex threadCountMutex;
 };
 
-void tFindPath(TCODPath*, int, int, int, int, boost::try_mutex*, bool*, bool*);
+void tFindPath(TCODPath*, int, int, int, int, boost::mutex*, bool*, bool*, bool);

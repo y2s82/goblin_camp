@@ -29,7 +29,7 @@ enum Orders {
 	NOORDER,
 	GUARD,
 	PATROL,
-	ESCORT
+	FOLLOW
 };
 
 class Squad : public boost::enable_shared_from_this<Squad> {
