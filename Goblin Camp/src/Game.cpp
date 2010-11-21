@@ -92,7 +92,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	std::list<boost::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
 		mati != Construction::Presets[construct].materials.end(); ++mati) {
-			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target);
+			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target, EMPTY);
 			if (boost::shared_ptr<Item> item = material.lock()) {
 				item->Reserve(true);
 				componentList.push_back(item);
@@ -150,7 +150,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		pickupJob->Parent(buildJob);
 		buildJob->PreReqs()->push_back(pickupJob);
 
-		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter));
+		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter, EMPTY));
 		pickupJob->tasks.push_back(Task(MOVE));
 		pickupJob->tasks.push_back(Task(TAKE));
 		pickupJob->tasks.push_back(Task(MOVE, newCons->Storage().lock()->Position(), newCons));
