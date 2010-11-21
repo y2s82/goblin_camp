@@ -218,17 +218,18 @@ void StartNewGame() {
 		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
 	}
 
-	game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
-	game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
-	int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
-	boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
-	corpse->Name("Human corpse");
-	corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
-	corpse = game->itemList[corpseuid];
-	corpse->Name("Human corpse");
-	for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + rand() % 3, corpseLoc1.Y() - 1 + rand() % 3));
-	for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + rand() % 3, corpseLoc2.Y() - 1 + rand() % 3));
-
+	{
+		game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
+		game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
+		int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
+		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
+		corpse->Name("Human corpse");
+		corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
+		corpse = game->itemList[corpseuid];
+		corpse->Name("Human corpse");
+		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + rand() % 3, corpseLoc1.Y() - 1 + rand() % 3));
+		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + rand() % 3, corpseLoc2.Y() - 1 + rand() % 3));
+	}
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
 	game->CenterOn(spawnCenterCandidates.top().second);
 

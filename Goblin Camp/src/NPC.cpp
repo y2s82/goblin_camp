@@ -838,7 +838,7 @@ MOVENEARend:
 
 			case STOCKPILEITEM:
 				if (carried.lock()) {
-					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true);
+					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true, true, false);
 					if (stockJob) {
 						stockJob->internal = true;
 						jobs.push_back(stockJob);
