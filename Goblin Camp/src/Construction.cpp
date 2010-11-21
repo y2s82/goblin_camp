@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 #include <algorithm>
 
+#include "Random.hpp"
 #include "Construction.hpp"
 #include "Announce.hpp"
 #include "Logger.hpp"
@@ -49,6 +50,8 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 }
 
 std::vector<int> Construction::AllowedAmount = std::vector<int>();
+std::set<std::string> Construction::Categories = std::set<std::string>();
+std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
 
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
 	color(TCODColor::white),
@@ -664,7 +667,7 @@ bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[ty
 
 void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
-		if (rand() % Construction::Presets[type].spawnFrequency == 0) {
+		if (Random::Generate(Construction::Presets[type].spawnFrequency - 1) == 0) {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
 			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
@@ -743,12 +746,13 @@ void Construction::Explode() {
 			item->SetFaction(0); //Return item to player faction
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget;
-			randomTarget.X(Position().X() + ((rand() % 11) - 5));
-			randomTarget.Y(Position().Y() + ((rand() % 11) - 5));
+			randomTarget.X(Position().X() + Random::Generate(-5, 5));
+			randomTarget.Y(Position().Y() + Random::Generate(-5, 5));
 			item->CalculateFlightPath(randomTarget, 50, GetHeight());
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
+
 }
 
 bool Construction::CheckMaterialsPresent() { 

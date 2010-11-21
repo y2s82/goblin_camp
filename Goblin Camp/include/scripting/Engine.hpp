@@ -30,4 +30,7 @@ namespace Script {
 	
 	// Logs active exception (noop if no exception is active).
 	void LogException(bool clear = true);
+	
+	// Extracts exception information into separate objects.
+	void ExtractException(py::object&, py::object&, py::object&);
 }

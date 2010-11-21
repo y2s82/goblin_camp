@@ -17,7 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 
-#include <boost\serialization\serialization.hpp>
+#include <boost/serialization/serialization.hpp>
 
 #include "Coordinate.hpp"
 

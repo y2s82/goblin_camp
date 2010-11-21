@@ -31,16 +31,20 @@ namespace Logger {
 	
 	std::ofstream& Prefix(const char *file, int line, const char *function) {
 		log <<
-			"[" << std::setw(15) << std::right <<
-			fs::path(file).filename().string() << ":" << std::setw(3) << std::left << line << "] " <<
-			"[" << function << "] "
+			"C++ (`" << fs::path(file).filename().string() << "` @ " <<
+			line << "), `" << function << "`:\n\t"
 		;
 		return log;
 	}
 	
+	const char* Suffix() {
+		return "\n================================\n";
+	}
+	
 	void OpenLogFile(const std::string& logFile) {
-		log.open(logFile.c_str());
 		// no buffering
+		log.rdbuf()->pubsetbuf(0, 0);
+		log.open(logFile.c_str());
 		log.rdbuf()->pubsetbuf(0, 0);
 		
 		LOG("Log opened " << boost::posix_time::second_clock::local_time());

@@ -15,8 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "Random.hpp"
 #include "SpawningPool.hpp"
-#include "UI\Button.hpp"
+#include "UI/Button.hpp"
 #include "GCamp.hpp"
 #include "StockManager.hpp"
 #include "JobManager.hpp"
@@ -58,7 +59,7 @@ void SpawningPool::Update() {
 		//Generate jobs
 
 		if (jobCount < 4) {
-			if (dumpFilth && rand() % (UPDATES_PER_SECOND * 5) == 0) {
+			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
 					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
 					filthDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
@@ -100,7 +101,7 @@ void SpawningPool::Update() {
 				}
 			}
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
-				rand() % (UPDATES_PER_SECOND * 5) == 0) {
+				Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
 					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
@@ -126,7 +127,7 @@ void SpawningPool::Update() {
 			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
-			for (int i = 0; i < 1 + rand() % 10; ++i) Map::Inst()->Corrupt(x, y);
+			for (int i = 0; i < 1 + Random::Generate(9); ++i) Map::Inst()->Corrupt(x, y);
 		}
 
 		if (corpses + filth > std::min(2 + 2*spawns, (unsigned int)10)) {
@@ -155,7 +156,7 @@ void SpawningPool::Update() {
 				++spawns;
 				if (filth >= corpses*2) {
 					for (int i = 0; i < 10 && filth > 0; ++i) --filth;
-					if (rand() % 3 < 2) {
+					if (Random::Generate(2) < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
 						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -165,7 +166,7 @@ void SpawningPool::Update() {
 				} else if (filth >= corpses) {
 					for (int i = 0; i < 5 && filth > 0; ++i) --filth;
 					--corpses;
-					if (rand() % 2) {
+					if (Random::GenerateBool()) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
 						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -174,7 +175,7 @@ void SpawningPool::Update() {
 					}
 				} else {
 					corpses -= 2;
-					if (rand() % 3 < 2) {
+					if (Random::Generate(2) < 2) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
 						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -183,7 +184,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (rand() % int(std::sqrt((double)spawns)) == 0) Expand();
+				if (Random::Generate(int(std::sqrt((double)spawns))) == 0) Expand();
 			}
 		}
 	}
@@ -192,11 +193,11 @@ void SpawningPool::Update() {
 void SpawningPool::Expand() {
 	Coordinate location(-1,-1);
 	for (int i = 0; i < 10; ++i) {
-		location = Coordinate((a.X()-1) + rand() % ((b.X()-a.X())+3), (a.Y()-1) + rand() % ((b.Y()-a.Y())+3));
+		location = Coordinate((a.X()-1) + Random::Generate(((b.X()-a.X())+3)), (a.Y()-1) + Random::Generate(((b.Y()-a.Y())+3)));
 		if (Map::Inst()->GetConstruction(location.X(), location.Y()) != uid) {
 			if (Map::Inst()->GetConstruction(location.X()-1, location.Y()) == uid) break;
-			if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;		
-			if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;		
+			if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;
+			if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;
 			if (Map::Inst()->GetConstruction(location.X(), location.Y()+1) == uid) break;
 		}
 		location = Coordinate(-1,-1);
@@ -241,7 +242,7 @@ void SpawningPool::Expand() {
 		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
 		Map::Inst()->SetTerritory(location.X(), location.Y(), true);
 
-		for (int i = 0; i < 5 + rand() % 5; ++i) Map::Inst()->Corrupt(location.X(), location.Y());
+		for (int i = 0; i < 5 + Random::Generate(4); ++i) Map::Inst()->Corrupt(location.X(), location.Y());
 
 	} else {
 		Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());

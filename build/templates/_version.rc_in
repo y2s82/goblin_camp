@@ -8,8 +8,10 @@ VS_VERSION_INFO VERSIONINFO
 	FILEOS         VOS_NT
 	FILETYPE       VFT_APP
 	FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
-#ifdef DEBUG
+#if defined(DEBUG)
 	FILEFLAGS      (VS_FF_DEBUG | VS_FF_PRERELEASE | VS_FF_PRIVATEBUILD)
+#elif defined(WITH_REVID)
+	FILEFLAGS      (VS_FF_PRERELEASE | VS_FF_PRIVATEBUILD)
 #endif
 BEGIN
 	BLOCK "StringFileInfo"
@@ -24,7 +26,7 @@ BEGIN
 			VALUE "OriginalFilename", "goblin-camp.exe"
 			VALUE "ProductName",      "Goblin Camp"
 			VALUE "ProductVersion",   "%GC_RC_VERSION%"
-		#ifdef DEBUG
+		#if defined(DEBUG) || defined(WITH_REVID)
 			VALUE "PrivateBuild",     "Built from Mercurial revision %GC_HG_REV%"
 		#endif
 		END

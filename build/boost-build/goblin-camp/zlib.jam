@@ -1,7 +1,6 @@
-# Windows SDK tool
+# zlib tool
 #
-# To configure:
-#   using winsdk : <include>path-to-includes <library>path-to-libraries ;
+# using zlib : <library>... <include>... <name>library-name ;
 
 #################
 
@@ -34,14 +33,35 @@ local rule create-project ( requirements * : usage-requirements * ) {
 
 #################
 
+#################
+
 rule use-project ( ) {
     create-project ;
 }
 
 local rule define-targets ( ) {
-    local libs = shell32 shlwapi dbghelp user32 comctl32 gdi32 ;
+    local name = ;
     
-    for local name in $(libs) {
-        lib $(name) ;
+    if $(.options) {
+        name = [ $(.options).get <name> ] ;
     }
+    
+    if $(name) {
+        lib zlib : : <name>$(name) ;
+    } else {
+        lib zlib : : <tag>@zlib-tag ;
+    }
+}
+
+rule zlib-tag ( name : type ? : property-set ) {
+    local name = ;
+    
+    if [ $(property-set).get <os> ] = NT {
+        name = zdll ;
+    } else {
+        name = z ;
+    }
+    
+    ECHO ** Using zlib: $(name) ;
+    return $(name) ;
 }

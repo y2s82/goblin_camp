@@ -9,10 +9,13 @@ import path ;
 import property-set ;
 import common ;
 
-import boost ;
-import libtcod ;
-import winsdk ;
-import python ;
+for local P in boost winsdk libtcod zlib python {
+    import $(P) ;
+    $(P).use-project ;
+}
+
+import gc-version ;
+import gc-sln ;
 
 ##
 # Project definition
@@ -21,9 +24,6 @@ project goblin-camp
     : default-build debug
     : requirements
       <threading>multi
-      <strip>off
-      <debug-symbols>on
-      <variant>debug:<define>DEBUG
       <include>$(GC_HEADERS)
       <include>$(GC_PROJECT_ROOT)
       <define>GC_BOOST_BUILD
@@ -37,6 +37,7 @@ project goblin-camp
       <os>NT:<define>WIN32_LEAN_AND_MEAN
       <os>NT:<define>NOMINMAX
       <os>NT,<variant>release:<user-interface>gui
+      <os>NT,<variant>profile:<user-interface>gui
       <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
@@ -50,14 +51,6 @@ project goblin-camp
     : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
 
-import gc-version ;
-import gc-sln ;
-
-boost.use-project ;
-winsdk.use-project ;
-libtcod.use-project ;
-python.use-project ;
-
 ##
 # Local rules
 ##
@@ -66,12 +59,12 @@ local rule explicit-alias ( name : sources * : requirements * : default-build * 
     explicit $(name) ;
 }
 
-local rule explicit-install ( name : sources + : requirements * ) {
+local rule explicit-install ( name : sources * : requirements * ) {
     install $(name) : $(sources) : $(requirements) ;
     explicit $(name) ;
 }
 
-local rule explicit-make ( name : sources + : generating-rule : requirements * ) {
+local rule explicit-make ( name : sources * : generating-rule : requirements * ) {
     make $(name) : $(sources) : $(generating-rule) : $(requirements) ;
     explicit $(name) ;
 }
@@ -119,6 +112,7 @@ current-sources = [ path.glob-tree $(GC_SOURCES) : *.cpp : win32 linux osx unix 
 win32-sources   = [ get-platform-sources WIN32 ] ;
 linux-sources   = [ get-platform-sources LINUX : UNIX : main.cpp ] ;
 macosx-sources  = [ get-platform-sources OSX : UNIX : main.cpp ] ;
+python-sources  = [ path.glob $(GC_PY_SOURCES) : *.c ] ;
 
 binaries-dist-dir   = ;
 data-dist-dir       = ;
@@ -209,7 +203,12 @@ explicit-alias gc-deps
 ##
 #
 # Version information
-alias gc-version : $(version-sources) ;
+version-reqs = ;
+if --with-revid in [ modules.peek : ARGV ] {
+    version-reqs = <define>WITH_REVID ;
+}
+
+alias gc-version : $(version-sources) : : : $(version-reqs) ;
 make mod.dat : $(GC_TEMPLATES_DIR)/mod.dat_in : @gc-version.generate ;
 always gc-version mod.dat ;
 
@@ -220,12 +219,21 @@ cpp-pch stdafx.hpp
 ;
 
 #
+# Python support
+lib pysupport
+    : $(python-sources)
+      /zlib//zlib
+    : <link>static <implicit-dependency>/python//python
+;
+
+#
 # goblin-camp executable
 exe goblin-camp
     : $(current-sources)
       gc-deps
       gc-version
       stdafx.hpp
+      pysupport
 ;
 
 #
@@ -297,8 +305,7 @@ explicit-install dist-data
 ;
 
 explicit-install dist-lib
-    : $(GC_PROJECT_ROOT)/lib/stdlib.zip [ path.glob-tree $(GC_PROJECT_ROOT)/lib/gcamp : *.py ]
-      [ path.glob-tree $(GC_PROJECT_ROOT)/lib/gcamp_core : *.py *.dat ]
+    : [ path.glob-tree $(GC_PROJECT_ROOT)/lib : *.py *.zip *.dat ]
     : <conditional>@get-dist-data
       <install-source-root>$(GC_PROJECT_ROOT)
 ;

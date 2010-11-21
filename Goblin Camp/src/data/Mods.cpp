@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "scripting/_python.hpp"
+
 #include <string>
 #include <boost/assert.hpp>
 #include <libtcod.hpp>
@@ -112,7 +114,7 @@ namespace {
 		type->addProperty("name",       TCOD_TYPE_STRING, true);
 		type->addProperty("author",     TCOD_TYPE_STRING, true);
 		type->addProperty("version",    TCOD_TYPE_STRING, true);
-		type->addProperty("apiVersion", TCOD_TYPE_INT, false);
+		type->addProperty("apiVersion", TCOD_TYPE_INT,    false);
 		
 		ModListener *listener = new ModListener(&metadata);
 		parser.run(metadataFile.string().c_str(), listener);
@@ -124,12 +126,20 @@ namespace {
 		NB: Currently there is no way to unload a mod.
 		
 		\param[in] dir      Mod's directory.
-		\param[in] required Passed down to LoadFile for every data file of the mod.
+		\param[in] required Passed down to \ref LoadFile for every data file of the mod.
 	*/
 	void LoadMod(const fs::path& dir, bool required = false) {
 		std::string mod = dir.filename().string();
 		
 		LOG_FUNC("Trying to load mod '" << mod << "' from " << dir.string(), "LoadMod");
+		
+		// Removed magic apiVersion in favour of reusing already-hardcoded 'required' code path.
+		Mods::Metadata metadata(mod, mod, "", "1.0", (required ? Script::version : -1));
+		
+		if (fs::exists(dir / "mod.dat")) {
+			LOG_FUNC("Loading metadata.", "LoadMod");
+			LoadMetadata(metadata, (dir / "mod.dat"));
+		}
 		
 		LoadFile("items",         dir, Item::LoadPresets, required);
 		LoadFile("constructions", dir, Construction::LoadPresets, required);
@@ -137,16 +147,9 @@ namespace {
 		LoadFile("names",         dir, LoadNames, required);
 		LoadFile("creatures",     dir, NPC::LoadPresets, required);
 		
-		Mods::Metadata metadata(mod, mod, "", "1.0", -1);
-		if (fs::exists(dir / "mod.dat")) {
-			LOG_FUNC("Loading metadata.", "LoadMod");
-			LoadMetadata(metadata, (dir / "mod.dat"));
-		}
-		
 		if (metadata.apiVersion != -1) {
-			// NB: 9999 is a magic value reserved for data shipped with Goblin Camp itself.
-			if (metadata.apiVersion != Script::version && metadata.apiVersion != 9999) {
-				LOG_FUNC("WARNING: Ignoring mod scripts because of incorrect API version.", "LoadMod");
+			if (metadata.apiVersion != Script::version) {
+				LOG_FUNC("WARNING: Ignoring mod scripts because of an incorrect API version.", "LoadMod");
 			} else {
 				Script::LoadScript(mod, dir.string());
 			}

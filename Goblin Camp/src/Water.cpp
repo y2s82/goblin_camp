@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/weak_ptr.hpp>
 
+#include "Random.hpp"
 #include "Logger.hpp"
 #include "Water.hpp"
 #include "Game.hpp"
@@ -127,7 +128,7 @@ void WaterNode::Update() {
 				depth = 1; //All of the water has flown to a low tile
 			}
 
-		} else if (rand() % 100 == 0) {
+		} else if (Random::Generate(99) == 0) {
 			if (depth > 0) { 
 				--depth;
 				Game::Inst()->RemoveWater(Coordinate(x,y)); //Water has evaporated
@@ -166,8 +167,8 @@ void WaterNode::UpdateGraphic() {
 	if (color.r < std::min(filth*10,190)) ++color.r;
 	if (color.r > std::min(filth*10,190)) --color.r;
 
-	if (rand() % 40 == 0 && color.b < 200) color.b += 20;
-	if (rand() % 10000 == 0 && color.g < 225) color.g += rand() % 25;
+	if (Random::Generate(39) == 0 && color.b < 200) color.b += 20;
+	if (Random::Generate(9999) == 0 && color.g < 225) color.g += Random::Generate(24);
 }
 
 Coordinate WaterNode::Position() {return Coordinate(x,y);}

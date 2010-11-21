@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include "Random.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "Coordinate.hpp"
@@ -252,8 +253,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	int radius = 1;
 	Coordinate originalTarget = target;
 	while (!Map::Inst()->Walkable(target.X(), target.Y()) && tries < 20) {
-		target.X(originalTarget.X() + TCODRandom::getInstance()->get(-radius, radius));
-		target.Y(originalTarget.Y() + TCODRandom::getInstance()->get(-radius, radius));
+		target.X(originalTarget.X() + Random::Generate(-radius, radius));
+		target.Y(originalTarget.Y() + Random::Generate(-radius, radius));
 		if (++tries % 3 == 0) ++radius;
 	}
 
@@ -273,10 +274,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->health = NPC::Presets[type].health;
 	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = NPC::Presets[type].stats[i] + ((NPC::Presets[type].stats[i] * 0.1) * (rand() % 2) ? 1 : -1);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + Random::Sign(NPC::Presets[type].stats[i] * 0.1);
 	}
 	for (int i = 0; i < RES_COUNT; ++i) {
-		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + ((NPC::Presets[type].resistances[i] * 0.1) * (rand() % 2) ? 1 : -1);
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
@@ -351,6 +352,31 @@ void Game::Exit(bool confirm) {
 int Game::ScreenWidth() const {	return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
+void Game::LoadingScreen() {
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->clear();
+	TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
+	TCODConsole::root->flush();
+}
+
+void Game::ErrorScreen() {
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->clear();
+	TCODConsole::root->print(
+		screenWidth / 2, screenHeight / 2,
+		"There was an error loading the data files, refer to the logfile for more information."
+	);
+	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
+	TCODConsole::root->flush();
+	
+	TCODConsole::waitForKeypress(true);
+	exit(255);
+}
+
 void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
@@ -377,17 +403,7 @@ void Game::Init() {
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
 
-	{
-		// "Loading..."
-		TCODConsole::root->setDefaultForeground(TCODColor::white);
-		TCODConsole::root->setDefaultBackground(TCODColor::black);
-		TCODConsole::root->setAlignment(TCOD_CENTER);
-		TCODConsole::root->clear();
-
-		TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
-
-		TCODConsole::root->flush();
-	}
+	LoadingScreen();
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
@@ -571,10 +587,15 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordina
 void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = std::max(abs(corner1.X()-corner2.X()),1);
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()),1);
+	int minX = std::min(corner1.X(), corner2.X());
+	int minY = std::min(corner1.Y(), corner2.Y());
 
 	for (int items = 0; items < quantity; ++items) {
-		Coordinate location(rand() % areaWidth + std::min(corner1.X(),corner2.X()), rand() % areaLength + std::min(corner1.Y(),corner2.Y()));
-		Game::Inst()->CreateItem(location, type);
+		Coordinate location(
+			Random::Generate(minX, areaWidth + minX - 1),
+			Random::Generate(minY, areaLength + minY - 1)
+		);
+		Game::Inst()->CreateItem(location, type, true);
 	}
 }
 
@@ -582,8 +603,8 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	if (filthList.size() == 0) return Coordinate(-1,-1);
 	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
-	for (unsigned int i = 0; i < std::min((unsigned int)10, filthList.size()); ++i) {
-		int filth = rand() % filthList.size();
+	for (size_t i = 0; i < std::min((size_t)10, filthList.size()); ++i) {
+		unsigned filth = Random::Choose(filthList);
 		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
 	}
@@ -660,7 +681,7 @@ void Game::Update() {
 	{
 		std::list<boost::weak_ptr<WaterNode> >::iterator nextWati = ++waterList.begin();
 		for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end();) {
-			if (wati->lock() && rand() % 50 == 0) wati->lock()->Update();
+			if (wati->lock() && Random::Generate(49) == 0) wati->lock()->Update();
 			else if (!wati->lock()) wati = waterList.erase(wati);
 			wati = nextWati;
 			++nextWati;
@@ -709,7 +730,7 @@ void Game::Update() {
 	/*Constantly checking our free item list for items that can be stockpiled is overkill, so it's done once every
 	5 seconds, on average, or immediately if a new stockpile is built or a stockpile's allowed items are changed.
 	To further reduce load when very many free items exist, only a quarter of them will be checked*/
-	if (rand() % (UPDATES_PER_SECOND * 5) == 0 || refreshStockpiles) {
+	if (Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0 || refreshStockpiles) {
 		refreshStockpiles = false;
 		if (freeItems.size() < 100) {
 			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
@@ -718,7 +739,7 @@ void Game::Update() {
 			}
 		} else {
 			for (unsigned int i = 0; i < std::max((unsigned int)100, freeItems.size()/4); ++i) {
-				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), rand() % freeItems.size());
+				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::Choose(freeItems));
 				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
 					StockpileItem(*itemi);
 			}
@@ -738,7 +759,7 @@ void Game::Update() {
 
 	events->Update(safeMonths > 0);
 
-	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
+	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 }
@@ -870,16 +891,14 @@ void Game::DeTillFarmPlots() {
 
 //First generates a heightmap, then translates that into the corresponding tiles
 //Third places plantlife according to heightmap, and some wildlife as well
-void Game::GenerateMap(uint32 seed) {
-	TCODRandom* random;
-	if (seed == 0) random = new TCODRandom();
-	else random = new TCODRandom(seed);
-
+void Game::GenerateMap(uint32_t seed) {
+	Random::Generator random(seed);
+	
 	Map* map = Map::Inst();
 	map->heightMap->clear();
 
-	bool riverStartLeft = random->get(0,1) ? true : false;
-	bool riverEndRight = random->get(0,1) ? true : false;
+	bool riverStartLeft = random.GenerateBool();
+	bool riverEndRight  = random.GenerateBool();
 
 	int px[4];
 	int py[4];
@@ -887,22 +906,22 @@ void Game::GenerateMap(uint32 seed) {
 	do {
 		if (riverStartLeft) {
 			px[0] = 0; 
-			py[0] = random->get(0,map->Height()-1);
+			py[0] = random.Generate(map->Height()-1);
 		} else {
-			px[0] = random->get(0,map->Width()-1);
+			px[0] = random.Generate(map->Width()-1);
 			py[0] = 0;
 		}
 
-		px[1] = 10 + random->get(0,map->Width()-20);
-		py[1] = 10 + random->get(0,map->Height()-20);
-		px[2] = 10 + random->get(0,map->Width()-20);
-		py[2] = 10 + random->get(0,map->Height()-20);
+		px[1] = 10 + random.Generate(map->Width()-20);
+		py[1] = 10 + random.Generate(map->Height()-20);
+		px[2] = 10 + random.Generate(map->Width()-20);
+		py[2] = 10 + random.Generate(map->Height()-20);
 
 		if (riverEndRight) {
 			px[3] = map->Width()-1;
-			py[3] = random->get(0,map->Height()-1);
+			py[3] = random.Generate(map->Height()-1);
 		} else {
-			px[3] = random->get(0,map->Width()-1);
+			px[3] = random.Generate(map->Width()-1);
 			py[3] = map->Height()-1;
 		}
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
@@ -915,8 +934,8 @@ void Game::GenerateMap(uint32 seed) {
 	//in case no suitable hill sites are found
 	int infinityCheck = 0;
 	while (hills < map->Width()/66 && infinityCheck < 1000) {
-		int x = random->get(0,map->Width()-1);
-		int y = random->get(0,map->Height()-1);
+		int x = random.Generate(map->Width()  - 1);
+		int y = random.Generate(map->Height() - 1);
 		int riverDistance;
 		int distance;
 		int lineX, lineY;
@@ -961,16 +980,19 @@ void Game::GenerateMap(uint32 seed) {
 		}
 
 		if (riverDistance > 35) {
-			map->heightMap->addHill((float)x, (float)y, (float)random->get(15,35), (float)random->get(1,3));
-			map->heightMap->addHill((float)x+random->get(-7,7), (float)y+random->get(-7,7), (float)random->get(15,25), (float)random->get(1,3));
-			map->heightMap->addHill((float)x+random->get(-7,7), (float)y+random->get(-7,7), (float)random->get(15,25), (float)random->get(1,3));
+			map->heightMap->addHill((float)x, (float)y, (float)random.Generate(15,35), (float)random.Generate(1,3));
+			map->heightMap->addHill((float)x+random.Generate(-7,7), (float)y+random.Generate(-7,7), (float)random.Generate(15,25), (float)random.Generate(1,3));
+			map->heightMap->addHill((float)x+random.Generate(-7,7), (float)y+random.Generate(-7,7), (float)random.Generate(15,25), (float)random.Generate(1,3));
 			++hills;
 		}
 
 		++infinityCheck;
 	}
-
-	map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.005f, 0.30f, random);
+	
+	{
+		std::auto_ptr<TCODRandom> tcodRandom = std::auto_ptr<TCODRandom>(new TCODRandom(random.GetSeed()));
+		map->heightMap->rainErosion(map->Width()*map->Height()*5, 0.005f, 0.30f, tcodRandom.get());
+	}
 
 	//This is a simple kernel transformation that does some horizontal smoothing (lifted straight from the libtcod docs)
 	int dx [] = {-1,1,0};
@@ -984,18 +1006,18 @@ void Game::GenerateMap(uint32 seed) {
 		for (int y = 0; y < map->Height(); ++y) {
 			float height = map->heightMap->getValue(x,y);
 			if (height < map->GetWaterlevel()) {
-				if (random->get(0,1)) map->Type(x,y,TILERIVERBED);
+				if (random.GenerateBool()) map->Type(x,y,TILERIVERBED);
 				else map->Type(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y));
 			} else if (height < 4.5f) {
 				map->Type(x,y,TILEGRASS);
-				if (random->get(0,9) < 9) {
+				if (random.Generate(9) < 9) {
 					if (height < -0.01f) {
-						map->ForeColor(x,y, TCODColor(random->get(100,192),127,0));
+						map->ForeColor(x,y, TCODColor(random.Generate(100,192),127,0));
 					} else if (height < 0.0f) {
-						map->ForeColor(x,y, TCODColor(random->get(20,170),127,0));
+						map->ForeColor(x,y, TCODColor(random.Generate(20,170),127,0));
 					} else if (height > 4.0f) {
-						map->ForeColor(x,y, TCODColor(90, random->get(120,150), 90));
+						map->ForeColor(x,y, TCODColor(90, random.Generate(120,150), 90));
 					}
 				}
 			} else {
@@ -1208,7 +1230,7 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 	while (amount > 0) {
 		Coordinate randomAdjacent = pos;
 		while (randomAdjacent == pos) {
-			randomAdjacent = Coordinate(pos.X() - 1 + rand() % 3, pos.Y() - 1 + rand() % 3);
+			randomAdjacent = Coordinate(pos.X() - 1 + Random::Generate(2), pos.Y() - 1 + Random::Generate(2));
 		}
 		Game::CreateFilth(randomAdjacent, 1);
 		--amount;
@@ -1307,24 +1329,21 @@ void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squa
 void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
+	int minX = std::min(corner1.X(), corner2.X());
+	int minY = std::min(corner1.Y(), corner2.Y());
 
 	for (int npcs = 0; npcs < quantity; ++npcs) {
-		Coordinate location((rand() % areaWidth) + std::min(corner1.X(),corner2.X()), (rand() % areaLength) + std::min(corner1.Y(),corner2.Y()));
+		Coordinate location(
+			Random::Generate(minX, areaWidth + minX - 1),
+			Random::Generate(minY, areaLength + minY - 1)
+		);
 
 		Game::Inst()->CreateNPC(location, type);
 	}
 }
 
 int Game::DiceToInt(TCOD_dice_t dice) {
-	if (dice.nb_faces == 0) 
-		dice.nb_faces = 1;
-	int result = 0;
-	for (; dice.nb_dices > 0; --dice.nb_dices) {
-		result += (1 + rand() % dice.nb_faces);
-	}
-	result *= (int)dice.multiplier;
-	result += (int)dice.addsub;
-	return result;
+	return Random::Dice(dice).Roll();
 }
 
 void Game::ToMainMenu(bool value) { Game::Inst()->toMainMenu = value; }
@@ -1384,7 +1403,7 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 		}
 	}
 	if (npcList.size() > 0)
-		return npcList[rand() % npcList.size()];
+		return npcList[Random::Choose(npcList)];
 	return -1;
 }
 
@@ -1469,7 +1488,7 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 }
 
 void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->Walkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && rand() % 5 < 2) {
+	if (Map::Inst()->Walkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
 
@@ -1480,7 +1499,7 @@ void Game::CreateNatureObject(Coordinate location) {
 			if (NatureObject::Presets[i].minHeight <= height &&
 				NatureObject::Presets[i].maxHeight >= height &&
 				NatureObject::Presets[i].evil == evil)
-				natureObjectQueue.push(std::pair<int,int>(rand() % NatureObject::Presets[i].rarity + rand() % 3, i));
+				natureObjectQueue.push(std::make_pair(Random::Generate(NatureObject::Presets[i].rarity - 1) + Random::Generate(2), i));
 		}
 
 		if (natureObjectQueue.empty()) return;
@@ -1491,11 +1510,11 @@ void Game::CreateNatureObject(Coordinate location) {
 		if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
 			std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
 
-		if (rand() % 100 < rarity) {
+		if (Random::Generate(99) < rarity) {
 
 			for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
-				int ax = location.X() + ((rand() % NatureObject::Presets[chosen].cluster) - NatureObject::Presets[chosen].cluster/2);
-				int ay = location.Y() + ((rand() % NatureObject::Presets[chosen].cluster) - NatureObject::Presets[chosen].cluster/2);
+				int ax = location.X() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
+				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
 				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&

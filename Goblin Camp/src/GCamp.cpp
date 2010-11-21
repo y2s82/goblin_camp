@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "scripting/_python.hpp"
+
 #include <libtcod.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -25,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <algorithm>
 #include <functional>
 
+#include "Random.hpp"
 #include "Camp.hpp"
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -51,6 +54,10 @@ void SettingsMenu();
 void KeysMenu();
 void ModsMenu();
 
+namespace Globals {
+	bool noDumpMode;
+}
+
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;
 	
@@ -58,6 +65,7 @@ int GCMain(std::vector<std::string>& args) {
 	// Bootstrap phase.
 	//
 	Paths::Init();
+	Random::Init();
 	Config::Init();
 	Script::Init(args);
 	
@@ -79,8 +87,20 @@ int GCMain(std::vector<std::string>& args) {
 	//
 	LOG("args.size() = " << args.size());
 	
-	if (std::find(args.begin(), args.end(), "-boottest") == args.end()) {
-		if (std::find(args.begin(), args.end(), "-dev") != args.end()) Game::Inst()->EnableDevMode();
+	bool bootTest = false;
+	Globals::noDumpMode = false;
+	
+	BOOST_FOREACH(std::string arg, args) {
+		if (arg == "-boottest") {
+			bootTest = true;
+		} else if (arg == "-dev") {
+			Game::Inst()->EnableDevMode();
+		} else if (arg == "-nodumps") {
+			Globals::noDumpMode = true;
+		}
+	}
+	
+	if (!bootTest) {
 		exitcode = MainMenu();
 	} else {
 		LOG("Bootstrap test, going into shutdown.");
@@ -135,6 +155,7 @@ void MainLoop() {
 void StartNewGame() {
 	Game* game = Game::Inst();
 	game->Reset();
+	game->LoadingScreen();
 	
 	Script::Event::GameStart();
 	game->GenerateMap();
@@ -143,8 +164,11 @@ void StartNewGame() {
 
 	for (unsigned int i = 0; i < 20; ++i) {
 		std::pair<int,Coordinate> candidate(0, 
-			Coordinate(100 + rand() % (Map::Inst()->Width()-200), 
-			100 + rand() % (Map::Inst()->Height()-200)));
+			Coordinate(
+				Random::Generate(100, Map::Inst()->Width()  - 101),
+				Random::Generate(100, Map::Inst()->Height() - 101)
+			)
+		);
 
 		int riverDistance = 1000, hillDistance = 1000;
 		int lineX, lineY;
@@ -194,7 +218,7 @@ void StartNewGame() {
 	//Clear starting area
 	for (int x = spawnTopCorner.X(); x < spawnBottomCorner.X(); ++x) {
 		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
-			if (Map::Inst()->NatureObject(x,y) >= 0 && rand() % 3 < 2) {
+			if (Map::Inst()->NatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
 				game->RemoveNatureObject(game->natureList[Map::Inst()->NatureObject(x,y)]);
 			}
 		}
@@ -207,15 +231,15 @@ void StartNewGame() {
 	game->CreateItems(10, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
-	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
-		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
-	Coordinate corpseLoc2 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
-		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
+	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+	Coordinate corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
 	while (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y()) || !Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) {
-		if (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
-		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
-		if (!Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + rand() % (spawnBottomCorner.X() - spawnTopCorner.X()),
-		spawnTopCorner.Y() + rand() % (spawnBottomCorner.Y() - spawnTopCorner.Y()));
+		if (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+		if (!Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
 	}
 
 	{
@@ -227,9 +251,10 @@ void StartNewGame() {
 		corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
 		corpse = game->itemList[corpseuid];
 		corpse->Name("Human corpse");
-		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + rand() % 3, corpseLoc1.Y() - 1 + rand() % 3));
-		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + rand() % 3, corpseLoc2.Y() - 1 + rand() % 3));
+		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + Random::Generate(2), corpseLoc1.Y() - 1 + Random::Generate(2)));
+		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + Random::Generate(2), corpseLoc2.Y() - 1 + Random::Generate(2)));
 	}
+
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
 	game->CenterOn(spawnCenterCandidates.top().second);
 
@@ -302,7 +327,7 @@ int MainMenu() {
 		TCODConsole::root->setBackgroundFlag(TCOD_BKGND_SET);
 
 		TCODConsole::root->setDefaultForeground(TCODColor::celadon);
-		TCODConsole::root->print(edgex+width/2, edgey-3, GC_VERSION);
+		TCODConsole::root->print(edgex+width/2, edgey-3, Globals::gameVersion);
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 
 		for (unsigned int idx = 0; idx < entryCount; ++idx) {
@@ -677,7 +702,7 @@ void ModsMenu() {
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 	
 	const std::list<Mods::Metadata>& modList = Mods::GetLoaded();
-	const int subH = modList.size() * 5;
+	const int subH = modList.size() * 9;
 	TCODConsole sub(w - 2, std::max(1, subH));
 
 	int currentY = 0;
@@ -691,11 +716,11 @@ void ModsMenu() {
 		
 		sub.setAlignment(TCOD_LEFT);
 		sub.setDefaultForeground(TCODColor::white);
-		sub.print(3, currentY + 1, "Name:    %s", mod.name.c_str());
-		sub.print(3, currentY + 2, "Author:  %s", mod.author.c_str());
-		sub.print(3, currentY + 3, "Version: %s", mod.version.c_str());
+		sub.print(3, currentY + 2, "Name:    %s", mod.name.c_str());
+		sub.print(3, currentY + 4, "Author:  %s", mod.author.c_str());
+		sub.print(3, currentY + 6, "Version: %s", mod.version.c_str());
 		
-		currentY += 5;
+		currentY += 9;
 	}
 
 	TCOD_key_t   key;
