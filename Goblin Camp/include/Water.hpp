@@ -40,6 +40,7 @@ private:
 	int inertCounter;
 	bool inert;
 	int timeFromRiverBed;
+	int filth;
 public:
 	WaterNode(int x=0,int y=0,int depth=0,int time=0);
 	~WaterNode();
@@ -52,4 +53,6 @@ public:
 	void Depth(int);
 	void UpdateGraphic();
 	Coordinate Position();
+	void AddFilth(int);
+	int GetFilth();
 };

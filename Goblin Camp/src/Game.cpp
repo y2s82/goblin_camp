@@ -505,12 +505,22 @@ void Game::CreateWater(Coordinate pos) {
 }
 
 void Game::CreateWater(Coordinate pos, int amount, int time) {
+
+	//If there is filth here mix it with the water
+	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X(), pos.Y()).lock();
+
 	boost::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos.X(), pos.Y()));
 	if (!water.lock()) {
 		boost::shared_ptr<WaterNode> newWater(new WaterNode(pos.X(), pos.Y(), amount, time));
 		waterList.push_back(boost::weak_ptr<WaterNode>(newWater));
 		Map::Inst()->SetWater(pos.X(), pos.Y(), newWater);
-	} else {water.lock()->Depth(water.lock()->Depth()+amount);}
+		if (filth) newWater->AddFilth(filth->Depth());
+	} else {
+		water.lock()->Depth(water.lock()->Depth()+amount);
+		if (filth) water.lock()->AddFilth(filth->Depth());
+	}
+
+	if (filth) RemoveFilth(pos);
 }
 
 int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
@@ -644,19 +654,27 @@ void Game::Update() {
 	//updates all its neighbours. Also, by updating only every 50th one, the load on the cpu is less, but you need to
 	//remember that Update gets called 25 times a second, and given the nature of rand() this means that each waternode
 	//will be updated once every 2 seconds. It turns out that from the player's viewpoint this is just fine
-	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
-		if (wati->lock() && rand() % 50 == 0) wati->lock()->Update();
-		else if (!wati->lock()) wati = waterList.erase(wati);
+	{
+		std::list<boost::weak_ptr<WaterNode> >::iterator nextWati = ++waterList.begin();
+		for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end();) {
+			if (wati->lock() && rand() % 50 == 0) wati->lock()->Update();
+			else if (!wati->lock()) wati = waterList.erase(wati);
+			wati = nextWati;
+			++nextWati;
+		}
 	}
-
 	//Updating the last 10 waternodes each time means that recently created water moves faster.
 	//This has the effect of making water rush to new places such as a moat very quickly, which is the
 	//expected behaviour of water.
 	if (waterList.size() > 0) {
+		//We have to use two iterators, because wati may be invalidated if the water evaporates and is removed
 		std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.end();
+		std::list<boost::weak_ptr<WaterNode> >::iterator nextwati = --wati;
 		while (std::distance(wati, waterList.end()) < 10) {
-			--wati;
+			--nextwati;
+			if (wati == waterList.end()) break;
 			if (wati->lock()) wati->lock()->Update();
+			wati = nextwati;
 		}
 	}
 
@@ -1165,6 +1183,13 @@ void Game::CreateFilth(Coordinate pos) {
 }
 
 void Game::CreateFilth(Coordinate pos, int amount) {
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+
+	if (water) { //If water exists here just add the filth there, no need for filthnodes
+		water->AddFilth(amount);
+		return;
+	}
+
 	boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.X(), pos.Y()));
 	if (!filth.lock()) { //No existing filth node so create one
 		boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), std::min(5, amount)));
@@ -1534,5 +1559,33 @@ void Game::GatherItems(Coordinate a, Coordinate b) {
 				}
 			}
 		}
+	}
+}
+
+void Game::RemoveFilth(Coordinate pos) {
+	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X(), pos.Y()).lock();
+	if (filth) {
+		for (std::list<boost::weak_ptr<FilthNode> >::iterator filthi = filthList.begin(); filthi != filthList.end(); ++filthi) {
+			if (filthi->lock() == filth) {
+				filthList.erase(filthi);
+				break;
+			}
+		}
+		Map::Inst()->SetFilth(pos.X(), pos.Y(), boost::shared_ptr<FilthNode>());
+	}
+}
+
+void Game::RemoveWater(Coordinate pos) {
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	if (water) {
+		for (std::list<boost::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
+			if (wateri->lock() == water) {
+				waterList.erase(wateri);
+				break;
+			}
+		}
+		int filth = water->GetFilth();
+		Map::Inst()->SetWater(pos.X(), pos.Y(), boost::shared_ptr<WaterNode>());
+		if (filth > 0) CreateFilth(pos, filth);
 	}
 }
