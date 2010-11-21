@@ -36,7 +36,7 @@ namespace Script { namespace API {
 	}
 	
 	const char *GetVersionString() {
-		return GC_VERSION;
+		return Globals::gameVersion;
 	}
 	
 	void ExposeFunctions() {

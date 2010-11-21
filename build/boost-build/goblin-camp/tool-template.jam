@@ -1,7 +1,5 @@
-# Windows SDK tool
+# Tool template
 #
-# To configure:
-#   using winsdk : <include>path-to-includes <library>path-to-libraries ;
 
 #################
 
@@ -34,14 +32,12 @@ local rule create-project ( requirements * : usage-requirements * ) {
 
 #################
 
+#################
+
 rule use-project ( ) {
     create-project ;
 }
 
 local rule define-targets ( ) {
-    local libs = shell32 shlwapi dbghelp user32 comctl32 gdi32 ;
     
-    for local name in $(libs) {
-        lib $(name) ;
-    }
 }

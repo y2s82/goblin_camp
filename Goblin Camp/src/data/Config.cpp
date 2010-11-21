@@ -38,19 +38,6 @@ namespace Globals {
 	Config::KeyMap  keys;
 }
 
-namespace {
-	/**
-		Ensures that Config::Save won't throw at exit.
-	*/
-	void SaveNoThrow() {
-		try {
-			Config::Save();
-		} catch (...) {
-			// pass
-		}
-	}
-}
-
 /**
 	Interface to manage game's configuration.
 */
@@ -106,9 +93,8 @@ namespace Config {
 			("Help",          'h')
 			("Pause",         ' ')
 			("Jobs",          'j')
+			("DevConsole",    '`')
 		;
-		
-		atexit(SaveNoThrow);
 	}
 	
 	/**

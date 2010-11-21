@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/lambda/lambda.hpp>
 
+#include "Random.hpp"
 #include "UI.hpp"
 #include "Announce.hpp"
 #include "Game.hpp"
@@ -40,6 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/AnnounceDialog.hpp"
 #include "UI/Tooltip.hpp"
 #include "UI/JobDialog.hpp"
+#include "UI/DevConsole.hpp"
 
 #pragma mark UI
 
@@ -119,10 +121,10 @@ void UI::HandleKeyboard() {
 				keyHelpTextColor = 855;
 			} else if (key.c == keyMap["Pause"]) {
 				Game::Inst()->Pause();
-			} else if (key.c == '.') {
-				Game::Inst()->CreateNPC(Coordinate(100,100), NPC::StringToNPCType("giant"));
-			} else if (key.c == keyMap["Jobs"]) { 
+			} else if (key.c == keyMap["Jobs"]) {
 				ChangeMenu(JobDialog::JobListingDialog());
+			} else if (Game::Inst()->DevMode() && key.c == keyMap["DevConsole"]) {
+				ShowDevConsole();
 			}
 
 			int addition = 1;
@@ -882,7 +884,7 @@ void UI::ChooseCorrupt() {
 
 void UI::ChooseNaturify() {
 	for (int i = 0; i < 10000; ++i) {
-		Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
+		Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 	}
 }
 

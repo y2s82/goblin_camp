@@ -30,6 +30,7 @@ global-path-constant GC_PREBUILT_DIR  : "$(GC_BUILD_ROOT)/prebuilt" ;
 # Generic GC sources
 global-path-constant GC_SOURCES       : "$(GC_PROJECT_ROOT)/src" ;
 global-path-constant GC_HEADERS       : "$(GC_PROJECT_ROOT)/include" ;
+global-path-constant GC_PY_SOURCES    : "$(GC_PROJECT_ROOT)/python" ;
 
 # Platform-specific GC sources
 global-path-constant GC_WIN32_SOURCES : "$(GC_SOURCES)/win32" ;
