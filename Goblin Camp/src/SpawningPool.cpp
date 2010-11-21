@@ -249,10 +249,20 @@ void SpawningPool::Expand() {
 			attack.Amount(damage);
 			if (Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) 
 				Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()->Damage(&attack);
+		}
 
+		//Swallow items
+		std::list<int> itemUids;
+		for (std::set<int>::iterator itemi = Map::Inst()->ItemList(location.X(), location.Y())->begin();
+			itemi != Map::Inst()->ItemList(location.X(), location.Y())->end(); ++itemi) {
+				itemUids.push_back(*itemi);
+		}
+		for (std::list<int>::iterator itemi = itemUids.begin(); itemi != itemUids.end(); ++itemi) {
+			Game::Inst()->RemoveItem(Game::Inst()->GetItem(*itemi));
 		}
 
 		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
+		Map::Inst()->SetTerritory(location.X(), location.Y(), true);
 
 		for (int i = 0; i < 5 + rand() % 5; ++i) Map::Inst()->Corrupt(location.X(), location.Y());
 
