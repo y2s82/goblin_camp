@@ -105,35 +105,12 @@ void SpawningPool::Update() {
 					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
 					corpseDumpJob->tasks.push_back(Task(TAKE));
-
-					Coordinate target(-1,-1);
-					for (int x = a.X(); x <= b.X(); ++x) {
-						for (int y = a.Y(); y <= b.Y(); ++y) {
-							if (Map::Inst()->GetConstruction(x,y) == uid) {
-								if (Map::Inst()->Walkable(x-1,y)) {
-									target = Coordinate(x-1,y);
-									break;
-								} else if (Map::Inst()->Walkable(x+1,y)) {
-									target = Coordinate(x+1,y);
-									break;
-								} else if (Map::Inst()->Walkable(x,y+1)) {
-									target = Coordinate(x,y+1);
-									break;
-								} else if (Map::Inst()->Walkable(x,y-1)) {
-									target = Coordinate(x,y-1);
-									break;
-								}
-							}
-						}
-					}
-
-					if (target.X() != -1 && target.Y() != -1) {
-						corpseDumpJob->tasks.push_back(Task(MOVE, target));
-						corpseDumpJob->tasks.push_back(Task(PUTIN, target, corpseContainer));
-						corpseDumpJob->ConnectToEntity(shared_from_this());
-						++jobCount;
-						JobManager::Inst()->AddJob(corpseDumpJob);
-					}
+					corpseDumpJob->tasks.push_back(Task(FORGET)); //Forget the corpse, would interfere with MOVEADJACENT
+					corpseDumpJob->tasks.push_back(Task(MOVEADJACENT, corpseContainer->Position()));
+					corpseDumpJob->tasks.push_back(Task(PUTIN, corpseContainer->Position(), corpseContainer));
+					corpseDumpJob->ConnectToEntity(shared_from_this());
+					++jobCount;
+					JobManager::Inst()->AddJob(corpseDumpJob);
 			}
 		}
 

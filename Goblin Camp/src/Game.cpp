@@ -740,9 +740,9 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 }
 
-boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory) {
+boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		if (!item->Reserved()) {
+		if (!reserveItem || !item->Reserved()) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -780,7 +780,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 
 				if (target.X() != -1) {
 					stockJob->ReserveSpot(nearest, target);
-					stockJob->ReserveEntity(item);
+					if (reserveItem) stockJob->ReserveEntity(item);
 					stockJob->tasks.push_back(Task(MOVE, item->Position()));
 					stockJob->tasks.push_back(Task(TAKE, item->Position(), item));
 					stockJob->tasks.push_back(Task(MOVE, target));
