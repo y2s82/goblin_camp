@@ -50,8 +50,6 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 }
 
 std::vector<int> Construction::AllowedAmount = std::vector<int>();
-std::set<std::string> Construction::Categories = std::set<std::string>();
-std::vector<ConstructionPreset> Construction::Presets = std::vector<ConstructionPreset>();
 
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
 	color(TCODColor::white),
@@ -752,7 +750,6 @@ void Construction::Explode() {
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
-
 }
 
 bool Construction::CheckMaterialsPresent() { 
