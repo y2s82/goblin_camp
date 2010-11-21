@@ -78,7 +78,7 @@ void Tile::type(TileType newType) {
 		vis = true; walkable = true; buildable = true; low = true;
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
-		_moveCost = rand() % 3 + 1;
+		_moveCost = 2 + rand() % 3;
 	} else if (_type == TILEBOG) {
 		vis = true; walkable = true; buildable = false; low = false;
 		switch ((rand() % 10)) {
@@ -95,7 +95,7 @@ void Tile::type(TileType newType) {
 		}
 		originalForeColor = TCODColor(rand() % 185, 127, 70);
 		backColor = TCODColor(60,30,20);
-		_moveCost = rand() % 5 + 1;
+		_moveCost = 5 + rand() % 5;
 	} else if (_type == TILEROCK) {
 		vis = true; walkable = true; buildable = true; low = false;
 		switch (rand() % 2) {
@@ -104,6 +104,15 @@ void Tile::type(TileType newType) {
 		}
 		originalForeColor = TCODColor(rand() % 20 + 182, rand() % 20 + 182, rand() % 20 + 182);
 		backColor = TCODColor(0, 0, 0);
+	} else if (_type == TILEMUD) {
+		vis = true; walkable = true; buildable = true; low = false;
+		switch (rand() % 2) {
+		case 0: graphic = '~'; break;
+		case 1: graphic = '#'; break;
+		}
+		originalForeColor = TCODColor(120 + rand() % 60, 80 + rand() % 50, 0);
+		backColor = TCODColor(0, 0, 0);
+		_moveCost = 4;
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
 }
@@ -209,10 +218,12 @@ void Tile::Mark() { marked = true; }
 void Tile::Unmark() { marked = false; }
 
 void Tile::WalkOver() {
-	++walkedOver;
+	//Ground under a construction wont turn to mud
+	if (walkedOver < 120 || construction < 0) ++walkedOver;
 	if (_type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = rand() % 2 ? '.' : ',';
+		if (walkedOver > 300 && rand() % 100 == 0) type(TILEMUD);
 	}
 }
 
