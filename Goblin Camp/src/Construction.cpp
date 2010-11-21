@@ -438,6 +438,7 @@ class ConstructionListener : public ITCODParserListener {
 		
 		if (Construction::Presets.back().tileReqs.empty()) {
 			Construction::Presets.back().tileReqs.insert(TILEGRASS);
+			Construction::Presets.back().tileReqs.insert(TILEMUD);
 			Construction::Presets.back().tileReqs.insert(TILEROCK);
 		}
 
