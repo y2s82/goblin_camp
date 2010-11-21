@@ -9,11 +9,13 @@ import path ;
 import property-set ;
 import common ;
 
-import boost ;
-import libtcod ;
-import winsdk ;
-import python ;
-import zlib ;
+for local P in boost winsdk libtcod zlib python {
+    import $(P) ;
+    $(P).use-project ;
+}
+
+import gc-version ;
+import gc-sln ;
 
 ##
 # Project definition
@@ -48,15 +50,6 @@ project goblin-camp
     : source-location $(GC_PROJECT_ROOT)
     : build-dir $(GC_TMP_DIR)/goblin-camp
 ;
-
-import gc-version ;
-import gc-sln ;
-
-boost.use-project ;
-winsdk.use-project ;
-libtcod.use-project ;
-zlib.use-project ;
-python.use-project ;
 
 ##
 # Local rules
