@@ -178,6 +178,7 @@ public:
 	std::list<boost::weak_ptr<WaterNode> > waterList;
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
+	void RemoveWater(Coordinate);
 	Coordinate FindWater(Coordinate);
 	Coordinate FindFilth(Coordinate);
 	static bool CheckTree(Coordinate, Coordinate);
@@ -203,6 +204,7 @@ public:
 	std::list<boost::weak_ptr<FilthNode> > filthList;
 	void CreateFilth(Coordinate);
 	void CreateFilth(Coordinate,int);
+	void RemoveFilth(Coordinate);
 
 	std::list<boost::weak_ptr<BloodNode> > bloodList;
 	void CreateBlood(Coordinate);

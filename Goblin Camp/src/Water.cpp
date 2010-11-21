@@ -31,7 +31,8 @@ WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 	x(vx), y(vy), depth(vdepth),
 	graphic('?'), color(TCODColor(0,128,255)),
 	inertCounter(0), inert(false),
-	timeFromRiverBed(time)
+	timeFromRiverBed(time),
+	filth(0)
 {
 	UpdateGraphic();
 }
@@ -72,13 +73,36 @@ void WaterNode::Update() {
 			std::vector<boost::weak_ptr<WaterNode> > waterList;
 			std::vector<Coordinate> coordList;
 			int depthSum = 0;
+
+			//Check if any of the surrounding tiles are low, this only matters if this tile is not low
+			bool onlyLowTiles = false;
+			if (!Map::Inst()->Low(x,y)) {
+				for (int ix = x-1; ix <= x+1; ++ix) {
+					for (int iy = y-1; iy <= y+1; ++iy) {
+						if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
+							if ((ix != x || iy != y) && Map::Inst()->Low(ix,iy)) { 
+								onlyLowTiles = true;
+								break;
+							}
+						}
+					}
+				}
+			}
+
 			for (int ix = x-1; ix <= x+1; ++ix) {
 				for (int iy = y-1; iy <= y+1; ++iy) {
 					if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
-						if ((Map::Inst()->Low(x,y) == Map::Inst()->Low(ix,iy) || depth > RIVERDEPTH*3 || Map::Inst()->Low(ix,iy)) && !Map::Inst()->BlocksWater(ix,iy)) {
-							waterList.push_back(Map::Inst()->GetWater(ix,iy));
-							coordList.push_back(Coordinate(ix,iy));
-							if (waterList.back().lock()) depthSum += waterList.back().lock()->depth;
+						/*Choose the surrounding tiles that:
+						Are the same height or low
+						or in case of [onlyLowTiles] are low
+						depth > RIVERDEPTH*3 at which point it can overflow upwards*/
+						if (((!onlyLowTiles && Map::Inst()->Low(x,y) == Map::Inst()->Low(ix,iy)) || depth > RIVERDEPTH*3 || Map::Inst()->Low(ix,iy)) && !Map::Inst()->BlocksWater(ix,iy)) {
+							//If we're choosing only low tiles, then this tile should be ignored completely
+							if (!onlyLowTiles || (ix != x || iy != y)) {
+								waterList.push_back(Map::Inst()->GetWater(ix,iy));
+								coordList.push_back(Coordinate(ix,iy));
+								if (waterList.back().lock()) depthSum += waterList.back().lock()->depth;
+							}
 						}
 					}
 				}
@@ -99,8 +123,15 @@ void WaterNode::Update() {
 				}
 			}
 
+			if (onlyLowTiles) {
+				depth = 1; //All of the water has flown to a low tile
+			}
+
 		} else if (rand() % 100 == 0) {
-			if (depth > 0) --depth;
+			if (depth > 0) { 
+				--depth;
+				Game::Inst()->RemoveWater(Coordinate(x,y)); //Water has evaporated
+			}
 		}
 	}
 }
@@ -125,14 +156,21 @@ void WaterNode::UpdateGraphic() {
 		graphic = 219;
 	}
 
-	int col = std::max(255-(int)(depth/25),100);
-	if (color.g < col/2) ++color.g;
-	if (color.b < col) ++color.b;
-	if (color.g > col/2) --color.g;
-	if (color.b > col) --color.b;
-	if (rand() % 5 == 0 && color.b < 247) color.b += 8;
-	if (rand() % 10000 == 0) color.g += rand() % 25;
+	int col = std::max(255-(int)(depth/25),140);
+	if (color.b < std::max(col-(filth*20), 0)) ++color.b;
+	if (color.b > std::max(col-(filth*20), 0)) --color.b;
+
+	if (color.g < std::max(col/4, std::min(filth*10,150))) ++color.g;
+	if (color.g > std::max(col/4, std::min(filth*10,150))) --color.g;
+
+	if (color.r < std::min(filth*10,190)) ++color.r;
+	if (color.r > std::min(filth*10,190)) --color.r;
+
+	if (rand() % 40 == 0 && color.b < 200) color.b += 20;
+	if (rand() % 10000 == 0 && color.g < 225) color.g += rand() % 25;
 }
 
 Coordinate WaterNode::Position() {return Coordinate(x,y);}
 
+void WaterNode::AddFilth(int newFilth) { filth += newFilth; }
+int WaterNode::GetFilth() { return filth; }
