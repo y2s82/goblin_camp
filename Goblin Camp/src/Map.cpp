@@ -261,8 +261,8 @@ int Map::GetMoveModifier(int x, int y) {
 	if (tileMap[x][y].type() == TILEBOG) modifier += 10;
 	else if (tileMap[x][y].type() == TILEDITCH) modifier += 4;
 	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) {
-		if (tileMap[x][y].construction < 0 || (Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() &&
-			Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->Built() &&
+		if (tileMap[x][y].construction < 0 || !Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() ||
+			(!Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->Built() ||
 			!Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(BRIDGE))) modifier += water->Depth();
 	}
 	return modifier;
