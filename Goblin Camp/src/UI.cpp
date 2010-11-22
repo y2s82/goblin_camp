@@ -895,7 +895,7 @@ void UI::ChooseRemoveNatureObjects() {
 }
 
 void UI::ChooseChangeTerritory(bool add) {
-	if (Camp::Inst()->IsAutoTerritoryEnabled()) {
+	if (Camp::Inst()->IsAutoTerritoryEnabled() && !add) {
 		Camp::Inst()->DisableAutoTerritory();
 		Announce::Inst()->AddMsg("Automatic territory handling disabled", TCODColor::cyan);
 	}
