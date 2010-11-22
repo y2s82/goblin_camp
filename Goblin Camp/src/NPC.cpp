@@ -386,7 +386,7 @@ AiThink NPC::Think() {
 
 		if (aggressor.lock()) {
 			JobManager::Inst()->NPCNotWaiting(uid);
-			if (Game::Inst()->Adjacent(Position(), aggressor)) Hit(aggressor);
+			if (Game::Adjacent(Position(), aggressor)) Hit(aggressor);
 			if (rand() % 10 <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
 				aggressor.reset();
 				TaskFinished(TASKFAILFATAL, "Target lost");
@@ -450,12 +450,12 @@ MOVENEARend:
 
 			case MOVEADJACENT:
 				if (currentEntity().lock()) {
-					if (Game::Inst()->Adjacent(Position(), currentEntity())) {
+					if (Game::Adjacent(Position(), currentEntity())) {
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
 				} else {
-					if (Game::Inst()->Adjacent(Position(), currentTarget())) {
+					if (Game::Adjacent(Position(), currentTarget())) {
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
@@ -480,7 +480,7 @@ MOVENEARend:
 				break;
 
 			case BUILD:
-				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
+				if (Game::Adjacent(Position(), currentEntity())) {
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
 						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
@@ -524,7 +524,7 @@ MOVENEARend:
 						TaskFinished(TASKFAILFATAL, "(PUTIN)Target does not exist");
 						break;
 					}
-					if (!Game::Inst()->Adjacent(Position(), currentEntity().lock()->Position())) {
+					if (!Game::Adjacent(Position(), currentEntity().lock()->Position())) {
 						TaskFinished(TASKFAILFATAL, "(PUTIN)Not adjacent to container");
 						break;
 					}
@@ -697,7 +697,7 @@ MOVENEARend:
 					break;
 				}
 
-				if (Game::Inst()->Adjacent(Position(), currentEntity())) {
+				if (Game::Adjacent(Position(), currentEntity())) {
 					Hit(currentEntity());
 					break;
 				} else if (WieldingRangedWeapon() && quiver.lock() && !quiver.lock()->empty()) {
@@ -1048,16 +1048,27 @@ TaskResult NPC::Move(TaskResult oldResult) {
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
 			if (pathIndex < path->size() && pathIndex >= 0) {
-				path->get(pathIndex, &moveX, &moveY);
-				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) {
+				path->get(pathIndex, &moveX, &moveY); //Get next move
+
+				if (pathIndex != path->size()-1 && Map::Inst()->NPCList(moveX, moveY)->size() > 0) {
+					//Our next move target has an npc on it, and it isn't our target
+					int nextX, nextY;
+					path->get(pathIndex+1, &nextX, &nextY);
+					/*Find a new target that is adjacent to our current, next, and the next after targets
+					Effectively this makes the npc try and move around another npc, instead of walking onto
+					the same tile and slowing down*/
+					Map::Inst()->FindEquivalentMoveTarget(x, y, moveX, moveY, nextX, nextY, (void*)this);
+				}
+
+				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
 					Position(Coordinate(moveX,moveY));
 					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
-				} else {
+				} else { //Encountered unexpected obstacle, fail and possibly repath
 					return TASKFAILNONFATAL;
 				}
-				return TASKCONTINUE;
-			} else if (!findPathWorking) return PATHEMPTY;
+				return TASKCONTINUE; //Everything is ok
+			} else if (!findPathWorking) return PATHEMPTY; //No path
 		}
 	}
 	//Can't move yet, so the earlier result is still valid
