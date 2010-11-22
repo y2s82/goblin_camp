@@ -392,7 +392,7 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	for (int x = left; x <= right; ++x) {
 		for (int y = up; y <= down; ++y) {
 			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
-				if (Walkable(x, y, npc) && tileMap[x][y].npcList.size() == 0) {
+				if (Walkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y)) {
 					Coordinate xy(x,y);
 					if (Game::Adjacent(xy, current) && Game::Adjacent(xy, move) && Game::Adjacent(xy, next)) {
 						moveX = x;
@@ -403,4 +403,14 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 			}
 		}
 	}
+}
+
+bool Map::IsUnbridgedWater(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		if (boost::shared_ptr<WaterNode> water = tileMap[x][y].water) {
+			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
+			if (water->Depth() > 1 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
+		}
+	}
+	return false;
 }
