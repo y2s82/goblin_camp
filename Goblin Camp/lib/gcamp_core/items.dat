@@ -416,6 +416,7 @@ item_type "Corpse" {
 	decaySpeed = 4
 	fruits = [ "Bones", "Hide" ]
 	bulk = 6
+	durability = 5
 }
 
 item_type "Wine" {
