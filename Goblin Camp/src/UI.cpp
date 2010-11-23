@@ -856,30 +856,6 @@ void UI::ChooseDig() {
 	UI::Inst()->SetCursor('_');
 }
 
-void UI::ChooseCreateFilth() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::CreateFilth, Game::Inst(), _1, 10));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('~');
-}
-
-void UI::ChooseCreateWater() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::CreateWater, Game::Inst(), _1));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('~');
-}
-
-void UI::ChooseCorrupt() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Map::Corrupt, Map::Inst(), _1, 2000));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('c');
-}
-
 void UI::ChooseNaturify() {
 	for (int i = 0; i < 10000; ++i) {
 		Map::Inst()->Naturify(rand() % Map::Inst()->Width(), rand() % Map::Inst()->Height());
@@ -914,26 +890,10 @@ void UI::ChooseGatherItems() {
 	UI::Inst()->SetCursor('G');
 }
 
-void UI::ChooseExplode() {
+void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
 	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::Damage, Game::Inst(), _1));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+	UI::Inst()->SetCallback(callback);
+	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('!');
-}
-
-void UI::ChooseHungerize() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::Hungerize, Game::Inst(), _1));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('H');
-}
-
-void UI::ChooseTire() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::Tire, Game::Inst(), _1));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('T');
+	UI::Inst()->SetCursor(cursor);
 }
