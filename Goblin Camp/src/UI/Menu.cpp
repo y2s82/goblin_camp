@@ -236,6 +236,7 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
 		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRemoveNatureObjects)));
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
+		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseExplode)));
 	}
 	return devMenu;
 }
