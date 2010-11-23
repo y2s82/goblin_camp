@@ -213,7 +213,7 @@ public:
 	void Kill();
 	void PickupItem(boost::weak_ptr<Item>);
 	void DropItem(boost::weak_ptr<Item>);
-	void Hit(boost::weak_ptr<Entity>);
+	void Hit(boost::weak_ptr<Entity>, bool careful = false);
 	void FireProjectile(boost::weak_ptr<Entity>);
 	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
 
