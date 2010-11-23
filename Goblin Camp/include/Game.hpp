@@ -137,6 +137,7 @@ public:
 	void CreateNPCs(int,NPCType,Coordinate,Coordinate);
 	unsigned int PeacefulFaunaCount() const;
 	void PeacefulFaunaCount(int);
+	void Hungerize(Coordinate);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());

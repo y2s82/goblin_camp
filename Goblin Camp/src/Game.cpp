@@ -326,8 +326,8 @@ void Game::BumpEntity(int uid) {
 	if (entity) {
 		if (!Map::Inst()->Walkable(entity->Position().X(), entity->Position().Y())) {
 			for (int radius = 1; radius < 10; ++radius) {
-				for (unsigned int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
-					for (unsigned int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
+				for (int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
+					for (int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
 						if (Map::Inst()->Walkable(xi, yi)) {
 							entity->Position(Coordinate(xi, yi));
 							return;
@@ -1617,5 +1617,18 @@ void Game::Damage(Coordinate pos) {
 		dice.addsub = 1000;
 		attack.AddDamage(dice);
 		construction->Damage(&attack);
+	}
+}
+
+void Game::Hungerize(Coordinate pos) {
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
+			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->hunger = (int)(HUNGER_THRESHOLD * 1.5);
+				}
+		}
 	}
 }
