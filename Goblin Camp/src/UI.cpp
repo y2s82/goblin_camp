@@ -913,3 +913,11 @@ void UI::ChooseGatherItems() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('G');
 }
+
+void UI::ChooseExplode() {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(boost::bind(&Game::Damage, Game::Inst(), _1));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('!');
+}

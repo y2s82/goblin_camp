@@ -311,7 +311,7 @@ void Game::GoblinCount(int add) { goblinCount += add; }
 //Moves the entity to a valid walkable tile
 //TODO: make it find the closest walkable tile instead of going right, that will lead to weirdness and problems
 void Game::BumpEntity(int uid) {
-	boost::weak_ptr<Entity> entity;
+	boost::shared_ptr<Entity> entity;
 
 	std::map<int,boost::shared_ptr<NPC> >::iterator npc = npcList.find(uid);
 	if (npc != npcList.end()) {
@@ -323,13 +323,19 @@ void Game::BumpEntity(int uid) {
 		}
 	}
 
-	if (entity.lock()) {
-		int newx = entity.lock()->X();
-		int newy = entity.lock()->Y();
-		while (!Map::Inst()->Walkable(newx,newy)) {
-			++newx;
+	if (entity) {
+		if (!Map::Inst()->Walkable(entity->Position().X(), entity->Position().Y())) {
+			for (int radius = 1; radius < 10; ++radius) {
+				for (unsigned int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
+					for (unsigned int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
+						if (Map::Inst()->Walkable(xi, yi)) {
+							entity->Position(Coordinate(xi, yi));
+							return;
+						}
+					}
+				}
+			}
 		}
-		entity.lock()->Position(Coordinate(newx,newy));
 	} 
 #ifdef DEBUG
 	else { std::cout<<"\nTried to bump nonexistant entity."; }
@@ -447,10 +453,11 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			newItem = boost::static_pointer_cast<Item>(orgItem);
 			orgItem->Nutrition(Item::Presets[type].nutrition);
 			orgItem->Growth(Item::Presets[type].growth);
+			orgItem->SetFaction(ownerFaction);
 		} else if (Item::Presets[type].container > 0) {
-			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, 0, comps)));
+			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, ownerFaction, comps)));
 		} else {
-			newItem.reset(new Item(pos, type, 0, comps));
+			newItem.reset(new Item(pos, type, ownerFaction, comps));
 		}
 
 		if (!container) {
@@ -699,6 +706,12 @@ void Game::Update() {
 
 	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
+		if (itemi->lock() && itemi->lock()->condition == 0) {
+			//The item has impacted and broken. Create debris owned by no one
+			std::vector<boost::weak_ptr<Item> > component(1, *itemi);
+			CreateItem(itemi->lock()->Position(), Item::StringToItemType("debris"), false, -1, component);
+			RemoveItem(*itemi);
+		}
 		itemi = stoppedItems.erase(itemi);
 	}
 
@@ -745,7 +758,7 @@ void Game::Update() {
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		if (!reserveItem || !item->Reserved()) {
+		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == 0) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -1590,5 +1603,19 @@ void Game::RemoveWater(Coordinate pos) {
 		int filth = water->GetFilth();
 		Map::Inst()->SetWater(pos.X(), pos.Y(), boost::shared_ptr<WaterNode>());
 		if (filth > 0) CreateFilth(pos, filth);
+	}
+}
+
+void Game::Damage(Coordinate pos) {
+	boost::shared_ptr<Construction> construction = GetConstruction(Map::Inst()->GetConstruction(pos.X(), pos.Y())).lock();
+	if (construction) {
+		Attack attack;
+		attack.Type(DAMAGE_MAGIC);
+		TCOD_dice_t dice;
+		dice.nb_dices = 10;
+		dice.nb_faces = 10;
+		dice.addsub = 1000;
+		attack.AddDamage(dice);
+		construction->Damage(&attack);
 	}
 }

@@ -151,6 +151,7 @@ public:
 	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 	boost::weak_ptr<Construction> GetConstruction(int);
 	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag);
+	void Damage(Coordinate);
 
 	/*      ITEMS       ITEMS       ITEMS       */
 	int CreateItem(Coordinate, ItemType, bool stockpile = false,
