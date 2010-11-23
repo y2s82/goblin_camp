@@ -71,6 +71,19 @@ void SideBar::Draw(TCODConsole* console) {
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
 		minimap.flush();
 		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
+
+		if (npc) { //Draw health bar
+			boost::shared_ptr<NPC> creature = boost::static_pointer_cast<NPC>(entity.lock());
+			int health = (int)(((double)creature->GetHealth() / (double)std::max(1, creature->GetMaxHealth())) * 10);
+			for (int i = 0; i < health; ++i) {
+				console->setChar(edgeX - (width-2), topY+12-i, 231);
+				TCODColor color;
+				if (health > 7) color = TCODColor::green;
+				else if (health > 3) color = TCODColor::yellow;
+				else color = TCODColor::red;
+				console->setCharForeground(edgeX - (width-2), topY+12-i, color);
+			}
+		}
 	}
 	console->setDefaultForeground(TCODColor::white);
 }
