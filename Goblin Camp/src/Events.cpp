@@ -74,7 +74,7 @@ void Events::SpawnHostileMonsters() {
 
 	Coordinate a,b;
 	int counter = 0;
-	while ((Map::Inst()->IsUnbridgedWater(a.X(), a.Y()) || Map::Inst()->IsUnbridgedWater(b.X(), b.Y())) && counter < 100) {
+	do {
 		switch (rand() % 4) {
 		case 0:
 			a.X(0);
@@ -105,7 +105,7 @@ void Events::SpawnHostileMonsters() {
 			break;
 		}
 		++counter;
-	}
+	} while ((Map::Inst()->IsUnbridgedWater(a.X(), a.Y()) || Map::Inst()->IsUnbridgedWater(b.X(), b.Y())) && counter < 100);
 
 	Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 	Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
