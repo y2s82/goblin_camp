@@ -159,11 +159,12 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 				jobs.pop_front();
 				taskIndex = 0;
 				foundItem = boost::weak_ptr<Item>();
+				addedTasksToCurrentJob = 0;
 			}
 		} else {
 			//Remove any tasks this NPC added onto the front before sending it back to the JobManager
 			for (int i = 0; i < addedTasksToCurrentJob; ++i) {
-				jobs.front()->tasks.erase(jobs.front()->tasks.begin());
+				if (!jobs.front()->tasks.empty()) jobs.front()->tasks.erase(jobs.front()->tasks.begin());
 			}
 			if (!jobs.front()->internal) JobManager::Inst()->CancelJob(jobs.front(), msg, result);
 			jobs.pop_front();
@@ -171,10 +172,10 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 			DropItem(carried);
 			carried.reset();
 			foundItem = boost::weak_ptr<Item>();
+			addedTasksToCurrentJob = 0;
 		}
 	}
 	taskBegun = false;
-	addedTasksToCurrentJob = 0;
 }
 
 void NPC::HandleThirst() {
@@ -1108,7 +1109,7 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 		job->tasks.insert(job->tasks.begin(), Task(TAKE));
 		job->tasks.insert(job->tasks.begin(), Task(MOVE));
 		job->tasks.insert(job->tasks.begin(), Task(FIND, Position(), boost::weak_ptr<Entity>(), job->GetRequiredTool()));
-		addedTasksToCurrentJob = 4;
+		addedTasksToCurrentJob = 5;
 	}
 
 	jobs.push_back(job);
