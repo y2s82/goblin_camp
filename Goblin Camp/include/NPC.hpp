@@ -227,6 +227,9 @@ public:
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
 
+	int GetHealth();
+	int GetMaxHealth();
+
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;
 	static std::string NPCTypeToString(NPCType);

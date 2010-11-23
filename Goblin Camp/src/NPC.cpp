@@ -919,7 +919,7 @@ CONTINUEEAT:
 					if (stockJob) {
 						stockJob->internal = true;
 						//Add remaining tasks into stockjob
-						for (int i = 1; taskIndex+i < jobs.front()->tasks.size(); ++i) {
+						for (unsigned int i = 1; taskIndex+i < jobs.front()->tasks.size(); ++i) {
 							stockJob->tasks.push_back(jobs.front()->tasks[taskIndex+i]);
 						}
 						jobs.front()->tasks.clear();
@@ -2016,3 +2016,6 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	group.nb_dices = 1;
 	group.nb_faces = 1;
 }
+
+int NPC::GetHealth() { return health; }
+int NPC::GetMaxHealth() { return maxHealth; }
