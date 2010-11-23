@@ -921,3 +921,11 @@ void UI::ChooseExplode() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('!');
 }
+
+void UI::ChooseHungerize() {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(boost::bind(&Game::Hungerize, Game::Inst(), _1));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('H');
+}
