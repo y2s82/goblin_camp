@@ -131,6 +131,20 @@ StatusEffect::StatusEffect(StatusEffectType typeval) :
 		statChanges[DODGE] = 0.0;
 		statChanges[STRENGTH] = 0.75;
 		break;
+
+	case EATING:
+		name = "Eating";
+		graphic = TCOD_CHAR_ARROW_N;
+		color = TCODColor::orange;
+		cooldown = -1;
+		break;
+
+	case DRINKING:
+		name = "Drinking";
+		graphic = TCOD_CHAR_ARROW_N;
+		color = TCODColor::blue;
+		cooldown = -1;
+		break;
 	}
 	cooldownDefault = cooldown;
 }
@@ -150,7 +164,7 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return SLEEPING;
 	} else if (boost::iequals(str, "poison")) {
 		return POISON;
-	}  else if (boost::iequals(str, "bleeding")) {
+	} else if (boost::iequals(str, "bleeding")) {
 		return BLEEDING;
 	}
 	return HUNGER;
