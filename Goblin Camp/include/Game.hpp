@@ -138,6 +138,7 @@ public:
 	unsigned int PeacefulFaunaCount() const;
 	void PeacefulFaunaCount(int);
 	void Hungerize(Coordinate);
+	void Tire(Coordinate);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());

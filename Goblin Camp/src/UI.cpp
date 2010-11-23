@@ -929,3 +929,11 @@ void UI::ChooseHungerize() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('H');
 }
+
+void UI::ChooseTire() {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(boost::bind(&Game::Tire, Game::Inst(), _1));
+	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor('T');
+}

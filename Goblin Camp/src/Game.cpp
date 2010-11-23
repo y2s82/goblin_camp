@@ -1632,3 +1632,16 @@ void Game::Hungerize(Coordinate pos) {
 		}
 	}
 }
+
+void Game::Tire(Coordinate pos) {
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
+			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->weariness = (int)(WEARY_THRESHOLD * 1.5);
+				}
+		}
+	}
+}
