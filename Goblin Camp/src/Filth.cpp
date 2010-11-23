@@ -18,8 +18,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Filth.hpp"
 #include "Game.hpp"
 
-FilthNode::FilthNode(int nx, int ny, int ndep) : x(nx), y(ny), depth(ndep)
+FilthNode::FilthNode(int nx, int ny, int ndep) : x(nx), y(ny)
 {
+	color.b = 0;
+	Depth(ndep);
 }
 
 FilthNode::~FilthNode() {}
@@ -34,11 +36,15 @@ void FilthNode::Draw(Coordinate upleft, TCODConsole* console) {
 	if (depth > 0) {
 		if (screenX >= 0 && screenX < console->getWidth() &&
 			screenY >= 0 && screenY < console->getHeight()) {
-				console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', TCODColor::darkerOrange, TCODColor::black);
+				console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', color, TCODColor::black);
 		}
 	}
 }
 
 int FilthNode::Depth() {return depth;}
-void FilthNode::Depth(int val) {depth=val;}
+void FilthNode::Depth(int val) {
+	depth=val;
+	color.r = 170 + rand() % 56;
+	color.g = 80 + rand() % 61;
+}
 Coordinate FilthNode::Position() {return Coordinate(x,y);}
