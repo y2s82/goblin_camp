@@ -417,6 +417,7 @@ item_type "Corpse" {
 	fruits = [ "Bones", "Hide" ]
 	bulk = 6
 	durability = 5
+	nutrition = 20000
 }
 
 item_type "Wine" {
@@ -447,7 +448,7 @@ item_type "Meat" {
 	components = ["Corpse"]
 	decay = [ "Filth" ]
 	decaySpeed = 5
-	nutrition = 10000
+	nutrition = 30000
 	constructedin = "Butcher"
 }
 
