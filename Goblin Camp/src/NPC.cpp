@@ -716,7 +716,10 @@ MOVENEARend:
 
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("(KILL)Could not find path to target")); break; }
 				else if (lastMoveResult == PATHEMPTY) {
-					findPath(currentEntity().lock()->Position());
+					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					if (tmpCoord.X() >= 0) {
+						findPath(tmpCoord);
+					}
 				}
 				break;
 
