@@ -102,6 +102,7 @@ public:
 	static void ChooseGatherItems();
 	static void ChooseExplode();
 	static void ChooseHungerize();
+	static void ChooseTire();
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);

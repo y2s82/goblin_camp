@@ -238,6 +238,7 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
 		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseExplode)));
 		devMenu->AddChoice(MenuChoice("Hungerize", boost::bind(UI::ChooseHungerize)));
+		devMenu->AddChoice(MenuChoice("Tire", boost::bind(UI::ChooseTire)));
 	}
 	return devMenu;
 }
