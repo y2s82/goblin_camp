@@ -149,7 +149,7 @@ boost::weak_ptr<Job> NPC::currentJob() { return jobs.empty() ? boost::weak_ptr<J
 void NPC::TaskFinished(TaskResult result, std::string msg) {
 #ifdef DEBUG
 	if (msg.size() > 0) {
-		std::cout<<msg<<"\n";
+		std::cout<<name<<":"<<msg<<"\n";
 	}
 #endif
 	if (jobs.size() > 0) {
@@ -270,7 +270,11 @@ void NPC::HandleWeariness() {
 		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
 		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
 		sleepJob->internal = true;
-		if (!expert) sleepJob->tasks.push_back(Task(UNWIELD));
+		if (!expert && mainHand.lock()) { //Menial job doers may wield a tool
+			sleepJob->tasks.push_back(Task(UNWIELD));
+			sleepJob->tasks.push_back(Task(TAKE));
+			sleepJob->tasks.push_back(Task(STOCKPILEITEM));
+		}
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
 			run = true;
 			sleepJob->ReserveEntity(bed);
@@ -586,6 +590,7 @@ MOVENEARend:
 								}
 							}
 					}
+					RemoveEffect(DRINKING);
 					TaskFinished(TASKFAILFATAL, "(DRINK)Not enough water");
 				}
 
@@ -654,7 +659,7 @@ CONTINUEEAT:
 			case FIND:
 				foundItem = Game::Inst()->FindItemByCategoryFromStockpiles(currentTask()->item, currentTask()->target, currentTask()->flags);
 				if (!foundItem.lock()) {
-					TaskFinished(TASKFAILFATAL, "Can't FIND item"); 
+					TaskFinished(TASKFAILFATAL, "(FIND)Failed"); 
 					break;
 				} else {
 					if (faction == 0) currentJob().lock()->ReserveEntity(foundItem);
@@ -912,6 +917,11 @@ CONTINUEEAT:
 					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true, true, false);
 					if (stockJob) {
 						stockJob->internal = true;
+						//Add remaining tasks into stockjob
+						for (int i = 1; taskIndex+i < jobs.front()->tasks.size(); ++i) {
+							stockJob->tasks.push_back(jobs.front()->tasks[taskIndex+i]);
+						}
+						jobs.front()->tasks.clear();
 						jobs.push_back(stockJob);
 						DropItem(carried); //The stockpiling job will pickup the item
 						carried.reset();
@@ -1035,6 +1045,7 @@ CONTINUEEAT:
 
 			case UNWIELD:
 				if (mainHand.lock()) {
+					foundItem = mainHand;
 					DropItem(mainHand);
 					mainHand.reset();
 				}
