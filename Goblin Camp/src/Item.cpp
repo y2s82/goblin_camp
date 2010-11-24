@@ -312,6 +312,7 @@ private:
 			}
 		} else if (boost::iequals(name, "decaySpeed")) {
 			Item::Presets.back().decaySpeed = value.i;
+			Item::Presets.back().decays = true;
 		} else if (boost::iequals(name,"type")) {
 			Item::Presets.back().attack.Type(Attack::StringToDamageType(value.s));
 		} else if (boost::iequals(name,"damage")) {
