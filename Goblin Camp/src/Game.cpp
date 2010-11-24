@@ -1607,16 +1607,23 @@ void Game::RemoveWater(Coordinate pos) {
 }
 
 void Game::Damage(Coordinate pos) {
+	Attack attack;
+	attack.Type(DAMAGE_MAGIC);
+	TCOD_dice_t dice;
+	dice.nb_dices = 10;
+	dice.nb_faces = 10;
+	dice.addsub = 1000;
+	attack.AddDamage(dice);
+	
 	boost::shared_ptr<Construction> construction = GetConstruction(Map::Inst()->GetConstruction(pos.X(), pos.Y())).lock();
 	if (construction) {
-		Attack attack;
-		attack.Type(DAMAGE_MAGIC);
-		TCOD_dice_t dice;
-		dice.nb_dices = 10;
-		dice.nb_faces = 10;
-		dice.addsub = 1000;
-		attack.AddDamage(dice);
 		construction->Damage(&attack);
+	}
+	for (std::set<int>::iterator npcuid = Map::Inst()->NPCList(pos.X(), pos.Y())->begin(); 
+		npcuid != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npcuid) {
+			boost::shared_ptr<NPC> npc;
+			if (npcList.find(*npcuid) != npcList.end()) npc = npcList[*npcuid];
+			if (npc) npc->Damage(&attack);
 	}
 }
 
