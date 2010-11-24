@@ -154,6 +154,8 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		std::cout<<name<<":"<<msg<<"\n";
 	}
 #endif
+	RemoveEffect(EATING);
+	RemoveEffect(DRINKING);
 	if (jobs.size() > 0) {
 		if (result == TASKSUCCESS) {
 			if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
@@ -587,14 +589,12 @@ MOVENEARend:
 									thirst -= (int)(THIRST_THRESHOLD / 10);
 									AddEffect(DRINKING);
 									if (thirst < 0) { 
-										RemoveEffect(DRINKING);
 										TaskFinished(TASKSUCCESS); 
 									}
 									break;
 								}
 							}
 					}
-					RemoveEffect(DRINKING);
 					TaskFinished(TASKFAILFATAL, "(DRINK)Not enough water");
 				}
 
@@ -604,7 +604,6 @@ MOVENEARend:
 					timer -= (int)(THIRST_THRESHOLD / 5);
 					if (timer <= 0) {
 						timer = 0;
-						RemoveEffect(DRINKING);
 						TaskFinished(TASKSUCCESS);
 					}
 				}
@@ -650,7 +649,6 @@ MOVENEARend:
 					timer -= 5000;
 					if (timer <= 0) {
 						timer = 0;
-						RemoveEffect(EATING);
 						TaskFinished(TASKSUCCESS);
 					}
 					break;
