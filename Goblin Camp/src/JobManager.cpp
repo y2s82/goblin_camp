@@ -120,9 +120,10 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 	std::map<int,boost::shared_ptr<NPC> >::iterator npc;
 	TCODColor color_mappings[] = { TCODColor::green, TCODColor::yellow, TCODColor::red, TCODColor::grey };
 
-	for (int i=0; i<PRIORITY_COUNT; i++) {
+	for (int i=0; i<=PRIORITY_COUNT; i++) {
 		console->setDefaultForeground(color_mappings[i]);
-		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = (i < PRIORITY_COUNT ? availableList[i].begin() : waitingList.begin()); 
+			jobi != (i < PRIORITY_COUNT ? availableList[i].end() : waitingList.end()); ++jobi) {
 			if (skip < from) ++skip;
 			else {
 				npc = Game::Inst()->npcList.find((*jobi)->Assigned());
