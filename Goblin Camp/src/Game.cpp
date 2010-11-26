@@ -1133,6 +1133,9 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
 			}
+			if (Map::Inst()->GroundMarked(x,y)) { //A dig job exists for this tile
+				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y));
+			}
 		}
 	}
 }

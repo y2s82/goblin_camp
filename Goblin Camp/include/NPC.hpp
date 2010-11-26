@@ -205,6 +205,7 @@ public:
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();
 	void AbortCurrentJob(bool);
+	void AbortJob(boost::weak_ptr<Job>);
 
 	bool Expert();
 	void Expert(bool);

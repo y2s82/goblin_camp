@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "KuhnMunkres.hpp"
 #include "StockManager.hpp"
+#include "Game.hpp"
 
 JobManager::JobManager() {
 	for (std::vector<ItemCat>::iterator i = Item::Categories.begin(); i != Item::Categories.end(); ++i) {
@@ -103,7 +104,7 @@ void JobManager::RemoveJob(boost::weak_ptr<Entity> entity) {
 						jobi = availableList[i].erase(jobi); /*Move iterator forward, it'll get invalidated by
 															 AbortCurrentJob() otherwise*/
 						if (npc != Game::Inst()->npcList.end()) { 
-							npc->second->AbortCurrentJob(false); /*When an NPC aborts a job it cancels it through
+							npc->second->AbortJob(*jobi); /*When an NPC aborts a job it cancels it through
 																 JobManager::CancelJob()*/
 						}
 				} else {
@@ -448,6 +449,34 @@ void JobManager::AssignJobs() {
 				}
 
 			}
+		}
+	}
+}
+
+void JobManager::RemoveJob(Action action, Coordinate location) {
+	for (int i = 0; i <= PRIORITY_COUNT; ++i) {
+		for (std::list<boost::shared_ptr<Job> >::iterator jobi = (i < PRIORITY_COUNT ? availableList[i].begin() : waitingList.begin()); 
+			jobi != (i < PRIORITY_COUNT ? availableList[i].end() : waitingList.end());) {
+				bool remove = false;
+				for (std::vector<Task>::iterator taski = (*jobi)->tasks.begin(); taski != (*jobi)->tasks.end(); ++taski) {
+					if (taski->action == action && taski->target == location) {
+						remove = true;
+						break;
+					}
+				}
+				if (remove) {
+					(*jobi)->Attempts(0);
+					if ((*jobi)->Assigned() >= 0) {
+						std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
+						boost::weak_ptr<Job> jobToRemove = *jobi;
+						++jobi; //AbortJob will cancel the job and the invalidate the old iterator
+						if (npc != Game::Inst()->npcList.end()) npc->second->AbortJob(jobToRemove);
+					} else {
+						jobi = (i < PRIORITY_COUNT ? availableList[i].erase(jobi) : waitingList.erase(jobi));
+					}
+				} else {
+					++jobi;
+				}
 		}
 	}
 }
