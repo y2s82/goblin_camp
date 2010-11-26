@@ -774,7 +774,8 @@ CONTINUEEAT:
 				if (Game::Adjacent(Position(), currentEntity())) {
 					Hit(currentEntity(), currentTask()->flags != 0);
 					break;
-				} else if (WieldingRangedWeapon() && quiver.lock() && !quiver.lock()->empty()) {
+				} else if (currentTask()->flags == 0 && WieldingRangedWeapon() && quiver.lock() && 
+					!quiver.lock()->empty()) {
 					FireProjectile(currentEntity());
 					break;
 				}
