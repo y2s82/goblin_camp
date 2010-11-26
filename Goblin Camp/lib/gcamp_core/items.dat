@@ -404,6 +404,7 @@ item_type "Leather" {
 	category = ["Leather"]
 	graphic = 245
 	color = "127,51,0"
+	components = ["Hide"]
 	fitsin = "Crate"
 	constructedin = "Tanner"
 }
