@@ -777,13 +777,13 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			}
 
 			if(nearest) {
-				//Check if the item can be contained, and if so if any containers are in the stockpile
-
-				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", LOW));
+				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
+					item->IsCategory(Item::StringToItemCategory("Food")) ? HIGH : LOW));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
 
+				//Check if the item can be contained, and if so if any containers are in the stockpile
 				if (Item::Presets[item->Type()].fitsin >= 0) {
 					container = nearest->FindItemByCategory(Item::Presets[item->Type()].fitsin, NOTFULL, item->GetBulk());
 					if (container.lock()) {
