@@ -2025,3 +2025,16 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 
 int NPC::GetHealth() { return health; }
 int NPC::GetMaxHealth() { return maxHealth; }
+
+void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
+	if (boost::shared_ptr<Job> job = wjob.lock()) {
+		for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
+			if (*jobi == job) {
+				if (job == jobs.front()) {
+					TaskFinished(TASKFAILFATAL, "(AbortJob)");
+				}
+				return;
+			}
+		}
+	}
+}
