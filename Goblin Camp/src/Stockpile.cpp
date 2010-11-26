@@ -74,39 +74,40 @@ int Stockpile::Build() {return 1;}
 boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, int value) {
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
 		if (!conti->second->empty()) {
-			boost::weak_ptr<Item> item = *conti->second->begin();
-			if (item.lock()) {
-				if (item.lock()->IsCategory(cat) && !item.lock()->Reserved()) {
+			boost::weak_ptr<Item> witem = *conti->second->begin();
+			if (boost::shared_ptr<Item> item = witem.lock()) {
+				if (item->IsCategory(cat) && !item->Reserved()) {
 					//The item is the one we want, check that it fullfills all the requisite flags
-					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item)) {
+						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 						//value represents bulk in this case. Needs to check Full() because bulk=value=0 is a possibility
 						if (container->Full() || container->Capacity() < value) continue;
 					}
 
 					if (flags & BETTERTHAN) {
-						if (item.lock()->RelativeValue() <= value) continue;
+						if (item->RelativeValue() <= value) continue;
 					} 
 
 					if (flags & APPLYMINIMUMS) {
 						/*For now this only affects seeds. With this flag set don't return
 						seeds if at or below the set minimum for them*/
-						if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
-							if (StockManager::Inst()->TypeQuantity(item.lock()->Type()) <=
-								StockManager::Inst()->Minimum(item.lock()->Type()))
+						if (item->IsCategory(Item::StringToItemCategory("Seed"))) {
+							if (StockManager::Inst()->TypeQuantity(item->Type()) <=
+								StockManager::Inst()->Minimum(item->Type()))
 								continue;
 						}
 					} 
 
-					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item.lock())) {
-						if (!boost::static_pointer_cast<Container>(item.lock())->empty()) continue;
+					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item)) {
+						if (!boost::static_pointer_cast<Container>(item)->empty() ||
+							boost::static_pointer_cast<Container>(item)->GetReservedSpace() > 0) continue;
 					}
 
 					return item;
 
-				} else if (boost::dynamic_pointer_cast<Container>(item.lock())) {
+				} else if (boost::dynamic_pointer_cast<Container>(item)) {
 					//This item is not the one we want, but it might contain what we're looking for.
-					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
+					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item);
 
 					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 						boost::shared_ptr<Item> innerItem(itemi->lock());
@@ -137,36 +138,37 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, int value) {
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
 		if (!conti->second->empty()) {
-			boost::weak_ptr<Item> item = *conti->second->begin();
-			if (item.lock()) {
-				if (item.lock()->Type() == typeValue && !item.lock()->Reserved()) {
-					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item.lock())) {
-						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+			boost::weak_ptr<Item> witem = *conti->second->begin();
+			if (boost::shared_ptr<Item> item = witem.lock()) {
+				if (item->Type() == typeValue && !item->Reserved()) {
+					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item)) {
+						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 						//value represents bulk in this case
 						if (container->Full() || container->Capacity() < value) continue;
 					}
 
 					if (flags & BETTERTHAN) {
-						if (item.lock()->RelativeValue() <= value) continue;
+						if (item->RelativeValue() <= value) continue;
 					} 
 
 					if (flags & APPLYMINIMUMS) {
 						/*For now this only affects seeds. With this flag set don't return
 						seeds if at or below the set minimum for them*/
-						if (item.lock()->IsCategory(Item::StringToItemCategory("Seed"))) {
-							if (StockManager::Inst()->TypeQuantity(item.lock()->Type()) <=
-								StockManager::Inst()->Minimum(item.lock()->Type()))
+						if (item->IsCategory(Item::StringToItemCategory("Seed"))) {
+							if (StockManager::Inst()->TypeQuantity(item->Type()) <=
+								StockManager::Inst()->Minimum(item->Type()))
 								continue;
 						}
 					} 
 
-					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item.lock())) {
-						if (!boost::static_pointer_cast<Container>(item.lock())->empty()) continue;
+					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item)) {
+						if (!boost::static_pointer_cast<Container>(item)->empty() ||
+							boost::static_pointer_cast<Container>(item)->GetReservedSpace() > 0) continue;
 					}
 
 					return item;
-				} else if (boost::dynamic_pointer_cast<Container>(item.lock())) {
-					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item.lock());
+				} else if (boost::dynamic_pointer_cast<Container>(item)) {
+					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item);
 					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 						boost::shared_ptr<Item> innerItem(itemi->lock());
 						if (innerItem && innerItem->Type() == typeValue && !innerItem->Reserved()) {

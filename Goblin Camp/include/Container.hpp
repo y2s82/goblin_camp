@@ -74,4 +74,5 @@ public:
 	void RemoveFilth(int);
 	int ContainsFilth();
 	void Draw(Coordinate, TCODConsole*);
+	int GetReservedSpace();
 };
