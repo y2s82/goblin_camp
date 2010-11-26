@@ -44,7 +44,7 @@ void FilthNode::Draw(Coordinate upleft, TCODConsole* console) {
 int FilthNode::Depth() {return depth;}
 void FilthNode::Depth(int val) {
 	depth=val;
-	color.r = 170 + rand() % 56;
-	color.g = 80 + rand() % 61;
+	color.r = 170 - std::min(Map::Inst()->GetCorruption(x, y), 40) + rand() % 56;
+	color.g = 80 - std::min(Map::Inst()->GetCorruption(x, y), 80) + rand() % 61;
 }
 Coordinate FilthNode::Position() {return Coordinate(x,y);}
