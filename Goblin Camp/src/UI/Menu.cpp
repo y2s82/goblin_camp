@@ -228,14 +228,32 @@ Menu* Menu::devMenu = 0;
 Menu* Menu::DevMenu() {
 	if (!devMenu) {
 		devMenu = new Menu(std::vector<MenuChoice>());
+
 		devMenu->AddChoice(MenuChoice("Create NPC", boost::bind(UI::ChooseCreateNPC)));
 		devMenu->AddChoice(MenuChoice("Create item", boost::bind(UI::ChooseCreateItem)));
-		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseCreateFilth)));
-		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseCreateWater)));
-		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseCorrupt)));
+
+		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
+		boost::function<void(Coordinate)> call = boost::bind(&Game::CreateFilth, Game::Inst(), _1, 10);
+		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~')));
+		
+		call = boost::bind(&Game::CreateWater, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~')));
+		
+		call = boost::bind(&Map::Corrupt, Map::Inst(), _1, 2000);
+		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'C')));
+
 		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
 		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRemoveNatureObjects)));
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
+		
+		call = boost::bind(&Game::Damage, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'E')));
+		
+		call = boost::bind(&Game::Hungerize, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Hungerize", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'H')));
+
+		call = boost::bind(&Game::Tire, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Tire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
 	}
 	return devMenu;
 }

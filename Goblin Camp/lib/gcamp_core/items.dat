@@ -416,6 +416,8 @@ item_type "Corpse" {
 	decaySpeed = 4
 	fruits = [ "Bones", "Hide" ]
 	bulk = 6
+	durability = 5
+	nutrition = 20000
 }
 
 item_type "Wine" {
@@ -445,8 +447,8 @@ item_type "Meat" {
 	color = "198,0,0"
 	components = ["Corpse"]
 	decay = [ "Filth" ]
-	decaySpeed = 12
-	nutrition = 10000
+	decaySpeed = 5
+	nutrition = 30000
 	constructedin = "Butcher"
 }
 
@@ -486,7 +488,7 @@ item_type "Flower" {
 	color = "255,255,255"
 	nutrition = 500
 	decay = ["Filth"]
-	decaySpeed = 12
+	decaySpeed = 3
 }
 
 item_type "Wooden club" {
@@ -605,6 +607,7 @@ item_type "Stone-tipped arrow" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 0
+	durability = 4
 }
 
 item_type "Wooden bow" {
@@ -768,4 +771,12 @@ item_type "Shovel" {
 	color = "155,128,128"
 	components = [ "Plank", "Metal bar" ]
 	fitsin = "Crate"
+}
+
+item_type "Debris" {
+	category = ["Garbage"]
+	graphic = 239
+	color = "150, 150, 150"
+	decaySpeed = 2
+	durability = 2
 }

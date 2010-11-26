@@ -76,36 +76,39 @@ void Events::SpawnHostileMonsters() {
 		% NPC::Presets[monsterType].name).str();
 
 	Coordinate a,b;
-
-	switch (Random::Generate(3)) {
-	case 0:
-		a.X(0);
-		a.Y(Random::Generate(map->Height() - 21));
-		b.X(1);
-		b.Y(a.Y() + 20);
-		break;
-
-	case 1:
-		a.X(Random::Generate(map->Width() - 21));
-		a.Y(0);
-		b.X(a.X() + 20);
-		b.Y(1);
-		break;
-
-	case 2:
-		a.X(map->Width() - 2);
-		a.Y(Random::Generate(map->Height() - 21));
-		b.X(map->Width() - 1);
-		b.Y(a.Y() + 20);
-		break;
-
-	case 3:
-		a.X(Random::Generate(map->Width() - 21));
-		a.Y(map->Height() - 2);
-		b.X(a.X() + 20);
-		b.Y(map->Height() - 1);
-		break;
-	}
+	int counter = 0;
+	do {
+		switch (Random::Generate(3)) {
+		case 0:
+			a.X(0);
+			a.Y(Random::Generate(map->Height() - 21));
+			b.X(1);
+			b.Y(a.Y() + 20);
+			break;
+	
+		case 1:
+			a.X(Random::Generate(map->Width() - 21));
+			a.Y(0);
+			b.X(a.X() + 20);
+			b.Y(1);
+			break;
+	
+		case 2:
+			a.X(map->Width() - 2);
+			a.Y(Random::Generate(map->Height() - 21));
+			b.X(map->Width() - 1);
+			b.Y(a.Y() + 20);
+			break;
+	
+		case 3:
+			a.X(Random::Generate(map->Width() - 21));
+			a.Y(map->Height() - 2);
+			b.X(a.X() + 20);
+			b.Y(map->Height() - 1);
+			break;
+		}
+		++counter;
+	} while ((Map::Inst()->IsUnbridgedWater(a.X(), a.Y()) || Map::Inst()->IsUnbridgedWater(b.X(), b.Y())) && counter < 100);
 
 	Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 	Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));

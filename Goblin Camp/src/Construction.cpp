@@ -149,9 +149,21 @@ int Construction::Build() {
 		//Theoretically it'd be possible to build a construction out of the wrong materials, but this should
 		//be impossible in practice.
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
+
+		std::list<boost::weak_ptr<Item> > itemsToRemove;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
+			if (Random::Generate(9) < 8) { //80% of materials can't be recovered
+				itemsToRemove.push_back(*itemi);
+			}
+		}
+
+		for (std::list<boost::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
+			materialsUsed->RemoveItem(*itemi);
+			Game::Inst()->RemoveItem(*itemi);
+			Game::Inst()->CreateItem(materialsUsed->Position(), Item::StringToItemType("debris"), false, -1, 
+				std::vector<boost::weak_ptr<Item> >(), materialsUsed);
 		}
 
 		//TODO: constructions should have the option of having both walkable and unwalkable tiles
@@ -741,12 +753,12 @@ void Construction::Damage(Attack* attack) {
 void Construction::Explode() {
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (boost::shared_ptr<Item> item = itemi->lock()) {
-			item->SetFaction(0); //Return item to player faction
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget;
 			randomTarget.X(Position().X() + Random::Generate(-5, 5));
 			randomTarget.Y(Position().Y() + Random::Generate(-5, 5));
 			item->CalculateFlightPath(randomTarget, 50, GetHeight());
+			if (item->Type() != Item::StringToItemType("debris")) item->SetFaction(0); //Return item to player faction
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }

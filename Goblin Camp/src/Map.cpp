@@ -259,18 +259,27 @@ void Map::Unmark(int x, int y) { tileMap[x][y].Unmark(); }
 
 int Map::GetMoveModifier(int x, int y) {
 	int modifier = 0;
-	if (tileMap[x][y].type() == TILEBOG) modifier += 10;
-	else if (tileMap[x][y].type() == TILEDITCH) modifier += 4;
-	else if (tileMap[x][y].type() == TILEMUD) {
-		if (tileMap[x][y].construction < 0 || !Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() ||
-			(!Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->Built() ||
-			!Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(BRIDGE))) modifier += 6;
+
+	boost::shared_ptr<Construction> construction;
+	if (tileMap[x][y].construction >= 0) construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
+	bool bridge = false;
+	if (construction) bridge = (construction->Built() && construction->HasTag(BRIDGE));
+
+	if (tileMap[x][y].type() == TILEBOG && !bridge) modifier += 10;
+	else if (tileMap[x][y].type() == TILEDITCH && !bridge) modifier += 4;
+	else if (tileMap[x][y].type() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
+		modifier += 6;
 	}
-	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) {
-		if (tileMap[x][y].construction < 0 || !Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() ||
-			(!Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->Built() ||
-			!Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(BRIDGE))) modifier += water->Depth();
+	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) { //Water adds 'depth' without a bridge
+		if (!bridge) modifier += water->Depth();
 	}
+
+	//Constructions (except bridges) slow down movement
+	if (construction && !bridge) modifier += 2;
+
+	//Other critters slow down movement
+	if (tileMap[x][y].npcList.size() > 0) modifier += 2 + Random::Generate(tileMap[x][y].npcList.size() - 1);
+
 	return modifier;
 }
 
@@ -356,3 +365,53 @@ void Map::AddOverlay(int flags) { overlayFlags |= flags; }
 void Map::RemoveOverlay(int flags) { overlayFlags = overlayFlags & ~flags; }
 
 void Map::ToggleOverlay(int flags) { overlayFlags ^= flags; }
+
+void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &moveY, int nextX, int nextY, void* npc) {
+	//We need to find a tile that is walkable, and adjacent to all 3 given tiles but not the same as moveX or moveY
+
+	//Find the edges
+	int left = currentX < moveX ? currentX : moveX;
+	left = left < nextX ? left : nextX;
+	int right = currentX > moveX ? currentX : moveX;
+	right = right > nextX ? right : nextX;
+
+	int up = currentY < moveY ? currentY : moveY;
+	up = up < nextY ? up : nextY;
+	int down = currentY > moveY ? currentY : moveY;
+	down = down > nextY ? down : nextY;
+
+	--left;
+	++right;
+	--up;
+	++down;
+
+	Coordinate current(currentX, currentY);
+	Coordinate move(moveX, moveY);
+	Coordinate next(nextX, nextY);
+
+	//Find a suitable target
+	for (int x = left; x <= right; ++x) {
+		for (int y = up; y <= down; ++y) {
+			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
+				if (Walkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y)) {
+					Coordinate xy(x,y);
+					if (Game::Adjacent(xy, current) && Game::Adjacent(xy, move) && Game::Adjacent(xy, next)) {
+						moveX = x;
+						moveY = y;
+						return;
+					}
+				}
+			}
+		}
+	}
+}
+
+bool Map::IsUnbridgedWater(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		if (boost::shared_ptr<WaterNode> water = tileMap[x][y].water) {
+			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
+			if (water->Depth() > 1 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
+		}
+	}
+	return false;
+}

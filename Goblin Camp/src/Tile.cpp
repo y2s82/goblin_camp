@@ -79,7 +79,7 @@ void Tile::type(TileType newType) {
 		vis = true; walkable = true; buildable = true; low = true;
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
-		_moveCost = Random::Generate(2, 4);
+		_moveCost = Random::Generate(3, 5);
 	} else if (_type == TILEBOG) {
 		vis = true; walkable = true; buildable = false; low = false;
 		switch (Random::Generate(9)) {
@@ -96,7 +96,7 @@ void Tile::type(TileType newType) {
 		}
 		originalForeColor = TCODColor(Random::Generate(184), 127, 70);
 		backColor = TCODColor(60,30,20);
-		_moveCost = Random::Generate(5, 9);
+		_moveCost = Random::Generate(6, 10);
 	} else if (_type == TILEROCK) {
 		vis = true; walkable = true; buildable = true; low = false;
 		graphic = (Random::GenerateBool() ? ',' : '.');
@@ -104,13 +104,10 @@ void Tile::type(TileType newType) {
 		backColor = TCODColor(0, 0, 0);
 	} else if (_type == TILEMUD) {
 		vis = true; walkable = true; buildable = true; low = false;
-		switch (rand() % 2) {
-		case 0: graphic = '~'; break;
-		case 1: graphic = '#'; break;
-		}
-		originalForeColor = TCODColor(120 + rand() % 60, 80 + rand() % 50, 0);
+		graphic = Random::GenerateBool() ? '#' : '~';
+		originalForeColor = TCODColor(Random::Generate(120, 120 + 59), Random::Generate(80, 80 + 49), 0);
 		backColor = TCODColor(0, 0, 0);
-		_moveCost = 4;
+		_moveCost = 5;
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
 }
@@ -154,9 +151,16 @@ int Tile::MoveCost(void* ptr) const {
 int Tile::MoveCost() const {
 	if (!Walkable()) return 0;
 	int cost = _moveCost;
-	if (construction >= 0) cost += 1;
-	if (water && (construction < 0 || (Game::Inst()->GetConstruction(construction).lock() && 
-		!Game::Inst()->GetConstruction(construction).lock()->HasTag(BRIDGE)))) cost += std::min(20, water->Depth());
+	if (construction >= 0) cost += 2;
+
+	//If a construction exists here, and it's a bridge, then movecost = 1 (disregards mud/ditch/etc)
+	if (construction > 0 && Game::Inst()->GetConstruction(construction).lock() && 
+		Game::Inst()->GetConstruction(construction).lock()->HasTag(BRIDGE)) {
+			cost = 1;
+	} else if (water) { //Otherwise take water depth into account
+		cost += std::min(20, water->Depth());
+	}
+
 	return cost;
 }
 void Tile::SetMoveCost(int value) { _moveCost = value; }
@@ -221,7 +225,7 @@ void Tile::WalkOver() {
 	if (_type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
-		if (walkedOver > 300 && rand() % 100 == 0) type(TILEMUD);
+		if (walkedOver > 300 && Random::Generate(99) == 0) type(TILEMUD);
 	}
 }
 
@@ -242,6 +246,8 @@ TileType Tile::StringToTileType(std::string string) {
 		return TILEDITCH;
 	} else if (boost::iequals(string, "rock")) {
 		return TILEROCK;
+	} else if (boost::iequals(string, "mud")) {
+		return TILEMUD;
 	}
 	return TILENONE;
 }

@@ -98,4 +98,6 @@ public:
 	void AddOverlay(int flags);
 	void RemoveOverlay(int flags);
 	void ToggleOverlay(int flags);
+	void FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &moveY, int nextX, int nextY, void* npc);
+	bool IsUnbridgedWater(int x, int y);
 };

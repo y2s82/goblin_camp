@@ -144,8 +144,17 @@ void SquadsDialog::CreateSquad() {
     if(squadName.length() > 0) {
         Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
                                        (squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
-        squadList->Select(Game::Inst()->squadList.size() - 1);
-        SelectSquad(Game::Inst()->squadList.size() - 1);
+		int squad = 0;
+        for (std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
+			it != Game::Inst()->squadList.end(); ++it) {
+				if (it->first == squadName) {
+					break;
+				}
+				++squad;
+		}
+		squad = std::min(squad, (signed int)Game::Inst()->squadList.size()-1);
+		squadList->Select(squad);
+        SelectSquad(squad);
     }
 }
 
@@ -157,6 +166,20 @@ void SquadsDialog::ModifySquad() {
                                    boost::shared_ptr<Squad> >(squadName, tempSquad));
     tempSquad->MemberLimit(squadMembers);
     tempSquad->Priority(squadPriority);
+
+	//Reselect the squad, changing the name may change it's position in the list
+	int squad = 0;
+	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
+		it != Game::Inst()->squadList.end(); ++it) {
+			if (it->first == squadName) {
+				break;
+			}
+				++squad;
+	}
+	squad = std::min(squad, (signed int)Game::Inst()->squadList.size()-1);
+	squadList->Select(squad);
+	SelectSquad(squad);
+
 }
 
 void SquadsDialog::DeleteSquad() {

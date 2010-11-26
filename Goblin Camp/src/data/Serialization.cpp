@@ -342,6 +342,7 @@ void Item::save(Archive & ar, const unsigned int version) const {
 	ar & decayCounter;
 	ar & attack;
 	ar & resistances;
+	ar & condition;
 	ar & container;
 	ar & internal;
 }
@@ -361,6 +362,7 @@ void Item::load(Archive & ar, const unsigned int version) {
 		ar & decayCounter;
 		ar & attack;
 		ar & resistances;
+		ar & condition;
 		ar & container;
 		ar & internal;
 	}

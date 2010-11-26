@@ -67,6 +67,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	}
 
 	bulk = Item::Presets[type].bulk;
+	condition = Item::Presets[type].condition;
 }
 
 Item::~Item() {
@@ -312,6 +313,7 @@ private:
 			}
 		} else if (boost::iequals(name, "decaySpeed")) {
 			Item::Presets.back().decaySpeed = value.i;
+			Item::Presets.back().decays = true;
 		} else if (boost::iequals(name,"type")) {
 			Item::Presets.back().attack.Type(Attack::StringToDamageType(value.s));
 		} else if (boost::iequals(name,"damage")) {
@@ -342,6 +344,8 @@ private:
 			Item::Presets.back().resistances[POISON_RES] = value.i;
 		} else if (boost::iequals(name,"bulk")) {
 			Item::Presets.back().bulk = value.i;
+		} else if (boost::iequals(name,"durability")) {
+			Item::Presets.back().condition = value.i;
 		}
 		return true;
 	}
@@ -379,6 +383,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("decaySpeed", TCOD_TYPE_INT, false);
 	itemTypeStruct->addProperty("constructedin", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("bulk", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("durability", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
@@ -443,6 +448,8 @@ int Item::RelativeValue() {
 int Item::Resistance(int i) const { return resistances[i]; }
 
 void Item::SetVelocity(int speed) {
+	if (velocity > 10 && speed == 0 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
+	
 	velocity = speed;
 	if (speed > 0) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
@@ -534,7 +541,8 @@ ItemPreset::ItemPreset() : graphic('?'),
 	decaySpeed(0),
 	decayList(std::vector<ItemType>()),
 	attack(Attack()),
-	bulk(1)
+	bulk(1),
+	condition(1)
 {
 	for (int i = 0; i < RES_COUNT; ++i) {
 		resistances[i] = 0;
