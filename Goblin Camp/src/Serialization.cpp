@@ -454,6 +454,7 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;
+	ar & reservedContainer;
 	ar & reservedSpace;
 	ar & tool;
 	ar & name;
@@ -485,6 +486,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 		ar & attempts;
 		ar & attemptMax;
 		ar & connectedEntity;
+		ar & reservedContainer;
 		ar & reservedSpace;
 		ar & tool;
 		ar & name;
