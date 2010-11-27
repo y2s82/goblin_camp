@@ -94,10 +94,11 @@ public:
 	static void ChooseCreateItem();
 	static void ChooseDig();
 	static void ChooseNaturify();
-	static void ChooseRemoveNatureObjects();
 	static void ChooseChangeTerritory(bool add);
 	static void ChooseGatherItems();
 	static void ChooseNormalPlacement(boost::function<void(Coordinate)> callback,
+		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
+	static void ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback,
 		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
