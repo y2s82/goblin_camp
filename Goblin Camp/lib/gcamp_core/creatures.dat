@@ -21,7 +21,7 @@ npc_type "orc" {
 	}
 	attack "attack" {
 		type="wielded"
-		damage="1d10+10"
+		damage="1d10+5"
 		cooldown=25
 	}
 }
@@ -86,7 +86,7 @@ npc_type "starving wolf" {
 	AI="HungryAnimal"
 	stats {
 		speed=24
-		health=150
+		health=75
 		dodge=10
 		size=7
 	}
@@ -96,7 +96,7 @@ npc_type "starving wolf" {
 	}
 	attack "Bite" {
 		type="slashing"
-		damage="5d4"
+		damage="5d4+6"
 		cooldown=50
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
@@ -122,7 +122,7 @@ npc_type "rabid albino rat" {
 	}
 	attack "Bite" {
 		type="piercing"
-		damage="1d2+1"
+		damage="2d7"
 		cooldown=40
 	}
 	spawnAsGroup="1d10+5"
@@ -165,7 +165,7 @@ npc_type "soldier ant" {
 		strength=15
 	}
 	resistances {
-		physical=10
+		physical=30
 	}
 	attack "Bite" {
 		type="slashing"
@@ -186,7 +186,7 @@ npc_type "killer bee" {
 	stats {
 		speed=15
 		health=10
-		dodge=20
+		dodge=50
 		size=2
 	}
 	resistances {
@@ -198,12 +198,12 @@ npc_type "killer bee" {
 		cooldown=15
 		statusEffects=["poison"]
 	}
-	spawnAsGroup="1d10+10"
+	spawnAsGroup="1d20+10"
 }
 
 npc_type "harpy" { 
 	name="Harpy"
-	tier=4
+	tier=3
 	plural="Harpies"
 	tags=["attacksRandomly", "flying"]
 	color="128,128,0"
@@ -220,7 +220,7 @@ npc_type "harpy" {
 	}
 	attack "Claw" {
 		type="slashing"
-		damage="2d3"
+		damage="2d7"
 		cooldown=10
 		statusEffects=["Bleeding"]
 		effectChances=[    20    ]
@@ -286,7 +286,7 @@ npc_type "troll" {
 	AI="HostileAnimal"
 	stats {
 		speed=15
-		health=350
+		health=300
 		dodge=5
 		size=15
 	}
@@ -318,7 +318,7 @@ npc_type "skeleton" {
 	graphic='Z'
 	AI="HostileAnimal"
 	stats {
-		health=20
+		health=75
 		speed=5
 		dodge=0
 		size=7
@@ -326,11 +326,12 @@ npc_type "skeleton" {
 	}
 	resistances {
 		physical=15
+		magic=50
 	}
 	spawnAsGroup="1d20"
 	attack "Swipe" {
 		type="slashing"
-		damage="1d6"
+		damage="1d24"
 		cooldown=75
 	}
 }
@@ -357,6 +358,7 @@ npc_type "bandersnatch" {
 		damage="1d12+4"
 		cooldown=25
 	}
+	spawnAsGroup="1d10"
 }
 
 npc_type "jabberwock" { 

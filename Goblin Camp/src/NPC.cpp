@@ -234,7 +234,7 @@ void NPC::HandleHunger() {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position());
 		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position());}
 		if (!item.lock()) { //Nothing to eat!
-			if (hunger > (int)(HUNGER_THRESHOLD * 1.5)) { //Nearing death
+			if (hunger > 48000) { //Nearing death
 				Game::Inst()->FindNearbyNPCs(boost::static_pointer_cast<NPC>(shared_from_this()));
 				boost::shared_ptr<NPC> weakest;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
@@ -322,7 +322,7 @@ void NPC::Update() {
 		} else if (thirst > THIRST_THRESHOLD * 2) Kill();
 		if (hunger > HUNGER_THRESHOLD && (rand() % (UPDATES_PER_SECOND*5)) == 0) {
 			HandleHunger();
-		} else if (hunger > HUNGER_THRESHOLD * 2) Kill();
+		} else if (hunger > 72000) Kill();
 	}
 
 	if (needsSleep) {
