@@ -213,7 +213,7 @@ construction_type "Pontoon bridge" {
 	bridge
 	walkable
 	maxCondition=50
-	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank"]
+	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank", "Rope", "Rope"]
 	graphicLength=2
 	graphic=[157, 157,
 			 157, 157]
