@@ -1216,12 +1216,16 @@ void NPC::Kill() {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
 		health = 0;
-		int corpsenum = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
-		boost::shared_ptr<Item> corpse = Game::Inst()->GetItem(corpsenum).lock();
-		corpse->Color(_color);
-		corpse->Name(corpse->Name() + "(" + name + ")");
-		if (velocity > 0) {
-			corpse->CalculateFlightPath(GetVelocityTarget(), velocity, GetHeight());
+		if (NPC::Presets[type].deathItem >= 0) {
+			int corpsenum = Game::Inst()->CreateItem(Position(), NPC::Presets[type].deathItem, false);
+			boost::shared_ptr<Item> corpse = Game::Inst()->GetItem(corpsenum).lock();
+			corpse->Color(_color);
+			corpse->Name(corpse->Name() + "(" + name + ")");
+			if (velocity > 0) {
+				corpse->CalculateFlightPath(GetVelocityTarget(), velocity, GetHeight());
+			}
+		} else if (NPC::Presets[type].deathItem == -1) {
+			Game::Inst()->CreateFilth(Position());
 		}
 
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
@@ -1764,6 +1768,9 @@ class NPCListener : public ITCODParserListener {
 			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"tier")) {
 			NPC::Presets.back().tier = value.i;
+		} else if (boost::iequals(name,"death")) {
+			if (boost::iequals(value.s,"filth")) NPC::Presets.back().deathItem = -1;
+			else NPC::Presets.back().deathItem = Item::StringToItemType(value.s);
 		}
 		return true;
 	}
@@ -1796,6 +1803,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
 	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
+	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -2009,7 +2017,8 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	group(TCOD_dice_t()),
 	attacks(std::list<Attack>()),
 	tags(std::set<std::string>()),
-	tier(0)
+	tier(0),
+	deathItem(-2)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;

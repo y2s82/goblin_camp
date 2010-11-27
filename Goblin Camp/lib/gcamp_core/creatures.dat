@@ -24,6 +24,7 @@ npc_type "orc" {
 		damage="1d10+5"
 		cooldown=25
 	}
+	death="Corpse"
 }
 
 npc_type "goblin" {
@@ -50,6 +51,7 @@ npc_type "goblin" {
 		damage="1d5"
 		cooldown=25
 	}
+	death="Corpse"
 }
 
 npc_type "giant snail" {
@@ -74,6 +76,7 @@ npc_type "giant snail" {
 		cooldown=75
 	}
 	spawnAsGroup="1d3"
+	death="Filth"
 }
 
 npc_type "starving wolf" {
@@ -102,6 +105,7 @@ npc_type "starving wolf" {
 		effectChances=[    33    ]
 	}
 	spawnAsGroup="1d4+3"
+	death="Corpse"
 }
 
 npc_type "rabid albino rat" {
@@ -126,6 +130,7 @@ npc_type "rabid albino rat" {
 		cooldown=40
 	}
 	spawnAsGroup="1d10+5"
+	death="Small corpse"
 }
 
 npc_type "snake" {
@@ -150,6 +155,7 @@ npc_type "snake" {
 		cooldown=50
 		statusEffects=["poison"]
 	}
+	death="Small corpse"
 }
 
 npc_type "soldier ant" {
@@ -174,6 +180,7 @@ npc_type "soldier ant" {
 	}
 	spawnAsGroup="1d7+3"
 	tags=["underground"]
+	death="Corpse"
 }
 
 npc_type "killer bee" {
@@ -199,6 +206,7 @@ npc_type "killer bee" {
 		statusEffects=["poison"]
 	}
 	spawnAsGroup="1d20+10"
+	death="Filth"
 }
 
 npc_type "harpy" { 
@@ -226,6 +234,7 @@ npc_type "harpy" {
 		effectChances=[    20    ]
 	}
 	spawnAsGroup="1d4+1"
+	death="Corpse"
 }
 
 npc_type "kobold" { 
@@ -250,6 +259,7 @@ npc_type "kobold" {
 		cooldown=20
 	}
 	spawnAsGroup="1d3+1"
+	death="Corpse"
 }
 
 npc_type "ogre" {
@@ -275,6 +285,7 @@ npc_type "ogre" {
 		statusEffects=["Concussion"]
 		effectChances=[     75     ]
 	}
+	death="Corpse"
 }
 
 npc_type "troll" { 
@@ -308,6 +319,7 @@ npc_type "troll" {
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
 	}
+	death="Corpse"
 }
 
 npc_type "skeleton" { 
@@ -334,6 +346,7 @@ npc_type "skeleton" {
 		damage="1d24"
 		cooldown=75
 	}
+	death="Bones"
 }
 
 npc_type "bandersnatch" { 
@@ -359,6 +372,7 @@ npc_type "bandersnatch" {
 		cooldown=25
 	}
 	spawnAsGroup="1d10"
+	death="Corpse"
 }
 
 npc_type "jabberwock" { 
@@ -391,6 +405,7 @@ npc_type "jabberwock" {
 		damage="1d100"
 		cooldown=110
 	}
+	death="Corpse"
 }
 
 npc_type "minotaur" { 
@@ -432,6 +447,7 @@ npc_type "minotaur" {
 		statusEffects=["Concussion"]
 		effectChances=[     33     ]
 	}
+	death="Corpse"
 }
 
 npc_type "cyclops" { 
@@ -457,6 +473,7 @@ npc_type "cyclops" {
 		cooldown=100
 		statusEffects=["Concussion"]
 	}
+	death="Corpse"
 }
 
 npc_type "giant" { 
@@ -486,6 +503,7 @@ npc_type "giant" {
 	stats {
 	    strength=25
 	}
+	death="Corpse"
 }
 
 npc_type "griffon" { 
@@ -510,6 +528,7 @@ npc_type "griffon" {
 		damage="2d20+6"
 		cooldown=30
 	}
+	death="Corpse"
 }
 
 npc_type "unicorn" { 
@@ -541,6 +560,7 @@ npc_type "unicorn" {
 		effectChances=[     50     ]
 	}
 	spawnAsGroup="1d2"
+	death="Corpse"
 }
 
 npc_type "will o wisp" { 
@@ -590,6 +610,7 @@ npc_type "raw golem" {
 		statusEffects=["Concussion"]
 		effectChances=[     70     ]
 	}
+	death="Red clay"
 }
 
 
@@ -616,4 +637,5 @@ npc_type "fired golem" {
 		statusEffects=["Concussion"]
 		effectChances=[     80     ]
 	}
+	death="Red clay"
 }

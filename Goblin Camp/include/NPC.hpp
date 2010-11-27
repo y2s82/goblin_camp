@@ -93,6 +93,7 @@ struct NPCPreset {
 	std::list<Attack> attacks;
 	std::set<std::string> tags;
 	int tier;
+	ItemType deathItem;
 };
 
 class NPC : public Entity {
