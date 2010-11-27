@@ -1041,7 +1041,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					fellJob->Attempts(50);
 					fellJob->ConnectToEntity(natObj);
 					fellJob->DisregardTerritory();
-					fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
+					fellJob->SetRequiredTool(Item::StringToItemCategory("Axe"));
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj->Position(), natObj));
 					JobManager::Inst()->AddJob(fellJob);
@@ -1451,7 +1451,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 			spot is reserved for digging. */
 			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
-				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
+				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
 				digJob->Attempts(1000);
 				digJob->DisregardTerritory();

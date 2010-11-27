@@ -48,6 +48,10 @@ category_type "Berry" {
 	parent="Food"
 }
 
+category_type "Fruit" {
+	parent="Food"
+}
+
 category_type "Drink" {
 }
 
@@ -143,6 +147,9 @@ category_type "Ranged weapon" {
 	parent="Weapon"
 }
 
+category_type "Rope" {
+}
+
 category_type "Quiver" {
 }
 
@@ -168,11 +175,15 @@ category_type "Heavy armor" {
 	parent="Armor"
 }
 
-category_type "Tools" {
+category_type "Tool" {
 }
 
-category_type "Digging tool" {
-	parent="Tools"
+category_type "Shovel" {
+	parent="Tool"
+}
+
+category_type "Axe" {
+	parent="Tool"
 }
 
 category_type "Garbage" {
@@ -366,6 +377,56 @@ item_type "Blueleaf tree" {
 	decaySpeed = 12
 }
 
+item_type "Nightbloom" {
+	category = [ "Fruit" ]
+	graphic = 248
+	color = "190,255,200"
+	nutrition = 5000
+	fruits = [ "Nightbloom seed" ]
+	decay = [ "Nightbloom seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Nightbloom seed" {
+	category = ["Seed"]
+	graphic = 250
+	color = "190,255,70"
+	growth = "Nightbloom sapling"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Nightbloom sapling" {
+	category = ["Misc."]
+	graphic = 214
+	color = "190,255,128"
+	growth = "Nightbloom tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Nightbloom tree" {
+	category = ["Misc."]
+	graphic = 215
+	color = "190,195,155"
+	fruits = [ "Nightbloom", "Nightbloom", "Nightbloom" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Dried fruit" {
+	category = ["Food"]
+	graphic = 42
+	color = "190,195,130"
+	components = ["Fruit"]
+	fitsin = "Basket"
+	nutrition = 4000
+	decaySpeed = 15
+	decay = ["Filth"]
+	constructedin = "Kitchen"
+}
+
 item_type "Dead plant" {
 	category = ["Fibrous material"]
 	graphic = 207
@@ -414,7 +475,7 @@ item_type "Corpse" {
 	graphic = 37
 	color = "127,0,55"
 	decay = [ "Bones", "Filth" ]
-	decaySpeed = 4
+	decaySpeed = 3
 	fruits = [ "Bones", "Hide" ]
 	bulk = 6
 	durability = 5
@@ -440,6 +501,8 @@ item_type "Pie" {
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood"]
 	nutrition = 48000
 	constructedin = "Kitchen"
+	decaySpeed = 12
+	decay = ["Filth"]
 }
 
 item_type "Meat" {
@@ -458,8 +521,10 @@ item_type "Bone Stew" {
 	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat", "Firewood"]
-	nutrition = 90000
+	nutrition = 50000
 	constructedin = "Kitchen"
+	decaySpeed = 8
+	decay = ["Filth"]
 }
 
 item_type "Bread" {
@@ -467,8 +532,10 @@ item_type "Bread" {
 	graphic = 37
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood"]
-	nutrition = 86000
+	nutrition = 40000
 	constructedin = "Kitchen"
+	decaySpeed = 12
+	decay = ["Filth"]
 }
 
 item_type "Flour" {
@@ -499,7 +566,7 @@ item_type "Wooden club" {
 	components = ["Plank"]
 	attack "Bash" {
 		type="blunt"
-		damage="1d10+10"
+		damage="1d10+3"
 		cooldown=25
 		statusEffects=["Concussion"]
 		effectChances=[     20     ]
@@ -515,7 +582,7 @@ item_type "Stone maul" {
 	components = ["Plank", "Rough stone"]
 	attack "Crush" {
 		type="blunt"
-		damage="1d15+15"
+		damage="1d15+10"
 		cooldown=25
 		statusEffects=["Concussion"]
 		effectChances=[    33    ]
@@ -526,14 +593,14 @@ item_type "Stone maul" {
 }
 
 item_type "Stone axe" {
-	category = ["Slashing weapon"]
+	category = ["Slashing weapon", "Axe"]
 	graphic = 41
 	color = "192,192,192"
 	components = ["Plank", "Sharpened stone"]
 	attack "Hack" {
 		type="slashing"
-		damage="1d15+15"
-		cooldown=25
+		damage="2d15+9"
+		cooldown=35
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
 	}
@@ -549,7 +616,7 @@ item_type "Stone spear" {
 	components = ["Plank", "Sharpened stone"]
 	attack "Thrust" {
 		type="piercing"
-		damage="1d15+15"
+		damage="1d15+10"
 		cooldown=25
 		statusEffects=["Bleeding"]
 		effectChances=[    10    ]
@@ -608,7 +675,7 @@ item_type "Stone-tipped arrow" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 0
-	durability = 4
+	durability = 2
 }
 
 item_type "Wooden bow" {
@@ -672,6 +739,15 @@ item_type "Cloth" {
 	fitsin = "Crate"
 }
 
+item_type "Rope" {
+	category = ["Rope"]
+	graphic = 167
+	color = "255,255,255"
+	components = ["Fiber", "Fiber"]
+	constructedin = "Weaver"
+	fitsin = "Crate"
+}
+
 item_type "Bone statue" {
 	category = ["Statue"]
 	graphic = 190
@@ -705,7 +781,7 @@ item_type "Leather armor" {
 	color = "160,82,45"
 	components = ["Leather", "Leather", "Leather", "Cloth"]
 	resistances {
-		physical = 10
+		physical = 15
 	}
 	constructedin = "Armor Crafter"
 	bulk = 2
@@ -717,7 +793,7 @@ item_type "Chainmail" {
 	color = "112,138,144"
 	components = ["Metal bar", "Metal bar", "Metal bar", "Cloth"]
 	resistances {
-		physical = 20
+		physical = 25
 	}
 	constructedin = "Armor Crafter"
 	bulk = 4
@@ -729,7 +805,7 @@ item_type "Platemail" {
 	color = "190,190,190"
 	components = ["Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Cloth", "Cloth"]
 	resistances {
-		physical = 30
+		physical = 40
 	}
 	constructedin = "Armor Crafter"
 	bulk = 6
@@ -767,7 +843,7 @@ item_type "Red brick" {
 }
 
 item_type "Shovel" {
-	category = ["Digging tool"]
+	category = ["Shovel"]
 	graphic = 93
 	color = "155,128,128"
 	components = [ "Plank", "Metal bar" ]

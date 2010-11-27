@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define MAXIMUM_JOB_ATTEMPTS 5
 
 #define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 10)
-#define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 13)
+#define HUNGER_THRESHOLD 18000
 #define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 12)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
