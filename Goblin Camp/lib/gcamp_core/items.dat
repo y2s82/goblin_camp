@@ -474,12 +474,24 @@ item_type "Corpse" {
 	category = ["Corpse"]
 	graphic = 37
 	color = "127,0,55"
-	decay = [ "Bones", "Filth" ]
+	decay = [ "Bones", "Bones", "Filth", "Filth" ]
 	decaySpeed = 3
-	fruits = [ "Bones", "Hide" ]
+	fruits = [ "Bones", "Bones", "Hide", "Hide" ]
 	bulk = 6
 	durability = 5
 	nutrition = 20000
+}
+
+item_type "Small corpse" {
+	category = ["Corpse"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Filth"]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide" ]
+	bulk = 3
+	durability = 5
+	nutrition = 10000
 }
 
 item_type "Wine" {
