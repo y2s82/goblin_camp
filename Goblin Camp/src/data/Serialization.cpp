@@ -342,6 +342,7 @@ void Item::save(Archive & ar, const unsigned int version) const {
 	ar & decayCounter;
 	ar & attack;
 	ar & resistances;
+	ar & condition;
 	ar & container;
 	ar & internal;
 }
@@ -361,6 +362,7 @@ void Item::load(Archive & ar, const unsigned int version) {
 		ar & decayCounter;
 		ar & attack;
 		ar & resistances;
+		ar & condition;
 		ar & container;
 		ar & internal;
 	}
@@ -453,6 +455,7 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;
+	ar & reservedContainer;
 	ar & reservedSpace;
 	ar & tool;
 	ar & name;
@@ -484,6 +487,7 @@ void Job::load(Archive & ar, const unsigned int version) {
 		ar & attempts;
 		ar & attemptMax;
 		ar & connectedEntity;
+		ar & reservedContainer;
 		ar & reservedSpace;
 		ar & tool;
 		ar & name;

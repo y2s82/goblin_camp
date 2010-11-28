@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define MAXIMUM_JOB_ATTEMPTS 5
 
 #define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 10)
-#define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 13)
+#define HUNGER_THRESHOLD 18000
 #define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 12)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
@@ -93,6 +93,7 @@ struct NPCPreset {
 	std::list<Attack> attacks;
 	std::set<std::string> tags;
 	int tier;
+	ItemType deathItem;
 };
 
 class NPC : public Entity {
@@ -205,6 +206,7 @@ public:
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();
 	void AbortCurrentJob(bool);
+	void AbortJob(boost::weak_ptr<Job>);
 
 	bool Expert();
 	void Expert(bool);
@@ -213,7 +215,7 @@ public:
 	void Kill();
 	void PickupItem(boost::weak_ptr<Item>);
 	void DropItem(boost::weak_ptr<Item>);
-	void Hit(boost::weak_ptr<Entity>);
+	void Hit(boost::weak_ptr<Entity>, bool careful = false);
 	void FireProjectile(boost::weak_ptr<Entity>);
 	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
 
@@ -226,6 +228,9 @@ public:
 	bool HasHands();
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
+
+	int GetHealth();
+	int GetMaxHealth();
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;

@@ -66,8 +66,6 @@ Job::~Job() {
 	if (connectedEntity.lock()) connectedEntity.lock()->CancelJob();
 	if (reservedContainer.lock()) {
 		reservedContainer.lock()->ReserveSpace(false, reservedSpace);
-		reservedContainer = boost::weak_ptr<Container>();
-		reservedSpace = 0;
 	}
 	if (markedGround.X() >= 0 && markedGround.X() < Map::Inst()->Width() &&
 		markedGround.Y() >= 0 && markedGround.Y() < Map::Inst()->Height()) {

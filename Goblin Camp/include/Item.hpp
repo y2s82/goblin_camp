@@ -65,6 +65,7 @@ struct ItemPreset {
 	Attack attack;
 	int resistances[RES_COUNT];
 	int bulk;
+	int condition;
 };
 
 class Item : public Entity {
@@ -91,6 +92,7 @@ private:
 	Attack attack;
 	int resistances[RES_COUNT];
 
+	int condition;
 protected:
 	TCODColor color;
 	int graphic;

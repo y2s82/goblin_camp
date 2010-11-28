@@ -139,6 +139,8 @@ public:
 	void CreateNPCs(int,NPCType,Coordinate,Coordinate);
 	unsigned int PeacefulFaunaCount() const;
 	void PeacefulFaunaCount(int);
+	void Hungerize(Coordinate);
+	void Tire(Coordinate);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());
@@ -150,9 +152,10 @@ public:
 	std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
 	std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
 	Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>);
-	bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
+	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 	boost::weak_ptr<Construction> GetConstruction(int);
 	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag);
+	void Damage(Coordinate);
 
 	/*      ITEMS       ITEMS       ITEMS       */
 	int CreateItem(Coordinate, ItemType, bool stockpile = false,
@@ -193,7 +196,7 @@ public:
 	static bool CheckTileType(TileType, Coordinate, Coordinate);
 	static void Dig(Coordinate, Coordinate);
 	Coordinate FindClosestAdjacent(Coordinate, Coordinate);
-	bool Adjacent(Coordinate, Coordinate);
+	static bool Adjacent(Coordinate, Coordinate);
 	void CreateNatureObject(Coordinate);
 	void CreateNatureObject(Coordinate, std::string);
 

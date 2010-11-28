@@ -858,46 +858,14 @@ void UI::ChooseDig() {
 	UI::Inst()->SetCursor('_');
 }
 
-void UI::ChooseCreateFilth() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::CreateFilth, Game::Inst(), _1, 10));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('~');
-}
-
-void UI::ChooseCreateWater() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Game::CreateWater, Game::Inst(), _1));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('~');
-}
-
-void UI::ChooseCorrupt() {
-	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(&Map::Corrupt, Map::Inst(), _1, 2000));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('c');
-}
-
 void UI::ChooseNaturify() {
 	for (int i = 0; i < 10000; ++i) {
 		Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 	}
 }
 
-void UI::ChooseRemoveNatureObjects() {
-	UI::Inst()->state(UIRECTPLACEMENT);
-	UI::Inst()->SetRectCallback(boost::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2));
-	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
-	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('R');
-}
-
 void UI::ChooseChangeTerritory(bool add) {
-	if (Camp::Inst()->IsAutoTerritoryEnabled()) {
+	if (Camp::Inst()->IsAutoTerritoryEnabled() && !add) {
 		Camp::Inst()->DisableAutoTerritory();
 		Announce::Inst()->AddMsg("Automatic territory handling disabled", TCODColor::cyan);
 	}
@@ -914,4 +882,20 @@ void UI::ChooseGatherItems() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('G');
+}
+
+void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
+	UI::Inst()->state(UIPLACEMENT);
+	UI::Inst()->SetCallback(callback);
+	UI::Inst()->SetPlacementCallback(placement);
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor(cursor);
+}
+
+void UI::ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
+	UI::Inst()->state(UIRECTPLACEMENT);
+	UI::Inst()->SetRectCallback(rectCallback);
+	UI::Inst()->SetPlacementCallback(placement);
+	UI::Inst()->blueprint(Coordinate(1,1));
+	UI::Inst()->SetCursor(cursor);
 }
