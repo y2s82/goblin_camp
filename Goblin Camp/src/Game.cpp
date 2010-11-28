@@ -312,7 +312,7 @@ void Game::GoblinCount(int add) { goblinCount += add; }
 //Moves the entity to a valid walkable tile
 //TODO: make it find the closest walkable tile instead of going right, that will lead to weirdness and problems
 void Game::BumpEntity(int uid) {
-	boost::weak_ptr<Entity> entity;
+	boost::shared_ptr<Entity> entity;
 
 	std::map<int,boost::shared_ptr<NPC> >::iterator npc = npcList.find(uid);
 	if (npc != npcList.end()) {
@@ -324,13 +324,19 @@ void Game::BumpEntity(int uid) {
 		}
 	}
 
-	if (entity.lock()) {
-		int newx = entity.lock()->X();
-		int newy = entity.lock()->Y();
-		while (!Map::Inst()->Walkable(newx,newy)) {
-			++newx;
+	if (entity) {
+		if (!Map::Inst()->Walkable(entity->Position().X(), entity->Position().Y())) {
+			for (int radius = 1; radius < 10; ++radius) {
+				for (int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
+					for (int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
+						if (Map::Inst()->Walkable(xi, yi)) {
+							entity->Position(Coordinate(xi, yi));
+							return;
+						}
+					}
+				}
+			}
 		}
-		entity.lock()->Position(Coordinate(newx,newy));
 	} 
 #ifdef DEBUG
 	else { std::cout<<"\nTried to bump nonexistant entity."; }
@@ -463,10 +469,11 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			newItem = boost::static_pointer_cast<Item>(orgItem);
 			orgItem->Nutrition(Item::Presets[type].nutrition);
 			orgItem->Growth(Item::Presets[type].growth);
+			orgItem->SetFaction(ownerFaction);
 		} else if (Item::Presets[type].container > 0) {
-			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, 0, comps)));
+			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, ownerFaction, comps)));
 		} else {
-			newItem.reset(new Item(pos, type, 0, comps));
+			newItem.reset(new Item(pos, type, ownerFaction, comps));
 		}
 
 		if (!container) {
@@ -720,6 +727,12 @@ void Game::Update() {
 
 	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
+		if (itemi->lock() && itemi->lock()->condition == 0) {
+			//The item has impacted and broken. Create debris owned by no one
+			std::vector<boost::weak_ptr<Item> > component(1, *itemi);
+			CreateItem(itemi->lock()->Position(), Item::StringToItemType("debris"), false, -1, component);
+			RemoveItem(*itemi);
+		}
 		itemi = stoppedItems.erase(itemi);
 	}
 
@@ -766,7 +779,7 @@ void Game::Update() {
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		if (!reserveItem || !item->Reserved()) {
+		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == 0) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -785,13 +798,13 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			}
 
 			if(nearest) {
-				//Check if the item can be contained, and if so if any containers are in the stockpile
-
-				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", LOW));
+				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
+					item->IsCategory(Item::StringToItemCategory("Food")) ? HIGH : LOW));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
 
+				//Check if the item can be contained, and if so if any containers are in the stockpile
 				if (Item::Presets[item->Type()].fitsin >= 0) {
 					container = nearest->FindItemByCategory(Item::Presets[item->Type()].fitsin, NOTFULL, item->GetBulk());
 					if (container.lock()) {
@@ -1050,7 +1063,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					fellJob->Attempts(50);
 					fellJob->ConnectToEntity(natObj);
 					fellJob->DisregardTerritory();
-					fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
+					fellJob->SetRequiredTool(Item::StringToItemCategory("Axe"));
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj->Position(), natObj));
 					JobManager::Inst()->AddJob(fellJob);
@@ -1141,6 +1154,9 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 			if (Map::Inst()->Type(x,y) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
+			}
+			if (Map::Inst()->GroundMarked(x,y)) { //A dig job exists for this tile
+				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y));
 			}
 		}
 	}
@@ -1454,7 +1470,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 			spot is reserved for digging. */
 			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
-				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
+				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
 				digJob->Attempts(1000);
 				digJob->DisregardTerritory();
@@ -1609,5 +1625,52 @@ void Game::RemoveWater(Coordinate pos) {
 		int filth = water->GetFilth();
 		Map::Inst()->SetWater(pos.X(), pos.Y(), boost::shared_ptr<WaterNode>());
 		if (filth > 0) CreateFilth(pos, filth);
+	}
+}
+
+void Game::Damage(Coordinate pos) {
+	Attack attack;
+	attack.Type(DAMAGE_MAGIC);
+	TCOD_dice_t dice;
+	dice.nb_dices = 10;
+	dice.nb_faces = 10;
+	dice.addsub = 1000;
+	attack.AddDamage(dice);
+	
+	boost::shared_ptr<Construction> construction = GetConstruction(Map::Inst()->GetConstruction(pos.X(), pos.Y())).lock();
+	if (construction) {
+		construction->Damage(&attack);
+	}
+	for (std::set<int>::iterator npcuid = Map::Inst()->NPCList(pos.X(), pos.Y())->begin(); 
+		npcuid != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npcuid) {
+			boost::shared_ptr<NPC> npc;
+			if (npcList.find(*npcuid) != npcList.end()) npc = npcList[*npcuid];
+			if (npc) npc->Damage(&attack);
+	}
+}
+
+void Game::Hungerize(Coordinate pos) {
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
+			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->hunger = (int)(HUNGER_THRESHOLD * 1.5);
+				}
+		}
+	}
+}
+
+void Game::Tire(Coordinate pos) {
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
+			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->weariness = (int)(WEARY_THRESHOLD * 1.5);
+				}
+		}
 	}
 }

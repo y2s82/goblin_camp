@@ -21,9 +21,10 @@ npc_type "orc" {
 	}
 	attack "attack" {
 		type="wielded"
-		damage="1d10+10"
+		damage="1d10+5"
 		cooldown=25
 	}
+	death="Corpse"
 }
 
 npc_type "goblin" {
@@ -50,6 +51,7 @@ npc_type "goblin" {
 		damage="1d5"
 		cooldown=25
 	}
+	death="Corpse"
 }
 
 npc_type "giant snail" {
@@ -74,6 +76,7 @@ npc_type "giant snail" {
 		cooldown=75
 	}
 	spawnAsGroup="1d3"
+	death="Filth"
 }
 
 npc_type "starving wolf" {
@@ -86,7 +89,7 @@ npc_type "starving wolf" {
 	AI="HungryAnimal"
 	stats {
 		speed=24
-		health=150
+		health=75
 		dodge=10
 		size=7
 	}
@@ -96,12 +99,13 @@ npc_type "starving wolf" {
 	}
 	attack "Bite" {
 		type="slashing"
-		damage="5d4"
+		damage="5d4+6"
 		cooldown=50
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
 	}
 	spawnAsGroup="1d4+3"
+	death="Corpse"
 }
 
 npc_type "rabid albino rat" {
@@ -122,10 +126,11 @@ npc_type "rabid albino rat" {
 	}
 	attack "Bite" {
 		type="piercing"
-		damage="1d2+1"
+		damage="2d7"
 		cooldown=40
 	}
 	spawnAsGroup="1d10+5"
+	death="Small corpse"
 }
 
 npc_type "snake" {
@@ -150,6 +155,7 @@ npc_type "snake" {
 		cooldown=50
 		statusEffects=["poison"]
 	}
+	death="Small corpse"
 }
 
 npc_type "soldier ant" {
@@ -165,7 +171,7 @@ npc_type "soldier ant" {
 		strength=15
 	}
 	resistances {
-		physical=10
+		physical=30
 	}
 	attack "Bite" {
 		type="slashing"
@@ -174,6 +180,7 @@ npc_type "soldier ant" {
 	}
 	spawnAsGroup="1d7+3"
 	tags=["underground"]
+	death="Corpse"
 }
 
 npc_type "killer bee" {
@@ -186,7 +193,7 @@ npc_type "killer bee" {
 	stats {
 		speed=15
 		health=10
-		dodge=20
+		dodge=50
 		size=2
 	}
 	resistances {
@@ -198,12 +205,13 @@ npc_type "killer bee" {
 		cooldown=15
 		statusEffects=["poison"]
 	}
-	spawnAsGroup="1d10+10"
+	spawnAsGroup="1d20+10"
+	death="Filth"
 }
 
 npc_type "harpy" { 
 	name="Harpy"
-	tier=4
+	tier=3
 	plural="Harpies"
 	tags=["attacksRandomly", "flying"]
 	color="128,128,0"
@@ -220,12 +228,13 @@ npc_type "harpy" {
 	}
 	attack "Claw" {
 		type="slashing"
-		damage="2d3"
+		damage="2d7"
 		cooldown=10
 		statusEffects=["Bleeding"]
 		effectChances=[    20    ]
 	}
 	spawnAsGroup="1d4+1"
+	death="Corpse"
 }
 
 npc_type "kobold" { 
@@ -250,6 +259,7 @@ npc_type "kobold" {
 		cooldown=20
 	}
 	spawnAsGroup="1d3+1"
+	death="Corpse"
 }
 
 npc_type "ogre" {
@@ -275,6 +285,7 @@ npc_type "ogre" {
 		statusEffects=["Concussion"]
 		effectChances=[     75     ]
 	}
+	death="Corpse"
 }
 
 npc_type "troll" { 
@@ -286,7 +297,7 @@ npc_type "troll" {
 	AI="HostileAnimal"
 	stats {
 		speed=15
-		health=350
+		health=300
 		dodge=5
 		size=15
 	}
@@ -308,6 +319,7 @@ npc_type "troll" {
 		statusEffects=["Bleeding"]
 		effectChances=[    33    ]
 	}
+	death="Corpse"
 }
 
 npc_type "skeleton" { 
@@ -318,7 +330,7 @@ npc_type "skeleton" {
 	graphic='Z'
 	AI="HostileAnimal"
 	stats {
-		health=20
+		health=75
 		speed=5
 		dodge=0
 		size=7
@@ -326,13 +338,15 @@ npc_type "skeleton" {
 	}
 	resistances {
 		physical=15
+		magic=50
 	}
 	spawnAsGroup="1d20"
 	attack "Swipe" {
 		type="slashing"
-		damage="1d6"
+		damage="1d24"
 		cooldown=75
 	}
+	death="Bones"
 }
 
 npc_type "bandersnatch" { 
@@ -357,6 +371,8 @@ npc_type "bandersnatch" {
 		damage="1d12+4"
 		cooldown=25
 	}
+	spawnAsGroup="1d10"
+	death="Corpse"
 }
 
 npc_type "jabberwock" { 
@@ -389,6 +405,7 @@ npc_type "jabberwock" {
 		damage="1d100"
 		cooldown=110
 	}
+	death="Corpse"
 }
 
 npc_type "minotaur" { 
@@ -430,6 +447,7 @@ npc_type "minotaur" {
 		statusEffects=["Concussion"]
 		effectChances=[     33     ]
 	}
+	death="Corpse"
 }
 
 npc_type "cyclops" { 
@@ -455,6 +473,7 @@ npc_type "cyclops" {
 		cooldown=100
 		statusEffects=["Concussion"]
 	}
+	death="Corpse"
 }
 
 npc_type "giant" { 
@@ -484,6 +503,7 @@ npc_type "giant" {
 	stats {
 	    strength=25
 	}
+	death="Corpse"
 }
 
 npc_type "griffon" { 
@@ -508,6 +528,7 @@ npc_type "griffon" {
 		damage="2d20+6"
 		cooldown=30
 	}
+	death="Corpse"
 }
 
 npc_type "unicorn" { 
@@ -539,6 +560,7 @@ npc_type "unicorn" {
 		effectChances=[     50     ]
 	}
 	spawnAsGroup="1d2"
+	death="Corpse"
 }
 
 npc_type "will o wisp" { 
@@ -588,6 +610,7 @@ npc_type "raw golem" {
 		statusEffects=["Concussion"]
 		effectChances=[     70     ]
 	}
+	death="Red clay"
 }
 
 
@@ -614,4 +637,5 @@ npc_type "fired golem" {
 		statusEffects=["Concussion"]
 		effectChances=[     80     ]
 	}
+	death="Red clay"
 }

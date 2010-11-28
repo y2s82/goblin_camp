@@ -50,7 +50,9 @@ enum StatusEffectType {
 	FLYING,
 	BADSLEEP,
 	RAGE,
-	SWIM
+	SWIM,
+	EATING,
+	DRINKING
 };
 
 struct StatusEffect {
