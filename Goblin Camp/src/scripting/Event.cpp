@@ -28,6 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Event.hpp"
 #include "scripting/API.hpp"
 #include "scripting/_gcampapi/PyItem.hpp"
+#include "scripting/_gcampapi/PyConstruction.hpp"
 
 namespace Script { namespace Event {
 	void GameStart() {
@@ -46,13 +47,17 @@ namespace Script { namespace Event {
 		Script::InvokeListeners("onGameLoaded", "(s)", filename.c_str());
 	}
 	
-	/*void BuildingCreated(Construction*, int, int) {
-	
+	void BuildingCreated(boost::weak_ptr<Construction> cons, int x, int y) {
+		Script::API::PyConstruction pyconstruction(cons);
+		py::object obj(boost::ref(pyconstruction));
+		Script::InvokeListeners("onBuildingCreated", "(Oii)", obj.ptr(), x, y);
 	}
 	
-	void BuildingDestroyed(Construction*, int, int) {
-	
-	}*/
+	void BuildingDestroyed(boost::weak_ptr<Construction> cons, int x, int y) {
+		Script::API::PyConstruction pyconstruction(cons);
+		py::object obj(boost::ref(pyconstruction));
+		Script::InvokeListeners("onBuildingDestroyed", "(Oii)", obj.ptr(), x, y);
+	}
 	
 	void ItemCreated(boost::weak_ptr<Item> item, int x, int y) {
 		Script::API::PyItem pyitem(item);
