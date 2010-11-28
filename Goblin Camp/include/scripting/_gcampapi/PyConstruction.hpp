@@ -15,23 +15,17 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <string>
-#include <boost/shared_ptr.hpp>
-
 class Construction;
-class Item;
 
-namespace Script {
-	namespace Event {
-		void GameStart();
-		void GameEnd();
-		void GameSaved(const std::string&);
-		void GameLoaded(const std::string&);
-		void BuildingCreated(boost::weak_ptr<Construction>, int, int);
-		void BuildingDestroyed(boost::weak_ptr<Construction>, int, int);
-		void ItemCreated(boost::weak_ptr<Item>, int, int);
-		/*void ItemDestroyed(Item*, int, int);
-		void NPCSpawned(NPC*, Construction*, int, int);
-		void NPCKilled(NPC*, NPC*, int, int);*/
-	}
-}
+namespace Script { namespace API {
+	struct PyConstruction {
+		PyConstruction(boost::weak_ptr<Construction>);
+		py::tuple GetPosition();
+		std::string GetTypeString();
+		int GetType();
+		
+		static void Expose();
+	private:
+		boost::weak_ptr<Construction> construction;
+	};
+}}

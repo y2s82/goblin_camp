@@ -185,6 +185,8 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 
 	Game::Inst()->RefreshStockpiles();
 
+	Script::Event::BuildingCreated(newSp, a.X(), a.Y());
+
 	//Spawning a BUILD job is not required because stockpiles are created "built"
 	return newSp->Uid();
 }
@@ -429,6 +431,9 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
+
+		Script::Event::BuildingDestroyed(cons, construct->X(), construct->Y());
+
 		if (Construction::Presets[construct->type].dynamic) {
 			Game::Inst()->dynamicConstructionList.erase(construct->Uid());
 		} else {
