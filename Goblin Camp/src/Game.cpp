@@ -756,7 +756,7 @@ void Game::Update() {
 		if (freeItems.size() < 100) {
 			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
-					if (item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
 						StockpileItem(item);
 				}
 			}
@@ -764,7 +764,7 @@ void Game::Update() {
 			for (unsigned int i = 0; i < std::max((unsigned int)100, freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::Choose(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
-					if (item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
 						StockpileItem(item);
 				}
 			}
@@ -1668,7 +1668,7 @@ void Game::Hungerize(Coordinate pos) {
 				boost::shared_ptr<NPC> npc;
 				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
 				if (npc) {
-					npc->hunger = (int)(HUNGER_THRESHOLD * 1.5);
+					npc->hunger = 50000;
 				}
 		}
 	}
