@@ -693,8 +693,9 @@ void Game::Update() {
 	{
 		std::list<boost::weak_ptr<WaterNode> >::iterator nextWati = ++waterList.begin();
 		for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end();) {
-			if (wati->lock() && Random::Generate(49) == 0) wati->lock()->Update();
-			else if (!wati->lock()) wati = waterList.erase(wati);
+			if (boost::shared_ptr<WaterNode> water = wati->lock()) {
+				if (Random::Generate(49) == 0) water->Update();
+			} else waterList.erase(wati);
 			wati = nextWati;
 			++nextWati;
 		}
@@ -732,11 +733,13 @@ void Game::Update() {
 
 	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
-		if (itemi->lock() && itemi->lock()->condition == 0) {
-			//The item has impacted and broken. Create debris owned by no one
-			std::vector<boost::weak_ptr<Item> > component(1, *itemi);
-			CreateItem(itemi->lock()->Position(), Item::StringToItemType("debris"), false, -1, component);
-			RemoveItem(*itemi);
+		if (boost::shared_ptr<Item> item = itemi->lock()) {
+			if (item->condition == 0) {
+				//The item has impacted and broken. Create debris owned by no one
+				std::vector<boost::weak_ptr<Item> > component(1, item);
+				CreateItem(item->Position(), Item::StringToItemType("debris"), false, -1, component);
+				RemoveItem(item);
+			}
 		}
 		itemi = stoppedItems.erase(itemi);
 	}
@@ -752,14 +755,18 @@ void Game::Update() {
 		refreshStockpiles = false;
 		if (freeItems.size() < 100) {
 			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
-				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
-					StockpileItem(*itemi);
+				if (boost::shared_ptr<Item> item = itemi->lock()) {
+					if (item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+						StockpileItem(item);
+				}
 			}
 		} else {
 			for (unsigned int i = 0; i < std::max((unsigned int)100, freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::Choose(freeItems));
-				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
-					StockpileItem(*itemi);
+				if (boost::shared_ptr<Item> item = itemi->lock()) {
+					if (item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+						StockpileItem(item);
+				}
 			}
 		}
 	}
