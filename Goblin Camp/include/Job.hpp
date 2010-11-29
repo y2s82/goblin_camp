@@ -69,7 +69,9 @@ enum Action {
 	POUR,
 	DIG,
 	FORGET,
-	UNWIELD
+	UNWIELD,
+	GETANGRY,
+	CALMDOWN
 };
 
 enum TaskResult {

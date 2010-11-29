@@ -247,8 +247,10 @@ void NPC::HandleHunger() {
 				if (weakest) { //Found a creature nearby, eat it
 					boost::shared_ptr<Job> newJob(new Job("Eat", HIGH, 0, !expert));
 					newJob->internal = true;
+					newJob->tasks.push_back(Task(GETANGRY));
 					newJob->tasks.push_back(Task(KILL, weakest->Position(), weakest, 0, 1));
 					newJob->tasks.push_back(Task(EAT));
+					newJob->tasks.push_back(Task(CALMDOWN));
 					jobs.push_back(newJob);
 					run = true;
 				}				
@@ -1056,6 +1058,16 @@ CONTINUEEAT:
 				TaskFinished(TASKSUCCESS);
 				break;
 
+			case GETANGRY:
+				aggressive = true;
+				TaskFinished(TASKSUCCESS);
+				break;
+
+			case CALMDOWN:
+				aggressive = false;
+				TaskFinished(TASKSUCCESS);
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -1067,7 +1079,7 @@ CONTINUEEAT:
 					fleeJob->internal = true;
 					run = true;
 					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
-						if (npci->lock() && npci->lock()->faction != faction) {
+						if (npci->lock() && (npci->lock()->faction != faction || npci->lock() == aggressor.lock())) {
 							int dx = x - npci->lock()->x;
 							int dy = y - npci->lock()->y;
 							if (Map::Inst()->Walkable(x + dx, y + dy, (void *)this)) {
@@ -1405,7 +1417,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	} else if (npc->coward) { //Aggressiveness trumps cowardice
 		Game::Inst()->FindNearbyNPCs(npc);
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if (npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) {
+			if ((npci->lock()->GetFaction() != npc->faction || npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
