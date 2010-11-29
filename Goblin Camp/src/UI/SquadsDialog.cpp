@@ -31,6 +31,7 @@
 #include "UI/TextBox.hpp"
 #include "UI/Frame.hpp"
 #include "Announce.hpp"
+#include "MapMarker.hpp"
 
 SquadsDialog* SquadsDialog::squadDialog = 0;
 SquadsDialog* SquadsDialog::SquadDialog() {
@@ -115,7 +116,7 @@ void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squa
 
 boost::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
 	std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
-	if (i < (signed int)Game::Inst()->squadList.size()) {
+	if (i >= 0 && i < (signed int)Game::Inst()->squadList.size()) {
 		return boost::next(it, i)->second;
 	}
     return boost::shared_ptr<Squad>();
@@ -134,6 +135,7 @@ void SquadsDialog::SelectSquad(int i) {
         squadMembers = 1;
         squadPriority = 0;
     }
+	RefreshMarkers();
 }
 
 bool SquadsDialog::SquadSelected(bool selected) {
@@ -247,4 +249,27 @@ void SquadsDialog::SelectArmor() {
 void SquadsDialog::Reequip() {
 	GetSquad(squadList->Selected())->Reequip();
 	Announce::Inst()->AddMsg(GetSquad(squadList->Selected())->Name() + " re-equipping armor");
+}
+
+void SquadsDialog::Close() {
+	UI::Inst()->SetTextMode(false);
+	for (std::list<int>::iterator markeri = markers.begin(); markeri != markers.end();) {
+		Map::Inst()->RemoveMarker(*markeri);
+		markeri = markers.erase(markeri);
+	}
+}
+
+void SquadsDialog::RefreshMarkers() {
+	for (std::list<int>::iterator markeri = markers.begin(); markeri != markers.end();) {
+		Map::Inst()->RemoveMarker(*markeri);
+		markeri = markers.erase(markeri);
+	}
+	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+	if (squad) {
+		markers.push_back(Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', squad->TargetCoordinate(), -1, TCODColor::azure)));
+	}
+}
+
+void SquadsDialog::Open() {
+	RefreshMarkers();
 }

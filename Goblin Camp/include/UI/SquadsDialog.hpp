@@ -17,6 +17,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
@@ -37,6 +38,8 @@ private:
 	UIList<std::pair<std::string, boost::shared_ptr<Squad> >, std::map<std::string, boost::shared_ptr<Squad> > > *squadList;
 	Frame *rightFrame;
 	Frame *orders;
+	std::list<int> markers;
+	void RefreshMarkers();
 public:
 	SquadsDialog(Drawable *ncontents, std::string ntitle, int nwidth, int nheight):
 		Dialog(ncontents, ntitle, nwidth, nheight), squadName(""), squadMembers(1), squadPriority(0) {}
@@ -57,4 +60,6 @@ public:
 	std::string SelectedSquadArmor();
 	void SelectArmor();
 	void Reequip();
+	virtual void Close();
+	virtual void Open();
 };
