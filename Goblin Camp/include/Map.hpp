@@ -22,6 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 
+class MapMarker;
+
 #define TERRITORY_OVERLAY (1 << 0)
 
 class Map : public ITCODPathCallback {
@@ -39,6 +41,8 @@ private:
 	int width, height;
 	float waterlevel;
 	int overlayFlags;
+	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
+	unsigned int markerids;
 
 public:
 	TCODHeightMap *heightMap;
@@ -100,4 +104,7 @@ public:
 	void ToggleOverlay(int flags);
 	void FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &moveY, int nextX, int nextY, void* npc);
 	bool IsUnbridgedWater(int x, int y);
+	void UpdateMarkers();
+	unsigned int AddMarker(MapMarker);
+	void RemoveMarker(int);
 };
