@@ -471,7 +471,7 @@ item_type "Leather" {
 }
 
 item_type "Corpse" {
-	category = ["Corpse"]
+	category = ["Corpse", "Food"]
 	graphic = 37
 	color = "127,0,55"
 	decay = [ "Bones", "Bones", "Filth", "Filth" ]
@@ -483,7 +483,7 @@ item_type "Corpse" {
 }
 
 item_type "Small corpse" {
-	category = ["Corpse"]
+	category = ["Corpse", "Food"]
 	graphic = 37
 	color = "127,0,55"
 	decay = ["Bones", "Filth"]
