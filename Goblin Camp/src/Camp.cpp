@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "Game.hpp"
 #include "Announce.hpp"
+#include "scripting/Event.hpp"
 
 Camp* Camp::instance = 0;
 
@@ -88,9 +89,11 @@ void Camp::LockCenter(Coordinate newCenter) {
 
 void Camp::UnlockCenter() { locked = false; }
 
-int Camp::GetTier() { return tier; }
+unsigned Camp::GetTier() { return tier; }
 
 void Camp::UpdateTier() {
+	unsigned oldTier = tier;
+	
 	switch (tier) {
 	case 0:
 		if (farmplots > 0 && workshops > 1 && production > 20 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 20)
@@ -119,7 +122,10 @@ void Camp::UpdateTier() {
 	else if (tier == 4) name = "Fort";
 	else if (tier == 5) name = "Stronghold";
 	else if (tier == 6) name = "Citadel";
-
+	
+	if (tier != oldTier) {
+		Script::Event::TierChanged(tier, name);
+	}
 }
 
 std::string Camp::GetName() { return name; }
