@@ -66,6 +66,10 @@ namespace Script { namespace Event {
 		Script::InvokeListeners("onItemCreated", "(Oii)", obj.ptr(), x, y);
 	}
 	
+	void TierChanged(unsigned tier, const std::string& campName) {
+		Script::InvokeListeners("onTierChanged", "(is)", tier, campName.c_str());
+	}
+	
 	/*void ItemDestroyed(Item*, int, int) {
 	
 	}
