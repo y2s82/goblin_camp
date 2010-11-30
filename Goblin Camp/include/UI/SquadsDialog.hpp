@@ -52,8 +52,8 @@ public:
 	void CreateSquad();
 	void ModifySquad();
 	void DeleteSquad();
-	void SelectOrder(Orders order);
-	bool OrderSelected(Orders order);
+	void SelectOrder(Order order);
+	bool OrderSelected(Order order);
 	std::string SelectedSquadWeapon();
 	void SelectWeapon();
 	void Rearm();

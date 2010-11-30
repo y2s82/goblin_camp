@@ -217,6 +217,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & timeCount;
 	ar & jobs;
 	ar & taskIndex;
+	ar & orderIndex;
 	ar & nopath;
 	ar & findPathWorking;
 	ar & timer;
@@ -274,6 +275,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar & timeCount;
 		ar & jobs;
 		ar & taskIndex;
+		ar & orderIndex;
 		ar & nopath;
 		ar & findPathWorking;
 		ar & timer;
@@ -574,9 +576,10 @@ void Squad::save(Archive & ar, const unsigned int version) const {
 	ar & name;
 	ar & memberReq;
 	ar & members;
-	ar & order;
-	ar & targetCoordinate;
-	ar & targetEntity;
+	ar & generalOrder;
+	ar & orders;
+	ar & targetCoordinates;
+	ar & targetEntities;
 	ar & priority;
 	ar & weapon;
 	ar & armor;
@@ -588,9 +591,10 @@ void Squad::load(Archive & ar, const unsigned int version) {
 		ar & name;
 		ar & memberReq;
 		ar & members;
-		ar & order;
-		ar & targetCoordinate;
-		ar & targetEntity;
+		ar & generalOrder;
+		ar & orders;
+		ar & targetCoordinates;
+		ar & targetEntities;
 		ar & priority;
 		ar & weapon;
 		ar & armor;

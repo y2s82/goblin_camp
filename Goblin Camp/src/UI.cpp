@@ -390,11 +390,8 @@ void UI::HandleMouse() {
 		menuY = mouseInput.cy;
 		menuOpen = !menuOpen;
 		currentMenu->selected(-1);
-		if (!menuOpen) {
-			_state = UINORMAL; 
-			a.X(0); 
-			a.Y(0); 
-			if (currentMenu) currentMenu->Close();
+		if (!menuOpen || _state != UINORMAL) {
+			CloseMenu();
 		}
 		currentMenu = 0;
 		if(!underCursor.empty()) {
@@ -674,17 +671,22 @@ void UI::ChoosePlantHarvest() {
 	UI::Inst()->SetCursor('H');
 }
 
-void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad) {
+void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order) {
 	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetCoordinate, _1, squad));
+	bool autoClose = true;
+	if (order == PATROL) {
+		autoClose = false;
+		order = GUARD;
+	}
+	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetCoordinate, order, _1, squad, autoClose));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('X');
 }
 
-void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad) {
+void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad, Order order) {
 	UI::Inst()->state(UIPLACEMENT);
-	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, _1, squad));
+	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, order, _1, squad));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	UI::Inst()->SetCursor('X');

@@ -25,7 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Entity.hpp"
 #include "Item.hpp"
 
-enum Orders {
+enum Order {
 	NOORDER,
 	GUARD,
 	PATROL,
@@ -45,9 +45,10 @@ private:
 	int memberReq;
 	//List of NPC uid's
 	std::list<int> members;
-	Orders order;
-	Coordinate targetCoordinate;
-	boost::weak_ptr<Entity> targetEntity;
+	Order generalOrder;
+	std::vector<Order> orders;
+	std::vector<Coordinate> targetCoordinates;
+	std::vector<boost::weak_ptr<Entity> > targetEntities;
 	int priority;
 	ItemCategory weapon;
 	ItemCategory armor;
@@ -56,12 +57,14 @@ public:
 	~Squad();
 	//Recruits one member if needed and returns true if the squad still requires more members
 	bool UpdateMembers();
-	Orders Order();
-	void Order(Orders);
-	Coordinate TargetCoordinate();
-	void TargetCoordinate(Coordinate);
-	boost::weak_ptr<Entity> TargetEntity();
-	void TargetEntity(boost::weak_ptr<Entity>);
+	Order GetOrder(int &orderIndex);
+	Order GetGeneralOrder(); //Used to highlight correct SquadsDialog button
+	void AddOrder(Order);
+	void ClearOrders();
+	Coordinate TargetCoordinate(int orderIndex);
+	void AddTargetCoordinate(Coordinate);
+	boost::weak_ptr<Entity> TargetEntity(int orderIndex);
+	void AddTargetEntity(boost::weak_ptr<Entity>);
 	int MemberCount();
 	int MemberLimit();
 	void MemberLimit(int);
@@ -77,4 +80,5 @@ public:
 	ItemCategory Armor();
 	void Armor(ItemCategory);
 	void Reequip();
+	void SetGeneralOrder(Order);
 };

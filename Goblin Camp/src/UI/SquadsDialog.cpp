@@ -65,6 +65,7 @@ SquadsDialog* SquadsDialog::SquadDialog() {
         contents->AddComponent(squadDialog->orders);
         squadDialog->orders->AddComponent(new ToggleButton("Guard", boost::bind(&SquadsDialog::SelectOrder, squadDialog, GUARD), boost::bind(&SquadsDialog::OrderSelected, squadDialog, GUARD), 2, 1, 9));
         squadDialog->orders->AddComponent(new ToggleButton("Follow", boost::bind(&SquadsDialog::SelectOrder, squadDialog, FOLLOW), boost::bind(&SquadsDialog::OrderSelected, squadDialog, FOLLOW), 14, 1, 10));
+		squadDialog->orders->AddComponent(new ToggleButton("Patrol", boost::bind(&SquadsDialog::SelectOrder, squadDialog, PATROL), boost::bind(&SquadsDialog::OrderSelected, squadDialog, PATROL), 27, 1, 10));
         Frame *weapons = new Frame("Weapons", std::vector<Drawable *>(), 0, 25, 23, 5);
         weapons->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, true));
         contents->AddComponent(weapons);
@@ -95,9 +96,9 @@ void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > s
 void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squad> > squadi, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry(squadi.first, TCODColor::white));
 	tooltip->AddEntry(TooltipEntry((boost::format(" Priority: %d") % squadi.second->Priority()).str(), TCODColor::grey));
-	if(squadi.second->Order() != NOORDER) {
+	if(squadi.second->GetGeneralOrder() != NOORDER) {
 		std::string order;
-		switch (squadi.second->Order()) {
+		switch (squadi.second->GetGeneralOrder()) {
 			case GUARD:
 				order = "Guard";
 				break;
@@ -185,28 +186,37 @@ void SquadsDialog::ModifySquad() {
 }
 
 void SquadsDialog::DeleteSquad() {
-    boost::shared_ptr<Squad> tempSquad = GetSquad(squadList->Selected());
-    tempSquad->RemoveAllMembers();
-    Game::Inst()->squadList.erase(tempSquad->Name());
-}
-
-void SquadsDialog::SelectOrder(Orders order) {
-    GetSquad(squadList->Selected())->Order(order);
-	switch (order) {
-	case GUARD:
-	default:
-		UI::ChooseOrderTargetCoordinate(GetSquad(squadList->Selected()));
-		break;
-
-	case FOLLOW:
-		UI::ChooseOrderTargetEntity(GetSquad(squadList->Selected()));
-		break;
+    boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+    if (squad) {
+		squad->RemoveAllMembers();
+		Game::Inst()->squadList.erase(squad->Name());
 	}
-    UI::Inst()->HideMenu();
 }
 
-bool SquadsDialog::OrderSelected(Orders order) {
-    return GetSquad(squadList->Selected())->Order() == order;
+void SquadsDialog::SelectOrder(Order order) {
+	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+	if (squad) {
+		squad->ClearOrders();
+		squad->SetGeneralOrder(order);
+
+		switch (order) {
+		case GUARD:
+		case PATROL:
+		default:
+			UI::ChooseOrderTargetCoordinate(squad, order);
+			break;
+
+		case FOLLOW:
+			UI::ChooseOrderTargetEntity(squad, FOLLOW);
+			break;
+		}
+		UI::Inst()->HideMenu();
+	}
+}
+
+bool SquadsDialog::OrderSelected(Order order) {
+	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+    return squad ? squad->GetGeneralOrder() == order : false;
 }
 
 std::string SquadsDialog::SelectedSquadWeapon() {
@@ -266,7 +276,11 @@ void SquadsDialog::RefreshMarkers() {
 	}
 	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
 	if (squad) {
-		markers.push_back(Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', squad->TargetCoordinate(), -1, TCODColor::azure)));
+		int orderIndex = 0;
+		do { 
+			markers.push_back(Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', squad->TargetCoordinate(orderIndex), -1, TCODColor::azure)));
+			squad->GetOrder(orderIndex);
+		} while (orderIndex != 0);
 	}
 }
 
