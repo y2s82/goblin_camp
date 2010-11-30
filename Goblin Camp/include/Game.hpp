@@ -133,8 +133,8 @@ public:
 	std::map<std::string, boost::shared_ptr<Squad> > squadList;
 	std::list<boost::shared_ptr<Squad> > hostileSquadList;
 	void CreateSquad(std::string);
-	static void SetSquadTargetCoordinate(Coordinate, boost::shared_ptr<Squad>);
-	static void SetSquadTargetEntity(Coordinate, boost::shared_ptr<Squad>);
+	static void SetSquadTargetCoordinate(Order, Coordinate, boost::shared_ptr<Squad>, bool autoClose = true);
+	static void SetSquadTargetEntity(Order, Coordinate, boost::shared_ptr<Squad>);
 	NPCType GetRandomNPCTypeByTag(std::string tag);
 	void CreateNPCs(int,NPCType,Coordinate,Coordinate);
 	unsigned int PeacefulFaunaCount() const;

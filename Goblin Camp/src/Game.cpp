@@ -270,10 +270,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->health = NPC::Presets[type].health;
 	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = NPC::Presets[type].stats[i] + Random::Sign(NPC::Presets[type].stats[i] * 0.1);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + (int)Random::Sign(NPC::Presets[type].stats[i] * 0.1);
 	}
 	for (int i = 0; i < RES_COUNT; ++i) {
-		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + (int)Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
@@ -1333,18 +1333,21 @@ void Game::CreateSquad(std::string name) {
 	squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >(name, boost::shared_ptr<Squad>(new Squad(name))));
 }
 
-void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
-	squad->TargetCoordinate(target);
-	UI::Inst()->CloseMenu();
+void Game::SetSquadTargetCoordinate(Order order, Coordinate target, boost::shared_ptr<Squad> squad, bool autoClose) {
+	squad->AddOrder(order);
+	squad->AddTargetCoordinate(target);
+	if (autoClose) UI::Inst()->CloseMenu();
 	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str(), TCODColor::white, target);
+	Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', target, UPDATES_PER_SECOND*5, TCODColor::azure));
 }
-void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squad) {
+void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_ptr<Squad> squad) {
 	if (target.X() >= 0 && target.X() < Map::Inst()->Width() && target.Y() >= 0 && target.Y() < Map::Inst()->Height()) {
 		std::set<int> *npcList = Map::Inst()->NPCList(target.X(), target.Y());
 		if (!npcList->empty()) {
-			squad->TargetEntity(Game::Inst()->npcList[*npcList->begin()]);
+			squad->AddOrder(order);
+			squad->AddTargetEntity(Game::Inst()->npcList[*npcList->begin()]);
 			UI::Inst()->CloseMenu();
-			Announce::Inst()->AddMsg((boost::format("[%1%] following %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str(), TCODColor::white, target);
+			Announce::Inst()->AddMsg((boost::format("[%1%] following %2%") % squad->Name() % Game::Inst()->npcList[*npcList->begin()]->Name()).str(), TCODColor::white, target);
 		}
 	}
 }

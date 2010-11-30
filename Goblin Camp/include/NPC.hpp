@@ -115,6 +115,7 @@ private:
 	int timeCount;
 	std::deque<boost::shared_ptr<Job> > jobs;
 	int taskIndex;
+	int orderIndex;
 	boost::mutex pathMutex;
 	TCODPath *path;
 	int pathIndex;

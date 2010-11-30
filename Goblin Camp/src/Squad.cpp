@@ -25,9 +25,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 Squad::Squad(std::string nameValue, int memberValue, int pri) :
 	name(nameValue),
 	memberReq(memberValue),
-	order(NOORDER),
-	targetCoordinate(Coordinate(-1,-1)),
-	targetEntity(boost::weak_ptr<Entity>()),
+	generalOrder(NOORDER),
+	orders(std::vector<Order>()),
+	targetCoordinates(std::vector<Coordinate>()),
+	targetEntities(std::vector<boost::weak_ptr<Entity> >()),
 	priority(pri),
 	weapon(-1),
 	armor(-1)
@@ -55,20 +56,41 @@ bool Squad::UpdateMembers() {
 	return false;
 }
 
-Orders Squad::Order() {return order;}
-
-//Setting an order resets the target of the order
-void Squad::Order(Orders newOrder) {
-	if (order != newOrder) targetCoordinate = Coordinate(-1,-1);
-	targetEntity = boost::weak_ptr<Entity>();
-	order = newOrder;
+Order Squad::GetOrder(int &orderIndex) {
+	++orderIndex;
+	if (orderIndex < 0 || orderIndex >= orders.size())
+		orderIndex = 0;
+	return orders.empty() ? NOORDER : orders[orderIndex];
 }
 
-Coordinate Squad::TargetCoordinate() {return targetCoordinate;}
-void Squad::TargetCoordinate(Coordinate newTarget) {targetCoordinate = newTarget;}
+//Setting an order resets the target of the order
+void Squad::AddOrder(Order newOrder) {
+	orders.push_back(newOrder);
+	targetCoordinates.push_back(Coordinate(-1,-1));
+	targetEntities.push_back(boost::weak_ptr<Entity>());
+}
 
-boost::weak_ptr<Entity> Squad::TargetEntity() {return targetEntity;}
-void Squad::TargetEntity(boost::weak_ptr<Entity> newEntity) {targetEntity = newEntity;}
+void Squad::ClearOrders() {
+	orders.clear();
+	targetCoordinates.clear();
+	targetEntities.clear();
+	generalOrder = NOORDER;
+}
+
+Coordinate Squad::TargetCoordinate(int index) {
+	if (index >= 0 && index < targetCoordinates.size()) {
+		return targetCoordinates[index];
+	} else return Coordinate(-1,-1);
+}
+void Squad::AddTargetCoordinate(Coordinate newTarget) {targetCoordinates.back() = newTarget;}
+
+boost::weak_ptr<Entity> Squad::TargetEntity(int index) {
+	if (index >= 0 && index < targetEntities.size()) {
+		return targetEntities[index];
+	} else return boost::weak_ptr<Entity>();
+}
+
+void Squad::AddTargetEntity(boost::weak_ptr<Entity> newEntity) {targetEntities.back() = newEntity;}
 
 int Squad::MemberCount() { return members.size(); }
 int Squad::MemberLimit() { return memberReq; }
@@ -112,3 +134,9 @@ void Squad::Reequip() {
 		Game::Inst()->npcList[*memberi]->FindNewArmor();
 	}
 }
+
+Order Squad::GetGeneralOrder() { 
+	return generalOrder;
+}
+
+void Squad::SetGeneralOrder(Order order) { generalOrder = order; }

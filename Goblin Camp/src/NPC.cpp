@@ -55,6 +55,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	type(0),
 	timeCount(0),
 	taskIndex(0),
+	orderIndex(0),
 	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
@@ -1362,26 +1363,29 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			npc->FindNewArmor();
 		}
 
-		switch (squad->Order()) {
+		switch (squad->GetOrder(npc->orderIndex)) { //GetOrder handles incrementing orderIndex
 		case GUARD:
-			if (squad->TargetCoordinate().X() >= 0) {
-				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate()));
+			if (squad->TargetCoordinate(npc->orderIndex).X() >= 0) {
+				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
-				if (Distance(npc->Position(), squad->TargetCoordinate()) < 10) npc->run = false;
+				if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
 				else npc->run = true;
 				return true;
 			}
 			break;
 
 		case FOLLOW:
-			if (squad->TargetEntity().lock()) {
-				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity().lock()->Position(), squad->TargetEntity()));
+			if (squad->TargetEntity(npc->orderIndex).lock()) {
+				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity(npc->orderIndex).lock()->Position(), squad->TargetEntity(npc->orderIndex)));
 				npc->jobs.push_back(newJob);
 				npc->run = true;
 				return true;
 			}
+			break;
+
+		default:
 			break;
 		}
 	} 

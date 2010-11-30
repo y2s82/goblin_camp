@@ -84,8 +84,8 @@ public:
 	static void ChooseStockpile(ConstructionType);
 	static void ChooseTreeFelling();
 	static void ChoosePlantHarvest();
-	static void ChooseOrderTargetCoordinate(boost::shared_ptr<Squad>);
-	static void ChooseOrderTargetEntity(boost::shared_ptr<Squad>);
+	static void ChooseOrderTargetCoordinate(boost::shared_ptr<Squad>, Order);
+	static void ChooseOrderTargetEntity(boost::shared_ptr<Squad>, Order);
 	static void ChooseDesignateTree();
 	static void ChooseDismantle();
 	static void ChooseUndesignate();
