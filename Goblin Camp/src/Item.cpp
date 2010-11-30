@@ -448,7 +448,7 @@ int Item::RelativeValue() {
 int Item::Resistance(int i) const { return resistances[i]; }
 
 void Item::SetVelocity(int speed) {
-	if (velocity > 10 && speed == 0 && condition > 0 && rand() % 10 < 7) --condition; //A sudden impact will damage the item
+	if (velocity > 10 && speed == 0 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
 	
 	velocity = speed;
 	if (speed > 0) {

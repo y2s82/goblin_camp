@@ -63,3 +63,6 @@ namespace Random {
 		return expr * Sign();
 	}
 }
+
+#include <cstdlib>
+#define rand() ___error_stray_rand_call___

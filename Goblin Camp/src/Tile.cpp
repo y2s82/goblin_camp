@@ -104,11 +104,8 @@ void Tile::type(TileType newType) {
 		backColor = TCODColor(0, 0, 0);
 	} else if (_type == TILEMUD) {
 		vis = true; walkable = true; buildable = true; low = false;
-		switch (rand() % 2) {
-		case 0: graphic = '~'; break;
-		case 1: graphic = '#'; break;
-		}
-		originalForeColor = TCODColor(120 + rand() % 60, 80 + rand() % 50, 0);
+		graphic = Random::GenerateBool() ? '#' : '~';
+		originalForeColor = TCODColor(Random::Generate(120, 120 + 59), Random::Generate(80, 80 + 49), 0);
 		backColor = TCODColor(0, 0, 0);
 		_moveCost = 5;
 	} else { vis = false; walkable = false; buildable = false; }
@@ -228,7 +225,7 @@ void Tile::WalkOver() {
 	if (_type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
-		if (walkedOver > 300 && rand() % 100 == 0) type(TILEMUD);
+		if (walkedOver > 300 && Random::Generate(99) == 0) type(TILEMUD);
 	}
 }
 

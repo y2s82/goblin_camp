@@ -40,7 +40,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "UI/ConstructionDialog.hpp"
 #include "Item.hpp"
-#include "scripting\Event.hpp"
+#include "scripting/Event.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -155,7 +155,7 @@ int Construction::Build() {
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
-			if (rand() % 10 < 8) { //80% of materials can't be recovered
+			if (Random::Generate(9) < 8) { //80% of materials can't be recovered
 				itemsToRemove.push_back(*itemi);
 			}
 		}
