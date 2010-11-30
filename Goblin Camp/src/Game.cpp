@@ -15,13 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <map>
-
-#include <boost/multi_array.hpp>
-#include <boost/bind.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -46,6 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Event.hpp"
 #include "SpawningPool.hpp"
 #include "Camp.hpp"
+#include "MapMarker.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -185,6 +179,8 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 
 	Game::Inst()->RefreshStockpiles();
 
+	Script::Event::BuildingCreated(newSp, a.X(), a.Y());
+
 	//Spawning a BUILD job is not required because stockpiles are created "built"
 	return newSp->Uid();
 }
@@ -274,10 +270,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->health = NPC::Presets[type].health;
 	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = NPC::Presets[type].stats[i] + Random::Sign(NPC::Presets[type].stats[i] * 0.1);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + (int)Random::Sign(NPC::Presets[type].stats[i] * 0.1);
 	}
 	for (int i = 0; i < RES_COUNT; ++i) {
-		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + (int)Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
@@ -429,6 +425,9 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
+
+		Script::Event::BuildingDestroyed(cons, construct->X(), construct->Y());
+
 		if (Construction::Presets[construct->type].dynamic) {
 			Game::Inst()->dynamicConstructionList.erase(construct->Uid());
 		} else {
@@ -688,8 +687,9 @@ void Game::Update() {
 	{
 		std::list<boost::weak_ptr<WaterNode> >::iterator nextWati = ++waterList.begin();
 		for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end();) {
-			if (wati->lock() && Random::Generate(49) == 0) wati->lock()->Update();
-			else if (!wati->lock()) wati = waterList.erase(wati);
+			if (boost::shared_ptr<WaterNode> water = wati->lock()) {
+				if (Random::Generate(49) == 0) water->Update();
+			} else waterList.erase(wati);
 			wati = nextWati;
 			++nextWati;
 		}
@@ -727,11 +727,13 @@ void Game::Update() {
 
 	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
-		if (itemi->lock() && itemi->lock()->condition == 0) {
-			//The item has impacted and broken. Create debris owned by no one
-			std::vector<boost::weak_ptr<Item> > component(1, *itemi);
-			CreateItem(itemi->lock()->Position(), Item::StringToItemType("debris"), false, -1, component);
-			RemoveItem(*itemi);
+		if (boost::shared_ptr<Item> item = itemi->lock()) {
+			if (item->condition == 0) {
+				//The item has impacted and broken. Create debris owned by no one
+				std::vector<boost::weak_ptr<Item> > component(1, item);
+				CreateItem(item->Position(), Item::StringToItemType("debris"), false, -1, component);
+				RemoveItem(item);
+			}
 		}
 		itemi = stoppedItems.erase(itemi);
 	}
@@ -747,14 +749,18 @@ void Game::Update() {
 		refreshStockpiles = false;
 		if (freeItems.size() < 100) {
 			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
-				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
-					StockpileItem(*itemi);
+				if (boost::shared_ptr<Item> item = itemi->lock()) {
+					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+						StockpileItem(item);
+				}
 			}
 		} else {
 			for (unsigned int i = 0; i < std::max((unsigned int)100, freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::Choose(freeItems));
-				if (itemi->lock() && !itemi->lock()->Reserved() && itemi->lock()->GetFaction() == 0 && itemi->lock()->GetVelocity() == 0) 
-					StockpileItem(*itemi);
+				if (boost::shared_ptr<Item> item = itemi->lock()) {
+					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+						StockpileItem(item);
+				}
 			}
 		}
 	}
@@ -775,6 +781,8 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
+
+	Map::Inst()->UpdateMarkers();
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
@@ -798,13 +806,13 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			}
 
 			if(nearest) {
-				//Check if the item can be contained, and if so if any containers are in the stockpile
-
-				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", LOW));
+				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
+					item->IsCategory(Item::StringToItemCategory("Food")) ? HIGH : LOW));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
 
+				//Check if the item can be contained, and if so if any containers are in the stockpile
 				if (Item::Presets[item->Type()].fitsin >= 0) {
 					container = nearest->FindItemByCategory(Item::Presets[item->Type()].fitsin, NOTFULL, item->GetBulk());
 					if (container.lock()) {
@@ -940,7 +948,7 @@ void Game::GenerateMap(uint32_t seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, 50, -5, 50, -5);
+	map->heightMap->digBezier(px, py, 30, -5, 30, -5);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
@@ -1063,7 +1071,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 					fellJob->Attempts(50);
 					fellJob->ConnectToEntity(natObj);
 					fellJob->DisregardTerritory();
-					fellJob->SetRequiredTool(Item::StringToItemCategory("Slashing weapon"));
+					fellJob->SetRequiredTool(Item::StringToItemCategory("Axe"));
 					fellJob->tasks.push_back(Task(MOVEADJACENT, natObj->Position(), natObj));
 					fellJob->tasks.push_back(Task(FELL, natObj->Position(), natObj));
 					JobManager::Inst()->AddJob(fellJob);
@@ -1154,6 +1162,9 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 			if (Map::Inst()->Type(x,y) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
+			}
+			if (Map::Inst()->GroundMarked(x,y)) { //A dig job exists for this tile
+				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y));
 			}
 		}
 	}
@@ -1322,18 +1333,21 @@ void Game::CreateSquad(std::string name) {
 	squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >(name, boost::shared_ptr<Squad>(new Squad(name))));
 }
 
-void Game::SetSquadTargetCoordinate(Coordinate target, boost::shared_ptr<Squad> squad) {
-	squad->TargetCoordinate(target);
-	UI::Inst()->CloseMenu();
+void Game::SetSquadTargetCoordinate(Order order, Coordinate target, boost::shared_ptr<Squad> squad, bool autoClose) {
+	squad->AddOrder(order);
+	squad->AddTargetCoordinate(target);
+	if (autoClose) UI::Inst()->CloseMenu();
 	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str(), TCODColor::white, target);
+	Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', target, UPDATES_PER_SECOND*5, TCODColor::azure));
 }
-void Game::SetSquadTargetEntity(Coordinate target, boost::shared_ptr<Squad> squad) {
+void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_ptr<Squad> squad) {
 	if (target.X() >= 0 && target.X() < Map::Inst()->Width() && target.Y() >= 0 && target.Y() < Map::Inst()->Height()) {
 		std::set<int> *npcList = Map::Inst()->NPCList(target.X(), target.Y());
 		if (!npcList->empty()) {
-			squad->TargetEntity(Game::Inst()->npcList[*npcList->begin()]);
+			squad->AddOrder(order);
+			squad->AddTargetEntity(Game::Inst()->npcList[*npcList->begin()]);
 			UI::Inst()->CloseMenu();
-			Announce::Inst()->AddMsg((boost::format("[%1%] following %2%") % squad->Name() % squad->TargetEntity().lock()->Name()).str(), TCODColor::white, target);
+			Announce::Inst()->AddMsg((boost::format("[%1%] following %2%") % squad->Name() % Game::Inst()->npcList[*npcList->begin()]->Name()).str(), TCODColor::white, target);
 		}
 	}
 }
@@ -1467,7 +1481,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 			spot is reserved for digging. */
 			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
-				digJob->SetRequiredTool(Item::StringToItemCategory("Digging tool"));
+				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
 				digJob->Attempts(1000);
 				digJob->DisregardTerritory();
@@ -1653,7 +1667,7 @@ void Game::Hungerize(Coordinate pos) {
 				boost::shared_ptr<NPC> npc;
 				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
 				if (npc) {
-					npc->hunger = (int)(HUNGER_THRESHOLD * 1.5);
+					npc->hunger = 50000;
 				}
 		}
 	}

@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define MAXIMUM_JOB_ATTEMPTS 5
 
 #define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 10)
-#define HUNGER_THRESHOLD (UPDATES_PER_SECOND * 60 * 13)
+#define HUNGER_THRESHOLD 18000
 #define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 12)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
@@ -93,6 +93,7 @@ struct NPCPreset {
 	std::list<Attack> attacks;
 	std::set<std::string> tags;
 	int tier;
+	ItemType deathItem;
 };
 
 class NPC : public Entity {
@@ -114,6 +115,7 @@ private:
 	int timeCount;
 	std::deque<boost::shared_ptr<Job> > jobs;
 	int taskIndex;
+	int orderIndex;
 	boost::mutex pathMutex;
 	TCODPath *path;
 	int pathIndex;
@@ -205,6 +207,7 @@ public:
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();
 	void AbortCurrentJob(bool);
+	void AbortJob(boost::weak_ptr<Job>);
 
 	bool Expert();
 	void Expert(bool);

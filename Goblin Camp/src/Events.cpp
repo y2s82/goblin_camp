@@ -78,28 +78,28 @@ void Events::SpawnHostileMonsters() {
 	Coordinate a,b;
 	int counter = 0;
 	do {
-		switch (Random::Generate(3)) {
+	switch (Random::Generate(3)) {
 		case 0:
 			a.X(0);
-			a.Y(Random::Generate(map->Height() - 21));
+		a.Y(Random::Generate(map->Height() - 21));
 			b.X(1);
 			b.Y(a.Y() + 20);
 			break;
-	
-		case 1:
-			a.X(Random::Generate(map->Width() - 21));
+
+	case 1:
+		a.X(Random::Generate(map->Width() - 21));
 			a.Y(0);
 			b.X(a.X() + 20);
 			b.Y(1);
 			break;
-	
+
 		case 2:
 			a.X(map->Width() - 2);
 			a.Y(Random::Generate(map->Height() - 21));
 			b.X(map->Width() - 1);
 			b.Y(a.Y() + 20);
 			break;
-	
+
 		case 3:
 			a.X(Random::Generate(map->Width() - 21));
 			a.Y(map->Height() - 2);

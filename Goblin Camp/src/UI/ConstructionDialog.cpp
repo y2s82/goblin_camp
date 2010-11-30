@@ -44,8 +44,14 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
 		cachedConstruct = cons;
 		ConstructionDialog *dialog = new ConstructionDialog(50, 5);
 		constructionInfoDialog = new Dialog(dialog, "", 50, 5);
-		dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
-		dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
+		if (!cons->HasTag(STOCKPILE) && !cons->HasTag(FARMPLOT)) {
+			dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
+			dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
+		} else {
+			dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 2, 1, 10));
+			dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 18, 1, 13));
+			dialog->AddComponent(new Button("Expand", boost::bind(&ConstructionDialog::Expand, dialog), 37, 1, 10));
+		}
 		if(cons->HasTag(STOCKPILE)) {
 			constructionInfoDialog->SetHeight(40);
 			dialog->AddComponent(new Button("All", boost::bind(&Stockpile::SetAllAllowed, static_cast<Stockpile *>(cons), true), 2, 5, 8));
@@ -91,6 +97,14 @@ void ConstructionDialog::Rename() {
 void ConstructionDialog::Dismantle() {
 	UI::Inst()->CloseMenu();
 	construct->Dismantle();
+}
+
+void ConstructionDialog::Expand() {
+	boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Stockpile::Expand, static_cast<Stockpile*>(construct), _1, _2);
+	boost::function<bool(Coordinate, Coordinate)> placement = boost::bind(Game::CheckPlacement, _1, Coordinate(1,1), 
+		Construction::Presets[construct->Type()].tileReqs);
+	UI::Inst()->CloseMenu();
+	UI::ChooseRectPlacement(rectCall, placement, '=');
 }
 
 void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {

@@ -55,6 +55,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	type(0),
 	timeCount(0),
 	taskIndex(0),
+	orderIndex(0),
 	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
@@ -235,7 +236,7 @@ void NPC::HandleHunger() {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position());
 		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position());}
 		if (!item.lock()) { //Nothing to eat!
-			if (hunger > (int)(HUNGER_THRESHOLD * 1.5)) { //Nearing death
+			if (hunger > 48000) { //Nearing death
 				Game::Inst()->FindNearbyNPCs(boost::static_pointer_cast<NPC>(shared_from_this()));
 				boost::shared_ptr<NPC> weakest;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
@@ -247,8 +248,10 @@ void NPC::HandleHunger() {
 				if (weakest) { //Found a creature nearby, eat it
 					boost::shared_ptr<Job> newJob(new Job("Eat", HIGH, 0, !expert));
 					newJob->internal = true;
+					newJob->tasks.push_back(Task(GETANGRY));
 					newJob->tasks.push_back(Task(KILL, weakest->Position(), weakest, 0, 1));
 					newJob->tasks.push_back(Task(EAT));
+					newJob->tasks.push_back(Task(CALMDOWN));
 					jobs.push_back(newJob);
 					run = true;
 				}				
@@ -323,13 +326,13 @@ void NPC::Update() {
 		} else if (thirst > THIRST_THRESHOLD * 2) Kill();
 		if (hunger > HUNGER_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleHunger();
-		} else if (hunger > HUNGER_THRESHOLD * 2) Kill();
+		} else if (hunger > 72000) Kill();
 	}
 
 	if (needsSleep) {
 		++weariness;
 
-		if (weariness >= WEARY_THRESHOLD) {
+		if (weariness >= WEARY_THRESHOLD) { 
 			AddEffect(DROWSY);
 			HandleWeariness();
 		} else RemoveEffect(DROWSY);
@@ -775,7 +778,8 @@ CONTINUEEAT:
 				if (Game::Adjacent(Position(), currentEntity())) {
 					Hit(currentEntity(), currentTask()->flags != 0);
 					break;
-				} else if (WieldingRangedWeapon() && quiver.lock() && !quiver.lock()->empty()) {
+				} else if (currentTask()->flags == 0 && WieldingRangedWeapon() && quiver.lock() && 
+					!quiver.lock()->empty()) {
 					FireProjectile(currentEntity());
 					break;
 				}
@@ -1055,6 +1059,16 @@ CONTINUEEAT:
 				TaskFinished(TASKSUCCESS);
 				break;
 
+			case GETANGRY:
+				aggressive = true;
+				TaskFinished(TASKSUCCESS);
+				break;
+
+			case CALMDOWN:
+				aggressive = false;
+				TaskFinished(TASKSUCCESS);
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -1066,7 +1080,7 @@ CONTINUEEAT:
 					fleeJob->internal = true;
 					run = true;
 					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
-						if (npci->lock() && npci->lock()->faction != faction) {
+						if (npci->lock() && (npci->lock()->faction != faction || npci->lock() == aggressor.lock())) {
 							int dx = x - npci->lock()->x;
 							int dy = y - npci->lock()->y;
 							if (Map::Inst()->Walkable(x + dx, y + dy, (void *)this)) {
@@ -1216,12 +1230,16 @@ void NPC::Kill() {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
 		health = 0;
-		int corpsenum = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Corpse"), false);
-		boost::shared_ptr<Item> corpse = Game::Inst()->GetItem(corpsenum).lock();
-		corpse->Color(_color);
-		corpse->Name(corpse->Name() + "(" + name + ")");
-		if (velocity > 0) {
-			corpse->CalculateFlightPath(GetVelocityTarget(), velocity, GetHeight());
+		if (NPC::Presets[type].deathItem >= 0) {
+			int corpsenum = Game::Inst()->CreateItem(Position(), NPC::Presets[type].deathItem, false);
+			boost::shared_ptr<Item> corpse = Game::Inst()->GetItem(corpsenum).lock();
+			corpse->Color(_color);
+			corpse->Name(corpse->Name() + "(" + name + ")");
+			if (velocity > 0) {
+				corpse->CalculateFlightPath(GetVelocityTarget(), velocity, GetHeight());
+			}
+		} else if (NPC::Presets[type].deathItem == -1) {
+			Game::Inst()->CreateFilth(Position());
 		}
 
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
@@ -1345,26 +1363,29 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			npc->FindNewArmor();
 		}
 
-		switch (squad->Order()) {
+		switch (squad->GetOrder(npc->orderIndex)) { //GetOrder handles incrementing orderIndex
 		case GUARD:
-			if (squad->TargetCoordinate().X() >= 0) {
-				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate()));
+			if (squad->TargetCoordinate(npc->orderIndex).X() >= 0) {
+				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
 				//WAIT waits Coordinate.x / 5 seconds
 				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				npc->jobs.push_back(newJob);
-				if (Distance(npc->Position(), squad->TargetCoordinate()) < 10) npc->run = false;
+				if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
 				else npc->run = true;
 				return true;
 			}
 			break;
 
 		case FOLLOW:
-			if (squad->TargetEntity().lock()) {
-				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity().lock()->Position(), squad->TargetEntity()));
+			if (squad->TargetEntity(npc->orderIndex).lock()) {
+				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity(npc->orderIndex).lock()->Position(), squad->TargetEntity(npc->orderIndex)));
 				npc->jobs.push_back(newJob);
 				npc->run = true;
 				return true;
 			}
+			break;
+
+		default:
 			break;
 		}
 	} 
@@ -1400,7 +1421,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	} else if (npc->coward) { //Aggressiveness trumps cowardice
 		Game::Inst()->FindNearbyNPCs(npc);
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if (npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) {
+			if ((npci->lock()->GetFaction() != npc->faction || npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
@@ -1766,6 +1787,9 @@ class NPCListener : public ITCODParserListener {
 			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"tier")) {
 			NPC::Presets.back().tier = value.i;
+		} else if (boost::iequals(name,"death")) {
+			if (boost::iequals(value.s,"filth")) NPC::Presets.back().deathItem = -1;
+			else NPC::Presets.back().deathItem = Item::StringToItemType(value.s);
 		}
 		return true;
 	}
@@ -1798,6 +1822,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addProperty("spawnAsGroup", TCOD_TYPE_DICE, false);
 	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
+	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -2011,7 +2036,8 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	group(TCOD_dice_t()),
 	attacks(std::list<Attack>()),
 	tags(std::set<std::string>()),
-	tier(0)
+	tier(0),
+	deathItem(-2)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;
@@ -2027,3 +2053,16 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 
 int NPC::GetHealth() { return health; }
 int NPC::GetMaxHealth() { return maxHealth; }
+
+void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
+	if (boost::shared_ptr<Job> job = wjob.lock()) {
+		for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
+			if (*jobi == job) {
+				if (job == jobs.front()) {
+					TaskFinished(TASKFAILFATAL, "(AbortJob)");
+				}
+				return;
+			}
+		}
+	}
+}

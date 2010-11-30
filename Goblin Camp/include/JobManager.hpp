@@ -42,6 +42,7 @@ public:
 	boost::weak_ptr<Job> GetJobByListIndex(int);
 	void RemoveJob(boost::weak_ptr<Job>);
 	void RemoveJob(boost::weak_ptr<Entity>);
+	void RemoveJob(Action, Coordinate); //Can remove more than was intended, use with caution
 	void Update();
 	int JobAmount();
 	void NPCWaiting(int);

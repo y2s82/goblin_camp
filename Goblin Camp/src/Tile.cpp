@@ -248,6 +248,8 @@ TileType Tile::StringToTileType(std::string string) {
 		return TILEROCK;
 	} else if (boost::iequals(string, "mud")) {
 		return TILEMUD;
+	} else if (boost::iequals(string, "bog")) {
+		return TILEBOG;
 	}
 	return TILENONE;
 }

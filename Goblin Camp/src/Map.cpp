@@ -22,9 +22,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StatusEffect.hpp"
 #include "Construction.hpp"
 #include "Door.hpp"
+#include "MapMarker.hpp"
 
 Map::Map() :
-overlayFlags(0) {
+overlayFlags(0), markerids(0) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
@@ -133,6 +134,10 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 				console->putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
 			}
 		}
+	}
+
+	for (std::list<std::pair<unsigned int, MapMarker> >::iterator markeri = mapMarkers.begin(); markeri != mapMarkers.end(); ++markeri) {
+		markeri->second.Draw(upleft, console);
 	}
 }
 
@@ -414,4 +419,27 @@ bool Map::IsUnbridgedWater(int x, int y) {
 		}
 	}
 	return false;
+}
+
+unsigned int Map::AddMarker(MapMarker marker) {
+	mapMarkers.push_back(std::pair<unsigned int, MapMarker>(markerids, marker));
+	++markerids;
+	return markerids - 1;
+}
+
+void Map::RemoveMarker(int markid) {
+	for (std::list<std::pair<unsigned int, MapMarker> >::iterator markeri = mapMarkers.begin(); markeri != mapMarkers.end(); ++markeri) {
+		if (markeri->first == markid) {
+			mapMarkers.erase(markeri);
+			return;
+		}
+	}
+}
+
+void Map::UpdateMarkers() {
+	for (std::list<std::pair<unsigned int, MapMarker> >::iterator markeri = mapMarkers.begin(); markeri != mapMarkers.end();) {
+		if (!markeri->second.Update()) {
+			markeri = mapMarkers.erase(markeri);
+		} else ++markeri;
+	}
 }

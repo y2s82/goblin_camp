@@ -34,7 +34,7 @@ plant_type "Wild Blueleaf" {
 	maxheight=0.5
 }
 
-plant_type "Yellow Flower" {
+plant_type "Dandelion" {
 	graphic=12
 	color="255,242,0"
 	components=["Flower"]
@@ -45,7 +45,7 @@ plant_type "Yellow Flower" {
 	walkable
 }
 
-plant_type "Red Flower" {
+plant_type "Red Poppy" {
 	graphic=12
 	color="237,21,85"
 	components=["Flower"]
@@ -55,7 +55,7 @@ plant_type "Red Flower" {
 	walkable
 }
 
-plant_type "Pink Flower" {
+plant_type "Alpine aster" {
 	graphic=12
 	color="230,150,193"
 	components=["Flower"]
@@ -66,7 +66,7 @@ plant_type "Pink Flower" {
 	walkable
 }
 
-plant_type "Blue Flower" {
+plant_type "Blue Skullcap" {
 	graphic=12
 	color="0,0,230"
 	components=["Flower"]

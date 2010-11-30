@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Announce.hpp"
 #include "scripting/API.hpp"
 #include "Version.hpp"
+#include "UI/MessageBox.hpp"
 
 namespace Script { namespace API {
 	void Announce(const char *str) {
@@ -39,10 +40,15 @@ namespace Script { namespace API {
 		return Globals::gameVersion;
 	}
 	
+	void MessageBox(const char *str) {
+		MessageBox::ShowMessageBox(str);
+	}
+
 	void ExposeFunctions() {
 		py::def("announce",         &Announce);
 		py::def("appendListener",   &Script::AppendListener);
 		py::def("getVersionString", &GetVersionString);
 		py::def("isDebugBuild",     &IsDebugBuild);
+		py::def("messageBox",       &MessageBox);
 	}
 }}

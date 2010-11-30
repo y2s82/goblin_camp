@@ -243,7 +243,9 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'C')));
 
 		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
-		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRemoveNatureObjects)));
+
+		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2);
+		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R')));
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
 		
 		call = boost::bind(&Game::Damage, Game::Inst(), _1);

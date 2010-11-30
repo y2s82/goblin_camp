@@ -159,3 +159,5 @@ void Container::Draw(Coordinate upleft, TCODConsole* console) {
 			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
 	}
 }
+
+int Container::GetReservedSpace() { return reservedSpace; }

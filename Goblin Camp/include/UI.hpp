@@ -84,8 +84,8 @@ public:
 	static void ChooseStockpile(ConstructionType);
 	static void ChooseTreeFelling();
 	static void ChoosePlantHarvest();
-	static void ChooseOrderTargetCoordinate(boost::shared_ptr<Squad>);
-	static void ChooseOrderTargetEntity(boost::shared_ptr<Squad>);
+	static void ChooseOrderTargetCoordinate(boost::shared_ptr<Squad>, Order);
+	static void ChooseOrderTargetEntity(boost::shared_ptr<Squad>, Order);
 	static void ChooseDesignateTree();
 	static void ChooseDismantle();
 	static void ChooseUndesignate();
@@ -94,10 +94,11 @@ public:
 	static void ChooseCreateItem();
 	static void ChooseDig();
 	static void ChooseNaturify();
-	static void ChooseRemoveNatureObjects();
 	static void ChooseChangeTerritory(bool add);
 	static void ChooseGatherItems();
 	static void ChooseNormalPlacement(boost::function<void(Coordinate)> callback,
+		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
+	static void ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback,
 		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);

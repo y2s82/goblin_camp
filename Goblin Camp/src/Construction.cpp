@@ -40,6 +40,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "UI/ConstructionDialog.hpp"
 #include "Item.hpp"
+#include "scripting/Event.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -188,6 +189,8 @@ int Construction::Build() {
 		if (!HasTag(CENTERSCAMP)) Camp::Inst()->UpdateCenter(Center(), true);
 		else Camp::Inst()->LockCenter(Center());
 		Camp::Inst()->ConstructionBuilt(type);
+
+		Script::Event::BuildingCreated(boost::static_pointer_cast<Construction>(shared_from_this()), x, y);
 	}
 	return condition;
 }

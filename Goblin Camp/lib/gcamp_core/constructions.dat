@@ -213,11 +213,11 @@ construction_type "Pontoon bridge" {
 	bridge
 	walkable
 	maxCondition=50
-	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank"]
+	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank", "Rope", "Rope"]
 	graphicLength=2
 	graphic=[157, 157,
 			 157, 157]
-	tileReqs=["grass", "rock", "ditch", "mud", "river"]
+	tileReqs=["grass", "rock", "ditch", "mud", "river", "bog"]
 	description="A bridge composed of barrels and planks"
 }
 
@@ -385,7 +385,7 @@ construction_type "Duckboard" {
 	materials=["Plank","Plank","Plank","Plank"]
 	graphicLength=1
 	graphic=[19]
-	tileReqs=["grass", "rock", "mud"]
+	tileReqs=["grass", "rock", "mud", "bog"]
 	placementType=2
 	description="A wooden platform for easier travel over muddy terrain"
 }
