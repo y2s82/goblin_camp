@@ -1,0 +1,392 @@
+construction_type "Stockpile" {
+	tier=0
+	category="Basics"
+	stockpile
+	walkable
+	graphicLength=1
+	graphic=[61]
+	maxCondition=10
+	description="Stockpiles are required to store items. Orcs in workshops can only use items from stockpiles."
+}
+
+construction_type "Farm plot" {
+	tier=0
+	category="Basics"
+	farmplot
+	walkable
+	graphicLength=1
+	graphic=[126]
+	maxCondition=10
+	tileReqs=["grass", "mud"]
+	description="Designates an area to be used for agriculture"
+}
+
+construction_type "Spawning pool" {
+	tier=0
+	category="Permanent"
+	graphicLength=1
+	graphic=[ 126 ]
+	color="0,255,128"
+	walkable
+	maxCondition=30
+	productionx=0
+	productiony=0
+	permanent
+	unique
+	spawningPool
+	description="A pit of slime, it will spawn new goblins and orcs as long as it is provided with filth and corpses"
+}
+
+construction_type "Saw pit" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  95, 95, 95,
+			 178, 46, 44]
+	walkable
+	maxCondition=90
+	materials=["Log","Log","Log"]
+	productionx=1
+	productiony=1
+	description="Planks are created in saw pits"
+}
+
+construction_type "Carpenter" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  35, 67, 46,
+			 178, 46,177]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=1
+	description="A carpenter's workshop allows your orcs to create basic wooden items"
+}
+
+construction_type "Basket Weaver" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 30, 30, 157,
+			  46, 46, 46,
+			  35, 30, 30]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Winery" {
+	tier=0
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10, 33, 35,231]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank"]
+	productionx=2
+	productiony=0
+}
+
+construction_type "Bed" {
+	tier=0
+	category="Furniture"
+	bed
+	graphicLength=1
+	graphic=[220]
+	walkable
+	maxCondition=10
+	materials=["Bed"]
+}
+
+construction_type "Door" {
+	tier=0
+	category="Furniture"
+	door
+	graphicLength=1
+	graphic=[43]
+	walkable
+	blocksLight
+	maxCondition=10
+	materials=["Door"]
+}
+
+construction_type "Kitchen" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  95, 95, 127]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Weaver" {
+	tier=1
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 21, 30, 30,
+			  46, 46, 46,
+			  30, 30, 21]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Bone Carver" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,179,  9, 
+			  19, 179,179, 19,
+			  41,  42, 42, 40]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Butcher" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 37,179,179, 37, 
+			  19,179,179, 19,
+			  37, 42, 42, 37]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Statue" {
+	tier=1
+	category="Furniture"
+	furniture
+	graphicLength=1
+	graphic=[190]
+	maxCondition=20
+	materials=["Statue"]
+}
+
+construction_type "Totem Pole" {
+	tier=1
+	category="Basics"
+	unique
+	centersCamp
+	maxCondition=100
+	materials=["Log", "Log", "Log", "Log", "Log"]
+	graphicLength=3
+	graphic=[201, 205, 187,
+			 186,  10, 186,
+			 200, 205, 188]
+	description="The Totem Pole represents the center of your camp"
+}
+
+construction_type "Palisade" {
+	tier=1
+	category="Basics"
+	wall
+	maxCondition=50
+	materials=["Log","Log","Log","Log","Log"]
+	placementType=2
+	description="A palisade will stop most monsters from gaining free access to your camp"
+}
+
+construction_type "Pontoon bridge" {
+	tier=1
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=50
+	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank", "Rope", "Rope"]
+	graphicLength=2
+	graphic=[157, 157,
+			 157, 157]
+	tileReqs=["grass", "rock", "ditch", "mud", "river", "bog"]
+	description="A bridge composed of barrels and planks"
+}
+
+construction_type "Stone quarry" {
+	tier=2
+	category="Permanent"
+	graphicLength=10
+	graphic=[176,176,178, 44,177,176,177,178,178,176,
+			 177, 46, 46, 44, 44, 44, 46,177,176,177,
+			  46, 46,178,176,177,176, 46, 46, 44,176,
+			 178, 46, 46,176,178,178,177,178, 44, 46,
+			 176, 46,177,178, 32, 32,176,177, 46,178,
+			 176, 46, 46, 44, 32, 32,177,176, 46,177,
+			 177,176,177,178,177,177,176,178, 46,177,
+			 178, 46, 46,177,176,178,176, 44, 46,178,
+			 176, 46,178,176,176,177,176, 44, 46, 46,
+			 178, 46,177,177,178,178,177, 44, 46, 46]
+	walkable
+	maxCondition=1000
+	productionx=3
+	productiony=5
+	spawnsCreatures="underground"
+	//Spawn creatures every x seconds
+	spawnFrequency=600
+	permanent
+	tileReqs=["rock"]
+}
+
+construction_type "Stone mason" {
+	tier=2
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,157,178,
+			  40, 10, 46,178,
+			 170,157, 46,178]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weapon crafter" {
+	tier=2
+	category="Workshops"
+	graphicLength=2
+	graphic=[ 91, 92,
+			 124, 46,
+			 124, 46,
+			 123,125]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Armor Crafter" {
+	tier=2
+	category="Workshops"
+	graphicLength=2
+	graphic=[16, 124,
+			 170, 124,
+			 91, 93,
+			 94, 251]
+	walkable
+	maxCondition=100
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Rough stone", "Rough stone"]
+}
+
+construction_type "Tanner" {
+	tier=2
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10,  9, 46,231,
+			  35, 35,  9,231]
+	walkable
+	maxCondition=120
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=1
+}
+
+construction_type "Mill" {
+	tier=2
+	category="Workshops"
+	graphicLength=5
+	graphic=[157,177, 30, 46, 46,
+			 157,177, 46, 92, 46,
+			  17, 46, 10,205, 16,
+			  46, 92, 46, 47, 46,
+			  46, 46, 31, 46, 46]
+	walkable
+	maxCondition=250
+	productionx=2
+	productiony=1
+	materials=["Rough stone","Rough stone","Log","Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Clay pit" {
+	tier=3
+	category="Permanent"
+	graphicLength=5
+	graphic=[201, 203, 203, 203, 187,
+			204,  92,  31,  47, 185,
+			204,  16, 176,  17, 185,
+			204,  47,  30,  92, 185,
+			200, 202, 202, 202, 188]
+	walkable
+	maxCondition=800
+	productionx=2
+	productiony=2
+	spawnsCreatures="claypit"
+	spawnFrequency=600
+	permanent
+	color="220,80,70"
+}
+
+construction_type "Bloomery" {
+	tier=3
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,176,191,
+			  40, 10, 46, 10,
+			 170,157,176,217]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Brick","Brick","Brick","Brick","Brick"]
+}
+
+construction_type "Clay kiln" {
+	tier=3
+	category="Workshops"
+	graphicLength=2
+	graphic=[ 10, 35,
+			  35, 46,
+			 231,  9,
+			   2,173]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank"]
+	productionx=1
+	productiony=1
+}
+
+construction_type "Brick Wall" {
+	tier=3
+	category="Basics"
+	wall
+	maxCondition=50
+	materials=["Brick","Brick","Brick","Brick","Brick"]
+}
+
+construction_type "Duckboard" {
+	tier=3
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=30
+	materials=["Plank","Plank","Plank","Plank"]
+	graphicLength=1
+	graphic=[19]
+	tileReqs=["grass", "rock", "mud", "bog"]
+	placementType=2
+	description="A wooden platform for easier travel over muddy terrain"
+}
+
