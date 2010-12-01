@@ -134,8 +134,7 @@ class NatureObjectListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("NatureObjectListener: " << msg);
-		Game::Inst()->Exit();
+		throw std::runtime_error(msg);
 	}
 };
 
