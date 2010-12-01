@@ -351,6 +351,10 @@ void NPC::Update() {
 
 	if (Random::Generate(UPDATES_PER_SECOND - 1) == 0 && health < maxHealth) ++health;
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
+
+	if (carried.lock()) {
+		AddEffect(StatusEffect(CARRYING, carried.lock()->Graphic(), carried.lock()->Color()));
+	} else RemoveEffect(CARRYING);
 }
 
 void NPC::UpdateStatusEffects() {
@@ -2065,4 +2069,15 @@ void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 			}
 		}
 	}
+}
+
+void NPC::AddEffect(StatusEffect effect) {
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->type == effect.type) {
+			statusEffectI->cooldown = statusEffectI->cooldownDefault;
+			return;
+		}
+	}
+
+	statusEffects.push_back(effect);
 }
