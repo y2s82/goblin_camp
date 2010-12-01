@@ -203,6 +203,7 @@ public:
 	void findPath(Coordinate);
 	void StartJob(boost::shared_ptr<Job>);
 	void AddEffect(StatusEffectType);
+	void AddEffect(StatusEffect);
 	void RemoveEffect(StatusEffectType);
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();

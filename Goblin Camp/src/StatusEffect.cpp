@@ -23,7 +23,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 //TODO: All this needs to be put into data files at some point
 
-StatusEffect::StatusEffect(StatusEffectType typeval) : 
+StatusEffect::StatusEffect(StatusEffectType typeval, int g, TCODColor col) : 
+graphic(g),
+	color(col),
 	type(typeval),
 	bleed(false)
 {
@@ -143,6 +145,11 @@ StatusEffect::StatusEffect(StatusEffectType typeval) :
 		name = "Drinking";
 		graphic = TCOD_CHAR_ARROW_N;
 		color = TCODColor::blue;
+		cooldown = -1;
+		break;
+
+	case CARRYING:
+		name = "Carrying item";
 		cooldown = -1;
 		break;
 	}
