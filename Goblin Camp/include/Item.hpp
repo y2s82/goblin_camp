@@ -86,8 +86,8 @@ private:
 	bool attemptedStore;
 	int decayCounter;
 
-	static std::map<std::string, ItemType> itemTypeNames;
-	static std::map<std::string, ItemCategory> itemCategoryNames;
+	static boost::unordered_map<std::string, ItemType> itemTypeNames;
+	static boost::unordered_map<std::string, ItemCategory> itemCategoryNames;
 
 	Attack attack;
 	int resistances[RES_COUNT];

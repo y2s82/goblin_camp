@@ -33,8 +33,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
-std::map<std::string, ItemType> Item::itemTypeNames = std::map<std::string, ItemType>();
-std::map<std::string, ItemType> Item::itemCategoryNames = std::map<std::string, ItemType>();
+boost::unordered_map<std::string, ItemType> Item::itemTypeNames = boost::unordered_map<std::string, ItemType>();
+boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::unordered_map<std::string, ItemType>();
 
 Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
 	type(typeval),
@@ -114,8 +114,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
 
-	if (container.lock()) Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), true);
-	else Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), false);
+	Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
 
 	if (!container.lock() && !reserved) {
 		Game::Inst()->StockpileItem(boost::static_pointer_cast<Item>(shared_from_this()));
@@ -134,6 +133,9 @@ std::string Item::ItemTypeToString(ItemType type) {
 
 ItemType Item::StringToItemType(std::string str) {
 	boost::to_upper(str);
+	if (itemTypeNames.find(str) == itemTypeNames.end()) {
+		return -1;
+	}
 	return itemTypeNames[str];
 }
 
@@ -143,6 +145,9 @@ std::string Item::ItemCategoryToString(ItemCategory category) {
 
 ItemCategory Item::StringToItemCategory(std::string str) {
 	boost::to_upper(str);
+	if (itemCategoryNames.find(str) == itemCategoryNames.end()) {
+		return -1;
+	}
 	return Item::itemCategoryNames[str];
 }
 
@@ -238,9 +243,7 @@ private:
 			Item::Categories.push_back(ItemCat());
 			++Game::ItemCatCount;
 			Item::Categories.back().name = name;
-			std::string upperName = name;
-			boost::to_upper(upperName);
-			Item::itemCategoryNames.insert(std::pair<std::string, ItemCategory>(upperName, Game::ItemCatCount-1));
+			Item::itemCategoryNames.insert(std::make_pair(boost::to_upper_copy(Item::Categories.back().name), Game::ItemCatCount-1));
 			presetCategoryParent.push_back("");
 		} else if (boost::iequals(str->getName(), "item_type")) {
 			mode = ITEMMODE;
@@ -250,9 +253,7 @@ private:
 			presetDecay.push_back(std::vector<std::string>());
 			++Game::ItemTypeCount;
 			Item::Presets.back().name = name;
-			std::string upperName = name;
-			boost::to_upper(upperName);
-			Item::itemTypeNames.insert(std::pair<std::string, ItemType>(upperName, Game::ItemTypeCount-1));
+			Item::itemTypeNames.insert(std::make_pair(boost::to_upper_copy(Item::Presets.back().name), Game::ItemTypeCount-1));
 			presetProjectile.push_back("");
 		} else if (boost::iequals(str->getName(), "attack")) {
 		}

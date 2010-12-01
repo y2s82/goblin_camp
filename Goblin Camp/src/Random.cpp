@@ -200,7 +200,7 @@ namespace Random {
 		\returns A random boolean.
 	*/
 	bool Generator::GenerateBool() {
-		return Generate(0, 1) ? true : false;
+		return !!Generate(0, 1);
 	}
 	
 	/**

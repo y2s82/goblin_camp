@@ -143,4 +143,8 @@ public:
 	void Damage(Attack*);
 	void Explode();
 	bool Built();
+	
+	static boost::unordered_map<std::string, ConstructionType> constructionNames;
+	static ConstructionType StringToConstructionType(std::string);
+	static std::string ConstructionTypeToString(ConstructionType);
 };

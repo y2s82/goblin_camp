@@ -14,8 +14,31 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
+import functools
 from . import log, events, utils, config
 import _gcampapi
 
 announce = _gcampapi.announce
 announce.__doc__ = 'Add a string to announce area'
+
+messageBox = _gcampapi.messageBox
+messageBox.__doc__ = 'Show a message box to player'
+
+getVersionString = _gcampapi.getVersionString
+getVersionString.__doc__ = 'Returns Goblin Camp version as a string'
+
+isDebugBuild = _gcampapi.isDebugBuild
+isDebugBuild.__doc__ = 'Returns True if running a debug build'
+
+isDevMode = _gcampapi.isDevMode
+isDevMode.__doc__ = 'Returns True if running in a devmode'
+
+spawnEntity = _gcampapi.spawnEntity
+spawnEntity.__doc__ = 'Spawns an entity on the map'
+
+for k in ('Building', 'NPC', 'Plant', 'Item'):
+	typeName = 'ENTITY_{0}'.format(k.upper())
+	funName  = 'spawn{0}'.format(k)
+	
+	globals()[typeName] = getattr(_gcampapi.EntityType, typeName)
+	globals()[funName]  = functools.partial(spawnEntity, globals()[typeName])
