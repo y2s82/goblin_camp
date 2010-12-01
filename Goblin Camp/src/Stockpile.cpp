@@ -199,8 +199,6 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 
 void Stockpile::Expand(Coordinate from, Coordinate to) {
 	//We can assume that from < to
-	if (from.X() > b.X() || to.X() < a.X()) return;
-	if (from.Y() > b.Y() || to.Y() < a.Y()) return;
 
 	//The algorithm: Check each tile inbetween from and to, and if a tile is adjacent to this
 	//stockpile, add it. Do this max(width,height) times.
