@@ -660,6 +660,10 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 	}
 }
 
+//
+// class Construction
+//
+BOOST_CLASS_VERSION(Construction, 0)
 
 template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {
