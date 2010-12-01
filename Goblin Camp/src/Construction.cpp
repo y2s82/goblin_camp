@@ -50,6 +50,20 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 	return Construction::Presets[construct].productionSpot;
 }
 
+boost::unordered_map<std::string, ConstructionType> Construction::constructionNames = boost::unordered_map<std::string, ConstructionType>();
+
+ConstructionType Construction::StringToConstructionType(std::string name) {
+	boost::to_upper(name);
+	if (constructionNames.find(name) == constructionNames.end()) {
+		return -1;
+	}
+	return constructionNames[name];
+}
+
+std::string Construction::ConstructionTypeToString(ConstructionType type) {
+	return Construction::Presets[type].name;
+}
+
 std::vector<int> Construction::AllowedAmount = std::vector<int>();
 
 Construction::Construction(ConstructionType vtype, Coordinate target) : Entity(),
@@ -317,6 +331,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		Construction::Presets.push_back(ConstructionPreset());
 		Construction::Presets.back().name = name;
+		Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
 		Construction::AllowedAmount.push_back(-1);
 		return true;
 	}
@@ -525,7 +540,7 @@ void Construction::LoadPresets(std::string filename) {
 	parser.run(filename.c_str(), new ConstructionListener());
 }
 
-bool _ResolveProductsPredicate(const ConstructionPreset& preset, const std::string& name) {
+bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string& name) {
 	return boost::iequals(preset.name, name);
 }
 
@@ -543,7 +558,7 @@ void Construction::ResolveProducts() {
 				// Could use bit more complicated lambda expression to eliminate
 				// separate predicate function entirely, but I think this is more
 				// clear to people not used to Boost.Lambda
-				boost::bind(_ResolveProductsPredicate, _1, itemPreset.constructedInRaw)
+				boost::bind(_ConstructionNameEquals, _1, itemPreset.constructedInRaw)
 			);
 			
 			if (conIt != Construction::Presets.end()) {
@@ -799,4 +814,4 @@ ConstructionPreset::ConstructionPreset() :
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
-	
+

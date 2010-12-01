@@ -1860,6 +1860,9 @@ std::string NPC::NPCTypeToString(NPCType type) {
 }
 
 NPCType NPC::StringToNPCType(std::string typeName) {
+	if (NPCTypeNames.find(typeName) == NPCTypeNames.end()) {
+		return -1;
+	}
 	return NPCTypeNames[typeName];
 }
 

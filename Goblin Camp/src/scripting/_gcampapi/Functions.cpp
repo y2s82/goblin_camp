@@ -22,9 +22,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/API.hpp"
 #include "Version.hpp"
 #include "UI/MessageBox.hpp"
+#include "Game.hpp"
+#include "Item.hpp"
+#include "Construction.hpp"
+#include "NatureObject.hpp"
 
 namespace Script { namespace API {
-	void Announce(const char *str) {
+	void Announce(const std::string& str) {
 		::Announce::Inst()->AddMsg(str);
 	}
 	
@@ -36,19 +40,80 @@ namespace Script { namespace API {
 	#endif
 	}
 	
+	bool IsDevMode() {
+		return Game::Inst()->DevMode();
+	}
+	
 	const char *GetVersionString() {
 		return Globals::gameVersion;
 	}
 	
-	void MessageBox(const char *str) {
+	void MessageBox(const std::string& str) {
 		MessageBox::ShowMessageBox(str);
 	}
-
+	
+	enum EntityType {
+		EConstr, EItem, ENPC, EPlant
+	};
+	
+	int _SpawnItem(Coordinate coords, int type) {
+		return Game::Inst()->CreateItem(coords, type);
+	}
+	
+	// XXX:  it doesn't 'spawn' constructions, it builds them (as in will fail and return -1 when there are no resources)
+	// TODO: make it spawn, and reserve building for something else
+	int SpawnEntity(EntityType type, const std::string& name, int x, int y) {
+		boost::function<int(Coordinate, int)> spawn;
+		boost::function<int(std::string)> getID;
+		Coordinate coords(x, y);
+		
+		switch (type) {
+			case EConstr:
+				spawn = &Game::PlaceConstruction;
+				getID = &Construction::StringToConstructionType;
+			break;
+			case EItem:
+				//spawn = boost::bind(&Game::CreateItem, Game::Inst(), _1, _2); // this makes the compiler cry for some reason
+				spawn = &_SpawnItem;
+				getID = &Item::StringToItemType;
+			break;
+			case ENPC:
+				spawn = boost::bind(&Game::CreateNPC, Game::Inst(), _1, _2);
+				getID = &NPC::StringToNPCType;
+			break;
+			case EPlant:
+				Game::Inst()->CreateNatureObject(coords, name);
+				return -1;
+			default:
+				PyErr_SetString(PyExc_ValueError, "Invalid type");
+				py::throw_error_already_set();
+				return -1;
+		}
+		
+		int id = getID(name);
+		
+		if (id == -1) {
+			PyErr_SetString(PyExc_ValueError, "Invalid name");
+			py::throw_error_already_set();
+		}
+		
+		return spawn(coords, id);
+	}
+	
 	void ExposeFunctions() {
 		py::def("announce",         &Announce);
 		py::def("appendListener",   &Script::AppendListener);
 		py::def("getVersionString", &GetVersionString);
 		py::def("isDebugBuild",     &IsDebugBuild);
+		py::def("isDevMode",        &IsDevMode);
 		py::def("messageBox",       &MessageBox);
+		py::def("spawnEntity",      &SpawnEntity);
+		
+		py::enum_<EntityType>("EntityType").
+			value("ENTITY_BUILDING", EConstr).
+			value("ENTITY_ITEM",     EItem).
+			value("ENTITY_NPC",      ENPC).
+			value("ENTITY_PLANT",    EPlant).
+		export_values();
 	}
 }}
