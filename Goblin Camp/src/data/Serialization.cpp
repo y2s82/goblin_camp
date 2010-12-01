@@ -150,7 +150,6 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & safeMonths;
 	ar & devMode;
 	ar & marks;
-	ar & delays;
 	ar & upleft;
 	ar & npcList;
 	ar & squadList;
@@ -185,7 +184,6 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar & safeMonths;
 		ar & devMode;
 		ar & marks;
-		ar & delays;
 		ar & upleft;
 		ar & npcList;
 		ar & squadList;
