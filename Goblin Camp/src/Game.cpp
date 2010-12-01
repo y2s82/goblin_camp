@@ -1401,6 +1401,11 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
 }
 
 void Game::Reset() {
+	for (int x = 0; x < Map::Inst()->Width(); ++x) {
+		for (int y = 0; y < Map::Inst()->Height(); ++y) {
+			Map::Inst()->Reset(x,y);
+		}
+	}
 	npcList.clear();
 	squadList.clear();
 	hostileSquadList.clear();
@@ -1422,11 +1427,6 @@ void Game::Reset() {
 	upleft = Coordinate(180,180);
 	safeMonths = 9;
 	Announce::Inst()->Reset();
-	for (int x = 0; x < Map::Inst()->Width(); ++x) {
-		for (int y = 0; y < Map::Inst()->Height(); ++y) {
-			Map::Inst()->Reset(x,y);
-		}
-	}
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
