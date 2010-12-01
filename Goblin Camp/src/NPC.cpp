@@ -1801,8 +1801,7 @@ class NPCListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("NPCListener: " << msg);
-		Game::Inst()->Exit(false);
+		throw std::runtime_error(msg);
 	}
 };
 

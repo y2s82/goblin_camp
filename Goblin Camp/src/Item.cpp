@@ -358,8 +358,7 @@ private:
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("ItemListener: " << msg);
-		Game::Inst()->Exit();
+		throw std::runtime_error(msg);
 	}
 };
 
