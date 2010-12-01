@@ -22,9 +22,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/API.hpp"
 #include "Version.hpp"
 #include "UI/MessageBox.hpp"
+#include "Game.hpp"
+#include "Logger.hpp"
 
 namespace Script { namespace API {
-	void Announce(const char *str) {
+	void Announce(const char* str) {
 		::Announce::Inst()->AddMsg(str);
 	}
 	
@@ -40,8 +42,17 @@ namespace Script { namespace API {
 		return Globals::gameVersion;
 	}
 	
-	void MessageBox(const char *str) {
+	void MessageBox(const char* str) {
 		MessageBox::ShowMessageBox(str);
+	}
+
+	void Delay(int delay, PyObject* callback) {
+		if (!PyCallable_Check(callback)) {
+			LOG("WARNING: Attempted to add a delay to an uncallable object");
+			return;
+		}
+		py::object function(py::handle<>(py::borrowed(callback)));
+		Game::Inst()->AddDelay(delay, function);
 	}
 
 	void ExposeFunctions() {
@@ -50,5 +61,6 @@ namespace Script { namespace API {
 		py::def("getVersionString", &GetVersionString);
 		py::def("isDebugBuild",     &IsDebugBuild);
 		py::def("messageBox",       &MessageBox);
+		py::def("delay",            &Delay);
 	}
 }}
