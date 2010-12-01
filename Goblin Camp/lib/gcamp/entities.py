@@ -14,14 +14,15 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-from . import log, events, utils, config, ui, entities
+import functools
 import _gcampapi
 
-getVersionString = _gcampapi.getVersionString
-getVersionString.__doc__ = 'Returns Goblin Camp version as a string'
+spawn = _gcampapi.spawnEntity
+spawn.__doc__ = 'Spawns an entity on the map'
 
-isDebugBuild = _gcampapi.isDebugBuild
-isDebugBuild.__doc__ = 'Returns True if running a debug build'
-
-isDevMode = _gcampapi.isDevMode
-isDevMode.__doc__ = 'Returns True if running in a devmode'
+for k in ('Building', 'NPC', 'Plant', 'Item'):
+	typeName = 'ENTITY_{0}'.format(k.upper())
+	funName  = 'spawn{0}'.format(k)
+	
+	globals()[typeName] = getattr(_gcampapi.EntityType, typeName)
+	globals()[funName]  = functools.partial(spawn, globals()[typeName])

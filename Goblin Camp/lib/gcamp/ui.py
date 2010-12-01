@@ -14,14 +14,10 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-from . import log, events, utils, config, ui, entities
 import _gcampapi
 
-getVersionString = _gcampapi.getVersionString
-getVersionString.__doc__ = 'Returns Goblin Camp version as a string'
+announce = _gcampapi.announce
+announce.__doc__ = 'Add a string to announce area'
 
-isDebugBuild = _gcampapi.isDebugBuild
-isDebugBuild.__doc__ = 'Returns True if running a debug build'
-
-isDevMode = _gcampapi.isDevMode
-isDevMode.__doc__ = 'Returns True if running in a devmode'
+messageBox = _gcampapi.messageBox
+messageBox.__doc__ = 'Show a message box to player'
