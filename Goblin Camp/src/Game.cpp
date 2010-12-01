@@ -783,6 +783,13 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 
 	Map::Inst()->UpdateMarkers();
+
+	for (std::list<std::pair<int, boost::function<void()> > >::iterator delit = delays.begin(); delit != delays.end();) {
+		if (--delit->first <= 0) {
+			delit->second();
+			delit = delays.erase(delit);
+		} else ++delit;
+	}
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
@@ -1684,4 +1691,8 @@ void Game::Tire(Coordinate pos) {
 				}
 		}
 	}
+}
+
+void Game::AddDelay(int delay, boost::function<void()> callback) {
+	delays.push_back(std::pair<int, boost::function<void()> >(delay, callback));
 }
