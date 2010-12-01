@@ -227,8 +227,9 @@ void StartNewGame() {
 	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, spawnBottomCorner);
 	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
 
-	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
-	game->CreateItems(10, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(10, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(5, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(15, Item::StringToItemType("Nightbloom seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
 	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
