@@ -390,6 +390,11 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	--up;
 	++down;
 
+	if (left < 0) left == 0;
+	if (right >= width) right = width-1;
+	if (up < 0) up == 0;
+	if (down >= height) down = height-1;
+
 	Coordinate current(currentX, currentY);
 	Coordinate move(moveX, moveY);
 	Coordinate next(nextX, nextY);
