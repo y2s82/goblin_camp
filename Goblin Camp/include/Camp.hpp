@@ -57,4 +57,5 @@ public:
 	void DisableAutoTerritory();
 	void ToggleAutoTerritory();
 	bool IsAutoTerritoryEnabled();
+	void Reset();
 };

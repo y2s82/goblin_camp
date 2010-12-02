@@ -1419,6 +1419,8 @@ void Game::Reset() {
 	JobManager::Inst()->Reset();
 	StockManager::Inst()->Reset();
 	time = 0;
+	orcCount = 0;
+	goblinCount = 0;
 	paused = false;
 	toMainMenu = false;
 	running = false;
@@ -1427,6 +1429,7 @@ void Game::Reset() {
 	upleft = Coordinate(180,180);
 	safeMonths = 9;
 	Announce::Inst()->Reset();
+	Camp::Inst()->Reset();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
