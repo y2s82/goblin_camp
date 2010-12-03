@@ -109,6 +109,8 @@ public:
 	void Pause();
 	bool Paused();
 
+	void GameOver();
+
 	int CharHeight() const;
 	int CharWidth() const;
 
