@@ -40,6 +40,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "SpawningPool.hpp"
 #include "Camp.hpp"
 #include "MapMarker.hpp"
+#include "UI/MessageBox.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -790,6 +791,8 @@ void Game::Update() {
 			delit = delays.erase(delit);
 		} else ++delit;
 	}
+
+	if (orcCount == 0 && goblinCount == 0) GameOver();
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
@@ -1698,4 +1701,9 @@ void Game::Tire(Coordinate pos) {
 
 void Game::AddDelay(int delay, boost::function<void()> callback) {
 	delays.push_back(std::pair<int, boost::function<void()> >(delay, callback));
+}
+
+void Game::GameOver() {
+	MessageBox::ShowMessageBox("All your orcs and goblins have died.");
+	running = false;
 }
