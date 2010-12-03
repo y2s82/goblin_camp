@@ -158,6 +158,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 #endif
 	RemoveEffect(EATING);
 	RemoveEffect(DRINKING);
+	RemoveEffect(WORKING);
 	if (jobs.size() > 0) {
 		if (result == TASKSUCCESS) {
 			if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
@@ -521,6 +522,7 @@ MOVENEARend:
 
 			case BUILD:
 				if (Game::Adjacent(Position(), currentEntity())) {
+					AddEffect(WORKING);
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
 						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
@@ -682,6 +684,7 @@ CONTINUEEAT:
 			case USE:
 				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Use();
+					AddEffect(WORKING);
 					if (tmp >= 100) {
 						TaskFinished(TASKSUCCESS);
 					} else if (tmp < 0) {
@@ -724,6 +727,7 @@ CONTINUEEAT:
 			case FELL:
 				if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = tree->Fell();
+					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
@@ -849,6 +853,7 @@ CONTINUEEAT:
 			case DISMANTLE:
 				if (boost::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(currentEntity().lock())) {
 					construct->Condition(construct->Condition()-10);
+					AddEffect(WORKING);
 					if (construct->Condition() <= 0) {
 						Game::Inst()->RemoveConstruction(construct);
 						TaskFinished(TASKSUCCESS);
@@ -904,6 +909,7 @@ CONTINUEEAT:
 
 			case BOGIRON:
 				if (Map::Inst()->Type(x, y) == TILEBOG) {
+					AddEffect(WORKING);
 					if (Random::Generate(UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
@@ -1043,6 +1049,7 @@ CONTINUEEAT:
 					timer = 0;
 					taskBegun = true;
 				} else {
+					AddEffect(WORKING);
 					if (++timer >= 50) {
 						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);

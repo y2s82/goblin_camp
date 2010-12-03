@@ -152,6 +152,13 @@ graphic(g),
 		name = "Carrying item";
 		cooldown = -1;
 		break;
+
+	case WORKING:
+		name = "Working";
+		cooldown = -1;
+		graphic = '+';
+		color = TCODColor::grey;
+		break;
 	}
 	cooldownDefault = cooldown;
 }

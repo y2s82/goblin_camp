@@ -53,7 +53,8 @@ enum StatusEffectType {
 	SWIM,
 	EATING,
 	DRINKING,
-	CARRYING
+	CARRYING,
+	WORKING
 };
 
 struct StatusEffect {
