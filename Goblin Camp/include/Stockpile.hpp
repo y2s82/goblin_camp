@@ -45,6 +45,7 @@ protected:
 	std::map<Coordinate, bool> used;
 	std::map<Coordinate, bool> reserved;
 	std::map<Coordinate, boost::shared_ptr<Container> > containers;
+	std::map<Coordinate, TCODColor> colors;
 public:
 	virtual ~Stockpile();
 	int Build();

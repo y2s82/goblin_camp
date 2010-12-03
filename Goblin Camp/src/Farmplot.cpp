@@ -47,7 +47,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
-						console->setCharForeground(screenx, screeny, TCODColor::white);
+						console->setCharForeground(screenx, screeny, TCODColor::darkAmber);
 						console->setChar(screenx,	screeny, (graphic[1]));
 
 						if (!containers[Coordinate(x,y)]->empty()) {

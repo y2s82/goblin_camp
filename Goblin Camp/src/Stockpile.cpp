@@ -35,6 +35,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Container *container = new Container(target, 0, 1000, -1);
 	container->AddListener(this);
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
+	colors.insert(std::pair<Coordinate, TCODColor>(target, TCODColor::lerp(color, Map::Inst()->GetColor(target.X(), target.Y()), 0.75f)));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
@@ -225,6 +226,9 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							Container *container = new Container(Coordinate(ix,iy), 0, 1000, -1);
 							container->AddListener(this);
 							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
+
+							//Update color
+							colors.insert(std::pair<Coordinate, TCODColor>(Coordinate(ix,iy), TCODColor::lerp(color, Map::Inst()->GetColor(ix, iy), 0.75f)));
 					}
 				}
 			}
@@ -243,7 +247,7 @@ void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
 						if (dismantle) console->setCharBackground(screenx,screeny, TCODColor::darkGrey);
-						console->setCharForeground(screenx, screeny, TCODColor::white);
+						console->setCharForeground(screenx, screeny, colors[Coordinate(x,y)]);
 						console->setChar(screenx, screeny, (graphic[1]));
 
 						if (!containers[Coordinate(x,y)]->empty()) {
