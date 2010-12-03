@@ -148,7 +148,9 @@ int Tile::MoveCost(void* ptr) const {
 			}
 		}
 	}
-	return MoveCost();
+	int cost = MoveCost();
+	if (cost == 0 && construction >= 0 && static_cast<NPC*>(ptr)->IsTunneler()) return 50;
+	return cost;
 }
 
 int Tile::MoveCost() const {

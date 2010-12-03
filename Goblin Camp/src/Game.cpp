@@ -295,6 +295,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->hasHands = true;
 	}
 
+	if (NPC::Presets[type].tags.find("tunneler") != NPC::Presets[type].tags.end()) {
+		npc->isTunneler = true;
+	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();

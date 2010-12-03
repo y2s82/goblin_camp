@@ -179,7 +179,7 @@ npc_type "soldier ant" {
 		cooldown=15
 	}
 	spawnAsGroup="1d7+3"
-	tags=["underground"]
+	tags=["underground", "tunneler"]
 	death="Corpse"
 }
 
