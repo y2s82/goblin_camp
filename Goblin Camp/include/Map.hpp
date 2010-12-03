@@ -107,4 +107,5 @@ public:
 	void UpdateMarkers();
 	unsigned int AddMarker(MapMarker);
 	void RemoveMarker(int);
+	TCODColor GetColor(int,int);
 };

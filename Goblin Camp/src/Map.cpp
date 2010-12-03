@@ -390,9 +390,9 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	--up;
 	++down;
 
-	if (left < 0) left == 0;
+	if (left < 0) left = 0;
 	if (right >= width) right = width-1;
-	if (up < 0) up == 0;
+	if (up < 0) up = 0;
 	if (down >= height) down = height-1;
 
 	Coordinate current(currentX, currentY);
@@ -447,4 +447,9 @@ void Map::UpdateMarkers() {
 			markeri = mapMarkers.erase(markeri);
 		} else ++markeri;
 	}
+}
+
+TCODColor Map::GetColor(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor();
+	return TCODColor::white;
 }
