@@ -39,7 +39,7 @@ npc_type "goblin" {
 	stats {
 		dodge=15
 		health=50
-		speed=18
+		speed=22
 		size=5
 	}
 	resistances {
