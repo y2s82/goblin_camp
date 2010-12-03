@@ -285,12 +285,14 @@ void NPC::HandleWeariness() {
 			sleepJob->tasks.push_back(Task(STOCKPILEITEM));
 		}
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
-			run = true;
-			sleepJob->ReserveEntity(bed);
-			sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
-			sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
-			jobs.push_back(sleepJob);
-			return;
+			if (bed->Built()) {
+				run = true;
+				sleepJob->ReserveEntity(bed);
+				sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
+				sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
+				jobs.push_back(sleepJob);
+				return;
+			}
 		}
 		sleepJob->tasks.push_back(Task(SLEEP, Position()));
 		jobs.push_back(sleepJob);
