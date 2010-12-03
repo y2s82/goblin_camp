@@ -627,7 +627,7 @@ Coordinate Game::FindWater(Coordinate pos) {
 		if (wati->lock()->Depth() > DRINKABLE_WATER_DEPTH) {
 			int waterDistance = Distance(wati->lock()->Position(), pos);
 			//Favor water inside territory
-			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 2;
+			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 4;
 			if (waterDistance < Distance(closest, pos)) closest = wati->lock()->Position();
 		}
 	}
