@@ -249,6 +249,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & needsNutrition;
 	ar & needsSleep;
 	ar & hasHands;
+	ar & isTunneler;
 	ar & baseStats;
 	ar & effectiveStats;
 	ar & baseResistances;
@@ -308,6 +309,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar & needsNutrition;
 		ar & needsSleep;
 		ar & hasHands;
+		ar & isTunneler;
 		ar & baseStats;
 		ar & effectiveStats;
 		ar & baseResistances;

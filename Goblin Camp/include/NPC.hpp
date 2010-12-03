@@ -152,6 +152,7 @@ private:
 	bool needsNutrition;
 	bool needsSleep;
 	bool hasHands;
+	bool isTunneler;
 
 	boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 	boost::function<void(boost::shared_ptr<NPC>)> React;
@@ -228,6 +229,7 @@ public:
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
 	bool HasHands();
+	bool IsTunneler();
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
 

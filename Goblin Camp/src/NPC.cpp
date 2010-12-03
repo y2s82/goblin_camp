@@ -83,6 +83,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	needsNutrition(false),
 	needsSleep(false),
 	hasHands(false),
+	isTunneler(false),
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
@@ -1175,7 +1176,11 @@ TaskResult NPC::Move(TaskResult oldResult) {
 					Position(Coordinate(moveX,moveY));
 					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
-				} else { //Encountered unexpected obstacle, fail and possibly repath
+				} else { //Encountered an obstacle. Fail if the npc can't tunnel
+					if (IsTunneler() && Map::Inst()->GetConstruction(moveX, moveY) >= 0) {
+						Hit(Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(moveX, moveY)));
+						return TASKCONTINUE;
+					}
 					return TASKFAILNONFATAL;
 				}
 				return TASKCONTINUE; //Everything is ok
@@ -1559,48 +1564,50 @@ void NPC::AbortCurrentJob(bool remove_job) {
 
 void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 	if (target.lock()) {
-		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
-			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(target.lock()));
+		boost::shared_ptr<NPC> npc = boost::dynamic_pointer_cast<NPC>(target.lock());
+		boost::shared_ptr<Construction> construction = boost::dynamic_pointer_cast<Construction>(target.lock());
+		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+			if (attacki->Cooldown() <= 0) {
+				attacki->ResetCooldown();
 
-			for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
-				if (attacki->Cooldown() <= 0) {
-					attacki->ResetCooldown();
+				if (npc) {
 					//First check if the target dodges the attack
 					if (Random::Generate(99) < npc->effectiveStats[DODGE]) {
-#ifdef DEBUG
+	#ifdef DEBUG
 						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
-#endif
+	#endif
 						continue;
 					}
-
-					Attack attack = *attacki;
-#ifdef DEBUG
-					std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
-#endif
-					
-					if (attack.Type() == DAMAGE_WIELDED) {
-#ifdef DEBUG
-						std::cout<<"Wielded attack\n";
-#endif
-						GetMainHandAttack(attack);
-					}
-#ifdef DEBUG
-					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
-#endif
-					if (!careful && effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
-						if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
-							Coordinate tar;
-							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-							npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
-							npc->pathIndex = -1;
-						}
-					}
-
-					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
 				}
+
+				Attack attack = *attacki;
+#ifdef DEBUG
+				std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
+#endif
+
+				if (attack.Type() == DAMAGE_WIELDED) {
+#ifdef DEBUG
+					std::cout<<"Wielded attack\n";
+#endif
+					GetMainHandAttack(attack);
+				}
+#ifdef DEBUG
+				std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
+#endif
+				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
+					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
+						Coordinate tar;
+						tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+						tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+						npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
+						npc->pathIndex = -1;
+					}
+				}
+
+				if (npc) npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
+				else if (construction) construction->Damage(&attack);
 			}
-		}
+		}	
 	}
 }
 
@@ -2090,3 +2097,5 @@ void NPC::AddEffect(StatusEffect effect) {
 
 	statusEffects.push_back(effect);
 }
+
+bool NPC::IsTunneler() { return isTunneler; }
