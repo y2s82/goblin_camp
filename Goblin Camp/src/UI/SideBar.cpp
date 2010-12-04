@@ -149,7 +149,7 @@ void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
 		container->AddComponent(new ScrollPanel(0, 3, width - 2, 33,
 												new UIList<ItemCat>(&Item::Categories, 0, 0, width, Item::Categories.size(),
 																	boost::bind(&ConstructionDialog::DrawCategory, boost::dynamic_pointer_cast<Construction>(entity.lock()).get(), _1, _2, _3, _4, _5, _6, _7),
-																	boost::bind(&Stockpile::SwitchAllowed, boost::dynamic_pointer_cast<Stockpile>(entity.lock()).get(), _1, boost::bind(&UI::ShiftPressed, UI::Inst())))));
+																	boost::bind(&Stockpile::SwitchAllowed, boost::dynamic_pointer_cast<Stockpile>(entity.lock()).get(), _1, true))));
 	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
 		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
 		if (construct->HasTag(WORKSHOP)) {
