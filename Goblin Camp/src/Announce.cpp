@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 AnnounceMessage::AnnounceMessage(std::string nmsg, TCODColor col, Coordinate pos) :
-	msg(nmsg),
+msg(nmsg),
 	counter(1),
 	color(col),
 	target(pos) {}
@@ -46,7 +46,7 @@ Announce* Announce::Inst() {
 }
 
 Announce::Announce() :
-	timer(0),
+timer(0),
 	length(0),
 	height(0)
 {}
@@ -127,9 +127,14 @@ void Announce::Draw(TCODConsole* console) {
 }
 
 void Announce::Draw(Coordinate pos, int from, int amount, TCODConsole* console) {
-	EmptyMessageQueue();
 	int count = 0;
-	for (std::deque<AnnounceMessage*>::iterator ani = history.begin(); ani != history.end(); ++ani) {
+	for (std::deque<AnnounceMessage*>::reverse_iterator ani = messageQueue.rbegin(); ani != messageQueue.rend(); ++ani) {
+		if (count++ >= from) {
+			console->print(pos.X(), pos.Y()+count-from, (*ani)->ToString().c_str());
+			if (count-from+1 == amount) return;
+		}
+	}
+	for (std::deque<AnnounceMessage*>::reverse_iterator ani = history.rbegin(); ani != history.rend(); ++ani) {
 		if (count++ >= from) {
 			console->print(pos.X(), pos.Y()+count-from, (*ani)->ToString().c_str());
 			if (count-from+1 == amount) return;
