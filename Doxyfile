@@ -72,7 +72,7 @@ SHOW_USED_FILES        = YES
 SHOW_DIRECTORIES       = YES
 SHOW_FILES             = YES
 SHOW_NAMESPACES        = YES
-FILE_VERSION_FILTER    = hgver
+FILE_VERSION_FILTER    =
 LAYOUT_FILE            =
 #---------------------------------------------------------------------------
 # configuration options related to warning and progress messages
