@@ -61,7 +61,7 @@ public:
 	Coordinate FreePosition();
 	void ReserveSpot(Coordinate, bool);
 	boost::weak_ptr<Container> Storage(Coordinate);
-	void SwitchAllowed(ItemCategory, bool childrenAlso = false);
+	void SwitchAllowed(ItemCategory, bool childrenAlso = true);
 	void SetAllAllowed(bool);
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 	void ItemAdded(boost::weak_ptr<Item>);

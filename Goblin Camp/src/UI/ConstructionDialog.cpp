@@ -59,7 +59,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
 			dialog->AddComponent(new ScrollPanel(2, 8, 46, 31,
 								 new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
 												   boost::bind(&ConstructionDialog::DrawCategory, cons, _1, _2, _3, _4, _5, _6, _7),
-												   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, boost::bind(&UI::ShiftPressed, UI::Inst()))), false));
+												   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, true)), false));
 		} else if(cons->Producer()) {
 			constructionInfoDialog->SetHeight(40);
 			dialog->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
