@@ -342,12 +342,14 @@ void NPC::Update() {
 		} else RemoveEffect(DROWSY);
 	}
 
-	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
-		boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
-		if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
-			AddEffect(SWIM);
+	if (!HasEffect(FLYING)) {
+		if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
+			boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
+			if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
+				AddEffect(SWIM);
+			} else { RemoveEffect(SWIM); }
 		} else { RemoveEffect(SWIM); }
-	} else { RemoveEffect(SWIM); }
+	}
 
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
