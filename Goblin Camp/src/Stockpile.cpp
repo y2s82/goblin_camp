@@ -421,7 +421,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 		std::sort(vecView.begin(), vecView.end(), AmountCompare());
 		int count = 0;
 		for(size_t i = 0; i < vecView.size(); i++) {
-			if(++count > 10) {
+			if(++count > 30) {
 				tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 				return;
 			}
@@ -431,7 +431,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 				if(cati->parent && Item::StringToItemCategory(cati->parent->GetName()) == vecView[i].first) {
 					int amt = amount[Item::StringToItemCategory(cati->GetName())];
 					if (amt > 0) {
-						if(++count > 10) {
+						if(++count > 30) {
 							tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 							return;
 						}
