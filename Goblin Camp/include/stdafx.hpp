@@ -84,6 +84,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/random/variate_generator.hpp>
 #		include <boost/filesystem.hpp>
 #       include <boost/math/constants/constants.hpp>
+#       include <boost/tuple/tuple.hpp>
 #	pragma warning(pop)
 // libtcod
 #	include <libtcod.hpp>

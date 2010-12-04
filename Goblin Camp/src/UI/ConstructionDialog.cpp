@@ -30,6 +30,7 @@
 #include "UI/UIComponents.hpp"
 #include "UI/Dialog.hpp"
 #include "UI/TextBox.hpp"
+#include "UI/Spinner.hpp"
 #include "UI.hpp"
 #include "Game.hpp"
 
@@ -56,10 +57,23 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
 			constructionInfoDialog->SetHeight(40);
 			dialog->AddComponent(new Button("All", boost::bind(&Stockpile::SetAllAllowed, static_cast<Stockpile *>(cons), true), 2, 5, 8));
 			dialog->AddComponent(new Button("None", boost::bind(&Stockpile::SetAllAllowed, static_cast<Stockpile *>(cons), false), 11, 5, 8));
-			dialog->AddComponent(new ScrollPanel(2, 8, 46, 31,
+			dialog->AddComponent(new ScrollPanel(2, 8, 23, 31,
 								 new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
 												   boost::bind(&ConstructionDialog::DrawCategory, cons, _1, _2, _3, _4, _5, _6, _7),
-												   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, true)), false));
+												   boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, true)), true));
+			dialog->AddComponent(new Label("Limits", 30, 7));
+			//Construct list of spinners for container limits
+			Grid *grid = new Grid(std::vector<Drawable *>(), 1, 0, 0, 48, 46);
+			for (int i = 0; i < Item::Categories.size(); ++i) {
+				if ((Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->GetName(), "Container"))) {
+						grid->AddComponent(new Label(Item::Categories[i].GetName(), 10, 0));
+						grid->AddComponent(new Spinner(0, 0, 20, boost::bind(&Stockpile::GetLimit, static_cast<Stockpile*>(cons), i),
+							boost::bind(&Stockpile::AdjustLimit, static_cast<Stockpile*>(cons), i, _1)));
+						grid->AddComponent(new Label("       ", 12, 0));
+				}
+			}
+
+			dialog->AddComponent(new ScrollPanel(24, 8, 23, 31, grid));
 		} else if(cons->Producer()) {
 			constructionInfoDialog->SetHeight(40);
 			dialog->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
