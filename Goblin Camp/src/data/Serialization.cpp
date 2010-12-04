@@ -456,7 +456,9 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & paused;
 	ar & waitingForRemoval;
 	ar & reservedEntities;
-	ar & reservedSpot;
+	ar & reservedSpot.get<0>();
+	ar & reservedSpot.get<1>();
+	ar & reservedSpot.get<2>();
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;
@@ -488,7 +490,13 @@ void Job::load(Archive & ar, const unsigned int version) {
 		ar & paused;
 		ar & waitingForRemoval;
 		ar & reservedEntities;
-		ar & reservedSpot;
+		boost::weak_ptr<Stockpile> sp;
+		ar & sp;
+		Coordinate location;
+		ar & location;
+		ItemType type;
+		ar & type;
+		reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
 		ar & attempts;
 		ar & attemptMax;
 		ar & connectedEntity;

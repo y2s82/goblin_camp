@@ -838,7 +838,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 				if (target.X() == -1) target = nearest->FreePosition();
 
 				if (target.X() != -1) {
-					stockJob->ReserveSpot(nearest, target);
+					stockJob->ReserveSpot(nearest, target, item->Type());
 					if (reserveItem) stockJob->ReserveEntity(item);
 					stockJob->tasks.push_back(Task(MOVE, item->Position()));
 					stockJob->tasks.push_back(Task(TAKE, item->Position(), item));
