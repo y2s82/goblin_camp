@@ -645,6 +645,14 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 	ar & used;
 	ar & reserved;
 	ar & containers;
+	int colorCount = colors.size();
+	ar & colorCount;
+	for (std::map<Coordinate, TCODColor>::const_iterator it = colors.begin(); it != colors.end(); ++it) {
+		ar & it->first;
+		ar & it->second.r;
+		ar & it->second.g;
+		ar & it->second.b;
+	}
 }
 
 template<class Archive>
@@ -660,6 +668,17 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 		ar & used;
 		ar & reserved;
 		ar & containers;
+		int colorCount;
+		ar & colorCount;
+		for (int i = 0; i < colorCount; ++i) {
+			Coordinate location;
+			ar & location;
+			uint8 r, g, b;
+			ar & r;
+			ar & g;
+			ar & b;
+			colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
+		}
 	}
 }
 
