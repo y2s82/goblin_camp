@@ -283,7 +283,7 @@ int Map::GetMoveModifier(int x, int y) {
 	if (construction && !bridge) modifier += 2;
 
 	//Other critters slow down movement
-	if (tileMap[x][y].npcList.size() > 0) modifier += 2 + rand() % tileMap[x][y].npcList.size();
+	if (tileMap[x][y].npcList.size() > 0) modifier += 2 + Random::Generate(tileMap[x][y].npcList.size() - 1);
 
 	return modifier;
 }

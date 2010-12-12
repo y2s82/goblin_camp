@@ -92,8 +92,9 @@ void UI::HandleKeyboard() {
 	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
 		if (!textMode) {
-			if (key.c == keyMap["Exit"]) Game::Exit();
-			else if (key.c == keyMap["Basics"]) {
+			if (key.c == keyMap["Exit"]) {
+				Game::Exit();
+			} else if (key.c == keyMap["Basics"]) {
 				menuX = mouseInput.cx;
 				menuY = mouseInput.cy;
 				ChangeMenu(Menu::BasicsMenu());
@@ -205,8 +206,12 @@ void UI::HandleKeyboard() {
 				if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
 			}
 		}
-		if (key.vk == TCODK_ESCAPE && menuOpen) {
-			rbuttonPressed = true;
+		if (key.vk == TCODK_ESCAPE) {
+			if (menuOpen) {
+				rbuttonPressed = true;
+			} else {
+				Game::Inst()->ToMainMenu(true);
+			}
 		}
 	}
 
