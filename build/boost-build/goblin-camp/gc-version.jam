@@ -35,7 +35,8 @@ if --with-revid in [ modules.peek : ARGV ] {
 
 GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
 GC_VERSION       = [ modules.peek : GC_VERSION ] ;
+PYTHON           = [ modules.peek : PYTHON ] ;
 
 actions generate {
-    python "$(GC_TEMPLATES_DIR)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
+    $(PYTHON) "$(GC_TEMPLATES_DIR)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
 }

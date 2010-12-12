@@ -89,11 +89,12 @@ rule make-nsis ( targets * : sources * : properties * ) {
         arch = x64 ;
     }
     
-    ARCH on $(targets) = $(arch) ;
+    ARCH on $(targets)   = $(arch) ;
+    PYTHON on $(targets) = [ modules.peek : PYTHON ] ;
 }
 
 actions make-nsis {
-    python $(GC_INSTALLER_DIR)/mkinstaller.py $(GC_VERSION) $(ARCH)
+    $(PYTHON) $(GC_INSTALLER_DIR)/mkinstaller.py $(GC_VERSION) $(ARCH)
 }
 
 rule cannot-make-nsis ( targets * : sources * : properties * ) {
@@ -263,9 +264,9 @@ local rule get-dist-dir ( properties * : what * ) {
     }
     
     if $(what) = bin && $(binaries-dist-dir) {
-        dir = $(dir)$(binaries-dist-dir) ;
+        dir = $(dir)$(binaries-dist-dir)/ ;
     } else if $(what) = data && $(data-dist-dir) {
-        dir = $(dir)$(data-dist-dir) ;
+        dir = $(dir)$(data-dist-dir)/ ;
     }
     
     return <location>$(dir) ;

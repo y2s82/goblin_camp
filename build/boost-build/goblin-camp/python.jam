@@ -2,7 +2,7 @@
 #
 # To configure:
 #   using python
-#       : <include>path-to-includes <library>path-to-libraries <version>2.7 <pydebug>on/off <suffix>_d
+#       : <include>path-to-includes <library>path-to-libraries <version>2.7 <pydebug>on/off <suffix>_d <interpreter>python
 #   ;
 #
 
@@ -52,10 +52,12 @@ local rule split-version ( version ) {
 }
 
 rule use-project ( ) {
-    local usage = ;
+    local usage  = ;
+    local interp = ;
     
     if $(.options) {
         .py-version = [ $(.options).get <version> ] ;
+        interp      = [ $(.options).get <interpreter> ] ;
         
         if [ $(.options).get <pydebug> ] = "on" {
             .py-debug  = [ $(.options).get <suffix> ] ;
@@ -66,6 +68,11 @@ rule use-project ( ) {
     
     .py-version ?= 2.7 ;
     .py-debug   ?=     ;
+    
+    interp ?= python ;
+    ECHO ** Using Python executable: $(interp) ;
+    
+    modules.poke : PYTHON : $(interp) ;
     
     create-project : $(usage) ;
 }

@@ -143,6 +143,7 @@ Properties:
 * ``<version>version`` — Python version (major.minor; by default 2.7)
 * ``<pydebug>on`` — enable Python debugging (link to debug version of Python)
 * ``<suffix>suffix`` — library name suffix (_d is default for debug libs)
+* ``<interpreter>python`` — interpreter executable name (default: python)
 
 Example::
 
