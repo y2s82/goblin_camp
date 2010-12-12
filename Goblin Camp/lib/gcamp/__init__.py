@@ -25,3 +25,6 @@ isDebugBuild.__doc__ = 'Returns True if running a debug build'
 
 isDevMode = _gcampapi.isDevMode
 isDevMode.__doc__ = 'Returns True if running in a devmode'
+
+delay = _gcampapi.delay
+delay.__doc__ = 'Run a function after a delay'
