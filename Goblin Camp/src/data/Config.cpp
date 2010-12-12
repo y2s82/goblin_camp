@@ -78,6 +78,7 @@ namespace Config {
 			("resolutionY", "600")
 			("fullscreen",  "0")
 			("renderer",    "0")
+			("tutorial",    "1")
 		;
 		
 		insert(Globals::keys)

@@ -44,7 +44,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	paused(false),
 	waitingForRemoval(false),
 	reservedEntities(std::list<boost::weak_ptr<Entity> >()),
-	reservedSpot(std::pair<boost::weak_ptr<Stockpile>, Coordinate>(boost::weak_ptr<Stockpile>(), Coordinate(0,0))),
+	reservedSpot(boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(boost::weak_ptr<Stockpile>(), Coordinate(0,0), -1)),
 	attempts(0),
 	attemptMax(5),
 	connectedEntity(boost::weak_ptr<Entity>()),
@@ -137,17 +137,17 @@ void Job::UnreserveEntities() {
 	reservedEntities.clear();
 }
 
-void Job::ReserveSpot(boost::weak_ptr<Stockpile> sp, Coordinate pos) {
+void Job::ReserveSpot(boost::weak_ptr<Stockpile> sp, Coordinate pos, ItemType type) {
 	if (sp.lock()) {
-		sp.lock()->ReserveSpot(pos, true);
-		reservedSpot = std::pair<boost::weak_ptr<Stockpile>, Coordinate>(sp, pos);
+		sp.lock()->ReserveSpot(pos, true, type);
+		reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, pos, type);
 	}
 }
 
 void Job::UnreserveSpot() {
-	if (reservedSpot.first.lock()) {
-		reservedSpot.first.lock()->ReserveSpot(reservedSpot.second, false);
-		reservedSpot.first.reset();
+	if (reservedSpot.get<0>().lock()) {
+		reservedSpot.get<0>().lock()->ReserveSpot(reservedSpot.get<1>(), false, reservedSpot.get<2>());
+		reservedSpot.get<0>().reset();
 	}
 }
 

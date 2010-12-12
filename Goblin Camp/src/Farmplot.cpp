@@ -47,7 +47,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
-						console->setCharForeground(screenx, screeny, TCODColor::white);
+						console->setCharForeground(screenx, screeny, TCODColor::darkAmber);
 						console->setChar(screenx,	screeny, (graphic[1]));
 
 						if (!containers[Coordinate(x,y)]->empty()) {
@@ -121,7 +121,7 @@ int FarmPlot::Use() {
 						if (seed.lock()) {
 							boost::shared_ptr<Job> plantJob(new Job("Plant " + Item::ItemTypeToString(seedi->first)));
 							plantJob->ReserveEntity(seed);
-							plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first);
+							plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first, seed.lock()->Type());
 							plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
 							plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
 							plantJob->tasks.push_back(Task(MOVE, containerIt->first));

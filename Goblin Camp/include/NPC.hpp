@@ -152,6 +152,7 @@ private:
 	bool needsNutrition;
 	bool needsSleep;
 	bool hasHands;
+	bool isTunneler;
 
 	boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 	boost::function<void(boost::shared_ptr<NPC>)> React;
@@ -203,6 +204,7 @@ public:
 	void findPath(Coordinate);
 	void StartJob(boost::shared_ptr<Job>);
 	void AddEffect(StatusEffectType);
+	void AddEffect(StatusEffect);
 	void RemoveEffect(StatusEffectType);
 	bool HasEffect(StatusEffectType);
 	std::list<StatusEffect>* StatusEffects();
@@ -227,6 +229,7 @@ public:
 	void FindNewWeapon();
 	boost::weak_ptr<Item> Wielding();
 	bool HasHands();
+	bool IsTunneler();
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
 

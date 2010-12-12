@@ -5,7 +5,7 @@ npc_type "orc" {
 	needsSleep
 	generateName
 	name="orc"
-	color="0,0,255"
+	color="0,50,255"
 	graphic='o'
 	AI="PlayerNPC"
 	stats {
@@ -39,7 +39,7 @@ npc_type "goblin" {
 	stats {
 		dodge=15
 		health=50
-		speed=18
+		speed=22
 		size=5
 	}
 	resistances {
@@ -179,7 +179,7 @@ npc_type "soldier ant" {
 		cooldown=15
 	}
 	spawnAsGroup="1d7+3"
-	tags=["underground"]
+	tags=["underground", "tunneler"]
 	death="Corpse"
 }
 

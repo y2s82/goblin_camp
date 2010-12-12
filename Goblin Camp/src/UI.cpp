@@ -354,8 +354,9 @@ void UI::HandleMouse() {
 							yswap = true;
 						}
 
-						if (placementCallback(Coordinate(a.X(), a.Y()), _blueprint))
-							rectCallback(a,b);
+						/*I removed the placement call from here, it causes unnecessary cancelations
+						Callbacks should check tile validity anyway*/
+						rectCallback(a,b);
 
 						a.X(0); a.Y(0); b.X(0); b.Y(0);
 					}

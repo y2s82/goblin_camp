@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Item.hpp"
 #include "Construction.hpp"
 #include "NatureObject.hpp"
+#include "Logger.hpp"
 
 namespace Script { namespace API {
 	void Announce(const std::string& str) {
@@ -50,6 +51,15 @@ namespace Script { namespace API {
 	
 	void MessageBox(const std::string& str) {
 		MessageBox::ShowMessageBox(str);
+	}
+	
+	void Delay(int delay, PyObject* callback) {
+		if (!PyCallable_Check(callback)) {
+			LOG("WARNING: Attempted to add a delay to an uncallable object");
+			return;
+		}
+		py::object function(py::handle<>(py::borrowed(callback)));
+		Game::Inst()->AddDelay(delay, function);
 	}
 	
 	enum EntityType {
@@ -107,6 +117,7 @@ namespace Script { namespace API {
 		py::def("isDebugBuild",     &IsDebugBuild);
 		py::def("isDevMode",        &IsDevMode);
 		py::def("messageBox",       &MessageBox);
+		py::def("delay",            &Delay);
 		py::def("spawnEntity",      &SpawnEntity);
 		
 		py::enum_<EntityType>("EntityType").

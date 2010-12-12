@@ -35,9 +35,13 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Container *container = new Container(target, 0, 1000, -1);
 	container->AddListener(this);
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
+	colors.insert(std::pair<Coordinate, TCODColor>(target, TCODColor::lerp(color, Map::Inst()->GetColor(target.X(), target.Y()), 0.75f)));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
+		if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->GetName(), "Container")) {
+				limits.insert(std::pair<ItemCategory, int>(i,0));
+		}
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
 	Camp::Inst()->ConstructionBuilt(type);
@@ -199,8 +203,6 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 
 void Stockpile::Expand(Coordinate from, Coordinate to) {
 	//We can assume that from < to
-	if (from.X() > b.X() || to.X() < a.X()) return;
-	if (from.Y() > b.Y() || to.Y() < a.Y()) return;
 
 	//The algorithm: Check each tile inbetween from and to, and if a tile is adjacent to this
 	//stockpile, add it. Do this max(width,height) times.
@@ -227,6 +229,9 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							Container *container = new Container(Coordinate(ix,iy), 0, 1000, -1);
 							container->AddListener(this);
 							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
+
+							//Update color
+							colors.insert(std::pair<Coordinate, TCODColor>(Coordinate(ix,iy), TCODColor::lerp(color, Map::Inst()->GetColor(ix, iy), 0.75f)));
 					}
 				}
 			}
@@ -245,7 +250,7 @@ void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
 						if (dismantle) console->setCharBackground(screenx,screeny, TCODColor::darkGrey);
-						console->setCharForeground(screenx, screeny, TCODColor::white);
+						console->setCharForeground(screenx, screeny, colors[Coordinate(x,y)]);
 						console->setChar(screenx, screeny, (graphic[1]));
 
 						if (!containers[Coordinate(x,y)]->empty()) {
@@ -277,6 +282,14 @@ bool Stockpile::Full(ItemType type) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				Coordinate location(ix,iy);
+				//If the stockpile has hit the limit then it's full for this itemtype
+				if (type != 1) {
+					for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
+						cati != Item::Presets[type].categories.end(); ++cati) {
+							if (GetLimit(*cati) > 0 && amount[*cati] >= GetLimit(*cati)) return true;
+					}
+				}
+
 				//If theres a free space then it obviously is not full
 				if (containers[location]->empty() && !reserved[location]) return false;
 
@@ -310,7 +323,20 @@ Coordinate Stockpile::FreePosition() {
 	return Coordinate(-1,-1);
 }
 
-void Stockpile::ReserveSpot(Coordinate pos, bool val) { reserved[pos] = val; }
+void Stockpile::ReserveSpot(Coordinate pos, bool val, ItemType type) { 
+	reserved[pos] = val;
+
+	/*Update amounts based on reserves if limits exist for the item
+	This is necessary to stop too many stockpilation jobs being queued up*/
+	if (type >= 0) {
+		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
+			cati != Item::Presets[type].categories.end(); ++cati) {
+				if (GetLimit(*cati) >= 0) {
+					amount[*cati] += val ? 1 : -1;
+				}
+		}
+	}
+}
 
 boost::weak_ptr<Container> Stockpile::Storage(Coordinate pos) {
 	return containers[pos];
@@ -395,7 +421,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 		std::sort(vecView.begin(), vecView.end(), AmountCompare());
 		int count = 0;
 		for(size_t i = 0; i < vecView.size(); i++) {
-			if(++count > 10) {
+			if(++count > 30) {
 				tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 				return;
 			}
@@ -405,7 +431,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 				if(cati->parent && Item::StringToItemCategory(cati->parent->GetName()) == vecView[i].first) {
 					int amt = amount[Item::StringToItemCategory(cati->GetName())];
 					if (amt > 0) {
-						if(++count > 10) {
+						if(++count > 30) {
 							tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 							return;
 						}
@@ -426,4 +452,17 @@ void Stockpile::TranslateInternalContainerListeners() {
 		it != containers.end(); ++it) {
 			it->second->TranslateContainerListeners();
 	}
+}
+
+void Stockpile::AdjustLimit(ItemCategory category, int amount) {
+	if (limits.find(category) != limits.end()) {
+		limits[category] = amount;
+	}
+}
+
+int Stockpile::GetLimit(ItemCategory category) { 
+	if (limits.find(category) != limits.end())
+		return limits[category];
+	else
+		return -1;
 }

@@ -5,6 +5,7 @@ construction_type "Stockpile" {
 	walkable
 	graphicLength=1
 	graphic=[61]
+	color="255,255,255"
 	maxCondition=10
 	description="Stockpiles are required to store items. Orcs in workshops can only use items from stockpiles."
 }

@@ -52,12 +52,14 @@ enum StatusEffectType {
 	RAGE,
 	SWIM,
 	EATING,
-	DRINKING
+	DRINKING,
+	CARRYING,
+	WORKING
 };
 
 struct StatusEffect {
 	friend class boost::serialization::access;
-	StatusEffect(StatusEffectType=HUNGER);
+	StatusEffect(StatusEffectType=HUNGER, int graphic = 'Y', TCODColor=TCODColor::pink);
 
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;

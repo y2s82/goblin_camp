@@ -83,6 +83,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	needsNutrition(false),
 	needsSleep(false),
 	hasHands(false),
+	isTunneler(false),
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
@@ -158,6 +159,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 #endif
 	RemoveEffect(EATING);
 	RemoveEffect(DRINKING);
+	RemoveEffect(WORKING);
 	if (jobs.size() > 0) {
 		if (result == TASKSUCCESS) {
 			if (++taskIndex >= (signed int)jobs.front()->tasks.size()) {
@@ -285,12 +287,14 @@ void NPC::HandleWeariness() {
 			sleepJob->tasks.push_back(Task(STOCKPILEITEM));
 		}
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
-			run = true;
-			sleepJob->ReserveEntity(bed);
-			sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
-			sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
-			jobs.push_back(sleepJob);
-			return;
+			if (bed->Built()) {
+				run = true;
+				sleepJob->ReserveEntity(bed);
+				sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
+				sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
+				jobs.push_back(sleepJob);
+				return;
+			}
 		}
 		sleepJob->tasks.push_back(Task(SLEEP, Position()));
 		jobs.push_back(sleepJob);
@@ -338,12 +342,14 @@ void NPC::Update() {
 		} else RemoveEffect(DROWSY);
 	}
 
-	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
-		boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
-		if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
-			AddEffect(SWIM);
+	if (!HasEffect(FLYING)) {
+		if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
+			boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
+			if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
+				AddEffect(SWIM);
+			} else { RemoveEffect(SWIM); }
 		} else { RemoveEffect(SWIM); }
-	} else { RemoveEffect(SWIM); }
+	}
 
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 		attacki->Update();
@@ -351,6 +357,10 @@ void NPC::Update() {
 
 	if (Random::Generate(UPDATES_PER_SECOND - 1) == 0 && health < maxHealth) ++health;
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
+
+	if (carried.lock()) {
+		AddEffect(StatusEffect(CARRYING, carried.lock()->Graphic(), carried.lock()->Color()));
+	} else RemoveEffect(CARRYING);
 }
 
 void NPC::UpdateStatusEffects() {
@@ -515,6 +525,7 @@ MOVENEARend:
 
 			case BUILD:
 				if (Game::Adjacent(Position(), currentEntity())) {
+					AddEffect(WORKING);
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
 						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
@@ -676,6 +687,7 @@ CONTINUEEAT:
 			case USE:
 				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Use();
+					AddEffect(WORKING);
 					if (tmp >= 100) {
 						TaskFinished(TASKSUCCESS);
 					} else if (tmp < 0) {
@@ -718,6 +730,7 @@ CONTINUEEAT:
 			case FELL:
 				if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = tree->Fell();
+					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
@@ -843,6 +856,7 @@ CONTINUEEAT:
 			case DISMANTLE:
 				if (boost::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(currentEntity().lock())) {
 					construct->Condition(construct->Condition()-10);
+					AddEffect(WORKING);
 					if (construct->Condition() <= 0) {
 						Game::Inst()->RemoveConstruction(construct);
 						TaskFinished(TASKSUCCESS);
@@ -898,6 +912,7 @@ CONTINUEEAT:
 
 			case BOGIRON:
 				if (Map::Inst()->Type(x, y) == TILEBOG) {
+					AddEffect(WORKING);
 					if (Random::Generate(UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
@@ -1037,6 +1052,7 @@ CONTINUEEAT:
 					timer = 0;
 					taskBegun = true;
 				} else {
+					AddEffect(WORKING);
 					if (++timer >= 50) {
 						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
@@ -1162,7 +1178,11 @@ TaskResult NPC::Move(TaskResult oldResult) {
 					Position(Coordinate(moveX,moveY));
 					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
-				} else { //Encountered unexpected obstacle, fail and possibly repath
+				} else { //Encountered an obstacle. Fail if the npc can't tunnel
+					if (IsTunneler() && Map::Inst()->GetConstruction(moveX, moveY) >= 0) {
+						Hit(Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(moveX, moveY)));
+						return TASKCONTINUE;
+					}
 					return TASKFAILNONFATAL;
 				}
 				return TASKCONTINUE; //Everything is ok
@@ -1546,48 +1566,50 @@ void NPC::AbortCurrentJob(bool remove_job) {
 
 void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 	if (target.lock()) {
-		if (boost::dynamic_pointer_cast<NPC>(target.lock())) {
-			boost::shared_ptr<NPC> npc(boost::static_pointer_cast<NPC>(target.lock()));
+		boost::shared_ptr<NPC> npc = boost::dynamic_pointer_cast<NPC>(target.lock());
+		boost::shared_ptr<Construction> construction = boost::dynamic_pointer_cast<Construction>(target.lock());
+		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+			if (attacki->Cooldown() <= 0) {
+				attacki->ResetCooldown();
 
-			for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
-				if (attacki->Cooldown() <= 0) {
-					attacki->ResetCooldown();
+				if (npc) {
 					//First check if the target dodges the attack
 					if (Random::Generate(99) < npc->effectiveStats[DODGE]) {
-#ifdef DEBUG
+	#ifdef DEBUG
 						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
-#endif
+	#endif
 						continue;
 					}
-
-					Attack attack = *attacki;
-#ifdef DEBUG
-					std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
-#endif
-					
-					if (attack.Type() == DAMAGE_WIELDED) {
-#ifdef DEBUG
-						std::cout<<"Wielded attack\n";
-#endif
-						GetMainHandAttack(attack);
-					}
-#ifdef DEBUG
-					std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
-#endif
-					if (!careful && effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
-						if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
-							Coordinate tar;
-							tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-							tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-							npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
-							npc->pathIndex = -1;
-						}
-					}
-
-					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
 				}
+
+				Attack attack = *attacki;
+#ifdef DEBUG
+				std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
+#endif
+
+				if (attack.Type() == DAMAGE_WIELDED) {
+#ifdef DEBUG
+					std::cout<<"Wielded attack\n";
+#endif
+					GetMainHandAttack(attack);
+				}
+#ifdef DEBUG
+				std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
+#endif
+				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
+					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
+						Coordinate tar;
+						tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+						tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+						npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
+						npc->pathIndex = -1;
+					}
+				}
+
+				if (npc) npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
+				else if (construction) construction->Damage(&attack);
 			}
-		}
+		}	
 	}
 }
 
@@ -2068,3 +2090,16 @@ void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 		}
 	}
 }
+
+void NPC::AddEffect(StatusEffect effect) {
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->type == effect.type) {
+			statusEffectI->cooldown = statusEffectI->cooldownDefault;
+			return;
+		}
+	}
+
+	statusEffects.push_back(effect);
+}
+
+bool NPC::IsTunneler() { return isTunneler; }

@@ -144,3 +144,19 @@ void Camp::ToggleAutoTerritory() {
 }
 
 bool Camp::IsAutoTerritoryEnabled() { return autoTerritory; }
+
+void Camp::Reset() {
+	centerX = 220.0;
+	centerY = 220.0;
+	buildingCount = 0;
+	locked = false;
+	lockedCenter = Coordinate(0,0);
+	tier = 0;
+	name = "Clearing";
+	workshops = 0;
+	farmplots = 0;
+	production = 0;
+	upperCorner = Coordinate(0, 0);
+	lowerCorner = Coordinate(0, 0);
+	autoTerritory = true;
+}

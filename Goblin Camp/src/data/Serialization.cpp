@@ -249,6 +249,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & needsNutrition;
 	ar & needsSleep;
 	ar & hasHands;
+	ar & isTunneler;
 	ar & baseStats;
 	ar & effectiveStats;
 	ar & baseResistances;
@@ -260,6 +261,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & squad;
 	ar & attacks;
 	ar & escaped;
+	ar & addedTasksToCurrentJob;
 	ar & Skills;
 }
 
@@ -307,6 +309,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar & needsNutrition;
 		ar & needsSleep;
 		ar & hasHands;
+		ar & isTunneler;
 		ar & baseStats;
 		ar & effectiveStats;
 		ar & baseResistances;
@@ -453,7 +456,9 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & paused;
 	ar & waitingForRemoval;
 	ar & reservedEntities;
-	ar & reservedSpot;
+	ar & reservedSpot.get<0>();
+	ar & reservedSpot.get<1>();
+	ar & reservedSpot.get<2>();
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;
@@ -485,7 +490,13 @@ void Job::load(Archive & ar, const unsigned int version) {
 		ar & paused;
 		ar & waitingForRemoval;
 		ar & reservedEntities;
-		ar & reservedSpot;
+		boost::weak_ptr<Stockpile> sp;
+		ar & sp;
+		Coordinate location;
+		ar & location;
+		ItemType type;
+		ar & type;
+		reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
 		ar & attempts;
 		ar & attemptMax;
 		ar & connectedEntity;
@@ -642,6 +653,14 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 	ar & used;
 	ar & reserved;
 	ar & containers;
+	int colorCount = colors.size();
+	ar & colorCount;
+	for (std::map<Coordinate, TCODColor>::const_iterator it = colors.begin(); it != colors.end(); ++it) {
+		ar & it->first;
+		ar & it->second.r;
+		ar & it->second.g;
+		ar & it->second.b;
+	}
 }
 
 template<class Archive>
@@ -657,9 +676,24 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 		ar & used;
 		ar & reserved;
 		ar & containers;
+		int colorCount;
+		ar & colorCount;
+		for (int i = 0; i < colorCount; ++i) {
+			Coordinate location;
+			ar & location;
+			uint8 r, g, b;
+			ar & r;
+			ar & g;
+			ar & b;
+			colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
+		}
 	}
 }
 
+//
+// class Construction
+//
+BOOST_CLASS_VERSION(Construction, 0)
 
 template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {

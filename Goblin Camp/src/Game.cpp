@@ -40,6 +40,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "SpawningPool.hpp"
 #include "Camp.hpp"
 #include "MapMarker.hpp"
+#include "UI/MessageBox.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -292,6 +293,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	if (NPC::Presets[type].tags.find("hashands") != NPC::Presets[type].tags.end()) {
 		npc->hasHands = true;
+	}
+
+	if (NPC::Presets[type].tags.find("tunneler") != NPC::Presets[type].tags.end()) {
+		npc->isTunneler = true;
 	}
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
@@ -627,7 +632,7 @@ Coordinate Game::FindWater(Coordinate pos) {
 		if (wati->lock()->Depth() > DRINKABLE_WATER_DEPTH) {
 			int waterDistance = Distance(wati->lock()->Position(), pos);
 			//Favor water inside territory
-			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 2;
+			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 4;
 			if (waterDistance < Distance(closest, pos)) closest = wati->lock()->Position();
 		}
 	}
@@ -783,6 +788,15 @@ void Game::Update() {
 	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
 
 	Map::Inst()->UpdateMarkers();
+
+	for (std::list<std::pair<int, boost::function<void()> > >::iterator delit = delays.begin(); delit != delays.end();) {
+		if (--delit->first <= 0) {
+			delit->second();
+			delit = delays.erase(delit);
+		} else ++delit;
+	}
+
+	if (orcCount == 0 && goblinCount == 0) GameOver();
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
@@ -824,7 +838,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 				if (target.X() == -1) target = nearest->FreePosition();
 
 				if (target.X() != -1) {
-					stockJob->ReserveSpot(nearest, target);
+					stockJob->ReserveSpot(nearest, target, item->Type());
 					if (reserveItem) stockJob->ReserveEntity(item);
 					stockJob->tasks.push_back(Task(MOVE, item->Position()));
 					stockJob->tasks.push_back(Task(TAKE, item->Position(), item));
@@ -1394,6 +1408,11 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
 }
 
 void Game::Reset() {
+	for (int x = 0; x < Map::Inst()->Width(); ++x) {
+		for (int y = 0; y < Map::Inst()->Height(); ++y) {
+			Map::Inst()->Reset(x,y);
+		}
+	}
 	npcList.clear();
 	squadList.clear();
 	hostileSquadList.clear();
@@ -1407,6 +1426,8 @@ void Game::Reset() {
 	JobManager::Inst()->Reset();
 	StockManager::Inst()->Reset();
 	time = 0;
+	orcCount = 0;
+	goblinCount = 0;
 	paused = false;
 	toMainMenu = false;
 	running = false;
@@ -1415,11 +1436,7 @@ void Game::Reset() {
 	upleft = Coordinate(180,180);
 	safeMonths = 9;
 	Announce::Inst()->Reset();
-	for (int x = 0; x < Map::Inst()->Width(); ++x) {
-		for (int y = 0; y < Map::Inst()->Height(); ++y) {
-			Map::Inst()->Reset(x,y);
-		}
-	}
+	Camp::Inst()->Reset();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
@@ -1684,4 +1701,13 @@ void Game::Tire(Coordinate pos) {
 				}
 		}
 	}
+}
+
+void Game::AddDelay(int delay, boost::function<void()> callback) {
+	delays.push_back(std::pair<int, boost::function<void()> >(delay, callback));
+}
+
+void Game::GameOver() {
+	MessageBox::ShowMessageBox("All your orcs and goblins have died.");
+	running = false;
 }

@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 
 #include <boost/serialization/serialization.hpp>
+#include <boost/tuple/tuple.hpp>
 
 #include "Item.hpp"
 #include "Construction.hpp"
@@ -119,7 +120,7 @@ private:
 	bool paused;
 	bool waitingForRemoval;
 	std::list<boost::weak_ptr<Entity> > reservedEntities;
-	std::pair<boost::weak_ptr<Stockpile>, Coordinate> reservedSpot;
+	boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType> reservedSpot;
 	int attempts, attemptMax;
 	boost::weak_ptr<Entity> connectedEntity;
 	boost::weak_ptr<Container> reservedContainer;
@@ -157,7 +158,7 @@ public:
 
 	void ReserveEntity(boost::weak_ptr<Entity>);
 	void UnreserveEntities();
-	void ReserveSpot(boost::weak_ptr<Stockpile>, Coordinate);
+	void ReserveSpot(boost::weak_ptr<Stockpile>, Coordinate, ItemType);
 	void UnreserveSpot();
 	void ConnectToEntity(boost::weak_ptr<Entity>);
 	boost::weak_ptr<Entity> ConnectedEntity();

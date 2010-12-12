@@ -227,8 +227,9 @@ void StartNewGame() {
 	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, spawnBottomCorner);
 	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
 
-	game->CreateItems(20, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
-	game->CreateItems(10, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(30, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(5, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
+	game->CreateItems(30, Item::StringToItemType("Nightbloom seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
 	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
@@ -375,7 +376,7 @@ int MainMenu() {
 				lButtonDown = false;
 				int entry = static_cast<int>(floor(selected / 2.));
 
-				if (entry < entryCount && entries[entry].isActive()) {
+				if (entry >= 0 && entry < entryCount && entries[entry].isActive()) {
 					if (entries[entry].function == NULL) {
 						exit = true;
 					} else {
@@ -567,11 +568,12 @@ void SettingsMenu() {
 	std::string height       = Config::GetStringCVar("resolutionY");
 	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
 	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
+	bool tutorial            = Config::GetCVar<bool>("tutorial");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	const int w = 40;
-	const int h = 16;
+	const int h = 18;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
@@ -639,6 +641,10 @@ void SettingsMenu() {
 		TCODConsole::root->print(x + 1, currentY, "Fullscreen mode");
 
 		currentY += 2;
+		TCODConsole::root->setDefaultForeground((tutorial ? TCODColor::green : TCODColor::grey));
+		TCODConsole::root->print(x + 1, currentY, "Tutorial");
+
+		currentY += 2;
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->print(x + 1, currentY, "Renderer");
 
@@ -662,15 +668,18 @@ void SettingsMenu() {
 			clicked = false;
 			int whereY      = mouse.cy - y - 1;
 			int rendererY   = currentY - y - 1;
-			int fullscreenY = rendererY - 2;
+			int fullscreenY = rendererY - 4;
+			int tutorialY = rendererY - 2;
 
-			if (whereY > 1 && whereY < rendererY && whereY != fullscreenY) {
+			if (whereY > 1 && whereY < fullscreenY) {
 				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
 				if (whereFocus >= 0 && whereFocus < fieldCount) {
 					focus = &fields[whereFocus];
 				}
 			} else if (whereY == fullscreenY) {
 				fullscreen = !fullscreen;
+			} else if (whereY == tutorialY) {
+				tutorial = !tutorial;
 			} else if (whereY > rendererY) {
 				int whereRenderer = whereY - rendererY - 1;
 				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
@@ -684,6 +693,7 @@ void SettingsMenu() {
 	Config::SetStringCVar("resolutionY", height);
 	Config::SetCVar("renderer", renderer);
 	Config::SetCVar("fullscreen", fullscreen);
+	Config::SetCVar("tutorial", tutorial);
 	
 	try {
 		Config::Save();

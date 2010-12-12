@@ -45,6 +45,8 @@ protected:
 	std::map<Coordinate, bool> used;
 	std::map<Coordinate, bool> reserved;
 	std::map<Coordinate, boost::shared_ptr<Container> > containers;
+	std::map<Coordinate, TCODColor> colors;
+	std::map<ItemCategory, int> limits;
 public:
 	virtual ~Stockpile();
 	int Build();
@@ -58,14 +60,16 @@ public:
 	bool Allowed(std::set<ItemCategory>);
 	bool Full(ItemType = -1);
 	Coordinate FreePosition();
-	void ReserveSpot(Coordinate, bool);
+	void ReserveSpot(Coordinate, bool, ItemType);
 	boost::weak_ptr<Container> Storage(Coordinate);
-	void SwitchAllowed(ItemCategory, bool childrenAlso = false);
+	void SwitchAllowed(ItemCategory, bool childrenAlso = true);
 	void SetAllAllowed(bool);
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 	void ItemAdded(boost::weak_ptr<Item>);
 	void ItemRemoved(boost::weak_ptr<Item>);
 	Coordinate Center();
 	void TranslateInternalContainerListeners();
+	void AdjustLimit(ItemCategory, int);
+	int GetLimit(ItemCategory);
 };
 

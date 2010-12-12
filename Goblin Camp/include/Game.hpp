@@ -78,6 +78,8 @@ private:
 	Coordinate marks[12];
 
 	boost::shared_ptr<Events> events;
+
+	std::list<std::pair<int, boost::function<void()> > > delays;
 public:
 	static Game* Inst();
 	static bool LoadGame(const std::string&);
@@ -106,6 +108,8 @@ public:
 
 	void Pause();
 	bool Paused();
+
+	void GameOver();
 
 	int CharHeight() const;
 	int CharWidth() const;
@@ -216,4 +220,6 @@ public:
 	void CreateBlood(Coordinate,int);
 
 	void TriggerAttack();
+
+	void AddDelay(int delay, boost::function<void()>);
 };
