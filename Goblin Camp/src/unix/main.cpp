@@ -17,13 +17,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <vector>
 #include <string>
-#include <algorithm>
-#include <iterator>
 
 int GCMain(std::vector<std::string>&);
 
 int main(int argc, char **argv) {
-	std::vector<std::string> args;
-	std::copy(argv, argv + argc, std::back_inserter(args));
+	std::vector<std::string> args(argv, argv + argc);
 	return GCMain(args);
 }
