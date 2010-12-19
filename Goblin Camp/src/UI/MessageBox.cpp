@@ -22,7 +22,8 @@
 #include "UI/Label.hpp"
 #include "UI/Button.hpp"
 
-void MessageBox::ShowMessageBox(std::string text, boost::function<void()> action, std::string button) {
+void MessageBox::ShowMessageBox(std::string text, boost::function<void()> firstAction, std::string firstButton,
+	boost::function<void()> secondAction, std::string secondButton) {
 	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 54, (text.length() / 50) + 8);
 	Dialog *dialog = new Dialog(contents, "", 54, (text.length() / 50) + 8);
 	int i = 0;
@@ -30,7 +31,13 @@ void MessageBox::ShowMessageBox(std::string text, boost::function<void()> action
 		contents->AddComponent(new Label(text.substr(i, 50), 27, 2+(i/50)));
 		i += 50;
 	} while (i < text.length());
-	contents->AddComponent(new Button(button, action, 22, (i/50)+3, 10, 'o', true));
+
+	if (secondButton == "") {
+		contents->AddComponent(new Button(firstButton, firstAction, 22, (i/50)+3, 10, firstButton.at(0), true));
+	} else {
+		contents->AddComponent(new Button(firstButton, firstAction, 12, (i/50)+3, 10, firstButton.at(0), true));
+		contents->AddComponent(new Button(secondButton, secondAction, 33, (i/50)+3, 10, secondButton.at(0), true));
+	}
 	dialog->ShowModal();
 }
 
