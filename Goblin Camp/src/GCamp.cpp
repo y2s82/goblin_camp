@@ -36,7 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
-#include "UI/YesNoDialog.hpp"
+#include "UI/MessageBox.hpp"
 #include "data/Paths.hpp"
 #include "data/Config.hpp"
 #include "data/Data.hpp"
@@ -293,8 +293,8 @@ namespace {
 
 void ConfirmStartNewGame() {
 	if (Game::Inst()->Running()) {
-		YesNoDialog::ShowYesNoDialog("A game is already running, are you sure you want  to start a new one?",
-			&StartNewGame, &Game::DoNothing);
+		MessageBox::ShowMessageBox("A game is already running, are you sure you want  to start a new one?",
+			&StartNewGame, "Yes", NULL, "No");
 	} else {
 		StartNewGame();
 	}

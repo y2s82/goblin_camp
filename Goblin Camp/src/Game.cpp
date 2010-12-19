@@ -350,7 +350,7 @@ void Game::Exit(bool confirm) {
 	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
 
 	if (confirm) {
-		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
+		MessageBox::ShowMessageBox("Really exit?", exitFunc, "Yes", NULL, "No");
 	} else {
 		exitFunc();
 	}
