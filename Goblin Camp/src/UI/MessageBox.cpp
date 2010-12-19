@@ -25,7 +25,6 @@
 void MessageBox::ShowMessageBox(std::string text, boost::function<void()> action, std::string button) {
 	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 54, (text.length() / 50) + 8);
 	Dialog *dialog = new Dialog(contents, "", 54, (text.length() / 50) + 8);
-
 	int i = 0;
 	do {
 		contents->AddComponent(new Label(text.substr(i, 50), 27, 2+(i/50)));
