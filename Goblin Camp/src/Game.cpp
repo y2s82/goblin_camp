@@ -35,7 +35,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 #include "data/Config.hpp"
-#include "UI/YesNoDialog.hpp"
 #include "scripting/Event.hpp"
 #include "SpawningPool.hpp"
 #include "Camp.hpp"
