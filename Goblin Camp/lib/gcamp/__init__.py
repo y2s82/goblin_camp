@@ -18,4 +18,10 @@ from . import log, events, utils, config
 import _gcampapi
 
 announce = _gcampapi.announce
-announce.__doc__ = 'Add a string to announce area'
+announce.__doc__ = 'Add a string to the announcements area'
+
+delay = _gcampapi.delay
+delay.__doc__ = 'Call a function after a set delay'
+
+messageBox = _gcampapi.messageBox
+messageBox.__doc__ = 'Display a message in a messagebox'
