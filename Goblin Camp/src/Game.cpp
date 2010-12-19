@@ -1227,13 +1227,13 @@ void Game::DecayItems() {
 		}
 	}
 
-	for (std::list<boost::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end(); ++bli) {
+	for (std::list<boost::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end();) {
 		if (boost::shared_ptr<BloodNode> blood = bli->lock()) {
 			blood->Depth(blood->Depth()-50);
 			if (blood->Depth() <= 0) {
 				Map::Inst()->SetBlood(blood->Position().X(), blood->Position().Y(), boost::shared_ptr<BloodNode>());
 				bli = bloodList.erase(bli);
-			}
+			} else ++bli;
 		} else {
 			bli = bloodList.erase(bli);
 		}
