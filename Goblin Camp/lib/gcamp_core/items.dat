@@ -18,6 +18,10 @@ category_type "Wicker" {
 category_type "Fuel" {
 }
 
+category_type "Charcoal" {
+	parent="Fuel"
+}
+
 category_type "Firewood" {
 	parent="Fuel"
 }
@@ -118,6 +122,10 @@ category_type "Brick" {
 }
 
 category_type "Metal" {
+}
+
+category_type "Metal ore" {
+	parent="Metal"
 }
 
 category_type "Impure metal" {
@@ -235,6 +243,16 @@ item_type "Wicker" {
     color = "127,106,0"
     fitsin = "Crate"
 	multiplier = 10
+}
+
+item_type "Wood charcoal" {
+	category = ["Charcoal"]
+	graphic = 176
+	color = "106, 106, 106"
+	components = ["Log"]
+	multiplier = 5
+	constructedin = "Charcoal burning clamp"
+	fitsin = "Sack"
 }
 
 item_type "Firewood" {
@@ -710,7 +728,7 @@ item_type "Quiver" {
 	color ="200,64,0"
 	components = ["Leather"]
 	containerSize = 100
-	constructedin = "Weapon crafter"
+	constructedin = "Leather crafter"
 	fitsin = "Crate"
 }
 
@@ -795,7 +813,7 @@ item_type "Leather armor" {
 	resistances {
 		physical = 15
 	}
-	constructedin = "Armor Crafter"
+	constructedin = "Leather Crafter"
 	bulk = 2
 }
 
@@ -803,11 +821,11 @@ item_type "Chainmail" {
 	category = ["Medium armor"]
 	graphic = 91
 	color = "112,138,144"
-	components = ["Metal bar", "Metal bar", "Metal bar", "Cloth"]
+	components = ["Metal bar", "Metal bar", "Metal bar", "Cloth", "Charcoal", "Charcoal"]
 	resistances {
 		physical = 25
 	}
-	constructedin = "Armor Crafter"
+	constructedin = "Smithy"
 	bulk = 4
 }
 
@@ -815,26 +833,35 @@ item_type "Platemail" {
 	category = ["Heavy armor"]
 	graphic = 91
 	color = "190,190,190"
-	components = ["Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Cloth", "Cloth"]
+	components = ["Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Cloth", "Cloth", "Charcoal", "Charcoal", "Charcoal"]
 	resistances {
 		physical = 40
 	}
-	constructedin = "Armor Crafter"
+	constructedin = "Smithy"
 	bulk = 6
 }
 
 item_type "Bog iron" {
-	category = ["Impure metal"]
+	category = ["Metal ore"]
 	graphic = 145
 	color = "230,135,80"
+}
+
+item_type "Sponge iron" {
+	category = ["Impure metal"]
+	graphic = 198
+	color = "230,135,80"
+	components = ["Metal ore", "Metal ore", "Metal ore", "Charcoal", "Charcoal", "Charcoal", "Charcoal"]
+	constructedin = "Bloomery"
+	bulk = 2
 }
 
 item_type "Wrought iron" {
 	category = ["Metal bar"]
 	graphic = 170
 	color = "110,110,110"
-	components = ["Impure metal", "Impure metal", "Impure metal", "Wood", "Wood"]
-	constructedin = "Bloomery"
+	components = ["Impure metal", "Impure metal", "Charcoal"]
+	constructedin = "Smithy"
 	bulk = 3
 }
 
@@ -850,7 +877,7 @@ item_type "Red brick" {
 	category = ["Brick"]
 	graphic = 22
 	color = "120,22,11"
-	components = [ "Clay", "Clay", "Clay", "Wood" ]
+	components = [ "Clay", "Clay", "Clay", "Charcoal" ]
 	constructedin = "Clay kiln"
 }
 
@@ -859,6 +886,7 @@ item_type "Shovel" {
 	graphic = 93
 	color = "155,128,128"
 	components = [ "Plank", "Metal bar" ]
+	constructedin = "Smithy"
 	fitsin = "Crate"
 }
 

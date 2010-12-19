@@ -276,7 +276,7 @@ construction_type "Weapon crafter" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 }
 
-construction_type "Armor Crafter" {
+construction_type "Leather Crafter" {
 	tier=2
 	category="Workshops"
 	graphicLength=2
@@ -285,10 +285,10 @@ construction_type "Armor Crafter" {
 			 91, 93,
 			 94, 251]
 	walkable
-	maxCondition=100
+	maxCondition=80
 	productionx=1
 	productiony=2
-	materials=["Plank","Plank","Plank","Rough stone", "Rough stone"]
+	materials=["Plank","Plank","Plank","Plank", "Plank"]
 }
 
 construction_type "Tanner" {
@@ -335,7 +335,7 @@ construction_type "Clay pit" {
 	productionx=2
 	productiony=2
 	spawnsCreatures="claypit"
-	spawnFrequency=600
+	spawnFrequency=900
 	permanent
 	color="220,80,70"
 }
@@ -348,10 +348,24 @@ construction_type "Bloomery" {
 			  40, 10, 46, 10,
 			 170,157,176,217]
 	walkable
-	maxCondition=90
+	maxCondition=120
 	productionx=2
 	productiony=1
 	materials=["Brick","Brick","Brick","Brick","Brick"]
+}
+
+construction_type "Smithy" {
+    tier=3
+	category="Workshops"
+	graphicLength=3
+	graphic=[176, 20, 28,
+			   9,254,177,
+			  35,177, 46]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Rough stone", "Log", "Brick", "Plank", "Plank"]
 }
 
 construction_type "Clay kiln" {
@@ -363,8 +377,8 @@ construction_type "Clay kiln" {
 			 231,  9,
 			   2,173]
 	walkable
-	maxCondition=90
-	materials=["Plank","Plank","Plank"]
+	maxCondition=80
+	materials=["Plank","Plank","Plank","Clay","Clay"]
 	productionx=1
 	productiony=1
 }
@@ -378,7 +392,7 @@ construction_type "Brick Wall" {
 }
 
 construction_type "Duckboard" {
-	tier=3
+	tier=2
 	category="Basics"
 	bridge
 	walkable
@@ -389,5 +403,24 @@ construction_type "Duckboard" {
 	tileReqs=["grass", "rock", "mud", "bog"]
 	placementType=2
 	description="A wooden platform for easier travel over muddy terrain"
+}
+
+construction_type "Charcoal burning clamp" {
+    tier=3
+	category="Permanent"
+	graphicLength=5
+	graphic=[ 44, 44, 44, 46, 44,
+			  46, 92, 30, 47, 46,
+			  46, 17,176, 16, 44,
+			  46, 47, 31, 92, 44,
+			  44, 46, 46, 44, 46]
+	walkable
+	maxCondition=250
+	productionx=2
+	productiony=2		
+	spawnsCreatures="fire"
+	spawnFrequency=600
+	permanent
+	color="190, 127, 0"
 }
 
