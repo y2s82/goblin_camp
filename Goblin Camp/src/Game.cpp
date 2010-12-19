@@ -627,12 +627,18 @@ Coordinate Game::FindFilth(Coordinate pos) {
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
 Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest(-9999,-9999);
+	int closestDistance = INT_MAX;
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
-		if (wati->lock()->Depth() > DRINKABLE_WATER_DEPTH) {
-			int waterDistance = Distance(wati->lock()->Position(), pos);
-			//Favor water inside territory
-			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 4;
-			if (waterDistance < Distance(closest, pos)) closest = wati->lock()->Position();
+		if (boost::shared_ptr<WaterNode> water = wati->lock()) {
+			if (water->Depth() > DRINKABLE_WATER_DEPTH) {
+				int waterDistance = Distance(water->Position(), pos);
+				//Favor water inside territory
+				if (Map::Inst()->IsTerritory(water->Position().X(), water->Position().Y())) waterDistance /= 4;
+				if (waterDistance < closestDistance) { 
+					closest = water->Position();
+					closestDistance = waterDistance;
+				}
+			}
 		}
 	}
 	if (closest.X() == -9999) return Coordinate(-1,-1);
