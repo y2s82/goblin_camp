@@ -127,7 +127,7 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 				}
 
 				if (overlayFlags & TERRITORY_OVERLAY) {
-					console->setCharBackground(x-screenDeltaX,y-screenDeltaY, tileMap[x][y].territory ? TCODColor::green : TCODColor::red);
+					console->setCharBackground(x-screenDeltaX,y-screenDeltaY, tileMap[x][y].territory ? TCODColor::darkGreen : TCODColor::darkRed);
 				}
 			}
 			else {
