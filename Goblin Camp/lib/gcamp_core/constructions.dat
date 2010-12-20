@@ -383,14 +383,6 @@ construction_type "Clay kiln" {
 	productiony=1
 }
 
-construction_type "Brick Wall" {
-	tier=3
-	category="Basics"
-	wall
-	maxCondition=50
-	materials=["Brick","Brick","Brick","Brick","Brick"]
-}
-
 construction_type "Duckboard" {
 	tier=2
 	category="Basics"
@@ -403,6 +395,14 @@ construction_type "Duckboard" {
 	tileReqs=["grass", "rock", "mud", "bog"]
 	placementType=2
 	description="A wooden platform for easier travel over muddy terrain"
+}
+
+construction_type "Brick Wall" {
+	tier=3
+	category="Basics"
+	wall
+	maxCondition=50
+	materials=["Brick","Brick","Brick","Brick","Brick"]
 }
 
 construction_type "Charcoal burning clamp" {
