@@ -437,12 +437,13 @@ item_type "Dried fruit" {
 	category = ["Food"]
 	graphic = 42
 	color = "190,195,130"
-	components = ["Fruit"]
+	components = ["Fruit","Fruit","Fruit"]
 	fitsin = "Basket"
 	nutrition = 4000
 	decaySpeed = 15
 	decay = ["Filth"]
 	constructedin = "Kitchen"
+	multiplier = 3
 }
 
 item_type "Dead plant" {
