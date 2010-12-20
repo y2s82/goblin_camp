@@ -160,7 +160,7 @@ void StartNewGame() {
 	game->LoadingScreen();
 	
 	Script::Event::GameStart();
-	game->GenerateMap();
+	game->GenerateMap(time(0));
 
 	std::priority_queue<std::pair<int, Coordinate> > spawnCenterCandidates;
 
