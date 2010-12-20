@@ -403,6 +403,7 @@ construction_type "Brick Wall" {
 	wall
 	maxCondition=50
 	materials=["Brick","Brick","Brick","Brick","Brick"]
+	placementType=2
 }
 
 construction_type "Charcoal burning clamp" {
