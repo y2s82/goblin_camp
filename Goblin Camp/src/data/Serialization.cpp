@@ -661,6 +661,7 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 		ar & it->second.g;
 		ar & it->second.b;
 	}
+	ar & limits;
 }
 
 template<class Archive>
@@ -687,6 +688,7 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 			ar & b;
 			colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
 		}
+		ar & limits;
 	}
 }
 
