@@ -645,7 +645,7 @@ npc_type "imp" {
 	plural="Imps"
 	tags=["fire", "hasHands"]
 	color="224,73,87"
-	graphic='I'
+	graphic='i'
 	AI="HostileAnimal"
 	stats {
 		speed=20
