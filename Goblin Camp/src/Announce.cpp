@@ -99,7 +99,7 @@ void Announce::AnnouncementClicked(int i) {
 }
 
 MenuResult Announce::Update(int x, int y, bool clicked) {
-	if(x < (signed int)length + 4 && y >= (signed int)top) {
+	if(x < (signed int)length + 6 && y >= (signed int)top) {
 		if(clicked && y > (signed int)top && (y - top - 1) >= 0 && (y - top - 1) < messageQueue.size()) {
 			AnnouncementClicked(messageQueue[y - top - 1]);
 		}
@@ -113,10 +113,10 @@ void Announce::Draw(TCODConsole* console) {
 
 	top = console->getHeight() - 1 - height;
 	if (height > 0 && (signed int)height < console->getHeight() - 1) {
-		console->hline(0, top, length+4);
-		console->putChar(length+3, top, TCOD_CHAR_NE, TCOD_BKGND_SET);
-		console->vline(length+3, top + 1, height);
-		console->rect(0, top + 1, length+3, height, true);
+		console->hline(0, top, length+6);
+		console->putChar(length+5, top, TCOD_CHAR_NE, TCOD_BKGND_SET);
+		console->vline(length+5, top + 1, height);
+		console->rect(0, top + 1, length+5, height, true);
 
 		for (int i = std::min((int)messageQueue.size() - 1, (int)height-1); i >= 0; --i) {
 			AnnounceMessage* msg = messageQueue[i];
