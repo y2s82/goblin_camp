@@ -7,7 +7,7 @@ construction_type "Stockpile" {
 	graphic=[61]
 	color="255,255,255"
 	maxCondition=10
-	description="Stockpiles are required to store items. Orcs in workshops can only use items from stockpiles."
+	description="Stockpiles are required to store items. Only items in stockpiles are usable."
 }
 
 construction_type "Farm plot" {
@@ -80,6 +80,7 @@ construction_type "Basket Weaver" {
 	productionx=1
 	productiony=1
 	materials=["Plank","Plank","Plank","Plank","Plank"]
+	description="Baskets are mainly used to store berries and fruit"
 }
 
 construction_type "Winery" {
@@ -104,6 +105,7 @@ construction_type "Bed" {
 	walkable
 	maxCondition=10
 	materials=["Bed"]
+	description="Sleeping without a bed makes your creatures tired"
 }
 
 construction_type "Door" {
@@ -116,6 +118,7 @@ construction_type "Door" {
 	blocksLight
 	maxCondition=10
 	materials=["Door"]
+	description="Handy for keeping out handless enemies"
 }
 
 construction_type "Kitchen" {
@@ -130,6 +133,7 @@ construction_type "Kitchen" {
 	materials=["Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
+	description="Dry fruits to keep longer, make bread, pies etc"
 }
 
 construction_type "Weaver" {
@@ -144,6 +148,7 @@ construction_type "Weaver" {
 	productionx=1
 	productiony=1
 	materials=["Plank","Plank","Plank","Plank","Plank"]
+	description="Make cloth, sacks and rope"
 }
 
 construction_type "Bone Carver" {
@@ -158,6 +163,7 @@ construction_type "Bone Carver" {
 	materials=["Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
+	description="Bones can be carved into weapons, furniture and decorations"
 }
 
 construction_type "Butcher" {
@@ -241,10 +247,10 @@ construction_type "Stone quarry" {
 	productionx=3
 	productiony=5
 	spawnsCreatures="underground"
-	//Spawn creatures every x seconds
 	spawnFrequency=600
 	permanent
 	tileReqs=["rock"]
+	description="Stone is required for more advanced buildings. Beware underground monsters!"
 }
 
 construction_type "Stone mason" {
@@ -303,6 +309,7 @@ construction_type "Tanner" {
 	materials=["Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=1
+	description="Tanners create leather from animal hides"
 }
 
 construction_type "Mill" {
@@ -319,6 +326,7 @@ construction_type "Mill" {
 	productionx=2
 	productiony=1
 	materials=["Rough stone","Rough stone","Log","Plank","Plank","Plank","Plank","Plank"]
+	description="Used to grind seeds into flour, for use in baking"
 }
 
 construction_type "Clay pit" {
@@ -338,6 +346,8 @@ construction_type "Clay pit" {
 	spawnFrequency=900
 	permanent
 	color="220,80,70"
+	tileReqs=["grass", "mud"]
+	description="Gives you access to clay."
 }
 
 construction_type "Bloomery" {
@@ -352,6 +362,7 @@ construction_type "Bloomery" {
 	productionx=2
 	productiony=1
 	materials=["Brick","Brick","Brick","Brick","Brick"]
+	description="Bloomeries are used to smelt iron"
 }
 
 construction_type "Smithy" {
@@ -366,6 +377,7 @@ construction_type "Smithy" {
 	productionx=1
 	productiony=1
 	materials=["Rough stone", "Log", "Brick", "Plank", "Plank"]
+	description="Create metal bars, and items from them"
 }
 
 construction_type "Clay kiln" {
@@ -381,6 +393,7 @@ construction_type "Clay kiln" {
 	materials=["Plank","Plank","Plank","Clay","Clay"]
 	productionx=1
 	productiony=1
+	description="Used to create bricks out of clay"
 }
 
 construction_type "Duckboard" {
@@ -423,5 +436,6 @@ construction_type "Charcoal burning clamp" {
 	spawnFrequency=600
 	permanent
 	color="190, 127, 0"
+	description="Used to make charcoal out of wood logs"
 }
 
