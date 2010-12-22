@@ -869,7 +869,7 @@ item_type "Wrought iron" {
 item_type "Red clay" {
 	category=["Clay"]
 	graphic = 4
-	color = "220,80,70"
+	color = "220,60,20"
 	multiplier = 5
 	constructedin = "Clay pit"
 }
@@ -877,7 +877,7 @@ item_type "Red clay" {
 item_type "Red brick" {
 	category = ["Brick"]
 	graphic = 22
-	color = "120,22,11"
+	color = "200,0,0"
 	components = [ "Clay", "Clay", "Clay", "Charcoal" ]
 	constructedin = "Clay kiln"
 }
