@@ -9,6 +9,50 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.13 --
+
+0.13 is a big update, lot's of changes. Proper heightmap based map
+generation, camp tiers, bridges, tunnelling monsters, a new spawning pool,
+and so forth.
+
+*Implemented heightmap based map generation for more interesting maps
+*Containers generalized
+*Stockpiles have container-specific limits
+*Ants can tunnel through walls
+*Gameover is registered when all your orcs+goblins are dead
+*Assigning orders to a squad now flashes a marker on thr map to better 
+visualize it
+*Added patrol orders
+*Fixed escort orders, and renamed it to 'Follow'
+*You can now define what an npc becomes on death (corpse, small corpse, 
+just filth, etc.)
+*Stockpiles and farmplots can be expanded after being built
+*Pontoon bridges
+*Health bar for npcs in the sidebar
+*NPC's will eat each other if starving (starting with the weakest npc they 
+see)
+*Ground will get muddy if walked over constantly
+*Duckboards can be built over mud to allow faster travel
+*Orcs and goblins spread filth
+*The spawning pool will grow organically while spreading corruption the more 
+filth and corpses you dump into it
+*Items have bulk, and heavier items will slow npcs down more than lighter ones 
+will
+*Reworked npc stats and food numbers (spreadsheets ahoy)
+*Added tooltips to menus to explain different constructions
+*Added camp tiers: At first only the most basic constructions are available,
+and only weak monsters will attack. As you advance through tiers more options 
+become available, and tougher monsters appear.
+*Tile requirements for constructions, now stone quarries can only be built on 
+stone for example.
+*If a place is left to itself plants will grow back and peaceful woodland 
+creatures will return
+*Goblins no longer stockpile things neatly into rows
+*Felling trees and digging ditches requires tools
+*Added a totem pole which centers the camp
+*Added a tutorial to help out newcomers and show how to use python for mods
+
+
 -- Version 0.12 --
 
 v0.12 brings a lot of internal improvements, improved mod support and
@@ -63,6 +107,8 @@ fly over your walls and poison your goblins!
 *Constructions set to be dismantled display this fact as well
 *msvcr100.dll and msvcp100.dll are included in the .zip to make install easier.
 
+--
+
 New constructions, creatures and items are included, many created by the community. 
 A big thanks to everyone who's contributed with mods and/or code!
 
@@ -96,8 +142,7 @@ A good way to start is to place a stockpile by choosing it from the menu
 Constructions -> Basics -> Stockpile. Then left-click the stockpile to open it 
 in the sidebar, and shift-click on Wood to allow all wood items in the 
 stockpile. Allow the food category as well so that the bread you started out 
-with gets stored. If you plan on making crates for planks, allow those too
-(plank containers).
+with gets stored. If you plan on making crates for planks, allow those too.
 
 Next designate trees for cutting by choosing Orders -> Designate trees, you can
 pretty much drag the selection over as big an area as you feel like. The trees 
@@ -106,14 +151,14 @@ log minimum, maybe to 50 or so.
 
 Now that the trees are being cut down, either allow the plant category in the 
 same stockpile, or make a separate one.
-Designate a farm plot, and allow both seed types there. 
+Designate a farm plot, and allow whichever seed types you want there. 
 Once spring begins, your goblins should plant all the seeds they have in the 
 fields, as long as they are in a stockpile to begin with. For items to be usable
 they must be stored in a stockpile.
 
-You'll need planks for various things, so now you should build a carpenter's 
-workshop. You can then raise the minimums for planks. Building some wooden clubs
-for your military is also a very good idea.
+You'll need planks for various things, so now you should build a saw pit. 
+You can then raise the minimums for planks. You'll need a carpenter's workshop
+for wooden clubs and other wooden items.
 
 You can create your first military squad by opening the Squads menu. Type in a
 name for the squad, set how many orcs you wish to be in it and click Create. 
@@ -146,21 +191,10 @@ The easiest way to change settings is through the main menu, but you can also
 change the settings through config.ini as described below:
 
 You can change the resolution and switch between windowed/full screen mode by
-editing config.ini which you'll find in your 
+editing config.py which you'll find in your 
 /Documents/My Games/Goblin camp/ folder (or equivalent).
 
-Fullscreen is toggled by adding/removing 'fullscreen', like so:
-
-config {
-	width = 1920
-	height = 1080
-	renderer = "SDL"
-	fullscreen
-}
-
-The above config.ini would set GC to run fullscreen and use 1920x1080
-as the resolution.
-
+--
 
 Licensing information is in COPYING.txt
 The libtcod license: LIBTCOD-LICENSE.txt
