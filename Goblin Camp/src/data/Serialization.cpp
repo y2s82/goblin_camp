@@ -48,6 +48,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 #include "JobManager.hpp"
+#include "MapMarker.hpp"
 #include "Map.hpp"
 #include "StockManager.hpp"
 #include "StatusEffect.hpp"
