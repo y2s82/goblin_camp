@@ -77,12 +77,23 @@ int Stockpile::Build() {return 1;}
 
 //TODO: Remove repeated code
 boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, int value) {
-	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
+
+	//These two are used only for MOSTDECAYED
+	int decay = -1;
+	boost::shared_ptr<Item> savedItem;
+
+	int itemsFound = 0; /*This keeps track of how many items we've found of the right category,
+						we can use this to know when we've searched through all of the items*/
+
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); 
+		conti != containers.end() && itemsFound < amount[cat]; ++conti) {
 		if (!conti->second->empty()) {
 			boost::weak_ptr<Item> witem = *conti->second->begin();
 			if (boost::shared_ptr<Item> item = witem.lock()) {
 				if (item->IsCategory(cat) && !item->Reserved()) {
 					//The item is the one we want, check that it fullfills all the requisite flags
+					++itemsFound;
+
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item)) {
 						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 						//value represents bulk in this case. Needs to check Full() because bulk=value=0 is a possibility
@@ -108,6 +119,14 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 							boost::static_pointer_cast<Container>(item)->GetReservedSpace() > 0) continue;
 					}
 
+					if (flags & MOSTDECAYED) {
+						if (decay == -1 || decay > item->GetDecay()) { //First item or closer to decay
+							decay = item->GetDecay();
+							savedItem = item;
+						}
+						continue; //Always continue, we need to look through all the items
+					}
+
 					return item;
 
 				} else if (boost::dynamic_pointer_cast<Container>(item)) {
@@ -117,6 +136,9 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 						boost::shared_ptr<Item> innerItem(itemi->lock());
 						if (innerItem && innerItem->IsCategory(cat) && !innerItem->Reserved()) {
+
+							++itemsFound;
+
 							if (flags & BETTERTHAN) {
 								if (innerItem->RelativeValue() <= value) continue;
 							}
@@ -129,6 +151,14 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 											continue;
 								}
 							}
+
+							if (flags & MOSTDECAYED) {
+								if (decay == -1 || decay > innerItem->GetDecay()) { //First item or closer to decay
+									decay = innerItem->GetDecay();
+									savedItem = innerItem;
+								}
+								continue; //Always continue, we need to look through all the items
+							}
 							
 							return innerItem;
 						}
@@ -137,15 +167,28 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 			}
 		}
 	}
-	return boost::weak_ptr<Item>();
+
+	return savedItem;
 }
 
 boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, int value) {
-	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); conti != containers.end(); ++conti) {
+
+	//These two are used only for MOSTDECAYED
+	int decay = -1;
+	boost::shared_ptr<Item> savedItem;
+
+	int itemsFound = 0; //This keeps track of how many items we've found of the right category
+	ItemCategory cat = *Item::Presets[typeValue].categories.begin(); /*Choose whatever happens to be the first
+																	 category. This'll give us an inaccurate
+																	 count, but it'll still make this faster*/
+
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); 
+		conti != containers.end() && itemsFound < amount[cat]; ++conti) {
 		if (!conti->second->empty()) {
 			boost::weak_ptr<Item> witem = *conti->second->begin();
 			if (boost::shared_ptr<Item> item = witem.lock()) {
 				if (item->Type() == typeValue && !item->Reserved()) {
+					++itemsFound;
 					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item)) {
 						boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 						//value represents bulk in this case
@@ -171,12 +214,21 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 							boost::static_pointer_cast<Container>(item)->GetReservedSpace() > 0) continue;
 					}
 
+					if (flags & MOSTDECAYED) {
+						if (decay == -1 || decay > item->GetDecay()) { //First item or closer to decay
+							decay = item->GetDecay();
+							savedItem = item;
+						}
+						continue; //Always continue, we need to look through all the items
+					}
+					
 					return item;
 				} else if (boost::dynamic_pointer_cast<Container>(item)) {
 					boost::weak_ptr<Container> cont = boost::static_pointer_cast<Container>(item);
 					for (std::set<boost::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 						boost::shared_ptr<Item> innerItem(itemi->lock());
 						if (innerItem && innerItem->Type() == typeValue && !innerItem->Reserved()) {
+							++itemsFound;
 							if (flags & BETTERTHAN) {
 								if (innerItem->RelativeValue() <= value) continue;
 							}
@@ -191,6 +243,14 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 								} 
 							}
 
+							if (flags & MOSTDECAYED) {
+								if (decay == -1 || decay > innerItem->GetDecay()) { //First item or closer to decay
+									decay = innerItem->GetDecay();
+									savedItem = innerItem;
+								}
+								continue; //Always continue, we need to look through all the items
+							}
+
 							return innerItem;
 						}
 					}
@@ -198,7 +258,7 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 			}
 		}
 	}
-	return boost::weak_ptr<Item>();
+	return savedItem;
 }
 
 void Stockpile::Expand(Coordinate from, Coordinate to) {

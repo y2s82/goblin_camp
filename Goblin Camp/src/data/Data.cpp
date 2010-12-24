@@ -35,7 +35,7 @@ namespace fs = boost::filesystem;
 #include "data/Data.hpp"
 #include "data/Paths.hpp"
 #include "Logger.hpp"
-#include "UI/YesNoDialog.hpp"
+#include "UI/MessageBox.hpp"
 #include "Game.hpp"
 #include "scripting/Event.hpp"
 #include "scripting/Engine.hpp"
@@ -257,9 +257,9 @@ namespace Data {
 		if (!fs::exists(file)) {
 			DoSave(file, result);
 		} else {
-			YesNoDialog::ShowYesNoDialog(
-				"Save game exists, overwrite?", boost::bind(DoSave, file, boost::ref(result)), NULL
-			);
+			MessageBox::ShowMessageBox(
+				"Save game exists, overwrite?", boost::bind(DoSave, file, boost::ref(result)), "Yes",
+				NULL, "No");
 		}
 		
 		return result;

@@ -127,7 +127,7 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 				}
 
 				if (overlayFlags & TERRITORY_OVERLAY) {
-					console->setCharBackground(x-screenDeltaX,y-screenDeltaY, tileMap[x][y].territory ? TCODColor::green : TCODColor::red);
+					console->setCharBackground(x-screenDeltaX,y-screenDeltaY, tileMap[x][y].territory ? TCODColor::darkGreen : TCODColor::darkRed);
 				}
 			}
 			else {
@@ -255,8 +255,15 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].npcList.clear();
 	tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
 	tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
+	tileMap[x][y].marked = false;
+	tileMap[x][y].walkedOver = 0;
+	tileMap[x][y].corruption = 0;
+	tileMap[x][y].territory = false;
 	heightMap->setValue(x,y,0.5f);
 	waterlevel = -0.8f;
+	overlayFlags = 0;
+	mapMarkers.clear();
+	markerids = 0;
 }
 
 void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }

@@ -639,3 +639,58 @@ npc_type "fired golem" {
 	}
 	death="Red clay"
 }
+
+npc_type "imp" {
+	name="Imp"
+	plural="Imps"
+	tags=["fire", "hasHands"]
+	color="224,73,87"
+	graphic='i'
+	AI="HostileAnimal"
+	stats {
+		speed=20
+		health=150
+		dodge=15
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="1d20+5"
+		cooldown=30
+	}
+	spawnAsGroup="1d4"
+	death="Corpse"
+}
+
+npc_type "treeman" { 
+	name="Treeman"
+	plural="Treemen"
+	tags=["localWildlife", "angers", "hasHands"]
+	color="0,200,14"
+	graphic=6
+	AI="PeacefulAnimal"
+	stats {
+		speed=1
+		health=800
+		dodge=2
+		size=35
+	}
+	resistances {
+		physical=15
+	}
+	spawnAsGroup="1d2"
+	attack "Smash" {
+		type="blunt"
+		damage="1d100+10"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
+	}
+	stats {
+	    strength=25
+	}
+	death="Wood log"
+}

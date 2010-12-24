@@ -21,6 +21,7 @@
 
 class MessageBox {
 public:
-	static void ShowMessageBox(std::string text, boost::function<void()> action = NULL, std::string button = "Ok");
+	static void ShowMessageBox(std::string text, boost::function<void()> firstAction = NULL, std::string firstButton = "Ok", 
+		boost::function<void()> secondAction = NULL, std::string secondButton = "");
 };
 
