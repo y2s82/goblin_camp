@@ -61,6 +61,7 @@ PyMODINIT_FUNC initzlib();
 PyMODINIT_FUNC initcStringIO();
 PyMODINIT_FUNC init_functools();
 PyMODINIT_FUNC init_weakref();
+PyMODINIT_FUNC inittime();
 
 namespace Script {
 	const short version = 0;
@@ -73,6 +74,7 @@ namespace Script {
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
 		
 		init_weakref();
+		inittime();
 		init_functools();
 		initcStringIO();
 		initzlib();
