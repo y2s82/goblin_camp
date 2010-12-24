@@ -151,6 +151,7 @@ void StockManager::Update() {
 								boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
 								fellJob->Attempts(50);
 								fellJob->ConnectToEntity(*treei);
+								fellJob->DisregardTerritory();
 								fellJob->SetRequiredTool(Item::StringToItemCategory("Axe"));
 								fellJob->tasks.push_back(Task(MOVEADJACENT, treei->lock()->Position(), *treei));
 								fellJob->tasks.push_back(Task(FELL, treei->lock()->Position(), *treei));
@@ -298,14 +299,14 @@ void StockManager::UpdateTreeDesignations(boost::weak_ptr<NatureObject> nObj, bo
 			designatedTrees.push_back(natObj);
 		} else {
 			for (std::list<boost::weak_ptr<NatureObject> >::iterator desi = designatedTrees.begin();
-				desi != designatedTrees.end(); ++desi) {
+				desi != designatedTrees.end();) {
 					//Now that we're iterating through the designations anyway, might as well
 					//do some upkeeping
 					if (!desi->lock()) desi = designatedTrees.erase(desi);
-					if (desi->lock() == natObj) {
+					else if (desi->lock() == natObj) {
 						designatedTrees.erase(desi);
 						break;
-					}
+					} else ++desi;
 			}
 		}
 	}

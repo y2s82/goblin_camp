@@ -25,3 +25,6 @@ import gcamp
 log = gcamp.log._createLogger('gcamp.__core__')
 
 log.info('Core mod loaded')
+
+import tutorial
+log.info('Tutorial loaded')

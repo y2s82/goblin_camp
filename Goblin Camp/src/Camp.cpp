@@ -108,9 +108,18 @@ void Camp::UpdateTier() {
 		if (workshops > 10 && production > 500 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 40)
 			++tier;
 		break;
-	case 3: break;
-	case 4: break;
-	case 5: break;
+	case 3: 
+		if (production > 1000 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 60)
+			++tier;
+		break;
+	case 4: 
+		if (production > 3000 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 100)
+			++tier;
+		break;
+	case 5: 
+		if (production > 10000 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 200)
+			++tier;
+		break;
 	case 6: break;
 	default: tier = 0; break;
 	}

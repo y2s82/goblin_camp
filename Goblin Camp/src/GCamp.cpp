@@ -36,6 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "Announce.hpp"
 #include "UI.hpp"
+#include "UI/MessageBox.hpp"
 #include "data/Paths.hpp"
 #include "data/Config.hpp"
 #include "data/Data.hpp"
@@ -154,11 +155,12 @@ void MainLoop() {
 
 void StartNewGame() {
 	Game* game = Game::Inst();
+
 	game->Reset();
 	game->LoadingScreen();
 	
 	Script::Event::GameStart();
-	game->GenerateMap();
+	game->GenerateMap(time(0));
 
 	std::priority_queue<std::pair<int, Coordinate> > spawnCenterCandidates;
 
@@ -289,9 +291,18 @@ namespace {
 	}
 }
 
+void ConfirmStartNewGame() {
+	if (Game::Inst()->Running()) {
+		MessageBox::ShowMessageBox("A game is already running, are you sure you want  to start a new one?",
+			&StartNewGame, "Yes", NULL, "No");
+	} else {
+		StartNewGame();
+	}
+}
+
 int MainMenu() {
 	MainMenuEntry entries[] = {
-		{"New Game", 'n', &ActiveAlways,     &StartNewGame},
+		{"New Game", 'n', &ActiveAlways,     &ConfirmStartNewGame},
 		{"Continue", 'c', &ActiveIfRunning,  &MainLoop},
 		{"Load",     'l', &ActiveIfHasSaves, &LoadMenu},
 		{"Save",     's', &ActiveIfRunning,  &SaveMenu},

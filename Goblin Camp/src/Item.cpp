@@ -516,6 +516,8 @@ void Item::UpdateVelocity() {
 
 void Item::SetInternal() { internal = true; }
 
+int Item::GetDecay() const { return decayCounter; }
+
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
 	parent(0)

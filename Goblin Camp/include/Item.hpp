@@ -137,6 +137,7 @@ public:
 	virtual void SetVelocity(int);
 	void UpdateVelocity();
 	void SetInternal();
+	int GetDecay() const;
 };
 
 class OrganicItem : public Item {

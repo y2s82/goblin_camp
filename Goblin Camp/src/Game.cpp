@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "scripting/_python.hpp"
+
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -35,7 +37,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 #include "data/Config.hpp"
-#include "UI/YesNoDialog.hpp"
+#include "scripting/Engine.hpp"
 #include "scripting/Event.hpp"
 #include "SpawningPool.hpp"
 #include "Camp.hpp"
@@ -350,7 +352,7 @@ void Game::Exit(bool confirm) {
 	boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
 
 	if (confirm) {
-		YesNoDialog::ShowYesNoDialog("Really exit?", exitFunc, NULL);
+		MessageBox::ShowMessageBox("Really exit?", exitFunc, "Yes", NULL, "No");
 	} else {
 		exitFunc();
 	}
@@ -628,12 +630,18 @@ Coordinate Game::FindFilth(Coordinate pos) {
 //Findwater returns the coordinates to the closest Water* that has sufficient depth
 Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest(-9999,-9999);
+	int closestDistance = INT_MAX;
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
-		if (wati->lock()->Depth() > DRINKABLE_WATER_DEPTH) {
-			int waterDistance = Distance(wati->lock()->Position(), pos);
-			//Favor water inside territory
-			if (Map::Inst()->IsTerritory(wati->lock()->Position().X(), wati->lock()->Position().Y())) waterDistance /= 4;
-			if (waterDistance < Distance(closest, pos)) closest = wati->lock()->Position();
+		if (boost::shared_ptr<WaterNode> water = wati->lock()) {
+			if (water->Depth() > DRINKABLE_WATER_DEPTH) {
+				int waterDistance = Distance(water->Position(), pos);
+				//Favor water inside territory
+				if (Map::Inst()->IsTerritory(water->Position().X(), water->Position().Y())) waterDistance /= 4;
+				if (waterDistance < closestDistance) { 
+					closest = water->Position();
+					closestDistance = waterDistance;
+				}
+			}
 		}
 	}
 	if (closest.X() == -9999) return Coordinate(-1,-1);
@@ -791,7 +799,11 @@ void Game::Update() {
 
 	for (std::list<std::pair<int, boost::function<void()> > >::iterator delit = delays.begin(); delit != delays.end();) {
 		if (--delit->first <= 0) {
-			delit->second();
+			try {
+				delit->second();
+			} catch (const py::error_already_set&) {
+				Script::LogException();
+			}
 			delit = delays.erase(delit);
 		} else ++delit;
 	}
@@ -1061,6 +1073,59 @@ void Game::GenerateMap(uint32 seed) {
 		}
 	}
 
+	//Create a bog
+	infinityCheck = 0;
+	while (infinityCheck < 1000) {
+		int x = random.Generate(map->Width()  - 1);
+		int y = random.Generate(map->Height() - 1);
+		int riverDistance;
+		int distance;
+		int lineX, lineY;
+		riverDistance = 70;
+		for (int i = 0; i < 4; ++i) {
+			switch (i) {
+			case 0:
+				lineX = x - 70;
+				lineY = y;
+				break;
+			case 1:
+				lineX = x + 70;
+				lineY = y;
+				break;
+			case 2:
+				lineX = x;
+				lineY = y - 70;
+				break;
+			case 3:
+				lineX = x;
+				lineY = y + 70;
+				break;
+			}
+			distance = 70;
+			TCODLine::init(lineX, lineY, x, y);
+			do {
+				if (lineX >= 0 && lineX < map->Width() && lineY >= 0 && lineY < map->Height()) {
+					if (map->heightMap->getValue(lineX, lineY) < map->GetWaterlevel()) {
+						if (distance < riverDistance) riverDistance = distance;
+					}
+				}
+				--distance;
+			} while (!TCODLine::step(&lineX, &lineY));
+		}
+		if (riverDistance > 30) {
+			for (int xOffset = -25; xOffset < 25; ++xOffset) {
+				int range = int(std::sqrt((double)(25*25 - xOffset*xOffset)));
+				int lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
+				int highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
+				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
+					map->Type(x+xOffset, y+yOffset, TILEBOG);
+				}
+			}
+			break; //Only generate one bog
+		}
+		++infinityCheck;
+	}
+
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
 			map->Naturify(x,y);
@@ -1228,13 +1293,13 @@ void Game::DecayItems() {
 		}
 	}
 
-	for (std::list<boost::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end(); ++bli) {
+	for (std::list<boost::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end();) {
 		if (boost::shared_ptr<BloodNode> blood = bli->lock()) {
 			blood->Depth(blood->Depth()-50);
 			if (blood->Depth() <= 0) {
 				Map::Inst()->SetBlood(blood->Position().X(), blood->Position().Y(), boost::shared_ptr<BloodNode>());
 				bli = bloodList.erase(bli);
-			}
+			} else ++bli;
 		} else {
 			bli = bloodList.erase(bli);
 		}
