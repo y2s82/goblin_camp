@@ -39,7 +39,7 @@ global-path-constant GC_OSX_SOURCES   : "$(GC_SOURCES)/osx" ;
 global-path-constant GC_UNIX_SOURCES  : "$(GC_SOURCES)/unix" ;
 
 # Current GC version
-global-constant GC_VERSION : 0.13 ;
+global-constant GC_VERSION : 0.14 ;
 
 import version ;
 
