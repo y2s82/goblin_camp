@@ -124,15 +124,16 @@ void Camp::UpdateTier() {
 	default: tier = 0; break;
 	}
 
-	if (tier == 0) name = "Clearing";
-	else if (tier == 1) name = "Camp";
-	else if (tier == 2) name = "Settlement";
-	else if (tier == 3) name = "Outpost";
-	else if (tier == 4) name = "Fort";
-	else if (tier == 5) name = "Stronghold";
-	else if (tier == 6) name = "Citadel";
+	if (tier == 0) name = "a Clearing";
+	else if (tier == 1) name = "a Camp";
+	else if (tier == 2) name = "a Settlement";
+	else if (tier == 3) name = "an Outpost";
+	else if (tier == 4) name = "a Fort";
+	else if (tier == 5) name = "a Stronghold";
+	else if (tier == 6) name = "a Citadel";
 	
 	if (tier != oldTier) {
+		Announce::Inst()->AddMsg("Your camp advanced to a higher tier and is now " + name + "!", TCODColor::lightGreen);
 		Script::Event::TierChanged(tier, name);
 	}
 }
