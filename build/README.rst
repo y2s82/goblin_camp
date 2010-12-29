@@ -218,6 +218,10 @@ To do this, use::
 
     bjam --user-config=gc-config.jam msvc10
 
+You can also use `parallel builds`_ — but instead of ``-jN`` option, you need to use
+``-sSLN_JOBS=N``. Unlike normal build (which is not parallel by default),
+solution generator defaults to 4 jobs. To turn it off, set the limit to 1 job.
+
 Generating NSIS installer
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 

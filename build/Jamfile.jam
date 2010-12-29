@@ -320,11 +320,14 @@ explicit-alias dist : dist-data dist-binaries dist-additional dist-lib dist-mod-
 
 #
 # Solution files
-explicit-make goblin-camp.sln             : $(GC_TEMPLATES_DIR)/goblin-camp.sln_in             : @gc-sln.generate ;
-explicit-make goblin-camp.vcxproj         : $(GC_TEMPLATES_DIR)/goblin-camp.vcxproj_in         : @gc-sln.generate ;
-explicit-make goblin-camp.vcxproj.filters : $(GC_TEMPLATES_DIR)/goblin-camp.vcxproj.filters_in : @gc-sln.generate ;
+sln-targets = ;
+
+for local T in sln vcxproj vcxproj.filters vcxproj.user {
+    explicit-make goblin-camp.$(T) : $(GC_TEMPLATES_DIR)/goblin-camp.$(T)_in : @gc-sln.generate ;
+    sln-targets += goblin-camp.$(T) ;
+}
 
 explicit-install msvc10
-    : goblin-camp.sln goblin-camp.vcxproj goblin-camp.vcxproj.filters
+    : $(sln-targets)
     : <location>$(GC_MSVC_SLN_DIR)
 ;
