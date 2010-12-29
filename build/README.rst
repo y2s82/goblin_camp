@@ -213,12 +213,10 @@ Additional build system capabilities
 Generating MSVC project files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Build system can generate MSVC2008 and MSVC2010 solution and project.
+Build system can generate MSVC2010 solution and project files.
 To do this, use::
 
-    bjam --user-config=gc-config.jam sln2008
-
-You can use ``sln2010`` instead to generate MSVC2010 project.
+    bjam --user-config=gc-config.jam msvc10
 
 Generating NSIS installer
 ~~~~~~~~~~~~~~~~~~~~~~~~~

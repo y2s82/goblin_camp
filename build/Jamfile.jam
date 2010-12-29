@@ -320,17 +320,11 @@ explicit-alias dist : dist-data dist-binaries dist-additional dist-lib dist-mod-
 
 #
 # Solution files
-explicit-make goblin-camp-msvc9.sln      : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9.sln_in      : @gc-sln.generate-sln ;
-explicit-make goblin-camp-msvc9.vcproj   : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9.vcproj_in   : @gc-sln.generate-2008 ;
-explicit-make goblin-camp-msvc10.sln     : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.sln_in     : @gc-sln.generate-sln ;
-explicit-make goblin-camp-msvc10.vcxproj : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.vcxproj_in : @gc-sln.generate-2010 ;
+explicit-make goblin-camp.sln             : $(GC_TEMPLATES_DIR)/goblin-camp.sln_in             : @gc-sln.generate ;
+explicit-make goblin-camp.vcxproj         : $(GC_TEMPLATES_DIR)/goblin-camp.vcxproj_in         : @gc-sln.generate ;
+explicit-make goblin-camp.vcxproj.filters : $(GC_TEMPLATES_DIR)/goblin-camp.vcxproj.filters_in : @gc-sln.generate ;
 
-explicit-install sln2008
-    : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj
-    : <location>$(GC_MSVC_SLN_DIR)
-;
-
-explicit-install sln2010
-    : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj
+explicit-install msvc10
+    : goblin-camp.sln goblin-camp.vcxproj goblin-camp.vcxproj.filters
     : <location>$(GC_MSVC_SLN_DIR)
 ;
