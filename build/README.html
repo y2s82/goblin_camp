@@ -540,6 +540,9 @@ To do this, use:</p>
 <pre class="literal-block">
 bjam --user-config=gc-config.jam msvc10
 </pre>
+<p>You can also use <a class="reference internal" href="#parallel-builds">parallel builds</a> — but instead of <tt class="docutils literal"><span class="pre">-jN</span></tt> option, you need to use
+<tt class="docutils literal"><span class="pre">-sSLN_JOBS=N</span></tt>. Unlike normal build (which is not parallel by default),
+solution generator defaults to 4 jobs. To turn it off, set the limit to 1 job.</p>
 </div>
 <div class="section" id="generating-nsis-installer">
 <h2><a class="toc-backref" href="#id22">Generating NSIS installer</a></h2>

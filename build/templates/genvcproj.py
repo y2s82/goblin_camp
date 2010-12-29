@@ -2,24 +2,20 @@
 # Requires Python 2.6.
 #
 # This script reads its input, replaces %VARIABLES%, and saves output.
-#  - genvcproj <GC_BUILD_ROOT> <GC_PROJECT_ROOT> <input> <output> <user-config file>
-# Expanded variables:
-#  - %GC_SOURCE_FILES% to XMLised list of Goblin Camp sources, and _version.cpp_in template
-#  - %GC_HEADER_FILES% to XMLised list of Goblin Camp headers
-#  - %GC_RESOURCE_FILES% to XMLised list of *.dat files, and _version.rc_in template
+#  - genvcproj <GC_BUILD_ROOT> <GC_PROJECT_ROOT> <input> <output> <jobs> <user-config file>
 #
 # NOTE: Generated project will be a "makefile" project, that will
 # call bjam to do the build. Sources and headers are included only
-# for navigation from within IDE.
+# for navigation from within IDE. Supports only MSVC2010.
 import sys, os, re, itertools, uuid, pickle, collections
 
 # XXX: Not as good as it could be.
 
 # Project will be put to build\msvc. Source root is ..\..\Goblin Camp.
-assert len(sys.argv) >= 5, 'Do not run directly, use build system instead.'
+assert len(sys.argv) >= 6, 'Do not run directly, use build system instead.'
 
-buildRoot, projectRoot, input, output = sys.argv[1:5]
-userConfig = os.path.realpath(sys.argv[5]) if len(sys.argv) == 6 else None
+buildRoot, projectRoot, input, output, jobs = sys.argv[1:6]
+userConfig = os.path.realpath(sys.argv[6]) if len(sys.argv) == 7 else None
 
 def genUUID():
     # cannot be lambda, must be pickable
@@ -71,8 +67,8 @@ pickle.dump(uuids, open(uuidCache, 'wb'), pickle.HIGHEST_PROTOCOL)
 # NB: filters are effective only in a separate .filters file
 templ = lambda X, D: '\n\t\t\t'.join('<{0} Include="{1}"><Filter>{2}</Filter></{0}>'.format(X, os.path.realpath(fn), filter) for fn, filter in D)
 
-msvc_bjam = 'msvc_bjam.cmd {0}-j2 dist'.format(
-    '--user-config={0} '.format(userConfig) if userConfig is not None else ''
+msvc_bjam = 'msvc_bjam.cmd {0}-j{1} dist'.format(
+    '--user-config={0} '.format(userConfig) if userConfig is not None else '', jobs
 )
 
 # XXX: preprocessor defines are hardcoded in the template
