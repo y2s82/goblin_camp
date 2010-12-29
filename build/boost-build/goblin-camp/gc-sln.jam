@@ -5,16 +5,9 @@ import modules ;
 USER_CONFIG      = [ modules.peek user-config : __file__ ] ;
 GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
 GC_PROJECT_ROOT  = [ modules.peek : GC_PROJECT_ROOT ] ;
+GC_BUILD_ROOT    = [ modules.peek : GC_BUILD_ROOT ] ; 
 PYTHON           = [ modules.peek : PYTHON ] ;
 
-actions generate-sln {
-    $(PYTHON) "$(GC_TEMPLATES_DIR)/genvcproj.py" sln "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
-}
-
-actions generate-2008 {
-    $(PYTHON) "$(GC_TEMPLATES_DIR)/genvcproj.py" 2008 "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
-}
-
-actions generate-2010 {
-    $(PYTHON) "$(GC_TEMPLATES_DIR)/genvcproj.py" 2010 "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
+actions generate {
+    $(PYTHON) "$(GC_TEMPLATES_DIR)/genvcproj.py" "$(GC_BUILD_ROOT)" "$(GC_PROJECT_ROOT)" "$(>)" "$(<)" "$(USER_CONFIG)"
 }
