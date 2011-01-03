@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/random/mersenne_twister.hpp>
+#include <boost/random.hpp>
 #include <libtcod.hpp>
 
 namespace Random {
@@ -42,7 +42,7 @@ namespace Random {
 		short Sign();
 		bool GenerateBool();
 	private:
-		boost::mt19937 generator;
+		boost::rand48 generator;
 		unsigned int seed;
 	};
 	
