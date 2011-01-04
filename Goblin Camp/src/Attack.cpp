@@ -30,7 +30,7 @@ Attack::Attack() : damageType(DAMAGE_BLUNT),
 {
 	damageAmount.addsub = 1;
 	damageAmount.multiplier = 1;
-	damageAmount.nb_rolls = 1;
+	damageAmount.nb_dices = 1;
 	damageAmount.nb_faces = 1;
 }
 
