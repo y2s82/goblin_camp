@@ -1,0 +1,43 @@
+# Tool template
+#
+
+#################
+
+import property-set ;
+import project ;
+import modules ;
+
+rule init ( options * ) {
+    modules.poke $(__name__) : .options : [ property-set.create $(options) ] ;
+}
+
+local rule create-project ( requirements * : usage-requirements * ) {
+    # Common options
+    if $(.options) {
+        local inc = [ $(.options).get <include> ] ;
+        local lib = [ $(.options).get <library> ] ;
+        
+        requirements       += <include>$(inc) <search>$(lib) ;
+        usage-requirements += <include>$(inc) ;
+    }
+    
+    project.push-current [ project.current ] ;
+    project.initialize $(__name__) ;
+    project $(__name__) : requirements $(requirements) : usage-requirements $(usage-requirements) ;
+    
+    define-targets ;
+    
+    project.pop-current ;
+}
+
+#################
+
+#################
+
+rule use-project ( ) {
+    create-project ;
+}
+
+local rule define-targets ( ) {
+    
+}
