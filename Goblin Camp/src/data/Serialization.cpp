@@ -1138,7 +1138,7 @@ void Attack::save(Archive & ar, const unsigned int version) const {
 	ar & damageType;
 	ar & damageAmount.addsub;
 	ar & damageAmount.multiplier;
-	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_rolls;
 	ar & damageAmount.nb_faces;
 	ar & cooldown;
 	ar & cooldownMax;
@@ -1152,7 +1152,7 @@ void Attack::load(Archive & ar, const unsigned int version) {
 		ar & damageType;
 		ar & damageAmount.addsub;
 		ar & damageAmount.multiplier;
-		ar & damageAmount.nb_dices;
+		ar & damageAmount.nb_rolls;
 		ar & damageAmount.nb_faces;
 		ar & cooldown;
 		ar & cooldownMax;

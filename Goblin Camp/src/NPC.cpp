@@ -2069,7 +2069,7 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	}
 	group.addsub = 0;
 	group.multiplier = 1;
-	group.nb_dices = 1;
+	group.nb_rolls = 1;
 	group.nb_faces = 1;
 }
 

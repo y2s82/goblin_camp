@@ -440,8 +440,8 @@ int Item::GetFaction() const { return faction; }
 
 int Item::RelativeValue() {
 	TCOD_dice_t amount = attack.Amount();
-	int minDamage = (int)(amount.nb_dices + amount.addsub);
-	int maxDamage = (int)((amount.nb_dices * amount.nb_faces) + amount.addsub);
+	int minDamage = (int)(amount.nb_rolls + amount.addsub);
+	int maxDamage = (int)((amount.nb_rolls * amount.nb_faces) + amount.addsub);
 	return (minDamage + maxDamage) / 2;
 }
 

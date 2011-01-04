@@ -1718,7 +1718,7 @@ void Game::Damage(Coordinate pos) {
 	Attack attack;
 	attack.Type(DAMAGE_MAGIC);
 	TCOD_dice_t dice;
-	dice.nb_dices = 10;
+	dice.nb_rolls = 10;
 	dice.nb_faces = 10;
 	dice.addsub = 1000;
 	attack.AddDamage(dice);
