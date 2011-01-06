@@ -107,40 +107,6 @@ int Map::GetConstruction(int x, int y) const {
 	return -1;
 }
 
-//TODO: Optimize. This causes the biggest performance hit by far right now 
-void Map::Draw(Coordinate upleft, TCODConsole *console) {
-	int screenDeltaX = upleft.X();
-	int screenDeltaY = upleft.Y();
-	for (int y = upleft.Y(); y < upleft.Y() + console->getHeight(); ++y) {
-		for (int x = upleft.X(); x < upleft.X() + console->getWidth(); ++x) {
-			if (x >= 0 && x < width && y >= 0 && y < height) {
-
-				console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), ForeColor(x,y), BackColor(x,y));
-
-				boost::weak_ptr<WaterNode> water = GetWater(x,y);
-				if (water.lock()) {
-					water.lock()->Draw(upleft, console);
-				}
-				boost::weak_ptr<FilthNode> filth = GetFilth(x,y);
-				if (filth.lock()) {
-					filth.lock()->Draw(upleft, console);
-				}
-
-				if (overlayFlags & TERRITORY_OVERLAY) {
-					console->setCharBackground(x-screenDeltaX,y-screenDeltaY, tileMap[x][y].territory ? TCODColor::darkGreen : TCODColor::darkRed);
-				}
-			}
-			else {
-				console->putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
-			}
-		}
-	}
-
-	for (std::list<std::pair<unsigned int, MapMarker> >::iterator markeri = mapMarkers.begin(); markeri != mapMarkers.end(); ++markeri) {
-		markeri->second.Draw(upleft, console);
-	}
-}
-
 boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetWater();
 	return boost::weak_ptr<WaterNode>();
@@ -459,4 +425,14 @@ void Map::UpdateMarkers() {
 TCODColor Map::GetColor(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor();
 	return TCODColor::white;
+}
+
+Map::MarkerIterator Map::MarkerBegin()
+{
+	return mapMarkers.begin();
+}
+
+Map::MarkerIterator Map::MarkerEnd()
+{
+	return mapMarkers.end();
 }

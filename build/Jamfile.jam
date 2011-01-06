@@ -9,7 +9,7 @@ import path ;
 import property-set ;
 import common ;
 
-for local P in boost winsdk libtcod zlib python {
+for local P in boost sdl winsdk libtcod zlib python {
     import $(P) ;
     $(P).use-project ;
 }
@@ -139,7 +139,7 @@ for local name in $(boost-libs) {
 
 # All common dependencies
 explicit-alias common-deps
-    : $(boost-deps) /libtcod//libtcod /python//python
+    : $(boost-deps) /libtcod//libtcod /python//python /sdl//sdl
 ;
 
 if [ os.name ] = NT {

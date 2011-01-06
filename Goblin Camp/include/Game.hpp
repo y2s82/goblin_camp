@@ -32,6 +32,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Events.hpp"
 #include "Job.hpp"
 
+class MapRenderer;
+
 #define BFS_MAX_DISTANCE 20
 
 #define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 2)
@@ -80,6 +82,8 @@ private:
 	boost::shared_ptr<Events> events;
 
 	std::list<std::pair<int, boost::function<void()> > > delays;
+
+	boost::shared_ptr<MapRenderer> renderer;
 public:
 	static Game* Inst();
 	static bool LoadGame(const std::string&);
@@ -116,7 +120,7 @@ public:
 
 	TCODConsole* buffer;
 	void FlipBuffer();
-	void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
+	void Draw(TCODConsole * console = Game::Inst()->buffer, Coordinate upleft = Game::Inst()->upleft, bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1);
 
 	static int DiceToInt(TCOD_dice_t);
 
