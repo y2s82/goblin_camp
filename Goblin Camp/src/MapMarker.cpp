@@ -34,7 +34,7 @@ bool MapMarker::Update() {
 	return duration != 0;
 }
 
-void MapMarker::Draw(Coordinate upleft, TCODConsole* console) {
+void MapMarker::Draw(Coordinate upleft, TCODConsole* console) const {
 	int screenx = x - upleft.X();
 	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {

@@ -40,18 +40,6 @@ WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 
 WaterNode::~WaterNode() {}
 
-void WaterNode::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenX = x - upleft.X();
-	int screenY = y - upleft.Y();
-
-	if (depth > 0) {
-		if (screenX >= 0 && screenX < console->getWidth() &&
-			screenY >= 0 && screenY < console->getHeight()) {
-				console->putCharEx(screenX, screenY, graphic, color, TCODColor::black);
-		}
-	}
-}
-
 void WaterNode::Update() {
 	double divided;
 
@@ -175,3 +163,13 @@ Coordinate WaterNode::Position() {return Coordinate(x,y);}
 
 void WaterNode::AddFilth(int newFilth) { filth += newFilth; }
 int WaterNode::GetFilth() { return filth; }
+
+int WaterNode::GetGraphic()
+{
+	return graphic;
+}
+
+TCODColor WaterNode::GetColor()
+{
+	return color;
+}

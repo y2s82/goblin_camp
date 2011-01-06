@@ -13,36 +13,17 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
+#pragma once
 
-#include "Filth.hpp"
-#include "Game.hpp"
+#include <libtcod.hpp>
+#include "MapRenderer.hpp"
 
-FilthNode::FilthNode(int nx, int ny, int ndep) : x(nx), y(ny)
+class SDLMapRenderer : public MapRenderer, public ITCODSDLRenderer
 {
-	color.b = 0;
-	Depth(ndep);
-}
+public:
+	SDLMapRenderer();
+	~SDLMapRenderer();
 
-FilthNode::~FilthNode() {}
-
-void FilthNode::Update() {
-}
-
-int FilthNode::GetGraphic()
-{
-	return (depth < 5 ) ? '~' : '#';
-}
-
-TCODColor FilthNode::GetColor()
-{
-	return color;
-}
-
-int FilthNode::Depth() {return depth;}
-void FilthNode::Depth(int val) {
-	depth=val;
-	color.r = 170 - std::min(Map::Inst()->GetCorruption(x, y), 40) + rand() % 56;
-	color.g = 80 - std::min(Map::Inst()->GetCorruption(x, y), 80) + rand() % 61;
-}
-Coordinate FilthNode::Position() {return Coordinate(x,y);}
+	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX = 0, int posY = 0, int sizeX = 0, int sizeY = 0) ;
+	void render(void *sdlSurface);
+};

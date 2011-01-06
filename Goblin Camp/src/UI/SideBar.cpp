@@ -66,7 +66,7 @@ void SideBar::Draw(TCODConsole* console) {
 			contents->Draw(edgeX - (width-1), topY+14, console);
 		}
 		
-		Game::Inst()->Draw(entity.lock()->Center()-5, &minimap, false);
+		Game::Inst()->Draw(&minimap, entity.lock()->Center()-5, false);
 		console->setDefaultForeground(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
 		minimap.flush();
