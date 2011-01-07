@@ -60,6 +60,5 @@ void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft
 		markeri->second.Draw(upleft, minimap);
 	}
 
-	minimap->flush();
 	TCODConsole::blit(minimap, 0, 0, sizeX, sizeY, console, posX, posY);
 }

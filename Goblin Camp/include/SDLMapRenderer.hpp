@@ -17,13 +17,26 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #include "MapRenderer.hpp"
+#include <SDL.h>
+#include <boost/multi_array.hpp>
+
+enum TileType;
 
 class SDLMapRenderer : public MapRenderer, public ITCODSDLRenderer
 {
 public:
-	SDLMapRenderer();
+	SDLMapRenderer(int screenWidth, int screenHeight);
 	~SDLMapRenderer();
 
 	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX = 0, int posY = 0, int sizeX = 0, int sizeY = 0) ;
 	void render(void *sdlSurface);
+private:
+	// the font characters size
+	int charWidth, charHeight, screenWidth, screenHeight;
+	SDL_Surface *mapSurface;
+	SDL_Surface *tempBuffer;
+	SDL_Surface *tiles;
+	TCODColor keyColor;
+	bool first;
+	boost::multi_array<TileType, 2> tileMap;
 };
