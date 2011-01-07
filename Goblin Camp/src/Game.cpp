@@ -362,11 +362,26 @@ int Game::ScreenWidth() const {	return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
 void Game::LoadingScreen() {
-	TCODConsole::root->setDefaultForeground(TCODColor::white);	TCODConsole::root->setDefaultBackground(TCODColor::black);	TCODConsole::root->setAlignment(TCOD_CENTER);	TCODConsole::root->clear();	TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");	TCODConsole::root->flush();
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->clear();
+	TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
+	TCODConsole::root->flush();
 }
 
 void Game::ErrorScreen() {
-	TCODConsole::root->setDefaultForeground(TCODColor::white);	TCODConsole::root->setDefaultBackground(TCODColor::black);	TCODConsole::root->setAlignment(TCOD_CENTER);	TCODConsole::root->clear();	TCODConsole::root->print(		screenWidth / 2, screenHeight / 2,		"There was an error loading the data files, refer to the logfile for more information."	);	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");	TCODConsole::root->flush();	TCODConsole::waitForKeypress(true);
+	TCODConsole::root->setDefaultForeground(TCODColor::white);
+	TCODConsole::root->setDefaultBackground(TCODColor::black);
+	TCODConsole::root->setAlignment(TCOD_CENTER);
+	TCODConsole::root->clear();
+	TCODConsole::root->print(
+		screenWidth / 2, screenHeight / 2,
+		"There was an error loading the data files, refer to the logfile for more information."
+	);
+	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
+	TCODConsole::root->flush();
+	TCODConsole::waitForKeypress(true);
 	exit(255);
 }
 
@@ -397,7 +412,8 @@ void Game::Init() {
 	TCODConsole::setKeyboardRepeat(500, 10);
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
-	renderer = boost::shared_ptr<MapRenderer>(new SDLMapRenderer());
+	renderer = boost::shared_ptr<MapRenderer>(new SDLMapRenderer(width, height));
+	//renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
 
 	LoadingScreen();
 
@@ -873,24 +889,51 @@ namespace {
 }
 
 void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
-	if (sizeX == -1)
-	{
+
+	if (sizeX == -1) {
 		sizeX = console->getWidth();
 	}
-	if (sizeY == -1)
-	{
+	if (sizeY == -1) {
 		sizeY = console->getHeight();
 	}
 	renderer->DrawMap(console, Map::Inst(), upleft, posX, posY, sizeX, sizeY);
 
-	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, console);
-	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, console);
-	//TODO: Make this consistent
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
-		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, console);
+	bool windowed = posX != 0 || posY != 0 || sizeX != console->getWidth() || sizeY != console->getHeight();
+
+	if (windowed)
+	{
+		TCODConsole mapConsole(sizeX, sizeY);
+		TCODConsole::blit(console, posX, posY, sizeX, sizeY, &mapConsole, 0, 0);
+		for (int x = 0; x < sizeX; x++) {
+			for (int y = 0; y < sizeY; y++) {
+				mapConsole.putCharEx(x, y, ' ', TCODColor::black, TCODColor::magenta);
+				mapConsole.setDirty(x,y,1,1);		
+			}
+		}
+	
+
+		InternalDrawMapItems("static constructions",  staticConstructionList, upleft, &mapConsole);
+		InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, &mapConsole);
+		//TODO: Make this consistent
+		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
+			if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &mapConsole);
+		}
+		InternalDrawMapItems("nature objects",        natureList, upleft, &mapConsole);
+		InternalDrawMapItems("NPCs",                  npcList, upleft, &mapConsole);
+
+		TCODConsole::blit(&mapConsole, 0,0,sizeX, sizeY, console, posX, posY);
 	}
-	InternalDrawMapItems("nature objects",        natureList, upleft, console);
-	InternalDrawMapItems("NPCs",                  npcList, upleft, console);
+	else
+	{
+		InternalDrawMapItems("static constructions",  staticConstructionList, upleft, console);
+		InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, console);
+		//TODO: Make this consistent
+		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
+			if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, console);
+		}
+		InternalDrawMapItems("nature objects",        natureList, upleft, console);
+		InternalDrawMapItems("NPCs",                  npcList, upleft, console);
+	}
 
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, console);

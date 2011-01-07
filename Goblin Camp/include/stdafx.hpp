@@ -88,6 +88,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	pragma warning(pop)
 // libtcod
 #	include <libtcod.hpp>
+#	include <SDL.h>
+#   include <SDL_image.h>
 #endif
 
 // Use with care.
