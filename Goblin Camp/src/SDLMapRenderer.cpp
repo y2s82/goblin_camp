@@ -25,7 +25,8 @@ SDLMapRenderer::SDLMapRenderer(int resolutionX, int resolutionY)
   keyColor(TCODColor::magenta),
   mapSurface(NULL),
   tempBuffer(NULL),
-  first(true) {
+  first(true),
+  tileset() {
    TCODSystem::getCharSize(&tileWidth, &tileHeight);
    Uint32 rmask, gmask, bmask, amask;
    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
@@ -50,11 +51,7 @@ SDLMapRenderer::SDLMapRenderer(int resolutionX, int resolutionY)
    TCODSystem::registerSDLRenderer(this);
 
    // TODO: Unhardcode tile set loading, move to different class? Nyeh
-   tiles = IMG_Load("tileset.png");
-   if (tiles == NULL)
-   {
-	   LOG(SDL_GetError());
-   }
+   tileset = boost::shared_ptr<Tileset>(new Tileset("tileset.png", 8, 8));
 }
 
 SDLMapRenderer::~SDLMapRenderer() {}
@@ -80,7 +77,7 @@ void SDLMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft,
 			SDL_Rect dstRect = {tileWidth * mapX, tileHeight * mapY, tileWidth, tileHeight};
 			console->setDirty(mapX, mapY, 1, 1);
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
-				DrawTile(map, tileX, tileY, &dstRect);
+				DrawTerrain(map, tileX, tileY, &dstRect);
 				DrawWater(map, tileX, tileY, &dstRect);
 				DrawFilth(map, tileX, tileY, &dstRect);
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
@@ -105,24 +102,20 @@ void SDLMapRenderer::DrawMarkers(Map* map, Coordinate upleft, int posX, int posY
 		if (markerX >= upleft.X() && markerY < upleft.X() + sizeX
 			&& markerY >= upleft.Y() && markerY < upleft.Y() + sizeY) {
 				SDL_Rect dstRect = {tileWidth * (markerX - upleft.X() + posX), tileHeight * (markerY - upleft.Y() + posY), tileWidth, tileHeight};
-				SDL_Rect srcRect = { 7 * tileWidth, tileHeight, tileWidth, tileHeight };
-				SDL_BlitSurface(tiles, &srcRect, mapSurface, &dstRect);
+				tileset->DrawTile(39, mapSurface, &dstRect);
 		}
 	}
 }
 
-void SDLMapRenderer::DrawTile(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void SDLMapRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	TileType type(map->Type(tileX, tileY));
 	SDL_Rect srcRect={tileWidth * type, 0, tileWidth, tileHeight};
-	SDL_BlitSurface(tiles,&srcRect,mapSurface, dstRect);
-	if (map->GetBlood(tileX, tileY).lock())
-	{
-		SDL_Rect srcRect={tileWidth * 9, tileHeight, tileWidth, tileHeight};
-		SDL_BlitSurface(tiles,&srcRect,mapSurface, dstRect);
+	tileset->DrawTile(type, mapSurface, dstRect);
+	if (map->GetBlood(tileX, tileY).lock())	{
+		tileset->DrawTile(41, mapSurface, dstRect);
 	}
 	if (map->GroundMarked(tileX, tileY)) {
-		SDL_Rect srcRect={tileWidth * 8, tileHeight, tileWidth, tileHeight};
-		SDL_BlitSurface(tiles,&srcRect,mapSurface, dstRect);
+		tileset->DrawTile(40, mapSurface, dstRect);
 	}
 	
 }
@@ -133,21 +126,18 @@ void SDLMapRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRec
 		switch (water.lock()->Depth()) {
 		case 1:
 			{
-				SDL_Rect srcRect={0 * tileWidth, tileHeight, tileWidth, tileHeight};
-				SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+				tileset->DrawTile(32, mapSurface, dstRect);
 			}
 			break;
 		case 2:
 			{
-				SDL_Rect srcRect={tileWidth * 1, tileHeight, tileWidth, tileHeight};
-				SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);	
+				tileset->DrawTile(33, mapSurface, dstRect);	
 			}
 			break;
 		default:
 			if (water.lock()->Depth() > 0)
 			{
-				SDL_Rect srcRect={tileWidth * 2, tileHeight, tileWidth, tileHeight};
-				SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+				tileset->DrawTile(34, mapSurface, dstRect);
 			}
 		}
 	}
@@ -156,14 +146,12 @@ void SDLMapRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRec
 void SDLMapRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	boost::weak_ptr<FilthNode> filth = map->GetFilth(tileX,tileY);
 	if (filth.lock() && filth.lock()->Depth() > 0) {
-		SDL_Rect srcRect={tileWidth * ((filth.lock()->Depth() > 5) ? 4 : 3), tileHeight, tileWidth, tileHeight};
-		SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+		tileset->DrawTile(((filth.lock()->Depth() > 5) ? 36 : 35), mapSurface, dstRect);
 	}
 }
 
 void SDLMapRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
-	SDL_Rect srcRect={tileWidth * ((map->IsTerritory(tileX,tileY)) ? 6 : 5), tileHeight, tileWidth, tileHeight};
-	SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+	tileset->DrawTile(((map->IsTerritory(tileX,tileY)) ? 38 : 37), mapSurface, dstRect);
 }
 
 void SDLMapRenderer::render(void * surf) {

@@ -17,10 +17,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #include "MapRenderer.hpp"
+#include "Tileset.hpp"
 #include <SDL.h>
 #include <boost/multi_array.hpp>
-
-enum TileType;
 
 class SDLMapRenderer : public MapRenderer, public ITCODSDLRenderer
 {
@@ -35,11 +34,11 @@ private:
 	int tileWidth, tileHeight, screenWidth, screenHeight;
 	SDL_Surface *mapSurface;
 	SDL_Surface *tempBuffer;
-	SDL_Surface *tiles;
+	boost::shared_ptr<Tileset> tileset;
 	TCODColor keyColor;
 	bool first;
 
-	void DrawTile(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
