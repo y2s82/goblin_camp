@@ -26,8 +26,7 @@ SDLMapRenderer::SDLMapRenderer(int resolutionX, int resolutionY)
   mapSurface(NULL),
   tempBuffer(NULL),
   first(true) {
-   TCODSystem::getCharSize(&charWidth, &charHeight);
-   tileMap.resize(boost::extents[resolutionX / charWidth][resolutionY / charHeight]);
+   TCODSystem::getCharSize(&tileWidth, &tileHeight);
    Uint32 rmask, gmask, bmask, amask;
    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
        rmask = 0xff000000;
@@ -62,8 +61,8 @@ SDLMapRenderer::~SDLMapRenderer() {}
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
 void SDLMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
-	for (int x = posX; x < sizeX; x++) {
-		for (int y = posY; y < sizeY; y++) {
+	for (int x = posX; x < posX + sizeX; x++) {
+		for (int y = posY; y < posY + sizeY; y++) {
 			console->putCharEx(x, y, ' ', TCODColor::black, keyColor);
 		}
 	}
@@ -74,48 +73,101 @@ void SDLMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft,
 		for (int x = 0; x < sizeX; ++x) {
 			int tileX = x + upleft.X();
 			int tileY = y + upleft.Y();
-			TileType type(TILENONE);
+			int mapX = x + posX;
+			int mapY = y + posY;
+
+			// Draw Terrain
+			SDL_Rect dstRect = {tileWidth * mapX, tileHeight * mapY, tileWidth, tileHeight};
+			console->setDirty(mapX, mapY, 1, 1);
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
-				type = map->Type(tileX, tileY);
-			}
-			if (tileMap[x + posX][y + posY] != type)
-			{
-				tileMap[x + posX][y + posY] = type;
-				console->setDirty(x + posX, y + posY,1,1);
-				SDL_Rect srcRect={8 * type, 0, 8, 8};
-				SDL_Rect dstRect={8 * (x + posX), 8 * (y + posY), 8, 8};
-				SDL_BlitSurface(tiles,&srcRect,mapSurface,&dstRect);
-			}
-
-				/*boost::weak_ptr<WaterNode> water = map->GetWater(x,y);
-				if (water.lock()) {
-					minimap->putCharEx(x-screenDeltaX, y-screenDeltaY, water.lock()->GetGraphic(), water.lock()->GetColor(), TCODColor::black);
-				}
-				boost::weak_ptr<FilthNode> filth = map->GetFilth(x,y);
-				if (filth.lock() && filth.lock()->Depth() > 0) {
-					minimap->putCharEx(x-screenDeltaX, y-screenDeltaY, filth.lock()->GetGraphic(), filth.lock()->GetColor(), TCODColor::black);
-				}
-
+				DrawTile(map, tileX, tileY, &dstRect);
+				DrawWater(map, tileX, tileY, &dstRect);
+				DrawFilth(map, tileX, tileY, &dstRect);
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
-					minimap->setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor::darkGreen : TCODColor::darkRed);
-				}*/
+					DrawTerritoryOverlay(map, tileX, tileY, &dstRect);
+				}
+			}
+			else {
+				// Out of world
+				SDL_FillRect(mapSurface, &dstRect, 0);
+			}
 		}
 	}
 
+	DrawMarkers(map, upleft, posX, posY, sizeX, sizeY);
+}
 
-	/*
-	
-
+void SDLMapRenderer::DrawMarkers(Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
+{
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
-		markeri->second.Draw(upleft, minimap);
+		int markerX = markeri->second.X();
+		int markerY = markeri->second.Y();
+		if (markerX >= upleft.X() && markerY < upleft.X() + sizeX
+			&& markerY >= upleft.Y() && markerY < upleft.Y() + sizeY) {
+				SDL_Rect dstRect = {tileWidth * (markerX - upleft.X() + posX), tileHeight * (markerY - upleft.Y() + posY), tileWidth, tileHeight};
+				SDL_Rect srcRect = { 7 * tileWidth, tileHeight, tileWidth, tileHeight };
+				SDL_BlitSurface(tiles, &srcRect, mapSurface, &dstRect);
+		}
 	}
-	TCODConsole::
-	minimap->flush();
-	TCODConsole::blit(minimap, 0, 0, sizeX, sizeY, console, posX, posY);*/
+}
+
+void SDLMapRenderer::DrawTile(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+	TileType type(map->Type(tileX, tileY));
+	SDL_Rect srcRect={tileWidth * type, 0, tileWidth, tileHeight};
+	SDL_BlitSurface(tiles,&srcRect,mapSurface, dstRect);
+	if (map->GetBlood(tileX, tileY).lock())
+	{
+		SDL_Rect srcRect={tileWidth * 9, tileHeight, tileWidth, tileHeight};
+		SDL_BlitSurface(tiles,&srcRect,mapSurface, dstRect);
+	}
+	if (map->GroundMarked(tileX, tileY)) {
+		SDL_Rect srcRect={tileWidth * 8, tileHeight, tileWidth, tileHeight};
+		SDL_BlitSurface(tiles,&srcRect,mapSurface, dstRect);
+	}
+	
+}
+
+void SDLMapRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+	boost::weak_ptr<WaterNode> water = map->GetWater(tileX,tileY);
+	if (water.lock()) {
+		switch (water.lock()->Depth()) {
+		case 1:
+			{
+				SDL_Rect srcRect={0 * tileWidth, tileHeight, tileWidth, tileHeight};
+				SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+			}
+			break;
+		case 2:
+			{
+				SDL_Rect srcRect={tileWidth * 1, tileHeight, tileWidth, tileHeight};
+				SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);	
+			}
+			break;
+		default:
+			if (water.lock()->Depth() > 0)
+			{
+				SDL_Rect srcRect={tileWidth * 2, tileHeight, tileWidth, tileHeight};
+				SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+			}
+		}
+	}
+}
+
+void SDLMapRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+	boost::weak_ptr<FilthNode> filth = map->GetFilth(tileX,tileY);
+	if (filth.lock() && filth.lock()->Depth() > 0) {
+		SDL_Rect srcRect={tileWidth * ((filth.lock()->Depth() > 5) ? 4 : 3), tileHeight, tileWidth, tileHeight};
+		SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
+	}
+}
+
+void SDLMapRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+	SDL_Rect srcRect={tileWidth * ((map->IsTerritory(tileX,tileY)) ? 6 : 5), tileHeight, tileWidth, tileHeight};
+	SDL_BlitSurface(tiles,&srcRect,mapSurface,dstRect);
 }
 
 void SDLMapRenderer::render(void * surf) {
-	 SDL_Surface *screen = (SDL_Surface *)surf;
+	  SDL_Surface *screen = (SDL_Surface *)surf;
       if ( first ) {
 		 first=false;
 		 SDL_SetColorKey(screen,SDL_SRCCOLORKEY, SDL_MapRGBA(screen->format, keyColor.r, keyColor.g, keyColor.b, 0));

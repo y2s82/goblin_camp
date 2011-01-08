@@ -33,5 +33,8 @@ class MapMarker {
 public:
 	MapMarker(MarkerType, int graphic, Coordinate position, int duration, TCODColor color);
 	bool Update();
-	void Draw(Coordinate upleft, TCODConsole*) const;
+	int X() const;
+	int Y() const;
+	int Graphic() const;
+	TCODColor Color() const;
 };
