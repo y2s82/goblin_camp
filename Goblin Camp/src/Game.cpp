@@ -412,8 +412,11 @@ void Game::Init() {
 	TCODConsole::setKeyboardRepeat(500, 10);
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
-	renderer = boost::shared_ptr<MapRenderer>(new SDLMapRenderer(width, height));
-	//renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
+	if (renderer_type == TCOD_RENDERER_SDL) {
+		renderer = boost::shared_ptr<MapRenderer>(new SDLMapRenderer(width, height));
+	} else {
+		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
+	}
 
 	LoadingScreen();
 
@@ -889,7 +892,7 @@ namespace {
 }
 
 void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
-
+	console->setBackgroundFlag(TCOD_BKGND_SET);
 	if (sizeX == -1) {
 		sizeX = console->getWidth();
 	}
@@ -900,17 +903,11 @@ void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX,
 
 	bool windowed = posX != 0 || posY != 0 || sizeX != console->getWidth() || sizeY != console->getHeight();
 
+	// TODO: This is temporary until everything properly uses posX/posY/sizeX/sizeY limiters
 	if (windowed)
 	{
 		TCODConsole mapConsole(sizeX, sizeY);
 		TCODConsole::blit(console, posX, posY, sizeX, sizeY, &mapConsole, 0, 0);
-		for (int x = 0; x < sizeX; x++) {
-			for (int y = 0; y < sizeY; y++) {
-				mapConsole.putCharEx(x, y, ' ', TCODColor::black, TCODColor::magenta);
-				mapConsole.setDirty(x,y,1,1);		
-			}
-		}
-	
 
 		InternalDrawMapItems("static constructions",  staticConstructionList, upleft, &mapConsole);
 		InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, &mapConsole);

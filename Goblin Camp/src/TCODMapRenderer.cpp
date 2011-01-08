@@ -57,7 +57,12 @@ void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft
 	}
 
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
-		markeri->second.Draw(upleft, minimap);
+		int markerX = markeri->second.X();
+		int markerY = markeri->second.Y();
+		if (markerX >= upleft.X() && markerY < upleft.X() + sizeX
+			&& markerY >= upleft.Y() && markerY < upleft.Y() + sizeY) {
+				minimap->putCharEx(markerX - upleft.X(), markerY - upleft.Y(), markeri->second.Graphic(), markeri->second.Color(), TCODColor::black);
+		}
 	}
 
 	TCODConsole::blit(minimap, 0, 0, sizeX, sizeY, console, posX, posY);

@@ -32,11 +32,17 @@ public:
 	void render(void *sdlSurface);
 private:
 	// the font characters size
-	int charWidth, charHeight, screenWidth, screenHeight;
+	int tileWidth, tileHeight, screenWidth, screenHeight;
 	SDL_Surface *mapSurface;
 	SDL_Surface *tempBuffer;
 	SDL_Surface *tiles;
 	TCODColor keyColor;
 	bool first;
-	boost::multi_array<TileType, 2> tileMap;
+
+	void DrawTile(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+
+	void DrawMarkers(Map * map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY);
 };
