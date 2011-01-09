@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tileset.hpp"
 #include <SDL.h>
 #include <boost/multi_array.hpp>
+#include <Construction.hpp>
 
 class SDLMapRenderer : public MapRenderer, public ITCODSDLRenderer
 {
@@ -42,6 +43,12 @@ private:
 	void DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 
 	void DrawMarkers(Map * map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY);
+
+	
+	void DrawItems(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
+	void DrawNatureObjects(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
+	void DrawNPCs(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
 };

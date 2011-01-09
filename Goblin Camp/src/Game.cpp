@@ -901,37 +901,6 @@ void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX,
 	}
 	renderer->DrawMap(console, Map::Inst(), upleft, posX, posY, sizeX, sizeY);
 
-	bool windowed = posX != 0 || posY != 0 || sizeX != console->getWidth() || sizeY != console->getHeight();
-
-	// TODO: This is temporary until everything properly uses posX/posY/sizeX/sizeY limiters
-	if (windowed)
-	{
-		TCODConsole mapConsole(sizeX, sizeY);
-		TCODConsole::blit(console, posX, posY, sizeX, sizeY, &mapConsole, 0, 0);
-
-		InternalDrawMapItems("static constructions",  staticConstructionList, upleft, &mapConsole);
-		InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, &mapConsole);
-		//TODO: Make this consistent
-		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
-			if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &mapConsole);
-		}
-		InternalDrawMapItems("nature objects",        natureList, upleft, &mapConsole);
-		InternalDrawMapItems("NPCs",                  npcList, upleft, &mapConsole);
-
-		TCODConsole::blit(&mapConsole, 0,0,sizeX, sizeY, console, posX, posY);
-	}
-	else
-	{
-		InternalDrawMapItems("static constructions",  staticConstructionList, upleft, console);
-		InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, console);
-		//TODO: Make this consistent
-		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
-			if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, console);
-		}
-		InternalDrawMapItems("nature objects",        natureList, upleft, console);
-		InternalDrawMapItems("NPCs",                  npcList, upleft, console);
-	}
-
 	if (drawUI) {
 		UI::Inst()->Draw(upleft, console);
 	}
