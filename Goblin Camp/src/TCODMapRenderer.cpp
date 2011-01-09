@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "TCODMapRenderer.hpp"
 #include <libtcod.hpp>
 #include "MapMarker.hpp"
+#include "Game.hpp"
 
 TCODMapRenderer::TCODMapRenderer()
 {
@@ -25,33 +26,54 @@ TCODMapRenderer::TCODMapRenderer()
 
 TCODMapRenderer::~TCODMapRenderer() {}
 
+namespace {
+	template <typename MapT>
+	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
+		for (typename MapT::iterator it = map.begin(); it != map.end(); ) {
+			typename MapT::mapped_type ptr = it->second;
+
+			if (ptr.get() != NULL) {
+				ptr->Draw(upleft, buffer);
+				++it;
+			} else {
+#ifdef DEBUG
+				std::cout << "!!! NULL POINTER !!! " << name << " ; id " << it->first << std::endl;
+#endif
+				typename MapT::iterator tmp = it;
+				++it;
+				map.erase(tmp);
+			}
+		}
+	}
+}
+
 //TODO: Optimize. This causes the biggest performance hit by far right now 
 void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
 {
 	int screenDeltaX = upleft.X();
 	int screenDeltaY = upleft.Y();
-	TCODConsole * minimap = new TCODConsole(sizeX, sizeY);
-	for (int y = upleft.Y(); y < upleft.Y() + minimap->getHeight(); ++y) {
-		for (int x = upleft.X(); x < upleft.X() + minimap->getWidth(); ++x) {
+	TCODConsole minimap(sizeX, sizeY);
+	for (int y = upleft.Y(); y < upleft.Y() + minimap.getHeight(); ++y) {
+		for (int x = upleft.X(); x < upleft.X() + minimap.getWidth(); ++x) {
 			if (x >= 0 && x < map->Width() && y >= 0 && y < map->Height()) {
 
-				minimap->putCharEx(x-screenDeltaX,y-(screenDeltaY), map->Graphic(x,y), map->ForeColor(x,y), map->BackColor(x,y));
+				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->Graphic(x,y), map->ForeColor(x,y), map->BackColor(x,y));
 
 				boost::weak_ptr<WaterNode> water = map->GetWater(x,y);
 				if (water.lock()) {
-					minimap->putCharEx(x-screenDeltaX, y-screenDeltaY, water.lock()->GetGraphic(), water.lock()->GetColor(), TCODColor::black);
+					minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water.lock()->GetGraphic(), water.lock()->GetColor(), TCODColor::black);
 				}
 				boost::weak_ptr<FilthNode> filth = map->GetFilth(x,y);
 				if (filth.lock() && filth.lock()->Depth() > 0) {
-					minimap->putCharEx(x-screenDeltaX, y-screenDeltaY, filth.lock()->GetGraphic(), filth.lock()->GetColor(), TCODColor::black);
+					minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth.lock()->GetGraphic(), filth.lock()->GetColor(), TCODColor::black);
 				}
 
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
-					minimap->setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor::darkGreen : TCODColor::darkRed);
+					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor::darkGreen : TCODColor::darkRed);
 				}
 			}
 			else {
-				minimap->putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
+				minimap.putCharEx(x-screenDeltaX,y-screenDeltaY, TCOD_CHAR_BLOCK3, TCODColor::black, TCODColor::white);
 			}
 		}
 	}
@@ -61,9 +83,18 @@ void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft
 		int markerY = markeri->second.Y();
 		if (markerX >= upleft.X() && markerY < upleft.X() + sizeX
 			&& markerY >= upleft.Y() && markerY < upleft.Y() + sizeY) {
-				minimap->putCharEx(markerX - upleft.X(), markerY - upleft.Y(), markeri->second.Graphic(), markeri->second.Color(), TCODColor::black);
+				minimap.putCharEx(markerX - upleft.X(), markerY - upleft.Y(), markeri->second.Graphic(), markeri->second.Color(), TCODColor::black);
 		}
 	}
 
-	TCODConsole::blit(minimap, 0, 0, sizeX, sizeY, console, posX, posY);
+	InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
+	InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
+		//TODO: Make this consistent
+	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
+		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &minimap);
+	}
+	InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
+	InternalDrawMapItems("NPCs",                  Game::Inst()->npcList, upleft, &minimap);
+
+	TCODConsole::blit(&minimap, 0, 0, sizeX, sizeY, console, posX, posY);
 }
