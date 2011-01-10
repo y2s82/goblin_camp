@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "Tileset.hpp"
+#include "tileRenderer/TileSetTexture.hpp"
 #include "Logger.hpp"
 
-Tileset::Tileset(boost::filesystem::path path, int tileW, int tileH)
+TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tileH)
 	: tileWidth(tileW), tileHeight(tileH), tiles(0), tileCount(0), tileXDim(0), tileYDim(0)
 {
 	tiles = IMG_Load("tileset.png");
@@ -35,7 +35,7 @@ Tileset::Tileset(boost::filesystem::path path, int tileW, int tileH)
 	}
 }
 
-Tileset::~Tileset()
+TileSetTexture::~TileSetTexture()
 {
 	if (tiles)
 	{
@@ -43,12 +43,12 @@ Tileset::~Tileset()
 	}
 }
 
-int Tileset::Count() const
+int TileSetTexture::Count() const
 {
 	return tileCount;
 }
 
-void Tileset::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const
+void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const
 {
 	if (tile < tileCount)
 	{

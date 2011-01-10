@@ -15,13 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "SDLMapRenderer.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
 #include "MapMarker.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
 #include "Data/Paths.hpp"
 
-SDLMapRenderer::SDLMapRenderer(int resolutionX, int resolutionY) 
+TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY) 
 : screenWidth(resolutionX), 
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
@@ -52,15 +52,18 @@ SDLMapRenderer::SDLMapRenderer(int resolutionX, int resolutionY)
    }
    TCODSystem::registerSDLRenderer(this);
 
-   tileset = boost::shared_ptr<Tileset>(new Tileset("tileset.png", 8, 8));
+   tileset = boost::shared_ptr<TileSetTexture>(new TileSetTexture("tileset.png", 8, 8));
 }
 
-SDLMapRenderer::~SDLMapRenderer() {}
+TileSetRenderer::~TileSetRenderer() {}
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
-void SDLMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
-	for (int x = posX; x < posX + sizeX; x++) {
-		for (int y = posY; y < posY + sizeY; y++) {
+void TileSetRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX, int offsetY, int sizeX, int sizeY) {
+	if (sizeX == -1) sizeX = console->getWidth();
+	if (sizeY == -1) sizeY = console->getHeight();
+
+	for (int x = offsetX; x < offsetX + sizeX; x++) {
+		for (int y = offsetY; y < offsetY + sizeY; y++) {
 			console->putCharEx(x, y, ' ', TCODColor::black, keyColor);
 		}
 	}
@@ -71,8 +74,8 @@ void SDLMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft,
 		for (int x = 0; x < sizeX; ++x) {
 			int tileX = x + upleft.X();
 			int tileY = y + upleft.Y();
-			int mapX = x + posX;
-			int mapY = y + posY;
+			int mapX = x + offsetX;
+			int mapY = y + offsetY;
 
 			// Draw Terrain
 			SDL_Rect dstRect = {tileWidth * mapX, tileHeight * mapY, tileWidth, tileHeight};
@@ -93,14 +96,14 @@ void SDLMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft,
 		}
 	}
 
-	DrawMarkers(map, upleft, posX, posY, sizeX, sizeY);
+	DrawMarkers(map, upleft, offsetX, offsetY, sizeX, sizeY);
 
-	DrawItems(upleft, posX, posY, sizeX, sizeY);
-	DrawNatureObjects(upleft, posX, posY, sizeX, sizeY);
-	DrawNPCs(upleft, posX, posY, sizeX, sizeY);
+	DrawItems(upleft, offsetX, offsetY, sizeX, sizeY);
+	DrawNatureObjects(upleft, offsetX, offsetY, sizeX, sizeY);
+	DrawNPCs(upleft, offsetX, offsetY, sizeX, sizeY);
 }
 
-void SDLMapRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect)
+void TileSetRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect)
 {
 	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(map->GetConstruction(tileX, tileY));
 	boost::shared_ptr<Construction> construct = constructPtr.lock();
@@ -110,7 +113,7 @@ void SDLMapRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect *
 	}
 }
 
-void SDLMapRenderer::DrawItems(Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawItems(Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
 	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
 		if (!itemi->second->ContainedIn().lock()) {
 			Coordinate itemPos = itemi->second->Position();
@@ -124,7 +127,7 @@ void SDLMapRenderer::DrawItems(Coordinate upleft, int posX, int posY, int sizeX,
 	}
 }
 
-void SDLMapRenderer::DrawNatureObjects(Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawNatureObjects(Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
 	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator planti = Game::Inst()->natureList.begin(); planti != Game::Inst()->natureList.end(); ++planti) {
 		Coordinate plantPos = planti->second->Position();
 		if (plantPos.X() >= upleft.X() && plantPos.X() < upleft.X() + sizeX
@@ -140,7 +143,7 @@ void SDLMapRenderer::DrawNatureObjects(Coordinate upleft, int posX, int posY, in
 	}
 }
 
-void SDLMapRenderer::DrawNPCs(Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawNPCs(Coordinate upleft, int posX, int posY, int sizeX, int sizeY) {
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
 		Coordinate npcPos = npci->second->Position();
 		if (npcPos.X() >= upleft.X() && npcPos.X() < upleft.X() + sizeX
@@ -152,7 +155,7 @@ void SDLMapRenderer::DrawNPCs(Coordinate upleft, int posX, int posY, int sizeX, 
 	}
 }
 
-void SDLMapRenderer::DrawMarkers(Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
+void TileSetRenderer::DrawMarkers(Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
 {
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
@@ -165,7 +168,7 @@ void SDLMapRenderer::DrawMarkers(Map* map, Coordinate upleft, int posX, int posY
 	}
 }
 
-void SDLMapRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	TileType type(map->Type(tileX, tileY));
 	SDL_Rect srcRect={tileWidth * type, 0, tileWidth, tileHeight};
 	if (type <= 6){
@@ -182,7 +185,7 @@ void SDLMapRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstR
 	
 }
 
-void SDLMapRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	boost::weak_ptr<WaterNode> water = map->GetWater(tileX,tileY);
 	if (water.lock()) {
 		switch (water.lock()->Depth()) {
@@ -205,18 +208,18 @@ void SDLMapRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRec
 	}
 }
 
-void SDLMapRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	boost::weak_ptr<FilthNode> filth = map->GetFilth(tileX,tileY);
 	if (filth.lock() && filth.lock()->Depth() > 0) {
 		tileset->DrawTile(((filth.lock()->Depth() > 5) ? 11 : 10), mapSurface, dstRect);
 	}
 }
 
-void SDLMapRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	tileset->DrawTile(((map->IsTerritory(tileX,tileY)) ? 13 : 12), mapSurface, dstRect);
 }
 
-void SDLMapRenderer::render(void * surf) {
+void TileSetRenderer::render(void * surf) {
 	  SDL_Surface *screen = (SDL_Surface *)surf;
       if ( first ) {
 		 first=false;

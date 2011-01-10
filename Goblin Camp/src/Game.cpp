@@ -42,7 +42,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/MessageBox.hpp"
 
 #include "TCODMapRenderer.hpp"
-#include "SDLMapRenderer.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -413,7 +413,7 @@ void Game::Init() {
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	if (renderer_type == TCOD_RENDERER_SDL) {
-		renderer = boost::shared_ptr<MapRenderer>(new SDLMapRenderer(width, height));
+		renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height));
 	} else {
 		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
 	}

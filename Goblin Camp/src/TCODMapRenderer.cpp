@@ -50,6 +50,9 @@ namespace {
 //TODO: Optimize. This causes the biggest performance hit by far right now 
 void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
 {
+	if (sizeX == -1) sizeX = console->getWidth();
+	if (sizeY == -1) sizeY = console->getHeight();
+
 	int screenDeltaX = upleft.X();
 	int screenDeltaY = upleft.Y();
 	TCODConsole minimap(sizeX, sizeY);
