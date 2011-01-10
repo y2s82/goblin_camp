@@ -23,5 +23,5 @@ class MapRenderer
 {
 public:
 	virtual ~MapRenderer() = 0;
-	virtual void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX = 0, int offsetY = 0, int sizeX = 0, int sizeY = 0) = 0;
+	virtual void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) = 0;
 };

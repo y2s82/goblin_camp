@@ -19,15 +19,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <SDL.h>
 
 /*******************
-// Tileset
+// TileSetTexture
+//
 // Encapsulates a texture containing equally-sized
-// tiles, allowing them to be drawn by an position value
+// tiles, allowing them to be drawn by an index. The index
+// is row wise (i.e. left to right, top to bottom)
 /******************/
-class Tileset
+class TileSetTexture
 {
 public:
-	Tileset(boost::filesystem::path path, int tileWidth, int tileHeight);
-	~Tileset();
+	TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
+	~TileSetTexture();
 
 	int Count() const;
 	void DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const;

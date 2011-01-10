@@ -17,37 +17,35 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #include "MapRenderer.hpp"
-#include "Tileset.hpp"
+#include "TileSetTexture.hpp"
 #include <SDL.h>
 #include <boost/multi_array.hpp>
 #include <Construction.hpp>
 
-class SDLMapRenderer : public MapRenderer, public ITCODSDLRenderer
+class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer
 {
 public:
-	SDLMapRenderer(int screenWidth, int screenHeight);
-	~SDLMapRenderer();
+	TileSetRenderer(int screenWidth, int screenHeight);
+	~TileSetRenderer();
 
-	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX = 0, int posY = 0, int sizeX = 0, int sizeY = 0) ;
+	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) ;
 	void render(void *sdlSurface);
 private:
 	// the font characters size
 	int tileWidth, tileHeight, screenWidth, screenHeight;
 	SDL_Surface *mapSurface;
 	SDL_Surface *tempBuffer;
-	boost::shared_ptr<Tileset> tileset;
+	boost::shared_ptr<TileSetTexture> tileset;
 	TCODColor keyColor;
 	bool first;
 
-	void DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
-	void DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
-	void DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
-	void DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
-	void DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawWater				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawFilth				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawTerritoryOverlay	(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
+	void DrawConstruction		(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 
 	void DrawMarkers(Map * map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY);
-
-	
 	void DrawItems(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
 	void DrawNatureObjects(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
 	void DrawNPCs(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
