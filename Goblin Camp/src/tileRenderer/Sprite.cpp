@@ -13,31 +13,28 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
 
-#include <boost/shared_ptr.hpp>
-#include <boost/filesystem.hpp>
-#include <SDL.h>
+#include "tileRenderer/Sprite.hpp"
 
-/*******************
-// TileSetTexture
-//
-// Encapsulates a texture containing equally-sized
-// tiles, allowing them to be drawn by an index. The index
-// is row wise (i.e. left to right, top to bottom)
-/******************/
-class TileSetTexture
+Sprite::Sprite()
+	: tile(-1), texture() {}
+
+Sprite::Sprite(int tileIndex, boost::shared_ptr<TileSetTexture> tileSetTexture)
+	: tile(tileIndex), texture(tileSetTexture) {}
+
+Sprite::~Sprite() {}
+
+void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const
 {
-public:
-	TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
-	~TileSetTexture();
+	if (tile != -1)
+	{
+		texture->DrawTile(tile, dst, dstRect);
+	}
+}
 
-	int Count() const;
-	void DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const;
+bool Sprite::Exists()
+{
+	return tile != -1;
+}
 
-private:
-	int tileWidth, tileHeight;
-	int tileXDim, tileYDim;
-	int tileCount;
-	boost::shared_ptr<SDL_Surface> tiles;
-};

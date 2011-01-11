@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -17,25 +17,25 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #include "MapRenderer.hpp"
-#include "TileSetTexture.hpp"
+#include "tileRenderer/TileSetTexture.hpp"
+#include "tileRenderer/TileSet.hpp"
 #include <SDL.h>
-#include <boost/multi_array.hpp>
-#include <Construction.hpp>
 
-class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer
+class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer, private boost::noncopyable
 {
 public:
-	TileSetRenderer(int screenWidth, int screenHeight);
+	TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet);
 	~TileSetRenderer();
 
 	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) ;
 	void render(void *sdlSurface);
 private:
 	// the font characters size
-	int tileWidth, tileHeight, screenWidth, screenHeight;
+	int screenWidth, screenHeight;
 	SDL_Surface *mapSurface;
 	SDL_Surface *tempBuffer;
-	boost::shared_ptr<TileSetTexture> tileset;
+	boost::shared_ptr<TileSet> tileSet;
+	boost::shared_ptr<TileSetTexture> depTileset;
 	TCODColor keyColor;
 	bool first;
 
@@ -49,4 +49,6 @@ private:
 	void DrawItems(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
 	void DrawNatureObjects(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
 	void DrawNPCs(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
+
+	SDL_Rect CalcDest(int mapPosX, int mapPosY) { SDL_Rect dstRect = {tileSet->TileWidth() * mapPosX, tileSet->TileHeight() * mapPosY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
 };

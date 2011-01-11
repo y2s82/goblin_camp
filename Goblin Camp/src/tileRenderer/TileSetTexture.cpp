@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -19,10 +19,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 
 TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tileH)
-	: tileWidth(tileW), tileHeight(tileH), tiles(0), tileCount(0), tileXDim(0), tileYDim(0)
+	: tileWidth(tileW), tileHeight(tileH), tiles(), tileCount(0), tileXDim(0), tileYDim(0)
 {
-	tiles = IMG_Load("tileset.png");
-    if (tiles == NULL)
+	tiles = boost::shared_ptr<SDL_Surface>(IMG_Load("tileset.png"), SDL_FreeSurface);
+	SDL_FreeSurface(NULL);
+	if (tiles.get() == NULL)
     {
 	   LOG(SDL_GetError());
 	   tileCount = 0;
@@ -37,10 +38,6 @@ TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tile
 
 TileSetTexture::~TileSetTexture()
 {
-	if (tiles)
-	{
-		SDL_FreeSurface(tiles);
-	}
 }
 
 int TileSetTexture::Count() const
@@ -55,6 +52,6 @@ void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) c
 		int xCoord = tile % tileXDim;
 		int yCoord = tile / tileXDim;
 		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, tileWidth, tileHeight};
-		SDL_BlitSurface(tiles,&srcRect, dst, dstRect);
+		SDL_BlitSurface(tiles.get(),&srcRect, dst, dstRect);
 	}
 }
