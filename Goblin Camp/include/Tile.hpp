@@ -33,7 +33,8 @@ enum TileType {
 	TILERIVERBED,
 	TILEBOG,
 	TILEROCK,
-	TILEMUD
+	TILEMUD,
+	TILE_TYPE_COUNT
 };
 
 class Tile {

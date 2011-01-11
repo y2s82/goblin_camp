@@ -42,7 +42,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/MessageBox.hpp"
 
 #include "TCODMapRenderer.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/TileSetRenderer.hpp"
+// TODO: Temporary
+#include "data/Paths.hpp"
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
@@ -413,7 +416,15 @@ void Game::Init() {
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	if (renderer_type == TCOD_RENDERER_SDL) {
-		renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height));
+		TileSetLoader loader;
+		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet()));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer()); 
+		}
 	} else {
 		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
 	}
@@ -1112,8 +1123,8 @@ void Game::GenerateMap(uint32_t seed) {
 		if (riverDistance > 30) {
 			for (int xOffset = -25; xOffset < 25; ++xOffset) {
 				int range = int(std::sqrt((double)(25*25 - xOffset*xOffset)));
-				int lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
-				int highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
+				int lowOffset = std::min(std::max(random.Generate(-1, 1), -5), 5);
+				int highOffset = std::min(std::max(random.Generate(-1, 1), -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
 					map->Type(x+xOffset, y+yOffset, TILEBOG);
 				}

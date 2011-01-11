@@ -1,0 +1,49 @@
+tileset_data "TestSmall" {
+	tileWidth=8
+	tileHeight=8
+	description="Test tileset with crappy sprites"
+	author="Immortius"
+
+	tile_texture_data "tileset.png"
+	{
+		// Terrain tiles
+		unknown_terrain=0
+		grass_terrain=1
+		ditch_terrain=2
+		riverbed_terrain=3
+		bog_terrain=4
+		rock_terrain=5
+		mud_terrain=6
+
+		// Terrain modifiers
+		water_levels=[7, 8, 9]
+		minor_filth=10
+		major_filth=11
+		marker=14
+		blood=16
+
+		// Overlays
+		non_territory=12
+		territory=13
+		marked=15
+	
+		/*
+		item_sprite_data "default" {
+			tile=17
+		}
+
+		construction_sprite_data "default" {
+			tile=17
+		}
+
+		creature_sprite_data "default" {
+			tile=17
+		}
+
+		plant_sprite_data "default" {
+			tile=17
+		}
+		*/
+	}
+}
+
