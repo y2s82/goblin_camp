@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
  This file is part of Goblin Camp.
  
  Goblin Camp is free software: you can redistribute it and/or modify
@@ -45,4 +45,3 @@ void NPCDialog::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int
 				   npci.second->currentJob().lock() ? npci.second->currentJob().lock()->name.c_str() : "No job",
 				   npci.second->currentTask() ? Job::ActionToString(npci.second->currentTask()->action).c_str() : "No task");
 }
-

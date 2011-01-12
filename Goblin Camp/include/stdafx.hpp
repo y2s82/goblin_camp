@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -83,8 +83,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/random/uniform_01.hpp>
 #		include <boost/random/variate_generator.hpp>
 #		include <boost/filesystem.hpp>
-#       include <boost/math/constants/constants.hpp>
-#       include <boost/tuple/tuple.hpp>
+#		include <boost/math/constants/constants.hpp>
+#		include <boost/tuple/tuple.hpp>
 #	pragma warning(pop)
 // libtcod
 #	include <libtcod.hpp>

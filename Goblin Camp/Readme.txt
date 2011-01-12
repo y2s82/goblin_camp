@@ -200,7 +200,7 @@ Licensing information is in COPYING.txt
 The libtcod license: LIBTCOD-LICENSE.txt
 Goblin Camp crash reporter tool uses SharpZipLib, which is GPL licensed (refer to COPYING.txt).
 
-Copyright 2010 Ilkka Halila
+Copyright 2010-2011 Ilkka Halila
 
 E-Mail: gencontain@gmail.com
 Twitter: ihalila
