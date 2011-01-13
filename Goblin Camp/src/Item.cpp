@@ -79,6 +79,10 @@ Item::~Item() {
 	}
 }
 
+int Item::GraphicsHint() const {
+	return Presets[type].graphicsHint;
+}
+
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = x - upleft.X();
 	int screeny = y - upleft.Y();
@@ -281,7 +285,9 @@ private:
 			Item::Presets.back().graphic = value.i;
 		} else if (boost::iequals(name, "color")) {
 			Item::Presets.back().color = value.col;
-		} else if (boost::iequals(name, "components")) {
+		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+			Item::Presets.back().fallbackGraphicsSet = value.s;
+		}else if (boost::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets.back().components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
 			}
@@ -384,6 +390,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("constructedin", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("bulk", TCOD_TYPE_INT, false);
 	itemTypeStruct->addProperty("durability", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
@@ -544,7 +551,9 @@ ItemPreset::ItemPreset() : graphic('?'),
 	decayList(std::vector<ItemType>()),
 	attack(Attack()),
 	bulk(1),
-	condition(1)
+	condition(1),
+	fallbackGraphicsSet(),
+	graphicsHint(-1)
 {
 	for (int i = 0; i < RES_COUNT; ++i) {
 		resistances[i] = 0;

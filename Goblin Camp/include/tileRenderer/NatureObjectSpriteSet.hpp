@@ -14,10 +14,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
-#include "stdafx.hpp"
-#include "tileRenderer/NPCSpriteSet.hpp"
+#pragma once
 
-NPCSpriteSet::NPCSpriteSet()
-	: tile() {}
+#include "tileRenderer/Sprite.hpp"
 
-NPCSpriteSet::~NPCSpriteSet() {}
+class NatureObjectSpriteSet
+{
+public:
+	NatureObjectSpriteSet();
+	~NatureObjectSpriteSet();
+
+	Sprite tile;
+};

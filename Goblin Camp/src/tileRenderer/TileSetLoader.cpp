@@ -28,10 +28,19 @@ TileSetLoader::TileSetLoader() :
 	tileWidth(-1),
 	tileHeight(-1),
 	currentTexture(),
-	tileSetPath()
+	tileSetPath(),
+	npcSpriteSet(),
+	natureObjectSpriteSet(),
+	itemSpriteSet()
 {
 	TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite_data");
-	creatureSpriteStruct->addProperty("creature_tile", TCOD_TYPE_INT, true);
+	creatureSpriteStruct->addProperty("main", TCOD_TYPE_INT, true);
+
+	TCODParserStruct* natureObjectSpriteStruct = parser.newStructure("plant_sprite_data");
+	natureObjectSpriteStruct->addProperty("main", TCOD_TYPE_INT, true);
+
+	TCODParserStruct* itemSpriteStruct = parser.newStructure("item_sprite_data");
+	itemSpriteStruct->addProperty("main", TCOD_TYPE_INT, true);
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
 
@@ -58,6 +67,8 @@ TileSetLoader::TileSetLoader() :
 	
 	// Sprite Sets
 	tileTextureStruct->addStructure(creatureSpriteStruct);
+	tileTextureStruct->addStructure(natureObjectSpriteStruct);
+	tileTextureStruct->addStructure(itemSpriteStruct);
 
 	TCODParserStruct* tilesetStruct = parser.newStructure("tileset_data");
 	tilesetStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
@@ -129,6 +140,16 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 			parser->error(uninitialisedTilesetError);
 		}
 		npcSpriteSet = NPCSpriteSet();
+	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
+		if (currentTexture.get() == 0) {
+			parser->error(uninitialisedTilesetError);
+		}
+		natureObjectSpriteSet = NatureObjectSpriteSet();
+	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
+		if (currentTexture.get() == 0) {
+			parser->error(uninitialisedTilesetError);
+		}
+		itemSpriteSet = ItemSpriteSet();
 	}
 
 	return success;
@@ -172,8 +193,10 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
 		} else if (boost::iequals(name, "marked")) {
 			tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "creature_tile")) {
+		} else if (boost::iequals(name, "main")) {
 			npcSpriteSet.tile = Sprite(value.i, currentTexture);
+			natureObjectSpriteSet.tile = Sprite(value.i, currentTexture);
+			itemSpriteSet.tile = Sprite(value.i, currentTexture);
 		}
 		return success;
 	}
@@ -211,17 +234,27 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 bool TileSetLoader::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
 	if (boost::iequals(str->getName(), "tile_texture_data")) {
 		currentTexture = boost::shared_ptr<TileSetTexture>();
-	}
-	else if (boost::iequals(str->getName(), "creature_sprite_data")) {
-		if (name == 0)
-		{
+	} else if (boost::iequals(str->getName(), "creature_sprite_data")) {
+		if (name == 0) {
 			tileSet->SetDefaultNPCSpriteSet(npcSpriteSet);
-		}
-		else
-		{
+		} else {
 			tileSet->AddNPCSpriteSet(std::string(name), npcSpriteSet);
 		}
+	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
+		if (name == 0) {
+			tileSet->SetDefaultNatureObjectSpriteSet(natureObjectSpriteSet);
+		} else {
+			tileSet->AddNatureObjectSpriteSet(std::string(name), natureObjectSpriteSet);
+		}
+	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
+		if (name == 0) {
+			tileSet->SetDefaultItemSpriteSet(itemSpriteSet);
+		} else {
+			tileSet->AddItemSpriteSet(std::string(name), itemSpriteSet);
+		}
 	}
+	
+	
 	return success;
 }
 

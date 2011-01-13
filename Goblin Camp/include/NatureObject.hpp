@@ -39,6 +39,8 @@ public:
 	bool tree, harvestable, walkable;
 	float minHeight, maxHeight;
 	bool evil;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class NatureObject : public Entity
@@ -66,6 +68,7 @@ public:
 
 	int Type();
 
+	int GraphicsHint() const;
 	void Draw(Coordinate, TCODConsole*);
 	void Update();
 	virtual void CancelJob(int=0);

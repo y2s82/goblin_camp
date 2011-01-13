@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/NPCSpriteSet.hpp"
+#include "tileRenderer/ItemSpriteSet.hpp"
 
 class TileSetLoader : public ITCODParserListener, private boost::noncopyable
 {
@@ -51,10 +52,10 @@ private:
 	int tileHeight;
 	boost::shared_ptr<TileSetTexture> currentTexture;
 	NPCSpriteSet npcSpriteSet;
+	NatureObjectSpriteSet natureObjectSpriteSet;
+	ItemSpriteSet itemSpriteSet;
 	
 	static const char * uninitialisedTilesetError;
-
-
-
+	
 	void Reset();
 };

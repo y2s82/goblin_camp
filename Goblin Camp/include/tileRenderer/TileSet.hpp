@@ -16,15 +16,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
-#include "tileRenderer/Sprite.hpp"
-#include <boost/array.hpp>
-#include "Tile.hpp"
-#include <SDL.h>
-#include "tileRenderer/NPCSpriteSet.hpp"
 
+#include <boost/array.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
+#include <SDL.h>
+
+#include "Tile.hpp"
 #include "NPC.hpp"
+#include "NatureObject.hpp"
+#include "tileRenderer/Sprite.hpp"
+#include "tileRenderer/NPCSpriteSet.hpp"
+#include "tileRenderer/NatureObjectSpriteSet.hpp"
+#include "tileRenderer/ItemSpriteSet.hpp"
 
 class TileSet : private boost::noncopyable
 {
@@ -47,8 +51,12 @@ public:
 	void DrawFilthMajor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
+	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
+	int GetGraphicsHintFor(const ItemPreset& itemPreset) const;
 
 	void SetAuthor(std::string auth);
 	void SetDescription(std::string desc);
@@ -63,10 +71,14 @@ public:
 	void SetMarkedOverlay(const Sprite& sprite);
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
+	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
+	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
+	void AddItemSpriteSet(std::string name, const ItemSpriteSet& set);
+	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
 
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
-	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> NPCLookupMap;
+	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> LookupMap;
 	int tileWidth;
 	int tileHeight;
 	std::string name;
@@ -87,5 +99,13 @@ private:
 
 	NPCSpriteSet defaultNPCSpriteSet;
 	std::vector<NPCSpriteSet> npcSpriteSets;
-	NPCLookupMap npcSpriteLookup;
+	LookupMap npcSpriteLookup;
+
+	NatureObjectSpriteSet defaultNatureObjectSpriteSet;
+	std::vector<NatureObjectSpriteSet> natureObjectSpriteSets;
+	LookupMap natureObjectSpriteLookup;
+
+	ItemSpriteSet defaultItemSpriteSet;
+	std::vector<ItemSpriteSet> itemSpriteSets;
+	LookupMap itemSpriteLookup;
 };

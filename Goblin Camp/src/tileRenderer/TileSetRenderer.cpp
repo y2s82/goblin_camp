@@ -63,6 +63,15 @@ void TileSetRenderer::PreparePrefabs()
 	{
 		npci->graphicsHint = tileSet->GetGraphicsHintFor(*npci);
 	}
+	for (std::vector<NatureObjectPreset>::iterator nopi = NatureObject::Presets.begin(); nopi != NatureObject::Presets.end(); ++nopi)
+	{
+		nopi->graphicsHint = tileSet->GetGraphicsHintFor(*nopi);
+	}
+
+	for (std::vector<ItemPreset>::iterator itemi = Item::Presets.begin(); itemi != Item::Presets.end(); ++itemi)
+	{
+		itemi->graphicsHint = tileSet->GetGraphicsHintFor(*itemi);
+	}
 }
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
@@ -106,8 +115,8 @@ void TileSetRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft
 
 	DrawMarkers(map, upleft, offsetX, offsetY, sizeX, sizeY);
 
-	DrawItems(upleft, offsetX, offsetY, sizeX, sizeY);
 	DrawNatureObjects(upleft, offsetX, offsetY, sizeX, sizeY);
+	DrawItems(upleft, offsetX, offsetY, sizeX, sizeY);
 	DrawNPCs(upleft, offsetX, offsetY, sizeX, sizeY);
 }
 
@@ -129,7 +138,7 @@ void TileSetRenderer::DrawItems(Coordinate upleft, int offsetX, int offsetY, int
 				&& itemPos.Y() >= upleft.Y() && itemPos.Y() < upleft.Y() + sizeY)
 			{
 				SDL_Rect dstRect(CalcDest(offsetX + itemPos.X() - upleft.X(), offsetY + itemPos.Y() - upleft.Y()));
-				depTileset->DrawTile(20, mapSurface, &dstRect);
+				tileSet->DrawItem(itemi->second, mapSurface, &dstRect);
 			}
 		}
 	}
@@ -146,7 +155,7 @@ void TileSetRenderer::DrawNatureObjects(Coordinate upleft, int offsetX, int offs
 			{
 				tileSet->DrawMarkedOverlay(mapSurface, &dstRect);
 			}
-			depTileset->DrawTile(22, mapSurface, &dstRect);
+			tileSet->DrawNatureObject(planti->second, mapSurface, &dstRect);
 		}
 	}
 }
