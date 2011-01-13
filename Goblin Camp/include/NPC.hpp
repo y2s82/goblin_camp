@@ -94,6 +94,9 @@ struct NPCPreset {
 	std::set<std::string> tags;
 	int tier;
 	ItemType deathItem;
+	std::string graphicsSet;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class NPC : public Entity {
@@ -193,6 +196,8 @@ public:
 	unsigned int speed();
 	void color(TCODColor,TCODColor=TCODColor::black);
 	void graphic(int);
+
+	int GraphicsHint() const;
 
 	Task* currentTask();
 	Task* nextTask();

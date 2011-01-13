@@ -57,6 +57,14 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
 
 TileSetRenderer::~TileSetRenderer() {}
 
+void TileSetRenderer::PreparePrefabs() 
+{
+	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci)
+	{
+		npci->graphicsHint = tileSet->GetGraphicsHintFor(*npci);
+	}
+}
+
 //TODO: Optimize. This causes the biggest performance hit by far right now 
 void TileSetRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX, int offsetY, int sizeX, int sizeY) {
 	if (sizeX == -1) sizeX = console->getWidth();
@@ -150,7 +158,7 @@ void TileSetRenderer::DrawNPCs(Coordinate upleft, int offsetX, int offsetY, int 
 				&& npcPos.Y() >= upleft.Y() && npcPos.Y() < upleft.Y() + sizeY)
 		{
 			SDL_Rect dstRect(CalcDest(offsetX + npcPos.X() - upleft.X(), offsetY + npcPos.Y() - upleft.Y()));
-			depTileset->DrawTile(21, mapSurface, &dstRect);
+			tileSet->DrawNPC(npci->second, mapSurface, &dstRect);
 		}
 	}
 }

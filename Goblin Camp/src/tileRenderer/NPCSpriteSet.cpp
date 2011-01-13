@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -13,16 +13,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+#include "stdafx.hpp"
+#include "tileRenderer/NPCSpriteSet.hpp"
 
-#include "MapRenderer.hpp"
+NPCSpriteSet::NPCSpriteSet()
+	: tile() {}
 
-class TCODMapRenderer : public MapRenderer
-{
-public:
-	TCODMapRenderer();
-	~TCODMapRenderer();
-
-	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX = 0, int posY = 0, int sizeX = 0, int sizeY = 0) ;
-	void PreparePrefabs();
-};
+NPCSpriteSet::~NPCSpriteSet() {}

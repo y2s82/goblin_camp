@@ -27,11 +27,23 @@ tileset_data "TestSmall" {
 		territory=13
 		marked=15
 	
-		/*
-		item_sprite_data "default" {
-			tile=17
+		creature_sprite_data {
+			creature_tile=21
 		}
 
+		creature_sprite_data "goblin" {
+			creature_tile=24
+		}
+
+		creature_sprite_data "orc" {
+			creature_tile=23
+		}
+
+		/*
+		item_sprite_data {
+			tile=17
+		}
+		
 		construction_sprite_data "default" {
 			tile=17
 		}

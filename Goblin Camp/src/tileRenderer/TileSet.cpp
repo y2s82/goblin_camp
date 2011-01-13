@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "tileRenderer/TileSet.hpp"
-#include <boost/numeric/conversion/cast.hpp>
+#include <boost/numeric/conversion/cast.hpp> 
 
 TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	name(tileSetName),
@@ -31,7 +31,9 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	territoryOverlay(),
 	markedOverlay(),
 	marker(),
-	blood() {
+	blood(),
+	npcSpriteSets(),
+	npcSpriteLookup() {
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -99,6 +101,40 @@ void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstR
 	}
 }
 
+void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = npc->GraphicsHint();
+	if (hint == -1 || hint >= npcSpriteSets.size())
+	{
+		defaultNPCSpriteSet.tile.Draw(dst, dstRect);
+	}
+	else
+	{
+		npcSpriteSets[hint].tile.Draw(dst, dstRect);
+	}
+}
+
+int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
+	NPCLookupMap::const_iterator set;
+
+	set = npcSpriteLookup.find(npcPreset.graphicsSet);
+	if (set != npcSpriteLookup.end()) {
+		return set->second;
+	}
+
+	set = npcSpriteLookup.find(npcPreset.fallbackGraphicsSet);
+	if (set != npcSpriteLookup.end()) {
+		return set->second;
+	}
+
+	set = npcSpriteLookup.find(npcPreset.typeName);
+	if (set != npcSpriteLookup.end()) {
+		return set->second;
+	}
+
+	return -1;
+}
+
+
 void TileSet::SetDescription(std::string desc) {
 	description = desc;
 }
@@ -107,7 +143,7 @@ void TileSet::SetAuthor(std::string auth) {
 	author = auth;
 }
 
-void TileSet::SetTerrain(TileType type, Sprite sprite) {
+void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
 	if (type < 0 || type >= TILE_TYPE_COUNT) 
 		return;
 
@@ -120,34 +156,44 @@ void TileSet::SetTerrain(TileType type, Sprite sprite) {
 	}
 }
 
-void TileSet::AddWater(Sprite sprite) {
+void TileSet::AddWater(const Sprite& sprite) {
 	waterTiles.push_back(sprite);
 }
 
-void TileSet::SetFilthMinor(Sprite sprite) {
+void TileSet::SetFilthMinor(const Sprite& sprite) {
 	minorFilth = sprite;
 }
 
-void TileSet::SetFilthMajor(Sprite sprite) {
+void TileSet::SetFilthMajor(const Sprite& sprite) {
 	majorFilth = sprite;
 }
 
-void TileSet::SetMarker(Sprite sprite) {
+void TileSet::SetMarker(const Sprite& sprite) {
 	marker = sprite;
 }
 
-void TileSet::SetBlood(Sprite sprite) {
+void TileSet::SetBlood(const Sprite& sprite) {
 	blood = sprite;
 }
 
-void TileSet::SetNonTerritoryOverlay(Sprite sprite) {
+void TileSet::SetNonTerritoryOverlay(const Sprite& sprite) {
 	nonTerritoryOverlay = sprite;
 }
 
-void TileSet::SetTerritoryOverlay(Sprite sprite) {
+void TileSet::SetTerritoryOverlay(const Sprite& sprite) {
 	territoryOverlay = sprite;
 }
 
-void TileSet::SetMarkedOverlay(Sprite sprite) {
+void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 	markedOverlay = sprite;
+}
+
+void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {
+	int index = npcSpriteSets.size();
+	npcSpriteSets.push_back(set);
+	npcSpriteLookup[name] = index;
+}
+
+void TileSet::SetDefaultNPCSpriteSet(const NPCSpriteSet& set) {
+	defaultNPCSpriteSet = set;
 }

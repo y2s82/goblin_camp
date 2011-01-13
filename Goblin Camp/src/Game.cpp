@@ -1510,6 +1510,7 @@ void Game::Reset() {
 	safeMonths = 9;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
+	renderer->PreparePrefabs();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
