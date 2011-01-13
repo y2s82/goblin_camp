@@ -94,7 +94,6 @@ struct NPCPreset {
 	std::set<std::string> tags;
 	int tier;
 	ItemType deathItem;
-	std::string graphicsSet;
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
 };

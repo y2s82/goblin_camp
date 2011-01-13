@@ -32,8 +32,15 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	markedOverlay(),
 	marker(),
 	blood(),
+	defaultNPCSpriteSet(),
 	npcSpriteSets(),
-	npcSpriteLookup() {
+	npcSpriteLookup(),
+	defaultNatureObjectSpriteSet(),
+	natureObjectSpriteSets(),
+	natureObjectSpriteLookup(),
+	itemSpriteSets(),
+	itemSpriteLookup(),
+	defaultItemSpriteSet() {
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -113,10 +120,34 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 	}
 }
 
-int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
-	NPCLookupMap::const_iterator set;
+void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = plant->GraphicsHint();
+	if (hint == -1 || hint >= natureObjectSpriteSets.size())
+	{
+		defaultNatureObjectSpriteSet.tile.Draw(dst, dstRect);
+	}
+	else
+	{
+		natureObjectSpriteSets[hint].tile.Draw(dst, dstRect);
+	}
+}
 
-	set = npcSpriteLookup.find(npcPreset.graphicsSet);
+void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = item->GraphicsHint();
+	if (hint == -1 || hint >= itemSpriteSets.size())
+	{
+		defaultItemSpriteSet.tile.Draw(dst, dstRect);
+	}
+	else
+	{
+		itemSpriteSets[hint].tile.Draw(dst, dstRect);
+	}
+}
+
+int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
+	LookupMap::const_iterator set;
+
+	set = npcSpriteLookup.find(npcPreset.typeName);
 	if (set != npcSpriteLookup.end()) {
 		return set->second;
 	}
@@ -124,16 +155,53 @@ int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
 	set = npcSpriteLookup.find(npcPreset.fallbackGraphicsSet);
 	if (set != npcSpriteLookup.end()) {
 		return set->second;
+	}	
+
+	return -1;
+}
+
+int TileSet::GetGraphicsHintFor(const NatureObjectPreset& natureObjectPreset) const {
+	LookupMap::const_iterator set;
+	
+	set = natureObjectSpriteLookup.find(natureObjectPreset.name);
+	if (set != natureObjectSpriteLookup.end()) {
+		return set->second;
 	}
 
-	set = npcSpriteLookup.find(npcPreset.typeName);
-	if (set != npcSpriteLookup.end()) {
+	set = natureObjectSpriteLookup.find(natureObjectPreset.fallbackGraphicsSet);
+	if (set != natureObjectSpriteLookup.end()) {
 		return set->second;
 	}
 
 	return -1;
 }
 
+int TileSet::GetGraphicsHintFor(const ItemPreset& itemPreset) const {
+	LookupMap::const_iterator set;
+	
+	set = itemSpriteLookup.find(itemPreset.name);
+	if (set != itemSpriteLookup.end()) {
+		return set->second;
+	}
+
+	set = itemSpriteLookup.find(itemPreset.fallbackGraphicsSet);
+	if (set != itemSpriteLookup.end()) {
+		return set->second;
+	}
+
+	for (std::set<ItemCategory>::const_iterator cati = itemPreset.specificCategories.begin(); cati != itemPreset.specificCategories.end(); ++cati) {
+		for (ItemCat * cat = &Item::Categories.at(*cati); cat != 0; cat = cat->parent)
+		{
+			set = itemSpriteLookup.find(cat->GetName());
+			if (set != itemSpriteLookup.end())
+			{
+				return set->second;
+			}
+		}
+	}
+
+	return -1;
+}
 
 void TileSet::SetDescription(std::string desc) {
 	description = desc;
@@ -196,4 +264,24 @@ void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {
 
 void TileSet::SetDefaultNPCSpriteSet(const NPCSpriteSet& set) {
 	defaultNPCSpriteSet = set;
+}
+
+void TileSet::AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set) {
+	int index = natureObjectSpriteSets.size();
+	natureObjectSpriteSets.push_back(set);
+	natureObjectSpriteLookup[name] = index;
+}
+
+void TileSet::SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set) {
+	defaultNatureObjectSpriteSet = set;
+}
+
+void TileSet::AddItemSpriteSet(std::string name, const ItemSpriteSet& set) {
+	int index = itemSpriteSets.size();
+	itemSpriteSets.push_back(set);
+	itemSpriteLookup[name] = index;
+}
+
+void TileSet::SetDefaultItemSpriteSet(const ItemSpriteSet& set) {
+	defaultItemSpriteSet = set;
 }
