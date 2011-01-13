@@ -47,6 +47,8 @@ namespace {
 	}
 }
 
+void TCODMapRenderer::PreparePrefabs() {}
+
 //TODO: Optimize. This causes the biggest performance hit by far right now 
 void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
 {

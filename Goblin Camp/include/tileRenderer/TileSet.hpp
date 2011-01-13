@@ -20,9 +20,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/array.hpp>
 #include "Tile.hpp"
 #include <SDL.h>
-#include "Tile.hpp"
+#include "tileRenderer/NPCSpriteSet.hpp"
 
-//#include <boost/unordered_map.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include "NPC.hpp"
 
 class TileSet : private boost::noncopyable
 {
@@ -44,21 +46,27 @@ public:
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMajor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
+
+	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 
 	void SetAuthor(std::string auth);
 	void SetDescription(std::string desc);
-	void SetTerrain(TileType type, Sprite sprite);
-	void AddWater(Sprite sprite);
-	void SetFilthMinor(Sprite sprite);
-	void SetFilthMajor(Sprite sprite);
-	void SetMarker(Sprite sprite);
-	void SetBlood(Sprite sprite);
-	void SetNonTerritoryOverlay(Sprite sprite);
-	void SetTerritoryOverlay(Sprite sprite);
-	void SetMarkedOverlay(Sprite sprite);
+	void SetTerrain(TileType type, const Sprite& sprite);
+	void AddWater(const Sprite& sprite);
+	void SetFilthMinor(const Sprite& sprite);
+	void SetFilthMajor(const Sprite& sprite);
+	void SetMarker(const Sprite& sprite);
+	void SetBlood(const Sprite& sprite);
+	void SetNonTerritoryOverlay(const Sprite& sprite);
+	void SetTerritoryOverlay(const Sprite& sprite);
+	void SetMarkedOverlay(const Sprite& sprite);
+	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
+	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> NPCLookupMap;
 	int tileWidth;
 	int tileHeight;
 	std::string name;
@@ -77,5 +85,7 @@ private:
 	Sprite marker;
 	Sprite blood;
 
-	//boost::unordered_map<std::string, ItemSpriteSet>
+	NPCSpriteSet defaultNPCSpriteSet;
+	std::vector<NPCSpriteSet> npcSpriteSets;
+	NPCLookupMap npcSpriteLookup;
 };

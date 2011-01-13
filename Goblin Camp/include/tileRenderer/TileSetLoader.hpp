@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
+#include "tileRenderer/NPCSpriteSet.hpp"
 
 class TileSetLoader : public ITCODParserListener, private boost::noncopyable
 {
@@ -49,6 +50,7 @@ private:
 	int tileWidth;
 	int tileHeight;
 	boost::shared_ptr<TileSetTexture> currentTexture;
+	NPCSpriteSet npcSpriteSet;
 	
 	static const char * uninitialisedTilesetError;
 

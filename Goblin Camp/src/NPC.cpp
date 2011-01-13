@@ -1239,6 +1239,7 @@ void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
 
 void NPC::color(TCODColor value, TCODColor bvalue) { _color = value; _bgcolor = bvalue; }
 void NPC::graphic(int value) { _graphic = value; }
+int NPC::GraphicsHint() const { return NPC::Presets[type].graphicsHint; }
 
 bool NPC::Expert() {return expert;}
 void NPC::Expert(bool value) {expert = value;}
@@ -1765,6 +1766,8 @@ class NPCListener : public ITCODParserListener {
 		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.i; }
 		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
 		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
+		else if (boost::iequals(name,"graphicsSet")) { NPC::Presets.back().graphicsSet = value.s; }
+		else if (boost::iequals(name,"fallbackGraphicsSet")) { NPC::Presets.back().fallbackGraphicsSet = value.s; }
 		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
 		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
 		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
@@ -1845,6 +1848,8 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("graphicSet", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("fallbackGraphicSet", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -2059,7 +2064,10 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	attacks(std::list<Attack>()),
 	tags(std::set<std::string>()),
 	tier(0),
-	deathItem(-2)
+	deathItem(-2),
+	graphicsSet(),
+	fallbackGraphicsSet(),
+	graphicsHint(-1)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;
