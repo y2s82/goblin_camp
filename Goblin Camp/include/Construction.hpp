@@ -73,6 +73,8 @@ struct ConstructionPreset {
 	std::set<TileType> tileReqs;
 	int tier;
 	std::string description;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class Construction : public Entity {
@@ -116,6 +118,7 @@ public:
 	void Condition(int);
 	int Condition();
 	virtual void Draw(Coordinate, TCODConsole*);
+	int GraphicsHint() const;
 	int Build();
 	ConstructionType Type();
 	std::list<ItemCategory>* MaterialList();

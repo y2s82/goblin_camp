@@ -28,8 +28,7 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
   mapSurface(NULL),
   tempBuffer(NULL),
   first(true),
-  tileSet(ts),
-  depTileset() {
+  tileSet(ts) {
    Uint32 rmask, gmask, bmask, amask;
    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
        rmask = 0xff000000;
@@ -50,8 +49,6 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
    {
 	   LOG(SDL_GetError());
    }
-   // TODO: Remove
-   depTileset = boost::shared_ptr<TileSetTexture>(new TileSetTexture("tileset.png", 8, 8));
    TCODSystem::registerSDLRenderer(this);
 }
 
@@ -67,10 +64,13 @@ void TileSetRenderer::PreparePrefabs()
 	{
 		nopi->graphicsHint = tileSet->GetGraphicsHintFor(*nopi);
 	}
-
 	for (std::vector<ItemPreset>::iterator itemi = Item::Presets.begin(); itemi != Item::Presets.end(); ++itemi)
 	{
 		itemi->graphicsHint = tileSet->GetGraphicsHintFor(*itemi);
+	}
+	for (std::vector<ConstructionPreset>::iterator constructi = Construction::Presets.begin(); constructi != Construction::Presets.end(); ++constructi)
+	{
+		constructi->graphicsHint = tileSet->GetGraphicsHintFor(*constructi);
 	}
 }
 
@@ -125,8 +125,7 @@ void TileSetRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect 
 	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(map->GetConstruction(tileX, tileY));
 	boost::shared_ptr<Construction> construct = constructPtr.lock();
 	if (construct) {
-		// Bunch of cleverness here later
-		depTileset->DrawTile(19, mapSurface, dstRect);
+		tileSet->DrawConstruction(construct, Coordinate(tileX, tileY), mapSurface, dstRect);
 	}
 }
 

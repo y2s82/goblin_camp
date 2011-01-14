@@ -29,6 +29,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/NPCSpriteSet.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
 #include "tileRenderer/ItemSpriteSet.hpp"
+#include "tileRenderer/ConstructionSpriteSet.hpp"
 
 class TileSet : private boost::noncopyable
 {
@@ -53,10 +54,12 @@ public:
 	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
 	int GetGraphicsHintFor(const ItemPreset& itemPreset) const;
+	int GetGraphicsHintFor(const ConstructionPreset& constructionPreset) const;
 
 	void SetAuthor(std::string auth);
 	void SetDescription(std::string desc);
@@ -69,12 +72,15 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
+
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
 	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
 	void AddItemSpriteSet(std::string name, const ItemSpriteSet& set);
 	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
+	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
+	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
 
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
@@ -108,4 +114,8 @@ private:
 	ItemSpriteSet defaultItemSpriteSet;
 	std::vector<ItemSpriteSet> itemSpriteSets;
 	LookupMap itemSpriteLookup;
+
+	ConstructionSpriteSet defaultConstructionSpriteSet;
+	std::vector<ConstructionSpriteSet> constructionSpriteSets;
+	LookupMap constructionSpriteLookup;
 };

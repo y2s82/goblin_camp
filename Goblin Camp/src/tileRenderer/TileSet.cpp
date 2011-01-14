@@ -40,7 +40,10 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	natureObjectSpriteLookup(),
 	itemSpriteSets(),
 	itemSpriteLookup(),
-	defaultItemSpriteSet() {
+	defaultItemSpriteSet(),
+	constructionSpriteSets(),
+	constructionSpriteLookup(),
+	defaultConstructionSpriteSet(){
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -85,10 +88,10 @@ void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
 }
 
 void TileSet::DrawWater(int index, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	int i = std::min(index, boost::numeric_cast<int>(waterTiles.size() - 1));
-	if (index > -1)
+	int i = std::min(index, boost::numeric_cast<int>(waterTiles.size()) - 1);
+	if (i > -1)
 	{
-		waterTiles.at(index).Draw(dst, dstRect);
+		waterTiles.at(i).Draw(dst, dstRect);
 	}
 }
 
@@ -141,6 +144,18 @@ void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect 
 	else
 	{
 		itemSpriteSets[hint].tile.Draw(dst, dstRect);
+	}
+}
+
+void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = construction->GraphicsHint();
+	if (hint == -1 || hint >= constructionSpriteSets.size())
+	{
+		defaultConstructionSpriteSet.Draw(construction, worldPos, dst, dstRect);
+	}
+	else
+	{
+		constructionSpriteSets[hint].Draw(construction, worldPos, dst, dstRect);
 	}
 }
 
@@ -198,6 +213,22 @@ int TileSet::GetGraphicsHintFor(const ItemPreset& itemPreset) const {
 				return set->second;
 			}
 		}
+	}
+
+	return -1;
+}
+
+int TileSet::GetGraphicsHintFor(const ConstructionPreset& constructPreset) const {
+	LookupMap::const_iterator set;
+	
+	set = constructionSpriteLookup.find(constructPreset.name);
+	if (set != itemSpriteLookup.end()) {
+		return set->second;
+	}
+
+	set = itemSpriteLookup.find(constructPreset.fallbackGraphicsSet);
+	if (set != itemSpriteLookup.end()) {
+		return set->second;
 	}
 
 	return -1;
@@ -284,4 +315,14 @@ void TileSet::AddItemSpriteSet(std::string name, const ItemSpriteSet& set) {
 
 void TileSet::SetDefaultItemSpriteSet(const ItemSpriteSet& set) {
 	defaultItemSpriteSet = set;
+}
+
+void TileSet::AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set) {
+	int index = constructionSpriteSets.size();
+	constructionSpriteSets.push_back(set);
+	constructionSpriteLookup[name] = index;
+}
+
+void TileSet::SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set) {
+	defaultConstructionSpriteSet = set;
 }
