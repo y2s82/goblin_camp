@@ -36,7 +36,6 @@ private:
 	SDL_Surface *mapSurface;
 	SDL_Surface *tempBuffer;
 	boost::shared_ptr<TileSet> tileSet;
-	boost::shared_ptr<TileSetTexture> depTileset;
 	TCODColor keyColor;
 	bool first;
 

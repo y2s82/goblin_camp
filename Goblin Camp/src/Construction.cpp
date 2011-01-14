@@ -116,6 +116,10 @@ Construction::~Construction() {
 void Construction::Condition(int value) {condition = value;}
 int Construction::Condition() {return condition;}
 
+int Construction::GraphicsHint() const {
+	return Construction::Presets[type].graphicsHint;
+}
+
 void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	int screeny = y - upleft.Y();
 	int screenx = x - upleft.X();
@@ -378,6 +382,8 @@ class ConstructionListener : public ITCODParserListener {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets.back().graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
+		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+			Construction::Presets.back().fallbackGraphicsSet = value.s;
 		} else if (boost::iequals(name, "category")) {
 			Construction::Presets.back().category = value.s;
 			Construction::Categories.insert(value.s);
@@ -521,6 +527,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("bridge");
 	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("description", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -795,7 +802,9 @@ ConstructionPreset::ConstructionPreset() :
 	color(TCODColor::black),
 	tileReqs(std::set<TileType>()),
 	tier(0),
-	description("")
+	description(""),
+	graphicsHint(-1),
+	fallbackGraphicsSet("")
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

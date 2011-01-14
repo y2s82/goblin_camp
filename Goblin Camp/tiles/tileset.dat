@@ -28,151 +28,155 @@ tileset_data "TestSmall" {
 		marked=15
 	
 		creature_sprite_data {
-			main=21
+			sprite=21
 		}
 
 		plant_sprite_data {
-			main=29
+			sprite=29
 		}
 
 		item_sprite_data {
-			main=20
+			sprite=20
+		}
+
+		construction_sprite_data {
+			sprites=[19]
 		}
 
 		creature_sprite_data "goblin" {
-			main=24
+			sprite=24
 		}
 
 		creature_sprite_data "orc" {
-			main=23
+			sprite=23
 		}		
 
 		plant_sprite_data "Pine"{
-			main=29
+			sprite=29
 		}
 
 		plant_sprite_data "Wild Bloodberry bush" {
-			main=22
+			sprite=22
 		}
 
 		plant_sprite_data "Wild Blueleaf" {
-			main=28
+			sprite=28
 		}
 
 		plant_sprite_data "Dandelion" {
-			main=28
+			sprite=28
 		}
 
 		plant_sprite_data "Red Poppy" {
-			main=28
+			sprite=28
 		}
 
 		plant_sprite_data "Alpine aster" {
-			main=30
+			sprite=30
 		}
 
 		plant_sprite_data "Blue Skullcap" {
-			main=28
+			sprite=28
 		}
 
 		plant_sprite_data "Willow" {
-			main=28
+			sprite=28
 		}
 
 		plant_sprite_data "Birch" {
-			main=29
+			sprite=29
 		}
 
 		plant_sprite_data "Spruce" {
-			main=29
+			sprite=29
 		}
 
 		plant_sprite_data "Silvervine" {
-			main=27
+			sprite=27
 		}
 
 		plant_sprite_data "Thornbush" {
-			main=22
+			sprite=22
 		}
 
 		plant_sprite_data "Withering tree" {
-			main=31
+			sprite=31
 		}
 
 		plant_sprite_data "Redhollow" {
-			main=30
+			sprite=30
 		}
 
 		plant_sprite_data "Darkroot" {
-			main=31
+			sprite=31
 		}
 
 		item_sprite_data {
-			main=20
+			sprite=20
 		}
 
 		item_sprite_data "Log" {
-			main=38 
+			sprite=38 
 		}
 
 		item_sprite_data "Plank" {
-			main=37
+			sprite=37
 		}
 
 		item_sprite_data "Stone" {
-			main=32
+			sprite=32
 		}
 
 		item_sprite_data "Firewood" {
-			main=36
+			sprite=36
 		}
 
 		item_sprite_data "Rough stone" {
-			main=32
+			sprite=32
 		}
 
 		item_sprite_data "Berry" {
-			main=35
+			sprite=35
 		}
 
 		item_sprite_data "Bread" {
-			main=35
+			sprite=35
 		}
 
 		item_sprite_data "Crate" {
-			main=40
+			sprite=40
 		}
 
 		item_sprite_data "Barrel" {
-			main=41
+			sprite=41
 		}
 
 		item_sprite_data "Sack" {
-			main=20
+			sprite=20
 		}
 
 		item_sprite_data "Door" {
-			main=39
+			sprite=39
 		}
 
 		item_sprite_data "Bed" {
-			main=42
+			sprite=42
 		}
 
 		item_sprite_data "Clay" {
-			main=34
+			sprite=34
 		}
 
-
-		/*
-		
-		
-		construction_sprite_data "default" {
-			tile=17
+		construction_sprite_data "Farm plot" {
+			sprites=[43]
 		}
 
-		
-		*/
+		construction_sprite_data "Totem Pole" {
+			sprites=[43,43,43,
+					 43,44,43,
+					 43,43,43]
+			width=3
+		}
 	}
 }
 

@@ -28,19 +28,25 @@ TileSetLoader::TileSetLoader() :
 	tileWidth(-1),
 	tileHeight(-1),
 	currentTexture(),
+	currentSpriteSet(SS_NONE),
 	tileSetPath(),
 	npcSpriteSet(),
 	natureObjectSpriteSet(),
-	itemSpriteSet()
+	itemSpriteSet(),
+	constructionSpriteSet()
 {
 	TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite_data");
-	creatureSpriteStruct->addProperty("main", TCOD_TYPE_INT, true);
+	creatureSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
 
 	TCODParserStruct* natureObjectSpriteStruct = parser.newStructure("plant_sprite_data");
-	natureObjectSpriteStruct->addProperty("main", TCOD_TYPE_INT, true);
+	natureObjectSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
 
 	TCODParserStruct* itemSpriteStruct = parser.newStructure("item_sprite_data");
-	itemSpriteStruct->addProperty("main", TCOD_TYPE_INT, true);
+	itemSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
+
+	TCODParserStruct* constructionSpriteStruct = parser.newStructure("construction_sprite_data");
+	constructionSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
+	constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
 
@@ -69,6 +75,7 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addStructure(creatureSpriteStruct);
 	tileTextureStruct->addStructure(natureObjectSpriteStruct);
 	tileTextureStruct->addStructure(itemSpriteStruct);
+	tileTextureStruct->addStructure(constructionSpriteStruct);
 
 	TCODParserStruct* tilesetStruct = parser.newStructure("tileset_data");
 	tilesetStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
@@ -135,21 +142,27 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 		if (currentTexture->Count() == 0) {
 			parser->error("Failed to load texture %s", name); 
 		}
-	} else if (boost::iequals(str->getName(), "creature_sprite_data")) {
-		if (currentTexture.get() == 0) {
-			parser->error(uninitialisedTilesetError);
-		}
+		return success;
+	}
+	
+	if (currentTexture.get() == 0) {
+		parser->error(uninitialisedTilesetError);
+		return false;
+	}
+	
+	// Sprite Sets
+	if (boost::iequals(str->getName(), "creature_sprite_data")) {
 		npcSpriteSet = NPCSpriteSet();
+		currentSpriteSet = SS_NPC;
 	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
-		if (currentTexture.get() == 0) {
-			parser->error(uninitialisedTilesetError);
-		}
 		natureObjectSpriteSet = NatureObjectSpriteSet();
+		currentSpriteSet = SS_NATURE;
 	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
-		if (currentTexture.get() == 0) {
-			parser->error(uninitialisedTilesetError);
-		}
 		itemSpriteSet = ItemSpriteSet();
+		currentSpriteSet = SS_ITEM;
+	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
+		constructionSpriteSet = ConstructionSpriteSet();
+		currentSpriteSet = SS_CONSTRUCTION;
 	}
 
 	return success;
@@ -162,42 +175,65 @@ bool TileSetLoader::parserFlag(TCODParser *parser,const char *name) {
 bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 	// Tile Texture Properties
 	if (currentTexture.get() != NULL) {
-		if (boost::iequals(name, "unknown_terrain")) {
-			tileSet->SetTerrain(TILENONE, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "grass_terrain")) {
-			tileSet->SetTerrain(TILEGRASS, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "ditch_terrain")) {
-			tileSet->SetTerrain(TILEDITCH, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "riverbed_terrain")) {
-			tileSet->SetTerrain(TILERIVERBED, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "bog_terrain")) {
-			tileSet->SetTerrain(TILEBOG, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "rock_terrain")) {
-			tileSet->SetTerrain(TILEROCK, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "mud_terrain")) {
-			tileSet->SetTerrain(TILEMUD, Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "water_levels")) {
-			for (int i = 0; i < TCOD_list_size(value.list); ++i)
-				tileSet->AddWater(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
-		} else if (boost::iequals(name, "minor_filth")) {
-			tileSet->SetFilthMinor(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "major_filth")) {
-			tileSet->SetFilthMajor(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "marker")) {
-			tileSet->SetMarker(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "blood")) {
-			tileSet->SetBlood(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "non_territory")) {
-			tileSet->SetNonTerritoryOverlay(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "territory")) {
-			tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "marked")) {
-			tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
-		} else if (boost::iequals(name, "main")) {
-			npcSpriteSet.tile = Sprite(value.i, currentTexture);
-			natureObjectSpriteSet.tile = Sprite(value.i, currentTexture);
-			itemSpriteSet.tile = Sprite(value.i, currentTexture);
-		}
+		switch (currentSpriteSet) {
+		case SS_NONE:
+			if (boost::iequals(name, "unknown_terrain")) {
+				tileSet->SetTerrain(TILENONE, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "grass_terrain")) {
+				tileSet->SetTerrain(TILEGRASS, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "ditch_terrain")) {
+				tileSet->SetTerrain(TILEDITCH, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "riverbed_terrain")) {
+				tileSet->SetTerrain(TILERIVERBED, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "bog_terrain")) {
+				tileSet->SetTerrain(TILEBOG, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "rock_terrain")) {
+				tileSet->SetTerrain(TILEROCK, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "mud_terrain")) {
+				tileSet->SetTerrain(TILEMUD, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "water_levels")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddWater(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			} else if (boost::iequals(name, "minor_filth")) {
+				tileSet->SetFilthMinor(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "major_filth")) {
+				tileSet->SetFilthMajor(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "marker")) {
+				tileSet->SetMarker(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "blood")) {
+				tileSet->SetBlood(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "non_territory")) {
+				tileSet->SetNonTerritoryOverlay(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "territory")) {
+				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "marked")) {
+				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
+			}
+			break;
+		case SS_NPC:
+			if (boost::iequals(name, "sprite")) {
+				npcSpriteSet.tile = Sprite(value.i, currentTexture);
+			}
+			break;
+		case SS_ITEM:
+			if (boost::iequals(name, "sprite")) {
+				itemSpriteSet.tile = Sprite(value.i, currentTexture);
+			}
+			break;
+		case SS_NATURE:
+			if (boost::iequals(name, "sprite")) {
+				natureObjectSpriteSet.tile = Sprite(value.i, currentTexture);
+			}
+			break;
+		case SS_CONSTRUCTION:
+			if (boost::iequals(name, "sprites")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					constructionSpriteSet.sprites.push_back(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			} else if (boost::iequals(name, "width")) {
+				constructionSpriteSet.width = value.i;
+			}
+			break;
+		}	
 		return success;
 	}
 
@@ -240,18 +276,32 @@ bool TileSetLoader::parserEndStruct(TCODParser *parser,const TCODParserStruct *s
 		} else {
 			tileSet->AddNPCSpriteSet(std::string(name), npcSpriteSet);
 		}
+		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultNatureObjectSpriteSet(natureObjectSpriteSet);
 		} else {
 			tileSet->AddNatureObjectSpriteSet(std::string(name), natureObjectSpriteSet);
 		}
+		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultItemSpriteSet(itemSpriteSet);
 		} else {
 			tileSet->AddItemSpriteSet(std::string(name), itemSpriteSet);
 		}
+		currentSpriteSet = SS_NONE;
+	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
+		if (constructionSpriteSet.sprites.size() > 0)
+		{
+			constructionSpriteSet.width = std::min(constructionSpriteSet.width, (int)constructionSpriteSet.sprites.size());
+			if (name == 0) {
+				tileSet->SetDefaultConstructionSpriteSet(constructionSpriteSet);
+			} else {
+				tileSet->AddConstructionSpriteSet(std::string(name), constructionSpriteSet);
+			}
+		}
+		currentSpriteSet = SS_NONE;
 	}
 	
 	
