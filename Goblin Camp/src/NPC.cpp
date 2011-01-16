@@ -1556,8 +1556,6 @@ bool NPC::HasEffect(StatusEffectType effect) {
 
 std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 
-/*TODO: Calling jobs.clear() isn't a good idea as the NPC can have more than one job queued up, should use
-TaskFinished(TASKFAILFATAL) or just remove the job we want aborted*/
 void NPC::AbortCurrentJob(bool remove_job) {
 	boost::shared_ptr<Job> job = jobs.front();
 	TaskFinished(TASKFAILFATAL, "Job aborted");
@@ -1992,7 +1990,14 @@ void NPC::UpdateVelocity() {
 
 						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
 							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
-								//TODO: Create attack based on weight and damage construct
+								Attack attack;
+								attack.Type(DAMAGE_BLUNT);
+								TCOD_dice_t damage;
+								damage.addsub = velocity/5;
+								damage.multiplier = 1;
+								damage.nb_dices = 1;
+								damage.nb_faces = 5 + effectiveStats[SIZE];
+								construct->Damage(&attack);
 							}
 						}
 

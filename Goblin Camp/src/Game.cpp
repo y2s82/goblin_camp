@@ -310,7 +310,6 @@ void Game::GoblinCount(int add) { goblinCount += add; }
 
 
 //Moves the entity to a valid walkable tile
-//TODO: make it find the closest walkable tile instead of going right, that will lead to weirdness and problems
 void Game::BumpEntity(int uid) {
 	boost::shared_ptr<Entity> entity;
 
