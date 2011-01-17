@@ -58,7 +58,6 @@ void SideBar::Draw(TCODConsole* console) {
 		int edgeX = console->getWidth();
 		leftX = edgeX - width;
 		topY = std::max(0,(console->getHeight() - height) / 2);
-		TCODConsole minimap(11,11);
 		
 		console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 		
@@ -66,12 +65,10 @@ void SideBar::Draw(TCODConsole* console) {
 			contents->Draw(edgeX - (width-1), topY+14, console);
 		}
 		
-		Game::Inst()->Draw(entity.lock()->Center()-5, &minimap, false);
 		console->setDefaultForeground(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
-		minimap.flush();
-		TCODConsole::blit(&minimap, 0, 0, 11, 11, console, edgeX - (width-4), topY + 2);
-
+		Game::Inst()->Draw(console, entity.lock()->Center()-5, false, edgeX - (width - 4), topY + 2, 11, 11);
+		
 		if (npc) { //Draw health bar
 			boost::shared_ptr<NPC> creature = boost::static_pointer_cast<NPC>(entity.lock());
 			int health = (int)(((double)creature->GetHealth() / (double)std::max(1, creature->GetMaxHealth())) * 10);

@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class MapMarker;
 
+
 #define TERRITORY_OVERLAY (1 << 0)
 
 class Map : public ITCODPathCallback {
@@ -45,6 +46,8 @@ private:
 	unsigned int markerids;
 
 public:
+	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
+
 	TCODHeightMap *heightMap;
 	static Map* Inst();
 	void Reset(int,int);
@@ -62,7 +65,6 @@ public:
 	void MoveFrom(int,int,int);
 	void SetConstruction(int,int,int);
 	int GetConstruction(int,int) const;
-	void Draw(Coordinate, TCODConsole*);
 	boost::weak_ptr<WaterNode> GetWater(int,int);
 	void SetWater(int,int,boost::shared_ptr<WaterNode>);
 	bool Low(int,int) const;
@@ -108,4 +110,7 @@ public:
 	unsigned int AddMarker(MapMarker);
 	void RemoveMarker(int);
 	TCODColor GetColor(int,int);
+
+	MarkerIterator MarkerBegin();
+	MarkerIterator MarkerEnd();
 };
