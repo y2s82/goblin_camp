@@ -1,8 +1,8 @@
-tileset_data "TestSmall" {
-	tileWidth=8
-	tileHeight=8
-	description="Test tileset with crappy sprites"
-	author="Immortius"
+tileset_data "TestMedium" {
+	tileWidth=16
+	tileHeight=16
+	description="Test tileset with various tiles sourced from Goblin Camp Forum"
+	author="onionknight, hutze, apostrophest"
 
 	tile_texture_data "tileset.png"
 	{
