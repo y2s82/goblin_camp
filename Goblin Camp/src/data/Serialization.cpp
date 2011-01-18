@@ -131,7 +131,7 @@ void Coordinate::load(Archive & ar, const unsigned int version) {
 //
 // class Game
 //
-BOOST_CLASS_VERSION(Game, 0)
+BOOST_CLASS_VERSION(Game, 1)
 
 template<class Archive>
 void Game::save(Archive & ar, const unsigned int version) const  {
@@ -150,7 +150,8 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & safeMonths;
 	ar & devMode;
 	ar & marks;
-	ar & upleft;
+	ar & camX;
+	ar & camY;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;
@@ -184,7 +185,14 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar & safeMonths;
 		ar & devMode;
 		ar & marks;
-		ar & upleft;
+		if (version < 1) {
+			ar & Coordinate();
+			camX = 0;
+			camY = 0;
+		} else {
+			ar & camX;
+			ar & camY;
+		}
 		ar & npcList;
 		ar & squadList;
 		ar & hostileSquadList;

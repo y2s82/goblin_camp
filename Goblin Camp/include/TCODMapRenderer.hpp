@@ -23,6 +23,7 @@ public:
 	TCODMapRenderer();
 	~TCODMapRenderer();
 
-	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX = 0, int posY = 0, int sizeX = 0, int sizeY = 0) ;
+	Coordinate TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) const;
+	void DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int posX = 0, int posY = 0, int sizeX = 0, int sizeY = 0) ;
 	void PreparePrefabs();
 };
