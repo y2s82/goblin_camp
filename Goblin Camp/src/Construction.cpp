@@ -82,7 +82,7 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 Construction::~Construction() {
 	for (int ix = x; ix < (signed int)x + Construction::Blueprint(type).X(); ++ix) {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
-			Map::Inst()->Buildable(ix,iy,true);
+			Map::Inst()->SetBuildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
 			Map::Inst()->BlocksLight(ix,iy,false);

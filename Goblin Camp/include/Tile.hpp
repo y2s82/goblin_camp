@@ -74,8 +74,8 @@ public:
 	void BlocksLight(bool);
 	bool IsWalkable() const;
 	void SetWalkable(bool);
-	bool Buildable() const;
-	void Buildable(bool);
+	bool IsBuildable() const;
+	void SetBuildable(bool);
 	int MoveCost() const;
 	int MoveCost(void*) const;
 	void SetMoveCost(int);
