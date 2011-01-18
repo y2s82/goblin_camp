@@ -65,7 +65,7 @@ Stockpile::~Stockpile() {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->GetConstruction(x,y) == uid) {
-				Map::Inst()->Buildable(x,y,true);
+				Map::Inst()->SetBuildable(x,y,true);
 				Map::Inst()->SetWalkable(x,y,true);
 				Map::Inst()->SetConstruction(x,y,-1);
 			}
@@ -270,7 +270,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
-				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->Buildable(ix,iy) &&
+				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->IsBuildable(ix,iy) &&
 					Construction::Presets[type].tileReqs.find(Map::Inst()->Type(ix,iy)) != Construction::Presets[type].tileReqs.end()) {
 					if (Map::Inst()->GetConstruction(ix-1,iy) == uid ||
 						Map::Inst()->GetConstruction(ix+1,iy) == uid ||
@@ -278,7 +278,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 						Map::Inst()->GetConstruction(ix,iy+1) == uid) {
 							//Current tile is walkable, buildable, and adjacent to the current stockpile
 							Map::Inst()->SetConstruction(ix,iy,uid);
-							Map::Inst()->Buildable(ix,iy,false);
+							Map::Inst()->SetBuildable(ix,iy,false);
 							Map::Inst()->SetTerritory(ix,iy,true);
 							//Update corner values
 							if (ix < a.X()) a.X(ix);

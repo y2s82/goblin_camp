@@ -96,10 +96,10 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 Construction::~Construction() {
 	for (int ix = x; ix < (signed int)x + Construction::Blueprint(type).X(); ++ix) {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
-			Map::Inst()->Buildable(ix,iy,true);
+			Map::Inst()->SetBuildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
-			Map::Inst()->BlocksLight(ix,iy,false);
+			Map::Inst()->SetBlocksLight(ix,iy,false);
 		}
 	}
 	
@@ -186,8 +186,8 @@ int Construction::Build() {
 		for (unsigned int ix = x; ix < x + Construction::Blueprint(type).X(); ++ix) {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
 				Map::Inst()->SetWalkable(ix, iy, walkable);
-				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, Construction::Presets[type].blocksLight);
+				Map::Inst()->SetBlocksWater(ix, iy, !walkable);
+				Map::Inst()->SetBlocksLight(ix, iy, Construction::Presets[type].blocksLight);
 			}
 		}
 

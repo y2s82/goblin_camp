@@ -61,7 +61,7 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 
 NatureObject::~NatureObject() {
 	Map::Inst()->SetWalkable(x, y, true);
-	Map::Inst()->Buildable(x, y, true);
+	Map::Inst()->SetBuildable(x, y, true);
 }
 
 void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
