@@ -1068,8 +1068,8 @@ void Game::GenerateMap(uint32_t seed) {
 	//Create a bog
 	infinityCheck = 0;
 	while (infinityCheck < 1000) {
-		int x = random.Generate(map->Width()  - 1);
-		int y = random.Generate(map->Height() - 1);
+		int x = random.Generate(30, map->Width()  - 30);
+		int y = random.Generate(30, map->Height() - 30);
 		int riverDistance;
 		int distance;
 		int lineX, lineY;
@@ -1105,10 +1105,12 @@ void Game::GenerateMap(uint32_t seed) {
 			} while (!TCODLine::step(&lineX, &lineY));
 		}
 		if (riverDistance > 30) {
+			int lowOffset = random.Generate(-5, 5);
+			int highOffset = random.Generate(-5, 5);
 			for (int xOffset = -25; xOffset < 25; ++xOffset) {
 				int range = int(std::sqrt((double)(25*25 - xOffset*xOffset)));
-				int lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
-				int highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
+				lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
+				highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
 					map->Type(x+xOffset, y+yOffset, TILEBOG);
 				}
