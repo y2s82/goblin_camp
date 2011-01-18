@@ -140,20 +140,20 @@ void Tile::SetWalkable(bool value) {
 bool Tile::BlocksWater() const { return blocksWater; }
 void Tile::BlocksWater(bool value) { blocksWater = value; }
 
-int Tile::MoveCost(void* ptr) const {
+int Tile::GetMoveCost(void* ptr) const {
 	if (!static_cast<NPC*>(ptr)->HasHands()) {
 		if (construction >= 0) {
 			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(construction).lock()) {
-				if (cons->HasTag(DOOR)) return MoveCost()+50;
+				if (cons->HasTag(DOOR)) return GetMoveCost()+50;
 			}
 		}
 	}
-	int cost = MoveCost();
+	int cost = GetMoveCost();
 	if (cost == 0 && construction >= 0 && static_cast<NPC*>(ptr)->IsTunneler()) return 50;
 	return cost;
 }
 
-int Tile::MoveCost() const {
+int Tile::GetMoveCost() const {
 	if (!IsWalkable()) return 0;
 	int cost = moveCost;
 	if (construction >= 0) cost += 2;

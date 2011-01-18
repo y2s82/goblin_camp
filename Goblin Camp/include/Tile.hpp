@@ -76,8 +76,8 @@ public:
 	void SetWalkable(bool);
 	bool IsBuildable() const;
 	void SetBuildable(bool);
-	int MoveCost() const;
-	int MoveCost(void*) const;
+	int GetMoveCost() const;
+	int GetMoveCost(void*) const;
 	void SetMoveCost(int);
 	void MoveFrom(int);
 	void MoveTo(int);
