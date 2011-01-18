@@ -47,7 +47,7 @@ Map* Map::Inst() {
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
-	return (float)tileMap[x0][y0].MoveCost(ptr);
+	return (float)tileMap[x0][y0].GetMoveCost(ptr);
 }
 
 //Simple version that doesn't take npc information into account
