@@ -198,7 +198,7 @@ void Tile::SetWater(boost::shared_ptr<WaterNode> value) {water = value;}
 bool Tile::IsLow() const {return low;}
 void Tile::SetLow(bool value) {low = value;}
 
-int Tile::Graphic() const { return graphic; }
+int Tile::GetGraphic() const { return graphic; }
 TCODColor Tile::GetForeColor() const { 
 	return foreColor;
 }
@@ -212,8 +212,8 @@ TCODColor Tile::GetBackColor() const {
 	return result; 
 }
 
-void Tile::NatureObject(int val) { natureObject = val; }
-int Tile::NatureObject() const { return natureObject; }
+void Tile::SetNatureObject(int val) { natureObject = val; }
+int Tile::GetNatureObject() const { return natureObject; }
 
 boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
 void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}

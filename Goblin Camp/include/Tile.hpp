@@ -89,11 +89,11 @@ public:
 	void SetLow(bool);
 	bool BlocksWater() const;
 	void SetBlocksWater(bool);
-	int Graphic() const;
+	int GetGraphic() const;
 	TCODColor GetForeColor() const;
 	TCODColor GetBackColor() const;
-	void NatureObject(int);
-	int NatureObject() const;
+	void SetNatureObject(int);
+	int GetNatureObject() const;
 	boost::weak_ptr<FilthNode> GetFilth() const;
 	void SetFilth(boost::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood() const;

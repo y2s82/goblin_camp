@@ -83,7 +83,7 @@ namespace Script { namespace API {
 	
 	int PyItem::GetGraphic() {
 		if (ITEM_ALIVE(ptr)) {
-			return ptr->Graphic();
+			return ptr->GetGraphic();
 		} else {
 			LOG("WARNING: ITEM POINTER LOST");
 			return -1;

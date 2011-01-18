@@ -359,7 +359,7 @@ void NPC::Update() {
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
-		AddEffect(StatusEffect(CARRYING, carried.lock()->Graphic(), carried.lock()->Color()));
+		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
 	} else RemoveEffect(CARRYING);
 }
 

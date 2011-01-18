@@ -124,7 +124,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 }
 boost::weak_ptr<Item> Item::ContainedIn() {return container;}
 
-int Item::Graphic() {return graphic;}
+int Item::GetGraphic() {return graphic;}
 
 Attack Item::GetAttack() const {return attack;}
 
