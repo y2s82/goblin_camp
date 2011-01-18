@@ -1135,7 +1135,7 @@ bool Game::CheckTree(Coordinate, Coordinate) {
 void Game::FellTree(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Tree() && !natObj->Marked()) {
@@ -1157,7 +1157,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 void Game::DesignateTree(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Tree() && !natObj->Marked()) {
@@ -1173,7 +1173,7 @@ void Game::DesignateTree(Coordinate a, Coordinate b) {
 void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Harvestable() && !natObj->Marked()) {
@@ -1195,7 +1195,7 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 	if (natObj.lock()) {
-		Map::Inst()->NatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
+		Map::Inst()->SetNatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
 		natureList.erase(natObj.lock()->Uid());
 	}
 }
@@ -1223,7 +1223,7 @@ void Game::DesignateBog(Coordinate a, Coordinate b) {
 void Game::Undesignate(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {	
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj.lock() && natObj.lock()->Tree() && natObj.lock()->Marked()) {
@@ -1621,11 +1621,11 @@ void Game::CreateNatureObject(Coordinate location) {
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
 				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
-					Map::Inst()->NatureObject(ax,ay) < 0 &&
+					Map::Inst()->GetNatureObject(ax,ay) < 0 &&
 					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
 						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-						Map::Inst()->NatureObject(ax,ay,natObj->Uid());
+						Map::Inst()->SetNatureObject(ax,ay,natObj->Uid());
 						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 						Map::Inst()->SetBuildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 						Map::Inst()->SetBlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
@@ -1647,11 +1647,11 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
 		if (location.X() >= 0 && location.X() < Map::Inst()->Width() && 
 			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
-			Map::Inst()->NatureObject(location.X(),location.Y()) < 0 &&
+			Map::Inst()->GetNatureObject(location.X(),location.Y()) < 0 &&
 			Map::Inst()->GetConstruction(location.X(), location.Y()) < 0) {
 				boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-				Map::Inst()->NatureObject(location.X(),location.Y(),natObj->Uid());
+				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
 				Map::Inst()->SetBuildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
 				Map::Inst()->SetBlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
@@ -1663,9 +1663,9 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 void Game::RemoveNatureObject(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int uid = Map::Inst()->NatureObject(x,y);
+			int uid = Map::Inst()->GetNatureObject(x,y);
 			if (uid >= 0) {
-				Map::Inst()->NatureObject(x,y,-1);
+				Map::Inst()->SetNatureObject(x,y,-1);
 				natureList.erase(uid);
 			}
 		}

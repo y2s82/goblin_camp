@@ -738,7 +738,7 @@ boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 			}
 		}
 
-		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
+		int entity = Map::Inst()->GetNatureObject(pos.X(), pos.Y());
 		if (entity > -1) return (Game::Inst()->natureList[entity]);
 
 		entity = Map::Inst()->GetConstruction(pos.X(), pos.Y());
@@ -765,7 +765,7 @@ void UI::HandleUnderCursor(Coordinate pos, std::list<boost::weak_ptr<Entity> >* 
 			}
 		}
 
-		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
+		int entity = Map::Inst()->GetNatureObject(pos.X(), pos.Y());
 		if (entity > -1) {
 			result->push_back(Game::Inst()->natureList[entity]);
 		}

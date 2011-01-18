@@ -70,12 +70,12 @@ public:
 	bool BlocksWater(int,int) const;
 	void SetBlocksWater(int,int,bool);
 	std::set<int>* NPCList(int,int);
-	int Graphic(int,int) const;
+	int GetGraphic(int,int) const;
 	TCODColor GetForeColor(int,int) const;
 	void ForeColor(int,int,TCODColor);
 	TCODColor GetBackColor(int,int) const;
-	void NatureObject(int,int,int);
-	int NatureObject(int,int) const;
+	void SetNatureObject(int,int,int);
+	int GetNatureObject(int,int) const;
 	std::set<int>* ItemList(int,int);
 	boost::weak_ptr<FilthNode> GetFilth(int,int);
 	void SetFilth(int,int,boost::shared_ptr<FilthNode>);

@@ -192,8 +192,8 @@ void SpawningPool::Expand() {
 		if (location.Y() > b.Y()) b.Y(location.Y());
 
 		//Swallow nature objects
-		if (Map::Inst()->NatureObject(location.X(), location.Y()) >= 0) {
-			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->NatureObject(location.X(), location.Y())]);
+		if (Map::Inst()->GetNatureObject(location.X(), location.Y()) >= 0) {
+			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->GetNatureObject(location.X(), location.Y())]);
 		}
 		//Destroy buildings
 		if (Map::Inst()->GetConstruction(location.X(), location.Y()) >= 0) {

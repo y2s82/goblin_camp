@@ -220,8 +220,8 @@ void StartNewGame() {
 	//Clear starting area
 	for (int x = spawnTopCorner.X(); x < spawnBottomCorner.X(); ++x) {
 		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
-			if (Map::Inst()->NatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
-				game->RemoveNatureObject(game->natureList[Map::Inst()->NatureObject(x,y)]);
+			if (Map::Inst()->GetNatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
+				game->RemoveNatureObject(game->natureList[Map::Inst()->GetNatureObject(x,y)]);
 			}
 		}
 	}

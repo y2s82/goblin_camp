@@ -115,7 +115,7 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 		for (int x = upleft.X(); x < upleft.X() + console->getWidth(); ++x) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
-				console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), GetForeColor(x,y), GetBackColor(x,y));
+				console->putCharEx(x-screenDeltaX,y-(screenDeltaY), GetGraphic(x,y), GetForeColor(x,y), GetBackColor(x,y));
 
 				boost::weak_ptr<WaterNode> water = GetWater(x,y);
 				if (water.lock()) {
@@ -174,8 +174,8 @@ std::set<int>* Map::ItemList(int x, int y) {
 	return &tileMap[0][0].itemList;
 }
 
-int Map::Graphic(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Graphic(); 
+int Map::GetGraphic(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetGraphic(); 
 	return '?';
 }
 TCODColor Map::GetForeColor(int x, int y) const { 
@@ -195,11 +195,11 @@ TCODColor Map::GetBackColor(int x, int y) const {
 	return TCODColor::yellow;
 }
 
-void Map::NatureObject(int x, int y, int val) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].NatureObject(val); 
+void Map::SetNatureObject(int x, int y, int val) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetNatureObject(val); 
 }
-int Map::NatureObject(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].NatureObject(); 
+int Map::GetNatureObject(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetNatureObject(); 
 	return -1;
 }
 
@@ -250,7 +250,7 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].SetLow(false);
 	tileMap[x][y].SetBlocksWater(false);
 	tileMap[x][y].SetBlocksLight(false);
-	tileMap[x][y].NatureObject(-1);
+	tileMap[x][y].SetNatureObject(-1);
 	tileMap[x][y].itemList.clear();
 	tileMap[x][y].npcList.clear();
 	tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
