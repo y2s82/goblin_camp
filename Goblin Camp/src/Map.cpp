@@ -29,7 +29,7 @@ overlayFlags(0), markerids(0) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
-			tileMap[i][e].type(TILEGRASS);
+			tileMap[i][e].SetType(TILEGRASS);
 		}
 	}
 	width = tileMap.size();
@@ -51,12 +51,12 @@ float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
 }
 
 //Simple version that doesn't take npc information into account
-bool Map::Walkable(int x, int y) const {
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Walkable();
+bool Map::IsWalkable(int x, int y) const {
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsWalkable();
 	return false;
 }
 
-bool Map::Walkable(int x, int y, void* ptr) const {
+bool Map::IsWalkable(int x, int y, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return true;
 	if (!static_cast<NPC*>(ptr)->HasHands()) {
 		if (GetConstruction(x,y) >= 0) {
@@ -67,11 +67,11 @@ bool Map::Walkable(int x, int y, void* ptr) const {
 			}
 		}
 	}
-	return Walkable(x,y);
+	return IsWalkable(x,y);
 }
 
 void Map::SetWalkable(int x,int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Walkable(value); 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWalkable(value); 
 }
 
 int Map::Width() { return width; }
@@ -84,11 +84,11 @@ void Map::Buildable(int x, int y, bool value) {
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Buildable(value); 
 }
 TileType Map::Type(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].type(); 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
 	return TILENONE;
 }
 void Map::Type(int x, int y, TileType ntype) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].type(ntype); 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetType(ntype); 
 }
 void Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
@@ -242,8 +242,8 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 }
 
 void Map::Reset(int x, int y) {
-	tileMap[x][y].type(TILEGRASS);
-	tileMap[x][y].Walkable(true);
+	tileMap[x][y].SetType(TILEGRASS);
+	tileMap[x][y].SetWalkable(true);
 	tileMap[x][y].Buildable(true);
 	tileMap[x][y].SetConstruction(-1);
 	tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
@@ -277,9 +277,9 @@ int Map::GetMoveModifier(int x, int y) {
 	bool bridge = false;
 	if (construction) bridge = (construction->Built() && construction->HasTag(BRIDGE));
 
-	if (tileMap[x][y].type() == TILEBOG && !bridge) modifier += 10;
-	else if (tileMap[x][y].type() == TILEDITCH && !bridge) modifier += 4;
-	else if (tileMap[x][y].type() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
+	if (tileMap[x][y].GetType() == TILEBOG && !bridge) modifier += 10;
+	else if (tileMap[x][y].GetType() == TILEDITCH && !bridge) modifier += 4;
+	else if (tileMap[x][y].GetType() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
 		modifier += 6;
 	}
 	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) { //Water adds 'depth' without a bridge
@@ -410,7 +410,7 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	for (int x = left; x <= right; ++x) {
 		for (int y = up; y <= down; ++y) {
 			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
-				if (Walkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y)) {
+				if (IsWalkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y)) {
 					Coordinate xy(x,y);
 					if (Game::Adjacent(xy, current) && Game::Adjacent(xy, move) && Game::Adjacent(xy, next)) {
 						moveX = x;

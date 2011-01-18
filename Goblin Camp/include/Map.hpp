@@ -49,8 +49,8 @@ public:
 	static Map* Inst();
 	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
-	bool Walkable(int,int) const;
-	bool Walkable(int,int,void*) const;
+	bool IsWalkable(int,int) const;
+	bool IsWalkable(int,int,void*) const;
 	void SetWalkable(int,int,bool);
 	int Width();
 	int Height();

@@ -115,16 +115,16 @@ void SpawningPool::Update() {
 			for (int x = a.X(); x <= b.X(); ++x) {
 				for (int y = a.Y(); y <= b.Y(); ++y) {
 					if (Map::Inst()->GetConstruction(x,y) == uid) {
-						if (Map::Inst()->Walkable(x-1,y)) {
+						if (Map::Inst()->IsWalkable(x-1,y)) {
 							spawnLocation = Coordinate(x-1,y);
 							break;
-						} else if (Map::Inst()->Walkable(x+1,y)) {
+						} else if (Map::Inst()->IsWalkable(x+1,y)) {
 							spawnLocation = Coordinate(x+1,y);
 							break;
-						} else if (Map::Inst()->Walkable(x,y+1)) {
+						} else if (Map::Inst()->IsWalkable(x,y+1)) {
 							spawnLocation = Coordinate(x,y+1);
 							break;
-						} else if (Map::Inst()->Walkable(x,y-1)) {
+						} else if (Map::Inst()->IsWalkable(x,y-1)) {
 							spawnLocation = Coordinate(x,y-1);
 							break;
 						}
