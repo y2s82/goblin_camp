@@ -1054,7 +1054,7 @@ CONTINUEEAT:
 				} else {
 					AddEffect(WORKING);
 					if (++timer >= 50) {
-						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
+						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
 						TaskFinished(TASKSUCCESS);
 					}

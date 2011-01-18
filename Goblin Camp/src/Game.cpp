@@ -1555,7 +1555,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
-			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
+			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
@@ -1628,7 +1628,7 @@ void Game::CreateNatureObject(Coordinate location) {
 						Map::Inst()->NatureObject(ax,ay,natObj->Uid());
 						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 						Map::Inst()->SetBuildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->SetBlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 				}
 			}
 		}
@@ -1654,7 +1654,7 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 				Map::Inst()->NatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
 				Map::Inst()->SetBuildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->BlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->SetBlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
 		}
 
 	}

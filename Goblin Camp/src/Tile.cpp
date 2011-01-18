@@ -116,7 +116,7 @@ void Tile::SetType(TileType newType) {
 }
 
 bool Tile::BlocksLight() const { return !vis; }
-void Tile::BlocksLight(bool value) { vis = !value; }
+void Tile::SetBlocksLight(bool value) { vis = !value; }
 
 bool Tile::IsWalkable() const {
 	return walkable;
@@ -138,7 +138,7 @@ void Tile::SetWalkable(bool value) {
 }
 
 bool Tile::BlocksWater() const { return blocksWater; }
-void Tile::BlocksWater(bool value) { blocksWater = value; }
+void Tile::SetBlocksWater(bool value) { blocksWater = value; }
 
 int Tile::GetMoveCost(void* ptr) const {
 	if (!static_cast<NPC*>(ptr)->HasHands()) {
@@ -195,14 +195,14 @@ int Tile::GetConstruction() const { return construction; }
 boost::weak_ptr<WaterNode> Tile::GetWater() const {return boost::weak_ptr<WaterNode>(water);}
 void Tile::SetWater(boost::shared_ptr<WaterNode> value) {water = value;}
 
-bool Tile::Low() const {return low;}
-void Tile::Low(bool value) {low = value;}
+bool Tile::IsLow() const {return low;}
+void Tile::SetLow(bool value) {low = value;}
 
 int Tile::Graphic() const { return graphic; }
-TCODColor Tile::ForeColor() const { 
+TCODColor Tile::GetForeColor() const { 
 	return foreColor;
 }
-TCODColor Tile::BackColor() const {
+TCODColor Tile::GetBackColor() const {
 	if (!blood && !marked) return backColor;
 	TCODColor result = backColor;
 	if (blood)

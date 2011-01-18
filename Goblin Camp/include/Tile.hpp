@@ -71,7 +71,7 @@ public:
 	TileType GetType();
 	void SetType(TileType);
 	bool BlocksLight() const;
-	void BlocksLight(bool);
+	void SetBlocksLight(bool);
 	bool IsWalkable() const;
 	void SetWalkable(bool);
 	bool IsBuildable() const;
@@ -85,13 +85,13 @@ public:
 	int GetConstruction() const;
 	boost::weak_ptr<WaterNode> GetWater() const;
 	void SetWater(boost::shared_ptr<WaterNode>);
-	bool Low() const;
-	void Low(bool);
+	bool IsLow() const;
+	void SetLow(bool);
 	bool BlocksWater() const;
-	void BlocksWater(bool);
+	void SetBlocksWater(bool);
 	int Graphic() const;
-	TCODColor ForeColor() const;
-	TCODColor BackColor() const;
+	TCODColor GetForeColor() const;
+	TCODColor GetBackColor() const;
 	void NatureObject(int);
 	int NatureObject() const;
 	boost::weak_ptr<FilthNode> GetFilth() const;

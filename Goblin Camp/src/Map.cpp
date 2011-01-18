@@ -115,7 +115,7 @@ void Map::Draw(Coordinate upleft, TCODConsole *console) {
 		for (int x = upleft.X(); x < upleft.X() + console->getWidth(); ++x) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
-				console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), ForeColor(x,y), BackColor(x,y));
+				console->putCharEx(x-screenDeltaX,y-(screenDeltaY), Graphic(x,y), GetForeColor(x,y), GetBackColor(x,y));
 
 				boost::weak_ptr<WaterNode> water = GetWater(x,y);
 				if (water.lock()) {
@@ -149,20 +149,20 @@ void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) {
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWater(value); 
 }
 
-bool Map::Low(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Low();
+bool Map::IsLow(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsLow();
 	return false;
 }
-void Map::Low(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Low(value); 
+void Map::SetLow(int x, int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetLow(value); 
 }
 
 bool Map::BlocksWater(int x, int y) const { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksWater(); 
 	return true;
 }
-void Map::BlocksWater(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].BlocksWater(value); 
+void Map::SetBlocksWater(int x, int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlocksWater(value); 
 }
 
 std::set<int>* Map::NPCList(int x, int y) { 
@@ -178,8 +178,8 @@ int Map::Graphic(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Graphic(); 
 	return '?';
 }
-TCODColor Map::ForeColor(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor(); 
+TCODColor Map::GetForeColor(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor(); 
 	return TCODColor::pink;
 }
 
@@ -190,8 +190,8 @@ void Map::ForeColor(int x, int y, TCODColor color) {
 	}
 }
 
-TCODColor Map::BackColor(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BackColor(); 
+TCODColor Map::GetBackColor(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetBackColor(); 
 	return TCODColor::yellow;
 }
 
@@ -223,8 +223,8 @@ bool Map::BlocksLight(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksLight(); 
 	return true;
 }
-void Map::BlocksLight(int x, int y, bool val) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].BlocksLight(val); 
+void Map::SetBlocksLight(int x, int y, bool val) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlocksLight(val); 
 }
 
 bool Map::LineOfSight(Coordinate a, Coordinate b) {
@@ -247,9 +247,9 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].SetBuildable(true);
 	tileMap[x][y].SetConstruction(-1);
 	tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
-	tileMap[x][y].Low(false);
-	tileMap[x][y].BlocksWater(false);
-	tileMap[x][y].BlocksLight(false);
+	tileMap[x][y].SetLow(false);
+	tileMap[x][y].SetBlocksWater(false);
+	tileMap[x][y].SetBlocksLight(false);
 	tileMap[x][y].NatureObject(-1);
 	tileMap[x][y].itemList.clear();
 	tileMap[x][y].npcList.clear();
@@ -457,6 +457,6 @@ void Map::UpdateMarkers() {
 }
 
 TCODColor Map::GetColor(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].ForeColor();
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor();
 	return TCODColor::white;
 }
