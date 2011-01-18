@@ -76,12 +76,12 @@ void Map::SetWalkable(int x,int y, bool value) {
 
 int Map::Width() { return width; }
 int Map::Height() { return height; }
-bool Map::Buildable(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].Buildable(); 
+bool Map::IsBuildable(int x, int y) const { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsBuildable(); 
 	return false;
 }
-void Map::Buildable(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Buildable(value); 
+void Map::SetBuildable(int x, int y, bool value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBuildable(value); 
 }
 TileType Map::Type(int x, int y) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
@@ -244,7 +244,7 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 void Map::Reset(int x, int y) {
 	tileMap[x][y].SetType(TILEGRASS);
 	tileMap[x][y].SetWalkable(true);
-	tileMap[x][y].Buildable(true);
+	tileMap[x][y].SetBuildable(true);
 	tileMap[x][y].SetConstruction(-1);
 	tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
 	tileMap[x][y].Low(false);

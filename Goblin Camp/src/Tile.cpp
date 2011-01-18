@@ -170,8 +170,8 @@ int Tile::MoveCost() const {
 }
 void Tile::SetMoveCost(int value) { moveCost = value; }
 
-void Tile::Buildable(bool value) { buildable = value; }
-bool Tile::Buildable() const { return buildable; }
+void Tile::SetBuildable(bool value) { buildable = value; }
+bool Tile::IsBuildable() const { return buildable; }
 
 void Tile::MoveFrom(int uid) {
 	if (npcList.find(uid) == npcList.end()) {

@@ -76,7 +76,7 @@ Game* Game::Inst() {
 bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType> tileReqs) {
 	for (int x = target.X(); x < target.X() + size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + size.Y(); ++y) {
-			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->Buildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
+			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
 		}
 	}
 	return true;
@@ -132,7 +132,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
-			Map::Inst()->Buildable(x,y,false);
+			Map::Inst()->SetBuildable(x,y,false);
 			Map::Inst()->SetConstruction(x,y,newCons->Uid());
 			Map::Inst()->SetTerritory(x,y,true);
 		}
@@ -167,7 +167,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//We want to create 1 stockpile, at a, and then expand it from a to b.
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
-	Map::Inst()->Buildable(a.X(), a.Y(), false);
+	Map::Inst()->SetBuildable(a.X(), a.Y(), false);
 	Map::Inst()->SetConstruction(a.X(), a.Y(), newSp->Uid());
 	Map::Inst()->SetTerritory(a.X(), a.Y(), true);
 	newSp->Expand(a,b);
@@ -424,7 +424,7 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 		Coordinate blueprint = Construction::Blueprint(construct->Type());
 		for (int x = construct->X(); x < construct->X() + blueprint.X(); ++x) {
 			for (int y = construct->Y(); y < construct->Y() + blueprint.Y(); ++y) {
-				Map::Inst()->Buildable(x,y,true);
+				Map::Inst()->SetBuildable(x,y,true);
 				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
@@ -1627,7 +1627,7 @@ void Game::CreateNatureObject(Coordinate location) {
 						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 						Map::Inst()->NatureObject(ax,ay,natObj->Uid());
 						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->SetBuildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
 						Map::Inst()->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 				}
 			}
@@ -1653,7 +1653,7 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 				Map::Inst()->NatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->Buildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->SetBuildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
 				Map::Inst()->BlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
 		}
 

@@ -54,8 +54,8 @@ public:
 	void SetWalkable(int,int,bool);
 	int Width();
 	int Height();
-	bool Buildable(int,int) const;
-	void Buildable(int,int,bool);
+	bool IsBuildable(int,int) const;
+	void SetBuildable(int,int,bool);
 	TileType Type(int,int);
 	void Type(int,int,TileType);
 	void MoveTo(int,int,int);
