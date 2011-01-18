@@ -156,7 +156,7 @@ void Container::Draw(Coordinate upleft, TCODConsole* console) {
 		if (!items.empty() && items.begin()->lock())
 			console->putCharEx(screenx, screeny, items.begin()->lock()->Graphic(), items.begin()->lock()->Color(), color);
 		else
-			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
+			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
 	}
 }
 
