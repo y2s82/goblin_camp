@@ -46,11 +46,11 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-	TileType _type;
+	TileType type;
 	bool vis; //Does light pass through this tile? Tile type, but also constructions/objects affect this
 	bool walkable;
 	bool buildable;
-	int _moveCost;
+	int moveCost;
 	int construction;
 	bool low, blocksWater;
 	boost::shared_ptr<WaterNode> water;
@@ -68,12 +68,12 @@ private:
 	
 public:
 	Tile(TileType = TILEGRASS, int = 1);
-	TileType type();
-	void type(TileType);
+	TileType GetType();
+	void SetType(TileType);
 	bool BlocksLight() const;
 	void BlocksLight(bool);
-	bool Walkable() const;
-	void Walkable(bool);
+	bool IsWalkable() const;
+	void SetWalkable(bool);
 	bool Buildable() const;
 	void Buildable(bool);
 	int MoveCost() const;

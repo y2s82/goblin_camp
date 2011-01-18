@@ -195,7 +195,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 				for (int iy = construct->Y()-1; iy <= construct->Y() + Construction::Blueprint(construct->Type()).Y(); ++iy) {
 					if (ix == construct->X()-1 || ix == construct->X() + Construction::Blueprint(construct->Type()).X() ||
 						iy == construct->Y()-1 || iy == construct->Y() + Construction::Blueprint(construct->Type()).Y()) {
-							if (Map::Inst()->Walkable(ix,iy)) {
+							if (Map::Inst()->IsWalkable(ix,iy)) {
 								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
 									closest = Coordinate(ix,iy);
 							}
@@ -207,7 +207,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 				for (int iy = ent.lock()->Y()-1; iy <= ent.lock()->Y()+1; ++iy) {
 					if (ix == ent.lock()->X()-1 || ix == ent.lock()->X()+1 ||
 						iy == ent.lock()->Y()-1 || iy == ent.lock()->Y()+1) {
-							if (Map::Inst()->Walkable(ix,iy)) {
+							if (Map::Inst()->IsWalkable(ix,iy)) {
 								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
 									closest = Coordinate(ix,iy);
 							}
@@ -248,7 +248,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	int tries = 0;
 	int radius = 1;
 	Coordinate originalTarget = target;
-	while (!Map::Inst()->Walkable(target.X(), target.Y()) && tries < 20) {
+	while (!Map::Inst()->IsWalkable(target.X(), target.Y()) && tries < 20) {
 		target.X(originalTarget.X() + Random::Generate(-radius, radius));
 		target.Y(originalTarget.Y() + Random::Generate(-radius, radius));
 		if (++tries % 3 == 0) ++radius;
@@ -324,11 +324,11 @@ void Game::BumpEntity(int uid) {
 	}
 
 	if (entity) {
-		if (!Map::Inst()->Walkable(entity->Position().X(), entity->Position().Y())) {
+		if (!Map::Inst()->IsWalkable(entity->Position().X(), entity->Position().Y())) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
 					for (int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi)) {
+						if (Map::Inst()->IsWalkable(xi, yi)) {
 							entity->Position(Coordinate(xi, yi));
 							return;
 						}
@@ -1573,7 +1573,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target) {
 		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
 			if (ix == target.X()-1 || ix == target.X()+1 ||
 				iy == target.Y()-1 || iy == target.Y()+1) {
-					if (Map::Inst()->Walkable(ix,iy)) {
+					if (Map::Inst()->IsWalkable(ix,iy)) {
 						if (Distance(from.X(), from.Y(), ix, iy) < Distance(from.X(), from.Y(), closest.X(), closest.Y()))
 							closest = Coordinate(ix,iy);
 					}
@@ -1589,7 +1589,7 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 }
 
 void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->Walkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
+	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
 
@@ -1618,7 +1618,7 @@ void Game::CreateNatureObject(Coordinate location) {
 				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
+				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
 					Map::Inst()->NatureObject(ax,ay) < 0 &&
 					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));

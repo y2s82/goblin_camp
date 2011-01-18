@@ -1045,11 +1045,11 @@ BOOST_CLASS_VERSION(Tile, 0)
 
 template<class Archive>
 void Tile::save(Archive & ar, const unsigned int version) const {
-	ar & _type;
+	ar & type;
 	ar & vis;
 	ar & walkable;
 	ar & buildable;
-	ar & _moveCost;
+	ar & moveCost;
 	ar & construction;
 	ar & low;
 	ar & blocksWater;
@@ -1078,11 +1078,11 @@ void Tile::save(Archive & ar, const unsigned int version) const {
 template<class Archive>
 void Tile::load(Archive & ar, const unsigned int version) {
 	if (version == 0) {
-		ar & _type;
+		ar & type;
 		ar & vis;
 		ar & walkable;
 		ar & buildable;
-		ar & _moveCost;
+		ar & moveCost;
 		ar & construction;
 		ar & low;
 		ar & blocksWater;

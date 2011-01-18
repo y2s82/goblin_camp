@@ -33,7 +33,7 @@ Tile::Tile(TileType newType, int newCost) :
 	vis(true),
 	walkable(true),
 	buildable(true),
-	_moveCost(newCost),
+	moveCost(newCost),
 	construction(-1),
 	low(false),
 	blocksWater(false),
@@ -52,14 +52,14 @@ Tile::Tile(TileType newType, int newCost) :
 	corruption(0),
 	territory(false)
 {
-	type(newType);
+	SetType(newType);
 }
 
-TileType Tile::type() { return _type; }
+TileType Tile::GetType() { return type; }
 
-void Tile::type(TileType newType) {
-	_type = newType;
-	if (_type == TILEGRASS) {
+void Tile::SetType(TileType newType) {
+	type = newType;
+	if (type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true;
 		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
 		backColor = TCODColor(0, 0, 0);
@@ -75,12 +75,12 @@ void Tile::type(TileType newType) {
 		case 8: graphic = ':'; break;
 		case 9: graphic = '\''; break;
 		}
-	} else if (_type == TILEDITCH || _type == TILERIVERBED) {
+	} else if (type == TILEDITCH || type == TILERIVERBED) {
 		vis = true; walkable = true; buildable = true; low = true;
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
-		_moveCost = Random::Generate(3, 5);
-	} else if (_type == TILEBOG) {
+		moveCost = Random::Generate(3, 5);
+	} else if (type == TILEBOG) {
 		vis = true; walkable = true; buildable = true; low = false;
 		switch (Random::Generate(9)) {
 		case 0:
@@ -96,13 +96,13 @@ void Tile::type(TileType newType) {
 		}
 		originalForeColor = TCODColor(Random::Generate(184), 127, 70);
 		backColor = TCODColor(60,30,20);
-		_moveCost = Random::Generate(6, 10);
-	} else if (_type == TILEROCK) {
+		moveCost = Random::Generate(6, 10);
+	} else if (type == TILEROCK) {
 		vis = true; walkable = true; buildable = true; low = false;
 		graphic = (Random::GenerateBool() ? ',' : '.');
 		originalForeColor = TCODColor(Random::Generate(182, 182 + 19), Random::Generate(182, 182 + 19), Random::Generate(182, 182 + 19));
 		backColor = TCODColor(0, 0, 0);
-	} else if (_type == TILEMUD) {
+	} else if (type == TILEMUD) {
 		vis = true; walkable = true; buildable = true; low = false;
 		switch (rand() % 2) {
 		case 0: graphic = '~'; break;
@@ -110,7 +110,7 @@ void Tile::type(TileType newType) {
 		}
 		originalForeColor = TCODColor(120 + rand() % 60, 80 + rand() % 50, 0);
 		backColor = TCODColor(0, 0, 0);
-		_moveCost = 5;
+		moveCost = 5;
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
 }
@@ -118,10 +118,10 @@ void Tile::type(TileType newType) {
 bool Tile::BlocksLight() const { return !vis; }
 void Tile::BlocksLight(bool value) { vis = !value; }
 
-bool Tile::Walkable() const {
+bool Tile::IsWalkable() const {
 	return walkable;
 }
-void Tile::Walkable(bool value) {
+void Tile::SetWalkable(bool value) {
 	std::queue<int> bumpQueue;
 	walkable = value;
 	if (value == false) {
@@ -154,8 +154,8 @@ int Tile::MoveCost(void* ptr) const {
 }
 
 int Tile::MoveCost() const {
-	if (!Walkable()) return 0;
-	int cost = _moveCost;
+	if (!IsWalkable()) return 0;
+	int cost = moveCost;
 	if (construction >= 0) cost += 2;
 
 	//If a construction exists here, and it's a bridge, then movecost = 1 (disregards mud/ditch/etc)
@@ -168,7 +168,7 @@ int Tile::MoveCost() const {
 
 	return cost;
 }
-void Tile::SetMoveCost(int value) { _moveCost = value; }
+void Tile::SetMoveCost(int value) { moveCost = value; }
 
 void Tile::Buildable(bool value) { buildable = value; }
 bool Tile::Buildable() const { return buildable; }
@@ -227,17 +227,17 @@ void Tile::Unmark() { marked = false; }
 void Tile::WalkOver() {
 	//Ground under a construction wont turn to mud
 	if (walkedOver < 120 || construction < 0) ++walkedOver;
-	if (_type == TILEGRASS) {
+	if (type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
-		if (walkedOver > 300 && rand() % 100 == 0) type(TILEMUD);
+		if (walkedOver > 300 && rand() % 100 == 0) SetType(TILEMUD);
 	}
 }
 
 void Tile::Corrupt(int magnitude) {
 	corruption += magnitude;
 	if (corruption < 0) corruption = 0;
-	if (_type == TILEGRASS) {
+	if (type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);;
 	}
 }
