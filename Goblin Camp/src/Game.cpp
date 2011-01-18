@@ -66,7 +66,8 @@ screenWidth(0),
 	safeMonths(9),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
-	upleft(Coordinate(0,0))
+	camX(0),
+	camY(0)
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
@@ -433,7 +434,8 @@ void Game::Init() {
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	
 	season = LateWinter;
-	upleft = Coordinate(180,180);
+	camX = 180;
+	camY = 180;
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
@@ -880,6 +882,10 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 	return boost::shared_ptr<Job>();
 }
 
+Coordinate Game::TileAt(int pixelX, int pixelY) const {
+	return renderer->TileAt(pixelX, pixelY, camX, camY, buffer);
+}
+
 namespace {
 	template <typename MapT>
 	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
@@ -901,7 +907,7 @@ namespace {
 	}
 }
 
-void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
+void Game::Draw(TCODConsole * console, float focusX, float focusY, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	if (sizeX == -1) {
 		sizeX = console->getWidth();
@@ -909,10 +915,10 @@ void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX,
 	if (sizeY == -1) {
 		sizeY = console->getHeight();
 	}
-	renderer->DrawMap(console, Map::Inst(), upleft, posX, posY, sizeX, sizeY);
+	renderer->DrawMap(console, Map::Inst(), focusX, focusY, posX, posY, sizeX, sizeY);
 
 	if (drawUI) {
-		UI::Inst()->Draw(upleft, console);
+		UI::Inst()->Draw(Coordinate(int(focusX), int(focusY)), console);
 	}
 }
 
@@ -1505,7 +1511,8 @@ void Game::Reset() {
 	running = false;
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	season = LateWinter;
-	upleft = Coordinate(180,180);
+	camX = 180;
+	camY = 180;
 	safeMonths = 9;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
@@ -1525,17 +1532,22 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 }
 
 void Game::CenterOn(Coordinate target) {
-	int x = std::max(0, target.X() - ScreenWidth() / 2);
-	int y = std::max(0, target.Y() - ScreenHeight() / 2);
-	upleft = Coordinate(x, y);
+	camX = target.X() + 0.5f;
+	camY = target.Y() + 0.5f;
+}
+
+void Game::MoveCam(float x, float y) {
+	camX = std::min(std::max(x + camX, 0.0f), Map::Inst()->Width() + 1.0f);
+	camY = std::min(std::max(y + camY, 0.0f), Map::Inst()->Height() + 1.0f);
 }
 
 void Game::SetMark(int i) {
-	marks[i] = Coordinate(upleft.X(), upleft.Y());
+	marks[i] = Coordinate(FloorToInt::convert(camX), FloorToInt::convert(camY));
 }
 
 void Game::ReturnToMark(int i) {
-	upleft = Coordinate(marks[i].X(), marks[i].Y());
+	camX = marks[i].X() + 0.5f;
+	camY = marks[i].Y() + 0.5f;
 }
 
 void Game::TranslateContainerListeners() {

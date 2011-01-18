@@ -88,6 +88,9 @@ void UI::Update() {
 void UI::HandleKeyboard() {
 	Config::KeyMap& keyMap = Config::GetKeyMap();
 
+	float diffX = 0;
+	float diffY = 0;
+
 	//TODO: This isn't pretty, but it works.
 	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
@@ -129,14 +132,16 @@ void UI::HandleKeyboard() {
 
 			int addition = 1;
 			if (ShiftPressed()) addition *= 10;
+			float diffX = 0;
+			float diffY = 0;
 			if (key.vk == TCODK_UP) {
-				if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
+				diffY -= 1;
 			} else if (key.vk == TCODK_DOWN) {
-				if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
+				diffY += 1;
 			} else if (key.vk == TCODK_LEFT) {
-				if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
+				diffX -= 1;
 			} else if (key.vk == TCODK_RIGHT) {
-				if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+				diffX += 1;
 			} else if (key.vk == TCODK_KP1) {
 				TCODMouse::showCursor(false);
 				drawCursor = true;
@@ -190,7 +195,7 @@ void UI::HandleKeyboard() {
 			} else if (key.vk == TCODK_PRINTSCREEN) {
 				Data::SaveScreenshot();
 			}
-
+			
 			if (key.vk >= TCODK_F1 && key.vk <= TCODK_F12) {
 				if(ShiftPressed()) {
 					Game::Inst()->SetMark(key.vk - TCODK_F1);
@@ -211,28 +216,25 @@ void UI::HandleKeyboard() {
 	}
 
 	if (mouseInput.x < 0) {
-		Game::Inst()->upleft.X(Game::Inst()->upleft.X() + mouseInput.cx);
+		diffX += mouseInput.cx;
 		mouseInput.x = 0;
 		mouseInput.cx = 0;
 	} else if (mouseInput.cx >= Game::Inst()->ScreenWidth()) {
-		Game::Inst()->upleft.X(Game::Inst()->upleft.X() + (mouseInput.cx - (Game::Inst()->ScreenWidth()-1)));
+		diffX += mouseInput.cx - (Game::Inst()->ScreenWidth()-1);
 		mouseInput.cx = Game::Inst()->ScreenWidth() - 1;
 		mouseInput.x = (Game::Inst()->ScreenWidth() - 1)* Game::Inst()->CharWidth();
 	}
 	if (mouseInput.y < 0) {
-		Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() + mouseInput.cy);
+		diffY += mouseInput.cy;
 		mouseInput.y = 0;
 		mouseInput.cy = 0;
 	} else if (mouseInput.cy >= Game::Inst()->ScreenHeight()) {
-		Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() + (mouseInput.cy - (Game::Inst()->ScreenHeight()-1)));
+		diffY += mouseInput.cy - (Game::Inst()->ScreenHeight()-1);
 		mouseInput.cy = Game::Inst()->ScreenHeight() - 1;
 		mouseInput.y = (Game::Inst()->ScreenHeight() - 1) * Game::Inst()->CharHeight();
 	}
 
-	if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
-	if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
-	if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
-	if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+	Game::Inst()->MoveCam(diffX, diffY);
 }
 
 void UI::HandleMouse() {
@@ -254,16 +256,16 @@ void UI::HandleMouse() {
 	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
 
 	if (_state == UINORMAL) {
-		HandleUnderCursor(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()), &underCursor);
+		HandleUnderCursor(Game::Inst()->TileAt(mouseInput.x, mouseInput.y), &underCursor);
 	}
 
 	if (_state == UIPLACEMENT || _state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		placeable = placementCallback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()), _blueprint);
+		// TODO: Change for renderer
+		placeable = placementCallback(Game::Inst()->TileAt(mouseInput.x, mouseInput.y), _blueprint);
 	}
 
 	if (_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		b.X(mouseInput.cx + Game::Inst()->upleft.X());
-		b.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+		b = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 	}
 
 	currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY);
@@ -289,11 +291,10 @@ void UI::HandleMouse() {
 					CloseMenu();
 				}
 				if (_state == UIPLACEMENT && placeable) {
-					callback(Coordinate(mouseInput.cx + Game::Inst()->upleft.X(), mouseInput.cy + Game::Inst()->upleft.Y()));
+					callback(Game::Inst()->TileAt(mouseInput.x, mouseInput.y));
 				} else if (_state == UIABPLACEMENT && placeable) {
 					if (a.X() == 0) {
-						a.X(mouseInput.cx + Game::Inst()->upleft.X());
-						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+						a = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 					}
 					else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
 						//Place construction from a->b
@@ -331,8 +332,7 @@ void UI::HandleMouse() {
 					}
 				} else if (_state == UIRECTPLACEMENT && placeable) {
 					if (a.X() == 0) {
-						a.X(mouseInput.cx + Game::Inst()->upleft.X());
-						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+						a = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 					}
 					else if(!draggingPlacement || a.X() != b.X() || a.Y() != b.Y()) {
 						//Place construction from a->b
@@ -371,14 +371,12 @@ void UI::HandleMouse() {
 			if (menuResult & NOMENUHIT) {
 				if (_state == UIABPLACEMENT && placeable) {
 					if (a.X() == 0) {
-						a.X(mouseInput.cx + Game::Inst()->upleft.X());
-						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+						a = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 						draggingPlacement = true;
 					}
 				} else if (_state == UIRECTPLACEMENT && placeable) {
 					if (a.X() == 0) {
-						a.X(mouseInput.cx + Game::Inst()->upleft.X());
-						a.Y(mouseInput.cy + Game::Inst()->upleft.Y());
+						a = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 						draggingPlacement = true;
 					}
 				}
@@ -422,12 +420,7 @@ void UI::HandleMouse() {
 	}
 
 	if (tempStatus.lbutton && _state == UINORMAL) {
-		Game::Inst()->upleft.X(Game::Inst()->upleft.X() - (tempStatus.dx / 3));
-		Game::Inst()->upleft.Y(Game::Inst()->upleft.Y() - (tempStatus.dy / 3));
-		if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()-1) < -1) Game::Inst()->upleft.Y(-1);
-		if (Game::Inst()->upleft.Y(Game::Inst()->upleft.Y()+1) > 1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight()) Game::Inst()->upleft.Y(1+ Map::Inst()->Height() - Game::Inst()->ScreenHeight());
-		if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()-1) < -1) Game::Inst()->upleft.X(-1);
-		if (Game::Inst()->upleft.X(Game::Inst()->upleft.X()+1) > 1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth()) Game::Inst()->upleft.X(1+ Map::Inst()->Width() - Game::Inst()->ScreenWidth());
+		Game::Inst()->MoveCam(-(tempStatus.dx / 3.0f), -(tempStatus.dy / 3.0f));
 		if (tempStatus.dx > 0 || tempStatus.dy > 0) draggingViewport = true;
 	}
 
@@ -436,6 +429,8 @@ void UI::HandleMouse() {
 	rbuttonPressed = false;
 	oldMouseInput = mouseInput;
 }
+
+//TODO: Need to change this to work with new renderer
 void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	int tmp;
 	bool xswap = false, yswap = false;
@@ -459,7 +454,8 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		&& !underCursor.empty() && underCursor.begin()->lock()) {
 			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
 				if (ucit->lock()) {
-					ucit->lock()->GetTooltip(Game::Inst()->upleft.X() + mouseInput.cx, Game::Inst()->upleft.Y() + mouseInput.cy, tooltip);
+					Coordinate mouseLoc = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
+					ucit->lock()->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
 				}
 			}
 	}

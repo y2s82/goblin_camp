@@ -50,10 +50,12 @@ namespace {
 void TCODMapRenderer::PreparePrefabs() {}
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
-void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY)
+void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int posX, int posY, int sizeX, int sizeY)
 {
 	if (sizeX == -1) sizeX = console->getWidth();
 	if (sizeY == -1) sizeY = console->getHeight();
+
+	Coordinate upleft(int(focusX - (sizeX / 2)), int(focusY - (sizeY / 2)));
 
 	int screenDeltaX = upleft.X();
 	int screenDeltaY = upleft.Y();
@@ -102,4 +104,13 @@ void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, Coordinate upleft
 	InternalDrawMapItems("NPCs",                  Game::Inst()->npcList, upleft, &minimap);
 
 	TCODConsole::blit(&minimap, 0, 0, sizeX, sizeY, console, posX, posY);
+}
+
+Coordinate TCODMapRenderer::TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX, int offsetY, int sizeX, int sizeY) const {
+	if (sizeX == -1) sizeX = console->getWidth();
+	if (sizeY == -1) sizeY = console->getHeight();
+	int charX, charY;
+	TCODSystem::getCharSize(&charX, &charY);
+
+	return Coordinate(int(focusX - (sizeX / 2)) + (x - offsetX) / charX, int(focusY - (sizeY / 2)) + (y - offsetY) / charY);
 }

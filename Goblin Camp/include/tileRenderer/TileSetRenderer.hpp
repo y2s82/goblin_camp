@@ -27,10 +27,14 @@ public:
 	TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet);
 	~TileSetRenderer();
 
-	void DrawMap(TCODConsole * console, Map* map, Coordinate upleft, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) ;
+	Coordinate TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) const;
+	void DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) ;
 	void PreparePrefabs();
 	void render(void *sdlSurface);
 private:
+	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Floor<float>> FloorToInt;
+	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Ceil<float>> CeilToInt;
+
 	// the font characters size
 	int screenWidth, screenHeight;
 	SDL_Surface *mapSurface;
@@ -38,6 +42,8 @@ private:
 	boost::shared_ptr<TileSet> tileSet;
 	TCODColor keyColor;
 	bool first;
+	int mapOffsetX, mapOffsetY;
+	int startTileX, startTileY;
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawWater				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
@@ -45,10 +51,10 @@ private:
 	void DrawTerritoryOverlay	(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawConstruction		(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 
-	void DrawMarkers(Map * map, Coordinate upleft, int posX, int posY, int sizeX, int sizeY);
-	void DrawItems(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
-	void DrawNatureObjects(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
-	void DrawNPCs(Coordinate upleft, int tileX, int tileY, int sizeX, int sizeY);
+	void DrawMarkers(Map * map, int startTileX, int startTileY, int sizeX, int sizeY);
+	void DrawItems(int startTileX, int startTileY, int sizeX, int sizeY);
+	void DrawNatureObjects(int startTileX, int startTileY, int sizeX, int sizeY);
+	void DrawNPCs(int startTileX, int startTileY, int sizeX, int sizeY);
 
-	SDL_Rect CalcDest(int mapPosX, int mapPosY) { SDL_Rect dstRect = {tileSet->TileWidth() * mapPosX, tileSet->TileHeight() * mapPosY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
+	SDL_Rect CalcDest(int mapPosX, int mapPosY) { SDL_Rect dstRect = {tileSet->TileWidth() * (mapPosX - startTileX) + mapOffsetX, tileSet->TileHeight() * (mapPosY - startTileY) + mapOffsetY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
 };

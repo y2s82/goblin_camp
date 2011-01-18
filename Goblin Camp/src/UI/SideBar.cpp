@@ -67,7 +67,7 @@ void SideBar::Draw(TCODConsole* console) {
 		
 		console->setDefaultForeground(TCODColor::white);
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
-		Game::Inst()->Draw(console, entity.lock()->Center()-5, false, edgeX - (width - 4), topY + 2, 11, 11);
+		Game::Inst()->Draw(console, entity.lock()->Center().X() + 0.5f, entity.lock()->Center().Y() + 0.5f, false, edgeX - (width - 4), topY + 2, 11, 11);
 		
 		if (npc) { //Draw health bar
 			boost::shared_ptr<NPC> creature = boost::static_pointer_cast<NPC>(entity.lock());

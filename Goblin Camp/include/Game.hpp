@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/numeric/conversion/converter.hpp>
 
 #include <libtcod.hpp>
 
@@ -32,7 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Events.hpp"
 #include "Job.hpp"
 
-class MapRenderer;
+#include "MapRenderer.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -58,6 +59,10 @@ class Game {
 	friend class ConfigListener;
 	friend void SettingsMenu();
 private:
+	// TODO: Move these somewhere shared/sharable
+	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Floor<float>> FloorToInt;
+	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Ceil<float>> CeilToInt;
+
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
 	template<class Archive>
@@ -96,6 +101,8 @@ public:
 	static void DoNothing();
 	static void Exit(bool confirm=true);
 
+	Coordinate TileAt(int pixelX, int pixelY) const;
+
 	int ScreenWidth() const;
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
@@ -105,8 +112,9 @@ public:
 	void GenerateMap(uint32 seed = 0);
 
 	void Update();
-	Coordinate upleft;
+	float camX, camY;
 	void CenterOn(Coordinate target);
+	void MoveCam(float x, float y);
 	void SetMark(int);
 	void ReturnToMark(int);
 
@@ -120,7 +128,7 @@ public:
 
 	TCODConsole* buffer;
 	void FlipBuffer();
-	void Draw(TCODConsole * console = Game::Inst()->buffer, Coordinate upleft = Game::Inst()->upleft, bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1);
+	void Draw(TCODConsole * console = Game::Inst()->buffer, float focusX = Game::Inst()->camX, float focusY = Game::Inst()->camY, bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1);
 
 	static int DiceToInt(TCOD_dice_t);
 
