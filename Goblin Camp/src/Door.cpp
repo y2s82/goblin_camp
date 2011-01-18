@@ -28,11 +28,11 @@ void Door::Update() {
 	if (!Map::Inst()->NPCList(x, y)->empty()) {
 		graphic[1] = 254;
 		time = (UPDATES_PER_SECOND / 2);
-		Map::Inst()->BlocksLight(x, y, false);
+		Map::Inst()->SetBlocksLight(x, y, false);
 	} else {
 		if (time == 0) {
 			graphic[1] = closedGraphic;
-			Map::Inst()->BlocksLight(x, y, true);
+			Map::Inst()->SetBlocksLight(x, y, true);
 		} else --time;
 	}
 }

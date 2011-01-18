@@ -220,8 +220,8 @@ void StartNewGame() {
 	//Clear starting area
 	for (int x = spawnTopCorner.X(); x < spawnBottomCorner.X(); ++x) {
 		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
-			if (Map::Inst()->NatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
-				game->RemoveNatureObject(game->natureList[Map::Inst()->NatureObject(x,y)]);
+			if (Map::Inst()->GetNatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
+				game->RemoveNatureObject(game->natureList[Map::Inst()->GetNatureObject(x,y)]);
 			}
 		}
 	}
@@ -238,10 +238,10 @@ void StartNewGame() {
 		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
 	Coordinate corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
 		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
-	while (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y()) || !Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) {
-		if (!Map::Inst()->Walkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+	while (!Map::Inst()->IsWalkable(corpseLoc1.X(), corpseLoc1.Y()) || !Map::Inst()->IsWalkable(corpseLoc2.X(), corpseLoc2.Y())) {
+		if (!Map::Inst()->IsWalkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
 		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
-		if (!Map::Inst()->Walkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
+		if (!Map::Inst()->IsWalkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
 		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
 	}
 

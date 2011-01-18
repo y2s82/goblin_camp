@@ -46,11 +46,11 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-	TileType _type;
+	TileType type;
 	bool vis; //Does light pass through this tile? Tile type, but also constructions/objects affect this
 	bool walkable;
 	bool buildable;
-	int _moveCost;
+	int moveCost;
 	int construction;
 	bool low, blocksWater;
 	boost::shared_ptr<WaterNode> water;
@@ -68,16 +68,16 @@ private:
 	
 public:
 	Tile(TileType = TILEGRASS, int = 1);
-	TileType type();
-	void type(TileType);
+	TileType GetType();
+	void SetType(TileType);
 	bool BlocksLight() const;
-	void BlocksLight(bool);
-	bool Walkable() const;
-	void Walkable(bool);
-	bool Buildable() const;
-	void Buildable(bool);
-	int MoveCost() const;
-	int MoveCost(void*) const;
+	void SetBlocksLight(bool);
+	bool IsWalkable() const;
+	void SetWalkable(bool);
+	bool IsBuildable() const;
+	void SetBuildable(bool);
+	int GetMoveCost() const;
+	int GetMoveCost(void*) const;
 	void SetMoveCost(int);
 	void MoveFrom(int);
 	void MoveTo(int);
@@ -85,15 +85,15 @@ public:
 	int GetConstruction() const;
 	boost::weak_ptr<WaterNode> GetWater() const;
 	void SetWater(boost::shared_ptr<WaterNode>);
-	bool Low() const;
-	void Low(bool);
+	bool IsLow() const;
+	void SetLow(bool);
 	bool BlocksWater() const;
-	void BlocksWater(bool);
-	int Graphic() const;
-	TCODColor ForeColor() const;
-	TCODColor BackColor() const;
-	void NatureObject(int);
-	int NatureObject() const;
+	void SetBlocksWater(bool);
+	int GetGraphic() const;
+	TCODColor GetForeColor() const;
+	TCODColor GetBackColor() const;
+	void SetNatureObject(int);
+	int GetNatureObject() const;
 	boost::weak_ptr<FilthNode> GetFilth() const;
 	void SetFilth(boost::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood() const;

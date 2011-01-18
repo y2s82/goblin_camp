@@ -83,7 +83,7 @@ void Item::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = x - upleft.X();
 	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
+		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
 	}
 }
 
@@ -123,7 +123,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 }
 boost::weak_ptr<Item> Item::ContainedIn() {return container;}
 
-int Item::Graphic() {return graphic;}
+int Item::GetGraphic() {return graphic;}
 
 Attack Item::GetAttack() const {return attack;}
 
@@ -455,11 +455,11 @@ void Item::SetVelocity(int speed) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
 	} else {
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
-		if (!Map::Inst()->Walkable(x, y)) {
+		if (!Map::Inst()->IsWalkable(x, y)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
 					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi)) {
+						if (Map::Inst()->IsWalkable(xi, yi)) {
 							Position(Coordinate(xi, yi));
 							return;
 						}

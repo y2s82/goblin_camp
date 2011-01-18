@@ -124,7 +124,7 @@ public:
 	virtual void Position(Coordinate);
 	virtual Coordinate Position();
 	ItemType Type();
-	int Graphic();
+	int GetGraphic();
 	TCODColor Color();
 	void Color(TCODColor);
 	bool IsCategory(ItemCategory);
