@@ -37,7 +37,7 @@ public:
 	bool flammable;
 	std::string name;
 	std::string GetName();
-	ItemCat* parent;
+	ItemCategory parent;
 };
 
 struct ItemPreset {
