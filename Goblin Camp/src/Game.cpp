@@ -602,12 +602,16 @@ void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordina
 	int minX = std::min(corner1.X(), corner2.X());
 	int minY = std::min(corner1.Y(), corner2.Y());
 
-	for (int items = 0; items < quantity; ++items) {
+	for (int items = 0, count = 0; items < quantity && count < quantity*10; ++count) {
 		Coordinate location(
 			Random::Generate(minX, areaWidth + minX - 1),
 			Random::Generate(minY, areaLength + minY - 1)
 		);
-		Game::Inst()->CreateItem(location, type, true);
+
+		if (Map::Inst()->IsWalkable(location.X(), location.Y())) {
+			Game::Inst()->CreateItem(location, type, true);
+			++items;
+		}
 	}
 }
 
