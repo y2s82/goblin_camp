@@ -39,7 +39,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
-		if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->GetName(), "Container")) {
+		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
 				limits.insert(std::pair<ItemCategory, int>(i,0));
 		}
 	}
@@ -406,8 +406,8 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 	allowed[cat] = !allowed[cat];
 	if (childrenAlso) {
 		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
-			if (Item::Categories[alli->first].parent &&
-				Item::Categories[alli->first].parent->name == Item::Categories[cat].name) {
+			if (Item::Categories[alli->first].parent >= 0 &&
+				Item::Categories[Item::Categories[alli->first].parent].name == Item::Categories[cat].name) {
 				alli->second = allowed[cat];
 			} else {
 				break;
@@ -473,7 +473,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
 	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
 	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
-		if(Item::Categories[it->first].parent == 0 && it->second > 0) {
+		if(Item::Categories[it->first].parent < 0 && it->second > 0) {
 			vecView.push_back(*it);
 		}
 	}
@@ -488,7 +488,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
 
 			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); cati != Item::Categories.end(); cati++) {
-				if(cati->parent && Item::StringToItemCategory(cati->parent->GetName()) == vecView[i].first) {
+				if(cati->parent >= 0 && Item::StringToItemCategory(Item::Categories[cati->parent].GetName()) == vecView[i].first) {
 					int amt = amount[Item::StringToItemCategory(cati->GetName())];
 					if (amt > 0) {
 						if(++count > 30) {

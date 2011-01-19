@@ -834,7 +834,7 @@ void UI::ChooseCreateItem() {
 	int item, category;
 	Menu *ItemCategoryMenu = new Menu(std::vector<MenuChoice>(), "Categories");
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-		if (!Item::Categories[i].parent)
+		if (Item::Categories[i].parent < 0)
 			ItemCategoryMenu->AddChoice(MenuChoice(Item::Categories[i].name, boost::lambda::var(category) = i));
 	}
 	ItemCategoryMenu->ShowModal();

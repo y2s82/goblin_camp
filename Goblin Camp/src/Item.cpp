@@ -188,7 +188,7 @@ public:
 	void translateNames() {
 		for (unsigned int i = 0; i < presetCategoryParent.size(); ++i) {
 			if (presetCategoryParent[i] != "") {
-				Item::Categories[firstCategoryIndex+i].parent = &Item::Categories[Item::StringToItemCategory(presetCategoryParent[i])];
+				Item::Categories[firstCategoryIndex+i].parent = Item::StringToItemCategory(presetCategoryParent[i]);
 			}
 		}
 
@@ -197,14 +197,17 @@ public:
 		because this items.dat may not be the first one read in, and we don't want to overwrite
 		existing items*/
 		for (unsigned int i = 0; i < presetGrowth.size(); ++i) {
-
 			for (std::set<ItemCategory>::iterator cati = Item::Presets[firstItemIndex+i].categories.begin();
 				cati != Item::Presets[firstItemIndex+i].categories.end(); ++cati) {
-					if (Item::Categories[*cati].parent) {
+					if (Item::Categories[*cati].parent >= 0 && 
+						Item::Presets[firstItemIndex+i].categories.find(Item::Categories[*cati].parent) == 
+						Item::Presets[firstItemIndex+i].categories.end()) {
 #ifdef DEBUG
-						std::cout<<"Item has a parent ->"<<Item::Categories[*cati].parent->name<<" = ("<<Item::StringToItemCategory(Item::Categories[*cati].parent->name)<<")\n";
+						std::cout<<"Item has a parent ->"<<Item::Categories[Item::Categories[*cati].parent].name;
+						std::cout<<" = ("<<Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name)<<")\n";
 #endif
-						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[*cati].parent->name));
+						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name));
+						cati = Item::Presets[firstItemIndex+i].categories.begin(); //Start from the beginning, inserting into a set invalidates the iterator
 					}
 			}
 
@@ -454,6 +457,7 @@ void Item::SetVelocity(int speed) {
 	if (speed > 0) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
 	} else {
+		//The item has moved before but has now stopped
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
 		if (!Map::Inst()->IsWalkable(x, y)) {
 			for (int radius = 1; radius < 10; ++radius) {
@@ -520,7 +524,7 @@ int Item::GetDecay() const { return decayCounter; }
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
-	parent(0)
+	parent(-1)
 {}
 
 std::string ItemCat::GetName() {
