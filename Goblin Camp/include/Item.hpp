@@ -138,7 +138,7 @@ public:
 	void UpdateVelocity();
 	void SetInternal();
 	int GetDecay() const;
-	virtual bool Impact(int speedChange);
+	virtual void Impact(int speedChange);
 };
 
 class OrganicItem : public Item {

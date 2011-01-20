@@ -744,10 +744,7 @@ void Game::Update() {
 	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
 		if (boost::shared_ptr<Item> item = itemi->lock()) {
-			if (item->condition == 0) {
-				//The item has impacted and broken. Create debris owned by no one
-				std::vector<boost::weak_ptr<Item> > component(1, item);
-				CreateItem(item->Position(), Item::StringToItemType("debris"), false, -1, component);
+			if (item->condition == 0) { //The impact has destroyed the item
 				RemoveItem(item);
 			}
 		}
