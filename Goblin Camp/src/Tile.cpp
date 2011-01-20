@@ -81,7 +81,7 @@ void Tile::type(TileType newType) {
 		originalForeColor = TCODColor(125,50,0);
 		_moveCost = Random::Generate(3, 5);
 	} else if (_type == TILEBOG) {
-		vis = true; walkable = true; buildable = false; low = false;
+		vis = true; walkable = true; buildable = true; low = false;
 		switch (Random::Generate(9)) {
 		case 0:
 		case 1:

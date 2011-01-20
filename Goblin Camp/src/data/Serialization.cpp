@@ -435,7 +435,7 @@ void Entity::load(Archive & ar, const unsigned int version) {
 //
 // class Job
 //
-BOOST_CLASS_VERSION(Job, 0)
+BOOST_CLASS_VERSION(Job, 1)
 
 template<class Archive>
 void Job::save(Archive & ar, const unsigned int version) const {
@@ -468,44 +468,48 @@ void Job::save(Archive & ar, const unsigned int version) const {
 	ar & name;
 	ar & tasks;
 	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
 }
 
 template<class Archive>
 void Job::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar.template register_type<Container>();
-		ar.template register_type<Item>();
-		ar.template register_type<Entity>();
-		ar.template register_type<NatureObject>();
-		ar.template register_type<Construction>();
-		ar.template register_type<Door>();
-		ar.template register_type<FarmPlot>();
-		ar & _priority;
-		ar & completion;
-		ar & preReqs;
-		ar & parent;
-		ar & npcUid;
-		ar & _zone;
-		ar & menial;
-		ar & paused;
-		ar & waitingForRemoval;
-		ar & reservedEntities;
-		boost::weak_ptr<Stockpile> sp;
-		ar & sp;
-		Coordinate location;
-		ar & location;
-		ItemType type;
-		ar & type;
-		reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
-		ar & attempts;
-		ar & attemptMax;
-		ar & connectedEntity;
-		ar & reservedContainer;
-		ar & reservedSpace;
-		ar & tool;
-		ar & name;
-		ar & tasks;
-		ar & internal;
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	boost::weak_ptr<Stockpile> sp;
+	ar & sp;
+	Coordinate location;
+	ar & location;
+	ItemType type;
+	ar & type;
+	reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	if (version >= 1) {
+		ar & markedGround;
+		ar & obeyTerritory;
 	}
 }
 
