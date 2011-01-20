@@ -524,11 +524,17 @@ void Item::SetInternal() { internal = true; }
 
 int Item::GetDecay() const { return decayCounter; }
 
-bool Item::Impact(int speedChange) {
+void Item::Impact(int speedChange) {
 	SetVelocity(0);
 	flightPath.clear();
 
 	if (speedChange >= 10 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
+	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
+		//The item has impacted and broken. Create debris owned by no one
+		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
+		//Game::Update removes all condition==0 items in the stopped items list, which is where this item will be
+	}
 }
 
 ItemCat::ItemCat() : flammable(false),
