@@ -61,8 +61,7 @@ menuOpen(false),
 	draggingViewport(false),
 	draggingPlacement(false),
 	textMode(false),
-	inputString(std::string("")),
-	cursorChar('X')
+	inputString(std::string(""))
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
@@ -260,7 +259,6 @@ void UI::HandleMouse() {
 	}
 
 	if (_state == UIPLACEMENT || _state == UIABPLACEMENT || _state == UIRECTPLACEMENT) {
-		// TODO: Change for renderer
 		placeable = placementCallback(Game::Inst()->TileAt(mouseInput.x, mouseInput.y), _blueprint);
 	}
 
@@ -430,8 +428,7 @@ void UI::HandleMouse() {
 	oldMouseInput = mouseInput;
 }
 
-//TODO: Need to change this to work with new renderer
-void UI::Draw(Coordinate upleft, TCODConsole* console) {
+void UI::Draw(TCODConsole* console) {
 	int tmp;
 	bool xswap = false, yswap = false;
 
@@ -461,14 +458,14 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 	}
 	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
 
+	Coordinate mouseTile(Game::Inst()->TileAt(mouseInput.x, mouseInput.y));
+	boost::shared_ptr<MapRenderer> renderer = Game::Inst()->Renderer();
+
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.X() == 0)) {
-		for (int x = mouseInput.cx; x < mouseInput.cx + _blueprint.X() && x < console->getWidth(); ++x) {
-			for (int y = mouseInput.cy; y < mouseInput.cy + _blueprint.Y() && y < console->getHeight(); ++y) {
-				if (!placeable) console->putCharEx(x,y, cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(x,y, cursorChar, TCODColor::green, TCODColor::black);
-			}
-		}
-	} else if (_state == UIABPLACEMENT && a.X() > 0) {
+	
+		renderer->DrawCursor(mouseTile, Coordinate(mouseTile.X() + _blueprint.X() - 1, mouseTile.Y() + _blueprint.Y() - 1), Game::Inst()->camX, Game::Inst()->camY, placeable);
+	}
+	else if (_state == UIABPLACEMENT && a.X() > 0) {
 		if (a.X() > b.X()) {
 			tmp = a.X();
 			a.X(b.X());
@@ -481,24 +478,20 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 			b.Y(tmp);
 			yswap = true;
 		}
-		for (int ix = a.X()-upleft.X(); ix <= b.X()-upleft.X() && ix < console->getWidth(); ++ix) {
+		for (int ix = a.X(); ix <= b.X(); ++ix) {
 			if (!yswap) {
-				if (!placeable) console->putCharEx(ix,a.Y()-upleft.Y(), cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,a.Y()-upleft.Y(), cursorChar, TCODColor::green, TCODColor::black);
+				renderer->DrawCursor(Coordinate(ix, a.Y()), Game::Inst()->camX, Game::Inst()->camY, placeable);
 			}
 			else {
-				if (!placeable) console->putCharEx(ix,b.Y()-upleft.Y(), cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,b.Y()-upleft.Y(), cursorChar, TCODColor::green, TCODColor::black);
+				renderer->DrawCursor(Coordinate(ix, b.Y()), Game::Inst()->camX, Game::Inst()->camY, placeable);
 			}
 		}
-		for (int iy = a.Y()-upleft.Y(); iy <= b.Y()-upleft.Y() && iy < console->getHeight(); ++iy) {
+		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (!xswap) {
-				if (!placeable) console->putCharEx(b.X()-upleft.X(),iy, cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(b.X()-upleft.X(),iy, cursorChar, TCODColor::green, TCODColor::black);
+				renderer->DrawCursor(Coordinate(b.X(), iy), Game::Inst()->camX, Game::Inst()->camY, placeable);
 			}
 			else {
-				if (!placeable) console->putCharEx(a.X()-upleft.X(),iy, cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(a.X()-upleft.X(),iy, cursorChar, TCODColor::green, TCODColor::black);
+				renderer->DrawCursor(Coordinate(a.X(), iy), Game::Inst()->camX, Game::Inst()->camY, placeable);
 			}
 		}
 		if (xswap) {
@@ -524,12 +517,7 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 			b.Y(tmp);
 			yswap = true;
 		}
-		for (int ix = a.X()-upleft.X(); ix <= b.X()-upleft.X() && ix < console->getWidth(); ++ix) {
-			for (int iy = a.Y()-upleft.Y(); iy <= b.Y()-upleft.Y() && iy < console->getHeight(); ++iy) {
-				if (!placeable) console->putCharEx(ix,iy,cursorChar, TCODColor::red, TCODColor::black);
-				else console->putCharEx(ix,iy,cursorChar, TCODColor::green, TCODColor::black);
-			}
-		}
+		renderer->DrawCursor(a, b, Game::Inst()->camX, Game::Inst()->camY, placeable);
 		if (xswap) {
 			tmp = a.X();
 			a.X(b.X());
@@ -542,8 +530,8 @@ void UI::Draw(Coordinate upleft, TCODConsole* console) {
 		}
 	}
 
-	if (drawCursor) console->putCharEx(mouseInput.cx, mouseInput.cy, 'X', TCODColor::azure, TCODColor::black);
-
+	if (drawCursor) renderer->DrawCursor(mouseTile, Game::Inst()->camX, Game::Inst()->camY, true);
+	
 	Announce::Inst()->Draw(console);
 }
 
@@ -641,7 +629,7 @@ void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, Construction::Presets[construct].tileReqs));
 	UI::Inst()->blueprint(Construction::Blueprint(construct));
 	UI::Inst()->state(state);
-	UI::Inst()->SetCursor('C');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Construct);
 }
 
 void UI::ChooseStockpile(ConstructionType stockpile) {
@@ -650,7 +638,7 @@ void UI::ChooseStockpile(ConstructionType stockpile) {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, Construction::Presets[stockpile].tileReqs));
 	UI::Inst()->blueprint(Construction::Blueprint(stockpile));
 	UI::Inst()->state(UIRECTPLACEMENT);
-	UI::Inst()->SetCursor('=');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Stockpile);
 }
 
 void UI::ChooseTreeFelling() {
@@ -658,7 +646,7 @@ void UI::ChooseTreeFelling() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::FellTree, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('X');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_TreeFelling);
 }
 
 void UI::ChoosePlantHarvest() {
@@ -666,7 +654,7 @@ void UI::ChoosePlantHarvest() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::HarvestWildPlant, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('H');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Harvest);
 }
 
 void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order) {
@@ -679,7 +667,7 @@ void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetCoordinate, order, _1, squad, autoClose));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('X');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Order);
 }
 
 void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad, Order order) {
@@ -687,7 +675,7 @@ void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad, Order order) {
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, order, _1, squad));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('X');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Order);
 }
 
 void UI::ChooseDesignateTree() {
@@ -695,7 +683,7 @@ void UI::ChooseDesignateTree() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::DesignateTree, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('T');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Tree);
 }
 
 void UI::ChooseDismantle() {
@@ -703,7 +691,7 @@ void UI::ChooseDismantle() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::DismantleConstruction, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('D');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Dismantle);
 }
 
 void UI::ChooseUndesignate() {
@@ -711,14 +699,14 @@ void UI::ChooseUndesignate() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::Undesignate, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('U');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Undesignate);
 }
 void UI::ChooseDesignateBog() {
 	UI::Inst()->state(UIRECTPLACEMENT);
 	UI::Inst()->SetRectCallback(boost::bind(Game::DesignateBog, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTileType, TILEBOG, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('B');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Bog);
 }
 
 
@@ -799,8 +787,6 @@ void UI::CloseMenu() {
 	currentMenu = Menu::MainMenu();
 }
 
-void UI::SetCursor(int value) { cursorChar = value; }
-
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
 TCOD_key_t UI::getKey() { return key; }
 
@@ -818,7 +804,7 @@ void UI::ChooseCreateNPC() {
 		UI::Inst()->SetCallback(boost::bind(&Game::CreateNPC, Game::Inst(), _1, NPCType(npc)));
 		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 		UI::Inst()->blueprint(Coordinate(1,1));
-		UI::Inst()->SetCursor(NPC::Presets[npc].graphic);
+		Game::Inst()->Renderer()->SetCursorMode(NPC::Presets[npc]);
 	}
 }
 
@@ -845,7 +831,7 @@ void UI::ChooseCreateItem() {
 			0, std::vector<boost::weak_ptr<Item> >(), boost::shared_ptr<Container>()));
 		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 		UI::Inst()->blueprint(Coordinate(1,1));
-		UI::Inst()->SetCursor(Item::Presets[item].graphic);
+		Game::Inst()->Renderer()->SetCursorMode(Item::Presets[item]);
 	}
 
 }
@@ -855,7 +841,7 @@ void UI::ChooseDig() {
 	UI::Inst()->SetRectCallback(boost::bind(Game::Dig, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, std::set<TileType>()));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('_');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Dig);
 }
 
 void UI::ChooseNaturify() {
@@ -873,7 +859,7 @@ void UI::ChooseChangeTerritory(bool add) {
 	UI::Inst()->SetRectCallback(boost::bind(&Map::SetTerritoryRectangle, Map::Inst(), _1, _2, add));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor(add ? '+' : '-');
+	Game::Inst()->Renderer()->SetCursorMode(add ? Cursor_AddTerritory : Cursor_RemoveTerritory);
 }
 
 void UI::ChooseGatherItems() {
@@ -881,7 +867,7 @@ void UI::ChooseGatherItems() {
 	UI::Inst()->SetRectCallback(boost::bind(&Game::GatherItems, Game::Inst(), _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor('G');
+	Game::Inst()->Renderer()->SetCursorMode(Cursor_Gather);
 }
 
 void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
@@ -889,7 +875,7 @@ void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost
 	UI::Inst()->SetCallback(callback);
 	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor(cursor);
+	Game::Inst()->Renderer()->SetCursorMode(cursor);
 }
 
 void UI::ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
@@ -897,5 +883,5 @@ void UI::ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectC
 	UI::Inst()->SetRectCallback(rectCallback);
 	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
-	UI::Inst()->SetCursor(cursor);
+	Game::Inst()->Renderer()->SetCursorMode(cursor);
 }

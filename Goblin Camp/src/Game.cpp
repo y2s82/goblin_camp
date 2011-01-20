@@ -419,14 +419,14 @@ void Game::Init() {
 		TileSetLoader loader;
 		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
 		{
-			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet()));
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
 		}
 		else
 		{
-			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer()); 
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
 		}
 	} else {
-		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
+		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
 	}
 
 	LoadingScreen();
@@ -883,7 +883,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 }
 
 Coordinate Game::TileAt(int pixelX, int pixelY) const {
-	return renderer->TileAt(pixelX, pixelY, camX, camY, buffer);
+	return renderer->TileAt(pixelX, pixelY, camX, camY);
 }
 
 namespace {
@@ -915,10 +915,12 @@ void Game::Draw(TCODConsole * console, float focusX, float focusY, bool drawUI, 
 	if (sizeY == -1) {
 		sizeY = console->getHeight();
 	}
-	renderer->DrawMap(console, Map::Inst(), focusX, focusY, posX, posY, sizeX, sizeY);
+	int charX, charY;
+	TCODSystem::getCharSize(&charX, &charY);
+	renderer->DrawMap(Map::Inst(), focusX, focusY, posX * charX, posY * charY, sizeX * charX, sizeY * charY);
 
 	if (drawUI) {
-		UI::Inst()->Draw(Coordinate(int(focusX), int(focusY)), console);
+		UI::Inst()->Draw(console);
 	}
 }
 

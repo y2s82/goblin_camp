@@ -19,8 +19,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include "MapMarker.hpp"
 #include "Game.hpp"
+#include "MathEx.hpp"
 
-TCODMapRenderer::TCODMapRenderer()
+TCODMapRenderer::TCODMapRenderer(TCODConsole * mapConsole) :
+	console(mapConsole),
+	cursorChar('X')
 {
 }
 
@@ -50,16 +53,28 @@ namespace {
 void TCODMapRenderer::PreparePrefabs() {}
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
-void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int posX, int posY, int sizeX, int sizeY)
+void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH)
 {
-	if (sizeX == -1) sizeX = console->getWidth();
-	if (sizeY == -1) sizeY = console->getHeight();
+	int charX, charY;
+	TCODSystem::getCharSize(&charX, &charY);
+	if (viewportW == -1) { 
+		viewportW = console->getWidth();
+	} else {
+		viewportW /= charX;
+	}
+	if (viewportH == -1) {
+		viewportH = console->getHeight();
+	} else {
+		viewportH /= charY;
+	}
+	viewportX /= charX;
+	viewportY /= charY;
 
-	Coordinate upleft(int(focusX - (sizeX / 2)), int(focusY - (sizeY / 2)));
+	Coordinate upleft(FloorToInt::convert(focusX) - (viewportW / 2), FloorToInt::convert(focusY) - (viewportH / 2));
 
 	int screenDeltaX = upleft.X();
 	int screenDeltaY = upleft.Y();
-	TCODConsole minimap(sizeX, sizeY);
+	TCODConsole minimap(viewportW, viewportH);
 	for (int y = upleft.Y(); y < upleft.Y() + minimap.getHeight(); ++y) {
 		for (int x = upleft.X(); x < upleft.X() + minimap.getWidth(); ++x) {
 			if (x >= 0 && x < map->Width() && y >= 0 && y < map->Height()) {
@@ -88,8 +103,8 @@ void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, float focusX, flo
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
-		if (markerX >= upleft.X() && markerY < upleft.X() + sizeX
-			&& markerY >= upleft.Y() && markerY < upleft.Y() + sizeY) {
+		if (markerX >= upleft.X() && markerY < upleft.X() + viewportW
+			&& markerY >= upleft.Y() && markerY < upleft.Y() + viewportH) {
 				minimap.putCharEx(markerX - upleft.X(), markerY - upleft.Y(), markeri->second.Graphic(), markeri->second.Color(), TCODColor::black);
 		}
 	}
@@ -103,14 +118,93 @@ void TCODMapRenderer::DrawMap(TCODConsole * console, Map* map, float focusX, flo
 	InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
 	InternalDrawMapItems("NPCs",                  Game::Inst()->npcList, upleft, &minimap);
 
-	TCODConsole::blit(&minimap, 0, 0, sizeX, sizeY, console, posX, posY);
+	TCODConsole::blit(&minimap, 0, 0, viewportW, viewportH, console, viewportX, viewportY);
 }
 
-Coordinate TCODMapRenderer::TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX, int offsetY, int sizeX, int sizeY) const {
-	if (sizeX == -1) sizeX = console->getWidth();
-	if (sizeY == -1) sizeY = console->getHeight();
+Coordinate TCODMapRenderer::TileAt(int x, int y, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const {
+	// Convert viewport to tile space
 	int charX, charY;
 	TCODSystem::getCharSize(&charX, &charY);
+	if (viewportW == -1) { 
+		viewportW = console->getWidth();
+	} else {
+		viewportW /= charX;
+	}
+	if (viewportH == -1) {
+		viewportH = console->getHeight();
+	} else {
+		viewportH /= charY;
+	}
+	viewportX /= charX;
+	viewportY /= charY;
 
-	return Coordinate(int(focusX - (sizeX / 2)) + (x - offsetX) / charX, int(focusY - (sizeY / 2)) + (y - offsetY) / charY);
+	return Coordinate(FloorToInt::convert(focusX) - (viewportW / 2) + (x - viewportX) / charX, FloorToInt::convert(focusY) - (viewportH / 2) + (y - viewportY) / charY);
+}
+
+void TCODMapRenderer::SetCursorMode(CursorType mode) {
+	switch (mode){
+	case Cursor_Construct:
+		cursorChar = 'C'; break;
+	case Cursor_Stockpile:
+		cursorChar = '='; break;
+	case Cursor_TreeFelling:
+	case Cursor_Order:
+		cursorChar = 'X'; break;
+	case Cursor_Harvest:
+		cursorChar = 'H'; break;
+	case Cursor_Tree:
+		cursorChar = 'T'; break;
+	case Cursor_Dismantle:
+		cursorChar = 'D'; break;
+	case Cursor_Undesignate:
+		cursorChar = 'U'; break;
+	case Cursor_Bog:
+		cursorChar = 'B'; break;
+	case Cursor_Dig:
+		cursorChar = '_'; break;
+	case Cursor_AddTerritory:
+		cursorChar = '+'; break;
+	case Cursor_RemoveTerritory:
+		cursorChar = '-'; break;
+	case Cursor_Gather:
+		cursorChar = 'G'; break;
+	default:
+		cursorChar = 'X'; break;
+	}
+}
+
+void TCODMapRenderer::SetCursorMode(const NPCPreset& preset) {
+	cursorChar = preset.graphic;
+}
+
+void TCODMapRenderer::SetCursorMode(const ItemPreset& preset) {
+	cursorChar = preset.graphic;
+}
+
+void TCODMapRenderer::SetCursorMode(int other) {
+	cursorChar = other;
+}
+
+void TCODMapRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {
+	Coordinate upleft(FloorToInt::convert(focusX) - (console->getWidth() / 2), FloorToInt::convert(focusY) - (console->getHeight() / 2));
+
+	for (int x = std::max(0, start.X() - upleft.X()); x <= std::min(console->getWidth() - 1, end.X() - upleft.X()); ++x)
+	{
+		for (int y = std::max(0, start.Y() - upleft.Y()); y <= std::min(console->getHeight() - 1, end.Y() - upleft.Y()); ++y)
+		{
+			if (!placeable) console->putCharEx(x, y, cursorChar, TCODColor::red, TCODColor::black);
+			else console->putCharEx(x, y, cursorChar, TCODColor::green, TCODColor::black);
+		}
+	}
+}
+
+void TCODMapRenderer::DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) {
+	Coordinate upleft(FloorToInt::convert(focusX) - (console->getWidth() / 2), FloorToInt::convert(focusY) - (console->getHeight() / 2));
+
+	if (pos.X() - upleft.X() >= 0 && pos.X() - upleft.X() < console->getWidth()
+		&& pos.Y() - upleft.Y() >= 0 && pos.Y() - upleft.Y() < console->getHeight())
+	{
+		if (!placeable) console->putCharEx(pos.X() - upleft.X(),pos.Y() - upleft.Y(), cursorChar, TCODColor::red, TCODColor::black);
+		else console->putCharEx(pos.X() - upleft.X(), pos.Y() - upleft.Y(), cursorChar, TCODColor::green, TCODColor::black);
+	}
 }

@@ -15,16 +15,16 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <boost/numeric/conversion/cast.hpp> 
-
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "MapMarker.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
 #include "Data/Paths.hpp"
+#include "MathEx.hpp"
 
-TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts) 
-: screenWidth(resolutionX), 
+TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
+: tcodConsole(mapConsole),
+  screenWidth(resolutionX), 
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
   mapSurface(NULL),
@@ -80,51 +80,57 @@ void TileSetRenderer::PreparePrefabs()
 	}
 }
 
-Coordinate TileSetRenderer::TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX, int offsetY, int sizeX, int sizeY) const {
-	if (sizeX == -1) sizeX = console->getWidth();
-	if (sizeY == -1) sizeY = console->getHeight();
+Coordinate TileSetRenderer::TileAt(int x, int y, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const {
+	if (viewportW == -1) viewportW = screenWidth;
+	if (viewportH == -1) viewportH = screenHeight;
 
-	int charX, charY;
-	TCODSystem::getCharSize(&charX, &charY);
-
-	float up = focusY * tileSet->TileHeight() - (sizeY * charY) * 0.5f;
-	float left = focusX * tileSet->TileWidth() - (sizeX * charX) * 0.5f;
-
+	float left = focusX * tileSet->TileWidth() - viewportW * 0.5f;
+	float up = focusY * tileSet->TileHeight() - viewportH * 0.5f;
+	
 	return Coordinate(FloorToInt::convert((left + x) / tileSet->TileWidth()), FloorToInt::convert((up + y) / tileSet->TileHeight()));
 }
 
 //TODO: Optimize. This causes the biggest performance hit by far right now 
-void TileSetRenderer::DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int offsetX, int offsetY, int sizeX, int sizeY) {
-	if (sizeX == -1) sizeX = console->getWidth();
-	if (sizeY == -1) sizeY = console->getHeight();
+void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) {
+	if (viewportW == -1) viewportW = screenWidth;
+	if (viewportH == -1) viewportH = screenHeight;
 
-	for (int x = offsetX; x < offsetX + sizeX; x++) {
-		for (int y = offsetY; y < offsetY + sizeY; y++) {
-			console->putCharEx(x, y, ' ', TCODColor::black, keyColor);
-			console->setDirty(x,y,1,1);
+	// Merge viewport to console
+	if (tcodConsole != 0) {
+		int charX, charY;
+		TCODSystem::getCharSize(&charX, &charY);
+		int offsetX = FloorToInt::convert(float(viewportX) / charX);
+		int offsetY = FloorToInt::convert(float(viewportY) / charY);
+		int sizeX = CeilToInt::convert(float(viewportW + offsetX * charX) / charX) - offsetX;
+		int sizeY = CeilToInt::convert(float(viewportH + offsetY * charY) / charY) - offsetY;
+		viewportX = offsetX * charX;
+		viewportY = offsetY * charY;
+		viewportW = sizeX * charX;
+		viewportH = sizeY * charY;
+
+		for (int x = offsetX; x < offsetX + sizeX; x++) {
+			for (int y = offsetY; y < offsetY + sizeY; y++) {
+				tcodConsole->putCharEx(x, y, ' ', TCODColor::black, keyColor);
+				tcodConsole->setDirty(x,y,1,1);
+			}
 		}
 	}
 
-	int charX, charY;
-	TCODSystem::getCharSize(&charX, &charY);
-
 	SDL_Rect viewportRect;
-	viewportRect.x = offsetX * charX;
-	viewportRect.y = offsetY * charY;
-	viewportRect.w = sizeX * charX;
-	viewportRect.h = sizeY * charY;
+	viewportRect.x = viewportX;
+	viewportRect.y = viewportY;
+	viewportRect.w = viewportW;
+	viewportRect.h = viewportH;
 	
 	SDL_SetClipRect(mapSurface, &viewportRect);
 	
 	// These are over-estimates, sometimes fewer tiles are needed.
 	startTileX = int((focusX * tileSet->TileWidth() - viewportRect.w / 2) / tileSet->TileWidth()) - 1;
 	startTileY = int((focusY * tileSet->TileHeight() - viewportRect.h / 2) / tileSet->TileHeight()) - 1;
-	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + viewportRect.w / 2);
-	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + viewportRect.h / 2);
+	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + viewportRect.w / 2) + viewportX;
+	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + viewportRect.h / 2) + viewportY;
 	int tilesX = CeilToInt::convert(boost::numeric_cast<float>(viewportRect.w) / tileSet->TileWidth()) + 2;
 	int tilesY = CeilToInt::convert(boost::numeric_cast<float>(viewportRect.h) / tileSet->TileHeight()) + 2;
-	mapOffsetX += offsetX * charX;
-	mapOffsetY += offsetY * charY;
 	
     // And then render to map
 	for (int y = 0; y < tilesY; ++y) {
@@ -158,6 +164,14 @@ void TileSetRenderer::DrawMap(TCODConsole * console, Map* map, float focusX, flo
 
 	SDL_SetClipRect(mapSurface, NULL);
 }
+
+void TileSetRenderer::SetCursorMode(CursorType mode) {}
+void TileSetRenderer::SetCursorMode(const NPCPreset& preset) {}
+void TileSetRenderer::SetCursorMode(const ItemPreset& preset) {}
+void TileSetRenderer::SetCursorMode(int other) {}
+	
+void TileSetRenderer::DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) {}
+void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {}
 
 void TileSetRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect)
 {

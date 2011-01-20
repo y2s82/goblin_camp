@@ -24,16 +24,23 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer, private boost::noncopyable
 {
 public:
-	TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet);
+	TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet, TCODConsole * mapConsole = 0);
 	~TileSetRenderer();
 
-	Coordinate TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) const;
-	void DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) ;
+	Coordinate TileAt(int screenX, int screenY, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const;
+	void DrawMap(Map* map, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) ;
 	void PreparePrefabs();
+
+	void SetCursorMode(CursorType mode);
+	void SetCursorMode(const NPCPreset& preset);
+	void SetCursorMode(const ItemPreset& preset);
+	void SetCursorMode(int other);
+	void DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable);
+	void DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable);
+
 	void render(void *sdlSurface);
 private:
-	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Floor<float>> FloorToInt;
-	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Ceil<float>> CeilToInt;
+	TCODConsole * tcodConsole;
 
 	// the font characters size
 	int screenWidth, screenHeight;
@@ -42,7 +49,7 @@ private:
 	boost::shared_ptr<TileSet> tileSet;
 	TCODColor keyColor;
 	bool first;
-	int mapOffsetX, mapOffsetY;
+	int mapOffsetX, mapOffsetY; // This is the pixel offset when drawing to the viewport
 	int startTileX, startTileY;
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect);

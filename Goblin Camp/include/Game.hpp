@@ -102,6 +102,7 @@ public:
 	static void Exit(bool confirm=true);
 
 	Coordinate TileAt(int pixelX, int pixelY) const;
+	boost::shared_ptr<MapRenderer> Renderer() { return renderer; };
 
 	int ScreenWidth() const;
 	int ScreenHeight() const;
