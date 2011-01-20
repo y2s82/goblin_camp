@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -15,10 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_int.hpp>
-#include <boost/random/uniform_01.hpp>
-#include <boost/random/variate_generator.hpp>
+#include <boost/random.hpp>
 #include <ctime>
 #include <cmath>
 #include <algorithm>
@@ -137,7 +134,7 @@ namespace Random {
 		\see Generator::Seed
 		\param[in] seed Seed to use.
 	*/
-	Generator::Generator(unsigned int seed) : generator(boost::mt19937()), seed(0) {
+	Generator::Generator(unsigned int seed) : generator(boost::rand48()), seed(0) {
 		SetSeed(seed);
 	}
 	
@@ -200,7 +197,7 @@ namespace Random {
 		\returns A random boolean.
 	*/
 	bool Generator::GenerateBool() {
-		return Generate(0, 1) ? true : false;
+		return !!Generate(0, 1);
 	}
 	
 	/**

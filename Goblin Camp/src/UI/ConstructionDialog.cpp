@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -65,7 +65,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
 			//Construct list of spinners for container limits
 			Grid *grid = new Grid(std::vector<Drawable *>(), 1, 0, 0, 48, 46);
 			for (int i = 0; i < Item::Categories.size(); ++i) {
-				if ((Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->GetName(), "Container"))) {
+				if ((Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container"))) {
 					grid->AddComponent(new Label(Item::Categories[i].GetName(), 10, 0));
 					grid->AddComponent(new Spinner(0, 0, 20, boost::bind(&Stockpile::GetLimit, static_cast<Stockpile*>(cons), i),
 						boost::bind(&Stockpile::AdjustLimit, static_cast<Stockpile*>(cons), i, _1)));
@@ -125,7 +125,7 @@ void ConstructionDialog::Expand() {
 void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
 	Stockpile *sp = static_cast<Stockpile*>(construct);
 	console->setDefaultForeground(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-	if (!category.parent) {
+	if (category.parent < 0) {
 		console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-3).c_str());
 	} else {
 		if (i+1 < (signed int)Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {

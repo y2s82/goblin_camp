@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -39,7 +39,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,false));
-		if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->GetName(), "Container")) {
+		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
 				limits.insert(std::pair<ItemCategory, int>(i,0));
 		}
 	}
@@ -65,7 +65,7 @@ Stockpile::~Stockpile() {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (Map::Inst()->GetConstruction(x,y) == uid) {
-				Map::Inst()->Buildable(x,y,true);
+				Map::Inst()->SetBuildable(x,y,true);
 				Map::Inst()->SetWalkable(x,y,true);
 				Map::Inst()->SetConstruction(x,y,-1);
 			}
@@ -270,7 +270,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
-				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->Buildable(ix,iy) &&
+				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->IsBuildable(ix,iy) &&
 					Construction::Presets[type].tileReqs.find(Map::Inst()->Type(ix,iy)) != Construction::Presets[type].tileReqs.end()) {
 					if (Map::Inst()->GetConstruction(ix-1,iy) == uid ||
 						Map::Inst()->GetConstruction(ix+1,iy) == uid ||
@@ -278,7 +278,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 						Map::Inst()->GetConstruction(ix,iy+1) == uid) {
 							//Current tile is walkable, buildable, and adjacent to the current stockpile
 							Map::Inst()->SetConstruction(ix,iy,uid);
-							Map::Inst()->Buildable(ix,iy,false);
+							Map::Inst()->SetBuildable(ix,iy,false);
 							Map::Inst()->SetTerritory(ix,iy,true);
 							//Update corner values
 							if (ix < a.X()) a.X(ix);
@@ -406,8 +406,8 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
 	allowed[cat] = !allowed[cat];
 	if (childrenAlso) {
 		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
-			if (Item::Categories[alli->first].parent &&
-				Item::Categories[alli->first].parent->name == Item::Categories[cat].name) {
+			if (Item::Categories[alli->first].parent >= 0 &&
+				Item::Categories[Item::Categories[alli->first].parent].name == Item::Categories[cat].name) {
 				alli->second = allowed[cat];
 			} else {
 				break;
@@ -473,7 +473,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry(name, TCODColor::white));
 	std::vector<std::pair<ItemCategory, int> > vecView = std::vector<std::pair<ItemCategory, int> >();
 	for(std::map<ItemCategory, int>::iterator it = amount.begin(); it != amount.end(); it++) {
-		if(Item::Categories[it->first].parent == 0 && it->second > 0) {
+		if(Item::Categories[it->first].parent < 0 && it->second > 0) {
 			vecView.push_back(*it);
 		}
 	}
@@ -488,7 +488,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
 
 			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); cati != Item::Categories.end(); cati++) {
-				if(cati->parent && Item::StringToItemCategory(cati->parent->GetName()) == vecView[i].first) {
+				if(cati->parent >= 0 && Item::StringToItemCategory(Item::Categories[cati->parent].GetName()) == vecView[i].first) {
 					int amt = amount[Item::StringToItemCategory(cati->GetName())];
 					if (amt > 0) {
 						if(++count > 30) {

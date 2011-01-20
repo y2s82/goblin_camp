@@ -143,6 +143,7 @@ Properties:
 * ``<version>version`` — Python version (major.minor; by default 2.7)
 * ``<pydebug>on`` — enable Python debugging (link to debug version of Python)
 * ``<suffix>suffix`` — library name suffix (_d is default for debug libs)
+* ``<interpreter>python`` — interpreter executable name (default: python)
 
 Example::
 
@@ -212,12 +213,14 @@ Additional build system capabilities
 Generating MSVC project files
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Build system can generate MSVC2008 and MSVC2010 solution and project.
+Build system can generate MSVC2010 solution and project files.
 To do this, use::
 
-    bjam --user-config=gc-config.jam sln2008
+    bjam --user-config=gc-config.jam msvc10
 
-You can use ``sln2010`` instead to generate MSVC2010 project.
+You can also use `parallel builds`_ — but instead of ``-jN`` option, you need to use
+``-sSLN_JOBS=N``. Unlike normal build (which is not parallel by default),
+solution generator defaults to 4 jobs. To turn it off, set the limit to 1 job.
 
 Generating NSIS installer
 ~~~~~~~~~~~~~~~~~~~~~~~~~

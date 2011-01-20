@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -94,8 +94,9 @@ void UI::HandleKeyboard() {
 	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
 		if (!textMode) {
-			if (key.c == keyMap["Exit"]) Game::Exit();
-			else if (key.c == keyMap["Basics"]) {
+			if (key.c == keyMap["Exit"]) {
+				Game::Exit();
+			} else if (key.c == keyMap["Basics"]) {
 				menuX = mouseInput.cx;
 				menuY = mouseInput.cy;
 				ChangeMenu(Menu::BasicsMenu());
@@ -209,8 +210,12 @@ void UI::HandleKeyboard() {
 				if (inputString.size() > 0) inputString.erase(inputString.end() - 1);
 			}
 		}
-		if (key.vk == TCODK_ESCAPE && menuOpen) {
-			rbuttonPressed = true;
+		if (key.vk == TCODK_ESCAPE) {
+			if (menuOpen) {
+				rbuttonPressed = true;
+			} else {
+				Game::Inst()->ToMainMenu(true);
+			}
 		}
 	}
 
@@ -723,7 +728,7 @@ boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 			}
 		}
 
-		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
+		int entity = Map::Inst()->GetNatureObject(pos.X(), pos.Y());
 		if (entity > -1) return (Game::Inst()->natureList[entity]);
 
 		entity = Map::Inst()->GetConstruction(pos.X(), pos.Y());
@@ -750,7 +755,7 @@ void UI::HandleUnderCursor(Coordinate pos, std::list<boost::weak_ptr<Entity> >* 
 			}
 		}
 
-		int entity = Map::Inst()->NatureObject(pos.X(), pos.Y());
+		int entity = Map::Inst()->GetNatureObject(pos.X(), pos.Y());
 		if (entity > -1) {
 			result->push_back(Game::Inst()->natureList[entity]);
 		}
@@ -812,7 +817,7 @@ void UI::ChooseCreateItem() {
 	int item, category;
 	Menu *ItemCategoryMenu = new Menu(std::vector<MenuChoice>(), "Categories");
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-		if (!Item::Categories[i].parent)
+		if (Item::Categories[i].parent < 0)
 			ItemCategoryMenu->AddChoice(MenuChoice(Item::Categories[i].name, boost::lambda::var(category) = i));
 	}
 	ItemCategoryMenu->ShowModal();

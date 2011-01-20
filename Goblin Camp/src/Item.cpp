@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -33,8 +33,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
-std::map<std::string, ItemType> Item::itemTypeNames = std::map<std::string, ItemType>();
-std::map<std::string, ItemType> Item::itemCategoryNames = std::map<std::string, ItemType>();
+boost::unordered_map<std::string, ItemType> Item::itemTypeNames = boost::unordered_map<std::string, ItemType>();
+boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::unordered_map<std::string, ItemType>();
 
 Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
 	type(typeval),
@@ -87,7 +87,7 @@ void Item::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = x - upleft.X();
 	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
+		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
 	}
 }
 
@@ -118,8 +118,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
 
-	if (container.lock()) Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), true);
-	else Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), false);
+	Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
 
 	if (!container.lock() && !reserved) {
 		Game::Inst()->StockpileItem(boost::static_pointer_cast<Item>(shared_from_this()));
@@ -128,7 +127,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 }
 boost::weak_ptr<Item> Item::ContainedIn() {return container;}
 
-int Item::Graphic() {return graphic;}
+int Item::GetGraphic() {return graphic;}
 
 Attack Item::GetAttack() const {return attack;}
 
@@ -138,6 +137,9 @@ std::string Item::ItemTypeToString(ItemType type) {
 
 ItemType Item::StringToItemType(std::string str) {
 	boost::to_upper(str);
+	if (itemTypeNames.find(str) == itemTypeNames.end()) {
+		return -1;
+	}
 	return itemTypeNames[str];
 }
 
@@ -147,6 +149,9 @@ std::string Item::ItemCategoryToString(ItemCategory category) {
 
 ItemCategory Item::StringToItemCategory(std::string str) {
 	boost::to_upper(str);
+	if (itemCategoryNames.find(str) == itemCategoryNames.end()) {
+		return -1;
+	}
 	return Item::itemCategoryNames[str];
 }
 
@@ -187,7 +192,7 @@ public:
 	void translateNames() {
 		for (unsigned int i = 0; i < presetCategoryParent.size(); ++i) {
 			if (presetCategoryParent[i] != "") {
-				Item::Categories[firstCategoryIndex+i].parent = &Item::Categories[Item::StringToItemCategory(presetCategoryParent[i])];
+				Item::Categories[firstCategoryIndex+i].parent = Item::StringToItemCategory(presetCategoryParent[i]);
 			}
 		}
 
@@ -196,14 +201,17 @@ public:
 		because this items.dat may not be the first one read in, and we don't want to overwrite
 		existing items*/
 		for (unsigned int i = 0; i < presetGrowth.size(); ++i) {
-
 			for (std::set<ItemCategory>::iterator cati = Item::Presets[firstItemIndex+i].categories.begin();
 				cati != Item::Presets[firstItemIndex+i].categories.end(); ++cati) {
-					if (Item::Categories[*cati].parent) {
+					if (Item::Categories[*cati].parent >= 0 && 
+						Item::Presets[firstItemIndex+i].categories.find(Item::Categories[*cati].parent) == 
+						Item::Presets[firstItemIndex+i].categories.end()) {
 #ifdef DEBUG
-						std::cout<<"Item has a parent ->"<<Item::Categories[*cati].parent->name<<" = ("<<Item::StringToItemCategory(Item::Categories[*cati].parent->name)<<")\n";
+						std::cout<<"Item has a parent ->"<<Item::Categories[Item::Categories[*cati].parent].name;
+						std::cout<<" = ("<<Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name)<<")\n";
 #endif
-						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[*cati].parent->name));
+						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name));
+						cati = Item::Presets[firstItemIndex+i].categories.begin(); //Start from the beginning, inserting into a set invalidates the iterator
 					}
 			}
 
@@ -242,9 +250,7 @@ private:
 			Item::Categories.push_back(ItemCat());
 			++Game::ItemCatCount;
 			Item::Categories.back().name = name;
-			std::string upperName = name;
-			boost::to_upper(upperName);
-			Item::itemCategoryNames.insert(std::pair<std::string, ItemCategory>(upperName, Game::ItemCatCount-1));
+			Item::itemCategoryNames.insert(std::make_pair(boost::to_upper_copy(Item::Categories.back().name), Game::ItemCatCount-1));
 			presetCategoryParent.push_back("");
 		} else if (boost::iequals(str->getName(), "item_type")) {
 			mode = ITEMMODE;
@@ -254,9 +260,7 @@ private:
 			presetDecay.push_back(std::vector<std::string>());
 			++Game::ItemTypeCount;
 			Item::Presets.back().name = name;
-			std::string upperName = name;
-			boost::to_upper(upperName);
-			Item::itemTypeNames.insert(std::pair<std::string, ItemType>(upperName, Game::ItemTypeCount-1));
+			Item::itemTypeNames.insert(std::make_pair(boost::to_upper_copy(Item::Presets.back().name), Game::ItemTypeCount-1));
 			presetProjectile.push_back("");
 		} else if (boost::iequals(str->getName(), "attack")) {
 		}
@@ -363,8 +367,7 @@ private:
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("ItemListener: " << msg);
-		Game::Inst()->Exit();
+		throw std::runtime_error(msg);
 	}
 };
 
@@ -455,18 +458,19 @@ int Item::RelativeValue() {
 int Item::Resistance(int i) const { return resistances[i]; }
 
 void Item::SetVelocity(int speed) {
-	if (velocity > 10 && speed == 0 && condition > 0 && rand() % 10 < 7) --condition; //A sudden impact will damage the item
+	if (velocity > 10 && speed == 0 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
 	
 	velocity = speed;
 	if (speed > 0) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
 	} else {
+		//The item has moved before but has now stopped
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
-		if (!Map::Inst()->Walkable(x, y)) {
+		if (!Map::Inst()->IsWalkable(x, y)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
 					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi)) {
+						if (Map::Inst()->IsWalkable(xi, yi)) {
 							Position(Coordinate(xi, yi));
 							return;
 						}
@@ -527,7 +531,7 @@ int Item::GetDecay() const { return decayCounter; }
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
-	parent(0)
+	parent(-1)
 {}
 
 std::string ItemCat::GetName() {

@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -83,7 +83,7 @@ namespace Script { namespace API {
 	
 	int PyItem::GetGraphic() {
 		if (ITEM_ALIVE(ptr)) {
-			return ptr->Graphic();
+			return ptr->GetGraphic();
 		} else {
 			LOG("WARNING: ITEM POINTER LOST");
 			return -1;

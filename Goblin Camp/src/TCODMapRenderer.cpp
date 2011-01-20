@@ -79,7 +79,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		for (int x = upleft.X(); x < upleft.X() + minimap.getWidth(); ++x) {
 			if (x >= 0 && x < map->Width() && y >= 0 && y < map->Height()) {
 
-				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->Graphic(x,y), map->ForeColor(x,y), map->BackColor(x,y));
+				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->GetGraphic(x,y), map->GetForeColor(x,y), map->GetBackColor(x,y));
 
 				boost::weak_ptr<WaterNode> water = map->GetWater(x,y);
 				if (water.lock()) {

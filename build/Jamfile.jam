@@ -89,11 +89,12 @@ rule make-nsis ( targets * : sources * : properties * ) {
         arch = x64 ;
     }
     
-    ARCH on $(targets) = $(arch) ;
+    ARCH on $(targets)   = $(arch) ;
+    PYTHON on $(targets) = [ modules.peek : PYTHON ] ;
 }
 
 actions make-nsis {
-    python $(GC_INSTALLER_DIR)/mkinstaller.py $(GC_VERSION) $(ARCH)
+    $(PYTHON) $(GC_INSTALLER_DIR)/mkinstaller.py $(GC_VERSION) $(ARCH)
 }
 
 rule cannot-make-nsis ( targets * : sources * : properties * ) {
@@ -263,9 +264,9 @@ local rule get-dist-dir ( properties * : what * ) {
     }
     
     if $(what) = bin && $(binaries-dist-dir) {
-        dir = $(dir)$(binaries-dist-dir) ;
+        dir = $(dir)$(binaries-dist-dir)/ ;
     } else if $(what) = data && $(data-dist-dir) {
-        dir = $(dir)$(data-dist-dir) ;
+        dir = $(dir)$(data-dist-dir)/ ;
     }
     
     return <location>$(dir) ;
@@ -319,17 +320,14 @@ explicit-alias dist : dist-data dist-binaries dist-additional dist-lib dist-mod-
 
 #
 # Solution files
-explicit-make goblin-camp-msvc9.sln      : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9.sln_in      : @gc-sln.generate-sln ;
-explicit-make goblin-camp-msvc9.vcproj   : $(GC_TEMPLATES_DIR)/goblin-camp-msvc9.vcproj_in   : @gc-sln.generate-2008 ;
-explicit-make goblin-camp-msvc10.sln     : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.sln_in     : @gc-sln.generate-sln ;
-explicit-make goblin-camp-msvc10.vcxproj : $(GC_TEMPLATES_DIR)/goblin-camp-msvc10.vcxproj_in : @gc-sln.generate-2010 ;
+sln-targets = ;
 
-explicit-install sln2008
-    : goblin-camp-msvc9.sln goblin-camp-msvc9.vcproj
-    : <location>$(GC_MSVC_SLN_DIR)
-;
+for local T in sln vcxproj vcxproj.filters vcxproj.user {
+    explicit-make goblin-camp.$(T) : $(GC_TEMPLATES_DIR)/goblin-camp.$(T)_in : @gc-sln.generate ;
+    sln-targets += goblin-camp.$(T) ;
+}
 
-explicit-install sln2010
-    : goblin-camp-msvc10.sln goblin-camp-msvc10.vcxproj
+explicit-install msvc10
+    : $(sln-targets)
     : <location>$(GC_MSVC_SLN_DIR)
 ;

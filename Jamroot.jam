@@ -39,7 +39,7 @@ global-path-constant GC_OSX_SOURCES   : "$(GC_SOURCES)/osx" ;
 global-path-constant GC_UNIX_SOURCES  : "$(GC_SOURCES)/unix" ;
 
 # Current GC version
-global-constant GC_VERSION : 0.13 ;
+global-constant GC_VERSION : 0.14 ;
 
 import version ;
 
@@ -48,8 +48,6 @@ ECHO *** Goblin Camp $(GC_VERSION) build system *** ;
 ECHO ** bjam [ version.jam ] Boost.Build [ version.boost-build ] ;
 ECHO ** ;
 ECHO ** Be sure to read build/README! ;
-ECHO ** Especially if you're getting 'Reference to unconfigured Boost version' error: ;
-ECHO "**   you need to create a config file (and run bjam --user-config=<config file>)!" ;
 ECHO ** ;
 ECHO ** If you still have problems, you can ask on forums: ;
 ECHO "**     http://www.goblincamp.com/forum" ;
@@ -62,8 +60,7 @@ use-project goblin-camp : $(GC_BUILD_ROOT) ;
 build-project $(GC_BUILD_ROOT) ;
 
 # Shortcuts
-alias nsis    : /goblin-camp//nsis ;
-alias dist    : /goblin-camp//dist ;
-alias sln2008 : /goblin-camp//sln2008 ;
-alias sln2010 : /goblin-camp//sln2010 ;
-explicit nsis dist sln2008 sln2010 ;
+alias nsis   : /goblin-camp//nsis   ;
+alias dist   : /goblin-camp//dist   ;
+alias msvc10 : /goblin-camp//msvc10 ;
+explicit nsis dist msvc10 ;

@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -28,11 +28,11 @@ void Door::Update() {
 	if (!Map::Inst()->NPCList(x, y)->empty()) {
 		graphic[1] = 254;
 		time = (UPDATES_PER_SECOND / 2);
-		Map::Inst()->BlocksLight(x, y, false);
+		Map::Inst()->SetBlocksLight(x, y, false);
 	} else {
 		if (time == 0) {
 			graphic[1] = closedGraphic;
-			Map::Inst()->BlocksLight(x, y, true);
+			Map::Inst()->SetBlocksLight(x, y, true);
 		} else --time;
 	}
 }

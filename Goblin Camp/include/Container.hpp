@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ private:
 
 	int water, filth; //Special cases for real liquids
 public:
-	Container(Coordinate = Coordinate(0,0), int type=0, int cap=1000, int faction = 0,
+	Container(Coordinate = Coordinate(0,0), ItemType type=0, int cap=1000, int faction = 0,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >(),
 		std::vector<ContainerListener*> = std::vector<ContainerListener*>());
 	virtual ~Container();

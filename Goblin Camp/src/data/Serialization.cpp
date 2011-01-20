@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -48,6 +48,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 #include "JobManager.hpp"
+#include "MapMarker.hpp"
 #include "Map.hpp"
 #include "StockManager.hpp"
 #include "StatusEffect.hpp"
@@ -1053,11 +1054,11 @@ BOOST_CLASS_VERSION(Tile, 0)
 
 template<class Archive>
 void Tile::save(Archive & ar, const unsigned int version) const {
-	ar & _type;
+	ar & type;
 	ar & vis;
 	ar & walkable;
 	ar & buildable;
-	ar & _moveCost;
+	ar & moveCost;
 	ar & construction;
 	ar & low;
 	ar & blocksWater;
@@ -1086,11 +1087,11 @@ void Tile::save(Archive & ar, const unsigned int version) const {
 template<class Archive>
 void Tile::load(Archive & ar, const unsigned int version) {
 	if (version == 0) {
-		ar & _type;
+		ar & type;
 		ar & vis;
 		ar & walkable;
 		ar & buildable;
-		ar & _moveCost;
+		ar & moveCost;
 		ar & construction;
 		ar & low;
 		ar & blocksWater;

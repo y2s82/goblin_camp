@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -154,9 +154,9 @@ void Container::Draw(Coordinate upleft, TCODConsole* console) {
 	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		if (!items.empty() && items.begin()->lock())
-			console->putCharEx(screenx, screeny, items.begin()->lock()->Graphic(), items.begin()->lock()->Color(), color);
+			console->putCharEx(screenx, screeny, items.begin()->lock()->GetGraphic(), items.begin()->lock()->Color(), color);
 		else
-			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
+			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
 	}
 }
 

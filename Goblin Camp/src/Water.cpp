@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -65,11 +65,11 @@ void WaterNode::Update() {
 
 			//Check if any of the surrounding tiles are low, this only matters if this tile is not low
 			bool onlyLowTiles = false;
-			if (!Map::Inst()->Low(x,y)) {
+			if (!Map::Inst()->IsLow(x,y)) {
 				for (int ix = x-1; ix <= x+1; ++ix) {
 					for (int iy = y-1; iy <= y+1; ++iy) {
 						if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
-							if ((ix != x || iy != y) && Map::Inst()->Low(ix,iy)) { 
+							if ((ix != x || iy != y) && Map::Inst()->IsLow(ix,iy)) { 
 								onlyLowTiles = true;
 								break;
 							}
@@ -85,7 +85,7 @@ void WaterNode::Update() {
 						Are the same height or low
 						or in case of [onlyLowTiles] are low
 						depth > RIVERDEPTH*3 at which point it can overflow upwards*/
-						if (((!onlyLowTiles && Map::Inst()->Low(x,y) == Map::Inst()->Low(ix,iy)) || depth > RIVERDEPTH*3 || Map::Inst()->Low(ix,iy)) && !Map::Inst()->BlocksWater(ix,iy)) {
+						if (((!onlyLowTiles && Map::Inst()->IsLow(x,y) == Map::Inst()->IsLow(ix,iy)) || depth > RIVERDEPTH*3 || Map::Inst()->IsLow(ix,iy)) && !Map::Inst()->BlocksWater(ix,iy)) {
 							//If we're choosing only low tiles, then this tile should be ignored completely
 							if (!onlyLowTiles || (ix != x || iy != y)) {
 								waterList.push_back(Map::Inst()->GetWater(ix,iy));
@@ -103,7 +103,7 @@ void WaterNode::Update() {
 			for (unsigned int i = 0; i < waterList.size(); ++i) {
 				if (waterList[i].lock()) {
 					waterList[i].lock()->depth = (int)divided;
-					if (Map::Inst()->Low(coordList[i].X(), coordList[i].Y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
+					if (Map::Inst()->IsLow(coordList[i].X(), coordList[i].Y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
 					waterList[i].lock()->timeFromRiverBed = timeFromRiverBed;
 					waterList[i].lock()->UpdateGraphic();
 				}

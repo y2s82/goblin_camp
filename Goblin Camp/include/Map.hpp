@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -52,13 +52,13 @@ public:
 	static Map* Inst();
 	void Reset(int,int);
 	float getWalkCost(int, int, int, int, void *) const;
-	bool Walkable(int,int) const;
-	bool Walkable(int,int,void*) const;
+	bool IsWalkable(int,int) const;
+	bool IsWalkable(int,int,void*) const;
 	void SetWalkable(int,int,bool);
 	int Width();
 	int Height();
-	bool Buildable(int,int) const;
-	void Buildable(int,int,bool);
+	bool IsBuildable(int,int) const;
+	void SetBuildable(int,int,bool);
 	TileType Type(int,int);
 	void Type(int,int,TileType);
 	void MoveTo(int,int,int);
@@ -67,24 +67,24 @@ public:
 	int GetConstruction(int,int) const;
 	boost::weak_ptr<WaterNode> GetWater(int,int);
 	void SetWater(int,int,boost::shared_ptr<WaterNode>);
-	bool Low(int,int) const;
-	void Low(int,int,bool);
+	bool IsLow(int,int) const;
+	void SetLow(int,int,bool);
 	bool BlocksWater(int,int) const;
-	void BlocksWater(int,int,bool);
+	void SetBlocksWater(int,int,bool);
 	std::set<int>* NPCList(int,int);
-	int Graphic(int,int) const;
-	TCODColor ForeColor(int,int) const;
+	int GetGraphic(int,int) const;
+	TCODColor GetForeColor(int,int) const;
 	void ForeColor(int,int,TCODColor);
-	TCODColor BackColor(int,int) const;
-	void NatureObject(int,int,int);
-	int NatureObject(int,int) const;
+	TCODColor GetBackColor(int,int) const;
+	void SetNatureObject(int,int,int);
+	int GetNatureObject(int,int) const;
 	std::set<int>* ItemList(int,int);
 	boost::weak_ptr<FilthNode> GetFilth(int,int);
 	void SetFilth(int,int,boost::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood(int,int);
 	void SetBlood(int,int,boost::shared_ptr<BloodNode>);
 	bool BlocksLight(int, int) const;
-	void BlocksLight(int, int, bool);
+	void SetBlocksLight(int, int, bool);
 	bool LineOfSight(Coordinate, Coordinate);
 	bool LineOfSight(int, int, int, int);
 	void Mark(int,int);

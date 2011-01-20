@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
  This file is part of Goblin Camp.
  
  Goblin Camp is free software: you can redistribute it and/or modify
@@ -43,4 +43,3 @@ Dialog* JobDialog::JobListingDialog() {
 	}
 	return jobListingDialog;
 }
-

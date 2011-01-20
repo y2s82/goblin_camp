@@ -1,4 +1,4 @@
-# Copyright 2010 Ilkka Halila
+# Copyright 2010-2011 Ilkka Halila
 # This file is part of Goblin Camp.
 # 
 # Goblin Camp is free software: you can redistribute it and/or modify
@@ -14,14 +14,17 @@
 # You should have received a copy of the GNU General Public License 
 # along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
 #
-from . import log, events, utils, config
+from . import log, events, utils, config, ui, entities
 import _gcampapi
 
-announce = _gcampapi.announce
-announce.__doc__ = 'Add a string to the announcements area'
+getVersionString = _gcampapi.getVersionString
+getVersionString.__doc__ = 'Returns Goblin Camp version as a string'
+
+isDebugBuild = _gcampapi.isDebugBuild
+isDebugBuild.__doc__ = 'Returns True if running a debug build'
+
+isDevMode = _gcampapi.isDevMode
+isDevMode.__doc__ = 'Returns True if running in a devmode'
 
 delay = _gcampapi.delay
-delay.__doc__ = 'Call a function after a set delay'
-
-messageBox = _gcampapi.messageBox
-messageBox.__doc__ = 'Display a message in a messagebox'
+delay.__doc__ = 'Run a function after a delay'

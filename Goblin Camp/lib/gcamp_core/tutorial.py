@@ -1,3 +1,20 @@
+# Copyright 2010-2011 Ilkka Halila
+# This file is part of Goblin Camp.
+# 
+# Goblin Camp is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# Goblin Camp is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License 
+# along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.
+#
+
 import gcamp
 import gcamp.config
 import gcamp.events
@@ -12,7 +29,7 @@ class Tutorial (gcamp.events.EventListener):
 		
 		if self.stage == 0:
 			gcamp.config.setCVar("tutorial", '0')
-			gcamp.delay(100, lambda : gcamp.messageBox("Welcome to the Goblin Camp tutorial!              "+
+			gcamp.delay(100, lambda : gcamp.ui.messageBox("Welcome to the Goblin Camp tutorial!              "+
 						"You're best off by first building a stockpile:    " +
 						"                                                  " +
 						"        -Right-click to open the menu             " +
@@ -23,12 +40,12 @@ class Tutorial (gcamp.events.EventListener):
 
 	def onBuildingCreated(self, construct, x, y):
 		if self.stage == 0 and construct.getTypeString().lower() == "stockpile":
-			gcamp.messageBox("Good work! Now left-click on the stockpile, and   " +
+			gcamp.ui.messageBox("Good work! Now left-click on the stockpile, and   " +
 						"click on the 'All' button to allow all item       " +
 						"categories. Your goblins should get to work       " +
 						"storing everything in there.")
 
-			gcamp.delay(400, lambda : gcamp.messageBox( "Next you should do two things:                    " +
+			gcamp.delay(400, lambda : gcamp.ui.messageBox( "Next you should do two things:                    " +
 						"                                                  " +
 						"    -Choose Orders->Designate trees and designate " +
 						"trees that can be chopped down for wood.          " +
@@ -39,18 +56,18 @@ class Tutorial (gcamp.events.EventListener):
 						"two axes and go forth to chop some trees down.    "))
 			self.stage = 10
 		elif self.stage == 20 and construct.getTypeString().lower() == "saw pit":
-			gcamp.messageBox("Now order up some planks from the                 " +
+			gcamp.ui.messageBox("Now order up some planks from the                 " +
 						"Stock Manager, we'll need those for more advanced " + 
 						"constructions.")
 			self.stage = 30
-						
+			
 	def onItemCreated(self, item, x, y):
 		if self.stage == 10 and item.getTypeString().lower() == "wood log":
-			gcamp.delay(75, lambda : gcamp.messageBox( "Alright, now you have wood logs! Once the logs    " +
+			gcamp.delay(75, lambda : gcamp.ui.messageBox( "Alright, now you have wood logs! Once the logs    " +
 						"have been stored in the stockpile, choose         " +
 						"Build->Workshops->Saw pit.                        " +
 						"Place it somewhere convenient"))
-			gcamp.delay(450, lambda : gcamp.messageBox("Now would be a good time to designate a farmplot. " +
+			gcamp.delay(450, lambda : gcamp.ui.messageBox("Now would be a good time to designate a farmplot. " +
 						"Choose some suitable place, designate it, and     " +
 						"enable planting of all three seed types by        " +
 						"left-clicking the farmplot and clicking the boxes " +
@@ -58,10 +75,10 @@ class Tutorial (gcamp.events.EventListener):
 			self.stage = 20
 			
 		elif self.stage == 30 and item.getTypeString().lower() == "wood plank":
-			gcamp.delay(75, lambda : gcamp.messageBox( "Now build a carpenter, it'll allow you to build   " +
+			gcamp.delay(75, lambda : gcamp.ui.messageBox( "Now build a carpenter, it'll allow you to build   " +
 						"crates to store most items and wooden clubs for   " +
 						"your future military"))
-			gcamp.delay(250, lambda : gcamp.messageBox("It's a good idea to check out what your territory " +
+			gcamp.delay(250, lambda : gcamp.ui.messageBox("It's a good idea to check out what your territory " +
 						"looks like time to time.                          " +
 						"        Territory->Toggle territory overlay       " +
 						"It'll expand automatically as you build things,   " +
@@ -69,7 +86,7 @@ class Tutorial (gcamp.events.EventListener):
 						"_not_ venture outside your territory to pick items" +
 						"up or otherwise. They will favour a drinking spot " +
 						"inside your territory as well"))
-			gcamp.delay(450, lambda : gcamp.messageBox("This is the end of the tutorial.                  " +
+			gcamp.delay(450, lambda : gcamp.ui.messageBox("This is the end of the tutorial.                  " +
 						"It's a good idea to choose a site for the spawning" +
 						"pool soon. Most constructions will have a         " +
 						"description in their tooltip, so look through the " +

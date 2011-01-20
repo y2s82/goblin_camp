@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -30,6 +30,7 @@ namespace Script {
 		void BuildingCreated(boost::weak_ptr<Construction>, int, int);
 		void BuildingDestroyed(boost::weak_ptr<Construction>, int, int);
 		void ItemCreated(boost::weak_ptr<Item>, int, int);
+		void TierChanged(unsigned, const std::string&);
 		/*void ItemDestroyed(Item*, int, int);
 		void NPCSpawned(NPC*, Construction*, int, int);
 		void NPCKilled(NPC*, NPC*, int, int);*/

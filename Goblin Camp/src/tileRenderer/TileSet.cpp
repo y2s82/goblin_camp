@@ -205,13 +205,15 @@ int TileSet::GetGraphicsHintFor(const ItemPreset& itemPreset) const {
 	}
 
 	for (std::set<ItemCategory>::const_iterator cati = itemPreset.specificCategories.begin(); cati != itemPreset.specificCategories.end(); ++cati) {
-		for (ItemCat * cat = &Item::Categories.at(*cati); cat != 0; cat = cat->parent)
-		{
-			set = itemSpriteLookup.find(cat->GetName());
+		ItemCategory catId = *cati;
+		while (catId != -1) {
+			ItemCat& cat = Item::Categories.at(catId);
+			set = itemSpriteLookup.find(cat.GetName());
 			if (set != itemSpriteLookup.end())
 			{
 				return set->second;
 			}
+			catId = cat.parent;
 		}
 	}
 

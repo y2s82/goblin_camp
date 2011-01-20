@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -146,4 +146,8 @@ public:
 	void Damage(Attack*);
 	void Explode();
 	bool Built();
+	
+	static boost::unordered_map<std::string, ConstructionType> constructionNames;
+	static ConstructionType StringToConstructionType(std::string);
+	static std::string ConstructionTypeToString(ConstructionType);
 };

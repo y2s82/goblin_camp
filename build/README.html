@@ -468,6 +468,7 @@ using python : properties ;
 <li><tt class="docutils literal">&lt;version&gt;version</tt> — Python version (major.minor; by default 2.7)</li>
 <li><tt class="docutils literal">&lt;pydebug&gt;on</tt> — enable Python debugging (link to debug version of Python)</li>
 <li><tt class="docutils literal">&lt;suffix&gt;suffix</tt> — library name suffix (_d is default for debug libs)</li>
+<li><tt class="docutils literal">&lt;interpreter&gt;python</tt> — interpreter executable name (default: python)</li>
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
@@ -534,12 +535,14 @@ crash handler depends on new version, and cannot run with OS-provided one).</p>
 <h1><a class="toc-backref" href="#id20">Additional build system capabilities</a></h1>
 <div class="section" id="generating-msvc-project-files">
 <h2><a class="toc-backref" href="#id21">Generating MSVC project files</a></h2>
-<p>Build system can generate MSVC2008 and MSVC2010 solution and project.
+<p>Build system can generate MSVC2010 solution and project files.
 To do this, use:</p>
 <pre class="literal-block">
-bjam --user-config=gc-config.jam sln2008
+bjam --user-config=gc-config.jam msvc10
 </pre>
-<p>You can use <tt class="docutils literal">sln2010</tt> instead to generate MSVC2010 project.</p>
+<p>You can also use <a class="reference internal" href="#parallel-builds">parallel builds</a> — but instead of <tt class="docutils literal"><span class="pre">-jN</span></tt> option, you need to use
+<tt class="docutils literal"><span class="pre">-sSLN_JOBS=N</span></tt>. Unlike normal build (which is not parallel by default),
+solution generator defaults to 4 jobs. To turn it off, set the limit to 1 job.</p>
 </div>
 <div class="section" id="generating-nsis-installer">
 <h2><a class="toc-backref" href="#id22">Generating NSIS installer</a></h2>

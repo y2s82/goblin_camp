@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
  This file is part of Goblin Camp.
  
  Goblin Camp is free software: you can redistribute it and/or modify
@@ -228,7 +228,7 @@ void SquadsDialog::SelectWeapon() {
     Menu *weaponChoiceMenu = new Menu(std::vector<MenuChoice>(), "Weapons");
     weaponChoiceMenu->AddChoice(MenuChoice("None", boost::bind(&Squad::Weapon, GetSquad(squadList->Selected()), -1)));
     for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-        if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Weapon")) {
+        if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].name, "Weapon")) {
             weaponChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), boost::bind(&Squad::Weapon, GetSquad(squadList->Selected()), i)));
         }
     }
@@ -249,7 +249,7 @@ void SquadsDialog::SelectArmor() {
 	Menu *armorChoiceMenu = new Menu(std::vector<MenuChoice>(), "Armor");
     armorChoiceMenu->AddChoice(MenuChoice("None", boost::bind(&Squad::Armor, GetSquad(squadList->Selected()), -1)));
     for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-        if (Item::Categories[i].parent && boost::iequals(Item::Categories[i].parent->name, "Armor")) {
+        if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].name, "Armor")) {
             armorChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), boost::bind(&Squad::Armor, GetSquad(squadList->Selected()), i)));
         }
     }

@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -95,7 +95,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	React(react),
 	escaped(false)
 {
-	while (!Map::Inst()->Walkable(pos.X(),pos.Y())) {
+	while (!Map::Inst()->IsWalkable(pos.X(),pos.Y())) {
 		pos.X(pos.X()+1);
 		pos.Y(pos.Y()+1);
 	}
@@ -212,7 +212,7 @@ void NPC::HandleThirst() {
 			} else {
 				for (int ix = tmpCoord.X()-1; ix <= tmpCoord.X()+1; ++ix) {
 					for (int iy = tmpCoord.Y()-1; iy <= tmpCoord.Y()+1; ++iy) {
-						if (Map::Inst()->Walkable(ix,iy,(void*)this)) {
+						if (Map::Inst()->IsWalkable(ix,iy,(void*)this)) {
 							newJob->tasks.push_back(Task(MOVE, Coordinate(ix,iy)));
 							goto CONTINUEDRINKBLOCK;
 						}
@@ -359,7 +359,7 @@ void NPC::Update() {
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
-		AddEffect(StatusEffect(CARRYING, carried.lock()->Graphic(), carried.lock()->Color()));
+		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
 	} else RemoveEffect(CARRYING);
 }
 
@@ -441,7 +441,7 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 			case MOVE:
-				if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
+				if (!Map::Inst()->IsWalkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
 					TaskFinished(TASKFAILFATAL, "(MOVE)Target unwalkable");
 					break;
 				}
@@ -476,7 +476,7 @@ AiThink NPC::Think() {
 						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 						if (tarY < 0) tarY = 0;
 						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-						if (Map::Inst()->Walkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY)) {
+						if (Map::Inst()->IsWalkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY)) {
 							if (!checkLOS || (checkLOS && 
 								Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y()))) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
@@ -1054,7 +1054,7 @@ CONTINUEEAT:
 				} else {
 					AddEffect(WORKING);
 					if (++timer >= 50) {
-						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
+						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
 						TaskFinished(TASKSUCCESS);
 					}
@@ -1099,13 +1099,13 @@ CONTINUEEAT:
 						if (npci->lock() && (npci->lock()->faction != faction || npci->lock() == aggressor.lock())) {
 							int dx = x - npci->lock()->x;
 							int dy = y - npci->lock()->y;
-							if (Map::Inst()->Walkable(x + dx, y + dy, (void *)this)) {
+							if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(x + dx, y, (void *)this)) {
+							} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(x, y + dy, (void *)this)) {
+							} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
 								jobs.push_back(fleeJob);
 							}
@@ -1174,7 +1174,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 					Map::Inst()->FindEquivalentMoveTarget(x, y, moveX, moveY, nextX, nextY, (void*)this);
 				}
 
-				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
+				if (Map::Inst()->IsWalkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
 					Position(Coordinate(moveX,moveY));
 					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
@@ -1823,8 +1823,7 @@ class NPCListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("NPCListener: " << msg);
-		Game::Inst()->Exit(false);
+		throw std::runtime_error(msg);
 	}
 };
 
@@ -1883,6 +1882,9 @@ std::string NPC::NPCTypeToString(NPCType type) {
 }
 
 NPCType NPC::StringToNPCType(std::string typeName) {
+	if (NPCTypeNames.find(typeName) == NPCTypeNames.end()) {
+		return -1;
+	}
 	return NPCTypeNames[typeName];
 }
 
@@ -1996,7 +1998,7 @@ void NPC::UpdateVelocity() {
 								Attack attack;
 								attack.Type(DAMAGE_BLUNT);
 								TCOD_dice_t damage;
-								damage.addsub = velocity/5;
+								damage.addsub = (float)velocity/5;
 								damage.multiplier = 1;
 								damage.nb_dices = 1;
 								damage.nb_faces = 5 + effectiveStats[SIZE];
@@ -2027,11 +2029,11 @@ void NPC::UpdateVelocity() {
 			} else SetVelocity(0);
 		}
 	} else { //We're not hurtling through air so let's tumble around if we're stuck on unwalkable terrain
-		if (!Map::Inst()->Walkable(x, y, (void*)this)) {
+		if (!Map::Inst()->IsWalkable(x, y, (void*)this)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
 					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi, (void*)this)) {
+						if (Map::Inst()->IsWalkable(xi, yi, (void*)this)) {
 							Position(Coordinate(xi, yi));
 							return;
 						}

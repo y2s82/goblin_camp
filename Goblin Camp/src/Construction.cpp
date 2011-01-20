@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -40,7 +40,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "UI/ConstructionDialog.hpp"
 #include "Item.hpp"
-#include "scripting\Event.hpp"
+#include "scripting/Event.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -48,6 +48,20 @@ Coordinate Construction::Blueprint(ConstructionType construct) {
 
 Coordinate Construction::ProductionSpot(ConstructionType construct) {
 	return Construction::Presets[construct].productionSpot;
+}
+
+boost::unordered_map<std::string, ConstructionType> Construction::constructionNames = boost::unordered_map<std::string, ConstructionType>();
+
+ConstructionType Construction::StringToConstructionType(std::string name) {
+	boost::to_upper(name);
+	if (constructionNames.find(name) == constructionNames.end()) {
+		return -1;
+	}
+	return constructionNames[name];
+}
+
+std::string Construction::ConstructionTypeToString(ConstructionType type) {
+	return Construction::Presets[type].name;
 }
 
 std::vector<int> Construction::AllowedAmount = std::vector<int>();
@@ -82,10 +96,10 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 Construction::~Construction() {
 	for (int ix = x; ix < (signed int)x + Construction::Blueprint(type).X(); ++ix) {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
-			Map::Inst()->Buildable(ix,iy,true);
+			Map::Inst()->SetBuildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
-			Map::Inst()->BlocksLight(ix,iy,false);
+			Map::Inst()->SetBlocksLight(ix,iy,false);
 		}
 	}
 	
@@ -159,7 +173,7 @@ int Construction::Build() {
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
-			if (rand() % 10 < 8) { //80% of materials can't be recovered
+			if (Random::Generate(9) < 8) { //80% of materials can't be recovered
 				itemsToRemove.push_back(*itemi);
 			}
 		}
@@ -176,8 +190,8 @@ int Construction::Build() {
 		for (unsigned int ix = x; ix < x + Construction::Blueprint(type).X(); ++ix) {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
 				Map::Inst()->SetWalkable(ix, iy, walkable);
-				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, Construction::Presets[type].blocksLight);
+				Map::Inst()->SetBlocksWater(ix, iy, !walkable);
+				Map::Inst()->SetBlocksLight(ix, iy, Construction::Presets[type].blocksLight);
 			}
 		}
 
@@ -321,6 +335,7 @@ class ConstructionListener : public ITCODParserListener {
 #endif
 		Construction::Presets.push_back(ConstructionPreset());
 		Construction::Presets.back().name = name;
+		Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
 		Construction::AllowedAmount.push_back(-1);
 		return true;
 	}
@@ -492,8 +507,7 @@ class ConstructionListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("ItemListener: " << msg);
-		Game::Inst()->Exit();
+		throw std::runtime_error(msg);
 	}
 };
 
@@ -532,7 +546,7 @@ void Construction::LoadPresets(std::string filename) {
 	parser.run(filename.c_str(), new ConstructionListener());
 }
 
-bool _ResolveProductsPredicate(const ConstructionPreset& preset, const std::string& name) {
+bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string& name) {
 	return boost::iequals(preset.name, name);
 }
 
@@ -550,7 +564,7 @@ void Construction::ResolveProducts() {
 				// Could use bit more complicated lambda expression to eliminate
 				// separate predicate function entirely, but I think this is more
 				// clear to people not used to Boost.Lambda
-				boost::bind(_ResolveProductsPredicate, _1, itemPreset.constructedInRaw)
+				boost::bind(_ConstructionNameEquals, _1, itemPreset.constructedInRaw)
 			);
 			
 			if (conIt != Construction::Presets.end()) {
@@ -808,4 +822,3 @@ ConstructionPreset::ConstructionPreset() :
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
-	

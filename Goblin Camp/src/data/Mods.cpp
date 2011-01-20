@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
+#include "Game.hpp"
 #include "Logger.hpp"
 #include "data/Mods.hpp"
 #include "data/Paths.hpp"
@@ -93,7 +94,7 @@ namespace {
 			LOG_FUNC("Doesn't exist.", "LoadFile");
 			
 			if (required) {
-				exit(1);
+				throw std::runtime_error("Doesn't exist.");
 			} else {
 				return;
 			}
@@ -141,11 +142,16 @@ namespace {
 			LoadMetadata(metadata, (dir / "mod.dat"));
 		}
 		
-		LoadFile("items",         dir, Item::LoadPresets, required);
-		LoadFile("constructions", dir, Construction::LoadPresets, required);
-		LoadFile("wildplants",    dir, NatureObject::LoadPresets, required);
-		LoadFile("names",         dir, LoadNames, required);
-		LoadFile("creatures",     dir, NPC::LoadPresets, required);
+		try {
+			LoadFile("items",         dir, Item::LoadPresets, required);
+			LoadFile("constructions", dir, Construction::LoadPresets, required);
+			LoadFile("wildplants",    dir, NatureObject::LoadPresets, required);
+			LoadFile("names",         dir, LoadNames, required);
+			LoadFile("creatures",     dir, NPC::LoadPresets, required);
+		} catch (const std::runtime_error& e) {
+			LOG_FUNC("Failed to load mod due to std::runtime_error: " << e.what(), "LoadMod");
+			if (required) Game::Inst()->ErrorScreen();
+		}
 		
 		if (metadata.apiVersion != -1) {
 			if (metadata.apiVersion != Script::version) {

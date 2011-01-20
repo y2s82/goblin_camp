@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -63,7 +63,7 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 
 NatureObject::~NatureObject() {
 	Map::Inst()->SetWalkable(x, y, true);
-	Map::Inst()->Buildable(x, y, true);
+	Map::Inst()->SetBuildable(x, y, true);
 }
 
 int NatureObject::GraphicsHint() const {
@@ -142,8 +142,7 @@ class NatureObjectListener : public ITCODParserListener {
 		return true;
 	}
 	void error(const char *msg) {
-		LOG("NatureObjectListener: " << msg);
-		Game::Inst()->Exit();
+		throw std::runtime_error(msg);
 	}
 };
 

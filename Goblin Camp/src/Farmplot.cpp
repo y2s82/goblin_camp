@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -53,7 +53,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 						if (!containers[Coordinate(x,y)]->empty()) {
 							boost::weak_ptr<Item> item = containers[Coordinate(x,y)]->GetFirstItem();
 							if (item.lock()) {
-								console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
+								console->putCharEx(screenx, screeny, item.lock()->GetGraphic(), item.lock()->Color(), TCODColor::black);
 							}
 						}
 				}

@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -33,7 +33,7 @@ Tile::Tile(TileType newType, int newCost) :
 	vis(true),
 	walkable(true),
 	buildable(true),
-	_moveCost(newCost),
+	moveCost(newCost),
 	construction(-1),
 	low(false),
 	blocksWater(false),
@@ -52,14 +52,14 @@ Tile::Tile(TileType newType, int newCost) :
 	corruption(0),
 	territory(false)
 {
-	type(newType);
+	SetType(newType);
 }
 
-TileType Tile::type() { return _type; }
+TileType Tile::GetType() { return type; }
 
-void Tile::type(TileType newType) {
-	_type = newType;
-	if (_type == TILEGRASS) {
+void Tile::SetType(TileType newType) {
+	type = newType;
+	if (type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true;
 		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
 		backColor = TCODColor(0, 0, 0);
@@ -75,12 +75,12 @@ void Tile::type(TileType newType) {
 		case 8: graphic = ':'; break;
 		case 9: graphic = '\''; break;
 		}
-	} else if (_type == TILEDITCH || _type == TILERIVERBED) {
+	} else if (type == TILEDITCH || type == TILERIVERBED) {
 		vis = true; walkable = true; buildable = true; low = true;
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
-		_moveCost = Random::Generate(3, 5);
-	} else if (_type == TILEBOG) {
+		moveCost = Random::Generate(3, 5);
+	} else if (type == TILEBOG) {
 		vis = true; walkable = true; buildable = true; low = false;
 		switch (Random::Generate(9)) {
 		case 0:
@@ -96,32 +96,29 @@ void Tile::type(TileType newType) {
 		}
 		originalForeColor = TCODColor(Random::Generate(184), 127, 70);
 		backColor = TCODColor(60,30,20);
-		_moveCost = Random::Generate(6, 10);
-	} else if (_type == TILEROCK) {
+		moveCost = Random::Generate(6, 10);
+	} else if (type == TILEROCK) {
 		vis = true; walkable = true; buildable = true; low = false;
 		graphic = (Random::GenerateBool() ? ',' : '.');
 		originalForeColor = TCODColor(Random::Generate(182, 182 + 19), Random::Generate(182, 182 + 19), Random::Generate(182, 182 + 19));
 		backColor = TCODColor(0, 0, 0);
-	} else if (_type == TILEMUD) {
+	} else if (type == TILEMUD) {
 		vis = true; walkable = true; buildable = true; low = false;
-		switch (rand() % 2) {
-		case 0: graphic = '~'; break;
-		case 1: graphic = '#'; break;
-		}
-		originalForeColor = TCODColor(120 + rand() % 60, 80 + rand() % 50, 0);
+		graphic = Random::GenerateBool() ? '#' : '~';
+		originalForeColor = TCODColor(Random::Generate(120, 120 + 59), Random::Generate(80, 80 + 49), 0);
 		backColor = TCODColor(0, 0, 0);
-		_moveCost = 5;
+		moveCost = 5;
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
 }
 
 bool Tile::BlocksLight() const { return !vis; }
-void Tile::BlocksLight(bool value) { vis = !value; }
+void Tile::SetBlocksLight(bool value) { vis = !value; }
 
-bool Tile::Walkable() const {
+bool Tile::IsWalkable() const {
 	return walkable;
 }
-void Tile::Walkable(bool value) {
+void Tile::SetWalkable(bool value) {
 	std::queue<int> bumpQueue;
 	walkable = value;
 	if (value == false) {
@@ -138,24 +135,24 @@ void Tile::Walkable(bool value) {
 }
 
 bool Tile::BlocksWater() const { return blocksWater; }
-void Tile::BlocksWater(bool value) { blocksWater = value; }
+void Tile::SetBlocksWater(bool value) { blocksWater = value; }
 
-int Tile::MoveCost(void* ptr) const {
+int Tile::GetMoveCost(void* ptr) const {
 	if (!static_cast<NPC*>(ptr)->HasHands()) {
 		if (construction >= 0) {
 			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(construction).lock()) {
-				if (cons->HasTag(DOOR)) return MoveCost()+50;
+				if (cons->HasTag(DOOR)) return GetMoveCost()+50;
 			}
 		}
 	}
-	int cost = MoveCost();
+	int cost = GetMoveCost();
 	if (cost == 0 && construction >= 0 && static_cast<NPC*>(ptr)->IsTunneler()) return 50;
 	return cost;
 }
 
-int Tile::MoveCost() const {
-	if (!Walkable()) return 0;
-	int cost = _moveCost;
+int Tile::GetMoveCost() const {
+	if (!IsWalkable()) return 0;
+	int cost = moveCost;
 	if (construction >= 0) cost += 2;
 
 	//If a construction exists here, and it's a bridge, then movecost = 1 (disregards mud/ditch/etc)
@@ -168,10 +165,10 @@ int Tile::MoveCost() const {
 
 	return cost;
 }
-void Tile::SetMoveCost(int value) { _moveCost = value; }
+void Tile::SetMoveCost(int value) { moveCost = value; }
 
-void Tile::Buildable(bool value) { buildable = value; }
-bool Tile::Buildable() const { return buildable; }
+void Tile::SetBuildable(bool value) { buildable = value; }
+bool Tile::IsBuildable() const { return buildable; }
 
 void Tile::MoveFrom(int uid) {
 	if (npcList.find(uid) == npcList.end()) {
@@ -195,14 +192,14 @@ int Tile::GetConstruction() const { return construction; }
 boost::weak_ptr<WaterNode> Tile::GetWater() const {return boost::weak_ptr<WaterNode>(water);}
 void Tile::SetWater(boost::shared_ptr<WaterNode> value) {water = value;}
 
-bool Tile::Low() const {return low;}
-void Tile::Low(bool value) {low = value;}
+bool Tile::IsLow() const {return low;}
+void Tile::SetLow(bool value) {low = value;}
 
-int Tile::Graphic() const { return graphic; }
-TCODColor Tile::ForeColor() const { 
+int Tile::GetGraphic() const { return graphic; }
+TCODColor Tile::GetForeColor() const { 
 	return foreColor;
 }
-TCODColor Tile::BackColor() const {
+TCODColor Tile::GetBackColor() const {
 	if (!blood && !marked) return backColor;
 	TCODColor result = backColor;
 	if (blood)
@@ -212,8 +209,8 @@ TCODColor Tile::BackColor() const {
 	return result; 
 }
 
-void Tile::NatureObject(int val) { natureObject = val; }
-int Tile::NatureObject() const { return natureObject; }
+void Tile::SetNatureObject(int val) { natureObject = val; }
+int Tile::GetNatureObject() const { return natureObject; }
 
 boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
 void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
@@ -227,17 +224,17 @@ void Tile::Unmark() { marked = false; }
 void Tile::WalkOver() {
 	//Ground under a construction wont turn to mud
 	if (walkedOver < 120 || construction < 0) ++walkedOver;
-	if (_type == TILEGRASS) {
+	if (type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
-		if (walkedOver > 300 && rand() % 100 == 0) type(TILEMUD);
+		if (walkedOver > 300 && Random::Generate(99) == 0) SetType(TILEMUD);
 	}
 }
 
 void Tile::Corrupt(int magnitude) {
 	corruption += magnitude;
 	if (corruption < 0) corruption = 0;
-	if (_type == TILEGRASS) {
+	if (type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);;
 	}
 }

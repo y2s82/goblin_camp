@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -115,16 +115,16 @@ void SpawningPool::Update() {
 			for (int x = a.X(); x <= b.X(); ++x) {
 				for (int y = a.Y(); y <= b.Y(); ++y) {
 					if (Map::Inst()->GetConstruction(x,y) == uid) {
-						if (Map::Inst()->Walkable(x-1,y)) {
+						if (Map::Inst()->IsWalkable(x-1,y)) {
 							spawnLocation = Coordinate(x-1,y);
 							break;
-						} else if (Map::Inst()->Walkable(x+1,y)) {
+						} else if (Map::Inst()->IsWalkable(x+1,y)) {
 							spawnLocation = Coordinate(x+1,y);
 							break;
-						} else if (Map::Inst()->Walkable(x,y+1)) {
+						} else if (Map::Inst()->IsWalkable(x,y+1)) {
 							spawnLocation = Coordinate(x,y+1);
 							break;
-						} else if (Map::Inst()->Walkable(x,y-1)) {
+						} else if (Map::Inst()->IsWalkable(x,y-1)) {
 							spawnLocation = Coordinate(x,y-1);
 							break;
 						}
@@ -192,8 +192,8 @@ void SpawningPool::Expand() {
 		if (location.Y() > b.Y()) b.Y(location.Y());
 
 		//Swallow nature objects
-		if (Map::Inst()->NatureObject(location.X(), location.Y()) >= 0) {
-			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->NatureObject(location.X(), location.Y())]);
+		if (Map::Inst()->GetNatureObject(location.X(), location.Y()) >= 0) {
+			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->GetNatureObject(location.X(), location.Y())]);
 		}
 		//Destroy buildings
 		if (Map::Inst()->GetConstruction(location.X(), location.Y()) >= 0) {

@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -64,6 +64,10 @@ namespace Script { namespace Event {
 		
 		py::object obj(boost::ref(pyitem));
 		Script::InvokeListeners("onItemCreated", "(Oii)", obj.ptr(), x, y);
+	}
+	
+	void TierChanged(unsigned tier, const std::string& campName) {
+		Script::InvokeListeners("onTierChanged", "(is)", tier, campName.c_str());
 	}
 	
 	/*void ItemDestroyed(Item*, int, int) {
