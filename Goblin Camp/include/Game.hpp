@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/numeric/conversion/converter.hpp>
 
 #include <libtcod.hpp>
 
@@ -31,6 +32,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Events.hpp"
 #include "Job.hpp"
+
+#include "MapRenderer.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -56,6 +59,10 @@ class Game {
 	friend class ConfigListener;
 	friend void SettingsMenu();
 private:
+	// TODO: Move these somewhere shared/sharable
+	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Floor<float>> FloorToInt;
+	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Ceil<float>> CeilToInt;
+
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
 	template<class Archive>
@@ -80,6 +87,8 @@ private:
 	boost::shared_ptr<Events> events;
 
 	std::list<std::pair<int, boost::function<void()> > > delays;
+
+	boost::shared_ptr<MapRenderer> renderer;
 public:
 	static Game* Inst();
 	static bool LoadGame(const std::string&);
@@ -92,6 +101,9 @@ public:
 	static void DoNothing();
 	static void Exit(bool confirm=true);
 
+	Coordinate TileAt(int pixelX, int pixelY) const;
+	boost::shared_ptr<MapRenderer> Renderer() { return renderer; };
+
 	int ScreenWidth() const;
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
@@ -101,8 +113,9 @@ public:
 	void GenerateMap(uint32 seed = 0);
 
 	void Update();
-	Coordinate upleft;
+	float camX, camY;
 	void CenterOn(Coordinate target);
+	void MoveCam(float x, float y);
 	void SetMark(int);
 	void ReturnToMark(int);
 
@@ -116,7 +129,7 @@ public:
 
 	TCODConsole* buffer;
 	void FlipBuffer();
-	void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
+	void Draw(TCODConsole * console = Game::Inst()->buffer, float focusX = Game::Inst()->camX, float focusY = Game::Inst()->camY, bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1);
 
 	static int DiceToInt(TCOD_dice_t);
 

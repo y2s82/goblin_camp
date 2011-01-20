@@ -139,7 +139,6 @@ void MainLoop() {
 				Announce::Inst()->Update();
 			}
 
-			game->buffer->flush();
 			game->Draw();
 			game->FlipBuffer();
 		}
