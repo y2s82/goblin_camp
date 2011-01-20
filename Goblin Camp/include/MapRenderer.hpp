@@ -16,14 +16,60 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <libtcod.hpp>
+#include "NPC.hpp"
+#include "Item.hpp"
 #include "Coordinate.hpp"
 #include "Map.hpp"
+
+enum CursorType
+{
+	Cursor_None,
+	Cursor_Construct,
+	Cursor_Stockpile,
+	Cursor_TreeFelling,
+	Cursor_Harvest,
+	Cursor_Order,
+	Cursor_Tree,
+	Cursor_Dismantle,
+	Cursor_Undesignate,
+	Cursor_Bog,
+	Cursor_NPC,
+	Cursor_Item,
+	Cursor_Dig,
+	Cursor_AddTerritory,
+	Cursor_RemoveTerritory,
+	Cursor_Gather
+};
 
 class MapRenderer
 {
 public:
 	virtual ~MapRenderer() = 0;
-	virtual void DrawMap(TCODConsole * console, Map* map, float focusX, float focusY, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) = 0;
-	virtual Coordinate TileAt(int x, int y, float focusX, float focusY, TCODConsole * console, int offsetX = 0, int offsetY = 0, int sizeX = -1, int sizeY = -1) const = 0;
+
 	virtual void PreparePrefabs() = 0;
+
+	/**
+	 * Draws the map.
+	 *
+	 * focus is the location in tile space the viewport is focused on
+	 * viewport is the location on the screen in pixels being rendered to
+	 **/
+	virtual void DrawMap(Map* map, float focusX, float focusY, int viewportX = 0, int viewportY = 0, int viewportW = -1, int viewportH = -1) = 0;
+
+	/**
+	 * Calculates the coordinate in tile space under the given screen location
+	 *
+	 * screen is the location in screen space (pixels) to get the tile under
+	 * focus is the location in tile space the viewport is focused on
+	 * viewport is the location on the screen in pixels where the viewport is
+	 **/
+	virtual Coordinate TileAt(int screenX, int screenY, float focusX, float focusY, int viewportX = 0, int viewportY = 0, int viewportW = -1, int viewportH = -1) const = 0;
+
+	virtual void SetCursorMode(CursorType mode) = 0;
+	virtual void SetCursorMode(const NPCPreset& preset) = 0;
+	virtual void SetCursorMode(const ItemPreset& preset) = 0;
+	virtual void SetCursorMode(int other) = 0;
+	
+	virtual void DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) = 0;
+	virtual void DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) = 0;
 };
