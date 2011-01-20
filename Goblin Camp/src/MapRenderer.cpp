@@ -15,34 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "Filth.hpp"
-#include "Game.hpp"
+#include "MapRenderer.hpp"
 
-FilthNode::FilthNode(int nx, int ny, int ndep) : x(nx), y(ny)
-{
-	color.b = 0;
-	Depth(ndep);
-}
-
-FilthNode::~FilthNode() {}
-
-void FilthNode::Update() {
-}
-
-int FilthNode::GetGraphic()
-{
-	return (depth < 5 ) ? '~' : '#';
-}
-
-TCODColor FilthNode::GetColor()
-{
-	return color;
-}
-
-int FilthNode::Depth() {return depth;}
-void FilthNode::Depth(int val) {
-	depth=val;
-	color.r = 170 - std::min(Map::Inst()->GetCorruption(x, y), 40) + rand() % 56;
-	color.g = 80 - std::min(Map::Inst()->GetCorruption(x, y), 80) + rand() % 61;
-}
-Coordinate FilthNode::Position() {return Coordinate(x,y);}
+MapRenderer::~MapRenderer() {}

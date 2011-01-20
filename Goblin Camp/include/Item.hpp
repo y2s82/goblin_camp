@@ -66,6 +66,8 @@ struct ItemPreset {
 	int resistances[RES_COUNT];
 	int bulk;
 	int condition;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class Item : public Entity {
@@ -118,6 +120,7 @@ public:
 
 	virtual ~Item();
 
+	int GraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
 	void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 	boost::weak_ptr<Item> ContainedIn();

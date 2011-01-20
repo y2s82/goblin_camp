@@ -41,6 +41,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "UI/MessageBox.hpp"
 
+#include "TCODMapRenderer.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
+// TODO: Temporary
+#include "data/Paths.hpp"
+
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
 
@@ -378,7 +384,6 @@ void Game::ErrorScreen() {
 	);
 	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
 	TCODConsole::root->flush();
-	
 	TCODConsole::waitForKeypress(true);
 	exit(255);
 }
@@ -387,7 +392,6 @@ void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
-	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
 
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
@@ -405,17 +409,30 @@ void Game::Init() {
 	srand((unsigned int)std::time(0));
 
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer);
+	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
 
+	buffer = new TCODConsole(screenWidth, screenHeight);
+	if (renderer_type == TCOD_RENDERER_SDL) {
+		TileSetLoader loader;
+		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet()));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer()); 
+		}
+	} else {
+		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer());
+	}
+
 	LoadingScreen();
 
-	TCODConsole::root->setAlignment(TCOD_LEFT);
-
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
-
-	buffer = new TCODConsole(screenWidth, screenHeight);
+	
 	season = LateWinter;
 	upleft = Coordinate(180,180);
 }
@@ -885,20 +902,18 @@ namespace {
 	}
 }
 
-void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
-	Map::Inst()->Draw(upleft, buffer);
-
-	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, buffer);
-	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, buffer);
-	//TODO: Make this consistent
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
-		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, buffer);
+void Game::Draw(TCODConsole * console, Coordinate upleft, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
+	console->setBackgroundFlag(TCOD_BKGND_SET);
+	if (sizeX == -1) {
+		sizeX = console->getWidth();
 	}
-	InternalDrawMapItems("nature objects",        natureList, upleft, buffer);
-	InternalDrawMapItems("NPCs",                  npcList, upleft, buffer);
+	if (sizeY == -1) {
+		sizeY = console->getHeight();
+	}
+	renderer->DrawMap(console, Map::Inst(), upleft, posX, posY, sizeX, sizeY);
 
 	if (drawUI) {
-		UI::Inst()->Draw(upleft, buffer);
+		UI::Inst()->Draw(upleft, console);
 	}
 }
 
@@ -1108,8 +1123,8 @@ void Game::GenerateMap(uint32_t seed) {
 		if (riverDistance > 30) {
 			for (int xOffset = -25; xOffset < 25; ++xOffset) {
 				int range = int(std::sqrt((double)(25*25 - xOffset*xOffset)));
-				int lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
-				int highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
+				int lowOffset = std::min(std::max(random.Generate(-1, 1), -5), 5);
+				int highOffset = std::min(std::max(random.Generate(-1, 1), -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
 					map->Type(x+xOffset, y+yOffset, TILEBOG);
 				}
@@ -1495,6 +1510,7 @@ void Game::Reset() {
 	safeMonths = 9;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
+	renderer->PreparePrefabs();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
