@@ -99,6 +99,8 @@ public:
 		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
 	static void ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback,
 		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
+	static void ChooseRectPlacementCursor(boost::function<void(Coordinate, Coordinate)> rectCallback,
+		boost::function<bool(Coordinate, Coordinate)> placement, CursorType cursor);
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);

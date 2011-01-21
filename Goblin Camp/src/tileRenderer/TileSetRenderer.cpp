@@ -92,7 +92,6 @@ Coordinate TileSetRenderer::TileAt(int x, int y, float focusX, float focusY, int
 	return Coordinate(FloorToInt::convert((left + x) / tileSet->TileWidth()), FloorToInt::convert((up + y) / tileSet->TileHeight()));
 }
 
-//TODO: Optimize. This causes the biggest performance hit by far right now 
 void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) {
 	if (viewportW == -1) viewportW = screenWidth;
 	if (viewportH == -1) viewportH = screenHeight;
