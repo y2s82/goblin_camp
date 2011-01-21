@@ -458,8 +458,6 @@ int Item::RelativeValue() {
 int Item::Resistance(int i) const { return resistances[i]; }
 
 void Item::SetVelocity(int speed) {
-	if (velocity > 10 && speed == 0 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
-	
 	velocity = speed;
 	if (speed > 0) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
@@ -487,9 +485,11 @@ void Item::UpdateVelocity() {
 		while (nextVelocityMove > 100) {
 			nextVelocityMove -= 100;
 			if (flightPath.size() > 0) {
+
 				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
 					int tx = flightPath.back().coord.X();
 					int ty = flightPath.back().coord.Y();
+
 					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
 						Attack attack = GetAttack();
 						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
@@ -497,11 +497,10 @@ void Item::UpdateVelocity() {
 								construct->Damage(&attack);
 							}
 						}
-						SetVelocity(0);
-						flightPath.clear();
+						Impact(velocity);
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0) { //Hit a creature
 						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
 							Attack attack = GetAttack();
@@ -509,18 +508,21 @@ void Item::UpdateVelocity() {
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);
-							SetVelocity(0);
-							flightPath.clear();
+							Impact(velocity);
 							return;
 						}
 					}
 				}
+
 				Position(flightPath.back().coord);
-				if (flightPath.back().height == 0) {
-					SetVelocity(0);
+
+				if (flightPath.back().height <= 0) { //Hit the ground early
+					Impact(velocity);
+					return;
 				}
+
 				flightPath.pop_back();
-			} else SetVelocity(0);
+			} else { Impact(velocity); return; } //No more flightpath
 		}
 	} 
 }
@@ -528,6 +530,19 @@ void Item::UpdateVelocity() {
 void Item::SetInternal() { internal = true; }
 
 int Item::GetDecay() const { return decayCounter; }
+
+void Item::Impact(int speedChange) {
+	SetVelocity(0);
+	flightPath.clear();
+
+	if (speedChange >= 10 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
+	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
+		//The item has impacted and broken. Create debris owned by no one
+		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
+		//Game::Update removes all condition==0 items in the stopped items list, which is where this item will be
+	}
+}
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
