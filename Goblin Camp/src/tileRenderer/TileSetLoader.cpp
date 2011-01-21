@@ -222,6 +222,8 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetNonTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "territory")) {
 				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "marked")) {
+				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "default_cursor")) {
 				SetCursorSprites(Cursor_None, value.list);
 			} else if (boost::iequals(name, "construction_cursor")) {
@@ -250,7 +252,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				SetCursorSprites(Cursor_RemoveTerritory, value.list);
 			} else if (boost::iequals(name, "gather_cursor")) {
 				SetCursorSprites(Cursor_Gather, value.list);
-			}
+			} 
 			break;
 		case SS_NPC:
 			if (boost::iequals(name, "sprite")) {
