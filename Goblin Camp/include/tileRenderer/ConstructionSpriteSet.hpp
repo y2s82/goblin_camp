@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/Sprite.hpp"
 #include "Construction.hpp"
+#include "ConstructionVisitor.hpp"
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -27,8 +28,13 @@ public:
 	ConstructionSpriteSet();
 	~ConstructionSpriteSet();
 
+	void AddSprite(const Sprite& sprite);
+	void SetWidth(int width);
+	bool IsValid() const;
+
+	void Draw(const Coordinate& constructUpleft, const Coordinate& pos, SDL_Surface * dst, SDL_Rect *dstRect) const;
+
+private:	
 	std::vector<Sprite> sprites;
 	int width;
-
-	void Draw(boost::shared_ptr<Construction> construction, const Coordinate& pos, SDL_Surface * dst, SDL_Rect *dstRect) const;
 };

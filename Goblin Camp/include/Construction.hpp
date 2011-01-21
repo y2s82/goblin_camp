@@ -30,6 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/UIComponents.hpp"
 #include "Tile.hpp"
 
+#include "ConstructionVisitor.hpp"
+
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
 };
@@ -146,6 +148,8 @@ public:
 	void Damage(Attack*);
 	void Explode();
 	bool Built();
+
+	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	
 	static boost::unordered_map<std::string, ConstructionType> constructionNames;
 	static ConstructionType StringToConstructionType(std::string);

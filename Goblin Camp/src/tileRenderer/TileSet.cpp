@@ -18,6 +18,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSet.hpp"
 #include <boost/numeric/conversion/cast.hpp> 
 
+#include "FarmPlot.hpp"
+#include "Stockpile.hpp"
+#include "Door.hpp"
+#include "SpawningPool.hpp"
+
 TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	name(tileSetName),
 	tileWidth(tileW),
@@ -141,12 +146,67 @@ void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect 
 	}
 }
 
-void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+
+class TileSet::DrawConstructionVisitor : public ConstructionVisitor  {
+private:
+	TileSet * tileSet;
+	SDL_Surface * dst;
+	SDL_Rect * dstRect;
+	const Coordinate& coordinate;
+public:
+	DrawConstructionVisitor(TileSet * t, SDL_Surface * destination, SDL_Rect *destinationRect, const Coordinate& pos)
+		: tileSet(t),
+		  dst(destination),
+		  dstRect(destinationRect),
+		  coordinate(pos)
+	{}
+
+
+	void Visit(FarmPlot * farmplot) { 
+		tileSet->DrawBaseConstruction(farmplot, coordinate, dst, dstRect);
+		tileSet->DrawStockpileContents(farmplot, coordinate, dst, dstRect);
+	}
+
+	void Visit(Stockpile * stockpile) {
+		tileSet->DrawBaseConstruction(stockpile, coordinate, dst, dstRect);
+		tileSet->DrawStockpileContents(stockpile, coordinate, dst, dstRect);
+	}
+
+	void Visit(Construction * construction) {
+		tileSet->DrawBaseConstruction(construction, coordinate, dst, dstRect);
+	}
+
+	void Visit(SpawningPool * spawningPool) {
+		tileSet->DrawBaseConstruction(spawningPool, coordinate, dst, dstRect);
+	}
+
+	void Visit(Door * door) {
+		tileSet->DrawBaseConstruction(door, coordinate, dst, dstRect);
+	}
+
+};
+
+void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
+	DrawConstructionVisitor visitor(this, dst, dstRect, worldPos);
+	construction->AcceptVisitor(visitor);
+}
+
+void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
 	int hint = construction->GetGraphicsHint();
 	if (hint == -1 || hint >= constructionSpriteSets.size()) {
-		defaultConstructionSpriteSet.Draw(construction, worldPos, dst, dstRect);
+		defaultConstructionSpriteSet.Draw(construction->Position(), worldPos, dst, dstRect);
 	} else {
-		constructionSpriteSets[hint].Draw(construction, worldPos, dst, dstRect);
+		constructionSpriteSets[hint].Draw(construction->Position(), worldPos, dst, dstRect);
+	}
+}
+
+void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
+	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
+	if (storage.get() != 0 && !storage->empty()) {
+		boost::shared_ptr<Item> item = storage->GetFirstItem().lock();
+		if (item.get() != 0) {
+			DrawItem(item, dst, dstRect);
+		}
 	}
 }
 

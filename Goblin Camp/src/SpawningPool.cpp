@@ -253,3 +253,7 @@ void SpawningPool::Draw(Coordinate upleft, TCODConsole* console) {
 void SpawningPool::CancelJob(int) {
 	if (jobCount > 0) --jobCount;
 }
+
+void SpawningPool::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}

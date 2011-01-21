@@ -56,7 +56,7 @@ public:
 	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
@@ -85,12 +85,14 @@ public:
 	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
 	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
 	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
-
+	
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
-
 	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> LookupMap;
+
+	class DrawConstructionVisitor;
+
 	int tileWidth;
 	int tileHeight;
 	std::string name;
@@ -127,4 +129,7 @@ private:
 
 	CursorTypeSpriteArray placeableCursors;
 	CursorTypeSpriteArray nonplaceableCursors;
+
+	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
+	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
 };

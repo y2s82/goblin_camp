@@ -154,3 +154,7 @@ void FarmPlot::SwitchAllowed(int index) {
 }
 
 bool FarmPlot::SeedAllowed(ItemType type) { return allowedSeeds[type]; }
+
+void FarmPlot::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}

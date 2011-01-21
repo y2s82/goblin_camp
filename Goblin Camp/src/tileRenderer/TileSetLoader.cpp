@@ -270,9 +270,9 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		case SS_CONSTRUCTION:
 			if (boost::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
-					constructionSpriteSet.sprites.push_back(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+					constructionSpriteSet.AddSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "width")) {
-				constructionSpriteSet.width = value.i;
+				constructionSpriteSet.SetWidth(value.i);
 			}
 			break;
 		}	
@@ -334,13 +334,17 @@ bool TileSetLoader::parserEndStruct(TCODParser *parser,const TCODParserStruct *s
 		}
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
-		if (constructionSpriteSet.sprites.size() > 0)
-		{
-			constructionSpriteSet.width = std::min(constructionSpriteSet.width, (int)constructionSpriteSet.sprites.size());
+		if (constructionSpriteSet.IsValid()) {
 			if (name == 0) {
 				tileSet->SetDefaultConstructionSpriteSet(constructionSpriteSet);
 			} else {
 				tileSet->AddConstructionSpriteSet(std::string(name), constructionSpriteSet);
+			}
+		} else {
+			if (name == 0) {
+				LOG("Skipping invalid construction sprite data: default");
+			} else {
+				LOG("Skipping invalid construction sprite data: " << std::string(name));
 			}
 		}
 		currentSpriteSet = SS_NONE;
