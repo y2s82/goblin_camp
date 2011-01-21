@@ -47,8 +47,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/TileSetRenderer.hpp"
+#include "MathEx.hpp"
+
 // TODO: Temporary
 #include "data/Paths.hpp"
+
 
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;

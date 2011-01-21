@@ -66,7 +66,7 @@ NatureObject::~NatureObject() {
 	Map::Inst()->SetBuildable(x, y, true);
 }
 
-int NatureObject::GraphicsHint() const {
+int NatureObject::GetGraphicsHint() const {
 	return Presets[type].graphicsHint;
 }
 

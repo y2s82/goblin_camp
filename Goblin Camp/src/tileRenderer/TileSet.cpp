@@ -47,6 +47,10 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
+		for (int i = 0; i < placeableCursors.size(); ++i) {
+			placeableCursors[i] = Sprite();
+			nonplaceableCursors[i] = Sprite();
+		}
 }
 
 TileSet::~TileSet() {}
@@ -89,8 +93,7 @@ void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
 
 void TileSet::DrawWater(int index, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	int i = std::min(index, boost::numeric_cast<int>(waterTiles.size()) - 1);
-	if (i > -1)
-	{
+	if (i > -1) {
 		waterTiles.at(i).Draw(dst, dstRect);
 	}
 }
@@ -112,50 +115,61 @@ void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstR
 }
 
 void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	int hint = npc->GraphicsHint();
-	if (hint == -1 || hint >= npcSpriteSets.size())
-	{
+	int hint = npc->GetGraphicsHint();
+	if (hint == -1 || hint >= npcSpriteSets.size()) {
 		defaultNPCSpriteSet.tile.Draw(dst, dstRect);
-	}
-	else
-	{
+	} else {
 		npcSpriteSets[hint].tile.Draw(dst, dstRect);
 	}
 }
 
 void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	int hint = plant->GraphicsHint();
-	if (hint == -1 || hint >= natureObjectSpriteSets.size())
-	{
+	int hint = plant->GetGraphicsHint();
+	if (hint == -1 || hint >= natureObjectSpriteSets.size()) {
 		defaultNatureObjectSpriteSet.tile.Draw(dst, dstRect);
-	}
-	else
-	{
+	} else {
 		natureObjectSpriteSets[hint].tile.Draw(dst, dstRect);
 	}
 }
 
 void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	int hint = item->GraphicsHint();
-	if (hint == -1 || hint >= itemSpriteSets.size())
-	{
+	int hint = item->GetGraphicsHint();
+	if (hint == -1 || hint >= itemSpriteSets.size()) {
 		defaultItemSpriteSet.tile.Draw(dst, dstRect);
-	}
-	else
-	{
+	} else {
 		itemSpriteSets[hint].tile.Draw(dst, dstRect);
 	}
 }
 
 void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	int hint = construction->GraphicsHint();
-	if (hint == -1 || hint >= constructionSpriteSets.size())
-	{
+	int hint = construction->GetGraphicsHint();
+	if (hint == -1 || hint >= constructionSpriteSets.size()) {
 		defaultConstructionSpriteSet.Draw(construction, worldPos, dst, dstRect);
-	}
-	else
-	{
+	} else {
 		constructionSpriteSets[hint].Draw(construction, worldPos, dst, dstRect);
+	}
+}
+
+void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (type == Cursor_Item_Mode)
+	{
+		if (cursorHint == -1 || cursorHint >= itemSpriteSets.size()) {
+			defaultItemSpriteSet.tile.Draw(dst, dstRect);
+		} else {
+			itemSpriteSets[cursorHint].tile.Draw(dst, dstRect);
+		}
+	} else if (type == Cursor_NPC_Mode) {
+		if (cursorHint == -1 || cursorHint >= npcSpriteSets.size()) {
+			defaultNPCSpriteSet.tile.Draw(dst, dstRect);
+		} else {
+			npcSpriteSets[cursorHint].tile.Draw(dst, dstRect);
+		}
+	} else {
+		if (placeable) {
+			placeableCursors.at(type).Draw(dst, dstRect);
+		} else {
+			nonplaceableCursors.at(type).Draw(dst, dstRect);
+		}
 	}
 }
 
@@ -287,6 +301,32 @@ void TileSet::SetTerritoryOverlay(const Sprite& sprite) {
 
 void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 	markedOverlay = sprite;
+}
+
+void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
+	placeableCursors[type] = sprite;
+	nonplaceableCursors[type] = sprite;
+	if (type == Cursor_None) {
+		for (CursorTypeSpriteArray::size_type i = 0; i < placeableCursors.size(); ++i) {
+			if (!placeableCursors[i].Exists()) {
+				placeableCursors[i] = sprite;
+				nonplaceableCursors[i] = sprite;
+			}
+		}
+	}
+}
+
+void TileSet::SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite) {
+	placeableCursors[type] = placeableSprite;
+	nonplaceableCursors[type] = nonplaceableSprite;
+	if (type == Cursor_None) {
+		for (CursorTypeSpriteArray::size_type i = 0; i < placeableCursors.size(); ++i) {
+			if (!placeableCursors[i].Exists()) {
+				placeableCursors[i] = placeableSprite;
+				nonplaceableCursors[i] = nonplaceableSprite;
+			}
+		}
+	}
 }
 
 void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {

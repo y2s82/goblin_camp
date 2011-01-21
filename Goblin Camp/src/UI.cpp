@@ -132,8 +132,6 @@ void UI::HandleKeyboard() {
 
 			int addition = 1;
 			if (ShiftPressed()) addition *= 10;
-			float diffX = 0;
-			float diffY = 0;
 			if (key.vk == TCODK_UP) {
 				diffY -= 1;
 			} else if (key.vk == TCODK_DOWN) {

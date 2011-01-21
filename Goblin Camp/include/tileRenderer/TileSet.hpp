@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/unordered_map.hpp>
 #include <SDL.h>
 
+#include "MapRenderer.hpp"
 #include "Tile.hpp"
 #include "NPC.hpp"
 #include "NatureObject.hpp"
@@ -43,6 +44,7 @@ public:
 	std::string GetAuthor() const;
 	std::string GetDescription() const;
 
+	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -72,7 +74,9 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
-
+	void SetCursorSprites(CursorType type, const Sprite& sprite);
+	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
+	
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
@@ -84,6 +88,8 @@ public:
 
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
+
 	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> LookupMap;
 	int tileWidth;
 	int tileHeight;
@@ -118,4 +124,7 @@ private:
 	ConstructionSpriteSet defaultConstructionSpriteSet;
 	std::vector<ConstructionSpriteSet> constructionSpriteSets;
 	LookupMap constructionSpriteLookup;
+
+	CursorTypeSpriteArray placeableCursors;
+	CursorTypeSpriteArray nonplaceableCursors;
 };

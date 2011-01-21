@@ -1,4 +1,4 @@
-/* Copyright 2010 Ilkka Halila
+/* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -33,12 +33,13 @@ enum CursorType
 	Cursor_Dismantle,
 	Cursor_Undesignate,
 	Cursor_Bog,
-	Cursor_NPC,
-	Cursor_Item,
 	Cursor_Dig,
 	Cursor_AddTerritory,
 	Cursor_RemoveTerritory,
-	Cursor_Gather
+	Cursor_Gather,
+	Cursor_Simple_Mode_Count,
+	Cursor_NPC_Mode,
+	Cursor_Item_Mode
 };
 
 class MapRenderer

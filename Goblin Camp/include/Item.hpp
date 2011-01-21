@@ -120,7 +120,7 @@ public:
 
 	virtual ~Item();
 
-	int GraphicsHint() const;
+	int GetGraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
 	void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 	boost::weak_ptr<Item> ContainedIn();
