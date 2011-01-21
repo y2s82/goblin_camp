@@ -51,6 +51,8 @@ private:
 	bool first;
 	int mapOffsetX, mapOffsetY; // This is the pixel offset when drawing to the viewport
 	int startTileX, startTileY;
+	CursorType cursorMode;
+	int cursorHint;
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawWater				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);

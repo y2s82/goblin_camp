@@ -34,7 +34,9 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
   mapOffsetX(0),
   mapOffsetY(0),
   startTileX(0),
-  startTileY(0) {
+  startTileY(0),
+  cursorMode(Cursor_None),
+  cursorHint(-1) {
    Uint32 rmask, gmask, bmask, amask;
    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
        rmask = 0xff000000;
@@ -165,13 +167,50 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	SDL_SetClipRect(mapSurface, NULL);
 }
 
-void TileSetRenderer::SetCursorMode(CursorType mode) {}
-void TileSetRenderer::SetCursorMode(const NPCPreset& preset) {}
-void TileSetRenderer::SetCursorMode(const ItemPreset& preset) {}
-void TileSetRenderer::SetCursorMode(int other) {}
+void TileSetRenderer::SetCursorMode(CursorType mode) {
+	cursorMode = mode;
+	cursorHint = -1;
+}
+
+void TileSetRenderer::SetCursorMode(const NPCPreset& preset) {
+	cursorMode = Cursor_NPC_Mode;
+	cursorHint = preset.graphicsHint;
+}
+
+void TileSetRenderer::SetCursorMode(const ItemPreset& preset) {
+	cursorMode = Cursor_Item_Mode;
+	cursorHint = preset.graphicsHint;
+}
+
+void TileSetRenderer::SetCursorMode(int other) {
+	cursorMode = Cursor_None;
+	cursorHint = -1;
+}
 	
-void TileSetRenderer::DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) {}
-void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {}
+void TileSetRenderer::DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) {
+	startTileX = int((focusX * tileSet->TileWidth() - screenWidth / 2) / tileSet->TileWidth()) - 1;
+	startTileY = int((focusY * tileSet->TileHeight() - screenHeight / 2) / tileSet->TileHeight()) - 1;
+	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + screenWidth / 2);
+	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + screenHeight / 2);
+
+	SDL_Rect dstRect(CalcDest(pos.X(), pos.Y()));
+	tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface, &dstRect);
+}
+
+void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {
+	startTileX = int((focusX * tileSet->TileWidth() - screenWidth / 2) / tileSet->TileWidth()) - 1;
+	startTileY = int((focusY * tileSet->TileHeight() - screenHeight / 2) / tileSet->TileHeight()) - 1;
+	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + screenWidth / 2);
+	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + screenHeight / 2);
+
+	for (int x = start.X(); x <= end.X(); ++x) {
+		for (int y = start.Y(); y <= end.Y(); ++y) {
+			SDL_Rect dstRect(CalcDest(x, y));
+			tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface, &dstRect);
+		}
+	}
+	
+}
 
 void TileSetRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect)
 {

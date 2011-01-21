@@ -70,6 +70,22 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("non_territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
+
+	// Cursors
+	tileTextureStruct->addListProperty("default_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("construction_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("stockpile_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("treeFelling_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("harvest_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("order_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("tree_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("dismantle_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("undesignate_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("bog_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("dig_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("add_territory_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("remove_territory_cursor", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("gather_cursor", TCOD_TYPE_INT, false);	
 	
 	// Sprite Sets
 	tileTextureStruct->addStructure(creatureSpriteStruct);
@@ -206,8 +222,34 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetNonTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "territory")) {
 				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
-			} else if (boost::iequals(name, "marked")) {
-				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_cursor")) {
+				SetCursorSprites(Cursor_None, value.list);
+			} else if (boost::iequals(name, "construction_cursor")) {
+				SetCursorSprites(Cursor_Construct, value.list);
+			} else if (boost::iequals(name, "stockpile_cursor")) {
+				SetCursorSprites(Cursor_Stockpile, value.list);
+			} else if (boost::iequals(name, "treeFelling_cursor")) {
+				SetCursorSprites(Cursor_TreeFelling, value.list);
+			} else if (boost::iequals(name, "harvest_cursor")) {
+				SetCursorSprites(Cursor_Harvest, value.list);
+			} else if (boost::iequals(name, "order_cursor")) {
+				SetCursorSprites(Cursor_Order, value.list);
+			} else if (boost::iequals(name, "tree_cursor")) {
+				SetCursorSprites(Cursor_Tree, value.list);
+			} else if (boost::iequals(name, "dismantle_cursor")) {
+				SetCursorSprites(Cursor_Dismantle, value.list);
+			} else if (boost::iequals(name, "undesignate_cursor")) {
+				SetCursorSprites(Cursor_Undesignate, value.list);
+			} else if (boost::iequals(name, "bog_cursor")) {
+				SetCursorSprites(Cursor_Bog, value.list);
+			} else if (boost::iequals(name, "dig_cursor")) {
+				SetCursorSprites(Cursor_Dig, value.list);
+			} else if (boost::iequals(name, "add_territory_cursor")) {
+				SetCursorSprites(Cursor_AddTerritory, value.list);
+			} else if (boost::iequals(name, "remove_territory_cursor")) {
+				SetCursorSprites(Cursor_RemoveTerritory, value.list);
+			} else if (boost::iequals(name, "gather_cursor")) {
+				SetCursorSprites(Cursor_Gather, value.list);
 			}
 			break;
 		case SS_NPC:
@@ -311,4 +353,13 @@ bool TileSetLoader::parserEndStruct(TCODParser *parser,const TCODParserStruct *s
 void TileSetLoader::error(const char *msg) {
 	LOG(msg);
 	success = false;
+}
+
+void TileSetLoader::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
+	int size = TCOD_list_size(cursors);
+	if (size == 1) {
+		tileSet->SetCursorSprites(type, Sprite((intptr_t)TCOD_list_get(cursors, 0), currentTexture));
+	} else if (size > 1) {
+		tileSet->SetCursorSprites(type, Sprite((intptr_t)TCOD_list_get(cursors, 0), currentTexture), Sprite((intptr_t)TCOD_list_get(cursors, 1), currentTexture));
+	}
 }

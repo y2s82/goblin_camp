@@ -118,7 +118,7 @@ public:
 	void Condition(int);
 	int Condition();
 	virtual void Draw(Coordinate, TCODConsole*);
-	int GraphicsHint() const;
+	int GetGraphicsHint() const;
 	int Build();
 	ConstructionType Type();
 	std::list<ItemCategory>* MaterialList();

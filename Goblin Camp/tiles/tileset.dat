@@ -26,6 +26,22 @@ tileset_data "TestMedium" {
 		non_territory=12
 		territory=13
 		marked=15
+
+		// Cursors
+		default_cursor=[12,13]
+		construction_cursor=[12,13]
+		stockpile_cursor=[12,13]
+		treeFelling_cursor=[12,13]
+		harvest_cursor=[12,13]
+		order_cursor=[12,13]
+		tree_cursor=[12,13]
+		dismantle_cursor=[12,13]
+		undesignate_cursor=[12,13]
+		bog_cursor=[12,13]
+		dig_cursor=[12,13]
+		add_territory_cursor=[13]
+		remove_territory_cursor=[12]
+		gather_cursor=[12,13]
 	
 		creature_sprite_data {
 			sprite=21

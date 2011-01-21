@@ -196,7 +196,7 @@ public:
 	void color(TCODColor,TCODColor=TCODColor::black);
 	void graphic(int);
 
-	int GraphicsHint() const;
+	int GetGraphicsHint() const;
 
 	Task* currentTask();
 	Task* nextTask();

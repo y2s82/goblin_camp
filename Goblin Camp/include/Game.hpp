@@ -22,7 +22,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/numeric/conversion/converter.hpp>
 
 #include <libtcod.hpp>
 
@@ -59,10 +58,6 @@ class Game {
 	friend class ConfigListener;
 	friend void SettingsMenu();
 private:
-	// TODO: Move these somewhere shared/sharable
-	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Floor<float>> FloorToInt;
-	typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Ceil<float>> CeilToInt;
-
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
 	template<class Archive>

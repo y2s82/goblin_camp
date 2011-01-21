@@ -79,7 +79,7 @@ Item::~Item() {
 	}
 }
 
-int Item::GraphicsHint() const {
+int Item::GetGraphicsHint() const {
 	return Presets[type].graphicsHint;
 }
 

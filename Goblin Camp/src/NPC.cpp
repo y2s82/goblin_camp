@@ -1239,7 +1239,7 @@ void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
 
 void NPC::color(TCODColor value, TCODColor bvalue) { _color = value; _bgcolor = bvalue; }
 void NPC::graphic(int value) { _graphic = value; }
-int NPC::GraphicsHint() const { return NPC::Presets[type].graphicsHint; }
+int NPC::GetGraphicsHint() const { return NPC::Presets[type].graphicsHint; }
 
 bool NPC::Expert() {return expert;}
 void NPC::Expert(bool value) {expert = value;}

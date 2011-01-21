@@ -68,7 +68,7 @@ public:
 
 	int Type();
 
-	int GraphicsHint() const;
+	int GetGraphicsHint() const;
 	void Draw(Coordinate, TCODConsole*);
 	void Update();
 	virtual void CancelJob(int=0);

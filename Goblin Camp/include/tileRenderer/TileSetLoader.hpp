@@ -72,4 +72,5 @@ private:
 	static const char * uninitialisedTilesetError;
 	
 	void Reset();
+	void SetCursorSprites(CursorType type, TCOD_list_t cursors);
 };
