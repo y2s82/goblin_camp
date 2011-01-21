@@ -44,6 +44,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "UI/MessageBox.hpp"
 
+#include "TCODMapRenderer.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
+#include "MathEx.hpp"
+
+// TODO: Temporary
+#include "data/Paths.hpp"
+
+
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
 
@@ -63,7 +72,8 @@ screenWidth(0),
 	safeMonths(9),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
-	upleft(Coordinate(0,0))
+	camX(0),
+	camY(0)
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
@@ -380,7 +390,6 @@ void Game::ErrorScreen() {
 	);
 	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
 	TCODConsole::root->flush();
-	
 	TCODConsole::waitForKeypress(true);
 	exit(255);
 }
@@ -389,7 +398,7 @@ void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
-	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	bool useTileset = Config::GetCVar<bool>("useTileset");
 
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
@@ -407,19 +416,33 @@ void Game::Init() {
 	srand((unsigned int)std::time(0));
 
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer);
+	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
 
+	buffer = new TCODConsole(screenWidth, screenHeight);
+	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
+		TileSetLoader loader;
+		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+		}
+	} else {
+		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
+	}
+
 	LoadingScreen();
 
-	TCODConsole::root->setAlignment(TCOD_LEFT);
-
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
-
-	buffer = new TCODConsole(screenWidth, screenHeight);
+	
 	season = LateWinter;
-	upleft = Coordinate(180,180);
+	camX = 180;
+	camY = 180;
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
@@ -871,6 +894,10 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 	return boost::shared_ptr<Job>();
 }
 
+Coordinate Game::TileAt(int pixelX, int pixelY) const {
+	return renderer->TileAt(pixelX, pixelY, camX, camY);
+}
+
 namespace {
 	template <typename MapT>
 	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
@@ -892,20 +919,20 @@ namespace {
 	}
 }
 
-void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
-	Map::Inst()->Draw(upleft, buffer);
-
-	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, buffer);
-	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, buffer);
-	//TODO: Make this consistent
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
-		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, buffer);
+void Game::Draw(TCODConsole * console, float focusX, float focusY, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
+	console->setBackgroundFlag(TCOD_BKGND_SET);
+	if (sizeX == -1) {
+		sizeX = console->getWidth();
 	}
-	InternalDrawMapItems("nature objects",        natureList, upleft, buffer);
-	InternalDrawMapItems("NPCs",                  npcList, upleft, buffer);
+	if (sizeY == -1) {
+		sizeY = console->getHeight();
+	}
+	int charX, charY;
+	TCODSystem::getCharSize(&charX, &charY);
+	renderer->DrawMap(Map::Inst(), focusX, focusY, posX * charX, posY * charY, sizeX * charX, sizeY * charY);
 
 	if (drawUI) {
-		UI::Inst()->Draw(upleft, buffer);
+		UI::Inst()->Draw(console);
 	}
 }
 
@@ -1500,10 +1527,12 @@ void Game::Reset() {
 	running = false;
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	season = LateWinter;
-	upleft = Coordinate(180,180);
+	camX = 180;
+	camY = 180;
 	safeMonths = 9;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
+	renderer->PreparePrefabs();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
@@ -1519,17 +1548,22 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 }
 
 void Game::CenterOn(Coordinate target) {
-	int x = std::max(0, target.X() - ScreenWidth() / 2);
-	int y = std::max(0, target.Y() - ScreenHeight() / 2);
-	upleft = Coordinate(x, y);
+	camX = target.X() + 0.5f;
+	camY = target.Y() + 0.5f;
+}
+
+void Game::MoveCam(float x, float y) {
+	camX = std::min(std::max(x + camX, 0.0f), Map::Inst()->Width() + 1.0f);
+	camY = std::min(std::max(y + camY, 0.0f), Map::Inst()->Height() + 1.0f);
 }
 
 void Game::SetMark(int i) {
-	marks[i] = Coordinate(upleft.X(), upleft.Y());
+	marks[i] = Coordinate(FloorToInt::convert(camX), FloorToInt::convert(camY));
 }
 
 void Game::ReturnToMark(int i) {
-	upleft = Coordinate(marks[i].X(), marks[i].Y());
+	camX = marks[i].X() + 0.5f;
+	camY = marks[i].Y() + 0.5f;
 }
 
 void Game::TranslateContainerListeners() {

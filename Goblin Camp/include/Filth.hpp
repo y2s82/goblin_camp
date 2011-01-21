@@ -38,8 +38,9 @@ public:
 	~FilthNode();
 
 	void Update();
-	void Draw(Coordinate, TCODConsole*);
 	int Depth();
 	void Depth(int);
 	Coordinate Position();
+	int GetGraphic();
+	TCODColor GetColor();
 };

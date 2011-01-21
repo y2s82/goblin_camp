@@ -40,3 +40,7 @@ void Door::Update() {
 bool Door::Open() {
 	return time > 0;
 }
+
+void Door::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}

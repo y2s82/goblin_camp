@@ -27,10 +27,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 
 enum UIState {
-	UINORMAL,
+	UINORMAL,		 // No selection highlights
 	UIPLACEMENT,
-	UIABPLACEMENT,
-	UIRECTPLACEMENT,
+	UIABPLACEMENT, 
+	UIRECTPLACEMENT,  
 	UICOUNT
 };
 
@@ -66,7 +66,6 @@ private:
 	bool textMode;
 	std::string inputString;
 	int inputStringLimit;
-	int cursorChar;
 
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
 	int DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut);
@@ -76,7 +75,7 @@ private:
 public:
 	static UI* Inst();
 	void Update();
-	void Draw(Coordinate, TCODConsole*);
+	void Draw(TCODConsole*);
 	void blueprint(Coordinate);
 	void state(UIState);
 	static void ChangeMenu(Panel*);
@@ -100,6 +99,8 @@ public:
 		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
 	static void ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback,
 		boost::function<bool(Coordinate, Coordinate)> placement, int cursor);
+	static void ChooseRectPlacementCursor(boost::function<void(Coordinate, Coordinate)> rectCallback,
+		boost::function<bool(Coordinate, Coordinate)> placement, CursorType cursor);
 	void SetCallback(boost::function<void(Coordinate)>);
 	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
 	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);
@@ -112,7 +113,6 @@ public:
 	void InputString(std::string);
 	void HideMenu();
 	void CloseMenu();
-	void SetCursor(int);
 	bool ShiftPressed();
 	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();

@@ -150,7 +150,8 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & peacefulFaunaCount;
 	ar & safeMonths;
 	ar & marks;
-	ar & upleft;
+	ar & camX;
+	ar & camY;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;
@@ -183,9 +184,14 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & safeMonths;
 	if (version == 0) {
 		ar & devMode;
+		ar & Coordinate();
+		camX = 0;
+		camY = 0;
+	} else {
+		ar & camX;
+		ar & camY;
 	}
 	ar & marks;
-	ar & upleft;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;

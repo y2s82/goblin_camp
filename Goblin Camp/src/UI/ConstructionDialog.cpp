@@ -118,7 +118,7 @@ void ConstructionDialog::Expand() {
 	boost::function<bool(Coordinate, Coordinate)> placement = boost::bind(Game::CheckPlacement, _1, Coordinate(1,1), 
 		Construction::Presets[construct->Type()].tileReqs);
 	UI::Inst()->CloseMenu();
-	UI::ChooseRectPlacement(rectCall, placement, '=');
+	UI::ChooseRectPlacementCursor(rectCall, placement, Cursor_Stockpile);
 }
 
 void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
