@@ -46,4 +46,5 @@ public:
 	void Draw(Coordinate, TCODConsole*);
 	void Expand();
 	virtual void CancelJob(int=0);
+	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };

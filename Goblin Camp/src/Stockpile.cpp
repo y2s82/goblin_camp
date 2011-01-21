@@ -526,3 +526,7 @@ int Stockpile::GetLimit(ItemCategory category) {
 	else
 		return -1;
 }
+
+void Stockpile::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}

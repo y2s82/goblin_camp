@@ -822,3 +822,7 @@ ConstructionPreset::ConstructionPreset() :
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
+
+void Construction::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}

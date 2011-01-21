@@ -13,34 +13,22 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
+#pragma once
 
-#include "Door.hpp"
-#include "Map.hpp"
-#include "GCamp.hpp"
+#include <boost/shared_ptr.hpp>
 
-Door::Door(ConstructionType type, Coordinate target) : Construction(type, target)
+class Construction;
+class Door;
+class Stockpile;
+class SpawningPool;
+class FarmPlot;
+
+class ConstructionVisitor
 {
-	closedGraphic = graphic[1];
-}
-
-void Door::Update() {
-	if (!Map::Inst()->NPCList(x, y)->empty()) {
-		graphic[1] = 254;
-		time = (UPDATES_PER_SECOND / 2);
-		Map::Inst()->SetBlocksLight(x, y, false);
-	} else {
-		if (time == 0) {
-			graphic[1] = closedGraphic;
-			Map::Inst()->SetBlocksLight(x, y, true);
-		} else --time;
-	}
-}
-
-bool Door::Open() {
-	return time > 0;
-}
-
-void Door::AcceptVisitor(ConstructionVisitor& visitor) {
-	visitor.Visit(this);
-}
+public:
+	virtual void Visit(FarmPlot * farmplot) = 0;
+	virtual void Visit(Stockpile * stockpile) = 0;
+	virtual void Visit(SpawningPool * spawningPool) = 0;
+	virtual void Visit(Door * door) = 0;
+	virtual void Visit(Construction * construction) = 0;
+};
