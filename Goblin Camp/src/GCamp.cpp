@@ -565,6 +565,7 @@ namespace {
 	struct SettingRenderer {
 		const char *label;
 		TCOD_renderer_t renderer;
+		bool useTileset;
 	};
 
 	struct SettingField {
@@ -577,20 +578,22 @@ void SettingsMenu() {
 	std::string width        = Config::GetStringCVar("resolutionX");
 	std::string height       = Config::GetStringCVar("resolutionY");
 	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	bool useTileset          = Config::GetCVar<bool>("useTileset");
 	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
 	bool tutorial            = Config::GetCVar<bool>("tutorial");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	const int w = 40;
-	const int h = 18;
+	const int h = 19;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
 	SettingRenderer renderers[] = {
-		{ "GLSL",   TCOD_RENDERER_GLSL   },
-		{ "OpenGL", TCOD_RENDERER_OPENGL },
-		{ "SDL",    TCOD_RENDERER_SDL    }
+		{ "Tileset",TCOD_RENDERER_SDL    , true},
+		{ "GLSL",   TCOD_RENDERER_GLSL   , false},
+		{ "OpenGL", TCOD_RENDERER_OPENGL , false},
+		{ "SDL",    TCOD_RENDERER_SDL    , false}
 	};
 
 	SettingField fields[] = {
@@ -659,7 +662,7 @@ void SettingsMenu() {
 		TCODConsole::root->print(x + 1, currentY, "Renderer");
 
 		for (unsigned int idx = 0; idx < rendererCount; ++idx) {
-			if (renderer == renderers[idx].renderer) {
+			if (renderer == renderers[idx].renderer && useTileset == renderers[idx].useTileset) {
 				TCODConsole::root->setDefaultForeground(TCODColor::green);
 			} else {
 				TCODConsole::root->setDefaultForeground(TCODColor::grey);
@@ -694,6 +697,7 @@ void SettingsMenu() {
 				int whereRenderer = whereY - rendererY - 1;
 				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
 					renderer = renderers[whereRenderer].renderer;
+					useTileset = renderers[whereRenderer].useTileset;
 				}
 			}
 		}
@@ -702,6 +706,7 @@ void SettingsMenu() {
 	Config::SetStringCVar("resolutionX", width);
 	Config::SetStringCVar("resolutionY", height);
 	Config::SetCVar("renderer", renderer);
+	Config::SetCVar("useTileset", useTileset);
 	Config::SetCVar("fullscreen", fullscreen);
 	Config::SetCVar("tutorial", tutorial);
 	
