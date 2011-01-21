@@ -132,7 +132,7 @@ void Coordinate::load(Archive & ar, const unsigned int version) {
 //
 // class Game
 //
-BOOST_CLASS_VERSION(Game, 0)
+BOOST_CLASS_VERSION(Game, 1)
 
 template<class Archive>
 void Game::save(Archive & ar, const unsigned int version) const  {
@@ -149,7 +149,6 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & goblinCount;
 	ar & peacefulFaunaCount;
 	ar & safeMonths;
-	ar & devMode;
 	ar & marks;
 	ar & upleft;
 	ar & npcList;
@@ -169,37 +168,37 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 
 template<class Archive>
 void Game::load(Archive & ar, const unsigned int version) {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
 	if (version == 0) {
-		ar.template register_type<Container>();
-		ar.template register_type<Item>();
-		ar.template register_type<Entity>();
-		ar.template register_type<OrganicItem>();
-		ar.template register_type<FarmPlot>();
-		ar.template register_type<Door>();
-		ar.template register_type<SpawningPool>();
-		ar & season;
-		ar & time;
-		ar & orcCount;
-		ar & goblinCount;
-		ar & peacefulFaunaCount;
-		ar & safeMonths;
 		ar & devMode;
-		ar & marks;
-		ar & upleft;
-		ar & npcList;
-		ar & squadList;
-		ar & hostileSquadList;
-		ar & staticConstructionList;
-		ar & dynamicConstructionList;
-		ar & itemList;
-		ar & freeItems;
-		ar & flyingItems;
-		ar & stoppedItems;
-		ar & natureList;
-		ar & waterList;
-		ar & filthList;
-		ar & bloodList;
 	}
+	ar & marks;
+	ar & upleft;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
 }
 
 //
@@ -778,7 +777,7 @@ void Door::load(Archive & ar, const unsigned int version) {
 //
 // class WaterNode
 //
-BOOST_CLASS_VERSION(WaterNode, 0)
+BOOST_CLASS_VERSION(WaterNode, 1)
 
 template<class Archive>
 void WaterNode::save(Archive & ar, const unsigned int version) const {
@@ -792,21 +791,23 @@ void WaterNode::save(Archive & ar, const unsigned int version) const {
 	ar & inertCounter;
 	ar & inert;
 	ar & timeFromRiverBed;
+	ar & filth;
 }
 
 template<class Archive>
 void WaterNode::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & x;
-		ar & y;
-		ar & depth;
-		ar & graphic;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-		ar & inertCounter;
-		ar & inert;
-		ar & timeFromRiverBed;
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & inertCounter;
+	ar & inert;
+	ar & timeFromRiverBed;
+	if (version >= 1) {
+		ar & filth;
 	}
 }
 
