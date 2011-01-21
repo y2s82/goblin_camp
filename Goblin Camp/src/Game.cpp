@@ -398,6 +398,7 @@ void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
+	bool useTileset = Config::GetCVar<bool>("useTileset");
 
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
@@ -421,7 +422,7 @@ void Game::Init() {
 	TCODConsole::setKeyboardRepeat(500, 10);
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
-	if (renderer_type == TCOD_RENDERER_SDL) {
+	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		TileSetLoader loader;
 		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
 		{
