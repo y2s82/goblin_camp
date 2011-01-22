@@ -165,6 +165,8 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & waterList;
 	ar & filthList;
 	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
 }
 
 template<class Archive>
@@ -207,6 +209,10 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & waterList;
 	ar & filthList;
 	ar & bloodList;
+	if (version >= 1) {
+		ar & fireList;
+		ar & spellList;
+	}
 }
 
 //
@@ -220,6 +226,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
+	ar.template register_type<Job>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & type;
 	ar & timeCount;
@@ -280,6 +287,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar.template register_type<Item>();
 		ar.template register_type<Entity>();
 		ar.template register_type<SkillSet>();
+		ar.template register_type<Job>();
 		ar & boost::serialization::base_object<Entity>(*this);
 		ar & type;
 		ar & timeCount;
@@ -940,7 +948,7 @@ void JobManager::load(Archive & ar, const unsigned int version) {
 //
 // class Camp
 //
-BOOST_CLASS_VERSION(Camp, 0)
+BOOST_CLASS_VERSION(Camp, 1)
 
 template<class Archive>
 void Camp::save(Archive & ar, const unsigned int version) const {
@@ -958,25 +966,27 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & upperCorner;
 	ar & lowerCorner;
 	ar & autoTerritory;
+	ar & article;
 }
 
 template<class Archive>
 void Camp::load(Archive & ar, const unsigned int version) {
-	ar.template register_type<Container>();
-	if (version == 0) {
-		ar & centerX;
-		ar & centerY;
-		ar & buildingCount;
-		ar & locked;
-		ar & lockedCenter;
-		ar & tier;
-		ar & name;
-		ar & workshops;
-		ar & farmplots;
-		ar & production;
-		ar & upperCorner;
-		ar & lowerCorner;
-		ar & autoTerritory;
+	ar.template register_type<Coordinate>();
+	ar & centerX;
+	ar & centerY;
+	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
+	ar & tier;
+	ar & name;
+	ar & workshops;
+	ar & farmplots;
+	ar & production;
+	ar & upperCorner;
+	ar & lowerCorner;
+	ar & autoTerritory;
+	if (version >= 1) {
+		ar & article;
 	}
 }
 
@@ -1033,18 +1043,20 @@ void Map::save(Archive & ar, const unsigned int version) const {
 	}
 	ar & width;
 	ar & height;
+	ar & windDirection;
 }
 
 template<class Archive>
 void Map::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		for (int x = 0; x < tileMap.size(); ++x) {
-			for (int y = 0; y < tileMap[x].size(); ++y) {
-				ar & tileMap[x][y];
-			}
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
 		}
-		ar & width;
-		ar & height;
+	}
+	ar & width;
+	ar & height;
+	if (version >= 1) {
+		ar & windDirection;
 	}
 }
 
@@ -1230,6 +1242,63 @@ void SpawningPool::load(Archive & ar, const unsigned int version) {
 		ar & jobCount;
 	}
 }
+
+//
+// class FireNode
+//
+BOOST_CLASS_VERSION(FireNode, 0)
+
+template<class Archive>
+void FireNode::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}
+
+template<class Archive>
+void FireNode::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}
+
+//
+// class Spell
+//
+BOOST_CLASS_VERSION(Spell, 0)
+
+template<class Archive>
+void Spell::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & graphic;
+	ar & type;
+	ar & dead;
+	ar & attack;
+	ar & immaterial;
+}
+
+template<class Archive>
+void Spell::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & graphic;
+	ar & type;
+	ar & dead;
+	ar & attack;
+	ar & immaterial;
+}
+
 
 //
 // Save/load entry points

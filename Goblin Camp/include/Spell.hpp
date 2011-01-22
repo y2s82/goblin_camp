@@ -36,7 +36,7 @@ private:
 	bool immaterial;
 
 public:
-	Spell(Coordinate,int);
+	Spell(Coordinate=Coordinate(0,0),int=0);
 	~Spell();
 
 	void Draw(Coordinate, TCODConsole*);
