@@ -1,0 +1,21 @@
+import os ;
+
+path-constant HERE : . ;
+
+common-reqs =
+    <include>$(HERE)/include
+;
+
+project libtcod
+    : requirements
+      <link>static
+      $(common-reqs)
+    : usage-requirements
+      $(common-reqs)
+;
+
+if [ os.name ] = MACOSX {
+    osxsupport = $(HERE)/src/macsupport.m ;
+}
+
+lib tcod : [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] $(osxsupport:E=) ;

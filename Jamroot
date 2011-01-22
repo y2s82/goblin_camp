@@ -1,0 +1,102 @@
+###############################################################################
+##### Goblin Camp build system.
+## See build/README.html for usage help.
+###############################################################################
+
+###############################################################################
+##### Global constants
+## GC_VERSION is the current Goblin Camp version. GC_ROOT is an absolute path
+## to Jamroot's directory.
+###############################################################################
+
+path-constant GC_ROOT    : .    ;
+constant      GC_VERSION : 0.14 ;
+
+###############################################################################
+##### Setup
+## Imports our tools and displays the banner.
+###############################################################################
+import modules ;
+import version ;
+
+modules.poke : GC_VERSION : $(GC_VERSION) ;
+modules.poke : GC_ROOT    : $(GC_ROOT)    ;
+
+V = $(GC_VERSION) ;
+
+ECHO "*******************************************" ;
+ECHO "****    Goblin Camp build system v3    ****" ;
+ECHO "*******************************************" ;
+ECHO "****     Building Goblin Camp $(V)     ****" ;
+ECHO "*******************************************" ;
+ECHO "** Running bjam:" [ version.jam ] ;
+ECHO "** Using Boost.Build:" [ version.boost-build ] ;
+
+for local P in [ glob $(GC_ROOT)/build/boost-build/goblin-camp/tools/*.jam ] {
+    import $(P:B) ;
+    ECHO $(P:B) ;
+    $(P:B).use-project ;
+}
+
+for local C in [ glob $(GC_ROOT)/build/boost-build/goblin-camp/*.jam ] {
+   import $(C:B) ;
+}
+
+ECHO ;
+
+###############################################################################
+##### Main project definition
+## A top-level project — all other projects will inherit its requirements.
+## If you need to set a symbol or property that needs to be propagated across
+## all projects, this is the right place.
+###############################################################################
+
+project
+    : requirements
+      <debug-symbols>on
+      <threading>multi
+      <define>GC_BOOST_BUILD
+      #####
+      ## Architecture defines
+      #####
+      <address-model>32:<define>X86
+      <address-model>64:<define>X64
+      #####
+      ## NT specific defines
+      #####
+      <os>NT:<define>WINDOWS
+      <os>NT:<define>WIN32_LEAN_AND_MEAN
+      <os>NT:<define>NOMINMAX
+      <os>NT:<define>_WIN32_WINNT=0x0502 ## We're targetting >=XP SP2
+      <os>NT:<define>WINVER=0x0502
+      <os>NT,<toolset>msvc:<define>_SCL_SECURE_NO_DEPRECATE
+      <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_WARNINGS
+      <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
+      <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
+      <os>NT,<toolset>msvc:<define>STRICT
+      <os>NT,<toolset>msvc:<define>_HAS_ITERATOR_DEBUGGING=0
+      <os>NT,<toolset>msvc:<define>_SECURE_SCL=0
+      <os>NT,<toolset>msvc:"<linkflags>/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCMTD"
+      #####
+      ## Linux specific defines
+      #####
+      <os>LINUX:<define>LINUX
+      #####
+      ## OSX specific defines
+      #####
+      <os>MACOSX:<define>MACOSX
+    : build-dir $(GC_ROOT)/build/tmp
+    : default-build debug
+;
+
+###############################################################################
+##### Projects
+## This sets up Jamfiles and triggers the build.
+###############################################################################
+
+for local P in [ glob $(GC_ROOT)/vendor/* ] {
+    use-project $(P:B) : $(P) ;
+}
+
+build-project "Goblin Camp" ;
+build-project tools ;
