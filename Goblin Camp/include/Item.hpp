@@ -89,11 +89,11 @@ private:
 	static boost::unordered_map<std::string, ItemType> itemTypeNames;
 	static boost::unordered_map<std::string, ItemCategory> itemCategoryNames;
 
-	Attack attack;
 	int resistances[RES_COUNT];
 
-	int condition;
 protected:
+	Attack attack;
+	int condition;
 	TCODColor color;
 	int graphic;
 	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
@@ -138,7 +138,7 @@ public:
 	void UpdateVelocity();
 	void SetInternal();
 	int GetDecay() const;
-	virtual void Impact(int speedChange);
+	void Impact(int speedChange);
 };
 
 class OrganicItem : public Item {
