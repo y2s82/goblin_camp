@@ -27,9 +27,8 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
   screenWidth(resolutionX), 
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
-  mapSurface(NULL),
-  tempBuffer(NULL),
-  first(true),
+  mapSurface(),
+  tempBuffer(),
   tileSet(ts),
   mapOffsetX(0),
   mapOffsetY(0),
@@ -49,11 +48,18 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
        bmask = 0x00ff0000;
        amask = 0xff000000;
    #endif
-   mapSurface = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
-   tempBuffer = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
-   SDL_SetAlpha(mapSurface, 0, SDL_ALPHA_OPAQUE);
-   SDL_SetAlpha(tempBuffer, 0, SDL_ALPHA_OPAQUE);
-   if (mapSurface == NULL)
+   SDL_Surface * temp = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
+   SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
+   mapSurface = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
+   SDL_FreeSurface(temp);
+
+   temp = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
+   tempBuffer = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
+   SDL_SetColorKey(tempBuffer.get(),SDL_SRCCOLORKEY, SDL_MapRGBA(tempBuffer->format, keyColor.r, keyColor.g, keyColor.b, 255));
+   //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
+   SDL_FreeSurface(temp);
+
+   if (mapSurface.get() == NULL || tempBuffer.get() == NULL)
    {
 	   LOG(SDL_GetError());
    }
@@ -123,7 +129,7 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	viewportRect.w = viewportW;
 	viewportRect.h = viewportH;
 	
-	SDL_SetClipRect(mapSurface, &viewportRect);
+	SDL_SetClipRect(mapSurface.get(), &viewportRect);
 	
 	// These are over-estimates, sometimes fewer tiles are needed.
 	startTileX = int((focusX * tileSet->TileWidth() - viewportRect.w / 2) / tileSet->TileWidth()) - 1;
@@ -152,7 +158,7 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 			}
 			else {
 				// Out of world
-				SDL_FillRect(mapSurface, &dstRect, 0);
+				SDL_FillRect(mapSurface.get(), &dstRect, 0);
 			}
 		}
 	}
@@ -163,7 +169,7 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	DrawItems(startTileX, startTileY, tilesX, tilesY);
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
 
-	SDL_SetClipRect(mapSurface, NULL);
+	SDL_SetClipRect(mapSurface.get(), NULL);
 }
 
 void TileSetRenderer::SetCursorMode(CursorType mode) {
@@ -193,7 +199,7 @@ void TileSetRenderer::DrawCursor(const Coordinate& pos, float focusX, float focu
 	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + screenHeight / 2);
 
 	SDL_Rect dstRect(CalcDest(pos.X(), pos.Y()));
-	tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface, &dstRect);
+	tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface.get(), &dstRect);
 }
 
 void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {
@@ -205,7 +211,7 @@ void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end,
 	for (int x = start.X(); x <= end.X(); ++x) {
 		for (int y = start.Y(); y <= end.Y(); ++y) {
 			SDL_Rect dstRect(CalcDest(x, y));
-			tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface, &dstRect);
+			tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface.get(), &dstRect);
 		}
 	}
 	
@@ -216,7 +222,7 @@ void TileSetRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect 
 	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(map->GetConstruction(tileX, tileY));
 	boost::shared_ptr<Construction> construct = constructPtr.lock();
 	if (construct) {
-		tileSet->DrawConstruction(construct, Coordinate(tileX, tileY), mapSurface, dstRect);
+		tileSet->DrawConstruction(construct, Coordinate(tileX, tileY), mapSurface.get(), dstRect);
 	}
 }
 
@@ -228,7 +234,7 @@ void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) {
 				&& itemPos.Y() >= startY && itemPos.Y() < startY + sizeY)
 			{
 				SDL_Rect dstRect(CalcDest(itemPos.X(), itemPos.Y()));
-				tileSet->DrawItem(itemi->second, mapSurface, &dstRect);
+				tileSet->DrawItem(itemi->second, mapSurface.get(), &dstRect);
 			}
 		}
 	}
@@ -243,9 +249,9 @@ void TileSetRenderer::DrawNatureObjects(int startX, int startY, int sizeX, int s
 			SDL_Rect dstRect(CalcDest(plantPos.X(), plantPos.Y()));
 			if (planti->second->Marked())
 			{
-				tileSet->DrawMarkedOverlay(mapSurface, &dstRect);
+				tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
 			}
-			tileSet->DrawNatureObject(planti->second, mapSurface, &dstRect);
+			tileSet->DrawNatureObject(planti->second, mapSurface.get(), &dstRect);
 		}
 	}
 }
@@ -257,7 +263,7 @@ void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) {
 				&& npcPos.Y() >= startY && npcPos.Y() < startY + sizeY)
 		{
 			SDL_Rect dstRect(CalcDest(npcPos.X(), npcPos.Y()));
-			tileSet->DrawNPC(npci->second, mapSurface, &dstRect);
+			tileSet->DrawNPC(npci->second, mapSurface.get(), &dstRect);
 		}
 	}
 }
@@ -270,19 +276,19 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 		if (markerX >= startX && markerY < startX + sizeX
 			&& markerY >= startY && markerY < startY + sizeY) {
 				SDL_Rect dstRect( CalcDest(markerX, markerY));
-				tileSet->DrawMarker(mapSurface, &dstRect);
+				tileSet->DrawMarker(mapSurface.get(), &dstRect);
 		}
 	}
 }
 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	TileType type(map->Type(tileX, tileY));
-	tileSet->DrawTerrain(type, mapSurface, dstRect);
+	tileSet->DrawTerrain(type, mapSurface.get(), dstRect);
 	if (map->GetBlood(tileX, tileY).lock())	{
-		tileSet->DrawBlood(mapSurface, dstRect);
+		tileSet->DrawBlood(mapSurface.get(), dstRect);
 	}
 	if (map->GroundMarked(tileX, tileY)) {
-		tileSet->DrawMarkedOverlay(mapSurface, dstRect);
+		tileSet->DrawMarkedOverlay(mapSurface.get(), dstRect);
 	}
 	
 }
@@ -292,7 +298,7 @@ void TileSetRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRe
 	if (water.lock()) {
 		if (water.lock()->Depth() > 0)
 		{
-			tileSet->DrawWater(water.lock()->Depth() / 5000, mapSurface, dstRect);
+			tileSet->DrawWater(water.lock()->Depth() / 5000, mapSurface.get(), dstRect);
 		}
 	}
 }
@@ -300,26 +306,23 @@ void TileSetRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRe
 void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	boost::weak_ptr<FilthNode> filth = map->GetFilth(tileX,tileY);
 	if (filth.lock() && filth.lock()->Depth() > 5) {
-		tileSet->DrawFilthMajor(mapSurface, dstRect);
+		tileSet->DrawFilthMajor(mapSurface.get(), dstRect);
 	} else if (filth.lock() && filth.lock()->Depth() > 0) {
-		tileSet->DrawFilthMinor(mapSurface, dstRect);
+		tileSet->DrawFilthMinor(mapSurface.get(), dstRect);
 	}
 }
 
 void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
-	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface, dstRect);
+	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
 }
 
 void TileSetRenderer::render(void * surf) {
 	  SDL_Surface *screen = (SDL_Surface *)surf;
-      if ( first ) {
-		 first=false;
-		 SDL_SetColorKey(screen,SDL_SRCCOLORKEY, SDL_MapRGBA(screen->format, keyColor.r, keyColor.g, keyColor.b, 0));
-      }
 
       SDL_Rect srcRect={0,0,screenWidth,screenHeight};
       SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	  SDL_BlitSurface(screen,&srcRect,mapSurface,&dstRect);
-      SDL_BlitSurface(mapSurface,&srcRect,screen,&dstRect);   
+	  SDL_BlitSurface(screen,&srcRect,tempBuffer.get(),&dstRect);
+	  SDL_BlitSurface(tempBuffer.get(),&srcRect,mapSurface.get(),&dstRect);
+      SDL_BlitSurface(mapSurface.get(),&srcRect,screen,&dstRect);   
 }
 

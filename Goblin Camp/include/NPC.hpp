@@ -231,7 +231,8 @@ public:
 	void GetMainHandAttack(Attack&);
 	bool WieldingRangedWeapon();
 	void FindNewWeapon();
-	boost::weak_ptr<Item> Wielding();
+	boost::weak_ptr<Item> Wielding() ;
+	boost::weak_ptr<Item> Carrying() const;
 	bool HasHands();
 	bool IsTunneler();
 	void FindNewArmor();

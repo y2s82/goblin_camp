@@ -77,6 +77,7 @@ public:
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
+	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
 	
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
@@ -90,6 +91,7 @@ public:
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
+	typedef boost::array<Sprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> LookupMap;
 
 	class DrawConstructionVisitor;
@@ -132,6 +134,8 @@ private:
 
 	CursorTypeSpriteArray placeableCursors;
 	CursorTypeSpriteArray nonplaceableCursors;
+
+	StatusEffectSpriteArray defaultStatusEffects;
 
 	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;

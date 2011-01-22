@@ -57,6 +57,9 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 			placeableCursors[i] = Sprite();
 			nonplaceableCursors[i] = Sprite();
 		}
+		for (int i = 0; i < defaultStatusEffects.size(); ++i) {
+			defaultStatusEffects[i] = Sprite();
+		}
 }
 
 TileSet::~TileSet() {}
@@ -126,6 +129,34 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 		defaultNPCSpriteSet.tile.Draw(dst, dstRect);
 	} else {
 		npcSpriteSets[hint].tile.Draw(dst, dstRect);
+	}
+
+	if ((TCODSystem::getElapsedMilli() % 1000 < 700)) {
+		if (npc->HasEffect(CARRYING)) {
+			boost::shared_ptr<Item> carriedItem = npc->Carrying().lock();
+			if (carriedItem.get() != 0) {
+				DrawItem(carriedItem, dst, dstRect);
+			}
+		}
+	}
+
+	int numEffects = npc->StatusEffects()->size();
+	if (npc->HasEffect(CARRYING)) numEffects--; // Already handled
+	if (npc->HasEffect(WORKING)) numEffects--; // Don't draw
+	if (npc->HasEffect(SWIM)) {
+		numEffects--;
+		defaultStatusEffects.at(SWIM).Draw(dst, dstRect);
+	}
+	if (npc->HasEffect(FLYING)) numEffects--; // Dont Draw
+	if (numEffects > 0) {
+		int effect = (TCODSystem::getElapsedMilli() % (250 * numEffects)) / 250;
+		int atEffect = 0;
+		for (std::list<StatusEffect>::iterator effecti(npc->StatusEffects()->begin()); effecti != npc->StatusEffects()->end(); ++effecti) {
+			if (effect == atEffect++) {
+				defaultStatusEffects.at(effecti->type).Draw(dst, dstRect);
+				break;
+			}
+		}
 	}
 }
 
@@ -422,6 +453,10 @@ void TileSet::SetCursorSprites(CursorType type, const Sprite& placeableSprite, c
 			}
 		}
 	}
+}
+
+void TileSet::SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite) {
+	defaultStatusEffects[statusEffect] = sprite;
 }
 
 void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {

@@ -21,15 +21,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tileH)
 	: tileWidth(tileW), tileHeight(tileH), tiles(), tileCount(0), tileXDim(0), tileYDim(0)
 {
-	tiles = boost::shared_ptr<SDL_Surface>(IMG_Load(path.string().c_str()), SDL_FreeSurface);
-	SDL_FreeSurface(NULL);
-	if (tiles.get() == NULL)
-    {
+	SDL_Surface * temp = IMG_Load(path.string().c_str());
+	if (temp != NULL) {
+		tiles = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormatAlpha(temp), SDL_FreeSurface);
+		SDL_FreeSurface(temp);
+	}
+	if (tiles.get() == NULL) {
 	   LOG(SDL_GetError());
 	   tileCount = 0;
-    }
-	else
-	{
+    } else {
 		tileXDim = (tiles->w / tileWidth);
 		tileYDim = (tiles->h / tileHeight);
 		tileCount = tileXDim * tileYDim;

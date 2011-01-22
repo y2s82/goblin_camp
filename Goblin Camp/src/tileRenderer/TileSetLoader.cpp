@@ -73,6 +73,21 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
 
+	// Status Effects
+	tileTextureStruct->addProperty("default_hungry", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_thirsty", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_panic", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_concussion", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_drowsy", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_asleep", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_poison", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_bleeding", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_sluggish", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_rage", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_eating", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_drinking", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_swimming", TCOD_TYPE_INT, false);
+
 	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
 
 	// Cursors
@@ -197,6 +212,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 	if (currentTexture.get() != NULL) {
 		switch (currentSpriteSet) {
 		case SS_NONE:
+			// Terrain
 			if (boost::iequals(name, "unknown_terrain")) {
 				tileSet->SetTerrain(TILENONE, Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "grass_terrain")) {
@@ -211,7 +227,10 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetTerrain(TILEROCK, Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "mud_terrain")) {
 				tileSet->SetTerrain(TILEMUD, Sprite(value.i, currentTexture));
-			} else if (boost::iequals(name, "water_levels")) {
+			} 
+			
+			// Terrain Modifiers
+			else if (boost::iequals(name, "water_levels")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tileSet->AddWater(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "minor_filth")) {
@@ -222,13 +241,19 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetMarker(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "blood")) {
 				tileSet->SetBlood(Sprite(value.i, currentTexture));
-			} else if (boost::iequals(name, "non_territory")) {
+			} 
+			
+			// Overlays
+			else if (boost::iequals(name, "non_territory")) {
 				tileSet->SetNonTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "territory")) {
 				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
-			} else if (boost::iequals(name, "default_cursor")) {
+			} 
+			
+			// Cursors
+			else if (boost::iequals(name, "default_cursor")) {
 				SetCursorSprites(Cursor_None, value.list);
 			} else if (boost::iequals(name, "construction_cursor")) {
 				SetCursorSprites(Cursor_Construct, value.list);
@@ -256,7 +281,38 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				SetCursorSprites(Cursor_RemoveTerritory, value.list);
 			} else if (boost::iequals(name, "gather_cursor")) {
 				SetCursorSprites(Cursor_Gather, value.list);
-			} else if (boost::iequals(name, "default_underconstruction")) {
+			} 
+			
+			// Status Effects
+			else if (boost::iequals(name, "default_hungry")) {
+				tileSet->SetStatusSprite(HUNGER, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_thirsty")) {
+				tileSet->SetStatusSprite(THIRST, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_panic")) {
+				tileSet->SetStatusSprite(PANIC, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_concussion")) {
+				tileSet->SetStatusSprite(CONCUSSION, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_drowsy")) {
+				tileSet->SetStatusSprite(DROWSY, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_asleep")) {
+				tileSet->SetStatusSprite(SLEEPING, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_poison")) {
+				tileSet->SetStatusSprite(POISON, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_bleeding")) {
+				tileSet->SetStatusSprite(BLEEDING, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_sluggish")) {
+				tileSet->SetStatusSprite(BADSLEEP, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_rage")) {
+				tileSet->SetStatusSprite(RAGE, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_eating")) {
+				tileSet->SetStatusSprite(EATING, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_drinking")) {
+				tileSet->SetStatusSprite(DRINKING, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_swimming")) {
+				tileSet->SetStatusSprite(SWIM, Sprite(value.i, currentTexture));
+			}
+			
+			else if (boost::iequals(name, "default_underconstruction")) {
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(value.i, currentTexture));
 			}
 			break;

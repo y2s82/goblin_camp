@@ -44,11 +44,10 @@ private:
 
 	// the font characters size
 	int screenWidth, screenHeight;
-	SDL_Surface *mapSurface;
-	SDL_Surface *tempBuffer;
+	boost::shared_ptr<SDL_Surface> mapSurface;
+	boost::shared_ptr<SDL_Surface> tempBuffer;
 	boost::shared_ptr<TileSet> tileSet;
 	TCODColor keyColor;
-	bool first;
 	int mapOffsetX, mapOffsetY; // This is the pixel offset when drawing to the viewport
 	int startTileX, startTileY;
 	CursorType cursorMode;

@@ -1974,6 +1974,10 @@ boost::weak_ptr<Item> NPC::Wielding() {
 	return mainHand;
 }
 
+boost::weak_ptr<Item> NPC::Carrying() const {
+	return carried;
+}
+
 boost::weak_ptr<Item> NPC::Wearing() {
 	return armor;
 }
