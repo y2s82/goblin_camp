@@ -30,6 +30,7 @@ void GCCommandLine(std::vector<std::string>&);
 #	define GC_MAIN_FUNCTION()  WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 #	define GC_GET_ARGUMENTS(A) GCCommandLine(A)
 #else
+#   undef main
 #	define GC_MAIN_FUNCTION()  main(int argc, char **argv)
 #	define GC_GET_ARGUMENTS(A) std::copy(argv, argv + argc, std::back_inserter(A))
 #endif

@@ -311,12 +311,18 @@ explicit-install dist-lib
       <install-source-root>$(GC_PROJECT_ROOT)
 ;
 
+explicit-install dist-tiles
+    : [ path.glob-tree $(GC_PROJECT_ROOT)/tiles : *.dat *.png ]
+    : <conditional>@get-dist-data
+      <install-source-root>$(GC_PROJECT_ROOT)
+;
+
 explicit-install dist-mod-version
     : mod.dat
     : <conditional>@get-dist-gccore
 ;
 
-explicit-alias dist : dist-data dist-binaries dist-additional dist-lib dist-mod-version ;
+explicit-alias dist : dist-data dist-binaries dist-additional dist-lib dist-tiles dist-mod-version ;
 
 #
 # Solution files
