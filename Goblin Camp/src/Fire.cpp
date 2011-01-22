@@ -64,7 +64,16 @@ void FireNode::Update() {
 				temperature -= water->Depth();
 				water->Depth(0);
 			}
-			Game::Inst()->CreateSpell(Coordinate(x,y), 2);
+			boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), 2);
+
+			Coordinate direction;
+			Direction wind = Map::Inst()->GetWindDirection();
+			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-7, -1));
+			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(1, 7));
+			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(1, 7));
+			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-7, -1));
+			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 		}
 	} else {
 		if (Random::Generate(5) == 0) { 
@@ -75,11 +84,37 @@ void FireNode::Update() {
 		if (Map::Inst()->Type(x, y) != TILEGRASS || Map::Inst()->Burnt(x, y) >= 10) temperature -= 3;
 
 		if (Random::Generate(20) == 0) {
-			Game::Inst()->CreateSpell(Coordinate(x,y), 0);
+			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), 0);
+			int distance = Random::Generate(0, 9);
+			if (distance < 7) {
+				distance = 1;
+			} else if (distance < 9) {
+				distance = 2;
+			} else {
+				distance = 3;
+			}
+
+			Coordinate direction;
+			Direction wind = Map::Inst()->GetWindDirection();
+			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(-distance);
+			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(distance);
+			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(distance);
+			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(-distance);
+			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+
+			spark->CalculateFlightPath(Coordinate(x,y) + direction, 50, 1);
 		}
 
 		if (Random::Generate(60) == 0) {
-			Game::Inst()->CreateSpell(Coordinate(x,y), 1);
+			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), 1);
+			Coordinate direction;
+			Direction wind = Map::Inst()->GetWindDirection();
+			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-75, -25));
+			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(25, 75));
+			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(25, 75));
+			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-75, -25));
+			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			smoke->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 		}
 	}
 }

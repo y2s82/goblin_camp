@@ -39,18 +39,20 @@ Spell::Spell(Coordinate pos, int vtype) : Entity(),
 		name = "Spark";
 		break;
 
-	case 1: //Smoke
+	case 1:{ //Smoke
 		graphic = 177;
-		color = TCODColor::darkGrey;
+		int rgb = Random::Generate(45, 90);
+		color = TCODColor(rgb, rgb, rgb);
 		immaterial = true;
-		name = "Smoke";
+		name = "Smoke";}
 		break;
 
-	case 2:
+	case 2:{
 		graphic = 176;
-		color = TCODColor::lightGrey;
+		int rgb = Random::Generate(180, 230);
+		color = TCODColor(rgb, rgb, rgb);
 		immaterial = true;
-		name = "Steam";
+		name = "Steam";}
 		break;
 	}
 }

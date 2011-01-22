@@ -1849,28 +1849,8 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 }
 
 /* Placeholder code before proper spells */
-void Game::CreateSpell(Coordinate pos, int type) {
+boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
-
-	spellList.push_back(boost::shared_ptr<Spell>(newSpell));
-	switch (type) {
-	case 0: {
-		int distance = Random::Generate(0, 9);
-		if (distance < 7) {
-			distance = 1;
-		} else if (distance < 9) {
-			distance = 2;
-		} else {
-			distance = 3;
-		}
-		newSpell->CalculateFlightPath(pos + Coordinate(Random::Generate(-distance, distance), Random::Generate(-distance, distance)), 50, 1);
-			}
-		break;
-	case 1:
-		newSpell->CalculateFlightPath(pos + Coordinate(Random::Generate(-15, 15), Random::Generate(-15, 15)), 5, 1);
-		break;
-	case 2:
-		newSpell->CalculateFlightPath(pos + Coordinate(Random::Generate(-5, 5), Random::Generate(-5, 5)), 5, 1);
-		break;
-	}
+	spellList.push_back(newSpell);
+	return newSpell;
 }

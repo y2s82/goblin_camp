@@ -237,6 +237,6 @@ public:
 	void CreateFire(Coordinate);
 	void CreateFire(Coordinate,int);
 
-	void CreateSpell(Coordinate, int type);
+	boost::shared_ptr<Spell> CreateSpell(Coordinate, int type);
 	std::list<boost::shared_ptr<Spell> > spellList;
 };
