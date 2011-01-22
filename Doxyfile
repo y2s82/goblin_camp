@@ -89,7 +89,7 @@ WARN_LOGFILE           =
 #---------------------------------------------------------------------------
 INPUT                  = "Goblin Camp/src" "Goblin Camp/include"
 INPUT_ENCODING         = UTF-8
-FILE_PATTERNS          = *.cpp *.hpp
+FILE_PATTERNS          = *.cpp *.hpp *.cpp_in
 RECURSIVE              = YES
 EXCLUDE                =
 EXCLUDE_SYMLINKS       = NO
