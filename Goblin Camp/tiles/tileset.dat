@@ -43,6 +43,21 @@ tileset_data "TestMedium" {
 		remove_territory_cursor=[12]
 		gather_cursor=[12,13]
 
+		// Status Effects
+		default_hungry=46
+		default_thirsty=47
+		default_panic=48
+		default_concussion=49
+		default_drowsy=50
+		default_asleep=51
+		default_poison=52
+		default_bleeding=53
+		default_sluggish=54
+		default_rage=55
+		default_eating=56
+		default_drinking=57
+		default_swimming=58
+
 		default_underconstruction=18
 	
 		creature_sprite_data {
