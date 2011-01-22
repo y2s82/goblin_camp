@@ -1051,7 +1051,7 @@ void Map::load(Archive & ar, const unsigned int version) {
 //
 // class Tile
 //
-BOOST_CLASS_VERSION(Tile, 0)
+BOOST_CLASS_VERSION(Tile, 1)
 
 template<class Archive>
 void Tile::save(Archive & ar, const unsigned int version) const {
@@ -1083,39 +1083,41 @@ void Tile::save(Archive & ar, const unsigned int version) const {
 	ar & walkedOver;
 	ar & corruption;
 	ar & territory;
+	ar & burnt;
 }
 
 template<class Archive>
 void Tile::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & type;
-		ar & vis;
-		ar & walkable;
-		ar & buildable;
-		ar & moveCost;
-		ar & construction;
-		ar & low;
-		ar & blocksWater;
-		ar & water;
-		ar & graphic;
-		ar & foreColor.r;
-		ar & foreColor.g;
-		ar & foreColor.b;
-		ar & originalForeColor.r;
-		ar & originalForeColor.g;
-		ar & originalForeColor.b;
-		ar & backColor.r;
-		ar & backColor.g;
-		ar & backColor.b;
-		ar & natureObject;
-		ar & npcList;
-		ar & itemList;
-		ar & filth;
-		ar & blood;
-		ar & marked;
-		ar & walkedOver;
-		ar & corruption;
-		ar & territory;
+	ar & type;
+	ar & vis;
+	ar & walkable;
+	ar & buildable;
+	ar & moveCost;
+	ar & construction;
+	ar & low;
+	ar & blocksWater;
+	ar & water;
+	ar & graphic;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & originalForeColor.r;
+	ar & originalForeColor.g;
+	ar & originalForeColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
+	ar & natureObject;
+	ar & npcList;
+	ar & itemList;
+	ar & filth;
+	ar & blood;
+	ar & marked;
+	ar & walkedOver;
+	ar & corruption;
+	ar & territory;
+	if (version >= 1) {
+		ar & burnt;
 	}
 }
 

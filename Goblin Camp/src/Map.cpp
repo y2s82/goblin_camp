@@ -185,6 +185,14 @@ void Map::SetBlood(int x, int y, boost::shared_ptr<BloodNode> value) {
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlood(value); 
 }
 
+boost::weak_ptr<FireNode> Map::GetFire(int x, int y) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetFire(); 
+	return boost::weak_ptr<FireNode>();
+}
+void Map::SetFire(int x, int y, boost::shared_ptr<FireNode> value) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetFire(value); 
+}
+
 bool Map::BlocksLight(int x, int y) const { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksLight(); 
 	return true;
@@ -295,6 +303,7 @@ void Map::Corrupt(int x, int y, int magnitude) {
 void Map::Naturify(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		if (tileMap[x][y].walkedOver > 0) --tileMap[x][y].walkedOver;
+		if (tileMap[x][y].burnt > 0) tileMap[x][y].Burn(-1);
 		if (tileMap[x][y].walkedOver == 0 && tileMap[x][y].natureObject < 0 && tileMap[x][y].construction < 0) {
 			int natureObjects = 0;
 			int beginx = std::max(0, x-2);
@@ -425,6 +434,27 @@ void Map::UpdateMarkers() {
 TCODColor Map::GetColor(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor();
 	return TCODColor::white;
+}
+
+void Map::Burn(int x, int y, int magnitude) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].Burn(magnitude);
+		if (tileMap[x][y].natureObject >= 0 && 
+			!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(), "Withering tree")) {
+			bool tree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
+			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
+			if (tree && Random::Generate(3) < 2) {
+				Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+			}
+		}
+	}
+}
+
+int Map::Burnt(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		return tileMap[x][y].burnt;
+	}
+	return 0;
 }
 
 Map::MarkerIterator Map::MarkerBegin()

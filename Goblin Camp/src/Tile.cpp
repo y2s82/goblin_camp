@@ -47,10 +47,12 @@ Tile::Tile(TileType newType, int newCost) :
 	itemList(std::set<int>()),
 	filth(boost::shared_ptr<FilthNode>()),
 	blood(boost::shared_ptr<BloodNode>()),
+	fire(boost::shared_ptr<FireNode>()),
 	marked(false),
 	walkedOver(0),
 	corruption(0),
-	territory(false)
+	territory(false),
+	burnt(0)
 {
 	SetType(newType);
 }
@@ -155,6 +157,8 @@ int Tile::GetMoveCost() const {
 	int cost = moveCost;
 	if (construction >= 0) cost += 2;
 
+	if (fire) cost += 100; //Walking through fire... not such a good idea.
+
 	//If a construction exists here, and it's a bridge, then movecost = 1 (disregards mud/ditch/etc)
 	if (construction > 0 && Game::Inst()->GetConstruction(construction).lock() && 
 		Game::Inst()->GetConstruction(construction).lock()->HasTag(BRIDGE)) {
@@ -218,6 +222,9 @@ void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
 boost::weak_ptr<BloodNode> Tile::GetBlood() const {return boost::weak_ptr<BloodNode>(blood);}
 void Tile::SetBlood(boost::shared_ptr<BloodNode> value) {blood = value;}
 
+boost::weak_ptr<FireNode> Tile::GetFire() const {return boost::weak_ptr<FireNode>(fire);}
+void Tile::SetFire(boost::shared_ptr<FireNode> value) { fire = value; }
+
 void Tile::Mark() { marked = true; }
 void Tile::Unmark() { marked = false; }
 
@@ -226,6 +233,7 @@ void Tile::WalkOver() {
 	if (walkedOver < 120 || construction < 0) ++walkedOver;
 	if (type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
+		if (burnt > 0) Burn(0); //Just to re-do the color
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
 		if (walkedOver > 300 && Random::Generate(99) == 0) SetType(TILEMUD);
 	}
@@ -236,6 +244,7 @@ void Tile::Corrupt(int magnitude) {
 	if (corruption < 0) corruption = 0;
 	if (type == TILEGRASS) {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);;
+		if (burnt > 0) Burn(0); //Just to re-do the color
 	}
 }
 
@@ -254,4 +263,28 @@ TileType Tile::StringToTileType(std::string string) {
 		return TILEBOG;
 	}
 	return TILENONE;
+}
+
+void Tile::Burn(int magnitude) {
+	if (type == TILEGRASS) {
+		burnt = std::min(10, burnt + magnitude);
+		burnt = std::max(0, burnt);
+		if (burnt == 0) {
+			Corrupt(0); /*Corruption changes the color, and by corrupting by 0 we just return to what color the tile
+						would be without any burning*/
+			return;
+		}
+
+		if (type == TILEGRASS) {
+			if (burnt < 5) {
+				foreColor.r = 130 + ((5 - burnt) * 10);
+				foreColor.g = 80 + ((5 - burnt) * 5);
+				foreColor.b = 0;
+			} else {
+				foreColor.r = 50 + ((10 - burnt) * 12);
+				foreColor.g = 50 + ((10 - burnt) * 6);
+				foreColor.b = (burnt - 5) * 10;
+			}
+		}
+	}
 }

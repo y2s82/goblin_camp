@@ -832,6 +832,27 @@ void Game::Update() {
 	}
 
 	if (orcCount == 0 && goblinCount == 0) GameOver();
+
+	for (std::list<boost::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
+		if (boost::shared_ptr<FireNode> fire = fireit->lock()) {
+			if (Random::GenerateBool()) fire->Update();
+			if (fire->GetHeat() <= 0) {
+				Map::Inst()->SetFire(fire->GetPosition().X(), fire->GetPosition().Y(), boost::shared_ptr<FireNode>());
+				fireit = fireList.erase(fireit);
+			} else { ++fireit; }
+		} else {
+			fireit = fireList.erase(fireit);
+		}
+	}
+
+	for (std::list<boost::shared_ptr<Spell> >::iterator spellit = spellList.begin(); spellit != spellList.end();) {
+		if ((*spellit)->IsDead()) {
+			spellit = spellList.erase(spellit);
+		} else {
+			(*spellit)->UpdateVelocity();
+			++spellit;
+		}
+	}
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
@@ -1811,4 +1832,45 @@ void Game::AddDelay(int delay, boost::function<void()> callback) {
 void Game::GameOver() {
 	MessageBox::ShowMessageBox("All your orcs and goblins have died.");
 	running = false;
+}
+
+void Game::CreateFire(Coordinate pos) {
+	CreateFire(pos, 30);
+}
+
+void Game::CreateFire(Coordinate pos, int temperature) {
+	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos.X(), pos.Y()));
+	if (!fire.lock()) { //No existing firenode
+		boost::shared_ptr<FireNode> newFire(new FireNode(pos.X(), pos.Y(), temperature));
+		fireList.push_back(boost::weak_ptr<FireNode>(newFire));
+		Map::Inst()->SetFire(pos.X(), pos.Y(), newFire);
+	} else {
+	}
+}
+
+/* Placeholder code before proper spells */
+void Game::CreateSpell(Coordinate pos, int type) {
+	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
+
+	spellList.push_back(boost::shared_ptr<Spell>(newSpell));
+	switch (type) {
+	case 0: {
+		int distance = Random::Generate(0, 9);
+		if (distance < 7) {
+			distance = 1;
+		} else if (distance < 9) {
+			distance = 2;
+		} else {
+			distance = 3;
+		}
+		newSpell->CalculateFlightPath(pos + Coordinate(Random::Generate(-distance, distance), Random::Generate(-distance, distance)), 50, 1);
+			}
+		break;
+	case 1:
+		newSpell->CalculateFlightPath(pos + Coordinate(Random::Generate(-15, 15), Random::Generate(-15, 15)), 5, 1);
+		break;
+	case 2:
+		newSpell->CalculateFlightPath(pos + Coordinate(Random::Generate(-5, 5), Random::Generate(-5, 5)), 5, 1);
+		break;
+	}
 }

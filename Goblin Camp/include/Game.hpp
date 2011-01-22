@@ -31,6 +31,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Events.hpp"
 #include "Job.hpp"
+#include "Fire.hpp"
+#include "Spell.hpp"
 
 #include "MapRenderer.hpp"
 
@@ -230,4 +232,11 @@ public:
 	void TriggerAttack();
 
 	void AddDelay(int delay, boost::function<void()>);
+
+	std::list<boost::weak_ptr<FireNode> > fireList;
+	void CreateFire(Coordinate);
+	void CreateFire(Coordinate,int);
+
+	void CreateSpell(Coordinate, int type);
+	std::list<boost::shared_ptr<Spell> > spellList;
 };

@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Water.hpp"
 #include "Filth.hpp"
 #include "Blood.hpp"
+#include "Fire.hpp"
 
 enum TileType {
 	TILENONE,
@@ -63,10 +64,12 @@ private:
 	std::set<int> itemList; //Set of Item uid's
 	boost::shared_ptr<FilthNode> filth;
 	boost::shared_ptr<BloodNode> blood;
+	boost::shared_ptr<FireNode> fire;
 	bool marked;
 	int walkedOver, corruption;
 	bool territory;
-	
+	int burnt;
+
 public:
 	Tile(TileType = TILEGRASS, int = 1);
 	TileType GetType();
@@ -99,9 +102,12 @@ public:
 	void SetFilth(boost::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood() const;
 	void SetBlood(boost::shared_ptr<BloodNode>);
+	boost::weak_ptr<FireNode> GetFire() const;
+	void SetFire(boost::shared_ptr<FireNode>);
 	void Mark();
 	void Unmark();
 	void WalkOver();
 	void Corrupt(int magnitude);
 	static TileType StringToTileType(std::string);
+	void Burn(int magnitude);
 };
