@@ -49,25 +49,28 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	x = pos.X();
 	y = pos.Y();
 
-	name = Item::Presets[type].name;
-	categories = Item::Presets[type].categories;
-	graphic = Item::Presets[type].graphic;
-	color = Item::Presets[type].color;
-	if (Item::Presets[type].decays) decayCounter = Item::Presets[type].decaySpeed;
+	if (type >= 0 && type < Item::Presets.size()) {
+		name = Item::Presets[type].name;
+		categories = Item::Presets[type].categories;
+		graphic = Item::Presets[type].graphic;
+		color = Item::Presets[type].color;
+		if (Item::Presets[type].decays) decayCounter = Item::Presets[type].decaySpeed;
+
+		attack = Item::Presets[type].attack;
+
+		for (int i = 0; i < RES_COUNT; ++i) {
+			resistances[i] = Item::Presets[type].resistances[i];
+		}
+
+		bulk = Item::Presets[type].bulk;
+		condition = Item::Presets[type].condition;
+	}
 
 	for (int i = 0; i < (signed int)components.size(); ++i) {
 		if (components[i].lock()) 
 			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
 	}
 
-	attack = Item::Presets[type].attack;
-
-	for (int i = 0; i < RES_COUNT; ++i) {
-		resistances[i] = Item::Presets[type].resistances[i];
-	}
-
-	bulk = Item::Presets[type].bulk;
-	condition = Item::Presets[type].condition;
 }
 
 Item::~Item() {
@@ -483,7 +486,7 @@ void Item::UpdateVelocity() {
 					int tx = flightPath.back().coord.X();
 					int ty = flightPath.back().coord.Y();
 
-					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
+					if (Map::Inst()->BlocksWater(tx,ty) || !Map::Inst()->IsWalkable(tx,ty)) { //We've hit an obstacle
 						Attack attack = GetAttack();
 						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
 							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
