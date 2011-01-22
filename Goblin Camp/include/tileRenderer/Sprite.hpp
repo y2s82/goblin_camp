@@ -29,7 +29,7 @@ public:
 	Sprite(int tile, boost::shared_ptr<TileSetTexture> tilesetTexture);
 	~Sprite();
 
-	bool Exists();
+	bool Exists() const;
 
 	void Draw(SDL_Surface * dst, SDL_Rect * dstRect) const; 
 };

@@ -49,12 +49,24 @@ void ConstructionSpriteSet::DrawUnderConstruction(const Coordinate& internalPos,
 	}
 }
 
+void ConstructionSpriteSet::DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (openSprite.Exists()) {
+		openSprite.Draw(dst, dstRect);
+	} else {
+		Draw(internalPos, dst, dstRect);
+	}
+}
+
 void ConstructionSpriteSet::AddSprite(const Sprite& sprite) {
 	sprites.push_back(sprite);
 }
 
 void ConstructionSpriteSet::AddUnderConstructionSprite(const Sprite& sprite) {
 	underconstructionSprites.push_back(sprite);
+}
+
+void ConstructionSpriteSet::SetOpenSprite(const Sprite& sprite) {
+	openSprite = sprite;
 }
 
 void ConstructionSpriteSet::SetWidth(int val) {

@@ -33,7 +33,7 @@ void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const
 	}
 }
 
-bool Sprite::Exists()
+bool Sprite::Exists() const
 {
 	return tile != -1;
 }

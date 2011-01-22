@@ -319,9 +319,7 @@ void TileSetRenderer::render(void * surf) {
 
       SDL_Rect srcRect={0,0,screenWidth,screenHeight};
       SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	  SDL_FillRect(tempBuffer, &dstRect, SDL_MapRGBA(tempBuffer->format, 0,0,0,255));
-	  SDL_BlitSurface(mapSurface,&srcRect,tempBuffer,&dstRect);
-	  SDL_BlitSurface(screen,&srcRect,tempBuffer,&dstRect);
-      SDL_BlitSurface(tempBuffer,&srcRect,screen,&dstRect);   
+	  SDL_BlitSurface(screen,&srcRect,mapSurface,&dstRect);
+      SDL_BlitSurface(mapSurface,&srcRect,screen,&dstRect);   
 }
 

@@ -193,10 +193,23 @@ public:
 	}
 
 	void Visit(Door * door) {
-		tileSet->DrawBaseConstruction(door, coordinate, dst, dstRect);
+		if (door->Open()) {
+			tileSet->DrawOpenDoor(door, coordinate, dst, dstRect);
+		} else {
+			tileSet->DrawBaseConstruction(door, coordinate, dst, dstRect);
+		}
 	}
 
 };
+
+void TileSet::DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = door->GetGraphicsHint();
+	if (hint == -1 || hint >= constructionSpriteSets.size()) {
+		defaultConstructionSpriteSet.DrawOpen(worldPos - door->Position(), dst, dstRect);
+	} else {
+		constructionSpriteSets[hint].DrawOpen(worldPos - door->Position(), dst, dstRect);
+	}
+}
 
 void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
 	DrawConstructionVisitor visitor(this, dst, dstRect, worldPos);
