@@ -1,0 +1,29 @@
+import path ;
+path-constant HERE : . ;
+
+common-reqs =
+    <define>BOOST_FILESYSTEM_VERSION=3
+    <define>BOOST_ALL_NO_LIB
+    <include>$(HERE)
+;
+
+project boost
+    : requirements
+      <link>static
+      <define>DATE_TIME_INLINE
+      <define>BOOST_PYTHON_SOURCE
+      <define>BOOST_THREAD_BUILD_LIB=1
+      $(common-reqs)
+    : usage-requirements
+      <define>BOOST_PYTHON_DYN_LINK
+      <define>BOOST_THREAD_USE_LIB=1
+      $(common-reqs)
+;
+
+lib date_time       : [ glob $(HERE)/libs/date_time/*.cpp ] ;
+lib filesystem      : [ glob $(HERE)/libs/filesystem/*.cpp ] ;
+lib gc-boost-python : [ path.glob-tree $(HERE)/libs/python : *.cpp ] /python : <link>shared ;
+lib random          : [ glob $(HERE)/libs/random/*.cpp ] ;
+lib serialization   : [ glob $(HERE)/libs/serialization/*.cpp ] ;
+lib system          : [ glob $(HERE)/libs/system/*.cpp ] ;
+lib thread          : [ glob $(HERE)/libs/thread/*.cpp ] [ glob $(HERE)/libs/thread/win32/*.cpp ] ;

@@ -1,0 +1,3 @@
+rule init ( version : options * ) {
+    ECHO "Boost sources are now built alongside Goblin Camp, remove 'using boost' from your config file." ;
+}
