@@ -38,6 +38,7 @@ private:
 	Coordinate lockedCenter;
 	unsigned tier;
 	std::string name;
+	std::string article;
 	int workshops, farmplots, production;
 	Coordinate upperCorner, lowerCorner;
 	bool autoTerritory;
