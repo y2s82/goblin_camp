@@ -76,6 +76,7 @@ public:
 	void SetMarkedOverlay(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
+	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
 	
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
@@ -111,6 +112,8 @@ private:
 	Sprite marker;
 	Sprite blood;
 
+	Sprite defaultUnderConstructionSprite;
+
 	NPCSpriteSet defaultNPCSpriteSet;
 	std::vector<NPCSpriteSet> npcSpriteSets;
 	LookupMap npcSpriteLookup;
@@ -130,6 +133,7 @@ private:
 	CursorTypeSpriteArray placeableCursors;
 	CursorTypeSpriteArray nonplaceableCursors;
 
-	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
-	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
+	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 };

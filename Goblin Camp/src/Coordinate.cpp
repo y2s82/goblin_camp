@@ -38,16 +38,20 @@ bool Coordinate::operator!=(Coordinate other) const {
 	return (x != other.X() || y != other.Y());
 }
 
-Coordinate Coordinate::operator+(int other) {
+Coordinate Coordinate::operator+(int other) const {
 	return Coordinate(x + other, y + other);
 }
 
-Coordinate Coordinate::operator-(int other) {
+Coordinate Coordinate::operator-(int other) const {
 	return Coordinate(x - other, y - other);
 }
 
-Coordinate Coordinate::operator+(Coordinate other) {
+Coordinate Coordinate::operator+(const Coordinate& other) const {
 	return Coordinate(x + other.X(), y + other.Y());
+}
+
+Coordinate Coordinate::operator-(const Coordinate& other) const {
+	return Coordinate(x - other.X(), y - other.Y());
 }
 
 template<class Archive>

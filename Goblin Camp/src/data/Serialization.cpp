@@ -184,6 +184,9 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & safeMonths;
 	if (version == 0) {
 		ar & devMode;
+	}
+	ar & marks;
+	if (version == 0) {
 		ar & Coordinate();
 		camX = 0;
 		camY = 0;
@@ -191,7 +194,6 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar & camX;
 		ar & camY;
 	}
-	ar & marks;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;
