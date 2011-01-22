@@ -55,3 +55,7 @@ void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) c
 		SDL_BlitSurface(tiles.get(),&srcRect, dst, dstRect);
 	}
 }
+
+boost::shared_ptr<SDL_Surface> TileSetTexture::GetInternalSurface() {
+	return tiles;
+}

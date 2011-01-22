@@ -46,6 +46,7 @@ TileSetLoader::TileSetLoader() :
 
 	TCODParserStruct* constructionSpriteStruct = parser.newStructure("construction_sprite_data");
 	constructionSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
+	constructionSpriteStruct->addListProperty("underconstruction_sprites", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
@@ -70,6 +71,8 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("non_territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
+
+	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
 
 	// Cursors
 	tileTextureStruct->addListProperty("default_cursor", TCOD_TYPE_INT, false);
@@ -252,7 +255,9 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				SetCursorSprites(Cursor_RemoveTerritory, value.list);
 			} else if (boost::iequals(name, "gather_cursor")) {
 				SetCursorSprites(Cursor_Gather, value.list);
-			} 
+			} else if (boost::iequals(name, "default_underconstruction")) {
+				tileSet->SetDefaultUnderConstructionSprite(Sprite(value.i, currentTexture));
+			}
 			break;
 		case SS_NPC:
 			if (boost::iequals(name, "sprite")) {
@@ -273,6 +278,9 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			if (boost::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					constructionSpriteSet.AddSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			} else if (boost::iequals(name, "underconstruction_sprites")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					constructionSpriteSet.AddUnderConstructionSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "width")) {
 				constructionSpriteSet.SetWidth(value.i);
 			}

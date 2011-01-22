@@ -42,6 +42,8 @@ tileset_data "TestMedium" {
 		add_territory_cursor=[13]
 		remove_territory_cursor=[12]
 		gather_cursor=[12,13]
+
+		default_underconstruction=18
 	
 		creature_sprite_data {
 			sprite=21
@@ -60,11 +62,11 @@ tileset_data "TestMedium" {
 		}
 
 		creature_sprite_data "goblin" {
-			sprite=24
+			sprite=23
 		}
 
 		creature_sprite_data "orc" {
-			sprite=23
+			sprite=24
 		}		
 
 		plant_sprite_data "Pine"{
@@ -191,6 +193,7 @@ tileset_data "TestMedium" {
 			sprites=[43,43,43,
 					 43,44,43,
 					 43,43,43]
+			underconstruction_sprites=[18]
 			width=3
 		}
 	}

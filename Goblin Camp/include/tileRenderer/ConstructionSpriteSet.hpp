@@ -29,12 +29,19 @@ public:
 	~ConstructionSpriteSet();
 
 	void AddSprite(const Sprite& sprite);
+	void AddUnderConstructionSprite(const Sprite& sprite);
 	void SetWidth(int width);
-	bool IsValid() const;
 
-	void Draw(const Coordinate& constructUpleft, const Coordinate& pos, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	bool IsValid() const;
+	bool HasUnderConstructionSprites() const;
+		
+	void Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	void DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
 
 private:	
 	std::vector<Sprite> sprites;
+	std::vector<Sprite> underconstructionSprites;
 	int width;
+
+	void GenerateUnderConstructionSprites();
 };

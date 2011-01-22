@@ -129,6 +129,8 @@ Construction::~Construction() {
 
 void Construction::Condition(int value) {condition = value;}
 int Construction::Condition() {return condition;}
+int Construction::GetMaxCondition() const {return maxCondition;}
+
 
 int Construction::GetGraphicsHint() const {
 	return Construction::Presets[type].graphicsHint;

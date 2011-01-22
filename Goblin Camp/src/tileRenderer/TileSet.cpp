@@ -37,6 +37,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	markedOverlay(),
 	marker(),
 	blood(),
+	defaultUnderConstructionSprite(),
 	defaultNPCSpriteSet(),
 	npcSpriteSets(),
 	npcSpriteLookup(),
@@ -173,11 +174,22 @@ public:
 	}
 
 	void Visit(Construction * construction) {
-		tileSet->DrawBaseConstruction(construction, coordinate, dst, dstRect);
+		Coordinate internal_pos = coordinate - construction->Position();
+		int pos = internal_pos.X() + internal_pos.Y() * Construction::Blueprint(construction->Type()).X();
+		int maxPos = Construction::Blueprint(construction->Type()).X() * Construction::Blueprint(construction->Type()).Y();
+		if ((construction->GetMaxCondition() + construction->Condition()) * maxPos > (pos + 1) * construction->GetMaxCondition()) {
+			tileSet->DrawBaseConstruction(construction, coordinate, dst, dstRect);
+		} else {
+			tileSet->DrawUnderConstruction(construction, coordinate, dst, dstRect);
+		}
 	}
 
 	void Visit(SpawningPool * spawningPool) {
-		tileSet->DrawBaseConstruction(spawningPool, coordinate, dst, dstRect);
+		if (spawningPool->Condition() < 0) {
+			tileSet->DrawUnderConstruction(spawningPool, coordinate, dst, dstRect);
+		} else { 
+			tileSet->DrawBaseConstruction(spawningPool, coordinate, dst, dstRect);
+		}
 	}
 
 	void Visit(Door * door) {
@@ -191,16 +203,26 @@ void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, con
 	construction->AcceptVisitor(visitor);
 }
 
-void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
+void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
 	if (hint == -1 || hint >= constructionSpriteSets.size()) {
-		defaultConstructionSpriteSet.Draw(construction->Position(), worldPos, dst, dstRect);
+		defaultConstructionSpriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
 	} else {
-		constructionSpriteSets[hint].Draw(construction->Position(), worldPos, dst, dstRect);
+		constructionSpriteSets[hint].Draw(worldPos - construction->Position(), dst, dstRect);
 	}
 }
 
-void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
+void TileSet::DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = construction->GetGraphicsHint();
+	const ConstructionSpriteSet& set((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (set.HasUnderConstructionSprites()) {
+		set.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
+	} else {
+		defaultUnderConstructionSprite.Draw(dst, dstRect);
+	}
+}
+
+void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
 	if (storage.get() != 0 && !storage->empty()) {
 		boost::shared_ptr<Item> item = storage->GetFirstItem().lock();
@@ -387,6 +409,10 @@ void TileSet::SetCursorSprites(CursorType type, const Sprite& placeableSprite, c
 			}
 		}
 	}
+}
+
+void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {
+	defaultUnderConstructionSprite = sprite;
 }
 
 void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {

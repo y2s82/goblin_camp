@@ -20,16 +20,29 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 #include "SpawningPool.hpp"
+#include "Logger.hpp"
 
 ConstructionSpriteSet::ConstructionSpriteSet()
 	: sprites(), width(1) {}
 
 ConstructionSpriteSet::~ConstructionSpriteSet() {}
 
-void ConstructionSpriteSet::Draw(const Coordinate& constructUpleft, const Coordinate& pos, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSpriteSet::Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
 	if (sprites.size() > 0) {
-		int xOffset = (pos.X() - constructUpleft.X()) % width;
-		int yOffset = (pos.Y() - constructUpleft.Y()) % (sprites.size() / width);
+		int xOffset = internalPos.X() % width;
+		int yOffset = internalPos.Y() % (sprites.size() / width);
+
+		int graphicIndex = xOffset + width * yOffset;
+		sprites.at(graphicIndex).Draw(dst, dstRect);
+	}
+}
+
+void ConstructionSpriteSet::DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (underconstructionSprites.size() == 1) {
+		underconstructionSprites[0].Draw(dst, dstRect);
+	} else {
+		int xOffset = internalPos.X() % width;
+		int yOffset = internalPos.Y() % (sprites.size() / width);
 
 		int graphicIndex = xOffset + width * yOffset;
 		sprites.at(graphicIndex).Draw(dst, dstRect);
@@ -40,10 +53,19 @@ void ConstructionSpriteSet::AddSprite(const Sprite& sprite) {
 	sprites.push_back(sprite);
 }
 
+void ConstructionSpriteSet::AddUnderConstructionSprite(const Sprite& sprite) {
+	underconstructionSprites.push_back(sprite);
+}
+
 void ConstructionSpriteSet::SetWidth(int val) {
 	width = val;
 }
 
 bool ConstructionSpriteSet::IsValid() const {
-	return sprites.size() > 0 && width > 0 && width <= sprites.size();
+	return (sprites.size() > 0 && width > 0 && width <= sprites.size() && (sprites.size() / width) * width == sprites.size());
 }
+
+bool ConstructionSpriteSet::HasUnderConstructionSprites() const {
+	return IsValid() && (underconstructionSprites.size() == 1 || underconstructionSprites.size() == sprites.size());
+}
+

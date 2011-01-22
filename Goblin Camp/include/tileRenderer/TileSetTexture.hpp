@@ -34,6 +34,7 @@ public:
 
 	int Count() const;
 	void DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	boost::shared_ptr<SDL_Surface> GetInternalSurface();
 
 private:
 	int tileWidth, tileHeight;

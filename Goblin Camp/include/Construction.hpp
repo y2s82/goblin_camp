@@ -119,6 +119,7 @@ public:
 	static std::vector<int> AllowedAmount;
 	void Condition(int);
 	int Condition();
+	int GetMaxCondition() const;
 	virtual void Draw(Coordinate, TCODConsole*);
 	int GetGraphicsHint() const;
 	int Build();
