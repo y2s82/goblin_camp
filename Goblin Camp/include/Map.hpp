@@ -24,8 +24,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class MapMarker;
 
-
 #define TERRITORY_OVERLAY (1 << 0)
+
+enum Direction {
+	NORTH,
+	NORTHEAST,
+	NORTHWEST,
+	EAST,
+	WEST,
+	SOUTH,
+	SOUTHEAST,
+	SOUTHWEST
+};
 
 class Map : public ITCODPathCallback {
 	friend class boost::serialization::access;
@@ -44,6 +54,7 @@ private:
 	int overlayFlags;
 	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
+	Direction windDirection;
 
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
@@ -117,4 +128,6 @@ public:
 
 	MarkerIterator MarkerBegin();
 	MarkerIterator MarkerEnd();
+
+	Direction GetWindDirection();
 };

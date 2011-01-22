@@ -25,7 +25,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 
 Map::Map() :
-overlayFlags(0), markerids(0) {
+overlayFlags(0), markerids(0),
+windDirection(NORTH) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
@@ -466,3 +467,5 @@ Map::MarkerIterator Map::MarkerEnd()
 {
 	return mapMarkers.end();
 }
+
+Direction Map::GetWindDirection() { return windDirection; }
