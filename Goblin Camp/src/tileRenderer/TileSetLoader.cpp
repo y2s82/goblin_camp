@@ -47,6 +47,7 @@ TileSetLoader::TileSetLoader() :
 	TCODParserStruct* constructionSpriteStruct = parser.newStructure("construction_sprite_data");
 	constructionSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
 	constructionSpriteStruct->addListProperty("underconstruction_sprites", TCOD_TYPE_INT, false);
+	constructionSpriteStruct->addProperty("openSprite", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
@@ -281,6 +282,8 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			} else if (boost::iequals(name, "underconstruction_sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					constructionSpriteSet.AddUnderConstructionSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			} else if (boost::iequals(name, "openSprite")) {
+				constructionSpriteSet.SetOpenSprite(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "width")) {
 				constructionSpriteSet.SetWidth(value.i);
 			}

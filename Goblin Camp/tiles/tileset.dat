@@ -196,6 +196,11 @@ tileset_data "TestMedium" {
 			underconstruction_sprites=[18]
 			width=3
 		}
+
+		construction_sprite_data "Door" {
+			sprites=[39]
+			openSprite=45
+		}
 	}
 }
 

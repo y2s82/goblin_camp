@@ -31,17 +31,17 @@ public:
 	void AddSprite(const Sprite& sprite);
 	void AddUnderConstructionSprite(const Sprite& sprite);
 	void SetWidth(int width);
+	void SetOpenSprite(const Sprite& sprite);
 
 	bool IsValid() const;
 	bool HasUnderConstructionSprites() const;
 		
 	void Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
 	void DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
-
+	void DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRecT) const;
 private:	
 	std::vector<Sprite> sprites;
 	std::vector<Sprite> underconstructionSprites;
+	Sprite openSprite;
 	int width;
-
-	void GenerateUnderConstructionSprites();
 };
