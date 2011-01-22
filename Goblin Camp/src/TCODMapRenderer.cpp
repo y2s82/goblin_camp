@@ -117,6 +117,12 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	}
 	InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
 	InternalDrawMapItems("NPCs",                  Game::Inst()->npcList, upleft, &minimap);
+	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
+		if (firei->lock()) firei->lock()->Draw(upleft, &minimap);
+	}
+	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
+		(*spelli)->Draw(upleft, &minimap);
+	}
 
 	TCODConsole::blit(&minimap, 0, 0, viewportW, viewportH, console, viewportX, viewportY);
 }

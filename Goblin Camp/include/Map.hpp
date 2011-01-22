@@ -83,6 +83,8 @@ public:
 	void SetFilth(int,int,boost::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood(int,int);
 	void SetBlood(int,int,boost::shared_ptr<BloodNode>);
+	boost::weak_ptr<FireNode> GetFire(int,int);
+	void SetFire(int,int,boost::shared_ptr<FireNode>);
 	bool BlocksLight(int, int) const;
 	void SetBlocksLight(int, int, bool);
 	bool LineOfSight(Coordinate, Coordinate);
@@ -110,6 +112,8 @@ public:
 	unsigned int AddMarker(MapMarker);
 	void RemoveMarker(int);
 	TCODColor GetColor(int,int);
+	void Burn(int x, int y, int magnitude=1);
+	int Burnt(int x, int y);
 
 	MarkerIterator MarkerBegin();
 	MarkerIterator MarkerEnd();

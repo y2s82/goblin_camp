@@ -55,6 +55,7 @@ enum StatusEffectType {
 	DRINKING,
 	CARRYING,
 	WORKING,
+	BURNING,
 	STATUS_EFFECT_COUNT
 };
 
