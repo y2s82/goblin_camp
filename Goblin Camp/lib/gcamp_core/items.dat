@@ -100,18 +100,22 @@ category_type "Container" {
 
 category_type "Crate" {
 	parent="Container"
+	flammable
 }
 
 category_type "Barrel" {
 	parent="Container"
+	flammable
 }
 
 category_type "Sack" {
 	parent="Container"
+	flammable
 }
 
 category_type "Basket" {
 	parent="Container"
+	flammable
 }
 
 category_type "Furniture" {
@@ -119,10 +123,12 @@ category_type "Furniture" {
 
 category_type "Door" {
 	parent="Furniture"
+	flammable
 }
 
 category_type "Bed" {
 	parent="Furniture"
+	flammable
 }
 
 category_type "Statue" {
@@ -174,9 +180,11 @@ category_type "Ranged weapon" {
 }
 
 category_type "Rope" {
+	flammable
 }
 
 category_type "Quiver" {
+	flammable
 }
 
 category_type "Ammunition" {
