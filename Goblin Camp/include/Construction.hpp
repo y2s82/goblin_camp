@@ -111,6 +111,7 @@ protected:
 	int time;
 	bool built;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
+	bool flammable;
 public:
 	virtual ~Construction();
 
@@ -149,6 +150,7 @@ public:
 	void Damage(Attack*);
 	void Explode();
 	bool Built();
+	bool IsFlammable();
 
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	

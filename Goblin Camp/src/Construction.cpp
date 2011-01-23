@@ -75,7 +75,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
 	dismantle(false),
 	time(0),
-	built(false)
+	built(false),
+	flammable(false)
 {
 	x = target.X();
 	y = target.Y();
@@ -171,14 +172,18 @@ int Construction::Build() {
 		//be impossible in practice.
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 
+		int flame = 0;
 		std::list<boost::weak_ptr<Item> > itemsToRemove;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
+			itemi->lock()->IsFlammable() ? ++flame : --flame;
 			if (Random::Generate(9) < 8) { //80% of materials can't be recovered
 				itemsToRemove.push_back(*itemi);
 			}
 		}
+
+		if (flame > 0) flammable = true;
 
 		for (std::list<boost::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
 			materialsUsed->RemoveItem(*itemi);
@@ -828,3 +833,5 @@ ConstructionPreset::ConstructionPreset() :
 void Construction::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
 }
+
+bool Construction::IsFlammable() { return flammable; }
