@@ -234,6 +234,7 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].walkedOver = 0;
 	tileMap[x][y].corruption = 0;
 	tileMap[x][y].territory = false;
+	tileMap[x][y].burnt = 0;
 	heightMap->setValue(x,y,0.5f);
 	waterlevel = -0.8f;
 	overlayFlags = 0;
