@@ -142,6 +142,7 @@ public:
 	void SetInternal();
 	int GetDecay() const;
 	void Impact(int speedChange);
+	bool IsFlammable();
 };
 
 class OrganicItem : public Item {

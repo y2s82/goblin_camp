@@ -66,11 +66,31 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 		condition = Item::Presets[type].condition;
 	}
 
-	for (int i = 0; i < (signed int)components.size(); ++i) {
-		if (components[i].lock()) 
-			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
+	//Calculate flammability based on categorical flammability, and then modify it based on components
+	int flame = 0;
+	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+		if (Item::Categories[*cati].flammable) ++flame;
+		else --flame;
 	}
 
+	for (int i = 0; i < (signed int)components.size(); ++i) {
+		if (components[i].lock()) {
+			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
+			if (components[i].lock()->IsFlammable()) ++flame;
+			else --flame;
+		}
+	}
+
+	if (flame > 0) {
+		flammable = true;
+#ifdef DEBUG
+		std::cout<<"Created flammable object "<<flammable<<"\n";
+#endif
+	} else {
+#ifdef DEBUG
+		std::cout<<"Created not flammable object "<<flammable<<"\n";
+#endif
+	}
 }
 
 Item::~Item() {
@@ -275,6 +295,9 @@ private:
 #ifdef DEBUG
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
+		if (boost::iequals(name, "flammable")) {
+			Item::Categories.back().flammable = true;
+		}
 		return true;
 	}
 
@@ -378,6 +401,7 @@ void Item::LoadPresets(std::string filename) {
 	TCODParser parser = TCODParser();
 	TCODParserStruct* categoryTypeStruct = parser.newStructure("category_type");
 	categoryTypeStruct->addProperty("parent", TCOD_TYPE_STRING, false);
+	categoryTypeStruct->addFlag("flammable");
 
 	TCODParserStruct* itemTypeStruct = parser.newStructure("item_type");
 	itemTypeStruct->addListProperty("category", TCOD_TYPE_STRING, true);
@@ -546,6 +570,8 @@ void Item::Impact(int speedChange) {
 		//Game::Update removes all condition==0 items in the stopped items list, which is where this item will be
 	}
 }
+
+bool Item::IsFlammable() { return flammable; }
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),

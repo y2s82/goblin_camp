@@ -121,6 +121,15 @@ void FireNode::Update() {
 			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
 				Game::Inst()->npcList[*npci]->AddEffect(BURNING);
 			}
+
+			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(x,y)->begin(); itemi != Map::Inst()->ItemList(x,y)->end(); ++itemi) {
+				boost::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
+				if (item && item->IsFlammable()) {
+					Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
+					Game::Inst()->RemoveItem(item);
+					break;
+				}
+			}
 		}
 	}
 }
