@@ -18,6 +18,7 @@ constant      GC_VERSION : 0.14 ;
 ###############################################################################
 import modules ;
 import version ;
+import build-system ;
 
 modules.poke : GC_VERSION : $(GC_VERSION) ;
 modules.poke : GC_ROOT    : $(GC_ROOT)    ;
@@ -42,6 +43,19 @@ for local C in [ glob $(GC_ROOT)/build/boost-build/goblin-camp/*.jam ] {
 }
 
 ECHO ;
+
+rule post-build ( ok ? ) {
+    if $(ok) {
+        ECHO ;
+        ECHO "*******************************************" ;
+        ECHO "****         Build successful!         ****" ;
+        ECHO "*******************************************" ;
+        ECHO "You will the binaries in the build/bin-<variant>-<cpu> directory." ;
+        ECHO ;
+    }
+}
+IMPORT $(__name__) : post-build : : $(__name__).post-build ;
+build-system.set-post-build-hook $(__name__).post-build ;
 
 ###############################################################################
 ##### Main project definition

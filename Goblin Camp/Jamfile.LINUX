@@ -1,0 +1,11 @@
+alias platform-deps : [ path.glob-tree $(HERE)/src/platform/linux : *.cpp ] [ path.glob-tree $(HERE)/src/platform/unix : *.cpp ] ;
+
+rule get-dist-bin ( properties * ) {
+    local dir = [ get-dist-base $(properties) ] ;
+    return $(dir)/bin ;
+}
+
+rule get-dist-data ( properties * ) {
+    local dir = [ get-dist-base $(properties) ] ;
+    return $(dir)/share/goblin-camp ;
+}

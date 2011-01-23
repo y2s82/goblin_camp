@@ -1,4 +1,27 @@
 import path ;
+import os ;
+import property-set ;
+import project ;
+
+local rule get-dist-base ( properties * ) {
+    local dir     = $(GC_ROOT)/build ;
+    local propset = [ property-set.create $(properties) ] ;
+    local variant = [ $(propset).get <variant> ] ;
+    local arch    = x86 ;
+    
+    if <address-model>64 in $(properties) {
+        arch = x64 ;
+    }
+    
+    dir = $(dir)/bin-$(variant)-$(arch) ;
+    
+    return <location>$(dir) ;
+}
+
+rule get-dist-gccore ( properties * ) {
+    dir = [ get-dist-data $(properties) ] ;
+    return $(dir)/lib/gcamp_core ;
+}
 
 path-constant HERE : . ;
 
@@ -9,14 +32,43 @@ project "Goblin Camp"
       <os>NT,<variant>release:<user-interface>gui
 ;
 
-sources = [ path.glob-tree $(HERE)/src : *.cpp : win32 linux osx unix ] ;
-version = $(HERE)/goblin-camp.rc_in $(HERE)/src/Version.cpp_in ;
+sources = [ path.glob-tree $(HERE)/src : *.cpp : platform ] ;
+version = $(HERE)/src/Version.cpp_in ;
 
-alias common-deps : /boost /winsdk /sdl /libpng /zlib /libtcod ;
+PLATFORM = [ os.name ] ;
+include $(HERE)/Jamfile.$(PLATFORM) ;
 
-cpp-pch stdafx.hpp : $(HERE)/include/stdafx.hpp common-deps ;
+version-reqs = ;
+if --with-revid in [ modules.peek : ARGV ] {
+    version-reqs = <define>WITH_REVID ;
+}
 
-alias version : $(version) ;
+make mod.dat : $(HERE)/lib/gcamp_core/mod.dat_in : @gc-version.generate : $(version-reqs) ;
+alias version : $(version) : : : $(version-reqs) ;
 always version ;
 
-exe goblin-camp : $(sources) stdafx.hpp [ glob $(HERE)/src/win32/*.cpp ] common-deps version /support//python-modules ;
+alias common-deps : /boost /sdl /libpng /zlib /libtcod ;
+cpp-pch stdafx.hpp : $(HERE)/include/stdafx.hpp common-deps ;
+exe goblin-camp : $(sources) stdafx.hpp [ glob $(HERE)/src/win32/*.cpp ] common-deps platform-deps version /support//python-modules ;
+
+install dist-bin
+    : goblin-camp
+    : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
+      <conditional>@get-dist-bin
+;
+
+install dist-data
+    : [ path.glob $(HERE) : *.txt *.png ]
+    : <conditional>@get-dist-data
+;
+
+install dist-lib
+    : [ path.glob-tree $(HERE)/lib : *.py *.zip *.dat ]
+    : <conditional>@get-dist-data
+      <install-source-root>$(HERE)
+;
+
+install dist-mod
+    : mod.dat
+    : <conditional>@get-dist-gccore
+;
