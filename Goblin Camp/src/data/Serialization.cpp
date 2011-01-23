@@ -715,7 +715,7 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 //
 // class Construction
 //
-BOOST_CLASS_VERSION(Construction, 0)
+BOOST_CLASS_VERSION(Construction, 1)
 
 template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {
@@ -741,33 +741,35 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & time;
 	ar & AllowedAmount;
 	ar & built;
+	ar & flammable;
 }
 
 template<class Archive>
 void Construction::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Entity>(*this);
-		ar & condition;
-		ar & maxCondition;
-		ar & graphic;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-		ar & type;
-		ar & walkable;
-		ar & materials;
-		ar & producer;
-		ar & products;
-		ar & jobList;
-		ar & progress;
-		ar & container;
-		ar & materialsUsed;
-		ar & stockpile;
-		ar & farmplot;
-		ar & dismantle;
-		ar & time;
-		ar & AllowedAmount;
-		ar & built;
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & condition;
+	ar & maxCondition;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & type;
+	ar & walkable;
+	ar & materials;
+	ar & producer;
+	ar & products;
+	ar & jobList;
+	ar & progress;
+	ar & container;
+	ar & materialsUsed;
+	ar & stockpile;
+	ar & farmplot;
+	ar & dismantle;
+	ar & time;
+	ar & AllowedAmount;
+	ar & built;
+	if (version >= 1) {
+		ar & flammable;
 	}
 }
 
