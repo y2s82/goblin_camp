@@ -1842,7 +1842,7 @@ void Game::GameOver() {
 }
 
 void Game::CreateFire(Coordinate pos) {
-	CreateFire(pos, 30);
+	CreateFire(pos, 10);
 }
 
 void Game::CreateFire(Coordinate pos, int temperature) {
