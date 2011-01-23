@@ -21,7 +21,7 @@ SetCompressor /SOLID lzma
 
 ; Installer settings
 Name              "Goblin Camp ${GC_VERSION}"
-OutFile           "build\dist\installer\GoblinCamp-${GC_VERSION}-Setup-%%_GC_PLATFORM_%%.exe"
+OutFile           "GoblinCamp-${GC_VERSION}-Setup-%%_GC_PLATFORM_%%.exe"
 CRCCheck          force
 InstProgressFlags smooth
 XPStyle           on
@@ -40,7 +40,7 @@ var ICONS_GROUP
 !define MUI_FINISHPAGE_SHOWREADME "$INSTDIR\README.txt"
 
 !insertmacro MUI_PAGE_WELCOME
-!insertmacro MUI_PAGE_LICENSE "Goblin Camp\COPYING.txt"
+!insertmacro MUI_PAGE_LICENSE "%%_GC_SOURCE_%%\COPYING.txt"
 !insertmacro MULTIUSER_PAGE_INSTALLMODE
 !insertmacro MUI_PAGE_DIRECTORY
 !insertmacro MUI_PAGE_COMPONENTS
@@ -70,17 +70,11 @@ Section "!Goblin Camp" EXEC_SEC
     !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
-Section /o "Program Database" PDB_SEC
-    SetOutPath "$INSTDIR"
-    
-    %%_GC_INSTALL_MANIFEST_PDB_%%
-SectionEnd
-
 !macro VCRedist Version
     !ifdef GC_BUNDLE_MSVC${Version}
         Section "Visual C++ ${Version} Runtime (%%_GC_PLATFORM_%%)" VCRED${Version}_SEC
             SetOutPath "$TEMP"
-            File       "build\installer\redists\vc${Version}\vcredist_%%_GC_PLATFORM_%%.exe"
+            File       "%%_GC_REDIST_%%\vc${Version}\vcredist_%%_GC_PLATFORM_%%.exe"
             ExecWait   '"$TEMP\vcredist_%%_GC_PLATFORM_%%.exe" /q'
             Delete     "$TEMP\vcredist_%%_GC_PLATFORM_%%.exe"
         SectionEnd
@@ -91,8 +85,7 @@ SectionEnd
 !insertmacro VCRedist 2010
 
 !insertmacro MUI_FUNCTION_DESCRIPTION_BEGIN
-    !insertmacro MUI_DESCRIPTION_TEXT ${EXEC_SEC} "Goblin Camp ${GC_VERSION}."
-    !insertmacro MUI_DESCRIPTION_TEXT ${PDB_SEC}  "Debugging symbols for the GC executables."
+    !insertmacro MUI_DESCRIPTION_TEXT ${EXEC_SEC} "Goblin Camp ${GC_VERSION} (%%_GC_PLATFORM_%% build)."
     !ifdef GC_BUNDLE_MSVC2008
         !insertmacro MUI_DESCRIPTION_TEXT ${VCRED2008_SEC} "Visual C++ 2008 Runtime redistributable package."
     !endif

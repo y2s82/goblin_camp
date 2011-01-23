@@ -47,6 +47,7 @@ screenshot*.png
 ccccReport\
 build\tmp
 build\bin-*
+build\installer-*
 build\dist
 *.py[co]
 build\msvc
