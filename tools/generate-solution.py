@@ -5,11 +5,11 @@
 # call bjam to do the build.
 import sys, os, re, itertools, uuid, pickle, collections
 
-here = os.path.dirname(os.path.realpath(__file__))
-root = os.path.normpath(here + '/..')
+HERE = os.path.dirname(os.path.realpath(__file__))
+ROOT = os.path.normpath(HERE + '/..')
 
-tmpDir  = os.path.join(root, 'build', 'tmp')
-projDir = os.path.join(root, 'Goblin Camp')
+tmpDir  = os.path.join(ROOT, 'build', 'tmp')
+projDir = os.path.join(ROOT, 'Goblin Camp')
 
 jobs   = int(sys.argv[1]) if len(sys.argv) >= 2 else 4
 config = os.path.realpath(sys.argv[2]) if len(sys.argv) >= 3 else None
@@ -72,7 +72,7 @@ msvc_bjam = 'bjam {0}-j{1}'.format(
 # XXX: preprocessor defines are hardcoded in the template
 
 variables = {
-    'DIST':          os.path.join(root, 'build'),
+    'DIST':          os.path.join(ROOT, 'build'),
     'ROOT':          projDir,
     'SOLUTION_UUID': solutionID,
     'PROJECT_UUID':  projectID,
@@ -86,7 +86,7 @@ variables = {
     ),
 }
 
-templateDir = os.path.join(here, 'vs2010-templates')
+templateDir = os.path.join(HERE, 'vs2010-templates')
 for fn in os.listdir(templateDir):
     out = fn[:-3]
     
