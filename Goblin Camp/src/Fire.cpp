@@ -55,26 +55,25 @@ void FireNode::Update() {
 	color.r = Random::Generate(225, 255);
 	color.g = Random::Generate(0, 250);
 
-	if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock()) {
-		if (water->Depth() > 0) {
-			if (water->Depth() >= temperature) {
-				water->Depth(water->Depth() - temperature);
-				temperature = 0;
-			} else {
-				temperature -= water->Depth();
-				water->Depth(0);
-			}
-			boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), 2);
-
-			Coordinate direction;
-			Direction wind = Map::Inst()->GetWindDirection();
-			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-7, -1));
-			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(1, 7));
-			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(1, 7));
-			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-7, -1));
-			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
-			steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock();
+	if (water && water->Depth() > 0) {
+		if (water->Depth() >= temperature) {
+			water->Depth(water->Depth() - temperature);
+			temperature = 0;
+		} else {
+			temperature -= water->Depth();
+			water->Depth(0);
 		}
+		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), 2);
+
+		Coordinate direction;
+		Direction wind = Map::Inst()->GetWindDirection();
+		if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-7, -1));
+		if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(1, 7));
+		if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(1, 7));
+		if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-7, -1));
+		direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+		steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 	} else {
 		if (Random::Generate(5) == 0) { 
 			--temperature;
