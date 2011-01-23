@@ -679,6 +679,9 @@ void Game::Update() {
 
 	if (time == MONTH_LENGTH) {
 		if (safeMonths > 0) --safeMonths;
+
+		Map::Inst()->ShiftWind();
+
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 
@@ -1181,6 +1184,8 @@ void Game::GenerateMap(uint32 seed) {
 			map->Naturify(x,y);
 		}
 	}
+
+	map->RandomizeWind();
 }
 
 //This is intentional, otherwise designating where to cut down trees would always show red unless you were over a tree
