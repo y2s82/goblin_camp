@@ -83,12 +83,12 @@ void FireNode::Update() {
 
 		if (Map::Inst()->Type(x, y) != TILEGRASS || Map::Inst()->Burnt(x, y) >= 10) temperature -= 3;
 
-		if (Random::Generate(20) == 0) {
+		if (Random::Generate(40) == 0) {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), 0);
-			int distance = Random::Generate(0, 9);
-			if (distance < 7) {
+			int distance = Random::Generate(0, 15);
+			if (distance < 12) {
 				distance = 1;
-			} else if (distance < 9) {
+			} else if (distance < 14) {
 				distance = 2;
 			} else {
 				distance = 3;
