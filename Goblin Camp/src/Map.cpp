@@ -473,7 +473,7 @@ Map::MarkerIterator Map::MarkerEnd()
 Direction Map::GetWindDirection() { return windDirection; }
 
 void Map::RandomizeWind() {
-	windDirection = (Direction)Random::Generate(8);
+	windDirection = (Direction)Random::Generate(7);
 }
 
 void Map::ShiftWind() {
