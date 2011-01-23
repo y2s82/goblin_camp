@@ -23,7 +23,7 @@ CRT_DLLS = {
 SYSTEM_DLLS = S(
     'kernel32.dll', 'user32.dll', 'gdi32.dll', 'opengl32.dll', 'winmm32.dll',
     'advapi32.dll', 'ntdll.dll', 'winmm.dll', 'rpcrt4.dll', 'secur32.dll',
-    'dbghelp.dll', 'shell32.dll', 'shlwapi.dll', 'kernelbase.dll'
+    'dbghelp.dll', 'shell32.dll', 'shlwapi.dll', 'kernelbase.dll',
 )
 
 class FindMeDLLs(object):
@@ -33,6 +33,7 @@ class FindMeDLLs(object):
         self.crts = set()
         
         self.searchPath = os.environ['PATH'].split(os.pathsep)
+        
         if 'SystemRoot' in os.environ:
             # system32/SysWOW64 are searched implicitly
             self.searchPath.insert(0, os.path.join(os.environ['SystemRoot'], 'SysWOW64'))
@@ -52,6 +53,11 @@ class FindMeDLLs(object):
                 continue
             
             return path, image
+        
+        path = os.path.join(self.dir, dll)
+        if os.path.exists(path):
+            # this is DLL built alongside GC
+            return None, pefile.PE(path)
         
         return None, None
     
@@ -82,13 +88,25 @@ class FindMeDLLs(object):
         return len(self.crts) > 1
     
     def copy(self):
+        # copy dbghelp.dll from redists
+        redist = os.path.join(os.path.dirname(__file__), 'installer', 'redists')
+        if self.pe.FILE_HEADER.Machine == pefile.MACHINE_TYPE['IMAGE_FILE_MACHINE_I386']:
+            dbghelp = os.path.join(redist, 'dbghelp-x86.dll')
+        else:
+            dbghelp = os.path.join(redist, 'dbghelp-x64.dll')
+        
+        shutil.copy(dbghelp, self.dir + '/dbghelp.dll')
+        
         for _, dll in self.dlls:
+            if dll is None: continue
             shutil.copy(dll, self.dir + '/')
+        
+        self.dlls.add(('dbghelp.dll', dbghelp))
 
 if __name__ == '__main__':
     finder = FindMeDLLs(sys.argv[1])
     if finder.hasMultipleCRTs():
         print '** Warning: multiple CRTs detected: {0}'.format(', '.join(finder.crts))
     print '** DLLs:'
-    print '\n'.join('{0} -> {1}'.format(fn, dll) for fn, dll in finder.dlls)
     finder.copy()
+    print '\n'.join('{0} -> {1}'.format(fn, dll if dll is not None else '<provided>') for fn, dll in finder.dlls)
