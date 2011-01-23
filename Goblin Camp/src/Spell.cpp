@@ -96,7 +96,7 @@ void Spell::UpdateVelocity() {
 							if (attack.Type() == DAMAGE_FIRE) {
 								/*The item's attack was a fire attack, so theres a chance it'll create fire on the 
 								obstacle it hit */
-								Game::Inst()->CreateFire(flightPath.back().coord, 15);
+								Game::Inst()->CreateFire(flightPath.back().coord, 5);
 							}
 							Impact(velocity);
 							return;
