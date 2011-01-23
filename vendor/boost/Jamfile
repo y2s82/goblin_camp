@@ -1,4 +1,6 @@
 import path ;
+import os ;
+
 path-constant HERE : . ;
 
 common-reqs =
@@ -15,15 +17,21 @@ project boost
       <define>BOOST_THREAD_BUILD_LIB=1
       $(common-reqs)
     : usage-requirements
-      <define>BOOST_PYTHON_DYN_LINK
+      <os>NT:<define>BOOST_PYTHON_DYN_LINK
       <define>BOOST_THREAD_USE_LIB=1
       $(common-reqs)
 ;
 
-lib date_time       : [ glob $(HERE)/libs/date_time/*.cpp ] ;
-lib filesystem      : [ glob $(HERE)/libs/filesystem/*.cpp ] ;
-lib gc-boost-python : [ path.glob-tree $(HERE)/libs/python : *.cpp ] /python : <link>shared ;
-lib random          : [ glob $(HERE)/libs/random/*.cpp ] ;
-lib serialization   : [ glob $(HERE)/libs/serialization/*.cpp ] ;
-lib system          : [ glob $(HERE)/libs/system/*.cpp ] ;
-lib thread          : [ glob $(HERE)/libs/thread/*.cpp ] [ glob $(HERE)/libs/thread/win32/*.cpp ] ;
+python-sources = [ path.glob-tree $(HERE)/libs/python : *.cpp ] ;
+
+if [ os.name ] = NT {
+    lib gc-boost-python : $(python-sources) /python : <link>shared ;
+} else {
+    lib gc-boost-python : $(python-sources) ;
+}
+
+for local L in date_time filesystem random serialization system {
+    lib $(L) : [ glob $(HERE)/libs/$(L)/*.cpp ] ;
+}
+
+lib thread : [ glob $(HERE)/libs/thread/*.cpp ] [ glob $(HERE)/libs/thread/win32/*.cpp ] ;
