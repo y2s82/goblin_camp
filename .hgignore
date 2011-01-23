@@ -46,6 +46,7 @@ screenshot*.png
 *.sav
 ccccReport\
 build\tmp
+build\bin-*
 build\dist
 *.py[co]
 build\msvc

@@ -1,0 +1,18 @@
+version += $(HERE)/goblin-camp.rc_in ;
+alias platform-deps : /winsdk [ path.glob-tree $(HERE)/src/platform/windows : *.cpp ] ;
+
+rule get-dist-bin ( properties * ) {
+    return [ get-dist-base $(properties) ] ;
+}
+
+rule get-dist-data ( properties * ) {
+    return [ get-dist-base $(properties) ] ;
+}
+
+make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x86.dll : @common.copy ;
+make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x64.dll : @common.copy : <address-model>64 ;
+
+install dist-prebuilt
+    : [ glob $(GC_ROOT)/support/crash-reporter/prebuilt/* ] dbghelp.dll
+    : <conditional>@get-dist-bin
+;
