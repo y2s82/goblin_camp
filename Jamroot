@@ -34,7 +34,6 @@ ECHO "** Using Boost.Build:" [ version.boost-build ] ;
 
 for local P in [ glob $(GC_ROOT)/build/boost-build/goblin-camp/tools/*.jam ] {
     import $(P:B) ;
-    ECHO $(P:B) ;
     $(P:B).use-project ;
 }
 
@@ -99,4 +98,4 @@ for local P in [ glob $(GC_ROOT)/vendor/* ] {
 }
 
 build-project "Goblin Camp" ;
-build-project tools ;
+build-project support ;

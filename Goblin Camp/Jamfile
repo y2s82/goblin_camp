@@ -4,23 +4,19 @@ path-constant HERE : . ;
 
 project "Goblin Camp"
     : requirements
-      <threading>multi
       <include>$(HERE)
       <include>$(HERE)/include
-      <os>NT:<user-interface>gui
+      <os>NT,<variant>release:<user-interface>gui
 ;
 
 sources = [ path.glob-tree $(HERE)/src : *.cpp : win32 linux osx unix ] ;
 version = $(HERE)/goblin-camp.rc_in $(HERE)/src/Version.cpp_in ;
 
-lib SDL ;
-lib libpng ;
-lib zdll ;
-alias common-deps : /boost /libtcod /winsdk SDL libpng zdll ;
+alias common-deps : /boost /winsdk /sdl /libpng /zlib /libtcod ;
 
 cpp-pch stdafx.hpp : $(HERE)/include/stdafx.hpp common-deps ;
 
 alias version : $(version) ;
 always version ;
 
-exe goblin-camp : $(sources) stdafx.hpp [ glob $(HERE)/src/win32/*.cpp ] common-deps version ;
+exe goblin-camp : $(sources) stdafx.hpp [ glob $(HERE)/src/win32/*.cpp ] common-deps version /support//python-modules ;

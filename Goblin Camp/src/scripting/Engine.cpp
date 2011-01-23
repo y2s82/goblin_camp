@@ -73,13 +73,11 @@ namespace Script {
 		Py_InitializeEx(0);
 		Py_SetProgramName(const_cast<char*>(args[0].c_str()));
 		
-		#if 0
 		init_weakref();
 		inittime();
 		init_functools();
 		initcStringIO();
 		initzlib();
-		#endif
 		
 		LOG("Python " << Py_GetVersion());
 		

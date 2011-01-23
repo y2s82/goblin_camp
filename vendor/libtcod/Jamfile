@@ -14,8 +14,10 @@ project libtcod
       $(common-reqs)
 ;
 
+sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
+
 if [ os.name ] = MACOSX {
-    osxsupport = $(HERE)/src/macsupport.m ;
+    sources += $(HERE)/src/macsupport.m ;
 }
 
-lib tcod : [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] $(osxsupport:E=) ;
+lib tcod : $(sources) ;
