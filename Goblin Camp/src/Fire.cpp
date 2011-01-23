@@ -118,7 +118,7 @@ void FireNode::Update() {
 
 		if (temperature > 1 && Random::Generate(9) < 4) {
 			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
-				Game::Inst()->npcList[*npci]->AddEffect(BURNING);
+				if (!Game::Inst()->npcList[*npci]->HasEffect(FLYING)) Game::Inst()->npcList[*npci]->AddEffect(BURNING);
 			}
 
 			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(x,y)->begin(); itemi != Map::Inst()->ItemList(x,y)->end(); ++itemi) {
