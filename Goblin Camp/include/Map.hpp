@@ -29,12 +29,12 @@ class MapMarker;
 enum Direction {
 	NORTH,
 	NORTHEAST,
-	NORTHWEST,
 	EAST,
-	WEST,
-	SOUTH,
 	SOUTHEAST,
-	SOUTHWEST
+	SOUTH,
+	SOUTHWEST,
+	WEST,
+	NORTHWEST
 };
 
 class Map : public ITCODPathCallback {
@@ -130,4 +130,7 @@ public:
 	MarkerIterator MarkerEnd();
 
 	Direction GetWindDirection();
+	void RandomizeWind();
+	void ShiftWind();
+	std::string GetWindAbbreviation();
 };

@@ -448,6 +448,7 @@ void Map::Burn(int x, int y, int magnitude) {
 			if (tree && Random::Generate(3) < 2) {
 				Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 			}
+			if (tileMap[x][y].fire) tileMap[x][y].fire->AddHeat(tree ? 30 : 5);
 		}
 	}
 }
@@ -470,3 +471,38 @@ Map::MarkerIterator Map::MarkerEnd()
 }
 
 Direction Map::GetWindDirection() { return windDirection; }
+
+void Map::RandomizeWind() {
+	windDirection = (Direction)Random::Generate(8);
+}
+
+void Map::ShiftWind() {
+	if (Random::Generate(2) == 0) {
+		windDirection = (Direction)(windDirection + Random::Generate(-1, 1));
+		if (windDirection < 0) windDirection = NORTHWEST;
+		if (windDirection > NORTHWEST) windDirection = NORTH;
+	}
+}
+
+std::string Map::GetWindAbbreviation() {
+	switch (windDirection) {
+	case NORTH:
+		return "N";
+	case NORTHEAST:
+		return "NE";
+	case EAST:
+		return "E";
+	case SOUTHEAST:
+		return "SE";
+	case SOUTH:
+		return "S";
+	case SOUTHWEST:
+		return "SW";
+	case WEST:
+		return "W";
+	case NORTHWEST:
+		return "NW";
+	default:
+		return "?";
+	}
+}

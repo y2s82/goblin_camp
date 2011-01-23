@@ -569,7 +569,8 @@ int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcu
 void UI::DrawTopBar(TCODConsole* console) {
 	console->setAlignment(TCOD_CENTER);
 	console->setDefaultForeground(TCODColor::white);
-	console->print(console->getWidth() / 2, 0, "%s  -  Orcs: %d   Goblins: %d  -  %s  FPS: %d", Camp::Inst()->GetName().c_str(),
+	console->print(console->getWidth() / 2, 0, "w(%s)  -  %s  -  Orcs: %d   Goblins: %d  -  %s  FPS: %d", Map::Inst()->GetWindAbbreviation().c_str(),
+		Camp::Inst()->GetName().c_str(),
 		Game::Inst()->OrcCount(), Game::Inst()->GoblinCount(), 
 		Game::Inst()->SeasonToString(Game::Inst()->CurrentSeason()).c_str(),
 		TCODSystem::getFps());
