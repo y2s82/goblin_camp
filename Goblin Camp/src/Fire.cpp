@@ -127,6 +127,7 @@ void FireNode::Update() {
 				if (item && item->IsFlammable()) {
 					Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
 					Game::Inst()->RemoveItem(item);
+					temperature += 5;
 					break;
 				}
 			}
