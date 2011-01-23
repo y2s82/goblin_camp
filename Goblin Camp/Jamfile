@@ -1,7 +1,20 @@
+###############################################################################
+##### Goblin Camp main project
+## This file contains definition and main targets of the Goblin Camp project.
+###############################################################################
+
 import path ;
 import os ;
 import property-set ;
 import project ;
+
+###############################################################################
+##### Rules and constants
+## get-dist-base and get-dist-gccore rules are used to determine where
+## files should be placed after the build. Note that get-dist-gccore depends
+## on get-dist-data, which is platform-specific (see below). HERE is a path
+## constant that's always pointing to the directory containing this Jamfile.
+###############################################################################
 
 local rule get-dist-base ( properties * ) {
     local dir     = $(GC_ROOT)/build ;
@@ -25,6 +38,11 @@ rule get-dist-gccore ( properties * ) {
 
 path-constant HERE : . ;
 
+###############################################################################
+##### Project
+## This sets requirements common to all targets in this project.
+###############################################################################
+
 project "Goblin Camp"
     : requirements
       <include>$(HERE)
@@ -32,24 +50,83 @@ project "Goblin Camp"
       <os>NT,<variant>release:<user-interface>gui
 ;
 
-sources = [ path.glob-tree $(HERE)/src : *.cpp : platform ] ;
+###############################################################################
+##### Platform specifics
+## Jamfile.$(PLATFORM) resolves to Jamfile.NT, Jamfile.LINUX or Jamfile.MACOSX
+## depending on which platform we're running. Note that cross-compiling
+## is not really supported. Platform Jamfile is supposed to define at least:
+##   - platform-deps target that pulls all sources and libraries required
+##     by that platform
+##   - get-dist-bin and get-dist-data rules that should call get-dist-base
+##     and modify it to suit platform requirements as to where binaries
+##     and data files should be located
+## Platform Jamfiles are also free to define additional targets to
+## copy/compile required files.
+###############################################################################
+
 version = $(HERE)/src/Version.cpp_in ;
 
 PLATFORM = [ os.name ] ;
 include $(HERE)/Jamfile.$(PLATFORM) ;
+
+###############################################################################
+##### Versioning support
+## To determine full current version up to two things are used:
+##   - GC_VERSION constant, defined in Jamroot
+##   - `hg id` of the working directory
+## Mercurial ID is never included in release builds, unless --with-revid is
+## passed as command-line argument to bjam (this is used in weekly builds).
+## Using --with-revid (or building debug variant) will mark the executable
+## as VS_FF_PRERELEASE and VS_FF_PRIVATEBUILD on Windows (and with debug
+## additionally as VS_FF_DEBUG).
+##
+## Note that version targets are always rebuilt, which means goblin-camp.exe
+## is always relinked, which may take time with release builds, due to LTCG.
+###############################################################################
 
 version-reqs = ;
 if --with-revid in [ modules.peek : ARGV ] {
     version-reqs = <define>WITH_REVID ;
 }
 
-make mod.dat : $(HERE)/lib/gcamp_core/mod.dat_in : @gc-version.generate : $(version-reqs) ;
-alias version : $(version) : : : $(version-reqs) ;
+make mod.dat
+    : $(HERE)/lib/gcamp_core/mod.dat_in
+    : @gc-version.generate
+    : $(version-reqs)
+;
+
+alias version
+    : $(version)
+    :
+    :
+    : $(version-reqs)
+;
+
 always version ;
 
+###############################################################################
+##### Targets
+## These define common dependencies, precompiled header and main executable.
+## Install targets define which files should be copied where after the build.
+##
+## Note that stdafx.hpp must depend on common-deps as well — otherwise
+## include paths may be wrong and the build will fail.
+###############################################################################
+
 alias common-deps : /boost /sdl /libpng /zlib /libtcod ;
-cpp-pch stdafx.hpp : $(HERE)/include/stdafx.hpp common-deps ;
-exe goblin-camp : $(sources) stdafx.hpp [ glob $(HERE)/src/win32/*.cpp ] common-deps platform-deps version /support//python-modules ;
+
+cpp-pch stdafx.hpp
+    : $(HERE)/include/stdafx.hpp common-deps
+;
+
+exe goblin-camp
+    : [ path.glob-tree $(HERE)/src : *.cpp : platform ]
+      stdafx.hpp
+      common-deps
+      platform-deps
+      version
+      /support//python-modules
+;
 
 install dist-bin
     : goblin-camp
