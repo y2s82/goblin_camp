@@ -1,29 +1,36 @@
 /* Item category definitions. */
 
 category_type "Wood" {
+	flammable
 }
 
 category_type "Log" {
 	parent="Wood"
+	flammable
 }
 
 category_type "Plank" {
 	parent="Wood"
+	flammable
 }
 
 category_type "Wicker" {
     parent="Wood"
+	flammable
 }
 
 category_type "Fuel" {
+	flammable
 }
 
 category_type "Charcoal" {
 	parent="Fuel"
+	flammable
 }
 
 category_type "Firewood" {
 	parent="Fuel"
+	flammable
 }
 
 category_type "Stone" {
@@ -38,44 +45,54 @@ category_type "Sharpened stone" {
 }
 
 category_type "Food" {
+	flammable
 }
 
 category_type "Meat" {
 	parent="Food"
+	flammable
 }
 
 category_type "Prepared food" {
 	parent="Food"
+	flammable
 }
 
 category_type "Berry" {
 	parent="Food"
+	flammable
 }
 
 category_type "Fruit" {
 	parent="Food"
+	flammable
 }
 
 category_type "Drink" {
 }
 
 category_type "Plant" {
+	flammable
 }
 
 category_type "Seed" {
 	parent="Plant"
+	flammable
 }
 
 category_type "Fiber" {
 	parent="Plant"
+	flammable
 }
 
 category_type "Cloth" {
 	parent="Plant"
+	flammable
 }
 
 category_type "Flour" {
 	parent="Plant"
+	flammable
 }
 
 category_type "Container" {
@@ -113,6 +130,7 @@ category_type "Statue" {
 }
 
 category_type "Leather" {
+	flammable
 }
 
 category_type "Clay" {
@@ -203,18 +221,22 @@ category_type "Bone" {
 
 category_type "Corpse" {
 	parent="Garbage"
+	flammable
 }
 
 category_type "Fibrous material" {
 	parent="Garbage"
+	flammable
 }
 
 category_type "Hide" {
 	parent="Garbage"
+	flammable
 }
 
 category_type "Misc." {
 	parent="Garbage"
+	flammable
 }
 
 /* Item types begin here */
@@ -897,4 +919,11 @@ item_type "Debris" {
 	color = "150, 150, 150"
 	decaySpeed = 2
 	durability = 2
+}
+
+item_type "Ash" {
+	category = ["Garbage"]
+	graphic = 249
+	color = "180, 180, 180"
+	decaySpeed = 12
 }
