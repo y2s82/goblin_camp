@@ -1,7 +1,11 @@
 ###############################################################################
 ##### Goblin Camp build system.
-## See build/README.html for usage help.
+## See docs/build-readme.html for usage help.
 ###############################################################################
+
+import modules ;
+import version ;
+import build-system ;
 
 ###############################################################################
 ##### Global constants
@@ -16,9 +20,6 @@ constant      GC_VERSION : 0.14 ;
 ##### Setup
 ## Imports our tools and displays the banner.
 ###############################################################################
-import modules ;
-import version ;
-import build-system ;
 
 modules.poke : GC_VERSION : $(GC_VERSION) ;
 modules.poke : GC_ROOT    : $(GC_ROOT)    ;
@@ -41,8 +42,6 @@ for local P in [ glob $(GC_ROOT)/build/boost-build/goblin-camp/tools/*.jam ] {
 for local C in [ glob $(GC_ROOT)/build/boost-build/goblin-camp/*.jam ] {
    import $(C:B) ;
 }
-
-ECHO ;
 
 rule post-build ( ok ? ) {
     if $(ok) {
