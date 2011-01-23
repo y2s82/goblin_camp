@@ -40,11 +40,12 @@ rule get-dist-data ( properties * ) {
 
 ## Note: Boost.Build reports an error here for me, but selects correct file anyway.
 ## I have no idea what causes it, and how to get rid of it.
-make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x86.dll : @common.copy ;
-make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x64.dll : @common.copy : <address-model>64 ;
+## Disabled dbghelp copying because that makes Visual Studio angry.
+#make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x86.dll : @common.copy ;
+#make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x64.dll : @common.copy : <address-model>64 ;
 
 install dist-prebuilt
     : [ glob $(GC_ROOT)/support/crash-reporter/prebuilt/* ]
-      dbghelp.dll
+      #dbghelp.dll
     : <conditional>@get-dist-bin
 ;

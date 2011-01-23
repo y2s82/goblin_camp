@@ -1,21 +1,18 @@
-# gc-sln generators helper.
-# Requires Python 2.6.
-#
-# This script reads its input, replaces %VARIABLES%, and saves output.
-#  - genvcproj <GC_BUILD_ROOT> <GC_PROJECT_ROOT> <input> <output> <jobs> <user-config file>
+# This tool generates VS2010 solution and projects for Goblin Camp
+# source tree.
 #
 # NOTE: Generated project will be a "makefile" project, that will
-# call bjam to do the build. Sources and headers are included only
-# for navigation from within IDE. Supports only MSVC2010.
+# call bjam to do the build.
 import sys, os, re, itertools, uuid, pickle, collections
 
-# XXX: Not as good as it could be.
+here = os.path.dirname(os.path.realpath(__file__))
+root = os.path.normpath(here + '/..')
 
-# Project will be put to build\msvc. Source root is ..\..\Goblin Camp.
-assert len(sys.argv) >= 6, 'Do not run directly, use build system instead.'
+tmpDir  = os.path.join(root, 'build', 'tmp')
+projDir = os.path.join(root, 'Goblin Camp')
 
-buildRoot, projectRoot, input, output, jobs = sys.argv[1:6]
-userConfig = os.path.realpath(sys.argv[6]) if len(sys.argv) == 7 else None
+jobs   = int(sys.argv[1]) if len(sys.argv) >= 2 else 4
+config = os.path.realpath(sys.argv[2]) if len(sys.argv) >= 3 else None
 
 def genUUID():
     # cannot be lambda, must be pickable
@@ -24,17 +21,17 @@ def genUUID():
 variables = {}
 
 # gather files
-sources   = [(os.path.join(buildRoot, 'templates', '_version.cpp_in'), r'templates')]
+sources   = []
 headers   = []
-resources = [(os.path.join(buildRoot, 'templates', '_version.rc_in'), r'templates')]
+resources = []
 
-CPP_RE = re.compile('^.*?[.]c(?:c|pp)?$', re.S | re.I)
+CPP_RE = re.compile('^.*?[.]c(?:c|pp|pp_in)?$', re.S | re.I)
 HPP_RE = re.compile('^.*?[.]h(?:h|pp)?$', re.S | re.I)
-DAT_RE = re.compile('^.*?[.](?:dat|py|txt)?$', re.S | re.I)
+DAT_RE = re.compile('^.*?[.](?:dat|py|txt|rc_in)?$', re.S | re.I)
 
-for root, dirs, files in os.walk(projectRoot):
+for root, dirs, files in os.walk(projDir):
     for fn in files:
-        file = os.path.join(root, fn), root[len(projectRoot) + 1:]
+        file = os.path.join(root, fn), root[len(projDir) + 1:]
         if HPP_RE.match(fn) is not None:
             headers.append(file)
         elif CPP_RE.match(fn) is not None:
@@ -42,13 +39,13 @@ for root, dirs, files in os.walk(projectRoot):
         elif DAT_RE.match(fn) is not None:
             resources.append(file)
 
-key = lambda x: os.path.basename(x[0])
+key = lambda x: x[1]
 sources.sort(key = key)
 headers.sort(key = key)
 resources.sort(key = key)
 
 # avoid regenerating UUIDs
-uuidCache = os.path.join(os.path.dirname(output), '.uuids')
+uuidCache = os.path.join(tmpDir, '.uuids')
 if os.path.exists(uuidCache):
     uuids = pickle.load(open(uuidCache, 'rb'))
 else:
@@ -57,6 +54,7 @@ else:
 # generate filters
 filters = set(filter for _, filter in sources + headers + resources if filter)
 filters = [(filter, uuids[filter]) for filter in filters]
+filters.sort(key = lambda x: x[0])
 
 # project/solution UUIDs
 solutionID = uuids['__solution__']
@@ -65,17 +63,17 @@ projectID  = uuids['__project__']
 pickle.dump(uuids, open(uuidCache, 'wb'), pickle.HIGHEST_PROTOCOL)
 
 # NB: filters are effective only in a separate .filters file
-templ = lambda X, D: '\n\t\t\t'.join('<{0} Include="{1}"><Filter>{2}</Filter></{0}>'.format(X, os.path.realpath(fn), filter) for fn, filter in D)
+templ = lambda X, D: '\n\t\t'.join('<{0} Include="{1}"><Filter>{2}</Filter></{0}>'.format(X, os.path.realpath(fn), filter) for fn, filter in D)
 
-msvc_bjam = 'msvc_bjam.cmd {0}-j{1} dist'.format(
-    '--user-config={0} '.format(userConfig) if userConfig is not None else '', jobs
+msvc_bjam = 'bjam {0}-j{1}'.format(
+    '--user-config={0} '.format(config) if config is not None else '', jobs
 )
 
 # XXX: preprocessor defines are hardcoded in the template
 
 variables = {
-    'DIST':          os.path.join(buildRoot, 'dist'),
-    'ROOT':          projectRoot,
+    'DIST':          os.path.join(root, 'build'),
+    'ROOT':          projDir,
     'SOLUTION_UUID': solutionID,
     'PROJECT_UUID':  projectID,
     'DEBUG_BJAM':    '{0} variant=debug'.format(msvc_bjam),
@@ -83,16 +81,22 @@ variables = {
     'SOURCE_FILES':  templ('ClCompile', sources),
     'HEADER_FILES':  templ('ClInclude', headers),
     'OTHER_FILES':   templ('None',      resources),
-    'FILTERS':       '\n\t\t\t'.join(
+    'FILTERS':       '\n\t\t'.join(
         '<Filter Include="{0}"><UniqueIdentifier>{1}</UniqueIdentifier></Filter>'.format(f, u) for f, u in filters
     ),
 }
 
-with open(input, 'r') as fp:
-    template = fp.read()
-
-for key, value in variables.iteritems():
-    template = template.replace('%{0}%'.format(key), value)
-
-with open(output, 'w') as fp:
-    fp.write(template)
+templateDir = os.path.join(here, 'vs2010-templates')
+for fn in os.listdir(templateDir):
+    out = fn[:-3]
+    
+    print '** Creating:', os.path.join(projDir, out)
+    
+    with open(os.path.join(templateDir, fn), 'rb') as fp:
+        template = fp.read()
+    
+    for k, v in variables.iteritems():
+        template = template.replace('%{0}%'.format(k), v)
+    
+    with open(os.path.join(projDir, out), 'wb') as fp:
+        fp.write(template)
