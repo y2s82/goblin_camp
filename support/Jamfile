@@ -1,0 +1,12 @@
+path-constant HERE : . ;
+
+common-reqs = <include>$(HERE)/python ;
+
+project support
+    : requirements
+      $(common-reqs)
+    : usage-requirements
+      $(common-reqs)
+;
+
+lib python-modules : [ glob $(HERE)/python/*.c ] : <link>static <dependency>/python <include>"$(GC_ROOT)/Goblin Camp/include" ;
