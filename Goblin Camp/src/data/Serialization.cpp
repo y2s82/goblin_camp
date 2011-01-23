@@ -1096,6 +1096,7 @@ void Tile::save(Archive & ar, const unsigned int version) const {
 	ar & corruption;
 	ar & territory;
 	ar & burnt;
+	ar & fire;
 }
 
 template<class Archive>
@@ -1130,6 +1131,7 @@ void Tile::load(Archive & ar, const unsigned int version) {
 	ar & territory;
 	if (version >= 1) {
 		ar & burnt;
+		ar & fire;
 	}
 }
 

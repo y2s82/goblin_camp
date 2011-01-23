@@ -1554,6 +1554,8 @@ void Game::Reset() {
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
 	renderer->PreparePrefabs();
+	fireList.clear();
+	spellList.clear();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
