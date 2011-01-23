@@ -116,5 +116,11 @@ void FireNode::Update() {
 			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
 			smoke->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 		}
+
+		if (temperature > 1 && Random::Generate(9) < 4) {
+			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
+				Game::Inst()->npcList[*npci]->AddEffect(BURNING);
+			}
+		}
 	}
 }
