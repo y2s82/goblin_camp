@@ -75,14 +75,14 @@ void FireNode::Update() {
 		direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
 		steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 	} else {
-		if (Random::Generate(5) == 0) { 
+		if (Random::Generate(10) == 0) { 
 			--temperature;
 			Map::Inst()->Burn(x, y);
 		}
 
 		if (Map::Inst()->Type(x, y) != TILEGRASS || Map::Inst()->Burnt(x, y) >= 10) temperature -= 3;
 
-		if (Random::Generate(40) == 0) {
+		if (Random::Generate(80) == 0) {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), 0);
 			int distance = Random::Generate(0, 15);
 			if (distance < 12) {
@@ -128,6 +128,40 @@ void FireNode::Update() {
 					Game::Inst()->RemoveItem(item);
 					temperature += 5;
 					break;
+				}
+			}
+
+			int cons = Map::Inst()->GetConstruction(x,y);
+			if (cons >= 0) {
+				boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
+				if (construct) {
+					if (construct->IsFlammable()) {
+						if (Random::Generate(9) == 0) {
+							Attack fire;
+							TCOD_dice_t dice;
+							dice.addsub = 1;
+							dice.multiplier = 1;
+							dice.nb_dices = 1;
+							dice.nb_faces = 1;
+							fire.Amount(dice);
+							fire.Type(DAMAGE_FIRE);
+							construct->Damage(&fire);
+						}
+						temperature += 10;
+					} else if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
+						/*Stockpiles are a special case. Not being an actual building, fire won't touch them.
+						Instead fire should be able to burn the items stored in the stockpile*/
+						boost::shared_ptr<Container> container = boost::static_pointer_cast<Stockpile>(construct)->Storage(Coordinate(x,y)).lock();
+						if (container) {
+							boost::shared_ptr<Item> item = container->GetFirstItem().lock();
+							if (item && item->IsFlammable()) {
+								container->RemoveItem(item);
+								Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
+								Game::Inst()->RemoveItem(item);
+								temperature += 5;
+							}
+						}
+					}
 				}
 			}
 		}
