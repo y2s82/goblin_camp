@@ -81,13 +81,15 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->GetGraphic(x,y), map->GetForeColor(x,y), map->GetBackColor(x,y));
 
-				boost::weak_ptr<WaterNode> water = map->GetWater(x,y);
-				if (water.lock()) {
-					minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water.lock()->GetGraphic(), water.lock()->GetColor(), TCODColor::black);
+				boost::weak_ptr<WaterNode> wwater = map->GetWater(x,y);
+				if (boost::shared_ptr<WaterNode> water = wwater.lock()) {
+					if (water->Depth() > 0)
+						minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water->GetGraphic(), water->GetColor(), TCODColor::black);
 				}
-				boost::weak_ptr<FilthNode> filth = map->GetFilth(x,y);
-				if (filth.lock() && filth.lock()->Depth() > 0) {
-					minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth.lock()->GetGraphic(), filth.lock()->GetColor(), TCODColor::black);
+				boost::weak_ptr<FilthNode> wfilth = map->GetFilth(x,y);
+				if (boost::shared_ptr<FilthNode> filth = wfilth.lock()) {
+					if (filth->Depth() > 0)
+						minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
 				}
 
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
