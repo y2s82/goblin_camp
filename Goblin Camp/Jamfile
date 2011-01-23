@@ -119,6 +119,8 @@ cpp-pch stdafx.hpp
     : $(HERE)/include/stdafx.hpp common-deps
 ;
 
+use-project support : $(GC_ROOT)/support ;
+
 exe goblin-camp
     : [ path.glob-tree $(HERE)/src : *.cpp : platform ]
       stdafx.hpp
