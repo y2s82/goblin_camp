@@ -34,10 +34,18 @@ bool MapMarker::Update() {
 	return duration != 0;
 }
 
-void MapMarker::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenx = x - upleft.X();
-	int screeny = y - upleft.Y();
-	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, TCODColor::black);
-	}
+int MapMarker::X() const {
+	return x;
+}
+
+int MapMarker::Y() const {
+	return y;
+}
+
+int MapMarker::Graphic() const {
+	return graphic;
+}
+
+TCODColor MapMarker::Color() const {
+	return color;
 }

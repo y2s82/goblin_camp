@@ -72,4 +72,5 @@ public:
 	void TranslateInternalContainerListeners();
 	void AdjustLimit(ItemCategory, int);
 	int GetLimit(ItemCategory);
+	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };

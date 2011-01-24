@@ -37,9 +37,10 @@ public:
 	bool operator<(const Coordinate) const;
 	bool operator==(const Coordinate) const;
 	bool operator!=(const Coordinate) const;
-	Coordinate operator+(int);
-	Coordinate operator-(int);
-	Coordinate operator+(Coordinate);
+	Coordinate operator+(int) const;
+	Coordinate operator-(int) const;
+	Coordinate operator+(const Coordinate&) const;
+	Coordinate operator-(const Coordinate&) const;
 };
 
 int Distance(int,int,int,int);

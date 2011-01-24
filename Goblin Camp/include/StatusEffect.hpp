@@ -54,7 +54,9 @@ enum StatusEffectType {
 	EATING,
 	DRINKING,
 	CARRYING,
-	WORKING
+	WORKING,
+	BURNING,
+	STATUS_EFFECT_COUNT
 };
 
 struct StatusEffect {

@@ -1,0 +1,221 @@
+tileset_data "TestMedium" {
+	tileWidth=16
+	tileHeight=16
+	description="Test tileset with various tiles sourced from Goblin Camp Forum"
+	author="onionknight, hutze, apostrophest"
+
+	tile_texture_data "tileset.png"
+	{
+		// Terrain tiles
+		unknown_terrain=0
+		grass_terrain=1
+		ditch_terrain=2
+		riverbed_terrain=3
+		bog_terrain=4
+		rock_terrain=5
+		mud_terrain=6
+
+		// Terrain modifiers
+		water_levels=[7, 8, 9]
+		minor_filth=10
+		major_filth=11
+		marker=14
+		blood=16
+
+		// Overlays
+		non_territory=12
+		territory=13
+		marked=15
+
+		// Cursors
+		default_cursor=[12,13]
+		construction_cursor=[12,13]
+		stockpile_cursor=[12,13]
+		treeFelling_cursor=[12,13]
+		harvest_cursor=[12,13]
+		order_cursor=[12,13]
+		tree_cursor=[12,13]
+		dismantle_cursor=[12,13]
+		undesignate_cursor=[12,13]
+		bog_cursor=[12,13]
+		dig_cursor=[12,13]
+		add_territory_cursor=[13]
+		remove_territory_cursor=[12]
+		gather_cursor=[12,13]
+
+		// Status Effects
+		default_hungry=46
+		default_thirsty=47
+		default_panic=48
+		default_concussion=49
+		default_drowsy=50
+		default_asleep=51
+		default_poison=52
+		default_bleeding=53
+		default_sluggish=54
+		default_rage=55
+		default_eating=56
+		default_drinking=57
+		default_swimming=58
+
+		default_underconstruction=18
+	
+		creature_sprite_data {
+			sprite=21
+		}
+
+		plant_sprite_data {
+			sprite=29
+		}
+
+		item_sprite_data {
+			sprite=20
+		}
+
+		construction_sprite_data {
+			sprites=[19]
+		}
+
+		creature_sprite_data "goblin" {
+			sprite=23
+		}
+
+		creature_sprite_data "orc" {
+			sprite=24
+		}		
+
+		plant_sprite_data "Pine"{
+			sprite=29
+		}
+
+		plant_sprite_data "Wild Bloodberry bush" {
+			sprite=22
+		}
+
+		plant_sprite_data "Wild Blueleaf" {
+			sprite=28
+		}
+
+		plant_sprite_data "Dandelion" {
+			sprite=28
+		}
+
+		plant_sprite_data "Red Poppy" {
+			sprite=28
+		}
+
+		plant_sprite_data "Alpine aster" {
+			sprite=30
+		}
+
+		plant_sprite_data "Blue Skullcap" {
+			sprite=28
+		}
+
+		plant_sprite_data "Willow" {
+			sprite=28
+		}
+
+		plant_sprite_data "Birch" {
+			sprite=29
+		}
+
+		plant_sprite_data "Spruce" {
+			sprite=29
+		}
+
+		plant_sprite_data "Silvervine" {
+			sprite=27
+		}
+
+		plant_sprite_data "Thornbush" {
+			sprite=22
+		}
+
+		plant_sprite_data "Withering tree" {
+			sprite=31
+		}
+
+		plant_sprite_data "Redhollow" {
+			sprite=30
+		}
+
+		plant_sprite_data "Darkroot" {
+			sprite=31
+		}
+
+		item_sprite_data {
+			sprite=20
+		}
+
+		item_sprite_data "Log" {
+			sprite=38 
+		}
+
+		item_sprite_data "Plank" {
+			sprite=37
+		}
+
+		item_sprite_data "Stone" {
+			sprite=32
+		}
+
+		item_sprite_data "Firewood" {
+			sprite=36
+		}
+
+		item_sprite_data "Rough stone" {
+			sprite=32
+		}
+
+		item_sprite_data "Berry" {
+			sprite=35
+		}
+
+		item_sprite_data "Bread" {
+			sprite=35
+		}
+
+		item_sprite_data "Crate" {
+			sprite=40
+		}
+
+		item_sprite_data "Barrel" {
+			sprite=41
+		}
+
+		item_sprite_data "Sack" {
+			sprite=20
+		}
+
+		item_sprite_data "Door" {
+			sprite=39
+		}
+
+		item_sprite_data "Bed" {
+			sprite=42
+		}
+
+		item_sprite_data "Clay" {
+			sprite=34
+		}
+
+		construction_sprite_data "Farm plot" {
+			sprites=[43]
+		}
+
+		construction_sprite_data "Totem Pole" {
+			sprites=[43,43,43,
+					 43,44,43,
+					 43,43,43]
+			underconstruction_sprites=[18]
+			width=3
+		}
+
+		construction_sprite_data "Door" {
+			sprites=[39]
+			openSprite=45
+		}
+	}
+}
+

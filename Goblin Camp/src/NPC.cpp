@@ -95,7 +95,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	React(react),
 	escaped(false)
 {
-	while (!Map::Inst()->Walkable(pos.X(),pos.Y())) {
+	while (!Map::Inst()->IsWalkable(pos.X(),pos.Y())) {
 		pos.X(pos.X()+1);
 		pos.Y(pos.Y()+1);
 	}
@@ -212,7 +212,7 @@ void NPC::HandleThirst() {
 			} else {
 				for (int ix = tmpCoord.X()-1; ix <= tmpCoord.X()+1; ++ix) {
 					for (int iy = tmpCoord.Y()-1; iy <= tmpCoord.Y()+1; ++iy) {
-						if (Map::Inst()->Walkable(ix,iy,(void*)this)) {
+						if (Map::Inst()->IsWalkable(ix,iy,(void*)this)) {
 							newJob->tasks.push_back(Task(MOVE, Coordinate(ix,iy)));
 							goto CONTINUEDRINKBLOCK;
 						}
@@ -359,8 +359,10 @@ void NPC::Update() {
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
-		AddEffect(StatusEffect(CARRYING, carried.lock()->Graphic(), carried.lock()->Color()));
+		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
 	} else RemoveEffect(CARRYING);
+
+	if (health <= 0) Kill();
 }
 
 void NPC::UpdateStatusEffects() {
@@ -441,7 +443,7 @@ AiThink NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 			case MOVE:
-				if (!Map::Inst()->Walkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
+				if (!Map::Inst()->IsWalkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
 					TaskFinished(TASKFAILFATAL, "(MOVE)Target unwalkable");
 					break;
 				}
@@ -476,7 +478,7 @@ AiThink NPC::Think() {
 						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 						if (tarY < 0) tarY = 0;
 						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-						if (Map::Inst()->Walkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY)) {
+						if (Map::Inst()->IsWalkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY)) {
 							if (!checkLOS || (checkLOS && 
 								Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y()))) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
@@ -1054,7 +1056,7 @@ CONTINUEEAT:
 				} else {
 					AddEffect(WORKING);
 					if (++timer >= 50) {
-						Map::Inst()->Low(currentTarget().X(), currentTarget().Y(), true);
+						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
 						TaskFinished(TASKSUCCESS);
 					}
@@ -1099,13 +1101,13 @@ CONTINUEEAT:
 						if (npci->lock() && (npci->lock()->faction != faction || npci->lock() == aggressor.lock())) {
 							int dx = x - npci->lock()->x;
 							int dy = y - npci->lock()->y;
-							if (Map::Inst()->Walkable(x + dx, y + dy, (void *)this)) {
+							if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(x + dx, y, (void *)this)) {
+							} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
 								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->Walkable(x, y + dy, (void *)this)) {
+							} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
 								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
 								jobs.push_back(fleeJob);
 							}
@@ -1174,7 +1176,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 					Map::Inst()->FindEquivalentMoveTarget(x, y, moveX, moveY, nextX, nextY, (void*)this);
 				}
 
-				if (Map::Inst()->Walkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
+				if (Map::Inst()->IsWalkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
 					Position(Coordinate(moveX,moveY));
 					Map::Inst()->WalkOver(moveX, moveY);
 					++pathIndex;
@@ -1239,6 +1241,7 @@ void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
 
 void NPC::color(TCODColor value, TCODColor bvalue) { _color = value; _bgcolor = bvalue; }
 void NPC::graphic(int value) { _graphic = value; }
+int NPC::GetGraphicsHint() const { return NPC::Presets[type].graphicsHint; }
 
 bool NPC::Expert() {return expert;}
 void NPC::Expert(bool value) {expert = value;}
@@ -1556,8 +1559,6 @@ bool NPC::HasEffect(StatusEffectType effect) {
 
 std::list<StatusEffect>* NPC::StatusEffects() { return &statusEffects; }
 
-/*TODO: Calling jobs.clear() isn't a good idea as the NPC can have more than one job queued up, should use
-TaskFinished(TASKFAILFATAL) or just remove the job we want aborted*/
 void NPC::AbortCurrentJob(bool remove_job) {
 	boost::shared_ptr<Job> job = jobs.front();
 	TaskFinished(TASKFAILFATAL, "Job aborted");
@@ -1765,6 +1766,7 @@ class NPCListener : public ITCODParserListener {
 		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.i; }
 		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
 		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
+		else if (boost::iequals(name,"fallbackGraphicsSet")) { NPC::Presets.back().fallbackGraphicsSet = value.s; }
 		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
 		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
 		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
@@ -1844,6 +1846,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addListProperty("tags", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -1973,6 +1976,10 @@ boost::weak_ptr<Item> NPC::Wielding() {
 	return mainHand;
 }
 
+boost::weak_ptr<Item> NPC::Carrying() const {
+	return carried;
+}
+
 boost::weak_ptr<Item> NPC::Wearing() {
 	return armor;
 }
@@ -1994,7 +2001,14 @@ void NPC::UpdateVelocity() {
 
 						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
 							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
-								//TODO: Create attack based on weight and damage construct
+								Attack attack;
+								attack.Type(DAMAGE_BLUNT);
+								TCOD_dice_t damage;
+								damage.addsub = (float)velocity/5;
+								damage.multiplier = 1;
+								damage.nb_dices = 1;
+								damage.nb_faces = 5 + effectiveStats[SIZE];
+								construct->Damage(&attack);
 							}
 						}
 
@@ -2021,11 +2035,11 @@ void NPC::UpdateVelocity() {
 			} else SetVelocity(0);
 		}
 	} else { //We're not hurtling through air so let's tumble around if we're stuck on unwalkable terrain
-		if (!Map::Inst()->Walkable(x, y, (void*)this)) {
+		if (!Map::Inst()->IsWalkable(x, y, (void*)this)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
 					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi, (void*)this)) {
+						if (Map::Inst()->IsWalkable(xi, yi, (void*)this)) {
 							Position(Coordinate(xi, yi));
 							return;
 						}
@@ -2061,7 +2075,9 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	attacks(std::list<Attack>()),
 	tags(std::set<std::string>()),
 	tier(0),
-	deathItem(-2)
+	deathItem(-2),
+	fallbackGraphicsSet(),
+	graphicsHint(-1)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;

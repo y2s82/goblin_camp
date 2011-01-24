@@ -44,6 +44,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "UI/MessageBox.hpp"
 
+#include "TCODMapRenderer.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
+#include "MathEx.hpp"
+
+// TODO: Temporary
+#include "data/Paths.hpp"
+
+
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
 
@@ -63,7 +72,8 @@ screenWidth(0),
 	safeMonths(9),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
-	upleft(Coordinate(0,0))
+	camX(0),
+	camY(0)
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
@@ -79,7 +89,7 @@ Game* Game::Inst() {
 bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType> tileReqs) {
 	for (int x = target.X(); x < target.X() + size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + size.Y(); ++y) {
-			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->Buildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
+			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
 		}
 	}
 	return true;
@@ -135,7 +145,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
-			Map::Inst()->Buildable(x,y,false);
+			Map::Inst()->SetBuildable(x,y,false);
 			Map::Inst()->SetConstruction(x,y,newCons->Uid());
 			Map::Inst()->SetTerritory(x,y,true);
 		}
@@ -170,7 +180,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//We want to create 1 stockpile, at a, and then expand it from a to b.
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
-	Map::Inst()->Buildable(a.X(), a.Y(), false);
+	Map::Inst()->SetBuildable(a.X(), a.Y(), false);
 	Map::Inst()->SetConstruction(a.X(), a.Y(), newSp->Uid());
 	Map::Inst()->SetTerritory(a.X(), a.Y(), true);
 	newSp->Expand(a,b);
@@ -198,7 +208,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 				for (int iy = construct->Y()-1; iy <= construct->Y() + Construction::Blueprint(construct->Type()).Y(); ++iy) {
 					if (ix == construct->X()-1 || ix == construct->X() + Construction::Blueprint(construct->Type()).X() ||
 						iy == construct->Y()-1 || iy == construct->Y() + Construction::Blueprint(construct->Type()).Y()) {
-							if (Map::Inst()->Walkable(ix,iy)) {
+							if (Map::Inst()->IsWalkable(ix,iy)) {
 								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
 									closest = Coordinate(ix,iy);
 							}
@@ -210,7 +220,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 				for (int iy = ent.lock()->Y()-1; iy <= ent.lock()->Y()+1; ++iy) {
 					if (ix == ent.lock()->X()-1 || ix == ent.lock()->X()+1 ||
 						iy == ent.lock()->Y()-1 || iy == ent.lock()->Y()+1) {
-							if (Map::Inst()->Walkable(ix,iy)) {
+							if (Map::Inst()->IsWalkable(ix,iy)) {
 								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
 									closest = Coordinate(ix,iy);
 							}
@@ -251,7 +261,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	int tries = 0;
 	int radius = 1;
 	Coordinate originalTarget = target;
-	while (!Map::Inst()->Walkable(target.X(), target.Y()) && tries < 20) {
+	while (!Map::Inst()->IsWalkable(target.X(), target.Y()) && tries < 20) {
 		target.X(originalTarget.X() + Random::Generate(-radius, radius));
 		target.Y(originalTarget.Y() + Random::Generate(-radius, radius));
 		if (++tries % 3 == 0) ++radius;
@@ -313,7 +323,6 @@ void Game::GoblinCount(int add) { goblinCount += add; }
 
 
 //Moves the entity to a valid walkable tile
-//TODO: make it find the closest walkable tile instead of going right, that will lead to weirdness and problems
 void Game::BumpEntity(int uid) {
 	boost::shared_ptr<Entity> entity;
 
@@ -328,11 +337,11 @@ void Game::BumpEntity(int uid) {
 	}
 
 	if (entity) {
-		if (!Map::Inst()->Walkable(entity->Position().X(), entity->Position().Y())) {
+		if (!Map::Inst()->IsWalkable(entity->Position().X(), entity->Position().Y())) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
 					for (int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi)) {
+						if (Map::Inst()->IsWalkable(xi, yi)) {
 							entity->Position(Coordinate(xi, yi));
 							return;
 						}
@@ -381,7 +390,6 @@ void Game::ErrorScreen() {
 	);
 	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
 	TCODConsole::root->flush();
-	
 	TCODConsole::waitForKeypress(true);
 	exit(255);
 }
@@ -390,7 +398,7 @@ void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
-	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	bool useTileset = Config::GetCVar<bool>("useTileset");
 
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
@@ -408,19 +416,33 @@ void Game::Init() {
 	srand((unsigned int)std::time(0));
 
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer);
+	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
 
+	buffer = new TCODConsole(screenWidth, screenHeight);
+	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
+		TileSetLoader loader;
+		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+		}
+	} else {
+		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
+	}
+
 	LoadingScreen();
 
-	TCODConsole::root->setAlignment(TCOD_LEFT);
-
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
-
-	buffer = new TCODConsole(screenWidth, screenHeight);
+	
 	season = LateWinter;
-	upleft = Coordinate(180,180);
+	camX = 180;
+	camY = 180;
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
@@ -428,7 +450,7 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 		Coordinate blueprint = Construction::Blueprint(construct->Type());
 		for (int x = construct->X(); x < construct->X() + blueprint.X(); ++x) {
 			for (int y = construct->Y(); y < construct->Y() + blueprint.Y(); ++y) {
-				Map::Inst()->Buildable(x,y,true);
+				Map::Inst()->SetBuildable(x,y,true);
 				Map::Inst()->SetConstruction(x,y,-1);
 			}
 		}
@@ -603,12 +625,16 @@ void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordina
 	int minX = std::min(corner1.X(), corner2.X());
 	int minY = std::min(corner1.Y(), corner2.Y());
 
-	for (int items = 0; items < quantity; ++items) {
+	for (int items = 0, count = 0; items < quantity && count < quantity*10; ++count) {
 		Coordinate location(
 			Random::Generate(minX, areaWidth + minX - 1),
 			Random::Generate(minY, areaLength + minY - 1)
 		);
-		Game::Inst()->CreateItem(location, type, true);
+
+		if (Map::Inst()->IsWalkable(location.X(), location.Y())) {
+			Game::Inst()->CreateItem(location, type, true);
+			++items;
+		}
 	}
 }
 
@@ -653,6 +679,9 @@ void Game::Update() {
 
 	if (time == MONTH_LENGTH) {
 		if (safeMonths > 0) --safeMonths;
+
+		Map::Inst()->ShiftWind();
+
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 
@@ -741,10 +770,7 @@ void Game::Update() {
 	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
 		if (boost::shared_ptr<Item> item = itemi->lock()) {
-			if (item->condition == 0) {
-				//The item has impacted and broken. Create debris owned by no one
-				std::vector<boost::weak_ptr<Item> > component(1, item);
-				CreateItem(item->Position(), Item::StringToItemType("debris"), false, -1, component);
+			if (item->condition == 0) { //The impact has destroyed the item
 				RemoveItem(item);
 			}
 		}
@@ -809,6 +835,27 @@ void Game::Update() {
 	}
 
 	if (orcCount == 0 && goblinCount == 0) GameOver();
+
+	for (std::list<boost::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
+		if (boost::shared_ptr<FireNode> fire = fireit->lock()) {
+			if (Random::GenerateBool()) fire->Update();
+			if (fire->GetHeat() <= 0) {
+				Map::Inst()->SetFire(fire->GetPosition().X(), fire->GetPosition().Y(), boost::shared_ptr<FireNode>());
+				fireit = fireList.erase(fireit);
+			} else { ++fireit; }
+		} else {
+			fireit = fireList.erase(fireit);
+		}
+	}
+
+	for (std::list<boost::shared_ptr<Spell> >::iterator spellit = spellList.begin(); spellit != spellList.end();) {
+		if ((*spellit)->IsDead()) {
+			spellit = spellList.erase(spellit);
+		} else {
+			(*spellit)->UpdateVelocity();
+			++spellit;
+		}
+	}
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
@@ -871,6 +918,10 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 	return boost::shared_ptr<Job>();
 }
 
+Coordinate Game::TileAt(int pixelX, int pixelY) const {
+	return renderer->TileAt(pixelX, pixelY, camX, camY);
+}
+
 namespace {
 	template <typename MapT>
 	inline void InternalDrawMapItems(const char *name, MapT& map, Coordinate& upleft, TCODConsole *buffer) {
@@ -892,20 +943,20 @@ namespace {
 	}
 }
 
-void Game::Draw(Coordinate upleft, TCODConsole* buffer, bool drawUI) {
-	Map::Inst()->Draw(upleft, buffer);
-
-	InternalDrawMapItems("static constructions",  staticConstructionList, upleft, buffer);
-	InternalDrawMapItems("dynamic constructions", dynamicConstructionList, upleft, buffer);
-	//TODO: Make this consistent
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = itemList.begin(); itemi != itemList.end(); ++itemi) {
-		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, buffer);
+void Game::Draw(TCODConsole * console, float focusX, float focusY, bool drawUI, int posX, int posY, int sizeX, int sizeY) {
+	console->setBackgroundFlag(TCOD_BKGND_SET);
+	if (sizeX == -1) {
+		sizeX = console->getWidth();
 	}
-	InternalDrawMapItems("nature objects",        natureList, upleft, buffer);
-	InternalDrawMapItems("NPCs",                  npcList, upleft, buffer);
+	if (sizeY == -1) {
+		sizeY = console->getHeight();
+	}
+	int charX, charY;
+	TCODSystem::getCharSize(&charX, &charY);
+	renderer->DrawMap(Map::Inst(), focusX, focusY, posX * charX, posY * charY, sizeX * charX, sizeY * charY);
 
 	if (drawUI) {
-		UI::Inst()->Draw(upleft, buffer);
+		UI::Inst()->Draw(console);
 	}
 }
 
@@ -1076,8 +1127,8 @@ void Game::GenerateMap(uint32 seed) {
 	//Create a bog
 	infinityCheck = 0;
 	while (infinityCheck < 1000) {
-		int x = random.Generate(map->Width()  - 1);
-		int y = random.Generate(map->Height() - 1);
+		int x = random.Generate(30, map->Width()  - 30);
+		int y = random.Generate(30, map->Height() - 30);
 		int riverDistance;
 		int distance;
 		int lineX, lineY;
@@ -1113,10 +1164,12 @@ void Game::GenerateMap(uint32 seed) {
 			} while (!TCODLine::step(&lineX, &lineY));
 		}
 		if (riverDistance > 30) {
+			int lowOffset = random.Generate(-5, 5);
+			int highOffset = random.Generate(-5, 5);
 			for (int xOffset = -25; xOffset < 25; ++xOffset) {
 				int range = int(std::sqrt((double)(25*25 - xOffset*xOffset)));
-				int lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
-				int highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
+				lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
+				highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
 					map->Type(x+xOffset, y+yOffset, TILEBOG);
 				}
@@ -1131,6 +1184,8 @@ void Game::GenerateMap(uint32 seed) {
 			map->Naturify(x,y);
 		}
 	}
+
+	map->RandomizeWind();
 }
 
 //This is intentional, otherwise designating where to cut down trees would always show red unless you were over a tree
@@ -1141,7 +1196,7 @@ bool Game::CheckTree(Coordinate, Coordinate) {
 void Game::FellTree(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Tree() && !natObj->Marked()) {
@@ -1163,7 +1218,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 void Game::DesignateTree(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Tree() && !natObj->Marked()) {
@@ -1179,7 +1234,7 @@ void Game::DesignateTree(Coordinate a, Coordinate b) {
 void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Harvestable() && !natObj->Marked()) {
@@ -1201,7 +1256,7 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 	if (natObj.lock()) {
-		Map::Inst()->NatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
+		Map::Inst()->SetNatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
 		natureList.erase(natObj.lock()->Uid());
 	}
 }
@@ -1229,7 +1284,7 @@ void Game::DesignateBog(Coordinate a, Coordinate b) {
 void Game::Undesignate(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {	
-			int natUid = Map::Inst()->NatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(x,y);
 			if (natUid >= 0) {
 				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj.lock() && natObj.lock()->Tree() && natObj.lock()->Marked()) {
@@ -1498,10 +1553,14 @@ void Game::Reset() {
 	running = false;
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	season = LateWinter;
-	upleft = Coordinate(180,180);
+	camX = 180;
+	camY = 180;
 	safeMonths = 9;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
+	renderer->PreparePrefabs();
+	fireList.clear();
+	spellList.clear();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
@@ -1517,17 +1576,22 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 }
 
 void Game::CenterOn(Coordinate target) {
-	int x = std::max(0, target.X() - ScreenWidth() / 2);
-	int y = std::max(0, target.Y() - ScreenHeight() / 2);
-	upleft = Coordinate(x, y);
+	camX = target.X() + 0.5f;
+	camY = target.Y() + 0.5f;
+}
+
+void Game::MoveCam(float x, float y) {
+	camX = std::min(std::max(x + camX, 0.0f), Map::Inst()->Width() + 1.0f);
+	camY = std::min(std::max(y + camY, 0.0f), Map::Inst()->Height() + 1.0f);
 }
 
 void Game::SetMark(int i) {
-	marks[i] = Coordinate(upleft.X(), upleft.Y());
+	marks[i] = Coordinate(FloorToInt::convert(camX), FloorToInt::convert(camY));
 }
 
 void Game::ReturnToMark(int i) {
-	upleft = Coordinate(marks[i].X(), marks[i].Y());
+	camX = marks[i].X() + 0.5f;
+	camY = marks[i].Y() + 0.5f;
 }
 
 void Game::TranslateContainerListeners() {
@@ -1561,7 +1625,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
-			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->Low(x,y)) {
+			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
@@ -1581,7 +1645,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target) {
 		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
 			if (ix == target.X()-1 || ix == target.X()+1 ||
 				iy == target.Y()-1 || iy == target.Y()+1) {
-					if (Map::Inst()->Walkable(ix,iy)) {
+					if (Map::Inst()->IsWalkable(ix,iy)) {
 						if (Distance(from.X(), from.Y(), ix, iy) < Distance(from.X(), from.Y(), closest.X(), closest.Y()))
 							closest = Coordinate(ix,iy);
 					}
@@ -1597,7 +1661,7 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 }
 
 void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->Walkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
+	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
 
@@ -1626,15 +1690,15 @@ void Game::CreateNatureObject(Coordinate location) {
 				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->Walkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
-					Map::Inst()->NatureObject(ax,ay) < 0 &&
+				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
+					Map::Inst()->GetNatureObject(ax,ay) < 0 &&
 					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
 						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-						Map::Inst()->NatureObject(ax,ay,natObj->Uid());
+						Map::Inst()->SetNatureObject(ax,ay,natObj->Uid());
 						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->Buildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->BlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->SetBuildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->SetBlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 				}
 			}
 		}
@@ -1653,14 +1717,14 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
 		if (location.X() >= 0 && location.X() < Map::Inst()->Width() && 
 			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
-			Map::Inst()->NatureObject(location.X(),location.Y()) < 0 &&
+			Map::Inst()->GetNatureObject(location.X(),location.Y()) < 0 &&
 			Map::Inst()->GetConstruction(location.X(), location.Y()) < 0) {
 				boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-				Map::Inst()->NatureObject(location.X(),location.Y(),natObj->Uid());
+				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->Buildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->BlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->SetBuildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->SetBlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
 		}
 
 	}
@@ -1669,9 +1733,9 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 void Game::RemoveNatureObject(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int uid = Map::Inst()->NatureObject(x,y);
+			int uid = Map::Inst()->GetNatureObject(x,y);
 			if (uid >= 0) {
-				Map::Inst()->NatureObject(x,y,-1);
+				Map::Inst()->SetNatureObject(x,y,-1);
 				natureList.erase(uid);
 			}
 		}
@@ -1775,4 +1839,25 @@ void Game::AddDelay(int delay, boost::function<void()> callback) {
 void Game::GameOver() {
 	MessageBox::ShowMessageBox("All your orcs and goblins have died.");
 	running = false;
+}
+
+void Game::CreateFire(Coordinate pos) {
+	CreateFire(pos, 10);
+}
+
+void Game::CreateFire(Coordinate pos, int temperature) {
+	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos.X(), pos.Y()));
+	if (!fire.lock()) { //No existing firenode
+		boost::shared_ptr<FireNode> newFire(new FireNode(pos.X(), pos.Y(), temperature));
+		fireList.push_back(boost::weak_ptr<FireNode>(newFire));
+		Map::Inst()->SetFire(pos.X(), pos.Y(), newFire);
+	} else {
+	}
+}
+
+/* Placeholder code before proper spells */
+boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
+	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
+	spellList.push_back(newSpell);
+	return newSpell;
 }

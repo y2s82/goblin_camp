@@ -40,7 +40,9 @@ NatureObjectPreset::NatureObjectPreset() :
 	walkable(false),
 	minHeight(0.0f),
 	maxHeight(2.0f),
-	evil(false)
+	evil(false),
+	fallbackGraphicsSet(),
+	graphicsHint(-1)
 {}
 
 std::vector<NatureObjectPreset> NatureObject::Presets = std::vector<NatureObjectPreset>();
@@ -61,7 +63,11 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 
 NatureObject::~NatureObject() {
 	Map::Inst()->SetWalkable(x, y, true);
-	Map::Inst()->Buildable(x, y, true);
+	Map::Inst()->SetBuildable(x, y, true);
+}
+
+int NatureObject::GetGraphicsHint() const {
+	return Presets[type].graphicsHint;
 }
 
 void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
@@ -123,6 +129,8 @@ class NatureObjectListener : public ITCODParserListener {
 			NatureObject::Presets.back().minHeight = value.f;
 		} else if (boost::iequals(name, "maxheight")) {
 			NatureObject::Presets.back().maxHeight = value.f;
+		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+			NatureObject::Presets.back().fallbackGraphicsSet = value.s;
 		}
 		return true;
 	}
@@ -152,6 +160,7 @@ void NatureObject::LoadPresets(std::string filename) {
 	natureObjectTypeStruct->addFlag("walkable");
 	natureObjectTypeStruct->addProperty("minheight", TCOD_TYPE_FLOAT, false);
 	natureObjectTypeStruct->addProperty("maxheight", TCOD_TYPE_FLOAT, false);
+	natureObjectTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	natureObjectTypeStruct->addFlag("evil");
 
 	parser.run(filename.c_str(), new NatureObjectListener());

@@ -31,6 +31,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Events.hpp"
 #include "Job.hpp"
+#include "Fire.hpp"
+#include "Spell.hpp"
+
+#include "MapRenderer.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -80,6 +84,8 @@ private:
 	boost::shared_ptr<Events> events;
 
 	std::list<std::pair<int, boost::function<void()> > > delays;
+
+	boost::shared_ptr<MapRenderer> renderer;
 public:
 	static Game* Inst();
 	static bool LoadGame(const std::string&);
@@ -92,6 +98,9 @@ public:
 	static void DoNothing();
 	static void Exit(bool confirm=true);
 
+	Coordinate TileAt(int pixelX, int pixelY) const;
+	boost::shared_ptr<MapRenderer> Renderer() { return renderer; };
+
 	int ScreenWidth() const;
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
@@ -101,8 +110,9 @@ public:
 	void GenerateMap(uint32 seed = 0);
 
 	void Update();
-	Coordinate upleft;
+	float camX, camY;
 	void CenterOn(Coordinate target);
+	void MoveCam(float x, float y);
 	void SetMark(int);
 	void ReturnToMark(int);
 
@@ -116,7 +126,7 @@ public:
 
 	TCODConsole* buffer;
 	void FlipBuffer();
-	void Draw(Coordinate = Game::Inst()->upleft, TCODConsole* = Game::Inst()->buffer, bool drawUI = true);
+	void Draw(TCODConsole * console = Game::Inst()->buffer, float focusX = Game::Inst()->camX, float focusY = Game::Inst()->camY, bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1);
 
 	static int DiceToInt(TCOD_dice_t);
 
@@ -222,4 +232,11 @@ public:
 	void TriggerAttack();
 
 	void AddDelay(int delay, boost::function<void()>);
+
+	std::list<boost::weak_ptr<FireNode> > fireList;
+	void CreateFire(Coordinate);
+	void CreateFire(Coordinate,int);
+
+	boost::shared_ptr<Spell> CreateSpell(Coordinate, int type);
+	std::list<boost::shared_ptr<Spell> > spellList;
 };

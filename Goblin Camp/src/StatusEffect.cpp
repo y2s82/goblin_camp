@@ -159,6 +159,14 @@ graphic(g),
 		graphic = '+';
 		color = TCODColor::grey;
 		break;
+
+	case BURNING:
+		name = "On fire!";
+		cooldown = UPDATES_PER_SECOND * 10;
+		graphic = '!';
+		color = TCODColor::red;
+		damage.second = 7;
+		break;
 	}
 	cooldownDefault = cooldown;
 }
@@ -180,6 +188,8 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return POISON;
 	} else if (boost::iequals(str, "bleeding")) {
 		return BLEEDING;
+	} else if (boost::iequals(str, "burning")) {
+		return BURNING;
 	}
 	return HUNGER;
 }
@@ -194,6 +204,7 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case SLEEPING: return "sleeping";
 	case POISON: return "poison";
 	case BLEEDING: return "bleeding";
+	case BURNING: return "burning";
 	default: return "";
 	}
 }

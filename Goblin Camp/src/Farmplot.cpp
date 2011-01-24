@@ -53,7 +53,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 						if (!containers[Coordinate(x,y)]->empty()) {
 							boost::weak_ptr<Item> item = containers[Coordinate(x,y)]->GetFirstItem();
 							if (item.lock()) {
-								console->putCharEx(screenx, screeny, item.lock()->Graphic(), item.lock()->Color(), TCODColor::black);
+								console->putCharEx(screenx, screeny, item.lock()->GetGraphic(), item.lock()->Color(), TCODColor::black);
 							}
 						}
 				}
@@ -154,3 +154,7 @@ void FarmPlot::SwitchAllowed(int index) {
 }
 
 bool FarmPlot::SeedAllowed(ItemType type) { return allowedSeeds[type]; }
+
+void FarmPlot::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}

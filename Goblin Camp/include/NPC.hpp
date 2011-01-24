@@ -94,6 +94,8 @@ struct NPCPreset {
 	std::set<std::string> tags;
 	int tier;
 	ItemType deathItem;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class NPC : public Entity {
@@ -194,6 +196,8 @@ public:
 	void color(TCODColor,TCODColor=TCODColor::black);
 	void graphic(int);
 
+	int GetGraphicsHint() const;
+
 	Task* currentTask();
 	Task* nextTask();
 	boost::weak_ptr<Job> currentJob();
@@ -227,7 +231,8 @@ public:
 	void GetMainHandAttack(Attack&);
 	bool WieldingRangedWeapon();
 	void FindNewWeapon();
-	boost::weak_ptr<Item> Wielding();
+	boost::weak_ptr<Item> Wielding() ;
+	boost::weak_ptr<Item> Carrying() const;
 	bool HasHands();
 	bool IsTunneler();
 	void FindNewArmor();

@@ -46,7 +46,6 @@ public:
 	~WaterNode();
 
 	void Update();
-	void Draw(Coordinate, TCODConsole*);
 	void MakeInert();
 	void DeInert();
 	int Depth();
@@ -55,4 +54,6 @@ public:
 	Coordinate Position();
 	void AddFilth(int);
 	int GetFilth();
+	int GetGraphic();
+	TCODColor GetColor();
 };
