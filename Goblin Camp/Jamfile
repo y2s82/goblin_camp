@@ -113,7 +113,7 @@ always version ;
 ## include paths may be wrong and the build will fail.
 ###############################################################################
 
-alias common-deps : /boost /sdl /libpng /zlib /libtcod ;
+alias common-deps : /boost /sdl /libpng /zlib /libtcod /python ;
 
 cpp-pch stdafx.hpp
     : $(HERE)/include/stdafx.hpp common-deps
