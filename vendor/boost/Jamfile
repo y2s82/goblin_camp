@@ -23,15 +23,18 @@ project boost
 ;
 
 python-sources = [ path.glob-tree $(HERE)/libs/python : *.cpp ] ;
+thread-sources = [ glob $(HERE)/libs/thread/*.cpp ] ;
 
 if [ os.name ] = NT {
     lib gc-boost-python : $(python-sources) /python : <link>shared ;
+    thread-sources += [ glob $(HERE)/libs/thread/win32/*.cpp ] ;
 } else {
     lib gc-boost-python : $(python-sources) ;
+    thread-sources += [ glob $(HERE)/libs/thread/pthread/*.cpp ] ;
 }
 
 for local L in date_time filesystem random serialization system {
     lib $(L) : [ glob $(HERE)/libs/$(L)/*.cpp ] ;
 }
 
-lib thread : [ glob $(HERE)/libs/thread/*.cpp ] [ glob $(HERE)/libs/thread/win32/*.cpp ] ;
+lib thread : $(thread-sources) ;
