@@ -189,7 +189,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	}
 	ar & marks;
 	if (version == 0) {
-		ar & Coordinate();
+		Coordinate c;
+		ar & c;
 		camX = 0;
 		camY = 0;
 	} else {

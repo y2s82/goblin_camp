@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSet.hpp"
 #include <boost/numeric/conversion/cast.hpp> 
 
-#include "FarmPlot.hpp"
+#include "Farmplot.hpp"
 #include "Stockpile.hpp"
 #include "Door.hpp"
 #include "SpawningPool.hpp"
