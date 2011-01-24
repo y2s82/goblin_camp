@@ -37,7 +37,7 @@ public:
 	bool flammable;
 	std::string name;
 	std::string GetName();
-	ItemCat* parent;
+	ItemCategory parent;
 };
 
 struct ItemPreset {
@@ -66,6 +66,8 @@ struct ItemPreset {
 	int resistances[RES_COUNT];
 	int bulk;
 	int condition;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class Item : public Entity {
@@ -89,11 +91,11 @@ private:
 	static boost::unordered_map<std::string, ItemType> itemTypeNames;
 	static boost::unordered_map<std::string, ItemCategory> itemCategoryNames;
 
-	Attack attack;
 	int resistances[RES_COUNT];
 
-	int condition;
 protected:
+	Attack attack;
+	int condition;
 	TCODColor color;
 	int graphic;
 	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
@@ -118,13 +120,14 @@ public:
 
 	virtual ~Item();
 
+	int GetGraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
 	void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 	boost::weak_ptr<Item> ContainedIn();
 	virtual void Position(Coordinate);
 	virtual Coordinate Position();
 	ItemType Type();
-	int Graphic();
+	int GetGraphic();
 	TCODColor Color();
 	void Color(TCODColor);
 	bool IsCategory(ItemCategory);
@@ -138,6 +141,8 @@ public:
 	void UpdateVelocity();
 	void SetInternal();
 	int GetDecay() const;
+	void Impact(int speedChange);
+	bool IsFlammable();
 };
 
 class OrganicItem : public Item {

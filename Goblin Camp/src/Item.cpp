@@ -49,25 +49,48 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	x = pos.X();
 	y = pos.Y();
 
-	name = Item::Presets[type].name;
-	categories = Item::Presets[type].categories;
-	graphic = Item::Presets[type].graphic;
-	color = Item::Presets[type].color;
-	if (Item::Presets[type].decays) decayCounter = Item::Presets[type].decaySpeed;
+	if (type >= 0 && type < Item::Presets.size()) {
+		name = Item::Presets[type].name;
+		categories = Item::Presets[type].categories;
+		graphic = Item::Presets[type].graphic;
+		color = Item::Presets[type].color;
+		if (Item::Presets[type].decays) decayCounter = Item::Presets[type].decaySpeed;
+
+		attack = Item::Presets[type].attack;
+
+		for (int i = 0; i < RES_COUNT; ++i) {
+			resistances[i] = Item::Presets[type].resistances[i];
+		}
+
+		bulk = Item::Presets[type].bulk;
+		condition = Item::Presets[type].condition;
+	}
+
+	//Calculate flammability based on categorical flammability, and then modify it based on components
+	int flame = 0;
+	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+		if (Item::Categories[*cati].flammable) ++flame;
+		else --flame;
+	}
 
 	for (int i = 0; i < (signed int)components.size(); ++i) {
-		if (components[i].lock()) 
+		if (components[i].lock()) {
 			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
+			if (components[i].lock()->IsFlammable()) ++flame;
+			else --flame;
+		}
 	}
 
-	attack = Item::Presets[type].attack;
-
-	for (int i = 0; i < RES_COUNT; ++i) {
-		resistances[i] = Item::Presets[type].resistances[i];
+	if (flame > 0) {
+		flammable = true;
+#ifdef DEBUG
+		std::cout<<"Created flammable object "<<flammable<<"\n";
+#endif
+	} else {
+#ifdef DEBUG
+		std::cout<<"Created not flammable object "<<flammable<<"\n";
+#endif
 	}
-
-	bulk = Item::Presets[type].bulk;
-	condition = Item::Presets[type].condition;
 }
 
 Item::~Item() {
@@ -79,11 +102,15 @@ Item::~Item() {
 	}
 }
 
+int Item::GetGraphicsHint() const {
+	return Presets[type].graphicsHint;
+}
+
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = x - upleft.X();
 	int screeny = y - upleft.Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->BackColor(x,y));
+		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
 	}
 }
 
@@ -123,7 +150,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 }
 boost::weak_ptr<Item> Item::ContainedIn() {return container;}
 
-int Item::Graphic() {return graphic;}
+int Item::GetGraphic() {return graphic;}
 
 Attack Item::GetAttack() const {return attack;}
 
@@ -188,7 +215,7 @@ public:
 	void translateNames() {
 		for (unsigned int i = 0; i < presetCategoryParent.size(); ++i) {
 			if (presetCategoryParent[i] != "") {
-				Item::Categories[firstCategoryIndex+i].parent = &Item::Categories[Item::StringToItemCategory(presetCategoryParent[i])];
+				Item::Categories[firstCategoryIndex+i].parent = Item::StringToItemCategory(presetCategoryParent[i]);
 			}
 		}
 
@@ -197,14 +224,17 @@ public:
 		because this items.dat may not be the first one read in, and we don't want to overwrite
 		existing items*/
 		for (unsigned int i = 0; i < presetGrowth.size(); ++i) {
-
 			for (std::set<ItemCategory>::iterator cati = Item::Presets[firstItemIndex+i].categories.begin();
 				cati != Item::Presets[firstItemIndex+i].categories.end(); ++cati) {
-					if (Item::Categories[*cati].parent) {
+					if (Item::Categories[*cati].parent >= 0 && 
+						Item::Presets[firstItemIndex+i].categories.find(Item::Categories[*cati].parent) == 
+						Item::Presets[firstItemIndex+i].categories.end()) {
 #ifdef DEBUG
-						std::cout<<"Item has a parent ->"<<Item::Categories[*cati].parent->name<<" = ("<<Item::StringToItemCategory(Item::Categories[*cati].parent->name)<<")\n";
+						std::cout<<"Item has a parent ->"<<Item::Categories[Item::Categories[*cati].parent].name;
+						std::cout<<" = ("<<Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name)<<")\n";
 #endif
-						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[*cati].parent->name));
+						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name));
+						cati = Item::Presets[firstItemIndex+i].categories.begin(); //Start from the beginning, inserting into a set invalidates the iterator
 					}
 			}
 
@@ -265,6 +295,9 @@ private:
 #ifdef DEBUG
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
+		if (boost::iequals(name, "flammable")) {
+			Item::Categories.back().flammable = true;
+		}
 		return true;
 	}
 
@@ -282,7 +315,9 @@ private:
 			Item::Presets.back().graphic = value.i;
 		} else if (boost::iequals(name, "color")) {
 			Item::Presets.back().color = value.col;
-		} else if (boost::iequals(name, "components")) {
+		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+			Item::Presets.back().fallbackGraphicsSet = value.s;
+		}else if (boost::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets.back().components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
 			}
@@ -366,6 +401,7 @@ void Item::LoadPresets(std::string filename) {
 	TCODParser parser = TCODParser();
 	TCODParserStruct* categoryTypeStruct = parser.newStructure("category_type");
 	categoryTypeStruct->addProperty("parent", TCOD_TYPE_STRING, false);
+	categoryTypeStruct->addFlag("flammable");
 
 	TCODParserStruct* itemTypeStruct = parser.newStructure("item_type");
 	itemTypeStruct->addListProperty("category", TCOD_TYPE_STRING, true);
@@ -384,6 +420,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("constructedin", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("bulk", TCOD_TYPE_INT, false);
 	itemTypeStruct->addProperty("durability", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
@@ -448,18 +485,17 @@ int Item::RelativeValue() {
 int Item::Resistance(int i) const { return resistances[i]; }
 
 void Item::SetVelocity(int speed) {
-	if (velocity > 10 && speed == 0 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
-	
 	velocity = speed;
 	if (speed > 0) {
 		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
 	} else {
+		//The item has moved before but has now stopped
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
-		if (!Map::Inst()->Walkable(x, y)) {
+		if (!Map::Inst()->IsWalkable(x, y)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
 					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->Walkable(xi, yi)) {
+						if (Map::Inst()->IsWalkable(xi, yi)) {
 							Position(Coordinate(xi, yi));
 							return;
 						}
@@ -476,21 +512,22 @@ void Item::UpdateVelocity() {
 		while (nextVelocityMove > 100) {
 			nextVelocityMove -= 100;
 			if (flightPath.size() > 0) {
+
 				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
 					int tx = flightPath.back().coord.X();
 					int ty = flightPath.back().coord.Y();
-					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
+
+					if (Map::Inst()->BlocksWater(tx,ty) || !Map::Inst()->IsWalkable(tx,ty)) { //We've hit an obstacle
 						Attack attack = GetAttack();
 						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
 							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
 								construct->Damage(&attack);
 							}
 						}
-						SetVelocity(0);
-						flightPath.clear();
+						Impact(velocity);
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0) {
+					if (Map::Inst()->NPCList(tx,ty)->size() > 0) { //Hit a creature
 						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
 							Attack attack = GetAttack();
@@ -498,18 +535,21 @@ void Item::UpdateVelocity() {
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);
-							SetVelocity(0);
-							flightPath.clear();
+							Impact(velocity);
 							return;
 						}
 					}
 				}
+
 				Position(flightPath.back().coord);
-				if (flightPath.back().height == 0) {
-					SetVelocity(0);
+
+				if (flightPath.back().height <= 0) { //Hit the ground early
+					Impact(velocity);
+					return;
 				}
+
 				flightPath.pop_back();
-			} else SetVelocity(0);
+			} else { Impact(velocity); return; } //No more flightpath
 		}
 	} 
 }
@@ -518,9 +558,24 @@ void Item::SetInternal() { internal = true; }
 
 int Item::GetDecay() const { return decayCounter; }
 
+void Item::Impact(int speedChange) {
+	SetVelocity(0);
+	flightPath.clear();
+
+	if (speedChange >= 10 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
+	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
+		//The item has impacted and broken. Create debris owned by no one
+		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
+		//Game::Update removes all condition==0 items in the stopped items list, which is where this item will be
+	}
+}
+
+bool Item::IsFlammable() { return flammable; }
+
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
-	parent(0)
+	parent(-1)
 {}
 
 std::string ItemCat::GetName() {
@@ -544,7 +599,9 @@ ItemPreset::ItemPreset() : graphic('?'),
 	decayList(std::vector<ItemType>()),
 	attack(Attack()),
 	bulk(1),
-	condition(1)
+	condition(1),
+	fallbackGraphicsSet(),
+	graphicsHint(-1)
 {
 	for (int i = 0; i < RES_COUNT; ++i) {
 		resistances[i] = 0;

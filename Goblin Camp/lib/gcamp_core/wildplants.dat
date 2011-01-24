@@ -166,3 +166,13 @@ plant_type "Darkroot" {
 	minheight=-5.0
 	maxheight=4.0
 }
+
+plant_type "Scorched tree" {
+	tree
+	graphic=141
+	color="75,50,20"
+	rarity=0
+	condition=10
+	minheight=-100.0
+	maxheight=-100.0
+}

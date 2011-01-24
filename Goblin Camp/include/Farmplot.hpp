@@ -43,4 +43,5 @@ public:
 	void SwitchAllowed(int);
 	bool SeedAllowed(ItemType);
 	std::map<ItemType, bool>* AllowedSeeds();
+	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };

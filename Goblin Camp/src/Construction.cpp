@@ -75,7 +75,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
 	dismantle(false),
 	time(0),
-	built(false)
+	built(false),
+	flammable(false)
 {
 	x = target.X();
 	y = target.Y();
@@ -96,10 +97,10 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 Construction::~Construction() {
 	for (int ix = x; ix < (signed int)x + Construction::Blueprint(type).X(); ++ix) {
 		for (int iy = y; iy < (signed int)y + Construction::Blueprint(type).Y(); ++iy) {
-			Map::Inst()->Buildable(ix,iy,true);
+			Map::Inst()->SetBuildable(ix,iy,true);
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
-			Map::Inst()->BlocksLight(ix,iy,false);
+			Map::Inst()->SetBlocksLight(ix,iy,false);
 		}
 	}
 	
@@ -129,6 +130,12 @@ Construction::~Construction() {
 
 void Construction::Condition(int value) {condition = value;}
 int Construction::Condition() {return condition;}
+int Construction::GetMaxCondition() const {return maxCondition;}
+
+
+int Construction::GetGraphicsHint() const {
+	return Construction::Presets[type].graphicsHint;
+}
 
 void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	int screeny = y - upleft.Y();
@@ -165,14 +172,18 @@ int Construction::Build() {
 		//be impossible in practice.
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 
+		int flame = 0;
 		std::list<boost::weak_ptr<Item> > itemsToRemove;
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
+			itemi->lock()->IsFlammable() ? ++flame : --flame;
 			if (Random::Generate(9) < 8) { //80% of materials can't be recovered
 				itemsToRemove.push_back(*itemi);
 			}
 		}
+
+		if (flame > 0) flammable = true;
 
 		for (std::list<boost::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
 			materialsUsed->RemoveItem(*itemi);
@@ -186,8 +197,8 @@ int Construction::Build() {
 		for (unsigned int ix = x; ix < x + Construction::Blueprint(type).X(); ++ix) {
 			for (unsigned int iy = y; iy < y + Construction::Blueprint(type).Y(); ++iy) {
 				Map::Inst()->SetWalkable(ix, iy, walkable);
-				Map::Inst()->BlocksWater(ix, iy, !walkable);
-				Map::Inst()->BlocksLight(ix, iy, Construction::Presets[type].blocksLight);
+				Map::Inst()->SetBlocksWater(ix, iy, !walkable);
+				Map::Inst()->SetBlocksLight(ix, iy, Construction::Presets[type].blocksLight);
 			}
 		}
 
@@ -393,6 +404,8 @@ class ConstructionListener : public ITCODParserListener {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets.back().graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
+		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+			Construction::Presets.back().fallbackGraphicsSet = value.s;
 		} else if (boost::iequals(name, "category")) {
 			Construction::Presets.back().category = value.s;
 			Construction::Categories.insert(value.s);
@@ -535,6 +548,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addFlag("bridge");
 	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("description", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -809,7 +823,15 @@ ConstructionPreset::ConstructionPreset() :
 	color(TCODColor::black),
 	tileReqs(std::set<TileType>()),
 	tier(0),
-	description("")
+	description(""),
+	graphicsHint(-1),
+	fallbackGraphicsSet("")
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
+
+void Construction::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}
+
+bool Construction::IsFlammable() { return flammable; }

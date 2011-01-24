@@ -30,6 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/UIComponents.hpp"
 #include "Tile.hpp"
 
+#include "ConstructionVisitor.hpp"
+
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
 };
@@ -73,6 +75,8 @@ struct ConstructionPreset {
 	std::set<TileType> tileReqs;
 	int tier;
 	std::string description;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class Construction : public Entity {
@@ -107,6 +111,7 @@ protected:
 	int time;
 	bool built;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
+	bool flammable;
 public:
 	virtual ~Construction();
 
@@ -115,7 +120,9 @@ public:
 	static std::vector<int> AllowedAmount;
 	void Condition(int);
 	int Condition();
+	int GetMaxCondition() const;
 	virtual void Draw(Coordinate, TCODConsole*);
+	int GetGraphicsHint() const;
 	int Build();
 	ConstructionType Type();
 	std::list<ItemCategory>* MaterialList();
@@ -143,6 +150,9 @@ public:
 	void Damage(Attack*);
 	void Explode();
 	bool Built();
+	bool IsFlammable();
+
+	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	
 	static boost::unordered_map<std::string, ConstructionType> constructionNames;
 	static ConstructionType StringToConstructionType(std::string);

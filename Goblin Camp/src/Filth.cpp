@@ -30,16 +30,14 @@ FilthNode::~FilthNode() {}
 void FilthNode::Update() {
 }
 
-void FilthNode::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenX = x - upleft.X();
-	int screenY = y - upleft.Y();
+int FilthNode::GetGraphic()
+{
+	return (depth < 5 ) ? '~' : '#';
+}
 
-	if (depth > 0) {
-		if (screenX >= 0 && screenX < console->getWidth() &&
-			screenY >= 0 && screenY < console->getHeight()) {
-				console->putCharEx(screenX, screenY, (depth < 5) ? '~' : '#', color, TCODColor::black);
-		}
-	}
+TCODColor FilthNode::GetColor()
+{
+	return color;
 }
 
 int FilthNode::Depth() {return depth;}
