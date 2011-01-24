@@ -361,6 +361,8 @@ void NPC::Update() {
 	if (carried.lock()) {
 		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
 	} else RemoveEffect(CARRYING);
+
+	if (health <= 0) Kill();
 }
 
 void NPC::UpdateStatusEffects() {
