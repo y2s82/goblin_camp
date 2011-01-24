@@ -642,10 +642,12 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	if (filthList.size() == 0) return Coordinate(-1,-1);
 	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
-	for (size_t i = 0; i < std::min((size_t)10, filthList.size()); ++i) {
+	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
 		unsigned filth = Random::Choose(filthList);
-		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
+		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
+			if (potentialFilth.top().first < 10) break; //Near enough
+		}
 	}
 	if (potentialFilth.size() > 0)
 		return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
