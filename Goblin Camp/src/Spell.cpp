@@ -129,3 +129,5 @@ void Spell::UpdateVelocity() {
 }
 
 bool Spell::IsDead() {return dead;}
+
+bool Spell::IsImmaterial() const { return immaterial; }

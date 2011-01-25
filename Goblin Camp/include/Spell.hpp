@@ -43,4 +43,5 @@ public:
 	void UpdateVelocity();
 	void Impact(int speedChange);
 	bool IsDead();
+	bool IsImmaterial() const;
 };

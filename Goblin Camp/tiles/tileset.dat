@@ -59,6 +59,10 @@ tileset_data "TestMedium" {
 		default_swimming=58
 
 		default_underconstruction=18
+		spark=62
+		smoke=63
+		fire=[64,65]
+		fireFPS=10
 	
 		creature_sprite_data {
 			sprite=21

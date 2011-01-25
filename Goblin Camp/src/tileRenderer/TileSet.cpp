@@ -49,7 +49,11 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	defaultItemSpriteSet(),
 	constructionSpriteSets(),
 	constructionSpriteLookup(),
-	defaultConstructionSpriteSet(){
+	defaultConstructionSpriteSet(),
+	sparkSprite(),
+	smokeSprite(),
+	fireTiles(),
+	fireFrameTime(100){
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -299,6 +303,22 @@ void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Su
 	}
 }
 
+void TileSet::DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (spell->IsImmaterial()) {
+		smokeSprite.Draw(dst, dstRect);
+	} else {
+		sparkSprite.Draw(dst, dstRect);
+	}
+}
+
+void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	// Determine frame
+	if (fireTiles.size() > 0) {
+		int fireTile = (TCODSystem::getElapsedMilli() / fireFrameTime) % fireTiles.size();
+		fireTiles[fireTile].Draw(dst, dstRect);
+	}
+}
+
 int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
 	LookupMap::const_iterator set;
 
@@ -461,6 +481,22 @@ void TileSet::SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprit
 
 void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {
 	defaultUnderConstructionSprite = sprite;
+}
+
+void TileSet::SetSparkSprite(const Sprite& sprite) {
+	sparkSprite = sprite;
+}
+
+void TileSet::SetSmokeSprite(const Sprite& sprite) {
+	smokeSprite = sprite;
+}
+
+void TileSet::AddFireSprite(const Sprite& sprite) {
+	fireTiles.push_back(sprite);
+}
+
+void TileSet::SetFireFrameRate(int fps) {
+	fireFrameTime = 1000 / fps;
 }
 
 void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {
