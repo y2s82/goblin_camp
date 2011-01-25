@@ -132,8 +132,8 @@ Coordinate Item::Position() {
 void Item::Reserve(bool value) {
 	reserved = value;
 	if (!reserved && !container.lock() && !attemptedStore) {
-		Game::Inst()->StockpileItem(boost::static_pointer_cast<Item>(shared_from_this()));
 		attemptedStore = true;
+		Game::Inst()->StockpileItem(boost::static_pointer_cast<Item>(shared_from_this()));
 	}
 }
 
