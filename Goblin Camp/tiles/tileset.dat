@@ -23,8 +23,8 @@ tileset_data "TestMedium" {
 		blood=16
 
 		// Overlays
-		non_territory=12
-		territory=13
+		non_territory=13
+		territory=12
 		marked=15
 
 		// Cursors
@@ -208,6 +208,10 @@ tileset_data "TestMedium" {
 			sprite=34
 		}
 
+		item_sprite_data "Seed" {
+			sprite=61
+		}
+		
 		construction_sprite_data "Farm plot" {
 			sprites=[43]
 		}
