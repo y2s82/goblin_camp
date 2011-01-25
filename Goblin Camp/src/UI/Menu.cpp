@@ -259,6 +259,9 @@ Menu* Menu::DevMenu() {
 
 		call = boost::bind(&Game::CreateFire, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '!')));
+
+		call = boost::bind(&Game::CreateDitch, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseABPlacement, call, checkTree, '_')));
 	}
 	return devMenu;
 }
