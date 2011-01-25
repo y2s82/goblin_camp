@@ -89,6 +89,10 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("default_swimming", TCOD_TYPE_INT, false);
 
 	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("spark", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("smoke", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("fire", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("fireFPS", TCOD_TYPE_INT, false);
 
 	// Cursors
 	tileTextureStruct->addListProperty("default_cursor", TCOD_TYPE_INT, false);
@@ -314,6 +318,19 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			
 			else if (boost::iequals(name, "default_underconstruction")) {
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(value.i, currentTexture));
+			}
+			else if (boost::iequals(name, "spark")) {
+				tileSet->SetSparkSprite(Sprite(value.i, currentTexture));
+			}
+			else if (boost::iequals(name, "smoke")) {
+				tileSet->SetSmokeSprite(Sprite(value.i, currentTexture));
+			}
+			else if (boost::iequals(name, "fireFPS")) {
+				tileSet->SetFireFrameRate(value.i);
+			}
+			else if (boost::iequals(name, "fire")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddFireSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			}
 			break;
 		case SS_NPC:

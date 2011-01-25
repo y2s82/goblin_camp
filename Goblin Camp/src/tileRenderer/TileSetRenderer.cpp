@@ -168,6 +168,8 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	DrawNatureObjects(startTileX, startTileY, tilesX, tilesY);
 	DrawItems(startTileX, startTileY, tilesX, tilesY);
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
+	DrawFires(startTileX, startTileY, tilesX, tilesY);
+	DrawSpells(startTileX, startTileY, tilesX, tilesY);
 
 	SDL_SetClipRect(mapSurface.get(), NULL);
 }
@@ -264,6 +266,34 @@ void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) {
 		{
 			SDL_Rect dstRect(CalcDest(npcPos.X(), npcPos.Y()));
 			tileSet->DrawNPC(npci->second, mapSurface.get(), &dstRect);
+		}
+	}
+}
+
+void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) {
+	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
+		Coordinate spellPos = (*spelli)->Position();
+		if (spellPos.X() >= startX && spellPos.X() < startX + sizeX
+				&& spellPos.Y() >= startY && spellPos.Y() < startY + sizeY)
+		{
+			SDL_Rect dstRect(CalcDest(spellPos.X(), spellPos.Y()));
+			tileSet->DrawSpell(*spelli, mapSurface.get(), &dstRect);
+		}
+	}
+}
+
+void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) {
+	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
+		boost::shared_ptr<FireNode> fire = firei->lock();
+		if (fire.get() != 0)
+		{
+			Coordinate firePos = fire->GetPosition();
+			if (firePos.X() >= startX && firePos.X() < startX + sizeX
+					&& firePos.Y() >= startY && firePos.Y() < startY + sizeY)
+			{
+				SDL_Rect dstRect(CalcDest(firePos.X(), firePos.Y()));
+				tileSet->DrawFire(fire, mapSurface.get(), &dstRect);
+			}
 		}
 	}
 }
