@@ -56,12 +56,12 @@ void FireNode::Update() {
 	color.g = Random::Generate(0, 250);
 
 	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock();
-	if (water && water->Depth() > 0) {
-		if (water->Depth() >= temperature) {
-			water->Depth(water->Depth() - temperature);
+	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(x, y)) {
+		if (water->Depth()*10 >= temperature) {
+			water->Depth(water->Depth() - (temperature/10));
 			temperature = 0;
 		} else {
-			temperature -= water->Depth();
+			temperature -= water->Depth()*10;
 			water->Depth(0);
 		}
 		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), 2);
@@ -80,9 +80,12 @@ void FireNode::Update() {
 			Map::Inst()->Burn(x, y);
 		}
 
-		if (Map::Inst()->Type(x, y) != TILEGRASS || Map::Inst()->Burnt(x, y) >= 10) temperature -= 3;
+		if (Map::Inst()->Type(x, y) != TILEGRASS) --temperature;
+		if (Map::Inst()->Burnt(x, y) >= 10) --temperature;
 
-		if (Random::Generate(80) == 0) {
+		int inverseSparkChance = 100 - std::max(0, ((temperature - 50) / 8));
+
+		if (Random::Generate(inverseSparkChance) == 0) {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), 0);
 			int distance = Random::Generate(0, 15);
 			if (distance < 12) {
@@ -99,7 +102,8 @@ void FireNode::Update() {
 			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(distance);
 			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(distance);
 			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(-distance);
-			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			if (Random::Generate(9) < 8) direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			else direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
 
 			spark->CalculateFlightPath(Coordinate(x,y) + direction, 50, 1);
 		}
@@ -126,7 +130,7 @@ void FireNode::Update() {
 				if (item && item->IsFlammable()) {
 					Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
 					Game::Inst()->RemoveItem(item);
-					temperature += 5;
+					temperature += 250;
 					break;
 				}
 			}
@@ -136,7 +140,7 @@ void FireNode::Update() {
 				boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
 				if (construct) {
 					if (construct->IsFlammable()) {
-						if (Random::Generate(9) == 0) {
+						if (Random::Generate(29) == 0) {
 							Attack fire;
 							TCOD_dice_t dice;
 							dice.addsub = 1;
@@ -147,7 +151,7 @@ void FireNode::Update() {
 							fire.Type(DAMAGE_FIRE);
 							construct->Damage(&fire);
 						}
-						temperature += 10;
+						temperature += 15;
 					} else if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 						/*Stockpiles are a special case. Not being an actual building, fire won't touch them.
 						Instead fire should be able to burn the items stored in the stockpile*/
@@ -158,7 +162,7 @@ void FireNode::Update() {
 								container->RemoveItem(item);
 								Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
 								Game::Inst()->RemoveItem(item);
-								temperature += 5;
+								temperature += 250;
 							}
 						}
 					}
