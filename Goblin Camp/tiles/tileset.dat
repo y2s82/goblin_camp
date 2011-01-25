@@ -84,6 +84,14 @@ tileset_data "TestMedium" {
 			sprite=24
 		}		
 
+		creature_sprite_data "soldier ant" {
+			sprite=59
+		}
+		
+		creature_sprite_data "starving wolf" {
+			sprite=60
+		}
+		
 		plant_sprite_data "Pine"{
 			sprite=29
 		}
