@@ -185,7 +185,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & peacefulFaunaCount;
 	ar & safeMonths;
 	if (version == 0) {
-		ar & devMode;
+		bool notUsed;
+		ar & notUsed;
 	}
 	ar & marks;
 	if (version == 0) {
@@ -226,7 +227,6 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
-//	ar.template register_type<Job>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & type;
 	ar & timeCount;
@@ -287,7 +287,6 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar.template register_type<Item>();
 		ar.template register_type<Entity>();
 		ar.template register_type<SkillSet>();
-		//ar.template register_type<Job>();
 		ar & boost::serialization::base_object<Entity>(*this);
 		ar & type;
 		ar & timeCount;
@@ -1034,7 +1033,7 @@ void StockManager::load(Archive & ar, const unsigned int version) {
 //
 // class Map
 //
-BOOST_CLASS_VERSION(Map, 0)
+BOOST_CLASS_VERSION(Map, 1)
 
 template<class Archive>
 void Map::save(Archive & ar, const unsigned int version) const {
