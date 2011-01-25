@@ -897,3 +897,11 @@ void UI::ChooseRectPlacementCursor(boost::function<void(Coordinate, Coordinate)>
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
 }
+
+void UI::ChooseABPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
+	UI::Inst()->state(UIABPLACEMENT);
+	UI::Inst()->SetCallback(callback);
+	UI::Inst()->SetPlacementCallback(placement);
+	UI::Inst()->blueprint(Coordinate(1,1));
+	Game::Inst()->Renderer()->SetCursorMode(cursor);
+}

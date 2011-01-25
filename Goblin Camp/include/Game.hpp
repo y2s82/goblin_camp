@@ -204,7 +204,7 @@ public:
 	static void FellTree(Coordinate, Coordinate);
 	static void DesignateTree(Coordinate, Coordinate);
 	void RemoveNatureObject(boost::weak_ptr<NatureObject>);
-	void RemoveNatureObject(Coordinate, Coordinate);
+	void RemoveNatureObject(Coordinate a, Coordinate b);
 	static void HarvestWildPlant(Coordinate, Coordinate);
 	static void DesignateBog(Coordinate, Coordinate);
 	static bool CheckTileType(TileType, Coordinate, Coordinate);
@@ -213,6 +213,7 @@ public:
 	static bool Adjacent(Coordinate, Coordinate);
 	void CreateNatureObject(Coordinate);
 	void CreateNatureObject(Coordinate, std::string);
+	void CreateDitch(Coordinate);
 
 	Season CurrentSeason();
 	std::string SeasonToString(Season);

@@ -1863,3 +1863,9 @@ boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 	spellList.push_back(newSpell);
 	return newSpell;
 }
+
+void Game::CreateDitch(Coordinate pos) {
+	RemoveNatureObject(pos, pos);
+	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
+	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
+}
