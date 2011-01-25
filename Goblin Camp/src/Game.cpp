@@ -1108,7 +1108,7 @@ void Game::GenerateMap(uint32 seed) {
 			if (height < map->GetWaterlevel()) {
 				if (random.GenerateBool()) map->Type(x,y,TILERIVERBED);
 				else map->Type(x,y,TILEDITCH);
-				CreateWater(Coordinate(x,y));
+				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
 				map->Type(x,y,TILEGRASS);
 				if (random.Generate(9) < 9) {
@@ -1862,4 +1862,10 @@ boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
 	spellList.push_back(newSpell);
 	return newSpell;
+}
+
+void Game::CreateDitch(Coordinate pos) {
+	RemoveNatureObject(pos, pos);
+	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
+	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
 }

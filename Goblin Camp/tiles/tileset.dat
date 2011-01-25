@@ -23,8 +23,8 @@ tileset_data "TestMedium" {
 		blood=16
 
 		// Overlays
-		non_territory=12
-		territory=13
+		non_territory=13
+		territory=12
 		marked=15
 
 		// Cursors
@@ -59,9 +59,9 @@ tileset_data "TestMedium" {
 		default_swimming=58
 
 		default_underconstruction=18
-		spark=59
-		smoke=60
-		fire=[61,62]
+		spark=62
+		smoke=63
+		fire=[64,65]
 		fireFPS=10
 	
 		creature_sprite_data {
@@ -88,6 +88,14 @@ tileset_data "TestMedium" {
 			sprite=24
 		}		
 
+		creature_sprite_data "soldier ant" {
+			sprite=59
+		}
+		
+		creature_sprite_data "starving wolf" {
+			sprite=60
+		}
+		
 		plant_sprite_data "Pine"{
 			sprite=29
 		}
@@ -204,6 +212,10 @@ tileset_data "TestMedium" {
 			sprite=34
 		}
 
+		item_sprite_data "Seed" {
+			sprite=61
+		}
+		
 		construction_sprite_data "Farm plot" {
 			sprites=[43]
 		}

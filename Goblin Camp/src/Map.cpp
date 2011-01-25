@@ -448,7 +448,7 @@ void Map::Burn(int x, int y, int magnitude) {
 			if (tree && Random::Generate(3) < 2) {
 				Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
 			}
-			if (tileMap[x][y].fire) tileMap[x][y].fire->AddHeat(tree ? 180 : 30);
+			if (tileMap[x][y].fire) tileMap[x][y].fire->AddHeat(tree ? 500 : 100);
 		}
 	}
 }
