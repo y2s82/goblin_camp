@@ -226,7 +226,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
-	ar.template register_type<Job>();
+//	ar.template register_type<Job>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & type;
 	ar & timeCount;
@@ -287,7 +287,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 		ar.template register_type<Item>();
 		ar.template register_type<Entity>();
 		ar.template register_type<SkillSet>();
-		ar.template register_type<Job>();
+		//ar.template register_type<Job>();
 		ar & boost::serialization::base_object<Entity>(*this);
 		ar & type;
 		ar & timeCount;
