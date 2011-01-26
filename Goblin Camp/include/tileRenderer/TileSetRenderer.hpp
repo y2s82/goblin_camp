@@ -54,7 +54,6 @@ private:
 	int cursorHint;
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
-	void DrawWater				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawFilth				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawTerritoryOverlay	(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawConstruction		(Map* map, int tileX, int tileY, SDL_Rect * dstRect);

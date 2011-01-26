@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "tileRenderer/TileSet.hpp"
+#include "tileRenderer/TileSetUtil.hpp"
 #include <boost/numeric/conversion/cast.hpp> 
 
 #include "FarmPlot.hpp"
@@ -35,6 +36,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	nonTerritoryOverlay(),
 	territoryOverlay(),
 	markedOverlay(),
+	corruptionTiles(),
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
@@ -98,6 +100,14 @@ void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
 
 void TileSet::DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	terrainTiles.at(type).Draw(dst, dstRect);
+}
+
+void TileSet::DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	if (corruptionTiles.size() >= 16) {
+		corruptionTiles.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+	} else if (corruptionTiles.size() > 0) {
+		corruptionTiles[0].Draw(dst, dstRect);
+	}
 }
 
 void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
@@ -468,6 +478,10 @@ void TileSet::SetTerritoryOverlay(const Sprite& sprite) {
 
 void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 	markedOverlay = sprite;
+}
+
+void TileSet::AddCorruption(const Sprite& sprite) {
+	corruptionTiles.push_back(sprite);
 }
 
 void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {

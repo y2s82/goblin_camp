@@ -14,8 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
-#pragma once
+#include "stdafx.hpp"
+#include "tileRenderer/TileSetUtil.hpp"
 
-namespace TilesetUtil {
-	int CalcConnectionMapIndex(bool connectNorth, bool connectEast, bool connectSouth, bool connectWest);
-};
+int TilesetUtil::CalcConnectionMapIndex(bool connectNorth, bool connectEast, bool connectSouth, bool connectWest) {
+	int index = 0;
+	if (!connectSouth) index += 8;
+	if (connectSouth == connectNorth) index +=4;
+	if (connectWest) index += 2;
+	if (connectEast != connectWest) index += 1;
+	return index;
+}
