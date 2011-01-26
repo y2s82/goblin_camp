@@ -59,7 +59,7 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
    //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
    SDL_FreeSurface(temp);
 
-   if (mapSurface.get() == NULL || tempBuffer.get() == NULL)
+   if (!mapSurface || !tempBuffer)
    {
 	   LOG(SDL_GetError());
    }
@@ -284,8 +284,7 @@ void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) {
 
 void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) {
 	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
-		boost::shared_ptr<FireNode> fire = firei->lock();
-		if (fire.get() != 0)
+		if (boost::shared_ptr<FireNode> fire = firei->lock())
 		{
 			Coordinate firePos = fire->GetPosition();
 			if (firePos.X() >= startX && firePos.X() < startX + sizeX

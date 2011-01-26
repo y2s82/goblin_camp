@@ -32,16 +32,25 @@ public:
 	void AddUnderConstructionSprite(const Sprite& sprite);
 	void SetWidth(int width);
 	void SetOpenSprite(const Sprite& sprite);
+	void SetConnectionMap(bool connected);
 
 	bool IsValid() const;
 	bool HasUnderConstructionSprites() const;
+	bool IsConnectionMap() const;
 		
+	// Normal draw
 	void Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
 	void DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRecT) const;
+	void DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRect) const;
+
+	// Connection map draw
+	void Draw(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	void DrawUnderConstruction(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	void DrawOpen(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const;
 private:	
 	std::vector<Sprite> sprites;
 	std::vector<Sprite> underconstructionSprites;
 	Sprite openSprite;
 	int width;
+	bool connectionMap;
 };

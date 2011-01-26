@@ -137,8 +137,7 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 
 	if ((TCODSystem::getElapsedMilli() % 1000 < 700)) {
 		if (npc->HasEffect(CARRYING)) {
-			boost::shared_ptr<Item> carriedItem = npc->Carrying().lock();
-			if (carriedItem.get() != 0) {
+			if (boost::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
 				DrawItem(carriedItem, dst, dstRect);
 			}
 		}
@@ -251,20 +250,43 @@ void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, con
 	construction->AcceptVisitor(visitor);
 }
 
+bool TileSet::ConstructionConnectTo(Construction * construction, int x, int y) const {
+	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y));
+	if (boost::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
+		return otherConstruct->Type() == construction->Type() && otherConstruct->Condition() > 0 == construction->Condition() > 0;
+	}
+	return false;
+}
+
 void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
-	if (hint == -1 || hint >= constructionSpriteSets.size()) {
-		defaultConstructionSpriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
+	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (spriteSet.IsConnectionMap()) {
+		ConstructionType type = construction->Type();
+		bool connectN = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() - 1);
+		bool connectE = ConstructionConnectTo(construction, worldPos.X() + 1, worldPos.Y());
+		bool connectS = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() + 1);
+		bool connectW = ConstructionConnectTo(construction, worldPos.X() - 1, worldPos.Y());
+		spriteSet.Draw(connectN, connectE, connectS, connectW, dst, dstRect);
 	} else {
-		constructionSpriteSets[hint].Draw(worldPos - construction->Position(), dst, dstRect);
+		spriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
 	}
 }
 
 void TileSet::DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
-	const ConstructionSpriteSet& set((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
-	if (set.HasUnderConstructionSprites()) {
-		set.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
+	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (spriteSet.HasUnderConstructionSprites()) {
+		if (spriteSet.IsConnectionMap()) {
+			ConstructionType type = construction->Type();
+			bool connectN = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() - 1);
+			bool connectE = ConstructionConnectTo(construction, worldPos.X() + 1, worldPos.Y());
+			bool connectS = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() + 1);
+			bool connectW = ConstructionConnectTo(construction, worldPos.X() - 1, worldPos.Y());
+			spriteSet.DrawUnderConstruction(connectN, connectE, connectS, connectW, dst, dstRect);
+		} else {
+			spriteSet.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
+		}
 	} else {
 		defaultUnderConstructionSprite.Draw(dst, dstRect);
 	}
@@ -272,9 +294,8 @@ void TileSet::DrawUnderConstruction(Construction * construction, const Coordinat
 
 void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
-	if (storage.get() != 0 && !storage->empty()) {
-		boost::shared_ptr<Item> item = storage->GetFirstItem().lock();
-		if (item.get() != 0) {
+	if (storage && !storage->empty()) {
+		if (boost::shared_ptr<Item> item = storage->GetFirstItem().lock()) {
 			DrawItem(item, dst, dstRect);
 		}
 	}

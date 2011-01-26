@@ -49,6 +49,7 @@ TileSetLoader::TileSetLoader() :
 	constructionSpriteStruct->addListProperty("underconstruction_sprites", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("openSprite", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
+	constructionSpriteStruct->addFlag("connection_map");
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
 
@@ -134,7 +135,7 @@ bool TileSetLoader::LoadTileSet(boost::filesystem::path path) {
 
 	parser.run(path.string().c_str(), this);
 
-	if (tileSet.get() == NULL) {
+	if (!tileSet) {
 		success = false;
 	}
 	Reset();
@@ -164,13 +165,13 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 	if (boost::iequals(str->getName(), "tileset_data"))
 	{
 		tileSetName = name;
-		if (tileSet.get() != NULL) {
+		if (tileSet) {
 			parser->error("Multiple tile set declarations in one file not supported");
 		}
 		return success;
 	}
 	
-	if (tileSet.get() == NULL) {
+	if (!tileSet) {
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
@@ -184,7 +185,7 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 		return success;
 	}
 	
-	if (currentTexture.get() == 0) {
+	if (!currentTexture) {
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
@@ -208,12 +209,20 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 }
 
 bool TileSetLoader::parserFlag(TCODParser *parser,const char *name) {
+	if (currentTexture) {
+		switch (currentSpriteSet) {
+		case SS_CONSTRUCTION:
+			if (boost::iequals(name, "connection_map")) {
+				constructionSpriteSet.SetConnectionMap(true);
+			}
+		}
+	}
 	return success;
 }
 
 bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 	// Tile Texture Properties
-	if (currentTexture.get() != NULL) {
+	if (currentTexture) {
 		switch (currentSpriteSet) {
 		case SS_NONE:
 			// Terrain
@@ -380,7 +389,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		return success;
 	}
 
-	if (tileSet.get() == NULL) { 
+	if (!tileSet) { 
 		parser->error(uninitialisedTilesetError); 
 		return false; 
 	}

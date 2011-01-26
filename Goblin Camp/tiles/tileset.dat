@@ -61,7 +61,7 @@ tileset_data "TestMedium" {
 		default_underconstruction=18
 		spark=62
 		smoke=63
-		fire=[64,65]
+		fire=[68,69]
 		fireFPS=10
 	
 		creature_sprite_data {
@@ -231,6 +231,14 @@ tileset_data "TestMedium" {
 		construction_sprite_data "Door" {
 			sprites=[39]
 			openSprite=45
+		}
+
+		construction_sprite_data "Palisade" {
+			connection_map
+			sprites=[64,65,66,67,
+			         80,81,82,83,
+					 96,97,98,99,
+					 112,113,114,115]
 		}
 	}
 }
