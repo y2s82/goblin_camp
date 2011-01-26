@@ -1,7 +1,18 @@
+###############################################################################
+##### Boost project
+###############################################################################
+
 import path ;
 import os ;
 
 path-constant HERE : . ;
+
+###############################################################################
+##### Project and targets
+## We're linking Boost statically, except for Boost.Python on NT.
+## Boost.Thread is linked with WinAPI thread support for Windows, and
+## pthreads for other OSes.
+###############################################################################
 
 common-reqs =
     <define>BOOST_FILESYSTEM_VERSION=3
@@ -15,6 +26,7 @@ project boost
       <define>DATE_TIME_INLINE
       <define>BOOST_PYTHON_SOURCE
       <define>BOOST_THREAD_BUILD_LIB=1
+      <warnings>off
       $(common-reqs)
     : usage-requirements
       <os>NT:<define>BOOST_PYTHON_DYN_LINK

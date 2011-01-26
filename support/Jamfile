@@ -1,3 +1,7 @@
+###############################################################################
+##### Supporting projects
+############################################################################### 
+
 path-constant HERE : . ;
 
 common-reqs = <include>$(HERE)/python ;
@@ -9,4 +13,16 @@ project support
       $(common-reqs)
 ;
 
-lib python-modules : [ glob $(HERE)/python/*.c ] : <link>static <dependency>/python <include>"$(GC_ROOT)/Goblin Camp/include" ;
+###############################################################################
+##### python-modules
+## Goblin Camp depends on several Python modules written in C. Instead
+## of hoping they'll be either linked in, or finding proper path to dynamic
+## libs in runtime, we link them in to the game and initialise them explicitly.
+############################################################################### 
+
+lib python-modules
+    : [ glob $(HERE)/python/*.c ]
+    : <link>static
+      <use>/python
+      <include>"$(GC_ROOT)/Goblin Camp/include"
+;
