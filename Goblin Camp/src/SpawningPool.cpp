@@ -33,7 +33,8 @@ SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construct
 	corpses(0),
 	spawns(0),
 	corpseContainer(boost::shared_ptr<Container>()),
-	jobCount(0)
+	jobCount(0),
+	burn(0)
 {
 	container = new UIContainer(std::vector<Drawable*>(), 0, 0, 16, 11);
 	dialog = new Dialog(container, "Spawning Pool", 16, 10);
@@ -168,6 +169,37 @@ void SpawningPool::Update() {
 			}
 		}
 	}
+	if (burn > 0) {
+		if (Random::Generate(2) == 0) --burn;
+		if (burn > 500) {
+			Expand();
+			Game::Inst()->CreateFire(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())));
+			if (Random::Generate(9) == 0) {
+				Coordinate spawnLocation(-1,-1);
+				for (int x = a.X(); x <= b.X(); ++x) {
+					for (int y = a.Y(); y <= b.Y(); ++y) {
+						if (Map::Inst()->GetConstruction(x,y) == uid) {
+							if (Map::Inst()->IsWalkable(x-1,y)) {
+								spawnLocation = Coordinate(x-1,y);
+								break;
+							} else if (Map::Inst()->IsWalkable(x+1,y)) {
+								spawnLocation = Coordinate(x+1,y);
+								break;
+							} else if (Map::Inst()->IsWalkable(x,y+1)) {
+								spawnLocation = Coordinate(x,y+1);
+								break;
+							} else if (Map::Inst()->IsWalkable(x,y-1)) {
+								spawnLocation = Coordinate(x,y-1);
+								break;
+							}
+						}
+					}
+				}
+
+				Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("imp"));
+			}
+		}
+	}
 }
 
 void SpawningPool::Expand() {
@@ -256,4 +288,14 @@ void SpawningPool::CancelJob(int) {
 
 void SpawningPool::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
+}
+
+void SpawningPool::Burn() {
+	burn += 5;
+#ifdef DEBUG
+	std::cout<<"SPBURN: "<<burn<<'\n';
+#endif
+	if (burn > 30000) {
+		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	}
 }
