@@ -21,6 +21,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "Game.hpp"
 #include "Water.hpp"
+#include "SpawningPool.hpp"
+
 
 FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 	temperature(vtemp) {
@@ -54,6 +56,8 @@ void FireNode::Update() {
 	graphic = Random::Generate(176,178);
 	color.r = Random::Generate(225, 255);
 	color.g = Random::Generate(0, 250);
+
+	if (temperature > 800) temperature = 800;
 
 	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock();
 	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(x, y)) {
@@ -165,6 +169,9 @@ void FireNode::Update() {
 								temperature += 250;
 							}
 						}
+					} else if (construct->HasTag(SPAWNINGPOOL)) {
+						boost::static_pointer_cast<SpawningPool>(construct)->Burn();
+						temperature += 25;
 					}
 				}
 			}

@@ -1212,7 +1212,7 @@ void SkillSet::load(Archive & ar, const unsigned int version) {
 //
 // class SpawningPool
 //
-BOOST_CLASS_VERSION(SpawningPool, 0)
+BOOST_CLASS_VERSION(SpawningPool, 1)
 
 	template<class Archive>
 void SpawningPool::save(Archive & ar, const unsigned int version) const {
@@ -1227,22 +1227,24 @@ void SpawningPool::save(Archive & ar, const unsigned int version) const {
 	ar & spawns;
 	ar & corpseContainer;
 	ar & jobCount;
+	ar & burn;
 }
 
 template<class Archive>
 void SpawningPool::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Construction>(*this);
-		ar & dumpFilth;
-		ar & dumpCorpses;
-		ar & a;
-		ar & b;
-		ar & expansion;
-		ar & filth;
-		ar & corpses;
-		ar & spawns;
-		ar & corpseContainer;
-		ar & jobCount;
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & dumpFilth;
+	ar & dumpCorpses;
+	ar & a;
+	ar & b;
+	ar & expansion;
+	ar & filth;
+	ar & corpses;
+	ar & spawns;
+	ar & corpseContainer;
+	ar & jobCount;
+	if (version >= 1) {
+		ar & burn;
 	}
 }
 

@@ -35,6 +35,7 @@ private:
 	unsigned int expansion, filth, corpses, spawns;
 	boost::shared_ptr<Container> corpseContainer;
 	int jobCount;
+	int burn;
 public:
 	SpawningPool(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	Panel* GetContextMenu();
@@ -47,4 +48,5 @@ public:
 	void Expand();
 	virtual void CancelJob(int=0);
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
+	void Burn();
 };
