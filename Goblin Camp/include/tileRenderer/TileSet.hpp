@@ -26,6 +26,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tile.hpp"
 #include "NPC.hpp"
 #include "NatureObject.hpp"
+#include "Spell.hpp"
+#include "Fire.hpp"
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/NPCSpriteSet.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
@@ -48,6 +50,7 @@ public:
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(int index, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -57,6 +60,8 @@ public:
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
+	void DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
@@ -74,11 +79,17 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
+	void AddCorruption(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
+	void SetSparkSprite(const Sprite& sprite);
+	void SetSmokeSprite(const Sprite& sprite);
+	void AddFireSprite(const Sprite& sprite);
+	void SetFireFrameRate(int fps);
+
 	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
-	
+		
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
@@ -110,11 +121,16 @@ private:
 	Sprite nonTerritoryOverlay;
 	Sprite territoryOverlay;
 	Sprite markedOverlay;
+	std::vector<Sprite> corruptionTiles;
 
 	Sprite marker;
 	Sprite blood;
 
 	Sprite defaultUnderConstructionSprite;
+	Sprite sparkSprite;
+	Sprite smokeSprite;
+	std::vector<Sprite> fireTiles;
+	int fireFrameTime;
 
 	NPCSpriteSet defaultNPCSpriteSet;
 	std::vector<NPCSpriteSet> npcSpriteSets;
@@ -136,6 +152,8 @@ private:
 	CursorTypeSpriteArray nonplaceableCursors;
 
 	StatusEffectSpriteArray defaultStatusEffects;
+
+	bool ConstructionConnectTo(Construction * construction, int x, int y) const;
 
 	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;

@@ -49,6 +49,7 @@ TileSetLoader::TileSetLoader() :
 	constructionSpriteStruct->addListProperty("underconstruction_sprites", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("openSprite", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
+	constructionSpriteStruct->addFlag("connection_map");
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
 
@@ -72,6 +73,7 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("non_territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("corruption", TCOD_TYPE_INT, false);
 
 	// Status Effects
 	tileTextureStruct->addProperty("default_hungry", TCOD_TYPE_INT, false);
@@ -89,6 +91,10 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("default_swimming", TCOD_TYPE_INT, false);
 
 	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("spark", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("smoke", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("fire", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("fireFPS", TCOD_TYPE_INT, false);
 
 	// Cursors
 	tileTextureStruct->addListProperty("default_cursor", TCOD_TYPE_INT, false);
@@ -130,7 +136,7 @@ bool TileSetLoader::LoadTileSet(boost::filesystem::path path) {
 
 	parser.run(path.string().c_str(), this);
 
-	if (tileSet.get() == NULL) {
+	if (!tileSet) {
 		success = false;
 	}
 	Reset();
@@ -160,13 +166,13 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 	if (boost::iequals(str->getName(), "tileset_data"))
 	{
 		tileSetName = name;
-		if (tileSet.get() != NULL) {
+		if (tileSet) {
 			parser->error("Multiple tile set declarations in one file not supported");
 		}
 		return success;
 	}
 	
-	if (tileSet.get() == NULL) {
+	if (!tileSet) {
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
@@ -180,7 +186,7 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 		return success;
 	}
 	
-	if (currentTexture.get() == 0) {
+	if (!currentTexture) {
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
@@ -204,12 +210,20 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 }
 
 bool TileSetLoader::parserFlag(TCODParser *parser,const char *name) {
+	if (currentTexture) {
+		switch (currentSpriteSet) {
+		case SS_CONSTRUCTION:
+			if (boost::iequals(name, "connection_map")) {
+				constructionSpriteSet.SetConnectionMap(true);
+			}
+		}
+	}
 	return success;
 }
 
 bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 	// Tile Texture Properties
-	if (currentTexture.get() != NULL) {
+	if (currentTexture) {
 		switch (currentSpriteSet) {
 		case SS_NONE:
 			// Terrain
@@ -250,8 +264,11 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
-			} 
-			
+			} else if (boost::iequals(name, "corruption")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddCorruption(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			}
+
 			// Cursors
 			else if (boost::iequals(name, "default_cursor")) {
 				SetCursorSprites(Cursor_None, value.list);
@@ -315,6 +332,19 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			else if (boost::iequals(name, "default_underconstruction")) {
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(value.i, currentTexture));
 			}
+			else if (boost::iequals(name, "spark")) {
+				tileSet->SetSparkSprite(Sprite(value.i, currentTexture));
+			}
+			else if (boost::iequals(name, "smoke")) {
+				tileSet->SetSmokeSprite(Sprite(value.i, currentTexture));
+			}
+			else if (boost::iequals(name, "fireFPS")) {
+				tileSet->SetFireFrameRate(value.i);
+			}
+			else if (boost::iequals(name, "fire")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddFireSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			}
 			break;
 		case SS_NPC:
 			if (boost::iequals(name, "sprite")) {
@@ -363,7 +393,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		return success;
 	}
 
-	if (tileSet.get() == NULL) { 
+	if (!tileSet) { 
 		parser->error(uninitialisedTilesetError); 
 		return false; 
 	}
