@@ -26,13 +26,13 @@ TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tile
 		tiles = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormatAlpha(temp), SDL_FreeSurface);
 		SDL_FreeSurface(temp);
 	}
-	if (tiles.get() == NULL) {
-	   LOG(SDL_GetError());
-	   tileCount = 0;
-    } else {
-		tileXDim = (tiles->w / tileWidth);
+	if (tiles) {
+	    tileXDim = (tiles->w / tileWidth);
 		tileYDim = (tiles->h / tileHeight);
 		tileCount = tileXDim * tileYDim;
+    } else {
+		LOG(SDL_GetError());
+	    tileCount = 0;
 	}
 }
 

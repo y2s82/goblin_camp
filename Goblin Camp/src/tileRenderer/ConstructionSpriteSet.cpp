@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "stdafx.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/TileSetUtil.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Door.hpp"
@@ -23,12 +24,16 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 
 ConstructionSpriteSet::ConstructionSpriteSet()
-	: sprites(), width(1) {}
+	: sprites(), 
+	underconstructionSprites(),
+	openSprite(),
+	width(1),
+	connectionMap() {}
 
 ConstructionSpriteSet::~ConstructionSpriteSet() {}
 
 void ConstructionSpriteSet::Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
-	if (sprites.size() > 0) {
+	if (IsValid()) {
 		int xOffset = internalPos.X() % width;
 		int yOffset = internalPos.Y() % (sprites.size() / width);
 
@@ -57,6 +62,30 @@ void ConstructionSpriteSet::DrawOpen(const Coordinate& internalPos, SDL_Surface 
 	}
 }
 
+void ConstructionSpriteSet::Draw(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (IsValid() && connectionMap) {
+		sprites.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+	}
+}
+
+void ConstructionSpriteSet::DrawUnderConstruction(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (HasUnderConstructionSprites() && connectionMap) {
+		if (underconstructionSprites.size() == 1) {
+			underconstructionSprites[0].Draw(dst, dstRect);
+		} else {
+			underconstructionSprites.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+		}
+	}
+}
+
+void ConstructionSpriteSet::DrawOpen(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (openSprite.Exists()) {
+		openSprite.Draw(dst, dstRect);
+	} else {
+		Draw(connectN, connectE, connectS, connectW, dst, dstRect);
+	}
+}
+
 void ConstructionSpriteSet::AddSprite(const Sprite& sprite) {
 	sprites.push_back(sprite);
 }
@@ -73,11 +102,23 @@ void ConstructionSpriteSet::SetWidth(int val) {
 	width = val;
 }
 
+void ConstructionSpriteSet::SetConnectionMap(bool connected) {
+	connectionMap = connected;
+}
+
 bool ConstructionSpriteSet::IsValid() const {
-	return (sprites.size() > 0 && width > 0 && width <= sprites.size() && (sprites.size() / width) * width == sprites.size());
+	if (connectionMap) {
+		return sprites.size() == 16;
+	} else {
+		return (sprites.size() > 0 && width > 0 && width <= sprites.size() && (sprites.size() / width) * width == sprites.size());
+	}
+}
+
+bool ConstructionSpriteSet::IsConnectionMap() const {
+	return connectionMap;
 }
 
 bool ConstructionSpriteSet::HasUnderConstructionSprites() const {
-	return IsValid() && (underconstructionSprites.size() == 1 || underconstructionSprites.size() == sprites.size());
+	return (underconstructionSprites.size() == 1 || underconstructionSprites.size() == sprites.size());
 }
 

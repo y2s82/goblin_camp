@@ -151,6 +151,8 @@ private:
 
 	StatusEffectSpriteArray defaultStatusEffects;
 
+	bool ConstructionConnectTo(Construction * construction, int x, int y) const;
+
 	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
