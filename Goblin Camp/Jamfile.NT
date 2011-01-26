@@ -45,7 +45,7 @@ rule get-dist-data ( properties * ) {
 #make dbghelp.dll : $(GC_ROOT)/tools/installer/redists/dbghelp-x64.dll : @common.copy : <address-model>64 ;
 
 install dist-prebuilt
-    : [ glob $(GC_ROOT)/support/crash-reporter/prebuilt/* ]
+    : [ glob $(HERE)/crash-reporter/prebuilt/* ]
       #dbghelp.dll
     : <conditional>@get-dist-bin
 ;

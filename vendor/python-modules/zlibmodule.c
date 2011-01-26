@@ -6,7 +6,7 @@
     Except for this comment and tweaked include directives, no changes have been made.
 */
 
-#include "scripting/_python.hpp"
+#include "_python.h"
 #include <zlib.h>
 
 #ifdef WITH_THREAD

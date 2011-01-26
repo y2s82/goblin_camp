@@ -1,17 +1,10 @@
 ###############################################################################
-##### Supporting projects
+##### Python modules project
 ############################################################################### 
 
 path-constant HERE : . ;
 
-common-reqs = <include>$(HERE)/python ;
-
-project support
-    : requirements
-      $(common-reqs)
-    : usage-requirements
-      $(common-reqs)
-;
+project python-modules ;
 
 ###############################################################################
 ##### python-modules
@@ -21,8 +14,7 @@ project support
 ############################################################################### 
 
 lib python-modules
-    : [ glob $(HERE)/python/*.c ]
+    : [ glob $(HERE)/*.c ]
     : <link>static
-      <use>/python
-      <include>"$(GC_ROOT)/Goblin Camp/include"
+      <use>/python <use>/zlib
 ;

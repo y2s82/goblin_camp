@@ -105,21 +105,27 @@ alias version
 always version ;
 
 ###############################################################################
-##### Targets
-## These define common dependencies, precompiled header and main executable.
-## Install targets define which files should be copied where after the build.
-##
-## Note that stdafx.hpp must depend on common-deps as well — otherwise
-## include paths may be wrong and the build will fail.
+##### common-deps
+## This alias pulls all our required dependencies, all other targets probably
+## should depend on it.
 ###############################################################################
 
 alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl ;
 
+###############################################################################
+##### stdafx.hpp
+## Precompiled header target.
+###############################################################################
+
 cpp-pch stdafx.hpp
-    : $(HERE)/include/stdafx.hpp common-deps
+    : $(HERE)/include/stdafx.hpp
+      common-deps
 ;
 
-use-project support : $(GC_ROOT)/support ;
+###############################################################################
+##### goblin-camp
+## Main game executable.
+###############################################################################
 
 exe goblin-camp
     : [ path.glob-tree $(HERE)/src : *.cpp : platform ]
@@ -127,7 +133,7 @@ exe goblin-camp
       common-deps
       platform-deps
       version
-      /support//python-modules
+      /python-modules
 ;
 
 install dist-bin

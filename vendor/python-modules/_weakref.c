@@ -3,8 +3,7 @@
     Except for this comment and tweaked include directives, no changes have been made.
 */
 
-#include "scripting/_python.hpp"
-
+#include "_python.h"
 
 #define GET_WEAKREFS_LISTPTR(o) \
         ((PyWeakReference **) PyObject_GET_WEAKREFS_LISTPTR(o))

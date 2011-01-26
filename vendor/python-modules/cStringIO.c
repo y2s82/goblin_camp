@@ -3,7 +3,7 @@
     Except for this comment and tweaked include directives, no changes have been made.
 */
 
-#include "scripting/_python.hpp"
+#include "_python.h"
 #include "import.h"
 #include "cStringIO.h"
 #include "structmember.h"
