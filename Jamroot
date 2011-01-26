@@ -111,4 +111,3 @@ for local P in [ glob $(GC_ROOT)/vendor/* ] {
 }
 
 build-project "Goblin Camp" ;
-build-project support ;
