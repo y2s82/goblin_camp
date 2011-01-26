@@ -149,7 +149,6 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 			SDL_Rect dstRect(CalcDest(tileX, tileY));
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
 				DrawTerrain(map, tileX, tileY, &dstRect);
-				DrawWater(map, tileX, tileY, &dstRect);
 				DrawConstruction(map, tileX, tileY, &dstRect);
 				DrawFilth(map, tileX, tileY, &dstRect);
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
@@ -302,7 +301,7 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
-		if (markerX >= startX && markerY < startX + sizeX
+		if (markerX >= startX && markerX < startX + sizeX
 			&& markerY >= startY && markerY < startY + sizeY) {
 				SDL_Rect dstRect( CalcDest(markerX, markerY));
 				tileSet->DrawMarker(mapSurface.get(), &dstRect);
@@ -313,6 +312,23 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	TileType type(map->Type(tileX, tileY));
 	tileSet->DrawTerrain(type, mapSurface.get(), dstRect);
+	
+	// Corruption
+	if (map->GetCorruption(tileX, tileY) >= 100) {
+		bool corruptN(map->GetCorruption(tileX, tileY - 1) >= 100);
+		bool corruptE(map->GetCorruption(tileX + 1, tileY) >= 100);
+		bool corruptS(map->GetCorruption(tileX, tileY + 1) >= 100);
+		bool corruptW(map->GetCorruption(tileX - 1, tileY) >= 100);
+		tileSet->DrawCorruption(corruptN, corruptE, corruptS, corruptW, mapSurface.get(), dstRect);
+	}
+	// Water
+	boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
+	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
+		if (water->Depth() > 0)
+		{
+			tileSet->DrawWater(water->Depth() / 5000, mapSurface.get(), dstRect);
+		}
+	}
 	if (map->GetBlood(tileX, tileY).lock())	{
 		tileSet->DrawBlood(mapSurface.get(), dstRect);
 	}
@@ -320,16 +336,6 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 		tileSet->DrawMarkedOverlay(mapSurface.get(), dstRect);
 	}
 	
-}
-
-void TileSetRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
-	boost::weak_ptr<WaterNode> water = map->GetWater(tileX,tileY);
-	if (water.lock()) {
-		if (water.lock()->Depth() > 0)
-		{
-			tileSet->DrawWater(water.lock()->Depth() / 5000, mapSurface.get(), dstRect);
-		}
-	}
 }
 
 void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {

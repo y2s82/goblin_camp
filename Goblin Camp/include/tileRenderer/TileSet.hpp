@@ -50,6 +50,7 @@ public:
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(int index, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -78,6 +79,7 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
+	void AddCorruption(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
@@ -87,8 +89,7 @@ public:
 	void SetFireFrameRate(int fps);
 
 	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
-	
-	
+		
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
@@ -120,6 +121,7 @@ private:
 	Sprite nonTerritoryOverlay;
 	Sprite territoryOverlay;
 	Sprite markedOverlay;
+	std::vector<Sprite> corruptionTiles;
 
 	Sprite marker;
 	Sprite blood;

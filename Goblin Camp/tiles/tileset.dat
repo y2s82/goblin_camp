@@ -26,6 +26,10 @@ tileset_data "TestMedium" {
 		non_territory=13
 		territory=12
 		marked=15
+		corruption=[128,129,130,131,
+					144,145,146,147,
+					160,161,162,163,
+					176,177,178,179]
 
 		// Cursors
 		default_cursor=[12,13]

@@ -73,6 +73,7 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("non_territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("corruption", TCOD_TYPE_INT, false);
 
 	// Status Effects
 	tileTextureStruct->addProperty("default_hungry", TCOD_TYPE_INT, false);
@@ -263,8 +264,11 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
-			} 
-			
+			} else if (boost::iequals(name, "corruption")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddCorruption(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			}
+
 			// Cursors
 			else if (boost::iequals(name, "default_cursor")) {
 				SetCursorSprites(Cursor_None, value.list);
