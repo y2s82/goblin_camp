@@ -54,6 +54,19 @@ Spell::Spell(Coordinate pos, int vtype) : Entity(),
 		immaterial = true;
 		name = "Steam";}
 		break;
+
+	case 3: {//Fireball 
+		graphic = 15;
+		color = TCODColor::red;
+		attack.Type(DAMAGE_FIRE);
+		TCOD_dice_t dice;
+		dice.addsub = 2;
+		dice.multiplier = 1;
+		dice.nb_dices = 1;
+		dice.nb_faces = 3;
+		attack.Amount(dice);
+		name = "Fireball"; }
+		break;
 	}
 }
 
@@ -71,7 +84,7 @@ void Spell::Impact(int speedChange) {
 	SetVelocity(0);
 	flightPath.clear();
 
-	if (type == 0) Game::Inst()->CreateFire(Position());
+	if (type == 0 || type == 3) Game::Inst()->CreateFire(Position());
 	dead = true;
 }
 
@@ -129,3 +142,16 @@ void Spell::UpdateVelocity() {
 }
 
 bool Spell::IsDead() {return dead;}
+
+int Spell::StringToSpellType (std::string spell) {
+	if (boost::iequals(spell, "fireball_spell")) {
+		return 3;
+	} else if (boost::iequals(spell, "spark")) {
+		return 0;
+	}
+	return -1;
+}
+
+void Spell::SetAttack(Attack newAttack) {
+	attack = newAttack;
+}

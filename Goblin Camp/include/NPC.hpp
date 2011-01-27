@@ -181,6 +181,8 @@ private:
 	void UpdateVelocity();
 	int addedTasksToCurrentJob;
 
+	bool hasMagicRangedAttacks;
+
 public:
 	~NPC();
 	SkillSet Skills;
@@ -225,6 +227,7 @@ public:
 	void Hit(boost::weak_ptr<Entity>, bool careful = false);
 	void FireProjectile(boost::weak_ptr<Entity>);
 	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
+	void CastOffensiveSpell(boost::weak_ptr<Entity>);
 
 	void MemberOf(boost::weak_ptr<Squad>);
 	boost::weak_ptr<Squad> MemberOf();

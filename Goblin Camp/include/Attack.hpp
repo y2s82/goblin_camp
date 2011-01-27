@@ -52,6 +52,7 @@ private:
 	int cooldownMax;
 	std::vector<std::pair<StatusEffectType, int> > statusEffects;
 	int projectile;
+	bool magicProjectile;
 public:
 	Attack();
 
@@ -72,4 +73,6 @@ public:
 	bool Ranged();
 	int Projectile();
 	void Projectile(int);
+	bool IsProjectileMagic();
+	void SetMagicProjectile();
 };

@@ -91,6 +91,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	squad(boost::weak_ptr<Squad>()),
 	attacks(std::list<Attack>()),
 	addedTasksToCurrentJob(0),
+	hasMagicRangedAttacks(false),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -796,6 +797,9 @@ CONTINUEEAT:
 				} else if (currentTask()->flags == 0 && WieldingRangedWeapon() && quiver.lock() && 
 					!quiver.lock()->empty()) {
 					FireProjectile(currentEntity());
+					break;
+				} else if (hasMagicRangedAttacks) {
+					CastOffensiveSpell(currentEntity());
 					break;
 				}
 
@@ -1615,23 +1619,43 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 }
 
 void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
-	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
-		if (attacki->Type() == DAMAGE_WIELDED) {
-			if (attacki->Cooldown() <= 0) {
-				attacki->ResetCooldown();
+	if (boost::shared_ptr<Entity> targetEntity = target.lock()) {
+		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+			if (attacki->Type() == DAMAGE_WIELDED) {
+				if (attacki->Cooldown() <= 0) {
+					attacki->ResetCooldown();
 
-				if (target.lock() && !quiver.lock()->empty()) {
-					boost::shared_ptr<Item> projectile = quiver.lock()->GetFirstItem().lock();
-					quiver.lock()->RemoveItem(projectile);
-					projectile->PutInContainer();
-					projectile->Position(Position());
-					projectile->CalculateFlightPath(target.lock()->Position(), 50, GetHeight());
+					if (!quiver.lock()->empty()) {
+						boost::shared_ptr<Item> projectile = quiver.lock()->GetFirstItem().lock();
+						quiver.lock()->RemoveItem(projectile);
+						projectile->PutInContainer();
+						projectile->Position(Position());
+						projectile->CalculateFlightPath(targetEntity->Position(), 50, GetHeight());
+					}
 				}
+				break;
 			}
-			break;
 		}
 	}
- }
+}
+
+void NPC::CastOffensiveSpell(boost::weak_ptr<Entity> target) {
+	if (boost::shared_ptr<Entity> targetEntity = target.lock()) {
+		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+			if (attacki->IsProjectileMagic()) {
+				if (attacki->Cooldown() <= 0) {
+					attacki->ResetCooldown();
+					
+					boost::shared_ptr<Spell> spell = Game::Inst()->CreateSpell(Position(), attacki->Projectile());
+					spell->CalculateFlightPath(target.lock()->Position(), 50, GetHeight());
+					spell->SetAttack(*attacki);
+				}
+				break;
+			}
+		}
+	}
+}
+
 
 void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	Resistance res;
@@ -1789,6 +1813,12 @@ class NPCListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name,"projectile")) {
 			NPC::Presets.back().attacks.back().Projectile(Item::StringToItemType(value.s));
+			if (NPC::Presets.back().attacks.back().Projectile() == -1) {
+				//No item found, probably a spell then
+				NPC::Presets.back().attacks.back().Projectile(Spell::StringToSpellType(value.s));
+				if (NPC::Presets.back().attacks.back().Projectile() >= 0) 
+					NPC::Presets.back().attacks.back().SetMagicProjectile();
+			}
 		} else if (boost::iequals(name,"physical")) {
 			NPC::Presets.back().resistances[PHYSICAL_RES] = value.i;
 		} else if (boost::iequals(name,"magic")) {
