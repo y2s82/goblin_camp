@@ -61,6 +61,7 @@ tileset_data "TestMedium" {
 		default_eating=56
 		default_drinking=57
 		default_swimming=58
+		default_burning=70
 
 		default_underconstruction=18
 		spark=62

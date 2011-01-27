@@ -155,12 +155,13 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 
 	int numEffects = npc->StatusEffects()->size();
 	if (npc->HasEffect(CARRYING)) numEffects--; // Already handled
-	if (npc->HasEffect(WORKING)) numEffects--; // Don't draw
+	if (npc->HasEffect(WORKING)) numEffects--;  // Don't draw
+	if (npc->HasEffect(FLYING)) numEffects--;   // Don't draw
 	if (npc->HasEffect(SWIM)) {
 		numEffects--;
 		defaultStatusEffects.at(SWIM).Draw(dst, dstRect);
 	}
-	if (npc->HasEffect(FLYING)) numEffects--; // Dont Draw
+	
 	if (numEffects > 0) {
 		int effect = (TCODSystem::getElapsedMilli() % (250 * numEffects)) / 250;
 		int atEffect = 0;

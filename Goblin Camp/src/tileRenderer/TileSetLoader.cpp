@@ -89,6 +89,7 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("default_eating", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("default_drinking", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("default_swimming", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_burning", TCOD_TYPE_INT, false);
 
 	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("spark", TCOD_TYPE_INT, false);
@@ -327,6 +328,8 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetStatusSprite(DRINKING, Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "default_swimming")) {
 				tileSet->SetStatusSprite(SWIM, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_burning")) {
+				tileSet->SetStatusSprite(BURNING, Sprite(value.i, currentTexture));
 			}
 			
 			else if (boost::iequals(name, "default_underconstruction")) {
