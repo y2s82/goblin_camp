@@ -43,4 +43,7 @@ public:
 	void UpdateVelocity();
 	void Impact(int speedChange);
 	bool IsDead();
+
+	static int StringToSpellType(std::string);
+	void SetAttack(Attack);
 };

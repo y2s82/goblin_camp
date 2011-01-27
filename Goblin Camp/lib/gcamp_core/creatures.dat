@@ -658,8 +658,14 @@ npc_type "imp" {
 	}
 	attack "Claw" {
 		type="slashing"
+		damage="1d5+5"
+		cooldown=50
+	}
+	attack "Fireball" {
+		type="fire"
 		damage="1d20+5"
 		cooldown=30
+		projectile="fireball_spell"
 	}
 	spawnAsGroup="1d4"
 	death="Corpse"
