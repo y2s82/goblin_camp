@@ -1292,7 +1292,7 @@ void Spell::save(Archive & ar, const unsigned int version) const {
 	ar & graphic;
 	ar & type;
 	ar & dead;
-	ar & attack;
+	ar & attacks;
 	ar & immaterial;
 }
 
@@ -1305,7 +1305,7 @@ void Spell::load(Archive & ar, const unsigned int version) {
 	ar & graphic;
 	ar & type;
 	ar & dead;
-	ar & attack;
+	ar & attacks;
 	ar & immaterial;
 }
 
