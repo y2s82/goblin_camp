@@ -125,10 +125,12 @@ void FireNode::Update() {
 		}
 
 		if (temperature > 1 && Random::Generate(9) < 4) {
+			//Burn npcs on the ground
 			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
 				if (!Game::Inst()->npcList[*npci]->HasEffect(FLYING)) Game::Inst()->npcList[*npci]->AddEffect(BURNING);
 			}
 
+			//Burn items
 			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(x,y)->begin(); itemi != Map::Inst()->ItemList(x,y)->end(); ++itemi) {
 				boost::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
 				if (item && item->IsFlammable()) {
@@ -139,6 +141,7 @@ void FireNode::Update() {
 				}
 			}
 
+			//Burn constructions
 			int cons = Map::Inst()->GetConstruction(x,y);
 			if (cons >= 0) {
 				boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
@@ -175,6 +178,19 @@ void FireNode::Update() {
 					}
 				}
 			}
+
+			//Burn plantlife
+			int natureObject = Map::Inst()->GetNatureObject(x, y);
+			if (natureObject >= 0 && 
+			!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
+				bool tree = Game::Inst()->natureList[natureObject]->Tree();
+				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
+				if (tree && Random::Generate(4) == 0) {
+					Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
+				}
+				temperature += tree ? 500 : 100;
+			}
+
 		}
 	}
 }
