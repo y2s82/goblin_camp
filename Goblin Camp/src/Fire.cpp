@@ -68,7 +68,7 @@ void FireNode::Update() {
 			temperature -= water->Depth()*10;
 			water->Depth(0);
 		}
-		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), 2);
+		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("steam"));
 
 		Coordinate direction;
 		Direction wind = Map::Inst()->GetWindDirection();
@@ -90,7 +90,7 @@ void FireNode::Update() {
 		int inverseSparkChance = 100 - std::max(0, ((temperature - 50) / 8));
 
 		if (Random::Generate(inverseSparkChance) == 0) {
-			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), 0);
+			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("spark"));
 			int distance = Random::Generate(0, 15);
 			if (distance < 12) {
 				distance = 1;
@@ -113,7 +113,7 @@ void FireNode::Update() {
 		}
 
 		if (Random::Generate(60) == 0) {
-			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), 1);
+			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("smoke"));
 			Coordinate direction;
 			Direction wind = Map::Inst()->GetWindDirection();
 			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-75, -25));

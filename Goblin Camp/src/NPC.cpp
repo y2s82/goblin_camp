@@ -1645,10 +1645,10 @@ void NPC::CastOffensiveSpell(boost::weak_ptr<Entity> target) {
 			if (attacki->IsProjectileMagic()) {
 				if (attacki->Cooldown() <= 0) {
 					attacki->ResetCooldown();
-					
 					boost::shared_ptr<Spell> spell = Game::Inst()->CreateSpell(Position(), attacki->Projectile());
-					spell->CalculateFlightPath(target.lock()->Position(), 50, GetHeight());
-					spell->SetAttack(*attacki);
+					if (spell) {
+						spell->CalculateFlightPath(target.lock()->Position(), Spell::Presets[attacki->Projectile()].speed, GetHeight());
+					}
 				}
 				break;
 			}

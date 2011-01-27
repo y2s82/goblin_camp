@@ -662,10 +662,8 @@ npc_type "imp" {
 		cooldown=50
 	}
 	attack "Fireball" {
-		type="fire"
-		damage="1d20+5"
 		cooldown=30
-		projectile="fireball_spell"
+		projectile="fireball"
 	}
 	spawnAsGroup="1d4"
 	death="Corpse"
