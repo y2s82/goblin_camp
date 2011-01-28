@@ -1,0 +1,2 @@
+This file is here to make sure generate-solution.py will include src\platform filter.
+I'll fix this some day, promise.
