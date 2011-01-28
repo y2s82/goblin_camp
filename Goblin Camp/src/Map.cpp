@@ -441,15 +441,6 @@ TCODColor Map::GetColor(int x, int y) {
 void Map::Burn(int x, int y, int magnitude) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		tileMap[x][y].Burn(magnitude);
-		if (tileMap[x][y].natureObject >= 0 && 
-			!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(), "Scorched tree")) {
-			bool tree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
-			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-			if (tree && Random::Generate(3) < 2) {
-				Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
-			}
-			if (tileMap[x][y].fire) tileMap[x][y].fire->AddHeat(tree ? 180 : 30);
-		}
 	}
 }
 

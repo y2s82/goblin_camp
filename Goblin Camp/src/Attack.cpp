@@ -26,7 +26,8 @@ Attack::Attack() : damageType(DAMAGE_BLUNT),
 	cooldown(0),
 	cooldownMax(UPDATES_PER_SECOND),
 	statusEffects(std::vector<std::pair<StatusEffectType, int> >()),
-	projectile(0)
+	projectile(0),
+	magicProjectile(false)
 {
 	damageAmount.addsub = 1;
 	damageAmount.multiplier = 1;
@@ -107,3 +108,6 @@ std::string Attack::DamageTypeToString(DamageType type) {
 void Attack::AddDamage(TCOD_dice_t value) {
 	damageAmount.addsub += Game::DiceToInt(value);
 }
+
+void Attack::SetMagicProjectile() { magicProjectile = true; }
+bool Attack::IsProjectileMagic() { return magicProjectile; }

@@ -185,7 +185,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & peacefulFaunaCount;
 	ar & safeMonths;
 	if (version == 0) {
-		ar & devMode;
+		bool notUsed;
+		ar & notUsed;
 	}
 	ar & marks;
 	if (version == 0) {
@@ -219,7 +220,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 //
 // class NPC
 //
-BOOST_CLASS_VERSION(NPC, 0)
+BOOST_CLASS_VERSION(NPC, 1)
 
 template<class Archive>
 void NPC::save(Archive & ar, const unsigned int version) const {
@@ -227,7 +228,6 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Item>();
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
-	ar.template register_type<Job>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & type;
 	ar & timeCount;
@@ -279,69 +279,71 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & escaped;
 	ar & addedTasksToCurrentJob;
 	ar & Skills;
+	ar & hasMagicRangedAttacks;
 }
 
 template<class Archive>
 void NPC::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar.template register_type<Container>();
-		ar.template register_type<Item>();
-		ar.template register_type<Entity>();
-		ar.template register_type<SkillSet>();
-		ar.template register_type<Job>();
-		ar & boost::serialization::base_object<Entity>(*this);
-		ar & type;
-		ar & timeCount;
-		ar & jobs;
-		ar & taskIndex;
-		ar & orderIndex;
-		ar & nopath;
-		ar & findPathWorking;
-		ar & timer;
-		ar & nextMove;
-		ar & run;
-		ar & _color.r;
-		ar & _color.g;
-		ar & _color.b;
-		ar & _bgcolor.r;
-		ar & _bgcolor.g;
-		ar & _bgcolor.b;
-		ar & _graphic;
-		ar & taskBegun;
-		ar & expert;
-		ar & carried;
-		ar & mainHand;
-		ar & offHand;
-		ar & armor;
-		ar & quiver;
-		ar & thirst;
-		ar & hunger;
-		ar & weariness;
-		ar & thinkSpeed;
-		ar & statusEffects;
-		ar & health;
-		ar & maxHealth;
-		ar & foundItem;
-		ar & inventory;
-		ar & needsNutrition;
-		ar & needsSleep;
-		ar & hasHands;
-		ar & isTunneler;
-		ar & baseStats;
-		ar & effectiveStats;
-		ar & baseResistances;
-		ar & effectiveResistances;
-		ar & aggressive;
-		ar & coward;
-		ar & aggressor;
-		ar & dead;
-		ar & squad;
-		ar & attacks;
-		ar & escaped;
-		ar & addedTasksToCurrentJob;
-		ar & Skills;
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<SkillSet>();
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & type;
+	ar & timeCount;
+	ar & jobs;
+	ar & taskIndex;
+	ar & orderIndex;
+	ar & nopath;
+	ar & findPathWorking;
+	ar & timer;
+	ar & nextMove;
+	ar & run;
+	ar & _color.r;
+	ar & _color.g;
+	ar & _color.b;
+	ar & _bgcolor.r;
+	ar & _bgcolor.g;
+	ar & _bgcolor.b;
+	ar & _graphic;
+	ar & taskBegun;
+	ar & expert;
+	ar & carried;
+	ar & mainHand;
+	ar & offHand;
+	ar & armor;
+	ar & quiver;
+	ar & thirst;
+	ar & hunger;
+	ar & weariness;
+	ar & thinkSpeed;
+	ar & statusEffects;
+	ar & health;
+	ar & maxHealth;
+	ar & foundItem;
+	ar & inventory;
+	ar & needsNutrition;
+	ar & needsSleep;
+	ar & hasHands;
+	ar & isTunneler;
+	ar & baseStats;
+	ar & effectiveStats;
+	ar & baseResistances;
+	ar & effectiveResistances;
+	ar & aggressive;
+	ar & coward;
+	ar & aggressor;
+	ar & dead;
+	ar & squad;
+	ar & attacks;
+	ar & escaped;
+	ar & addedTasksToCurrentJob;
+	ar & Skills;
+
+	if (version >= 1) {
+		ar & hasMagicRangedAttacks;
 	}
-	
+
 	InitializeAIFunctions();
 }
 
@@ -1035,7 +1037,7 @@ void StockManager::load(Archive & ar, const unsigned int version) {
 //
 // class Map
 //
-BOOST_CLASS_VERSION(Map, 0)
+BOOST_CLASS_VERSION(Map, 1)
 
 template<class Archive>
 void Map::save(Archive & ar, const unsigned int version) const {
@@ -1164,7 +1166,7 @@ void FarmPlot::load(Archive & ar, const unsigned int version) {
 //
 // class Attack
 //
-BOOST_CLASS_VERSION(Attack, 0)
+BOOST_CLASS_VERSION(Attack, 1)
 
 template<class Archive>
 void Attack::save(Archive & ar, const unsigned int version) const {
@@ -1177,20 +1179,22 @@ void Attack::save(Archive & ar, const unsigned int version) const {
 	ar & cooldownMax;
 	ar & statusEffects;
 	ar & projectile;
+	ar & magicProjectile;
 }
 
 template<class Archive>
 void Attack::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & damageType;
-		ar & damageAmount.addsub;
-		ar & damageAmount.multiplier;
-		ar & damageAmount.nb_dices;
-		ar & damageAmount.nb_faces;
-		ar & cooldown;
-		ar & cooldownMax;
-		ar & statusEffects;
-		ar & projectile;
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & projectile;
+	if (version >= 1) {
+		ar & magicProjectile;
 	}
 }
 
@@ -1214,7 +1218,7 @@ void SkillSet::load(Archive & ar, const unsigned int version) {
 //
 // class SpawningPool
 //
-BOOST_CLASS_VERSION(SpawningPool, 0)
+BOOST_CLASS_VERSION(SpawningPool, 1)
 
 	template<class Archive>
 void SpawningPool::save(Archive & ar, const unsigned int version) const {
@@ -1229,22 +1233,24 @@ void SpawningPool::save(Archive & ar, const unsigned int version) const {
 	ar & spawns;
 	ar & corpseContainer;
 	ar & jobCount;
+	ar & burn;
 }
 
 template<class Archive>
 void SpawningPool::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Construction>(*this);
-		ar & dumpFilth;
-		ar & dumpCorpses;
-		ar & a;
-		ar & b;
-		ar & expansion;
-		ar & filth;
-		ar & corpses;
-		ar & spawns;
-		ar & corpseContainer;
-		ar & jobCount;
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & dumpFilth;
+	ar & dumpCorpses;
+	ar & a;
+	ar & b;
+	ar & expansion;
+	ar & filth;
+	ar & corpses;
+	ar & spawns;
+	ar & corpseContainer;
+	ar & jobCount;
+	if (version >= 1) {
+		ar & burn;
 	}
 }
 
@@ -1287,7 +1293,7 @@ void Spell::save(Archive & ar, const unsigned int version) const {
 	ar & graphic;
 	ar & type;
 	ar & dead;
-	ar & attack;
+	ar & attacks;
 	ar & immaterial;
 }
 
@@ -1300,7 +1306,7 @@ void Spell::load(Archive & ar, const unsigned int version) {
 	ar & graphic;
 	ar & type;
 	ar & dead;
-	ar & attack;
+	ar & attacks;
 	ar & immaterial;
 }
 

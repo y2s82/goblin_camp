@@ -290,6 +290,12 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
+	for (std::list<Attack>::iterator attacki = NPC::Presets[type].attacks.begin(); attacki != NPC::Presets[type].attacks.end(); ++attacki) {
+		if (attacki->IsProjectileMagic()) {
+			npc->hasMagicRangedAttacks = true;
+			break;
+		}
+	}
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
@@ -642,10 +648,12 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	if (filthList.size() == 0) return Coordinate(-1,-1);
 	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
-	for (size_t i = 0; i < std::min((size_t)10, filthList.size()); ++i) {
+	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
 		unsigned filth = Random::Choose(filthList);
-		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0)
+		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
+			if (potentialFilth.top().first < 10) break; //Near enough
+		}
 	}
 	if (potentialFilth.size() > 0)
 		return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
@@ -1106,7 +1114,7 @@ void Game::GenerateMap(uint32 seed) {
 			if (height < map->GetWaterlevel()) {
 				if (random.GenerateBool()) map->Type(x,y,TILERIVERBED);
 				else map->Type(x,y,TILEDITCH);
-				CreateWater(Coordinate(x,y));
+				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
 				map->Type(x,y,TILEGRASS);
 				if (random.Generate(9) < 9) {
@@ -1860,4 +1868,10 @@ boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
 	spellList.push_back(newSpell);
 	return newSpell;
+}
+
+void Game::CreateDitch(Coordinate pos) {
+	RemoveNatureObject(pos, pos);
+	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
+	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
 }

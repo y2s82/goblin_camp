@@ -143,6 +143,7 @@ namespace {
 		}
 		
 		try {
+			LoadFile("spells",        dir, Spell::LoadPresets, required);
 			LoadFile("items",         dir, Item::LoadPresets, required);
 			LoadFile("constructions", dir, Construction::LoadPresets, required);
 			LoadFile("wildplants",    dir, NatureObject::LoadPresets, required);
