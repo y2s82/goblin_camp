@@ -982,10 +982,15 @@ CONTINUEEAT:
 				TaskFinished(TASKFAILFATAL, "(QUIVER)Not carrying an item");
 				break;
 
-			case FILL:
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Barrel"))) {
-					boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(carried.lock()));
+			case FILL: {
+				boost::shared_ptr<Container> cont;
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+					cont = boost::static_pointer_cast<Container>(carried.lock());
+				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+					cont = boost::static_pointer_cast<Container>(mainHand.lock());
+				}
 					
+				if (cont) {
 					if (!cont->empty() && cont->ContainsWater() == 0 && cont->ContainsFilth() == 0) {
 						//Not empty, but doesn't have water/filth, so it has items in it
 						TaskFinished(TASKFAILFATAL, "(FILL)Attempting to fill non-empty container");
@@ -1014,18 +1019,19 @@ CONTINUEEAT:
 					TaskFinished(TASKFAILFATAL, "(FILL)Nothing to fill container with");
 					break;
 				} 
-
+					   }
 				TaskFinished(TASKFAILFATAL, "(FILL)Not carrying a liquid container");
 				break;
 
-			case POUR:
-				if (!carried.lock() || !boost::dynamic_pointer_cast<Container>(carried.lock())) {
-					TaskFinished(TASKFAILFATAL, "(POUR)Not carrying a liquid container");
-					break;
+			case POUR: {
+				boost::shared_ptr<Container> sourceContainer;
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+					sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
+				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+					sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
 				}
-				{
-					boost::shared_ptr<Container> sourceContainer(boost::static_pointer_cast<Container>(carried.lock()));
 
+				if (sourceContainer) {
 					if (currentEntity().lock() && boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						boost::shared_ptr<Container> targetContainer(boost::static_pointer_cast<Container>(currentEntity().lock()));
 						if (sourceContainer->ContainsWater() > 0) {
@@ -1049,7 +1055,10 @@ CONTINUEEAT:
 							TaskFinished(TASKSUCCESS);
 							break;
 					}
-				}
+				} else {
+					TaskFinished(TASKFAILFATAL, "(POUR) Not carrying a container!");
+					break;
+				} }
 				TaskFinished(TASKFAILFATAL, "(POUR)No valid target");
 				break;
 
