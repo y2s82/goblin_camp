@@ -290,6 +290,12 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
+	for (std::list<Attack>::iterator attacki = NPC::Presets[type].attacks.begin(); attacki != NPC::Presets[type].attacks.end(); ++attacki) {
+		if (attacki->IsProjectileMagic()) {
+			npc->hasMagicRangedAttacks = true;
+			break;
+		}
+	}
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
