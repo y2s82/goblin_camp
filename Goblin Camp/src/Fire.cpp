@@ -68,7 +68,7 @@ void FireNode::Update() {
 			temperature -= water->Depth()*10;
 			water->Depth(0);
 		}
-		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), 2);
+		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("steam"));
 
 		Coordinate direction;
 		Direction wind = Map::Inst()->GetWindDirection();
@@ -90,7 +90,7 @@ void FireNode::Update() {
 		int inverseSparkChance = 100 - std::max(0, ((temperature - 50) / 8));
 
 		if (Random::Generate(inverseSparkChance) == 0) {
-			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), 0);
+			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("spark"));
 			int distance = Random::Generate(0, 15);
 			if (distance < 12) {
 				distance = 1;
@@ -113,7 +113,7 @@ void FireNode::Update() {
 		}
 
 		if (Random::Generate(60) == 0) {
-			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), 1);
+			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("smoke"));
 			Coordinate direction;
 			Direction wind = Map::Inst()->GetWindDirection();
 			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-75, -25));
@@ -125,10 +125,12 @@ void FireNode::Update() {
 		}
 
 		if (temperature > 1 && Random::Generate(9) < 4) {
+			//Burn npcs on the ground
 			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
 				if (!Game::Inst()->npcList[*npci]->HasEffect(FLYING)) Game::Inst()->npcList[*npci]->AddEffect(BURNING);
 			}
 
+			//Burn items
 			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(x,y)->begin(); itemi != Map::Inst()->ItemList(x,y)->end(); ++itemi) {
 				boost::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
 				if (item && item->IsFlammable()) {
@@ -139,6 +141,7 @@ void FireNode::Update() {
 				}
 			}
 
+			//Burn constructions
 			int cons = Map::Inst()->GetConstruction(x,y);
 			if (cons >= 0) {
 				boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
@@ -175,6 +178,19 @@ void FireNode::Update() {
 					}
 				}
 			}
+
+			//Burn plantlife
+			int natureObject = Map::Inst()->GetNatureObject(x, y);
+			if (natureObject >= 0 && 
+			!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
+				bool tree = Game::Inst()->natureList[natureObject]->Tree();
+				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
+				if (tree && Random::Generate(4) == 0) {
+					Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
+				}
+				temperature += tree ? 500 : 100;
+			}
+
 		}
 	}
 }

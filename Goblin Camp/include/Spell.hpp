@@ -15,11 +15,29 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/unordered_map.hpp>
+
 #include "Entity.hpp"
 #include "Attack.hpp"
 
+typedef int SpellType;
+
+class SpellListener;
+
+class SpellPreset {
+public:
+	SpellPreset(std::string);
+	std::string name;
+	std::list<Attack> attacks;
+	bool immaterial;
+	int graphic;
+	int speed;
+	TCODColor color;
+};
+
 class Spell : public Entity {
 	friend class boost::serialization::access;
+	friend class SpellListener;
 
 private:
 	template<class Archive>
@@ -32,16 +50,23 @@ private:
 	int graphic;
 	int type;
 	bool dead;
-	Attack attack;
+	std::list<Attack> attacks;
 	bool immaterial;
-
+	
+	static boost::unordered_map<std::string, SpellType> spellTypeNames;
 public:
 	Spell(Coordinate=Coordinate(0,0),int=0);
 	~Spell();
+
+	static std::vector<SpellPreset> Presets;
 
 	void Draw(Coordinate, TCODConsole*);
 	void UpdateVelocity();
 	void Impact(int speedChange);
 	bool IsDead();
 	bool IsImmaterial() const;
+
+	static int StringToSpellType(std::string);
+
+	static void LoadPresets(std::string);
 };

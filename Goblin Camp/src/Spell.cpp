@@ -19,42 +19,37 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Random.hpp"
 
+boost::unordered_map<std::string, SpellType> Spell::spellTypeNames = boost::unordered_map<std::string, SpellType>();
+std::vector<SpellPreset> Spell::Presets = std::vector<SpellPreset>();
+
+SpellPreset::SpellPreset(std::string vname) : 
+name(vname),
+	attacks(std::list<Attack>()),
+	immaterial(false),
+	graphic('?'),
+	speed(1),
+	color(TCODColor::pink)
+{}
+
 Spell::Spell(Coordinate pos, int vtype) : Entity(),
 	type(vtype), dead(false), immaterial(false)
 {
 	x = pos.X();
 	y = pos.Y();
 
-	switch (type) {
-	case 0:
-		graphic = 250;
-		color = TCODColor::orange;
-		attack.Type(DAMAGE_FIRE);
-		TCOD_dice_t dice;
-		dice.addsub = 2;
-		dice.multiplier = 1;
-		dice.nb_dices = 1;
-		dice.nb_faces = 3;
-		attack.Amount(dice);
-		name = "Spark";
-		break;
+	color = Spell::Presets[type].color;
 
-	case 1:{ //Smoke
-		graphic = 177;
-		int rgb = Random::Generate(45, 90);
-		color = TCODColor(rgb, rgb, rgb);
-		immaterial = true;
-		name = "Smoke";}
-		break;
-
-	case 2:{
-		graphic = 176;
-		int rgb = Random::Generate(180, 230);
-		color = TCODColor(rgb, rgb, rgb);
-		immaterial = true;
-		name = "Steam";}
-		break;
+	//TODO: I don't like making special cases like this, perhaps a flag instead?
+	if (boost::iequals(Spell::Presets[type].name, "smoke") || boost::iequals(Spell::Presets[type].name, "steam")) {
+		int add = Random::Generate(50);
+		color.r += add;
+		color.g += add;
+		color.b += add;
 	}
+
+	graphic = Spell::Presets[type].graphic;
+	attacks = Spell::Presets[type].attacks;
+	immaterial = Spell::Presets[type].immaterial;
 }
 
 Spell::~Spell() {}
@@ -71,7 +66,13 @@ void Spell::Impact(int speedChange) {
 	SetVelocity(0);
 	flightPath.clear();
 
-	if (type == 0) Game::Inst()->CreateFire(Position());
+	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+		if (attacki->Type() == DAMAGE_FIRE) {
+			Game::Inst()->CreateFire(Position());
+			break;
+		}
+	}
+
 	dead = true;
 }
 
@@ -90,13 +91,18 @@ void Spell::UpdateVelocity() {
 						if (Map::Inst()->BlocksWater(tx,ty) || !Map::Inst()->IsWalkable(tx,ty)) { //We've hit an obstacle
 							if (Map::Inst()->GetConstruction(tx,ty) > -1) {
 								if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
-									construct->Damage(&attack);
+									for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+										construct->Damage(&*attacki);
+									}
 								}
 							}
-							if (attack.Type() == DAMAGE_FIRE) {
-								/*The item's attack was a fire attack, so theres a chance it'll create fire on the 
+							for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+								if (attacki->Type() == DAMAGE_FIRE) {
+								/*The spell's attack was a fire attack, so theres a chance it'll create fire on the 
 								obstacle it hit */
-								Game::Inst()->CreateFire(flightPath.back().coord, 5);
+									Game::Inst()->CreateFire(flightPath.back().coord, 5);
+									break;
+								}
 							}
 							Impact(velocity);
 							return;
@@ -105,7 +111,9 @@ void Spell::UpdateVelocity() {
 							if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
 								boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
-								npc->Damage(&attack);
+								for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
+									npc->Damage(&*attacki);
+								}
 
 								Position(flightPath.back().coord);
 								Impact(velocity);
@@ -131,3 +139,82 @@ void Spell::UpdateVelocity() {
 bool Spell::IsDead() {return dead;}
 
 bool Spell::IsImmaterial() const { return immaterial; }
+
+int Spell::StringToSpellType (std::string spell) {
+	if (spellTypeNames.find(spell) != spellTypeNames.end()) return spellTypeNames[spell];
+	return -1;
+}
+
+class SpellListener : public ITCODParserListener {
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		if (boost::iequals(str->getName(), "spell_type")) {
+			Spell::Presets.push_back(SpellPreset(name));
+			Spell::spellTypeNames[name] = Spell::Presets.size()-1;
+		} else if (boost::iequals(str->getName(), "attack")) {
+			Spell::Presets.back().attacks.push_back(Attack());
+		}
+		return true;
+	}
+	bool parserFlag(TCODParser *parser,const char *name) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name,"immaterial")) { Spell::Presets.back().immaterial = true; }
+		return true;
+	}
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+#ifdef DEBUG
+		std::cout<<(boost::format("%s\n") % name).str();
+#endif
+		if (boost::iequals(name,"name")) { Spell::Presets.back().name = value.s; }
+		else if (boost::iequals(name,"speed")) { Spell::Presets.back().speed = value.i; }
+		else if (boost::iequals(name,"color")) { Spell::Presets.back().color = value.col; }
+		else if (boost::iequals(name,"graphic")) { Spell::Presets.back().graphic = value.i; }
+		else if (boost::iequals(name,"type")) {
+			Spell::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
+		} else if (boost::iequals(name,"damage")) {
+			Spell::Presets.back().attacks.back().Amount(value.dice);
+		} else if (boost::iequals(name,"cooldown")) {
+			Spell::Presets.back().attacks.back().CooldownMax(value.i);
+		} else if (boost::iequals(name,"statusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Spell::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"effectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Spell::Presets.back().attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+			}
+		}
+		return true;
+	}
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+#ifdef DEBUG
+		std::cout<<boost::format("end of %s\n") % str->getName();
+#endif
+		return true;
+	}
+	void error(const char *msg) {
+		throw std::runtime_error(msg);
+	}
+};
+
+void Spell::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct *spellTypeStruct = parser.newStructure("spell_type");
+	spellTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
+	spellTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	spellTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
+	spellTypeStruct->addFlag("immaterial");
+	spellTypeStruct->addProperty("speed", TCOD_TYPE_INT, true);
+	
+	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
+	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
+	attackTypeStruct->addValueList("type", damageTypes, true);
+	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
+	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
+	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);
+
+	spellTypeStruct->addStructure(attackTypeStruct);
+
+	parser.run(filename.c_str(), new SpellListener());
+}
