@@ -64,8 +64,6 @@ tileset_data "TestMedium" {
 		default_burning=70
 
 		default_underconstruction=18
-		spark=62
-		smoke=63
 		fire=[68,69]
 		fireFPS=10
 	
@@ -79,6 +77,11 @@ tileset_data "TestMedium" {
 
 		item_sprite_data {
 			sprite=20
+		}
+		
+		spell_sprite_data {
+		    sprites=[71,73]
+			fps=30
 		}
 
 		construction_sprite_data {
@@ -244,6 +247,18 @@ tileset_data "TestMedium" {
 			         80,81,82,83,
 					 96,97,98,99,
 					 112,113,114,115]
+		}
+
+		spell_sprite_data "smoke" {
+			sprites=[63]
+		}
+
+		spell_sprite_data "spark" {
+		    sprites=[62]
+		}
+
+		spell_sprite_data "steam" {
+			sprites=[72]
 		}
 	}
 }

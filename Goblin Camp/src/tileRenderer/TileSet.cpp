@@ -52,8 +52,9 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	constructionSpriteSets(),
 	constructionSpriteLookup(),
 	defaultConstructionSpriteSet(),
-	sparkSprite(),
-	smokeSprite(),
+	defaultSpellSpriteSet(),
+	spellSpriteLookup(),
+	spellSpriteSets(),
 	fireTiles(),
 	fireFrameTime(100){
 		for (int i = 0; i < terrainTiles.size(); ++i) {
@@ -336,10 +337,10 @@ void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Su
 }
 
 void TileSet::DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const {
-	if (spell->IsImmaterial()) {
-		smokeSprite.Draw(dst, dstRect);
+	if (spell->GetGraphicsHint() == -1) {
+		defaultSpellSpriteSet.Draw(dst, dstRect);
 	} else {
-		sparkSprite.Draw(dst, dstRect);
+		spellSpriteSets[spell->GetGraphicsHint()].Draw(dst, dstRect);
 	}
 }
 
@@ -416,12 +417,28 @@ int TileSet::GetGraphicsHintFor(const ConstructionPreset& constructPreset) const
 	LookupMap::const_iterator set;
 	
 	set = constructionSpriteLookup.find(constructPreset.name);
-	if (set != itemSpriteLookup.end()) {
+	if (set != constructionSpriteLookup.end()) {
 		return set->second;
 	}
 
-	set = itemSpriteLookup.find(constructPreset.fallbackGraphicsSet);
-	if (set != itemSpriteLookup.end()) {
+	set = constructionSpriteLookup.find(constructPreset.fallbackGraphicsSet);
+	if (set != constructionSpriteLookup.end()) {
+		return set->second;
+	}
+
+	return -1;
+}
+
+int TileSet::GetGraphicsHintFor(const SpellPreset& spellPreset) const {
+	LookupMap::const_iterator set;
+	
+	set = spellSpriteLookup.find(spellPreset.name);
+	if (set != spellSpriteLookup.end()) {
+		return set->second;
+	}
+
+	set = spellSpriteLookup.find(spellPreset.fallbackGraphicsSet);
+	if (set != spellSpriteLookup.end()) {
 		return set->second;
 	}
 
@@ -519,14 +536,6 @@ void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {
 	defaultUnderConstructionSprite = sprite;
 }
 
-void TileSet::SetSparkSprite(const Sprite& sprite) {
-	sparkSprite = sprite;
-}
-
-void TileSet::SetSmokeSprite(const Sprite& sprite) {
-	smokeSprite = sprite;
-}
-
 void TileSet::AddFireSprite(const Sprite& sprite) {
 	fireTiles.push_back(sprite);
 }
@@ -573,4 +582,14 @@ void TileSet::AddConstructionSpriteSet(std::string name, const ConstructionSprit
 
 void TileSet::SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set) {
 	defaultConstructionSpriteSet = set;
+}
+
+void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& set) {
+	int index = spellSpriteSets.size();
+	spellSpriteSets.push_back(set);
+	spellSpriteLookup[name] = index;
+}
+
+void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& set) {
+	defaultSpellSpriteSet = set;
 }

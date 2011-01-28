@@ -70,21 +70,20 @@ TileSetRenderer::~TileSetRenderer() {}
 
 void TileSetRenderer::PreparePrefabs() 
 {
-	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci)
-	{
+	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci) {
 		npci->graphicsHint = tileSet->GetGraphicsHintFor(*npci);
 	}
-	for (std::vector<NatureObjectPreset>::iterator nopi = NatureObject::Presets.begin(); nopi != NatureObject::Presets.end(); ++nopi)
-	{
+	for (std::vector<NatureObjectPreset>::iterator nopi = NatureObject::Presets.begin(); nopi != NatureObject::Presets.end(); ++nopi) {
 		nopi->graphicsHint = tileSet->GetGraphicsHintFor(*nopi);
 	}
-	for (std::vector<ItemPreset>::iterator itemi = Item::Presets.begin(); itemi != Item::Presets.end(); ++itemi)
-	{
+	for (std::vector<ItemPreset>::iterator itemi = Item::Presets.begin(); itemi != Item::Presets.end(); ++itemi) {
 		itemi->graphicsHint = tileSet->GetGraphicsHintFor(*itemi);
 	}
-	for (std::vector<ConstructionPreset>::iterator constructi = Construction::Presets.begin(); constructi != Construction::Presets.end(); ++constructi)
-	{
+	for (std::vector<ConstructionPreset>::iterator constructi = Construction::Presets.begin(); constructi != Construction::Presets.end(); ++constructi) {
 		constructi->graphicsHint = tileSet->GetGraphicsHintFor(*constructi);
+	}
+	for (std::vector<SpellPreset>::iterator spelli = Spell::Presets.begin(); spelli != Spell::Presets.end(); ++spelli) {
+		spelli->graphicsHint = tileSet->GetGraphicsHintFor(*spelli);
 	}
 }
 
