@@ -220,6 +220,10 @@ Menu* Menu::OrdersMenu() {
 		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", boost::bind(UI::ChooseDesignateBog)));
 		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
 		ordersMenu->AddChoice(MenuChoice("Gather items", boost::bind(UI::ChooseGatherItems)));
+
+		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
+		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
+		ordersMenu->AddChoice(MenuChoice("Pour water", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W')));
 	}
 	return ordersMenu;
 }
