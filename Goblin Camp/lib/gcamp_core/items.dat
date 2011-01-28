@@ -220,6 +220,10 @@ category_type "Axe" {
 	parent="Tool"
 }
 
+category_type "Bucket" {
+	parent="Tool"
+}
+
 category_type "Garbage" {
 }
 
@@ -318,7 +322,7 @@ item_type "Wooden barrel" {
 	containerSize = 20
 	graphic = 155
 	color = "255,73,7"
-	components = [ "Plank", "Plank" ]
+	components = [ "Plank", "Plank", "Plank" ]
 	constructedin = "Carpenter"
 	bulk = 5
 }
@@ -934,4 +938,14 @@ item_type "Ash" {
 	graphic = 249
 	color = "180, 180, 180"
 	decaySpeed = 12
+}
+
+item_type "Wooden bucket" {
+	category = ["Bucket"]
+	containerSize = 10
+	graphic = 234
+	color = "255,73,7"
+	components = [ "Plank", "Plank" ]
+	constructedin = "Carpenter"
+	bulk = 2
 }
