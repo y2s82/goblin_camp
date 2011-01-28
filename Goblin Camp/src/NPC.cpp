@@ -282,7 +282,7 @@ void NPC::HandleWeariness() {
 		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
 		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
 		sleepJob->internal = true;
-		if (!expert && mainHand.lock()) { //Menial job doers may wield a tool
+		if (!squad.lock() && mainHand.lock()) { //Only soldiers go to sleep gripping their weapons
 			sleepJob->tasks.push_back(Task(UNWIELD));
 			sleepJob->tasks.push_back(Task(TAKE));
 			sleepJob->tasks.push_back(Task(STOCKPILEITEM));
