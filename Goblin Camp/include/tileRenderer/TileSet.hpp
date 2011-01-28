@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
 #include "tileRenderer/ItemSpriteSet.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/SpellSpriteSet.hpp"
 
 class TileSet : private boost::noncopyable
 {
@@ -67,6 +68,7 @@ public:
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
 	int GetGraphicsHintFor(const ItemPreset& itemPreset) const;
 	int GetGraphicsHintFor(const ConstructionPreset& constructionPreset) const;
+	int GetGraphicsHintFor(const SpellPreset& spellPreset) const;
 
 	void SetAuthor(std::string auth);
 	void SetDescription(std::string desc);
@@ -83,21 +85,22 @@ public:
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
-	void SetSparkSprite(const Sprite& sprite);
-	void SetSmokeSprite(const Sprite& sprite);
 	void AddFireSprite(const Sprite& sprite);
 	void SetFireFrameRate(int fps);
 
 	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
 		
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
-	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
-	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
 	void AddItemSpriteSet(std::string name, const ItemSpriteSet& set);
-	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
 	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
+	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
+	
+	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
+	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
+	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
 	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
+	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
 	
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
@@ -127,8 +130,6 @@ private:
 	Sprite blood;
 
 	Sprite defaultUnderConstructionSprite;
-	Sprite sparkSprite;
-	Sprite smokeSprite;
 	std::vector<Sprite> fireTiles;
 	int fireFrameTime;
 
@@ -147,6 +148,10 @@ private:
 	ConstructionSpriteSet defaultConstructionSpriteSet;
 	std::vector<ConstructionSpriteSet> constructionSpriteSets;
 	LookupMap constructionSpriteLookup;
+
+	SpellSpriteSet defaultSpellSpriteSet;
+	std::vector<SpellSpriteSet> spellSpriteSets;
+	LookupMap spellSpriteLookup;
 
 	CursorTypeSpriteArray placeableCursors;
 	CursorTypeSpriteArray nonplaceableCursors;

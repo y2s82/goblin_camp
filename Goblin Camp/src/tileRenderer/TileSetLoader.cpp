@@ -33,7 +33,8 @@ TileSetLoader::TileSetLoader() :
 	npcSpriteSet(),
 	natureObjectSpriteSet(),
 	itemSpriteSet(),
-	constructionSpriteSet()
+	constructionSpriteSet(),
+	spellSpriteSet()
 {
 	TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite_data");
 	creatureSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
@@ -43,6 +44,10 @@ TileSetLoader::TileSetLoader() :
 
 	TCODParserStruct* itemSpriteStruct = parser.newStructure("item_sprite_data");
 	itemSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
+
+	TCODParserStruct* spellSpriteStruct = parser.newStructure("spell_sprite_data");
+	spellSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
+	spellSpriteStruct->addProperty("fps", TCOD_TYPE_INT, false);
 
 	TCODParserStruct* constructionSpriteStruct = parser.newStructure("construction_sprite_data");
 	constructionSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
@@ -92,8 +97,6 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("default_burning", TCOD_TYPE_INT, false);
 
 	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("spark", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("smoke", TCOD_TYPE_INT, false);
 	tileTextureStruct->addListProperty("fire", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("fireFPS", TCOD_TYPE_INT, false);
 
@@ -118,6 +121,7 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addStructure(natureObjectSpriteStruct);
 	tileTextureStruct->addStructure(itemSpriteStruct);
 	tileTextureStruct->addStructure(constructionSpriteStruct);
+	tileTextureStruct->addStructure(spellSpriteStruct);
 
 	TCODParserStruct* tilesetStruct = parser.newStructure("tileset_data");
 	tilesetStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
@@ -205,6 +209,9 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
 		constructionSpriteSet = ConstructionSpriteSet();
 		currentSpriteSet = SS_CONSTRUCTION;
+	} else if (boost::iequals(str->getName(), "spell_sprite_data")) {
+		spellSpriteSet = SpellSpriteSet();
+		currentSpriteSet = SS_SPELL;
 	}
 
 	return success;
@@ -335,12 +342,6 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			else if (boost::iequals(name, "default_underconstruction")) {
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(value.i, currentTexture));
 			}
-			else if (boost::iequals(name, "spark")) {
-				tileSet->SetSparkSprite(Sprite(value.i, currentTexture));
-			}
-			else if (boost::iequals(name, "smoke")) {
-				tileSet->SetSmokeSprite(Sprite(value.i, currentTexture));
-			}
 			else if (boost::iequals(name, "fireFPS")) {
 				tileSet->SetFireFrameRate(value.i);
 			}
@@ -375,6 +376,14 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				constructionSpriteSet.SetOpenSprite(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "width")) {
 				constructionSpriteSet.SetWidth(value.i);
+			}
+			break;
+		case SS_SPELL:
+			if (boost::iequals(name, "sprites")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					spellSpriteSet.AddSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			} else if (boost::iequals(name, "fps")) {
+				spellSpriteSet.SetFrameRate(value.i);
 			}
 			break;
 		}	
@@ -448,6 +457,13 @@ bool TileSetLoader::parserEndStruct(TCODParser *parser,const TCODParserStruct *s
 			} else {
 				LOG("Skipping invalid construction sprite data: " << std::string(name));
 			}
+		}
+		currentSpriteSet = SS_NONE;
+	} else if (boost::iequals(str->getName(), "spell_sprite_data")) {
+		if (name == 0) {
+			tileSet->SetDefaultSpellSpriteSet(spellSpriteSet);
+		} else {
+			tileSet->AddSpellSpriteSet(std::string(name), spellSpriteSet);
 		}
 		currentSpriteSet = SS_NONE;
 	}
