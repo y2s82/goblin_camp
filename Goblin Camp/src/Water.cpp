@@ -59,6 +59,9 @@ void WaterNode::Update() {
 
 		if (depth > 1) {
 
+			if (timeFromRiverBed == 0 && Random::Generate(100) == 0) depth -= 1; //Evaporation
+			if (timeFromRiverBed > 0 && depth < RIVERDEPTH) depth += 10; //Water rushing from the river
+
 			std::vector<boost::weak_ptr<WaterNode> > waterList;
 			std::vector<Coordinate> coordList;
 			int depthSum = 0;
@@ -103,7 +106,6 @@ void WaterNode::Update() {
 			for (unsigned int i = 0; i < waterList.size(); ++i) {
 				if (waterList[i].lock()) {
 					waterList[i].lock()->depth = (int)divided;
-					if (Map::Inst()->IsLow(coordList[i].X(), coordList[i].Y()) && waterList[i].lock()->depth < RIVERDEPTH) waterList[i].lock()->depth += 10;
 					waterList[i].lock()->timeFromRiverBed = timeFromRiverBed;
 					waterList[i].lock()->UpdateGraphic();
 				}
@@ -116,7 +118,7 @@ void WaterNode::Update() {
 				depth = 1; //All of the water has flown to a low tile
 			}
 
-		} else if (Random::Generate(99) == 0) {
+		} else if (Random::Generate(500) == 0) {
 			if (depth > 0) { 
 				--depth;
 				Game::Inst()->RemoveWater(Coordinate(x,y)); //Water has evaporated
