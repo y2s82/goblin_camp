@@ -220,11 +220,6 @@ void Camp::RemoveWaterZone(Coordinate from, Coordinate to) {
 }
 
 inline void CreateWaterJob(boost::shared_ptr<Job> waterJob, Coordinate location) {
-/*	waterJob->tasks.push_back(Task(FIND, location, boost::weak_ptr<Entity>(), Item::StringToItemCategory("Bucket"), EMPTY));
-	waterJob->tasks.push_back(Task(MOVE));
-	waterJob->tasks.push_back(Task(TAKE));
-	waterJob->tasks.push_back(Task(FORGET)); //Otherwise MOVEADJACENT will try to move adjacent to the container
-	*/
 	waterJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
 	Coordinate waterLocation = Game::Inst()->FindWater(location);
 	waterJob->tasks.push_back(Task(MOVEADJACENT, waterLocation));
