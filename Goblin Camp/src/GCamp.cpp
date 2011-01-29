@@ -901,6 +901,7 @@ void TilesetsMenu() {
 							Config::SetStringCVar("tileset", tilesetsList.at(selection).basePath.filename().string());
 						}
 					}
+					Game::Inst()->TilesetChanged();
 					return;
 				} else if (mouse.cx >= listWidth + 2 * buttonDist - 4 && mouse.cx < listWidth + 2 * buttonDist + 4) {
 					return;
