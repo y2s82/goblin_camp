@@ -67,7 +67,7 @@ user-config.jam
 *.xcbkptlist
 xcuserdata
 gc-config.jam
-docs\doxy
+docs\internals
 docs\sphinx\_build
 userdata
 *.sln

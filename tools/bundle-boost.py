@@ -2,15 +2,7 @@
 # Scans INCLUDE env var to find Boost path automatically
 import sys, os, fnmatch, re, collections, shutil
 
-# input is path to Goblin Camp\src
-# output is path to where Boost deps should be copied
-# boost is path to where Boost is (if not provided, then
-if len(sys.argv) < 3:
-    print 'Usage: bundle-boost.py <sources> <output> [boost path]'
-    sys.exit(1)
-
-input, output = sys.argv[1:3]
-boost = None if len(sys.argv) < 4 else sys.argv[3]
+boost = None if len(sys.argv) < 2 else sys.argv[1]
 
 if boost is None:
     paths = os.environ.get('INCLUDE', '').split(os.pathsep)
@@ -23,13 +15,31 @@ if boost is None:
     print 'Boost not found.'
     sys.exit(1)
 
+HERE = os.path.dirname(__file__)
+
+input  = os.path.normpath(HERE + '/../Goblin Camp/')
+output = os.path.normpath(HERE + '/../vendor/boost/')
+
 src = []
 for root, dirs, files in os.walk(input):
-    src.extend(os.path.join(root, fn) for fn in fnmatch.filter(files, '*.cpp'))
+    src.extend(os.path.join(root, fn) for fn in fnmatch.filter(files, '*.[ch]pp'))
 for root, dirs, files in os.walk(os.path.join(output, 'libs')):
     src.extend(os.path.join(root, fn) for fn in fnmatch.filter(files, '*.cpp'))
 
-CPP_INCLUDE = re.compile(r'^#\s*include\s*([<"].*\.[hi]pp[">])$', re.I)
+CPP_INCLUDE = re.compile(r'''
+    ^[#]\s*
+    (?:
+        include                                                       |
+        define \s* BOOST_PP_(?:ITERATION_PARAMS|FILENAME|ITERATE)_\d+ |
+        define \s* BOOST_PP_(?:LOCAL_ITERATE|INCLUDE_SELF)\(\)        |
+        define \s* BOOST_(?:USER|COMPILER|PLATFORM|STDLIB)_CONFIG     |
+        define \s* BOOST_ABI_(?:PRE|SUF)FIX
+    )
+    .*
+    ([<"].*\.[hi]pp[">])
+    .*
+    $
+''', re.I | re.X)
 
 found    = set()
 searched = set()
@@ -73,6 +83,11 @@ def parse(fn, isBoost = False):
 
 for fn in src:
     parse(fn)
+
+mpl = os.path.join(boost, 'boost', 'mpl', 'aux_', 'preprocessed')
+for root, dirs, files in os.walk(mpl):
+    for fn in files:
+        found.add(os.path.normpath(os.path.join(root, fn)))
 
 print '*** Boost headers'
 
