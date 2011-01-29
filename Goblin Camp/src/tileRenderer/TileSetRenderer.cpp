@@ -325,7 +325,7 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
 		if (water->Depth() > 0)
 		{
-			tileSet->DrawWater(water->Depth() / 5000, mapSurface.get(), dstRect);
+			tileSet->DrawWater(water->Depth() / 100, mapSurface.get(), dstRect);
 		}
 	}
 	if (map->GetBlood(tileX, tileY).lock())	{
