@@ -263,6 +263,21 @@ void Construction::CancelJob(int index) {
 int Construction::Use() {
 	if (jobList.size() > 0) {
 		++progress;
+
+		if (Construction::Presets[type].chimney.X() != -1 && Construction::Presets[type].chimney.Y() != -1) {
+			if (Random::Generate(9) == 0) {
+				boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Position()+Construction::Presets[type].chimney, Spell::StringToSpellType("smoke"));
+				Coordinate direction;
+				Direction wind = Map::Inst()->GetWindDirection();
+				if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-75, -25));
+				if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(25, 75));
+				if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(25, 75));
+				if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-75, -25));
+				direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
+				smoke->CalculateFlightPath(Position()+ Construction::Presets[type].chimney + direction, 5, 1);
+			}
+		}
+
 		if (progress >= 100) {
 
 			bool allComponentsFound = true;
@@ -468,6 +483,10 @@ class ConstructionListener : public ITCODParserListener {
 				width += it->length();
 			}
 
+		} else if (boost::iequals(name, "chimneyx")) {
+			Construction::Presets.back().chimney.X(value.i);
+		} else if (boost::iequals(name, "chimneyy")) {
+			Construction::Presets.back().chimney.Y(value.i);
 		}
 
 		return true;
@@ -549,6 +568,8 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("description", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
 
 	parser.run(filename.c_str(), new ConstructionListener());
 }
@@ -825,7 +846,8 @@ ConstructionPreset::ConstructionPreset() :
 	tier(0),
 	description(""),
 	graphicsHint(-1),
-	fallbackGraphicsSet("")
+	fallbackGraphicsSet(""),
+	chimney(Coordinate(-1,-1))
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

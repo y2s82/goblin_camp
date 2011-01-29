@@ -120,7 +120,7 @@ void FireNode::Update() {
 			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(25, 75));
 			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(25, 75));
 			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-75, -25));
-			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
 			smoke->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 		}
 
