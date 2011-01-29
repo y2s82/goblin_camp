@@ -52,6 +52,9 @@ namespace fs = boost::filesystem;
 		
 	\var Paths::Path::ExecutableDir
 		\see Globals::execDir
+
+	\var Paths::Path::Tilesets
+	    \see Globals::tilesetsDir
 */
 
 /**
@@ -111,6 +114,9 @@ namespace Globals {
 			
 		\var modsDir
 			Path to user's mods directory (subdir of personalDir).
+
+		\var modsDir
+			Path to user's tilesets directory (subdir of personalDir).
 			
 		\var config
 			Path to user's configuration file.
@@ -119,7 +125,7 @@ namespace Globals {
 			Path to user's bitmap font.
 	*/
 	fs::path personalDir, exec, execDir, dataDir;
-	fs::path savesDir, screensDir, modsDir;
+	fs::path savesDir, screensDir, modsDir, tilesetsDir;
 	fs::path config, font;
 }
 
@@ -143,6 +149,7 @@ namespace Paths {
 		savesDir   = personalDir / "saves";
 		screensDir = personalDir / "screenshots";
 		modsDir    = personalDir / "mods";
+		tilesetsDir = personalDir / "tilesets";
 		
 		config     = personalDir / "config.py";
 		font       = personalDir / "terminal.png";
@@ -163,6 +170,7 @@ namespace Paths {
 		LOG("Saves directory: " << Globals::savesDir);
 		LOG("Screenshots directory: " << Globals::screensDir);
 		LOG("Mods directory: " << Globals::modsDir);
+		LOG("Tilesets directory: " << Globals::tilesetsDir);
 		LOG("Executable directory: " << Globals::execDir);
 		LOG("Global data directory: " << Globals::dataDir);
 		LOG("Executable: " << Globals::exec);
@@ -175,6 +183,7 @@ namespace Paths {
 			fs::create_directory(Globals::savesDir);
 			fs::create_directory(Globals::screensDir);
 			fs::create_directory(Globals::modsDir);
+			fs::create_directory(Globals::tilesetsDir);
 		} catch (const fs::filesystem_error& e) {
 			LOG("filesystem_error while creating directories: " << e.what());
 			exit(1);
@@ -202,6 +211,7 @@ namespace Paths {
 			case Font:          return Globals::font;
 			case Config:        return Globals::config;
 			case ExecutableDir: return Globals::execDir;
+			case Tilesets:		return Globals::tilesetsDir;
 		}
 		
 		// If control reaches here, then someone added new value to the enum,

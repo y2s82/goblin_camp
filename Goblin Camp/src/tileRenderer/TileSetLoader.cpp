@@ -20,22 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 const char* TileSetLoader::uninitialisedTilesetError = "tileset_data must be defined and tileWidth & tileHeight must be provided first";
 
-TileSetLoader::TileSetLoader() :
-	tileSet(),
-	success(false),
-	parser(),
-	tileSetName(),
-	tileWidth(-1),
-	tileHeight(-1),
-	currentTexture(),
-	currentSpriteSet(SS_NONE),
-	tileSetPath(),
-	npcSpriteSet(),
-	natureObjectSpriteSet(),
-	itemSpriteSet(),
-	constructionSpriteSet(),
-	spellSpriteSet()
-{
+void TileSetLoader::SetupTilesetParser(TCODParser& parser) {
 	TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite_data");
 	creatureSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
 
@@ -127,8 +112,28 @@ TileSetLoader::TileSetLoader() :
 	tilesetStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
 	tilesetStruct->addProperty("tileHeight", TCOD_TYPE_INT, true);
 	tilesetStruct->addProperty("author", TCOD_TYPE_STRING, false);
+	tilesetStruct->addProperty("version", TCOD_TYPE_STRING, false);
 	tilesetStruct->addProperty("description", TCOD_TYPE_STRING, false);
 	tilesetStruct->addStructure(tileTextureStruct);
+}
+
+TileSetLoader::TileSetLoader() :
+	tileSet(),
+	success(false),
+	parser(),
+	tileSetName(),
+	tileWidth(-1),
+	tileHeight(-1),
+	currentTexture(),
+	currentSpriteSet(SS_NONE),
+	tileSetPath(),
+	npcSpriteSet(),
+	natureObjectSpriteSet(),
+	itemSpriteSet(),
+	constructionSpriteSet(),
+	spellSpriteSet()
+{
+	SetupTilesetParser(parser);
 }
 
 TileSetLoader::~TileSetLoader() {
@@ -415,7 +420,9 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		tileSet->SetDescription(value.s);
 	} else if (boost::iequals(name, "author")) {
 		tileSet->SetAuthor(value.s);
-	} 
+	} else if (boost::iequals(name, "version")) {
+		tileSet->SetVersion(value.s);
+	}
 
 	return success;
 }

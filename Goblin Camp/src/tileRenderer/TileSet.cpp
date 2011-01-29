@@ -30,6 +30,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	tileHeight(tileH),
 	author(""),
 	description(""),
+	version(""),
 	waterTiles(),
 	minorFilth(),
 	majorFilth(),
@@ -85,6 +86,10 @@ std::string TileSet::GetName() const {
 
 std::string TileSet::GetAuthor() const {
 	return author;
+}
+
+std::string TileSet::GetVersion() const {
+	return version;
 }
 
 std::string TileSet::GetDescription() const {
@@ -451,6 +456,10 @@ void TileSet::SetDescription(std::string desc) {
 
 void TileSet::SetAuthor(std::string auth) {
 	author = auth;
+}
+
+void TileSet::SetVersion(std::string ver) {
+	version = ver;
 }
 
 void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
