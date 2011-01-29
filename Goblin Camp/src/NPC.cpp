@@ -234,6 +234,10 @@ void NPC::HandleHunger() {
 	Coordinate tmpCoord;
 	bool found = false;
 
+	if (hunger > 48000 && jobs.front()->name.find("Eat") == std::string::npos) { //Starving and doing something else
+		TaskFinished(TASKFAILNONFATAL);
+	}
+		
 	for (std::deque<boost::shared_ptr<Job> >::iterator jobIter = jobs.begin(); jobIter != jobs.end(); ++jobIter) {
 		if ((*jobIter)->name.find("Eat") != std::string::npos) found = true;
 	}
