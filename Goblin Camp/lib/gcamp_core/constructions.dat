@@ -134,6 +134,8 @@ construction_type "Kitchen" {
 	productionx=1
 	productiony=2
 	description="Dry fruits to keep longer, make bread, pies etc"
+	chimneyx=0
+	chimneyy=1
 }
 
 construction_type "Weaver" {
@@ -363,6 +365,8 @@ construction_type "Bloomery" {
 	productiony=1
 	materials=["Brick","Brick","Brick","Brick","Brick"]
 	description="Bloomeries are used to smelt iron"
+	chimneyx=2
+	chimneyy=1
 }
 
 construction_type "Smithy" {
@@ -378,6 +382,8 @@ construction_type "Smithy" {
 	productiony=1
 	materials=["Rough stone", "Log", "Brick", "Plank", "Plank"]
 	description="Create metal bars, and items from them"
+	chimneyx=2
+	chimneyy=0
 }
 
 construction_type "Clay kiln" {
@@ -394,6 +400,8 @@ construction_type "Clay kiln" {
 	productionx=1
 	productiony=1
 	description="Used to create bricks out of clay"
+	chimneyx=0
+	chimneyy=2
 }
 
 construction_type "Duckboard" {
@@ -437,5 +445,7 @@ construction_type "Charcoal burning clamp" {
 	permanent
 	color="190, 127, 0"
 	description="Used to make charcoal out of wood logs"
+	chimneyx=2
+	chimneyy=2
 }
 

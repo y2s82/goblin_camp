@@ -77,6 +77,7 @@ struct ConstructionPreset {
 	std::string description;
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
+	Coordinate chimney;
 };
 
 class Construction : public Entity {
