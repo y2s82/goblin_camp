@@ -34,6 +34,7 @@ public:
 	TileSetLoader();
 	~TileSetLoader();
 
+	static void SetupTilesetParser(TCODParser& parser);
 	bool LoadTileSet(boost::filesystem::path path);
 	bool Success() const;
 	boost::shared_ptr<TileSet> LoadedTileSet() const;

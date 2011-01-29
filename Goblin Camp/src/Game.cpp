@@ -15,8 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "scripting/_python.hpp"
-
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -430,7 +428,17 @@ void Game::Init() {
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		TileSetLoader loader;
-		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		bool foundTileset = false;
+		if (tilesetName.size() > 0) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
+		}
+		if (!foundTileset) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
+		}
+
+		if (foundTileset)
 		{
 			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
 		}

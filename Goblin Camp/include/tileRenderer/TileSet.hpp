@@ -45,6 +45,7 @@ public:
 	int TileHeight() const;
 	std::string GetName() const;
 	std::string GetAuthor() const;
+	std::string GetVersion() const;
 	std::string GetDescription() const;
 
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -71,6 +72,7 @@ public:
 	int GetGraphicsHintFor(const SpellPreset& spellPreset) const;
 
 	void SetAuthor(std::string auth);
+	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
 	void SetTerrain(TileType type, const Sprite& sprite);
 	void AddWater(const Sprite& sprite);
@@ -114,6 +116,7 @@ private:
 	int tileHeight;
 	std::string name;
 	std::string author;
+	std::string version;
 	std::string description;
 
 	TileTypeSpriteArray terrainTiles;

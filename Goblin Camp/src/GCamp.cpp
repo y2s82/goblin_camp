@@ -15,8 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "scripting/_python.hpp"
-
 #include <libtcod.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -41,6 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "data/Config.hpp"
 #include "data/Data.hpp"
 #include "data/Mods.hpp"
+#include "data/Tilesets.hpp"
 #include "NPC.hpp"
 #include "Item.hpp"
 #include "scripting/Engine.hpp"
@@ -54,6 +53,7 @@ void SaveMenu();
 void SettingsMenu();
 void KeysMenu();
 void ModsMenu();
+void TilesetsMenu();
 
 namespace Globals {
 	bool noDumpMode;
@@ -308,6 +308,7 @@ int MainMenu() {
 		{"Settings", 'o', &ActiveAlways,     &SettingsMenu},
 		{"Keys",     'k', &ActiveAlways,     &KeysMenu},
 		{"Mods",     'm', &ActiveAlways,     &ModsMenu},
+		{"Tilesets", 't', &ActiveAlways,     &TilesetsMenu},
 		{"Exit",     'q', &ActiveAlways,     NULL}
 	};
 
@@ -780,6 +781,129 @@ void ModsMenu() {
 					scroll = std::max(0, scroll - 1);
 				} else if (mouse.cy == y + h - 2) {
 					scroll = std::min(subH - h + 3, scroll + 1);
+				}
+			}
+			clicked = false;
+		}
+
+		TCODConsole::root->flush();
+	}
+}
+
+
+void TilesetsMenu() {
+	TCODConsole::root->setAlignment(TCOD_LEFT);
+
+	int screenWidth = TCODConsole::root->getWidth();
+	int screenHeight = TCODConsole::root->getHeight();
+
+	int listWidth = screenWidth / 3;
+
+	const std::vector<Tilesets::Metadata> tilesetsList = Tilesets::LoadTilesetMetadata();
+	
+	const int subH = tilesetsList.size();
+	TCODConsole sub(listWidth - 2, std::max(1, subH));
+
+	int currentY = 0;
+	
+	BOOST_FOREACH(Tilesets::Metadata tileset, tilesetsList) {
+		sub.setDefaultBackground(TCODColor::black);
+		
+		sub.setAlignment(TCOD_LEFT);
+		sub.setDefaultForeground(TCODColor::azure);
+		sub.print(0, currentY, "%s", tileset.name.c_str());
+		currentY += 1;
+	}
+
+	TCOD_key_t   key;
+	TCOD_mouse_t mouse;
+
+	int originalSelection = 0;
+	int selection = 0;
+	std::string tilesetDir = Config::GetStringCVar("tileset");
+	if (tilesetDir.size() > 0) {
+		for (int i = 0; i < tilesetsList.size(); ++i) {
+			if (boost::iequals(tilesetDir, tilesetsList.at(i).basePath.filename().string())) {
+				selection = i;
+				originalSelection = i;
+				break;
+			}
+		}
+	}
+
+	int scroll = 0;
+	bool clicked = false;
+
+	while (true) {
+		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		if (key.vk == TCODK_ESCAPE) return;
+
+		TCODConsole::root->clear();
+
+		TCODConsole::root->setDefaultForeground(TCODColor::white);
+		TCODConsole::root->setDefaultBackground(TCODColor::black);
+
+		// Left frame
+		TCODConsole::root->printFrame(0, 0, listWidth, screenHeight, true, TCOD_BKGND_SET, "Tilesets");
+		TCODConsole::blit(&sub, 0, scroll, listWidth - 2, screenHeight - 4, TCODConsole::root, 1, 2);
+
+		if (scroll > 0)
+		{
+			TCODConsole::root->putChar(listWidth - 2,     1,     TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
+		}
+		if (scroll < subH - screenHeight + 3) 
+		{
+			TCODConsole::root->putChar(listWidth - 2, screenHeight - 2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
+		}
+
+		// Right frame
+		TCODConsole::root->printFrame(listWidth, 0, screenWidth - listWidth, screenHeight, true, TCOD_BKGND_SET, "Details");
+
+		int currentY = 2;
+		TCODConsole::root->print(listWidth + 3, 2,      "Name:    %s", tilesetsList.at(selection).name.c_str());
+		TCODConsole::root->print(listWidth + 3, 4,      "Size:    %dx%d", tilesetsList.at(selection).width, tilesetsList.at(selection).height);
+		TCODConsole::root->print(listWidth + 3, 6,      "Author:  %s", tilesetsList.at(selection).author.c_str());
+		TCODConsole::root->print(listWidth + 3, 8,      "Version: %s", tilesetsList.at(selection).version.c_str());
+		TCODConsole::root->print(listWidth + 3, 10,     "Description:");
+		TCODConsole::root->printRect(listWidth + 3, 12, screenWidth - listWidth - 6, screenHeight - 19, "%s", tilesetsList.at(selection).description.c_str());
+				
+		// Buttons
+		int buttonDist = (screenWidth - listWidth) / 3;
+		TCODConsole::root->printFrame(listWidth + buttonDist - 4, screenHeight - 6, 8, 3);
+		TCODConsole::root->print(listWidth + buttonDist - 1, screenHeight - 5, "Ok");
+		TCODConsole::root->printFrame(listWidth + 2 * buttonDist - 4, screenHeight - 6, 8, 3);
+		TCODConsole::root->print(listWidth + 2 * buttonDist - 3, screenHeight - 5, "Cancel");
+		mouse = TCODMouse::getStatus();
+		if (mouse.lbutton) {
+			clicked = true;
+		}
+
+		if (clicked && !mouse.lbutton) {
+			// Left frame click checks
+			if (mouse.cx == listWidth - 2) {
+				if (mouse.cy == 1) {
+					scroll = std::max(0, scroll - 1);
+				} else if (mouse.cy == screenHeight - 2) {
+					scroll = std::max(0, std::min(subH - screenHeight + 3, scroll + 1));
+				}
+			}
+			else if (mouse.cx > 1 && mouse.cx < listWidth - 2 && mouse.cy > 1 && mouse.cy < screenHeight - 2 && mouse.cy - 2 + scroll < tilesetsList.size()) {
+				selection = scroll + mouse.cy - 2;
+			}
+
+			// Button clicks
+			else if (mouse.cy >= screenHeight - 6 && mouse.cy < screenHeight - 3) {
+				if (mouse.cx >= listWidth + buttonDist - 4 && mouse.cx < listWidth + buttonDist + 4) {
+					if (selection != originalSelection) {
+						if (tilesetsList.at(selection).defaultTileset) {
+							Config::SetStringCVar("tileset", "");
+						} else {
+							Config::SetStringCVar("tileset", tilesetsList.at(selection).basePath.filename().string());
+						}
+					}
+					return;
+				} else if (mouse.cx >= listWidth + 2 * buttonDist - 4 && mouse.cx < listWidth + 2 * buttonDist + 4) {
+					return;
 				}
 			}
 			clicked = false;
