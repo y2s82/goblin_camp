@@ -26,11 +26,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Tile.hpp"
 #include "NPC.hpp"
 #include "NatureObject.hpp"
+#include "Spell.hpp"
+#include "Fire.hpp"
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/NPCSpriteSet.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
 #include "tileRenderer/ItemSpriteSet.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/SpellSpriteSet.hpp"
 
 class TileSet : private boost::noncopyable
 {
@@ -42,12 +45,14 @@ public:
 	int TileHeight() const;
 	std::string GetName() const;
 	std::string GetAuthor() const;
+	std::string GetVersion() const;
 	std::string GetDescription() const;
 
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(int index, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -57,13 +62,17 @@ public:
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect);
+	void DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
 	int GetGraphicsHintFor(const ItemPreset& itemPreset) const;
 	int GetGraphicsHintFor(const ConstructionPreset& constructionPreset) const;
+	int GetGraphicsHintFor(const SpellPreset& spellPreset) const;
 
 	void SetAuthor(std::string auth);
+	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
 	void SetTerrain(TileType type, const Sprite& sprite);
 	void AddWater(const Sprite& sprite);
@@ -74,19 +83,26 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
+	void AddCorruption(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
+	void AddFireSprite(const Sprite& sprite);
+	void SetFireFrameRate(int fps);
+
 	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
-	
+		
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
-	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
-	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
 	void AddItemSpriteSet(std::string name, const ItemSpriteSet& set);
-	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
 	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
+	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
+	
+	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
+	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
+	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
 	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
+	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
 	
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
@@ -100,6 +116,7 @@ private:
 	int tileHeight;
 	std::string name;
 	std::string author;
+	std::string version;
 	std::string description;
 
 	TileTypeSpriteArray terrainTiles;
@@ -110,11 +127,14 @@ private:
 	Sprite nonTerritoryOverlay;
 	Sprite territoryOverlay;
 	Sprite markedOverlay;
+	std::vector<Sprite> corruptionTiles;
 
 	Sprite marker;
 	Sprite blood;
 
 	Sprite defaultUnderConstructionSprite;
+	std::vector<Sprite> fireTiles;
+	int fireFrameTime;
 
 	NPCSpriteSet defaultNPCSpriteSet;
 	std::vector<NPCSpriteSet> npcSpriteSets;
@@ -132,10 +152,16 @@ private:
 	std::vector<ConstructionSpriteSet> constructionSpriteSets;
 	LookupMap constructionSpriteLookup;
 
+	SpellSpriteSet defaultSpellSpriteSet;
+	std::vector<SpellSpriteSet> spellSpriteSets;
+	LookupMap spellSpriteLookup;
+
 	CursorTypeSpriteArray placeableCursors;
 	CursorTypeSpriteArray nonplaceableCursors;
 
 	StatusEffectSpriteArray defaultStatusEffects;
+
+	bool ConstructionConnectTo(Construction * construction, int x, int y) const;
 
 	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;

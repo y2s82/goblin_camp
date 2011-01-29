@@ -33,6 +33,8 @@ public:
 	int graphic;
 	int speed;
 	TCODColor color;
+	std::string fallbackGraphicsSet;
+	int graphicsHint;
 };
 
 class Spell : public Entity {
@@ -64,6 +66,7 @@ public:
 	void UpdateVelocity();
 	void Impact(int speedChange);
 	bool IsDead();
+	int GetGraphicsHint() const;
 
 	static int StringToSpellType(std::string);
 

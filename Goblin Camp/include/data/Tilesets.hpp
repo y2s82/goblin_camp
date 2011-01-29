@@ -15,14 +15,18 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <list>
 #include <boost/filesystem.hpp>
 
-namespace Paths {
-	enum Path {
-		Executable, GlobalData, Personal, Mods, Saves,
-		Screenshots, Font, Config, ExecutableDir, Tilesets
+namespace Tilesets {
+	struct Metadata {
+		boost::filesystem::path basePath;
+		std::string name, author, version, description;
+		int width, height;
+		bool valid;
+		bool defaultTileset;
+		Metadata(const boost::filesystem::path& path);
 	};
 	
-	void Init();
-	const boost::filesystem::path& Get(Path);
+	std::vector<Metadata> LoadTilesetMetadata();
 }
