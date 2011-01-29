@@ -92,6 +92,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	attacks(std::list<Attack>()),
 	addedTasksToCurrentJob(0),
 	hasMagicRangedAttacks(false),
+	threatLocation(Coordinate(-1,-1)),
+	seenFire(false),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -316,7 +318,6 @@ void NPC::Update() {
 
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
 	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
-	
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
@@ -367,11 +368,10 @@ void NPC::Update() {
 }
 
 void NPC::UpdateStatusEffects() {
-
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		effectiveStats[i] = baseStats[i];
 	}
-	for (int i = 0; i < STAT_COUNT; ++i) {
+	for (int i = 0; i < RES_COUNT; ++i) {
 		effectiveResistances[i] = baseResistances[i];
 	}
 	++statusGraphicCounter;
@@ -380,7 +380,7 @@ void NPC::UpdateStatusEffects() {
 		for (int i = 0; i < STAT_COUNT; ++i) {
 			effectiveStats[i] = (int)(effectiveStats[i] * statusEffectI->statChanges[i]);
 		}
-		for (int i = 0; i < STAT_COUNT; ++i) {
+		for (int i = 0; i < RES_COUNT; ++i) {
 			effectiveResistances[i] = (int)(effectiveResistances[i] * statusEffectI->resistanceChanges[i]);
 		}
 
@@ -425,7 +425,6 @@ AiThink NPC::Think() {
 	}
 
 	while (timeCount > UPDATES_PER_SECOND) {
-
 		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock()) {
@@ -1105,28 +1104,21 @@ CONTINUEEAT:
 		} else {
 			if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
-				bool enemyFound = false;
-				if (jobs.empty() && !nearNpcs.empty()) {
+				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
 					run = true;
-					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
-						if (npci->lock() && (npci->lock()->faction != faction || npci->lock() == aggressor.lock())) {
-							int dx = x - npci->lock()->x;
-							int dy = y - npci->lock()->y;
-							if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
-								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
-								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
-								jobs.push_back(fleeJob);
-							}
-							enemyFound = true;
-							break;
-						}
+					int dx = x - threatLocation.X();
+					int dy = y - threatLocation.Y();
+					if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
+						jobs.push_back(fleeJob);
+					} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
+						jobs.push_back(fleeJob);
+					} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
+						jobs.push_back(fleeJob);
 					}
 				}
 			} else if (!GetSquadJob(boost::static_pointer_cast<NPC>(shared_from_this())) && 
@@ -1436,28 +1428,40 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
-	if (npc->aggressive) {
-		if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
-			npc->ScanSurroundings(true);
-			for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-				if (npci->lock()->faction != npc->faction) {
-					JobManager::Inst()->NPCNotWaiting(npc->uid);
-					boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
-					killJob->internal = true;
-					killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-					while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
-					npc->jobs.push_back(killJob);
-					npc->run = true;
-				}
-			}
-		}
-	} else if (npc->coward) { //Aggressiveness trumps cowardice
+	if (npc->coward) {
 		npc->ScanSurroundings();
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if ((npci->lock()->GetFaction() != npc->faction || npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) {
+			if (( (npci->lock()->GetFaction() != npc->faction) || 
+				(npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) || 
+				npc->seenFire) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
+			}
+		}
+	} else {
+		if (npc->aggressive) {
+			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
+				npc->ScanSurroundings(true);
+				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
+					if (npci->lock()->faction != npc->faction) {
+						JobManager::Inst()->NPCNotWaiting(npc->uid);
+						boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
+						killJob->internal = true;
+						killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
+						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+						npc->jobs.push_back(killJob);
+						npc->run = true;
+						return;
+					}
+				}
+			}
+		}
+		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
+			npc->ScanSurroundings();
+			if (npc->seenFire) {
+				npc->AddEffect(PANIC);
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL);
 			}
 		}
 	}
@@ -1465,6 +1469,13 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 
 void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 	animal->ScanSurroundings();
+
+	if (animal->seenFire) {
+		animal->AddEffect(PANIC);
+		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
+		return;
+	}
+
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 		if (npci->lock()->faction != animal->faction) {
 			animal->AddEffect(PANIC);
@@ -1499,7 +1510,14 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
 			animal->jobs.push_back(killJob);
 			animal->run = true;
+			return;
 		}
+	}
+
+	if (animal->seenFire) {
+		animal->AddEffect(PANIC);
+		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
+		return;
 	}
 }
 
@@ -2158,6 +2176,8 @@ bool NPC::IsTunneler() { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
 	nearNpcs.clear();
+	threatLocation = Coordinate(-1,-1);
+	seenFire = false;
 	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
 		for (int endy = std::max((signed int)y - LOS_DISTANCE, 0); endy <= std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
 			if (endx == std::max((signed int)x - LOS_DISTANCE, 0) || endx == std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1)
@@ -2169,7 +2189,14 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 						if (Map::Inst()->BlocksLight(tx,ty)) break;
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
+								if (Game::Inst()->npcList[*npci]->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
 								if (!onlyHostiles || (onlyHostiles && Game::Inst()->npcList[*npci]->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->npcList[*npci]);
+							}
+						}
+						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
+							if (effectiveResistances[FIRE_RES] < 90) {
+								threatLocation = Coordinate(tx,ty);
+								seenFire = true;
 							}
 						}
 
