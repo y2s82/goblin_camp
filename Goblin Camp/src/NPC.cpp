@@ -386,8 +386,15 @@ void NPC::UpdateStatusEffects() {
 
 		if (statusEffectI->damage.second > 0 && --statusEffectI->damage.first <= 0) {
 			statusEffectI->damage.first = UPDATES_PER_SECOND;
-			health -= statusEffectI->damage.second;
-			if (statusEffectI->bleed) Game::Inst()->CreateBlood(Position());
+			TCOD_dice_t dice;
+			dice.addsub = (float)statusEffectI->damage.second;
+			dice.multiplier = 1;
+			dice.nb_dices = 1;
+			dice.nb_faces = std::max(1, (int)dice.addsub / 5);
+			Attack attack;
+			attack.Amount(dice);
+			attack.Type((DamageType)statusEffectI->damageType);
+			Damage(&attack);
 		}
 
 		//Remove the statuseffect if its cooldown has run out
@@ -1704,11 +1711,6 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	int damage = (int)(Game::DiceToInt(attack->Amount()) * resistance);
 	health -= damage;
 
-	#ifdef DEBUG
-	std::cout<<"Resistance: "<<resistance<<"\n";
-	std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
-	#endif
-
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
 		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
 			AddEffect(attack->StatusEffects()->at(effecti).first);
@@ -1717,11 +1719,11 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 	if (health <= 0) Kill();
 
-	if (damage > 0) {
+	if (damage > 0 && res == PHYSICAL_RES) {
 		Game::Inst()->CreateBlood(Coordinate(
 			Position().X() + Random::Generate(-1, 1),
-			Position().Y() + Random::Generate(-1, 1)
-		));
+			Position().Y() + Random::Generate(-1, 1)),
+			Random::Generate(50, 50+damage*10));
 		if (aggr.lock()) aggressor = aggr;
 	}
 }
