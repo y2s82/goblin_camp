@@ -189,7 +189,6 @@ void Camp::Reset() {
 	waterZones.clear();
 	menialWaterJobs.clear();
 	expertWaterJobs.clear();
-	drinkingSpot = Coordinate(-1, -1);
 }
 
 void Camp::Update() {
