@@ -971,6 +971,9 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & lowerCorner;
 	ar & autoTerritory;
 	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
 }
 
 template<class Archive>
@@ -991,6 +994,9 @@ void Camp::load(Archive & ar, const unsigned int version) {
 	ar & autoTerritory;
 	if (version >= 1) {
 		ar & article;
+		ar & waterZones;
+		ar & menialWaterJobs;
+		ar & expertWaterJobs;
 	}
 }
 

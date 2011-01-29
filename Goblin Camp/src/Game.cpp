@@ -835,7 +835,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 
-	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
+	if (time % (UPDATES_PER_SECOND * 1) == 0) Camp::Inst()->Update();
 
 	Map::Inst()->UpdateMarkers();
 
@@ -1313,8 +1313,9 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
 			}
-			if (Map::Inst()->GroundMarked(x,y)) { //A dig job exists for this tile
-				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y));
+			if (Map::Inst()->GroundMarked(x,y)) { 
+				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y)); //A dig job may exist for this tile
+				Camp::Inst()->RemoveWaterZone(Coordinate(x,y), Coordinate(x,y)); //May be marked for water
 			}
 		}
 	}
