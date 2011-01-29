@@ -928,8 +928,17 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			}
 
 			if(nearest) {
+				JobPriority priority;
+				if (item->IsCategory(Item::StringToItemCategory("Food"))) priority = HIGH;
+				else {
+					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(item->Type()) / (float)StockManager::Inst()->Minimum(item->Type());
+					if (stockDeficit >= 1.0) priority = LOW;
+					else if (stockDeficit > 0.25) priority = MED;
+					else priority = HIGH;
+				}
+
 				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
-					item->IsCategory(Item::StringToItemCategory("Food")) ? HIGH : LOW));
+					priority));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
