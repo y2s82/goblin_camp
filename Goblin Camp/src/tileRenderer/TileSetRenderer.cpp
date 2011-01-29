@@ -59,7 +59,7 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
    //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
    SDL_FreeSurface(temp);
 
-   if (mapSurface.get() == NULL || tempBuffer.get() == NULL)
+   if (!mapSurface || !tempBuffer)
    {
 	   LOG(SDL_GetError());
    }
@@ -70,21 +70,20 @@ TileSetRenderer::~TileSetRenderer() {}
 
 void TileSetRenderer::PreparePrefabs() 
 {
-	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci)
-	{
+	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci) {
 		npci->graphicsHint = tileSet->GetGraphicsHintFor(*npci);
 	}
-	for (std::vector<NatureObjectPreset>::iterator nopi = NatureObject::Presets.begin(); nopi != NatureObject::Presets.end(); ++nopi)
-	{
+	for (std::vector<NatureObjectPreset>::iterator nopi = NatureObject::Presets.begin(); nopi != NatureObject::Presets.end(); ++nopi) {
 		nopi->graphicsHint = tileSet->GetGraphicsHintFor(*nopi);
 	}
-	for (std::vector<ItemPreset>::iterator itemi = Item::Presets.begin(); itemi != Item::Presets.end(); ++itemi)
-	{
+	for (std::vector<ItemPreset>::iterator itemi = Item::Presets.begin(); itemi != Item::Presets.end(); ++itemi) {
 		itemi->graphicsHint = tileSet->GetGraphicsHintFor(*itemi);
 	}
-	for (std::vector<ConstructionPreset>::iterator constructi = Construction::Presets.begin(); constructi != Construction::Presets.end(); ++constructi)
-	{
+	for (std::vector<ConstructionPreset>::iterator constructi = Construction::Presets.begin(); constructi != Construction::Presets.end(); ++constructi) {
 		constructi->graphicsHint = tileSet->GetGraphicsHintFor(*constructi);
+	}
+	for (std::vector<SpellPreset>::iterator spelli = Spell::Presets.begin(); spelli != Spell::Presets.end(); ++spelli) {
+		spelli->graphicsHint = tileSet->GetGraphicsHintFor(*spelli);
 	}
 }
 
@@ -149,7 +148,6 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 			SDL_Rect dstRect(CalcDest(tileX, tileY));
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
 				DrawTerrain(map, tileX, tileY, &dstRect);
-				DrawWater(map, tileX, tileY, &dstRect);
 				DrawConstruction(map, tileX, tileY, &dstRect);
 				DrawFilth(map, tileX, tileY, &dstRect);
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
@@ -168,6 +166,8 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	DrawNatureObjects(startTileX, startTileY, tilesX, tilesY);
 	DrawItems(startTileX, startTileY, tilesX, tilesY);
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
+	DrawFires(startTileX, startTileY, tilesX, tilesY);
+	DrawSpells(startTileX, startTileY, tilesX, tilesY);
 
 	SDL_SetClipRect(mapSurface.get(), NULL);
 }
@@ -268,12 +268,39 @@ void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) {
 	}
 }
 
+void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) {
+	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
+		Coordinate spellPos = (*spelli)->Position();
+		if (spellPos.X() >= startX && spellPos.X() < startX + sizeX
+				&& spellPos.Y() >= startY && spellPos.Y() < startY + sizeY)
+		{
+			SDL_Rect dstRect(CalcDest(spellPos.X(), spellPos.Y()));
+			tileSet->DrawSpell(*spelli, mapSurface.get(), &dstRect);
+		}
+	}
+}
+
+void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) {
+	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
+		if (boost::shared_ptr<FireNode> fire = firei->lock())
+		{
+			Coordinate firePos = fire->GetPosition();
+			if (firePos.X() >= startX && firePos.X() < startX + sizeX
+					&& firePos.Y() >= startY && firePos.Y() < startY + sizeY)
+			{
+				SDL_Rect dstRect(CalcDest(firePos.X(), firePos.Y()));
+				tileSet->DrawFire(fire, mapSurface.get(), &dstRect);
+			}
+		}
+	}
+}
+
 void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, int sizeY)
 {
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
-		if (markerX >= startX && markerY < startX + sizeX
+		if (markerX >= startX && markerX < startX + sizeX
 			&& markerY >= startY && markerY < startY + sizeY) {
 				SDL_Rect dstRect( CalcDest(markerX, markerY));
 				tileSet->DrawMarker(mapSurface.get(), &dstRect);
@@ -284,6 +311,23 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	TileType type(map->Type(tileX, tileY));
 	tileSet->DrawTerrain(type, mapSurface.get(), dstRect);
+	
+	// Corruption
+	if (map->GetCorruption(tileX, tileY) >= 100) {
+		bool corruptN(map->GetCorruption(tileX, tileY - 1) >= 100);
+		bool corruptE(map->GetCorruption(tileX + 1, tileY) >= 100);
+		bool corruptS(map->GetCorruption(tileX, tileY + 1) >= 100);
+		bool corruptW(map->GetCorruption(tileX - 1, tileY) >= 100);
+		tileSet->DrawCorruption(corruptN, corruptE, corruptS, corruptW, mapSurface.get(), dstRect);
+	}
+	// Water
+	boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
+	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
+		if (water->Depth() > 0)
+		{
+			tileSet->DrawWater(water->Depth() / 5000, mapSurface.get(), dstRect);
+		}
+	}
 	if (map->GetBlood(tileX, tileY).lock())	{
 		tileSet->DrawBlood(mapSurface.get(), dstRect);
 	}
@@ -291,16 +335,6 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 		tileSet->DrawMarkedOverlay(mapSurface.get(), dstRect);
 	}
 	
-}
-
-void TileSetRenderer::DrawWater(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
-	boost::weak_ptr<WaterNode> water = map->GetWater(tileX,tileY);
-	if (water.lock()) {
-		if (water.lock()->Depth() > 0)
-		{
-			tileSet->DrawWater(water.lock()->Depth() / 5000, mapSurface.get(), dstRect);
-		}
-	}
 }
 
 void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {

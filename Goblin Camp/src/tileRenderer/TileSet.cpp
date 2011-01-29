@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "tileRenderer/TileSet.hpp"
+#include "tileRenderer/TileSetUtil.hpp"
 #include <boost/numeric/conversion/cast.hpp> 
 
 #include "FarmPlot.hpp"
@@ -29,12 +30,14 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	tileHeight(tileH),
 	author(""),
 	description(""),
+	version(""),
 	waterTiles(),
 	minorFilth(),
 	majorFilth(),
 	nonTerritoryOverlay(),
 	territoryOverlay(),
 	markedOverlay(),
+	corruptionTiles(),
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
@@ -49,7 +52,12 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	defaultItemSpriteSet(),
 	constructionSpriteSets(),
 	constructionSpriteLookup(),
-	defaultConstructionSpriteSet(){
+	defaultConstructionSpriteSet(),
+	defaultSpellSpriteSet(),
+	spellSpriteLookup(),
+	spellSpriteSets(),
+	fireTiles(),
+	fireFrameTime(100){
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -80,6 +88,10 @@ std::string TileSet::GetAuthor() const {
 	return author;
 }
 
+std::string TileSet::GetVersion() const {
+	return version;
+}
+
 std::string TileSet::GetDescription() const {
 	return description;
 }
@@ -94,6 +106,14 @@ void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
 
 void TileSet::DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	terrainTiles.at(type).Draw(dst, dstRect);
+}
+
+void TileSet::DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	if (corruptionTiles.size() >= 16) {
+		corruptionTiles.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+	} else if (corruptionTiles.size() > 0) {
+		corruptionTiles[0].Draw(dst, dstRect);
+	}
 }
 
 void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
@@ -133,8 +153,7 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 
 	if ((TCODSystem::getElapsedMilli() % 1000 < 700)) {
 		if (npc->HasEffect(CARRYING)) {
-			boost::shared_ptr<Item> carriedItem = npc->Carrying().lock();
-			if (carriedItem.get() != 0) {
+			if (boost::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
 				DrawItem(carriedItem, dst, dstRect);
 			}
 		}
@@ -142,12 +161,13 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 
 	int numEffects = npc->StatusEffects()->size();
 	if (npc->HasEffect(CARRYING)) numEffects--; // Already handled
-	if (npc->HasEffect(WORKING)) numEffects--; // Don't draw
+	if (npc->HasEffect(WORKING)) numEffects--;  // Don't draw
+	if (npc->HasEffect(FLYING)) numEffects--;   // Don't draw
 	if (npc->HasEffect(SWIM)) {
 		numEffects--;
 		defaultStatusEffects.at(SWIM).Draw(dst, dstRect);
 	}
-	if (npc->HasEffect(FLYING)) numEffects--; // Dont Draw
+	
 	if (numEffects > 0) {
 		int effect = (TCODSystem::getElapsedMilli() % (250 * numEffects)) / 250;
 		int atEffect = 0;
@@ -247,20 +267,43 @@ void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, con
 	construction->AcceptVisitor(visitor);
 }
 
+bool TileSet::ConstructionConnectTo(Construction * construction, int x, int y) const {
+	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y));
+	if (boost::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
+		return otherConstruct->Type() == construction->Type() && otherConstruct->Condition() > 0 == construction->Condition() > 0;
+	}
+	return false;
+}
+
 void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
-	if (hint == -1 || hint >= constructionSpriteSets.size()) {
-		defaultConstructionSpriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
+	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (spriteSet.IsConnectionMap()) {
+		ConstructionType type = construction->Type();
+		bool connectN = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() - 1);
+		bool connectE = ConstructionConnectTo(construction, worldPos.X() + 1, worldPos.Y());
+		bool connectS = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() + 1);
+		bool connectW = ConstructionConnectTo(construction, worldPos.X() - 1, worldPos.Y());
+		spriteSet.Draw(connectN, connectE, connectS, connectW, dst, dstRect);
 	} else {
-		constructionSpriteSets[hint].Draw(worldPos - construction->Position(), dst, dstRect);
+		spriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
 	}
 }
 
 void TileSet::DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
-	const ConstructionSpriteSet& set((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
-	if (set.HasUnderConstructionSprites()) {
-		set.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
+	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (spriteSet.HasUnderConstructionSprites()) {
+		if (spriteSet.IsConnectionMap()) {
+			ConstructionType type = construction->Type();
+			bool connectN = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() - 1);
+			bool connectE = ConstructionConnectTo(construction, worldPos.X() + 1, worldPos.Y());
+			bool connectS = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() + 1);
+			bool connectW = ConstructionConnectTo(construction, worldPos.X() - 1, worldPos.Y());
+			spriteSet.DrawUnderConstruction(connectN, connectE, connectS, connectW, dst, dstRect);
+		} else {
+			spriteSet.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
+		}
 	} else {
 		defaultUnderConstructionSprite.Draw(dst, dstRect);
 	}
@@ -268,9 +311,8 @@ void TileSet::DrawUnderConstruction(Construction * construction, const Coordinat
 
 void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
-	if (storage.get() != 0 && !storage->empty()) {
-		boost::shared_ptr<Item> item = storage->GetFirstItem().lock();
-		if (item.get() != 0) {
+	if (storage && !storage->empty()) {
+		if (boost::shared_ptr<Item> item = storage->GetFirstItem().lock()) {
 			DrawItem(item, dst, dstRect);
 		}
 	}
@@ -296,6 +338,22 @@ void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Su
 		} else {
 			nonplaceableCursors.at(type).Draw(dst, dstRect);
 		}
+	}
+}
+
+void TileSet::DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (spell->GetGraphicsHint() == -1) {
+		defaultSpellSpriteSet.Draw(dst, dstRect);
+	} else {
+		spellSpriteSets[spell->GetGraphicsHint()].Draw(dst, dstRect);
+	}
+}
+
+void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	// Determine frame
+	if (fireTiles.size() > 0) {
+		int fireTile = (TCODSystem::getElapsedMilli() / fireFrameTime) % fireTiles.size();
+		fireTiles[fireTile].Draw(dst, dstRect);
 	}
 }
 
@@ -364,12 +422,28 @@ int TileSet::GetGraphicsHintFor(const ConstructionPreset& constructPreset) const
 	LookupMap::const_iterator set;
 	
 	set = constructionSpriteLookup.find(constructPreset.name);
-	if (set != itemSpriteLookup.end()) {
+	if (set != constructionSpriteLookup.end()) {
 		return set->second;
 	}
 
-	set = itemSpriteLookup.find(constructPreset.fallbackGraphicsSet);
-	if (set != itemSpriteLookup.end()) {
+	set = constructionSpriteLookup.find(constructPreset.fallbackGraphicsSet);
+	if (set != constructionSpriteLookup.end()) {
+		return set->second;
+	}
+
+	return -1;
+}
+
+int TileSet::GetGraphicsHintFor(const SpellPreset& spellPreset) const {
+	LookupMap::const_iterator set;
+	
+	set = spellSpriteLookup.find(spellPreset.name);
+	if (set != spellSpriteLookup.end()) {
+		return set->second;
+	}
+
+	set = spellSpriteLookup.find(spellPreset.fallbackGraphicsSet);
+	if (set != spellSpriteLookup.end()) {
 		return set->second;
 	}
 
@@ -382,6 +456,10 @@ void TileSet::SetDescription(std::string desc) {
 
 void TileSet::SetAuthor(std::string auth) {
 	author = auth;
+}
+
+void TileSet::SetVersion(std::string ver) {
+	version = ver;
 }
 
 void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
@@ -429,6 +507,10 @@ void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 	markedOverlay = sprite;
 }
 
+void TileSet::AddCorruption(const Sprite& sprite) {
+	corruptionTiles.push_back(sprite);
+}
+
 void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
 	placeableCursors[type] = sprite;
 	nonplaceableCursors[type] = sprite;
@@ -461,6 +543,14 @@ void TileSet::SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprit
 
 void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {
 	defaultUnderConstructionSprite = sprite;
+}
+
+void TileSet::AddFireSprite(const Sprite& sprite) {
+	fireTiles.push_back(sprite);
+}
+
+void TileSet::SetFireFrameRate(int fps) {
+	fireFrameTime = 1000 / fps;
 }
 
 void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {
@@ -501,4 +591,14 @@ void TileSet::AddConstructionSpriteSet(std::string name, const ConstructionSprit
 
 void TileSet::SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set) {
 	defaultConstructionSpriteSet = set;
+}
+
+void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& set) {
+	int index = spellSpriteSets.size();
+	spellSpriteSets.push_back(set);
+	spellSpriteLookup[name] = index;
+}
+
+void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& set) {
+	defaultSpellSpriteSet = set;
 }

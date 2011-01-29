@@ -1,4 +1,4 @@
-/* Copyright 2010-2011 Ilkka Halila
+/* Copyright 2011 Ilkka Halila
 This file is part of Goblin Camp.
 
 Goblin Camp is free software: you can redistribute it and/or modify
@@ -13,16 +13,26 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
 
-#include <boost/filesystem.hpp>
+#include "stdafx.hpp"
+#include "tileRenderer/SpellSpriteSet.hpp"
 
-namespace Paths {
-	enum Path {
-		Executable, GlobalData, Personal, Mods, Saves,
-		Screenshots, Font, Config, ExecutableDir, Tilesets
-	};
-	
-	void Init();
-	const boost::filesystem::path& Get(Path);
+SpellSpriteSet::SpellSpriteSet()
+	: tiles(), frameTime(15) {}
+
+SpellSpriteSet::~SpellSpriteSet() {}
+
+void SpellSpriteSet::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (tiles.size() > 0) {
+		int frame = (TCODSystem::getElapsedMilli() / frameTime) % tiles.size();
+		tiles[frame].Draw(dst, dstRect);
+	}
+}
+
+void SpellSpriteSet::AddSprite(Sprite tile) {
+	tiles.push_back(tile);
+}
+
+void SpellSpriteSet::SetFrameRate(int fps) {
+	frameTime = 1000/fps;
 }

@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/NPCSpriteSet.hpp"
 #include "tileRenderer/ItemSpriteSet.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/SpellSpriteSet.hpp"
 
 
 
@@ -33,6 +34,7 @@ public:
 	TileSetLoader();
 	~TileSetLoader();
 
+	static void SetupTilesetParser(TCODParser& parser);
 	bool LoadTileSet(boost::filesystem::path path);
 	bool Success() const;
 	boost::shared_ptr<TileSet> LoadedTileSet() const;
@@ -50,7 +52,8 @@ private:
 		SS_NPC,
 		SS_ITEM,
 		SS_NATURE,
-		SS_CONSTRUCTION
+		SS_CONSTRUCTION,
+		SS_SPELL
 	};
 
 	boost::shared_ptr<TileSet> tileSet;
@@ -68,6 +71,7 @@ private:
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSpriteSet itemSpriteSet;
 	ConstructionSpriteSet constructionSpriteSet;
+	SpellSpriteSet spellSpriteSet;
 	
 	static const char * uninitialisedTilesetError;
 	

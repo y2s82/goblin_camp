@@ -28,7 +28,9 @@ name(vname),
 	immaterial(false),
 	graphic('?'),
 	speed(1),
-	color(TCODColor::pink)
+	color(TCODColor::pink),
+	fallbackGraphicsSet(""),
+	graphicsHint(-1)
 {}
 
 Spell::Spell(Coordinate pos, int vtype) : Entity(),
@@ -60,6 +62,10 @@ void Spell::Draw(Coordinate upleft, TCODConsole* console) {
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
 	}
+}
+
+int Spell::GetGraphicsHint() const {
+	return Spell::Presets[type].graphicsHint;
 }
 
 void Spell::Impact(int speedChange) {
@@ -168,6 +174,7 @@ class SpellListener : public ITCODParserListener {
 		else if (boost::iequals(name,"speed")) { Spell::Presets.back().speed = value.i; }
 		else if (boost::iequals(name,"color")) { Spell::Presets.back().color = value.col; }
 		else if (boost::iequals(name,"graphic")) { Spell::Presets.back().graphic = value.i; }
+		else if (boost::iequals(name,"fallbackGraphicsSet")) { Spell::Presets.back().fallbackGraphicsSet = value.s; }
 		else if (boost::iequals(name,"type")) {
 			Spell::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
 		} else if (boost::iequals(name,"damage")) {
@@ -204,6 +211,7 @@ void Spell::LoadPresets(std::string filename) {
 	spellTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
 	spellTypeStruct->addFlag("immaterial");
 	spellTypeStruct->addProperty("speed", TCOD_TYPE_INT, true);
+	spellTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };

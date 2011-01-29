@@ -15,8 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "scripting/_python.hpp"
-
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -430,7 +428,17 @@ void Game::Init() {
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		TileSetLoader loader;
-		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		bool foundTileset = false;
+		if (tilesetName.size() > 0) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
+		}
+		if (!foundTileset) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
+		}
+
+		if (foundTileset)
 		{
 			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
 		}
@@ -449,6 +457,39 @@ void Game::Init() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
+}
+
+void Game::TilesetChanged() {
+	// For now just recreate the whole renderer
+	bool useTileset = Config::GetCVar<bool>("useTileset");
+
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_SDL && useTileset) {
+		TileSetLoader loader;
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		bool foundTileset = false;
+		if (tilesetName.size() > 0) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
+		}
+		if (!foundTileset) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
+		}
+
+		int screenWidth, screenHeight;
+		TCODSystem::getCurrentResolution(&screenWidth, &screenHeight);
+
+		if (foundTileset)
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(screenWidth, screenHeight, loader.LoadedTileSet(), buffer));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+		}
+	}
+	if (running) {
+		renderer->PreparePrefabs();
+	}
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {

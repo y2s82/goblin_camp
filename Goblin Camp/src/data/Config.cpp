@@ -79,6 +79,7 @@ namespace Config {
 			("fullscreen",  "0")
 			("renderer",    "0")
 			("useTileset",  "0")
+			("tileset",     "")
 			("tutorial",    "1")
 		;
 		
