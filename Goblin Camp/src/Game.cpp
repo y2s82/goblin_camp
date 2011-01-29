@@ -459,6 +459,39 @@ void Game::Init() {
 	camY = 180;
 }
 
+void Game::TilesetChanged() {
+	// For now just recreate the whole renderer
+	bool useTileset = Config::GetCVar<bool>("useTileset");
+
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_SDL && useTileset) {
+		TileSetLoader loader;
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		bool foundTileset = false;
+		if (tilesetName.size() > 0) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
+		}
+		if (!foundTileset) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
+		}
+
+		int screenWidth, screenHeight;
+		TCODSystem::getCurrentResolution(&screenWidth, &screenHeight);
+
+		if (foundTileset)
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(screenWidth, screenHeight, loader.LoadedTileSet(), buffer));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+		}
+	}
+	if (running) {
+		renderer->PreparePrefabs();
+	}
+}
+
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 	if (boost::shared_ptr<Construction> construct = cons.lock()) {
 		Coordinate blueprint = Construction::Blueprint(construct->Type());
