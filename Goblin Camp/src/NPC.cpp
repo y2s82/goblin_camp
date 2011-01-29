@@ -240,7 +240,7 @@ void NPC::HandleHunger() {
 		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position(), MOSTDECAYED);}
 		if (!item.lock()) { //Nothing to eat!
 			if (hunger > 48000) { //Nearing death
-				Game::Inst()->FindNearbyNPCs(boost::static_pointer_cast<NPC>(shared_from_this()));
+				ScanSurroundings();
 				boost::shared_ptr<NPC> weakest;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
 					if (npci->lock() && (!weakest || npci->lock()->health < weakest->health)) {
@@ -1438,7 +1438,7 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	if (npc->aggressive) {
 		if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
-			Game::Inst()->FindNearbyNPCs(npc, true);
+			npc->ScanSurroundings(true);
 			for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 				if (npci->lock()->faction != npc->faction) {
 					JobManager::Inst()->NPCNotWaiting(npc->uid);
@@ -1446,16 +1446,13 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 					killJob->internal = true;
 					killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
 					while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
-#ifdef DEBUG
-					std::cout<<"Push_back(killJob)\n";
-#endif
 					npc->jobs.push_back(killJob);
 					npc->run = true;
 				}
 			}
 		}
 	} else if (npc->coward) { //Aggressiveness trumps cowardice
-		Game::Inst()->FindNearbyNPCs(npc);
+		npc->ScanSurroundings();
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			if ((npci->lock()->GetFaction() != npc->faction || npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
@@ -1467,7 +1464,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 }
 
 void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
-	Game::Inst()->FindNearbyNPCs(animal);
+	animal->ScanSurroundings();
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 		if (npci->lock()->faction != animal->faction) {
 			animal->AddEffect(PANIC);
@@ -1493,7 +1490,7 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 
 void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 	animal->aggressive = true;
-	Game::Inst()->FindNearbyNPCs(animal);
+	animal->ScanSurroundings();
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 		if (npci->lock()->faction != animal->faction) {
 			boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
@@ -2158,3 +2155,28 @@ void NPC::AddEffect(StatusEffect effect) {
 }
 
 bool NPC::IsTunneler() { return isTunneler; }
+
+void NPC::ScanSurroundings(bool onlyHostiles) {
+	nearNpcs.clear();
+	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
+		for (int endy = std::max((signed int)y - LOS_DISTANCE, 0); endy <= std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
+			if (endx == std::max((signed int)x - LOS_DISTANCE, 0) || endx == std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1)
+				|| endy == std::max((signed int)y - LOS_DISTANCE, 0) || endy == std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
+					int tx = x;
+					int ty = y;
+					TCODLine::init(tx, ty, endx, endy);
+					do {
+						if (Map::Inst()->BlocksLight(tx,ty)) break;
+						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
+							if (*npci != uid) {
+								if (!onlyHostiles || (onlyHostiles && Game::Inst()->npcList[*npci]->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->npcList[*npci]);
+							}
+						}
+
+						if (nearNpcs.size() > 10) break;
+
+					} while(!TCODLine::step(&tx, &ty));
+			}
+		}
+	}
+}

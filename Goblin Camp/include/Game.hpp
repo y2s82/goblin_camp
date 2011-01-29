@@ -141,7 +141,6 @@ public:
 	int DistanceNPCToCoordinate(int, Coordinate);
 	int OrcCount() const; int GoblinCount() const;
 	void OrcCount(int); void GoblinCount(int);
-	void FindNearbyNPCs(boost::shared_ptr<NPC>, bool onlyHostiles = false);
 	void RemoveNPC(boost::weak_ptr<NPC>);
 	int FindMilitaryRecruit();
 	std::map<std::string, boost::shared_ptr<Squad> > squadList;

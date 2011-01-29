@@ -183,6 +183,8 @@ private:
 
 	bool hasMagicRangedAttacks;
 
+	void ScanSurroundings(bool onlyHostiles=false);
+
 public:
 	~NPC();
 	SkillSet Skills;

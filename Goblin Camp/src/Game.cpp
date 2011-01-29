@@ -1417,35 +1417,6 @@ void Game::CreateBlood(Coordinate pos, int amount) {
 	} else {blood.lock()->Depth(blood.lock()->Depth()+amount);}
 }
 
-
-//This function uses straightforward raycasting, and it is somewhat imprecise right now as it only casts a ray to every second
-//tile at the edge of the line of sight distance. This is to conserve cpu cycles, as there may be several hundred creatures
-//active at a time, and given the fact that they'll usually be constantly moving, this function needen't be 100% accurate.
-void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc, bool onlyHostiles) {
-	npc->nearNpcs.clear();
-	for (int endx = std::max((signed int)npc->x - LOS_DISTANCE, 0); endx <= std::min((signed int)npc->x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
-		for (int endy = std::max((signed int)npc->y - LOS_DISTANCE, 0); endy <= std::min((signed int)npc->y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
-			if (endx == std::max((signed int)npc->x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->x + LOS_DISTANCE, Map::Inst()->Width()-1)
-				|| endy == std::max((signed int)npc->y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
-					int x = npc->x;
-					int y = npc->y;
-					TCODLine::init(x, y, endx, endy);
-					do {
-						if (Map::Inst()->BlocksLight(x,y)) break;
-						for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
-							if (*npci != npc->uid) {
-								if (!onlyHostiles || (onlyHostiles && npcList[*npci]->faction != npc->faction)) npc->nearNpcs.push_back(npcList[*npci]);
-							}
-						}
-
-						if (npc->nearNpcs.size() > 10) break;
-
-					} while(!TCODLine::step(&x, &y));
-			}
-		}
-	}
-}
-
 void Game::Pause() {
 	paused = !paused;
 }
