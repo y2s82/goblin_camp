@@ -285,7 +285,7 @@ void NPC::HandleWeariness() {
 		if ((*jobIter)->name.find("Sleep") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
+		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED, Position());
 		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
 		sleepJob->internal = true;
 		if (!squad.lock() && mainHand.lock()) { //Only soldiers go to sleep gripping their weapons
