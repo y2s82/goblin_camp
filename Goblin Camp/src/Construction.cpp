@@ -235,6 +235,9 @@ ItemType Construction::JobList(int index) { return jobList[index]; }
 
 void Construction::AddJob(ItemType item) {
 	if (!dismantle) {
+#ifdef DEBUG
+		std::cout<<"Produce "<<Item::ItemTypeToString(item)<<" at "<<name<<'\n';
+#endif
 		jobList.push_back(item);
 		if (jobList.size() == 1) {
 			SpawnProductionJob();
@@ -287,6 +290,25 @@ int Construction::Use() {
 				if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-75, -25));
 				direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
 				smoke->CalculateFlightPath(Position()+ Construction::Presets[type].chimney + direction, 5, 1);
+				if (Random::Generate(50000) == 0) {
+					boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("spark"));
+					int distance = Random::Generate(0, 15);
+					if (distance < 12) {
+						distance = 1;
+					} else if (distance < 14) {
+						distance = 2;
+					} else {
+						distance = 3;
+					}
+					direction = Coordinate(0,0);
+					if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(-distance);
+					if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(distance);
+					if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(distance);
+					if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(-distance);
+					if (Random::Generate(9) < 8) direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+					else direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
+					spark->CalculateFlightPath(Coordinate(x,y) + direction, 50, 1);
+				}
 			}
 		}
 
@@ -640,6 +662,9 @@ bool Construction::SpawnProductionJob() {
 					resi->lock()->Reserve(false);
 				}
 				jobList.pop_front();
+#ifdef DEBUG
+				std::cout<<"Couldn't spawn production job at "<<name<<": components missing\n";
+#endif
 				return false;
 			}
 		}
@@ -672,6 +697,9 @@ bool Construction::SpawnProductionJob() {
 		JobManager::Inst()->AddJob(newProductionJob);
 		return true;
 	}
+#ifdef DEBUG
+std::cout<<"Couldn't spawn a production job at "<<name<<": Reserved\n";
+#endif
 	return false;
 }
 
