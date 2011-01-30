@@ -113,6 +113,7 @@ protected:
 	bool built;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 	bool flammable;
+	int smoke;
 public:
 	virtual ~Construction();
 

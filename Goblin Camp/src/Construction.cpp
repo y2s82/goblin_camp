@@ -76,7 +76,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	dismantle(false),
 	time(0),
 	built(false),
-	flammable(false)
+	flammable(false),
+	smoke(0)
 {
 	x = target.X();
 	y = target.Y();
@@ -242,6 +243,7 @@ void Construction::AddJob(ItemType item) {
 }
 
 void Construction::CancelJob(int index) {
+	smoke = 0;
 	if (index == 0 && index < (signed int)jobList.size()) {
 		jobList.erase(jobList.begin());
 		//Empty container in case some pickup jobs got done
@@ -264,7 +266,17 @@ int Construction::Use() {
 	if (jobList.size() > 0) {
 		++progress;
 
-		if (Construction::Presets[type].chimney.X() != -1 && Construction::Presets[type].chimney.Y() != -1) {
+		if (smoke == 0) {
+			smoke = 1;
+			for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+				if (itemi->lock()->IsCategory(Item::StringToItemCategory("Fuel"))) {
+					smoke = 2;
+					break;
+				}
+			}
+		}
+
+		if (smoke == 2 && Construction::Presets[type].chimney.X() != -1 && Construction::Presets[type].chimney.Y() != -1) {
 			if (Random::Generate(9) == 0) {
 				boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Position()+Construction::Presets[type].chimney, Spell::StringToSpellType("smoke"));
 				Coordinate direction;
