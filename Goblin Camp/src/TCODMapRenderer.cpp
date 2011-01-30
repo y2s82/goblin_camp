@@ -102,6 +102,14 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		}
 	}
 
+	InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
+	InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
+		//TODO: Make this consistent
+	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
+		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &minimap);
+	}
+	InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
+
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
@@ -111,13 +119,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		}
 	}
 
-	InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
-	InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
-		//TODO: Make this consistent
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
-		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &minimap);
-	}
-	InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
+
 	InternalDrawMapItems("NPCs",                  Game::Inst()->npcList, upleft, &minimap);
 	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (firei->lock()) firei->lock()->Draw(upleft, &minimap);
