@@ -172,7 +172,7 @@ void SpawningPool::Update() {
 	if (burn > 0) {
 		if (Random::Generate(2) == 0) --burn;
 		if (burn > 500) {
-			Expand();
+			Expand(false);
 			Game::Inst()->CreateFire(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())));
 			if (Random::Generate(9) == 0) {
 				Coordinate spawnLocation(-1,-1);
@@ -202,7 +202,7 @@ void SpawningPool::Update() {
 	}
 }
 
-void SpawningPool::Expand() {
+void SpawningPool::Expand(bool message) {
 	Coordinate location(-1,-1);
 	for (int i = 0; i < 10; ++i) {
 		location = Coordinate((a.X()-1) + Random::Generate(((b.X()-a.X())+3)), (a.Y()-1) + Random::Generate(((b.Y()-a.Y())+3)));
@@ -217,7 +217,7 @@ void SpawningPool::Expand() {
 
 	if (location.X() != -1 && location.Y() != -1) {
 		++expansion;
-		Announce::Inst()->AddMsg("The spawning pool expands", TCODColor::darkGreen, location);
+		if (message) Announce::Inst()->AddMsg("The spawning pool expands", TCODColor::darkGreen, location);
 		if (location.X() < a.X()) a.X(location.X());
 		if (location.Y() < a.Y()) a.Y(location.Y());
 		if (location.X() > b.X()) b.X(location.X());
@@ -257,7 +257,7 @@ void SpawningPool::Expand() {
 		for (int i = 0; i < 5 + Random::Generate(4); ++i) Map::Inst()->Corrupt(location.X(), location.Y());
 
 	} else {
-		Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
+		if (message) Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
 		for (int i = 0; i < 5; ++i) Map::Inst()->Corrupt(x, y);
 	}
 
