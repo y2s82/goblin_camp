@@ -43,7 +43,8 @@ TCODColor FilthNode::GetColor()
 int FilthNode::Depth() {return depth;}
 void FilthNode::Depth(int val) {
 	depth=val;
-	color.r = 170 - std::min(Map::Inst()->GetCorruption(x, y), 40) + Random::Generate(55);
-	color.g = 80 - std::min(Map::Inst()->GetCorruption(x, y), 80) + Random::Generate(60);
+	int add = Random::Generate(60);
+	color.r = 170 - std::min(Map::Inst()->GetCorruption(x, y), 40) + add;
+	color.g = 150 - std::min(Map::Inst()->GetCorruption(x, y), 80) + add;
 }
 Coordinate FilthNode::Position() {return Coordinate(x,y);}

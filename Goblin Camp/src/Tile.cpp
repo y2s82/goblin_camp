@@ -107,7 +107,7 @@ void Tile::SetType(TileType newType) {
 	} else if (type == TILEMUD) {
 		vis = true; walkable = true; buildable = true; low = false;
 		graphic = Random::GenerateBool() ? '#' : '~';
-		originalForeColor = TCODColor(Random::Generate(120, 120 + 59), Random::Generate(80, 80 + 49), 0);
+		originalForeColor = TCODColor(Random::Generate(120, 130), Random::Generate(80, 90), 0);
 		backColor = TCODColor(0, 0, 0);
 		moveCost = 5;
 	} else { vis = false; walkable = false; buildable = false; }
