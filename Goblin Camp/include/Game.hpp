@@ -237,6 +237,7 @@ public:
 	std::list<boost::weak_ptr<FireNode> > fireList;
 	void CreateFire(Coordinate);
 	void CreateFire(Coordinate,int);
+	void StartFire(Coordinate);
 
 	boost::shared_ptr<Spell> CreateSpell(Coordinate, int type);
 	std::list<boost::shared_ptr<Spell> > spellList;

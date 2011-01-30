@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Logger.hpp"
 #include "GCamp.hpp"
+#include "MapMarker.hpp"
 
 Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
 	target(tar),
@@ -71,6 +72,10 @@ Job::~Job() {
 		markedGround.Y() >= 0 && markedGround.Y() < Map::Inst()->Height()) {
 			Map::Inst()->Unmark(markedGround.X(), markedGround.Y());
 	}
+	for (std::list<int>::iterator marki = mapMarkers.begin(); marki != mapMarkers.end(); ++marki) {
+		Map::Inst()->RemoveMarker(*marki);
+	}
+	mapMarkers.clear();
 }
 
 void Job::priority(JobPriority value) { _priority = value; }
@@ -236,4 +241,8 @@ bool Job::OutsideTerritory() {
 		}
 	}
 	return false;
+}
+
+void Job::AddMapMarker(MapMarker marker) {
+	mapMarkers.push_back(Map::Inst()->AddMarker(marker));
 }
