@@ -144,11 +144,8 @@ install dist-bin
 
 install dist-data
     : [ path.glob $(HERE) : *.txt *.png ]
-    : <conditional>@get-dist-data
-;
-
-install dist-lib
-    : [ path.glob-tree $(HERE)/lib : *.py *.zip *.dat ]
+      [ path.glob-tree $(HERE)/lib : *.py *.zip *.dat ]
+      [ path.glob-tree $(HERE)/tiles : *.dat *.png ]
     : <conditional>@get-dist-data
       <install-source-root>$(HERE)
 ;
