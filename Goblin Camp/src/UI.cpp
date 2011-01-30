@@ -43,8 +43,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/JobDialog.hpp"
 #include "UI/DevConsole.hpp"
 
-#pragma mark UI
-
 UI* UI::instance = 0;
 
 UI::UI() :

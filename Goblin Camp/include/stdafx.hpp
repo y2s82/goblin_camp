@@ -85,9 +85,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/filesystem.hpp>
 #		include <boost/math/constants/constants.hpp>
 #		include <boost/tuple/tuple.hpp>
+#		include <boost/python/detail/wrap_python.hpp>
+#		include <boost/python.hpp>
+		namespace py = boost::python;
 #	pragma warning(pop)
 // libtcod
 #	include <libtcod.hpp>
+// SDL
 #	include <SDL.h>
 #	include <SDL_image.h>
 #endif

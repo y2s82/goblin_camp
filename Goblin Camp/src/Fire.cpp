@@ -61,13 +61,8 @@ void FireNode::Update() {
 
 	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock();
 	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(x, y)) {
-		if (water->Depth()*10 >= temperature) {
-			water->Depth(water->Depth() - (temperature/10));
-			temperature = 0;
-		} else {
-			temperature -= water->Depth()*10;
-			water->Depth(0);
-		}
+		temperature = 0;
+		water->Depth(water->Depth()-1);
 		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("steam"));
 
 		Coordinate direction;
@@ -78,7 +73,7 @@ void FireNode::Update() {
 		if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-7, -1));
 		direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
 		steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
-	} else {
+		} else if (temperature > 0) {
 		if (Random::Generate(10) == 0) { 
 			--temperature;
 			Map::Inst()->Burn(x, y);
@@ -120,7 +115,7 @@ void FireNode::Update() {
 			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(25, 75));
 			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(25, 75));
 			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-75, -25));
-			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
 			smoke->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 		}
 

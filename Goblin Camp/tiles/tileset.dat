@@ -26,6 +26,10 @@ tileset_data "TestMedium" {
 		non_territory=13
 		territory=12
 		marked=15
+		corruption=[128,129,130,131,
+					144,145,146,147,
+					160,161,162,163,
+					176,177,178,179]
 
 		// Cursors
 		default_cursor=[12,13]
@@ -57,8 +61,11 @@ tileset_data "TestMedium" {
 		default_eating=56
 		default_drinking=57
 		default_swimming=58
+		default_burning=70
 
 		default_underconstruction=18
+		fire=[68,69]
+		fireFPS=10
 	
 		creature_sprite_data {
 			sprite=21
@@ -70,6 +77,11 @@ tileset_data "TestMedium" {
 
 		item_sprite_data {
 			sprite=20
+		}
+		
+		spell_sprite_data {
+		    sprites=[71,73]
+			fps=30
 		}
 
 		construction_sprite_data {
@@ -227,6 +239,26 @@ tileset_data "TestMedium" {
 		construction_sprite_data "Door" {
 			sprites=[39]
 			openSprite=45
+		}
+
+		construction_sprite_data "Palisade" {
+			connection_map
+			sprites=[64,65,66,67,
+			         80,81,82,83,
+					 96,97,98,99,
+					 112,113,114,115]
+		}
+
+		spell_sprite_data "smoke" {
+			sprites=[63]
+		}
+
+		spell_sprite_data "spark" {
+		    sprites=[62]
+		}
+
+		spell_sprite_data "steam" {
+			sprites=[72]
 		}
 	}
 }

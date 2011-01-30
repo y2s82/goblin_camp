@@ -15,8 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "scripting/_python.hpp"
-
 #ifdef DEBUG
 #include <iostream>
 #endif
@@ -430,7 +428,17 @@ void Game::Init() {
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		TileSetLoader loader;
-		if (loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat"))
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		bool foundTileset = false;
+		if (tilesetName.size() > 0) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
+		}
+		if (!foundTileset) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
+		}
+
+		if (foundTileset)
 		{
 			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
 		}
@@ -449,6 +457,39 @@ void Game::Init() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
+}
+
+void Game::TilesetChanged() {
+	// For now just recreate the whole renderer
+	bool useTileset = Config::GetCVar<bool>("useTileset");
+
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_SDL && useTileset) {
+		TileSetLoader loader;
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		bool foundTileset = false;
+		if (tilesetName.size() > 0) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
+		}
+		if (!foundTileset) {
+			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
+		}
+
+		int screenWidth, screenHeight;
+		TCODSystem::getCurrentResolution(&screenWidth, &screenHeight);
+
+		if (foundTileset)
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(screenWidth, screenHeight, loader.LoadedTileSet(), buffer));
+		}
+		else
+		{
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+		}
+	}
+	if (running) {
+		renderer->PreparePrefabs();
+	}
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
@@ -827,7 +868,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
 
-	if (time % (UPDATES_PER_SECOND * 2) == 0) Camp::Inst()->UpdateTier();
+	if (time % (UPDATES_PER_SECOND * 1) == 0) Camp::Inst()->Update();
 
 	Map::Inst()->UpdateMarkers();
 
@@ -887,8 +928,17 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			}
 
 			if(nearest) {
+				JobPriority priority;
+				if (item->IsCategory(Item::StringToItemCategory("Food"))) priority = HIGH;
+				else {
+					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(item->Type()) / (float)StockManager::Inst()->Minimum(item->Type());
+					if (stockDeficit >= 1.0) priority = LOW;
+					else if (stockDeficit > 0.25) priority = MED;
+					else priority = HIGH;
+				}
+
 				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
-					item->IsCategory(Item::StringToItemCategory("Food")) ? HIGH : LOW));
+					priority));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
@@ -1305,8 +1355,9 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
 			}
-			if (Map::Inst()->GroundMarked(x,y)) { //A dig job exists for this tile
-				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y));
+			if (Map::Inst()->GroundMarked(x,y)) { 
+				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y)); //A dig job may exist for this tile
+				Camp::Inst()->RemoveWaterZone(Coordinate(x,y), Coordinate(x,y)); //May be marked for water
 			}
 		}
 	}
@@ -1416,35 +1467,6 @@ void Game::CreateBlood(Coordinate pos, int amount) {
 	} else {blood.lock()->Depth(blood.lock()->Depth()+amount);}
 }
 
-
-//This function uses straightforward raycasting, and it is somewhat imprecise right now as it only casts a ray to every second
-//tile at the edge of the line of sight distance. This is to conserve cpu cycles, as there may be several hundred creatures
-//active at a time, and given the fact that they'll usually be constantly moving, this function needen't be 100% accurate.
-void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc, bool onlyHostiles) {
-	npc->nearNpcs.clear();
-	for (int endx = std::max((signed int)npc->x - LOS_DISTANCE, 0); endx <= std::min((signed int)npc->x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
-		for (int endy = std::max((signed int)npc->y - LOS_DISTANCE, 0); endy <= std::min((signed int)npc->y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
-			if (endx == std::max((signed int)npc->x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->x + LOS_DISTANCE, Map::Inst()->Width()-1)
-				|| endy == std::max((signed int)npc->y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
-					int x = npc->x;
-					int y = npc->y;
-					TCODLine::init(x, y, endx, endy);
-					do {
-						if (Map::Inst()->BlocksLight(x,y)) break;
-						for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
-							if (*npci != npc->uid) {
-								if (!onlyHostiles || (onlyHostiles && npcList[*npci]->faction != npc->faction)) npc->nearNpcs.push_back(npcList[*npci]);
-							}
-						}
-
-						if (npc->nearNpcs.size() > 10) break;
-
-					} while(!TCODLine::step(&x, &y));
-			}
-		}
-	}
-}
-
 void Game::Pause() {
 	paused = !paused;
 }
@@ -1521,18 +1543,44 @@ bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
 void Game::Running(bool value) { running = value; }
 bool Game::Running() { return running; }
 
-boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
+boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, Coordinate closeTo) {
+	
+	int distance = -1;
+	boost::weak_ptr<Construction> foundConstruct;
+
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator stati = staticConstructionList.begin();
 		stati != staticConstructionList.end(); ++stati) {
-			if (!stati->second->Reserved() && stati->second->HasTag(tag)) return stati->second;
+			if (!stati->second->Reserved() && stati->second->HasTag(tag)) {
+				if (closeTo.X() == -1)
+					return stati->second;
+				else {
+					if (distance == -1 || Distance(closeTo, stati->second->Position()) < distance) {
+						distance = Distance(closeTo, stati->second->Position());
+						foundConstruct = stati->second;
+						if (distance < 5) return foundConstruct;
+					}
+				}
+			}
 	}
+
+	if (foundConstruct.lock()) return foundConstruct;
 
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator dynai = dynamicConstructionList.begin();
 		dynai != dynamicConstructionList.end(); ++dynai) {
-			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) return dynai->second;
+			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) {
+				if (closeTo.X() == -1)
+					return dynai->second;
+				else {
+					if (distance == -1 || Distance(closeTo, dynai->second->Position()) < distance) {
+						distance = Distance(closeTo, dynai->second->Position());
+						foundConstruct = dynai->second;
+						if (distance < 5) return foundConstruct;
+					}
+				}
+			}
 	}
 
-	return boost::weak_ptr<Construction>();
+	return foundConstruct;
 }
 
 void Game::Reset() {

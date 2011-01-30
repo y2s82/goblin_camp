@@ -16,10 +16,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <string>
+#include <set>
+#include <list>
 
 #include <boost/serialization/serialization.hpp>
+#include <boost/weak_ptr.hpp>
 
 #include "Coordinate.hpp"
+
+class Job;
 
 class Camp {
 	friend class boost::serialization::access;
@@ -42,6 +47,9 @@ private:
 	int workshops, farmplots, production;
 	Coordinate upperCorner, lowerCorner;
 	bool autoTerritory;
+	std::set<Coordinate> waterZones;
+	std::list<boost::weak_ptr<Job> > menialWaterJobs;
+	std::list<boost::weak_ptr<Job> > expertWaterJobs;
 
 public:
 	static Camp* Inst();
@@ -59,4 +67,8 @@ public:
 	void ToggleAutoTerritory();
 	bool IsAutoTerritoryEnabled();
 	void Reset();
+	void Update();
+	void AddWaterZone(Coordinate from, Coordinate to);
+	void RemoveWaterZone(Coordinate from, Coordinate to);
+	void UpdateWaterJobs();
 };

@@ -20,21 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 const char* TileSetLoader::uninitialisedTilesetError = "tileset_data must be defined and tileWidth & tileHeight must be provided first";
 
-TileSetLoader::TileSetLoader() :
-	tileSet(),
-	success(false),
-	parser(),
-	tileSetName(),
-	tileWidth(-1),
-	tileHeight(-1),
-	currentTexture(),
-	currentSpriteSet(SS_NONE),
-	tileSetPath(),
-	npcSpriteSet(),
-	natureObjectSpriteSet(),
-	itemSpriteSet(),
-	constructionSpriteSet()
-{
+void TileSetLoader::SetupTilesetParser(TCODParser& parser) {
 	TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite_data");
 	creatureSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
 
@@ -44,11 +30,16 @@ TileSetLoader::TileSetLoader() :
 	TCODParserStruct* itemSpriteStruct = parser.newStructure("item_sprite_data");
 	itemSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
 
+	TCODParserStruct* spellSpriteStruct = parser.newStructure("spell_sprite_data");
+	spellSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
+	spellSpriteStruct->addProperty("fps", TCOD_TYPE_INT, false);
+
 	TCODParserStruct* constructionSpriteStruct = parser.newStructure("construction_sprite_data");
 	constructionSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
 	constructionSpriteStruct->addListProperty("underconstruction_sprites", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("openSprite", TCOD_TYPE_INT, false);
 	constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
+	constructionSpriteStruct->addFlag("connection_map");
 	
 	TCODParserStruct* tileTextureStruct = parser.newStructure("tile_texture_data");
 
@@ -72,6 +63,7 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("non_territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("corruption", TCOD_TYPE_INT, false);
 
 	// Status Effects
 	tileTextureStruct->addProperty("default_hungry", TCOD_TYPE_INT, false);
@@ -87,8 +79,11 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addProperty("default_eating", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("default_drinking", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("default_swimming", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("default_burning", TCOD_TYPE_INT, false);
 
 	tileTextureStruct->addProperty("default_underconstruction", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("fire", TCOD_TYPE_INT, false);
+	tileTextureStruct->addProperty("fireFPS", TCOD_TYPE_INT, false);
 
 	// Cursors
 	tileTextureStruct->addListProperty("default_cursor", TCOD_TYPE_INT, false);
@@ -111,13 +106,34 @@ TileSetLoader::TileSetLoader() :
 	tileTextureStruct->addStructure(natureObjectSpriteStruct);
 	tileTextureStruct->addStructure(itemSpriteStruct);
 	tileTextureStruct->addStructure(constructionSpriteStruct);
+	tileTextureStruct->addStructure(spellSpriteStruct);
 
 	TCODParserStruct* tilesetStruct = parser.newStructure("tileset_data");
 	tilesetStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
 	tilesetStruct->addProperty("tileHeight", TCOD_TYPE_INT, true);
 	tilesetStruct->addProperty("author", TCOD_TYPE_STRING, false);
+	tilesetStruct->addProperty("version", TCOD_TYPE_STRING, false);
 	tilesetStruct->addProperty("description", TCOD_TYPE_STRING, false);
 	tilesetStruct->addStructure(tileTextureStruct);
+}
+
+TileSetLoader::TileSetLoader() :
+	tileSet(),
+	success(false),
+	parser(),
+	tileSetName(),
+	tileWidth(-1),
+	tileHeight(-1),
+	currentTexture(),
+	currentSpriteSet(SS_NONE),
+	tileSetPath(),
+	npcSpriteSet(),
+	natureObjectSpriteSet(),
+	itemSpriteSet(),
+	constructionSpriteSet(),
+	spellSpriteSet()
+{
+	SetupTilesetParser(parser);
 }
 
 TileSetLoader::~TileSetLoader() {
@@ -130,7 +146,7 @@ bool TileSetLoader::LoadTileSet(boost::filesystem::path path) {
 
 	parser.run(path.string().c_str(), this);
 
-	if (tileSet.get() == NULL) {
+	if (!tileSet) {
 		success = false;
 	}
 	Reset();
@@ -160,13 +176,13 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 	if (boost::iequals(str->getName(), "tileset_data"))
 	{
 		tileSetName = name;
-		if (tileSet.get() != NULL) {
+		if (tileSet) {
 			parser->error("Multiple tile set declarations in one file not supported");
 		}
 		return success;
 	}
 	
-	if (tileSet.get() == NULL) {
+	if (!tileSet) {
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
@@ -180,7 +196,7 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 		return success;
 	}
 	
-	if (currentTexture.get() == 0) {
+	if (!currentTexture) {
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
@@ -198,18 +214,29 @@ bool TileSetLoader::parserNewStruct(TCODParser *parser,const TCODParserStruct *s
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
 		constructionSpriteSet = ConstructionSpriteSet();
 		currentSpriteSet = SS_CONSTRUCTION;
+	} else if (boost::iequals(str->getName(), "spell_sprite_data")) {
+		spellSpriteSet = SpellSpriteSet();
+		currentSpriteSet = SS_SPELL;
 	}
 
 	return success;
 }
 
 bool TileSetLoader::parserFlag(TCODParser *parser,const char *name) {
+	if (currentTexture) {
+		switch (currentSpriteSet) {
+		case SS_CONSTRUCTION:
+			if (boost::iequals(name, "connection_map")) {
+				constructionSpriteSet.SetConnectionMap(true);
+			}
+		}
+	}
 	return success;
 }
 
 bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 	// Tile Texture Properties
-	if (currentTexture.get() != NULL) {
+	if (currentTexture) {
 		switch (currentSpriteSet) {
 		case SS_NONE:
 			// Terrain
@@ -250,8 +277,11 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetTerritoryOverlay(Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(Sprite(value.i, currentTexture));
-			} 
-			
+			} else if (boost::iequals(name, "corruption")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddCorruption(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			}
+
 			// Cursors
 			else if (boost::iequals(name, "default_cursor")) {
 				SetCursorSprites(Cursor_None, value.list);
@@ -310,10 +340,19 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				tileSet->SetStatusSprite(DRINKING, Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "default_swimming")) {
 				tileSet->SetStatusSprite(SWIM, Sprite(value.i, currentTexture));
+			} else if (boost::iequals(name, "default_burning")) {
+				tileSet->SetStatusSprite(BURNING, Sprite(value.i, currentTexture));
 			}
 			
 			else if (boost::iequals(name, "default_underconstruction")) {
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(value.i, currentTexture));
+			}
+			else if (boost::iequals(name, "fireFPS")) {
+				tileSet->SetFireFrameRate(value.i);
+			}
+			else if (boost::iequals(name, "fire")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddFireSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			}
 			break;
 		case SS_NPC:
@@ -344,6 +383,14 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 				constructionSpriteSet.SetWidth(value.i);
 			}
 			break;
+		case SS_SPELL:
+			if (boost::iequals(name, "sprites")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					spellSpriteSet.AddSprite(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
+			} else if (boost::iequals(name, "fps")) {
+				spellSpriteSet.SetFrameRate(value.i);
+			}
+			break;
 		}	
 		return success;
 	}
@@ -363,7 +410,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		return success;
 	}
 
-	if (tileSet.get() == NULL) { 
+	if (!tileSet) { 
 		parser->error(uninitialisedTilesetError); 
 		return false; 
 	}
@@ -373,7 +420,9 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		tileSet->SetDescription(value.s);
 	} else if (boost::iequals(name, "author")) {
 		tileSet->SetAuthor(value.s);
-	} 
+	} else if (boost::iequals(name, "version")) {
+		tileSet->SetVersion(value.s);
+	}
 
 	return success;
 }
@@ -415,6 +464,13 @@ bool TileSetLoader::parserEndStruct(TCODParser *parser,const TCODParserStruct *s
 			} else {
 				LOG("Skipping invalid construction sprite data: " << std::string(name));
 			}
+		}
+		currentSpriteSet = SS_NONE;
+	} else if (boost::iequals(str->getName(), "spell_sprite_data")) {
+		if (name == 0) {
+			tileSet->SetDefaultSpellSpriteSet(spellSpriteSet);
+		} else {
+			tileSet->AddSpellSpriteSet(std::string(name), spellSpriteSet);
 		}
 		currentSpriteSet = SS_NONE;
 	}

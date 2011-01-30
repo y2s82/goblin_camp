@@ -77,6 +77,7 @@ struct ConstructionPreset {
 	std::string description;
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
+	Coordinate chimney;
 };
 
 class Construction : public Entity {
@@ -112,6 +113,7 @@ protected:
 	bool built;
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 	bool flammable;
+	int smoke;
 public:
 	virtual ~Construction();
 

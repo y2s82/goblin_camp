@@ -63,7 +63,7 @@ void SpawningPool::Update() {
 			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
 					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
-					filthDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
+					filthDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Bucket"), EMPTY));
 					filthDumpJob->tasks.push_back(Task(MOVE));
 					filthDumpJob->tasks.push_back(Task(TAKE));
 					filthDumpJob->tasks.push_back(Task(FORGET)); //Otherwise MOVEADJACENT will try to move adjacent to the container

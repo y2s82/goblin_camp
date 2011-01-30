@@ -564,7 +564,7 @@ void Container::load(Archive & ar, const unsigned int version) {
 //
 // class StatusEffect
 //
-BOOST_CLASS_VERSION(StatusEffect, 0)
+BOOST_CLASS_VERSION(StatusEffect, 1)
 
 template<class Archive>
 void StatusEffect::save(Archive & ar, const unsigned int version) const {
@@ -579,12 +579,11 @@ void StatusEffect::save(Archive & ar, const unsigned int version) const {
 	ar & statChanges;
 	ar & resistanceChanges;
 	ar & damage;
-	ar & bleed;
+	ar & damageType;
 }
 
 template<class Archive>
 void StatusEffect::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
 		ar & graphic;
 		ar & color.r;
 		ar & color.g;
@@ -596,8 +595,12 @@ void StatusEffect::load(Archive & ar, const unsigned int version) {
 		ar & statChanges;
 		ar & resistanceChanges;
 		ar & damage;
-		ar & bleed;
-	}
+		if (version == 0) {
+			bool temp;
+			ar & temp;
+		} else if (version >= 1) {
+			ar & damageType;
+		}
 }
 
 //
@@ -972,6 +975,9 @@ void Camp::save(Archive & ar, const unsigned int version) const {
 	ar & lowerCorner;
 	ar & autoTerritory;
 	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
 }
 
 template<class Archive>
@@ -992,6 +998,9 @@ void Camp::load(Archive & ar, const unsigned int version) {
 	ar & autoTerritory;
 	if (version >= 1) {
 		ar & article;
+		ar & waterZones;
+		ar & menialWaterJobs;
+		ar & expertWaterJobs;
 	}
 }
 

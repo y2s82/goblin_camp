@@ -54,7 +54,6 @@ private:
 	int cursorHint;
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
-	void DrawWater				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawFilth				(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawTerritoryOverlay	(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
 	void DrawConstruction		(Map* map, int tileX, int tileY, SDL_Rect * dstRect);
@@ -63,6 +62,8 @@ private:
 	void DrawItems(int startTileX, int startTileY, int sizeX, int sizeY);
 	void DrawNatureObjects(int startTileX, int startTileY, int sizeX, int sizeY);
 	void DrawNPCs(int startTileX, int startTileY, int sizeX, int sizeY);
+	void DrawSpells(int startTileX, int startTileY, int sizeX, int sizeY);
+	void DrawFires(int startTile, int startTileY, int sizeX, int sizeY);
 
 	SDL_Rect CalcDest(int mapPosX, int mapPosY) { SDL_Rect dstRect = {tileSet->TileWidth() * (mapPosX - startTileX) + mapOffsetX, tileSet->TileHeight() * (mapPosY - startTileY) + mapOffsetY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
 };
