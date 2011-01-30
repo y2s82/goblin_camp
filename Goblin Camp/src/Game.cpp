@@ -1543,18 +1543,44 @@ bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
 void Game::Running(bool value) { running = value; }
 bool Game::Running() { return running; }
 
-boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
+boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, Coordinate closeTo) {
+	
+	int distance = -1;
+	boost::weak_ptr<Construction> foundConstruct;
+
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator stati = staticConstructionList.begin();
 		stati != staticConstructionList.end(); ++stati) {
-			if (!stati->second->Reserved() && stati->second->HasTag(tag)) return stati->second;
+			if (!stati->second->Reserved() && stati->second->HasTag(tag)) {
+				if (closeTo.X() == -1)
+					return stati->second;
+				else {
+					if (distance == -1 || Distance(closeTo, stati->second->Position()) < distance) {
+						distance = Distance(closeTo, stati->second->Position());
+						foundConstruct = stati->second;
+						if (distance < 5) return foundConstruct;
+					}
+				}
+			}
 	}
+
+	if (foundConstruct.lock()) return foundConstruct;
 
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator dynai = dynamicConstructionList.begin();
 		dynai != dynamicConstructionList.end(); ++dynai) {
-			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) return dynai->second;
+			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) {
+				if (closeTo.X() == -1)
+					return dynai->second;
+				else {
+					if (distance == -1 || Distance(closeTo, dynai->second->Position()) < distance) {
+						distance = Distance(closeTo, dynai->second->Position());
+						foundConstruct = dynai->second;
+						if (distance < 5) return foundConstruct;
+					}
+				}
+			}
 	}
 
-	return boost::weak_ptr<Construction>();
+	return foundConstruct;
 }
 
 void Game::Reset() {
