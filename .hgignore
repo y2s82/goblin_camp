@@ -46,6 +46,8 @@ screenshot*.png
 *.sav
 ccccReport\
 build\tmp
+build\bin-*
+build\installer-*
 build\dist
 *.py[co]
 build\msvc
@@ -65,7 +67,7 @@ user-config.jam
 *.xcbkptlist
 xcuserdata
 gc-config.jam
-docs\doxy
+docs\internals
 docs\sphinx\_build
 userdata
 *.sln

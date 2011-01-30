@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
-#include "Data/Paths.hpp"
+#include "data/Paths.hpp"
 #include "MathEx.hpp"
 
 TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
@@ -359,4 +359,3 @@ void TileSetRenderer::render(void * surf) {
 	  SDL_BlitSurface(tempBuffer.get(),&srcRect,mapSurface.get(),&dstRect);
       SDL_BlitSurface(mapSurface.get(),&srcRect,screen,&dstRect);   
 }
-

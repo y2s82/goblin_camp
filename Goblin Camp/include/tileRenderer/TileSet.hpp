@@ -108,7 +108,7 @@ private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
 	typedef boost::array<Sprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
-	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> LookupMap;
+	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
 
 	class DrawConstructionVisitor;
 
