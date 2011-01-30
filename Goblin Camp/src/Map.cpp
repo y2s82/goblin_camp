@@ -404,7 +404,7 @@ bool Map::IsUnbridgedWater(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		if (boost::shared_ptr<WaterNode> water = tileMap[x][y].water) {
 			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
-			if (water->Depth() > 1 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
+			if (water->Depth() > 0 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
 		}
 	}
 	return false;
