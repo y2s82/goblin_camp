@@ -1923,3 +1923,13 @@ void Game::CreateDitch(Coordinate pos) {
 	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
 	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
 }
+
+void Game::StartFire(Coordinate pos) {
+	boost::shared_ptr<Job> fireJob(new Job("Start a fire", HIGH, 0, false));
+	fireJob->Attempts(2);
+	fireJob->DisregardTerritory();
+	fireJob->tasks.push_back(Task(MOVEADJACENT, pos));
+	fireJob->tasks.push_back(Task(STARTFIRE, pos));
+	fireJob->AddMapMarker(MapMarker(FLASHINGMARKER, 'F', pos, -1, TCODColor::red));
+	JobManager::Inst()->AddJob(fireJob);
+}
