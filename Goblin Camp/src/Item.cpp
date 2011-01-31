@@ -441,9 +441,9 @@ void Item::LoadPresets(std::string filename) {
 	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
 	itemTypeStruct->addStructure(resistancesStruct);
 
-	ItemListener* itemListener = new ItemListener();
-	parser.run(filename.c_str(), itemListener);
-	itemListener->translateNames();
+	ItemListener itemListener = ItemListener();
+	parser.run(filename.c_str(), &itemListener);
+	itemListener.translateNames();
 }
 
 void Item::ResolveContainers() {

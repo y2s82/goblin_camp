@@ -71,10 +71,17 @@ screenWidth(0),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	camX(0),
-	camY(0)
+	camY(0),
+	buffer(0)
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
+	}
+}
+
+Game::~Game() {
+	if (buffer) {
+		delete buffer;
 	}
 }
 

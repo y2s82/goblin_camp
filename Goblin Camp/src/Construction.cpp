@@ -549,8 +549,9 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("description", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
-
-	parser.run(filename.c_str(), new ConstructionListener());
+	
+	ConstructionListener listener = ConstructionListener();
+	parser.run(filename.c_str(), &listener);
 }
 
 bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string& name) {
