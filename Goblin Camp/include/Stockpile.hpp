@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define APPLYMINIMUMS (1 << 2)
 #define EMPTY (1 << 3)
 #define MOSTDECAYED (1 << 4)
+#define AVOIDGARBAGE (1 << 5)
 
 class Stockpile : public Construction, public ContainerListener {
 	friend class boost::serialization::access;

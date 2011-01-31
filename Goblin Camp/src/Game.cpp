@@ -935,8 +935,17 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			}
 
 			if(nearest) {
+				JobPriority priority;
+				if (item->IsCategory(Item::StringToItemCategory("Food"))) priority = HIGH;
+				else {
+					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(item->Type()) / (float)StockManager::Inst()->Minimum(item->Type());
+					if (stockDeficit >= 1.0) priority = LOW;
+					else if (stockDeficit > 0.25) priority = MED;
+					else priority = HIGH;
+				}
+
 				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
-					item->IsCategory(Item::StringToItemCategory("Food")) ? HIGH : LOW));
+					priority));
 				stockJob->Attempts(1);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
@@ -1465,35 +1474,6 @@ void Game::CreateBlood(Coordinate pos, int amount) {
 	} else {blood.lock()->Depth(blood.lock()->Depth()+amount);}
 }
 
-
-//This function uses straightforward raycasting, and it is somewhat imprecise right now as it only casts a ray to every second
-//tile at the edge of the line of sight distance. This is to conserve cpu cycles, as there may be several hundred creatures
-//active at a time, and given the fact that they'll usually be constantly moving, this function needen't be 100% accurate.
-void Game::FindNearbyNPCs(boost::shared_ptr<NPC> npc, bool onlyHostiles) {
-	npc->nearNpcs.clear();
-	for (int endx = std::max((signed int)npc->x - LOS_DISTANCE, 0); endx <= std::min((signed int)npc->x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
-		for (int endy = std::max((signed int)npc->y - LOS_DISTANCE, 0); endy <= std::min((signed int)npc->y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
-			if (endx == std::max((signed int)npc->x - LOS_DISTANCE, 0) || endx == std::min((signed int)npc->x + LOS_DISTANCE, Map::Inst()->Width()-1)
-				|| endy == std::max((signed int)npc->y - LOS_DISTANCE, 0) || endy == std::min((signed int)npc->y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
-					int x = npc->x;
-					int y = npc->y;
-					TCODLine::init(x, y, endx, endy);
-					do {
-						if (Map::Inst()->BlocksLight(x,y)) break;
-						for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
-							if (*npci != npc->uid) {
-								if (!onlyHostiles || (onlyHostiles && npcList[*npci]->faction != npc->faction)) npc->nearNpcs.push_back(npcList[*npci]);
-							}
-						}
-
-						if (npc->nearNpcs.size() > 10) break;
-
-					} while(!TCODLine::step(&x, &y));
-			}
-		}
-	}
-}
-
 void Game::Pause() {
 	paused = !paused;
 }
@@ -1570,18 +1550,44 @@ bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
 void Game::Running(bool value) { running = value; }
 bool Game::Running() { return running; }
 
-boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag) {
+boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, Coordinate closeTo) {
+	
+	int distance = -1;
+	boost::weak_ptr<Construction> foundConstruct;
+
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator stati = staticConstructionList.begin();
 		stati != staticConstructionList.end(); ++stati) {
-			if (!stati->second->Reserved() && stati->second->HasTag(tag)) return stati->second;
+			if (!stati->second->Reserved() && stati->second->HasTag(tag)) {
+				if (closeTo.X() == -1)
+					return stati->second;
+				else {
+					if (distance == -1 || Distance(closeTo, stati->second->Position()) < distance) {
+						distance = Distance(closeTo, stati->second->Position());
+						foundConstruct = stati->second;
+						if (distance < 5) return foundConstruct;
+					}
+				}
+			}
 	}
+
+	if (foundConstruct.lock()) return foundConstruct;
 
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator dynai = dynamicConstructionList.begin();
 		dynai != dynamicConstructionList.end(); ++dynai) {
-			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) return dynai->second;
+			if (!dynai->second->Reserved() && dynai->second->HasTag(tag)) {
+				if (closeTo.X() == -1)
+					return dynai->second;
+				else {
+					if (distance == -1 || Distance(closeTo, dynai->second->Position()) < distance) {
+						distance = Distance(closeTo, dynai->second->Position());
+						foundConstruct = dynai->second;
+						if (distance < 5) return foundConstruct;
+					}
+				}
+			}
 	}
 
-	return boost::weak_ptr<Construction>();
+	return foundConstruct;
 }
 
 void Game::Reset() {
@@ -1754,7 +1760,7 @@ void Game::CreateNatureObject(Coordinate location) {
 						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 						Map::Inst()->SetNatureObject(ax,ay,natObj->Uid());
 						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->SetBuildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->SetBuildable(ax,ay,false);
 						Map::Inst()->SetBlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 				}
 			}
@@ -1780,7 +1786,7 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->SetBuildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->SetBuildable(location.X(),location.Y(),false);
 				Map::Inst()->SetBlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
 		}
 
@@ -1923,4 +1929,14 @@ void Game::CreateDitch(Coordinate pos) {
 	RemoveNatureObject(pos, pos);
 	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
 	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
+}
+
+void Game::StartFire(Coordinate pos) {
+	boost::shared_ptr<Job> fireJob(new Job("Start a fire", HIGH, 0, false));
+	fireJob->Attempts(2);
+	fireJob->DisregardTerritory();
+	fireJob->tasks.push_back(Task(MOVEADJACENT, pos));
+	fireJob->tasks.push_back(Task(STARTFIRE, pos));
+	fireJob->AddMapMarker(MapMarker(FLASHINGMARKER, 'F', pos, -1, TCODColor::red));
+	JobManager::Inst()->AddJob(fireJob);
 }

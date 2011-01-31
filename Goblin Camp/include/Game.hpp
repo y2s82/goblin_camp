@@ -143,7 +143,6 @@ public:
 	int DistanceNPCToCoordinate(int, Coordinate);
 	int OrcCount() const; int GoblinCount() const;
 	void OrcCount(int); void GoblinCount(int);
-	void FindNearbyNPCs(boost::shared_ptr<NPC>, bool onlyHostiles = false);
 	void RemoveNPC(boost::weak_ptr<NPC>);
 	int FindMilitaryRecruit();
 	std::map<std::string, boost::shared_ptr<Squad> > squadList;
@@ -170,7 +169,7 @@ public:
 	Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>);
 	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 	boost::weak_ptr<Construction> GetConstruction(int);
-	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag);
+	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag, Coordinate closeTo=Coordinate(-1,-1));
 	void Damage(Coordinate);
 
 	/*      ITEMS       ITEMS       ITEMS       */
@@ -239,6 +238,7 @@ public:
 	std::list<boost::weak_ptr<FireNode> > fireList;
 	void CreateFire(Coordinate);
 	void CreateFire(Coordinate,int);
+	void StartFire(Coordinate);
 
 	boost::shared_ptr<Spell> CreateSpell(Coordinate, int type);
 	std::list<boost::shared_ptr<Spell> > spellList;

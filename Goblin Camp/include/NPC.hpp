@@ -183,6 +183,10 @@ private:
 
 	bool hasMagicRangedAttacks;
 
+	void ScanSurroundings(bool onlyHostiles=false);
+	Coordinate threatLocation;
+	bool seenFire;
+
 public:
 	~NPC();
 	SkillSet Skills;

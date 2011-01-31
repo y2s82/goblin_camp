@@ -92,6 +92,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	attacks(std::list<Attack>()),
 	addedTasksToCurrentJob(0),
 	hasMagicRangedAttacks(false),
+	threatLocation(Coordinate(-1,-1)),
+	seenFire(false),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -232,15 +234,19 @@ void NPC::HandleHunger() {
 	Coordinate tmpCoord;
 	bool found = false;
 
+	if (hunger > 48000 && jobs.front()->name.find("Eat") == std::string::npos) { //Starving and doing something else
+		TaskFinished(TASKFAILNONFATAL);
+	}
+		
 	for (std::deque<boost::shared_ptr<Job> >::iterator jobIter = jobs.begin(); jobIter != jobs.end(); ++jobIter) {
 		if ((*jobIter)->name.find("Eat") != std::string::npos) found = true;
 	}
 	if (!found) {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position(), MOSTDECAYED);
-		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position(), MOSTDECAYED);}
+		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position(), MOSTDECAYED | AVOIDGARBAGE);}
 		if (!item.lock()) { //Nothing to eat!
 			if (hunger > 48000) { //Nearing death
-				Game::Inst()->FindNearbyNPCs(boost::static_pointer_cast<NPC>(shared_from_this()));
+				ScanSurroundings();
 				boost::shared_ptr<NPC> weakest;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
 					if (npci->lock() && (!weakest || npci->lock()->health < weakest->health)) {
@@ -279,7 +285,7 @@ void NPC::HandleWeariness() {
 		if ((*jobIter)->name.find("Sleep") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED);
+		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED, Position());
 		boost::shared_ptr<Job> sleepJob(new Job("Sleep"));
 		sleepJob->internal = true;
 		if (!squad.lock() && mainHand.lock()) { //Only soldiers go to sleep gripping their weapons
@@ -316,7 +322,6 @@ void NPC::Update() {
 
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
 	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
-	
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
@@ -367,11 +372,10 @@ void NPC::Update() {
 }
 
 void NPC::UpdateStatusEffects() {
-
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		effectiveStats[i] = baseStats[i];
 	}
-	for (int i = 0; i < STAT_COUNT; ++i) {
+	for (int i = 0; i < RES_COUNT; ++i) {
 		effectiveResistances[i] = baseResistances[i];
 	}
 	++statusGraphicCounter;
@@ -380,14 +384,21 @@ void NPC::UpdateStatusEffects() {
 		for (int i = 0; i < STAT_COUNT; ++i) {
 			effectiveStats[i] = (int)(effectiveStats[i] * statusEffectI->statChanges[i]);
 		}
-		for (int i = 0; i < STAT_COUNT; ++i) {
+		for (int i = 0; i < RES_COUNT; ++i) {
 			effectiveResistances[i] = (int)(effectiveResistances[i] * statusEffectI->resistanceChanges[i]);
 		}
 
 		if (statusEffectI->damage.second > 0 && --statusEffectI->damage.first <= 0) {
 			statusEffectI->damage.first = UPDATES_PER_SECOND;
-			health -= statusEffectI->damage.second;
-			if (statusEffectI->bleed) Game::Inst()->CreateBlood(Position());
+			TCOD_dice_t dice;
+			dice.addsub = (float)statusEffectI->damage.second;
+			dice.multiplier = 1;
+			dice.nb_dices = 1;
+			dice.nb_faces = std::max(1, (int)dice.addsub / 5);
+			Attack attack;
+			attack.Amount(dice);
+			attack.Type((DamageType)statusEffectI->damageType);
+			Damage(&attack);
 		}
 
 		//Remove the statuseffect if its cooldown has run out
@@ -425,7 +436,6 @@ AiThink NPC::Think() {
 	}
 
 	while (timeCount > UPDATES_PER_SECOND) {
-
 		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
 		if (aggressor.lock()) {
@@ -1100,33 +1110,39 @@ CONTINUEEAT:
 				TaskFinished(TASKSUCCESS);
 				break;
 
+			case STARTFIRE:
+				if (!taskBegun) {
+					taskBegun = true;
+					timer = 0;
+				} else {
+					AddEffect(WORKING);
+					if (++timer >= 50) {
+						Game::Inst()->CreateFire(currentTarget(), 10);
+						TaskFinished(TASKSUCCESS);
+					}
+				}
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
 			if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
-				bool enemyFound = false;
-				if (jobs.empty() && !nearNpcs.empty()) {
+				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
 					run = true;
-					for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
-						if (npci->lock() && (npci->lock()->faction != faction || npci->lock() == aggressor.lock())) {
-							int dx = x - npci->lock()->x;
-							int dy = y - npci->lock()->y;
-							if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
-								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
-								jobs.push_back(fleeJob);
-							} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
-								fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
-								jobs.push_back(fleeJob);
-							}
-							enemyFound = true;
-							break;
-						}
+					int dx = x - threatLocation.X();
+					int dy = y - threatLocation.Y();
+					if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
+						jobs.push_back(fleeJob);
+					} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
+						jobs.push_back(fleeJob);
+					} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
+						jobs.push_back(fleeJob);
 					}
 				}
 			} else if (!GetSquadJob(boost::static_pointer_cast<NPC>(shared_from_this())) && 
@@ -1436,38 +1452,54 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
-	if (npc->aggressive) {
-		if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
-			Game::Inst()->FindNearbyNPCs(npc, true);
-			for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-				if (npci->lock()->faction != npc->faction) {
-					JobManager::Inst()->NPCNotWaiting(npc->uid);
-					boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
-					killJob->internal = true;
-					killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-					while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
-#ifdef DEBUG
-					std::cout<<"Push_back(killJob)\n";
-#endif
-					npc->jobs.push_back(killJob);
-					npc->run = true;
-				}
-			}
-		}
-	} else if (npc->coward) { //Aggressiveness trumps cowardice
-		Game::Inst()->FindNearbyNPCs(npc);
+	if (npc->coward) {
+		npc->ScanSurroundings();
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if ((npci->lock()->GetFaction() != npc->faction || npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) {
+			if (( (npci->lock()->GetFaction() != npc->faction) || 
+				(npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) || 
+				npc->seenFire) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
+			}
+		}
+	} else {
+		if (npc->aggressive) {
+			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
+				npc->ScanSurroundings(true);
+				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
+					if (npci->lock()->faction != npc->faction) {
+						JobManager::Inst()->NPCNotWaiting(npc->uid);
+						boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
+						killJob->internal = true;
+						killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
+						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+						npc->jobs.push_back(killJob);
+						npc->run = true;
+						return;
+					}
+				}
+			}
+		}
+		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
+			npc->ScanSurroundings();
+			if (npc->seenFire) {
+				npc->AddEffect(PANIC);
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL);
 			}
 		}
 	}
 }
 
 void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
-	Game::Inst()->FindNearbyNPCs(animal);
+	animal->ScanSurroundings();
+
+	if (animal->seenFire) {
+		animal->AddEffect(PANIC);
+		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
+		return;
+	}
+
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 		if (npci->lock()->faction != animal->faction) {
 			animal->AddEffect(PANIC);
@@ -1493,7 +1525,7 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 
 void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 	animal->aggressive = true;
-	Game::Inst()->FindNearbyNPCs(animal);
+	animal->ScanSurroundings();
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 		if (npci->lock()->faction != animal->faction) {
 			boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
@@ -1502,7 +1534,14 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
 			animal->jobs.push_back(killJob);
 			animal->run = true;
+			return;
 		}
+	}
+
+	if (animal->seenFire) {
+		animal->AddEffect(PANIC);
+		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
+		return;
 	}
 }
 
@@ -1689,11 +1728,6 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	int damage = (int)(Game::DiceToInt(attack->Amount()) * resistance);
 	health -= damage;
 
-	#ifdef DEBUG
-	std::cout<<"Resistance: "<<resistance<<"\n";
-	std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
-	#endif
-
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
 		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
 			AddEffect(attack->StatusEffects()->at(effecti).first);
@@ -1702,11 +1736,11 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 	if (health <= 0) Kill();
 
-	if (damage > 0) {
+	if (damage > 0 && res == PHYSICAL_RES) {
 		Game::Inst()->CreateBlood(Coordinate(
 			Position().X() + Random::Generate(-1, 1),
-			Position().Y() + Random::Generate(-1, 1)
-		));
+			Position().Y() + Random::Generate(-1, 1)),
+			Random::Generate(50, 50+damage*10));
 		if (aggr.lock()) aggressor = aggr;
 	}
 }
@@ -2159,3 +2193,37 @@ void NPC::AddEffect(StatusEffect effect) {
 }
 
 bool NPC::IsTunneler() { return isTunneler; }
+
+void NPC::ScanSurroundings(bool onlyHostiles) {
+	nearNpcs.clear();
+	threatLocation = Coordinate(-1,-1);
+	seenFire = false;
+	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
+		for (int endy = std::max((signed int)y - LOS_DISTANCE, 0); endy <= std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
+			if (endx == std::max((signed int)x - LOS_DISTANCE, 0) || endx == std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1)
+				|| endy == std::max((signed int)y - LOS_DISTANCE, 0) || endy == std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
+					int tx = x;
+					int ty = y;
+					TCODLine::init(tx, ty, endx, endy);
+					do {
+						if (Map::Inst()->BlocksLight(tx,ty)) break;
+						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
+							if (*npci != uid) {
+								if (Game::Inst()->npcList[*npci]->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
+								if (!onlyHostiles || (onlyHostiles && Game::Inst()->npcList[*npci]->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->npcList[*npci]);
+							}
+						}
+						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
+							if (effectiveResistances[FIRE_RES] < 90) {
+								threatLocation = Coordinate(tx,ty);
+								seenFire = true;
+							}
+						}
+
+						if (nearNpcs.size() > 10) break;
+
+					} while(!TCODLine::step(&tx, &ty));
+			}
+		}
+	}
+}

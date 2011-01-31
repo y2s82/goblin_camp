@@ -76,7 +76,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	dismantle(false),
 	time(0),
 	built(false),
-	flammable(false)
+	flammable(false),
+	smoke(0)
 {
 	x = target.X();
 	y = target.Y();
@@ -234,6 +235,9 @@ ItemType Construction::JobList(int index) { return jobList[index]; }
 
 void Construction::AddJob(ItemType item) {
 	if (!dismantle) {
+#ifdef DEBUG
+		std::cout<<"Produce "<<Item::ItemTypeToString(item)<<" at "<<name<<'\n';
+#endif
 		jobList.push_back(item);
 		if (jobList.size() == 1) {
 			SpawnProductionJob();
@@ -242,6 +246,7 @@ void Construction::AddJob(ItemType item) {
 }
 
 void Construction::CancelJob(int index) {
+	smoke = 0;
 	if (index == 0 && index < (signed int)jobList.size()) {
 		jobList.erase(jobList.begin());
 		//Empty container in case some pickup jobs got done
@@ -263,6 +268,50 @@ void Construction::CancelJob(int index) {
 int Construction::Use() {
 	if (jobList.size() > 0) {
 		++progress;
+
+		if (smoke == 0) {
+			smoke = 1;
+			for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+				if (itemi->lock()->IsCategory(Item::StringToItemCategory("Fuel"))) {
+					smoke = 2;
+					break;
+				}
+			}
+		}
+
+		if (smoke == 2 && Construction::Presets[type].chimney.X() != -1 && Construction::Presets[type].chimney.Y() != -1) {
+			if (Random::Generate(9) == 0) {
+				boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Position()+Construction::Presets[type].chimney, Spell::StringToSpellType("smoke"));
+				Coordinate direction;
+				Direction wind = Map::Inst()->GetWindDirection();
+				if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(25, 75));
+				if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(-75, -25));
+				if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(-75, -25));
+				if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(25, 75));
+				direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
+				smoke->CalculateFlightPath(Position()+ Construction::Presets[type].chimney + direction, 5, 1);
+				if (Random::Generate(50000) == 0) {
+					boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("spark"));
+					int distance = Random::Generate(0, 15);
+					if (distance < 12) {
+						distance = 1;
+					} else if (distance < 14) {
+						distance = 2;
+					} else {
+						distance = 3;
+					}
+					direction = Coordinate(0,0);
+					if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(distance);
+					if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(-distance);
+					if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(-distance);
+					if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(distance);
+					if (Random::Generate(9) < 8) direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+					else direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
+					spark->CalculateFlightPath(Coordinate(x,y) + direction, 50, 1);
+				}
+			}
+		}
+
 		if (progress >= 100) {
 
 			bool allComponentsFound = true;
@@ -468,6 +517,10 @@ class ConstructionListener : public ITCODParserListener {
 				width += it->length();
 			}
 
+		} else if (boost::iequals(name, "chimneyx")) {
+			Construction::Presets.back().chimney.X(value.i);
+		} else if (boost::iequals(name, "chimneyy")) {
+			Construction::Presets.back().chimney.Y(value.i);
 		}
 
 		return true;
@@ -549,6 +602,8 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("description", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
+	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
 	
 	ConstructionListener listener = ConstructionListener();
 	parser.run(filename.c_str(), &listener);
@@ -608,6 +663,9 @@ bool Construction::SpawnProductionJob() {
 					resi->lock()->Reserve(false);
 				}
 				jobList.pop_front();
+#ifdef DEBUG
+				std::cout<<"Couldn't spawn production job at "<<name<<": components missing\n";
+#endif
 				return false;
 			}
 		}
@@ -640,6 +698,9 @@ bool Construction::SpawnProductionJob() {
 		JobManager::Inst()->AddJob(newProductionJob);
 		return true;
 	}
+#ifdef DEBUG
+std::cout<<"Couldn't spawn a production job at "<<name<<": Reserved\n";
+#endif
 	return false;
 }
 
@@ -826,7 +887,8 @@ ConstructionPreset::ConstructionPreset() :
 	tier(0),
 	description(""),
 	graphicsHint(-1),
-	fallbackGraphicsSet("")
+	fallbackGraphicsSet(""),
+	chimney(Coordinate(-1,-1))
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
