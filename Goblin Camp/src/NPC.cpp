@@ -243,7 +243,7 @@ void NPC::HandleHunger() {
 	}
 	if (!found) {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position(), MOSTDECAYED);
-		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position(), MOSTDECAYED);}
+		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position(), MOSTDECAYED | AVOIDGARBAGE);}
 		if (!item.lock()) { //Nothing to eat!
 			if (hunger > 48000) { //Nearing death
 				ScanSurroundings();
@@ -1108,6 +1108,19 @@ CONTINUEEAT:
 			case CALMDOWN:
 				aggressive = false;
 				TaskFinished(TASKSUCCESS);
+				break;
+
+			case STARTFIRE:
+				if (!taskBegun) {
+					taskBegun = true;
+					timer = 0;
+				} else {
+					AddEffect(WORKING);
+					if (++timer >= 50) {
+						Game::Inst()->CreateFire(currentTarget(), 10);
+						TaskFinished(TASKSUCCESS);
+					}
+				}
 				break;
 
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;

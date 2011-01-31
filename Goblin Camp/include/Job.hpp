@@ -27,6 +27,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Coordinate.hpp"
 
+class MapMarker;
+
 enum JobPriority {
 	HIGH,
 	MED,
@@ -72,7 +74,8 @@ enum Action {
 	FORGET,
 	UNWIELD,
 	GETANGRY,
-	CALMDOWN
+	CALMDOWN,
+	STARTFIRE
 };
 
 enum TaskResult {
@@ -128,6 +131,7 @@ private:
 	ItemCategory tool;
 	Coordinate markedGround;
 	bool obeyTerritory;
+	std::list<int> mapMarkers;
 public:
 	static boost::shared_ptr<Job> MoveJob(Coordinate);
 	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
@@ -178,4 +182,6 @@ public:
 	static std::string ActionToString(Action);
 	void DisregardTerritory();
 	bool OutsideTerritory();
+
+	void AddMapMarker(MapMarker);
 };
