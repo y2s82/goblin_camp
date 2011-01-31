@@ -224,6 +224,10 @@ Menu* Menu::OrdersMenu() {
 		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
 		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
 		ordersMenu->AddChoice(MenuChoice("Pour water", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W')));
+
+		boost::function<void(Coordinate)> call = boost::bind(&Game::StartFire, Game::Inst(), _1);
+		ordersMenu->AddChoice(MenuChoice("Start fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'F')));
+
 	}
 	return ordersMenu;
 }

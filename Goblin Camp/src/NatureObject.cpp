@@ -62,7 +62,7 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 }
 
 NatureObject::~NatureObject() {
-	Map::Inst()->SetWalkable(x, y, true);
+	if (!NatureObject::Presets[type].walkable) Map::Inst()->SetWalkable(x, y, true);
 	Map::Inst()->SetBuildable(x, y, true);
 }
 

@@ -45,7 +45,7 @@ public:
 	static void ToggleDumpCorpses(SpawningPool*);
 	void Update();
 	void Draw(Coordinate, TCODConsole*);
-	void Expand();
+	void Expand(bool message=true);
 	virtual void CancelJob(int=0);
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	void Burn();

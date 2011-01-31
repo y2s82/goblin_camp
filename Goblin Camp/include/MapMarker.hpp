@@ -15,15 +15,24 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/serialization.hpp>
 #include <libtcod.hpp>
 
-class Coordinate;
+#include "Coordinate.hpp"
 
 enum MarkerType {
 	FLASHINGMARKER
 };
 
 class MapMarker {
+	friend class boost::serialization::access;
+private:
+	template<class Archive>
+	void save(Archive & ar, const unsigned int version) const;
+	template<class Archive>
+	void load(Archive & ar, const unsigned int version);
+	BOOST_SERIALIZATION_SPLIT_MEMBER()
+
 	MarkerType type;
 	TCODColor origColor, color;
 	int duration;
@@ -31,7 +40,8 @@ class MapMarker {
 	int x, y;
 	float counter;
 public:
-	MapMarker(MarkerType, int graphic, Coordinate position, int duration, TCODColor color);
+	MapMarker(MarkerType=FLASHINGMARKER, int graphic='?', Coordinate position=Coordinate(0,0), 
+		int duration=1, TCODColor color=TCODColor::pink);
 	bool Update();
 	int X() const;
 	int Y() const;

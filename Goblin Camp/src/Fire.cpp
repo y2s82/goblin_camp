@@ -61,24 +61,19 @@ void FireNode::Update() {
 
 	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock();
 	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(x, y)) {
-		if (water->Depth()*10 >= temperature) {
-			water->Depth(water->Depth() - (temperature/10));
-			temperature = 0;
-		} else {
-			temperature -= water->Depth()*10;
-			water->Depth(0);
-		}
+		temperature = 0;
+		water->Depth(water->Depth()-1);
 		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("steam"));
 
 		Coordinate direction;
 		Direction wind = Map::Inst()->GetWindDirection();
-		if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-7, -1));
-		if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(1, 7));
-		if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(1, 7));
-		if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-7, -1));
+		if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(1, 7));
+		if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(-7, -1));
+		if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(-7, -1));
+		if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(1, 7));
 		direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
 		steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
-	} else {
+		} else if (temperature > 0) {
 		if (Random::Generate(10) == 0) { 
 			--temperature;
 			Map::Inst()->Burn(x, y);
@@ -102,10 +97,10 @@ void FireNode::Update() {
 
 			Coordinate direction;
 			Direction wind = Map::Inst()->GetWindDirection();
-			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(-distance);
-			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(distance);
-			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(distance);
-			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(-distance);
+			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(distance);
+			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(-distance);
+			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(-distance);
+			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(distance);
 			if (Random::Generate(9) < 8) direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
 			else direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
 
@@ -116,11 +111,11 @@ void FireNode::Update() {
 			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("smoke"));
 			Coordinate direction;
 			Direction wind = Map::Inst()->GetWindDirection();
-			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(-75, -25));
-			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(25, 75));
-			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(25, 75));
-			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(-75, -25));
-			direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
+			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(25, 75));
+			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(-75, -25));
+			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(-75, -25));
+			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(25, 75));
+			direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
 			smoke->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
 		}
 

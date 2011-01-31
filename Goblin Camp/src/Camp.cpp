@@ -186,6 +186,9 @@ void Camp::Reset() {
 	upperCorner = Coordinate(0, 0);
 	lowerCorner = Coordinate(0, 0);
 	autoTerritory = true;
+	waterZones.clear();
+	menialWaterJobs.clear();
+	expertWaterJobs.clear();
 }
 
 void Camp::Update() {

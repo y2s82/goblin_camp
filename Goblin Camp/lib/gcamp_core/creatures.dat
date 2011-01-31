@@ -629,6 +629,7 @@ npc_type "fired golem" {
 	resistances {
 		physical=25
 		poison=100
+		fire=100
 	}
 	attack "Smash" {
 		type="blunt"
@@ -655,6 +656,7 @@ npc_type "imp" {
 	}
 	resistances {
 		physical=5
+		fire=50
 	}
 	attack "Claw" {
 		type="slashing"
