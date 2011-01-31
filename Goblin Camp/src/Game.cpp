@@ -1753,7 +1753,7 @@ void Game::CreateNatureObject(Coordinate location) {
 						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 						Map::Inst()->SetNatureObject(ax,ay,natObj->Uid());
 						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->SetBuildable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
+						Map::Inst()->SetBuildable(ax,ay,false);
 						Map::Inst()->SetBlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
 				}
 			}
@@ -1779,7 +1779,7 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->SetBuildable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
+				Map::Inst()->SetBuildable(location.X(),location.Y(),false);
 				Map::Inst()->SetBlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
 		}
 
@@ -1922,4 +1922,14 @@ void Game::CreateDitch(Coordinate pos) {
 	RemoveNatureObject(pos, pos);
 	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
 	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
+}
+
+void Game::StartFire(Coordinate pos) {
+	boost::shared_ptr<Job> fireJob(new Job("Start a fire", HIGH, 0, false));
+	fireJob->Attempts(2);
+	fireJob->DisregardTerritory();
+	fireJob->tasks.push_back(Task(MOVEADJACENT, pos));
+	fireJob->tasks.push_back(Task(STARTFIRE, pos));
+	fireJob->AddMapMarker(MapMarker(FLASHINGMARKER, 'F', pos, -1, TCODColor::red));
+	JobManager::Inst()->AddJob(fireJob);
 }

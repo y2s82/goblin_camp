@@ -120,8 +120,10 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 					}
 
 					if (flags & MOSTDECAYED) {
-						if (decay == -1 || decay > item->GetDecay()) { //First item or closer to decay
-							decay = item->GetDecay();
+						int itemDecay = item->GetDecay();
+						if (flags & AVOIDGARBAGE && item->IsCategory(Item::StringToItemCategory("Garbage"))) itemDecay += 100;
+						if (decay == -1 || decay > itemDecay) { //First item or closer to decay
+							decay = itemDecay;
 							savedItem = item;
 						}
 						continue; //Always continue, we need to look through all the items
@@ -153,8 +155,10 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 							}
 
 							if (flags & MOSTDECAYED) {
-								if (decay == -1 || decay > innerItem->GetDecay()) { //First item or closer to decay
-									decay = innerItem->GetDecay();
+								int itemDecay = innerItem->GetDecay();
+								if (flags & AVOIDGARBAGE && innerItem->IsCategory(Item::StringToItemCategory("Garbage"))) itemDecay += 100;
+								if (decay == -1 || decay > itemDecay) { //First item or closer to decay
+									decay = itemDecay;
 									savedItem = innerItem;
 								}
 								continue; //Always continue, we need to look through all the items
@@ -215,8 +219,10 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 					}
 
 					if (flags & MOSTDECAYED) {
-						if (decay == -1 || decay > item->GetDecay()) { //First item or closer to decay
-							decay = item->GetDecay();
+						int itemDecay = item->GetDecay();
+						if (flags & AVOIDGARBAGE && item->IsCategory(Item::StringToItemCategory("Garbage"))) itemDecay += 100;
+						if (decay == -1 || decay > itemDecay) { //First item or closer to decay
+							decay = itemDecay;
 							savedItem = item;
 						}
 						continue; //Always continue, we need to look through all the items
@@ -244,8 +250,10 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 							}
 
 							if (flags & MOSTDECAYED) {
-								if (decay == -1 || decay > innerItem->GetDecay()) { //First item or closer to decay
-									decay = innerItem->GetDecay();
+								int itemDecay = innerItem->GetDecay();
+								if (flags & AVOIDGARBAGE && innerItem->IsCategory(Item::StringToItemCategory("Garbage"))) itemDecay += 100;
+								if (decay == -1 || decay > itemDecay) { //First item or closer to decay
+									decay = itemDecay;
 									savedItem = innerItem;
 								}
 								continue; //Always continue, we need to look through all the items
