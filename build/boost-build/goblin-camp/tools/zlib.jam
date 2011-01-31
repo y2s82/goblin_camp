@@ -7,6 +7,7 @@
 import property-set ;
 import project ;
 import modules ;
+import os ;
 
 rule init ( options * ) {
     modules.poke $(__name__) : .options : [ property-set.create $(options) ] ;
@@ -46,22 +47,12 @@ local rule define-targets ( ) {
         name = [ $(.options).get <name> ] ;
     }
     
-    if $(name) {
-        lib zlib : : <name>$(name) ;
+    if [ os.name ] = NT {
+        name ?= zdll ;
     } else {
-        lib zlib : : <tag>@zlib-tag ;
-    }
-}
-
-rule zlib-tag ( name : type ? : property-set ) {
-    local name = ;
-    
-    if [ $(property-set).get <os> ] = NT {
-        name = zdll ;
-    } else {
-        name = z ;
+        name ?= z ;
     }
     
     ECHO ** Using zlib: $(name) ;
-    return $(name) ;
+    lib zlib : : <name>$(name) ;
 }
