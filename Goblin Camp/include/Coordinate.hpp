@@ -16,6 +16,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/serialization/split_member.hpp>
+#include <boost/functional/hash.hpp>
+
+enum Direction {
+	NORTH,
+	NORTHEAST,
+	EAST,
+	SOUTHEAST,
+	SOUTH,
+	SOUTHWEST,
+	WEST,
+	NORTHWEST,
+	NODIRECTION
+};
 
 class Coordinate {
 	friend class boost::serialization::access;
@@ -27,6 +40,7 @@ private:
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
 	int x, y;
+
 public:
 	Coordinate(int valuex = 0,int = 0);
 
@@ -41,6 +55,8 @@ public:
 	Coordinate operator-(int) const;
 	Coordinate operator+(const Coordinate&) const;
 	Coordinate operator-(const Coordinate&) const;
+
+	friend std::size_t hash_value(Coordinate const& coord);
 };
 
 int Distance(int,int,int,int);
