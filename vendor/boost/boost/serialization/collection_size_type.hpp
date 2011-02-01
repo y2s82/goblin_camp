@@ -10,7 +10,6 @@
 #include <boost/serialization/strong_typedef.hpp>
 #include <boost/serialization/level.hpp>
 #include <boost/serialization/split_free.hpp>
-#include <boost/serialization/is_bitwise_serializable.hpp>
 
 namespace boost { 
 namespace serialization {
@@ -38,7 +37,7 @@ public:
         return *this;
     }
     // used for text output
-    operator base_type () const {
+    operator const base_type () const {
         return t;
     }                
     // used for text input
@@ -57,6 +56,5 @@ public:
 } } // end namespace boost::serialization
 
 BOOST_CLASS_IMPLEMENTATION(collection_size_type, primitive_type)
-BOOST_IS_BITWISE_SERIALIZABLE(collection_size_type)
 
 #endif //BOOST_SERIALIZATION_COLLECTION_SIZE_TYPE_HPP
