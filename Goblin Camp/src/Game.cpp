@@ -61,6 +61,7 @@ screenWidth(0),
 	screenHeight(0),
 	season(EarlySpring),
 	time(0),
+	age(0),
 	orcCount(0),
 	goblinCount(0),
 	peacefulFaunaCount(0),
@@ -749,6 +750,7 @@ void Game::Update() {
 		switch (season) {
 		case EarlySpring:
 			Announce::Inst()->AddMsg("Spring has begun");
+			++age;
 		case Spring:
 		case LateSpring:
 			SpawnTillageJobs();
@@ -2010,3 +2012,5 @@ void Game::StartFire(Coordinate pos) {
 	fireJob->AddMapMarker(MapMarker(FLASHINGMARKER, 'F', pos, -1, TCODColor::red));
 	JobManager::Inst()->AddJob(fireJob);
 }
+
+int Game::GetAge() { return age; }
