@@ -52,7 +52,8 @@ Tile::Tile(TileType newType, int newCost) :
 	walkedOver(0),
 	corruption(0),
 	territory(false),
-	burnt(0)
+	burnt(0),
+	flow(NODIRECTION)
 {
 	SetType(newType);
 }

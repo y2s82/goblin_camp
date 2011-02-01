@@ -177,6 +177,19 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//Placing a stockpile isn't as straightforward as just building one in each tile
 	//We want to create 1 stockpile, at a, and then expand it from a to b.
 	//Using the stockpile expansion function ensures that it only expands into valid tiles
+
+	//Find a tile from a to b that is buildable
+	for (int y = a.Y(); y <= b.Y(); ++y) {
+		for (int x = a.X(); x <= b.X(); ++x) {
+			if (Map::Inst()->IsBuildable(x,y)) {
+				a = Coordinate(x,y);
+				goto ContinuePlaceStockpile;
+			}
+		}
+	}
+	return -1; //No buildable tiles
+
+ContinuePlaceStockpile:
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
 	Map::Inst()->SetBuildable(a.X(), a.Y(), false);
 	Map::Inst()->SetConstruction(a.X(), a.Y(), newSp->Uid());
@@ -702,13 +715,13 @@ Coordinate Game::FindFilth(Coordinate pos) {
 		return Coordinate(-1,-1);
 }
 
-//Findwater returns the coordinates to the closest Water* that has sufficient depth
+//Findwater returns the coordinates to the closest Water* that has sufficient depth and is coastal
 Coordinate Game::FindWater(Coordinate pos) {
-	Coordinate closest(-9999,-9999);
+	Coordinate closest(-1,-1);
 	int closestDistance = INT_MAX;
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (boost::shared_ptr<WaterNode> water = wati->lock()) {
-			if (water->Depth() > DRINKABLE_WATER_DEPTH) {
+			if (water->IsCoastal() && water->Depth() > DRINKABLE_WATER_DEPTH) {
 				int waterDistance = Distance(water->Position(), pos);
 				//Favor water inside territory
 				if (Map::Inst()->IsTerritory(water->Position().X(), water->Position().Y())) waterDistance /= 4;
@@ -719,7 +732,6 @@ Coordinate Game::FindWater(Coordinate pos) {
 			}
 		}
 	}
-	if (closest.X() == -9999) return Coordinate(-1,-1);
 	return closest;
 }
 
@@ -1244,6 +1256,8 @@ void Game::GenerateMap(uint32 seed) {
 	}
 
 	map->RandomizeWind();
+	
+	map->CalculateFlow(px, py);
 }
 
 //This is intentional, otherwise designating where to cut down trees would always show red unless you were over a tree
