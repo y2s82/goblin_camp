@@ -19,6 +19,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 
 namespace Random {
+	typedef boost::rand48 GeneratorImpl;
+
 	struct Dice {
 		Dice(unsigned int, unsigned int = 1, float = 1.f, float = 0.f);
 		Dice(const TCOD_dice_t&);
@@ -42,7 +44,7 @@ namespace Random {
 		short Sign();
 		bool GenerateBool();
 	private:
-		boost::rand48 generator;
+		GeneratorImpl generator;
 		unsigned int seed;
 	};
 	
@@ -54,8 +56,18 @@ namespace Random {
 	bool GenerateBool();
 	
 	template <typename T>
-	inline unsigned Choose(const T& container) {
+	inline unsigned ChooseIndex(const T& container) {
 		return static_cast<unsigned>(Generate(0, container.size() - 1));
+	}
+	
+	template <typename T>
+	inline const typename T::value_type& ChooseElement(const T& container) {
+		return container[ChooseIndex(container)];
+	}
+	
+	template <typename T>
+	inline typename T::value_type& ChooseElement(T& container) {
+		return container[ChooseIndex(container)];
 	}
 	
 	template <typename T>
@@ -63,6 +75,3 @@ namespace Random {
 		return expr * Sign();
 	}
 }
-
-#include <cstdlib>
-#define rand() ___error_stray_rand_call___
