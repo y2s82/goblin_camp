@@ -69,6 +69,7 @@ private:
 	int walkedOver, corruption;
 	bool territory;
 	int burnt;
+	Direction flow;
 
 public:
 	Tile(TileType = TILEGRASS, int = 1);
