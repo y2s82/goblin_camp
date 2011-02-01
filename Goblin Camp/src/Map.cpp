@@ -623,6 +623,44 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 		}
 	}
 
+	//Calculate flow for all ground tiles
+	for (int y = 0; y < Height(); ++y) {
+		for (int x = 0; x < Width(); ++x) {
+			if (tileMap[x][y].flow == NODIRECTION) {
+				Coordinate lowest(x,y);
+				for (int iy = y-1; iy <= y+1; ++iy) {
+					for (int ix = x-1; ix <= x+1; ++ix) {
+						if (iy >= 0 && iy < Height() && ix >= 0 && ix < Width()) {
+							if (heightMap->getValue(ix, iy) < heightMap->getValue(lowest.X(), lowest.Y())) {
+								lowest = Coordinate(ix, iy);
+							}
+						}
+					}
+				}
+
+				if (lowest.X() < x) {
+					if (lowest.Y() < y)
+						tileMap[x][y].flow = NORTHWEST;
+					else if (lowest.Y() == y)
+						tileMap[x][y].flow = WEST;
+					else 
+						tileMap[x][y].flow = SOUTHWEST;
+				} else if (lowest.X() == x) {
+					if (lowest.Y() < y)
+						tileMap[x][y].flow = NORTH;
+					else if (lowest.Y() > y)
+						tileMap[x][y].flow = SOUTH;
+				} else {
+					if (lowest.Y() < y)
+						tileMap[x][y].flow = NORTHEAST;
+					else if (lowest.Y() == y)
+						tileMap[x][y].flow = EAST;
+					else
+						tileMap[x][y].flow = SOUTHEAST;
+				}
+			}
+		}
+	}
 }
 
 Direction Map::GetFlow(int x, int y) {
