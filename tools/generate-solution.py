@@ -45,6 +45,11 @@ headers.sort(key = key)
 resources.sort(key = key)
 
 # avoid regenerating UUIDs
+try:
+    os.makedirs(tmpDir)
+except OSError:
+    pass
+
 uuidCache = os.path.join(tmpDir, '.uuids')
 if os.path.exists(uuidCache):
     uuids = pickle.load(open(uuidCache, 'rb'))
