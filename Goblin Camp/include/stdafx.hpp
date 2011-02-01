@@ -104,3 +104,22 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	define GC_DEBUG_INDUCE_CRASH()
 #	define GC_DEBUG_BREAKPOINT()
 #endif
+
+// Annotations.
+#if defined(_MSC_VER)
+#	define GC_DEPRECATED(Fn)        __declspec(deprecated)      Fn
+#	define GC_DEPRECATED_M(Fn, Msg) __declspec(deprecated(Msg)) Fn
+#elif defined(__GNUC__)
+#	define GC_DEPRECATED(Fn)        Fn __attribute__((deprecated))
+#	define GC_DEPRECATED_M(Fn, Msg) Fn __attribute__((deprecated (Msg)))
+#else
+#	define GC_DEPRECATED(Fn)        Fn
+#	define GC_DEPRECATED_M(Fn, Msg) Fn
+#endif
+
+// Deprecation settings.
+#ifdef _MSC_VER
+#	pragma warning(1: 4996 4995) // Ensure that deprecation warnings will be shown
+#	include <cstdlib>
+#	pragma deprecated(rand, srand)
+#endif
