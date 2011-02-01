@@ -702,7 +702,7 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 	ar & allowed;
 	if (version == 0) {
 		std::map<Coordinate, bool> temp;
-		ar & temp
+		ar & temp;
 	}
 	ar & reserved;
 	ar & containers;
