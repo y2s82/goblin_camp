@@ -690,7 +690,7 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
 	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
-		unsigned filth = Random::Choose(filthList);
+		unsigned filth = Random::ChooseIndex(filthList);
 		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
 			if (potentialFilth.top().first < 10) break; //Near enough
@@ -844,7 +844,7 @@ void Game::Update() {
 			}
 		} else {
 			for (unsigned int i = 0; i < std::max((size_t)100, freeItems.size()/4); ++i) {
-				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::Choose(freeItems));
+				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
 						StockpileItem(item);
@@ -1627,7 +1627,7 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 		}
 	}
 	if (npcList.size() > 0)
-		return npcList[Random::Choose(npcList)];
+		return Random::ChooseElement(npcList);
 	return -1;
 }
 

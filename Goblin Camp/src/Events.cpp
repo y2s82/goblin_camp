@@ -65,7 +65,7 @@ void Events::SpawnHostileMonsters() {
 		}
 	}
 
-	NPCType monsterType = possibleMonsters[Random::Choose(possibleMonsters)];
+	NPCType monsterType = Random::ChooseElement(possibleMonsters);
 	int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
 
 	std::string msg;
@@ -119,7 +119,7 @@ void Events::SpawnBenignFauna() {
 	if (peacefulAnimals.size() > 0 && Game::Inst()->PeacefulFaunaCount() < 20) {
 		//Generate benign fauna
 		for (int i = 0; i < Random::Generate(1, 10); ++i) {
-			unsigned type = Random::Choose(peacefulAnimals);
+			unsigned type = Random::ChooseIndex(peacefulAnimals);
 			Coordinate target;
 			do {
 				target.X(Random::Generate(map->Width() - 1));
