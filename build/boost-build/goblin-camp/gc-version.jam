@@ -15,9 +15,8 @@ if [ os.name ] = NT {
     generators.register-standard gc-version.generate : RC_IN : RC ;
 }
 generators.register-standard gc-version.generate : CPP_IN : CPP ;
-generators.register-standard gc-version.generate : PLIST_IN : PLIST ;
 
-toolset.flags gc-version.generate APPEND_HG <variant>debug   : yes ;
+toolset.flags gc-version.generate APPEND_HG <variant>debug : yes ;
 
 local rule set-appendhg-flag ( what ) {
     local variants = release profile ;
@@ -33,10 +32,10 @@ if --with-revid in [ modules.peek : ARGV ] {
     set-appendhg-flag no  ;
 }
 
-GC_TEMPLATES_DIR = [ modules.peek : GC_TEMPLATES_DIR ] ;
-GC_VERSION       = [ modules.peek : GC_VERSION ] ;
-PYTHON           = [ modules.peek : PYTHON ] ;
+GC_ROOT    = [ modules.peek : GC_ROOT ] ;
+GC_VERSION = [ modules.peek : GC_VERSION ] ;
+PYTHON     = [ modules.peek : PYTHON ] ;
 
 actions generate {
-    $(PYTHON) "$(GC_TEMPLATES_DIR)/genversion.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
+    $(PYTHON) "$(GC_ROOT)/tools/generate-version.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
 }
