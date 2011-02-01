@@ -57,10 +57,8 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	spellSpriteLookup(),
 	spellSpriteSets(),
 	fireTiles(),
-	fireFrameTime(100){
-		for (int i = 0; i < terrainTiles.size(); ++i) {
-			terrainTiles[i] = Sprite();
-		}
+	fireFrameTime(100),
+	defaultTerrainTile() {
 		for (int i = 0; i < placeableCursors.size(); ++i) {
 			placeableCursors[i] = Sprite();
 			nonplaceableCursors[i] = Sprite();
@@ -104,8 +102,18 @@ void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	marker.Draw(dst, dstRect);
 }
 
-void TileSet::DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	terrainTiles.at(type).Draw(dst, dstRect);
+void TileSet::DrawTerrain(TileType type, bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	if (type == TILENONE || terrainTiles.at(type).size() == 0) { 
+		defaultTerrainTile.Draw(dst, dstRect);
+	} else if (terrainTiles.at(type).size() != 16) {
+		terrainTiles.at(type)[0].Draw(dst, dstRect);
+	} else {
+		if (connectN || connectS || connectE || connectW) {
+			defaultTerrainTile.Draw(dst, dstRect);
+		}
+		terrainTiles.at(type).at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+	}
+	
 }
 
 void TileSet::DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
@@ -463,16 +471,14 @@ void TileSet::SetVersion(std::string ver) {
 	version = ver;
 }
 
-void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
+void TileSet::AddTerrain(TileType type, const Sprite& sprite) {
 	if (type < 0 || type >= TILE_TYPE_COUNT) 
 		return;
 
 	if (type == TILENONE) {
-		for (int i = 0; i < terrainTiles.size(); ++i) {
-			if (!terrainTiles[i].Exists()) terrainTiles[i] = sprite;
-		}
+		defaultTerrainTile = sprite;
 	} else {
-		terrainTiles[type] = sprite;
+		terrainTiles[type].push_back(sprite);
 	}
 }
 

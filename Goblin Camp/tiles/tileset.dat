@@ -1,4 +1,4 @@
-tileset_data "TestMedium" {
+tileset_data "Default Tileset" {
 	tileWidth=16
 	tileHeight=16
 	description="Test tileset with various tiles sourced from Goblin Camp Forum"
@@ -8,12 +8,18 @@ tileset_data "TestMedium" {
 	{
 		// Terrain tiles
 		unknown_terrain=0
-		grass_terrain=1
-		ditch_terrain=2
-		riverbed_terrain=3
-		bog_terrain=4
-		rock_terrain=5
-		mud_terrain=6
+		grass_terrain=[88,89,90,91,
+					   104,105,106,107,
+					   120,121,122,123,
+					   136,137,138,139]
+		ditch_terrain=[2]
+		riverbed_terrain=[3]
+		bog_terrain=[4]
+		rock_terrain=[92,93,94,95,
+					  108,109,110,111,
+					  124,125,126,127,
+					  140,141,142,143]
+		mud_terrain=[6]
 
 		// Terrain modifiers
 		water=[84,85,86,87,

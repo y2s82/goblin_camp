@@ -310,7 +310,11 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
 	TileType type(map->Type(tileX, tileY));
-	tileSet->DrawTerrain(type, mapSurface.get(), dstRect);
+	bool connectN(map->Type(tileX, tileY - 1) == type);
+	bool connectE(map->Type(tileX + 1, tileY) == type);
+	bool connectS(map->Type(tileX, tileY + 1) == type);
+	bool connectW(map->Type(tileX - 1, tileY) == type);
+	tileSet->DrawTerrain(type, connectN, connectE, connectS, connectW, mapSurface.get(), dstRect);
 	
 	// Corruption
 	if (map->GetCorruption(tileX, tileY) >= 100) {
