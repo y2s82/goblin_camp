@@ -26,7 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 namespace Globals {
 	/**
 		The global pseudo-random number generator.
-		Created in \ref Random::Init.
+		Seeded in \ref Random::Init.
 	*/
 	Random::Generator generator;
 }
@@ -72,16 +72,19 @@ namespace Random {
 		\param[in] multiplier Result modifier.
 		\param[in] offset     Result modifier.
 	*/
-	Dice::Dice(unsigned int faces, unsigned int dices, float multiplier, float offset) : faces(std::max(1U, faces)), dices(std::max(1U, dices)), multiplier(multiplier), offset(offset) {
+	Dice::Dice(unsigned int faces, unsigned int dices, float multiplier, float offset) :
+		faces(std::max(1U, faces)), dices(std::max(1U, dices)), multiplier(multiplier), offset(offset)
+	{
 	}
 	
 	/**
 		Creates the dice out of TCOD_dice_t.
 		
-		\param[in]  dice TCOD_dice_t to convert.
-		\deprecated      Temporary.
+		\param[in] dice TCOD_dice_t to convert.
 	*/
-	Dice::Dice(const TCOD_dice_t& dice) : faces(std::max(1U, (unsigned)dice.nb_faces)), dices(std::max(1U, (unsigned)dice.nb_dices)), multiplier(dice.multiplier), offset(dice.addsub) {
+	Dice::Dice(const TCOD_dice_t& dice) :
+		faces(std::max(1U, (unsigned)dice.nb_faces)), dices(std::max(1U, (unsigned)dice.nb_dices)), multiplier(dice.multiplier), offset(dice.addsub)
+	{
 	}
 	
 	/**
@@ -134,7 +137,7 @@ namespace Random {
 		\see Generator::Seed
 		\param[in] seed Seed to use.
 	*/
-	Generator::Generator(unsigned int seed) : generator(boost::rand48()), seed(0) {
+	Generator::Generator(unsigned int seed) : generator(GeneratorImpl()), seed(0) {
 		SetSeed(seed);
 	}
 	
@@ -163,7 +166,6 @@ namespace Random {
 	/**
 		Generates a random integer from range [start, end] using uniform distribution.
 		
-		\todo            Use half-open interval?
 		\param[in] start The start of the range.
 		\param[in] end   The end of the range.
 		\returns         A random number from specified range.
@@ -175,8 +177,8 @@ namespace Random {
 	/**
 		Generates a random integer from range [0, end] using uniform distribution.
 		
-		\param[in] end   The end of the range.
-		\returns         A random number from specified range.
+		\param[in] end The end of the range.
+		\returns       A random number from specified range.
 	*/
 	int Generator::Generate(int end) {
 		return Generate(0, end);
@@ -201,7 +203,7 @@ namespace Random {
 	}
 	
 	/**
-		Generates a random sign.
+		Generates a random sign. XXX come up with a better name.
 		
 		\returns Either 1 or -1.
 	*/
@@ -245,7 +247,7 @@ namespace Random {
 	
 	/**
 		\fn T Sign(const T&)
-			Multiplies the expression by a random sign.
+			Multiplies the expression by a random sign. XXX come up with a better name.
 			
 			\see Generator::Sign
 			\tparam    T    The expression type.
@@ -254,11 +256,20 @@ namespace Random {
 	*/
 	
 	/**
-		\fn unsigned Choose(const T&)
-			Chooses a random element from given STL container.
+		\fn unsigned ChooseIndex(const T&)
+			Chooses a random index from a given STL container.
 			
 			\tparam T            The container type (must implement the <tt>Random Access Container</tt> concept).
 			\param[in] container The container.
-			\returns             The index of the chosen element.
+			\returns             The index of a random element.
+	*/
+	
+	/**
+		\fn unsigned ChooseElement(const T&)
+			Chooses a random element from a given STL container.
+			
+			\tparam T            The container type (must implement the <tt>Random Access Container</tt> concept).
+			\param[in] container The container.
+			\returns             A random element.
 	*/
 }

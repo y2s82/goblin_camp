@@ -1,0 +1,38 @@
+###############################################################################
+##### Goblin Camp project: Linux-specific Jamfile
+###############################################################################
+
+###############################################################################
+##### Platform dependencies
+## There are no additional dependencies under Linux that need to be specified
+## (SDL already pulls X libraries for us). Linux uses the same main.cpp as OSX.
+###############################################################################
+
+alias platform-deps
+    : [ path.glob-tree $(HERE)/src/platform/linux : *.cpp ]
+      [ path.glob-tree $(HERE)/src/platform/unix  : *.cpp ]
+;
+
+###############################################################################
+##### Dist rules
+## On Linux, binaries are put in the `bin` subdirectory (user commands),
+## and data in the `share/goblin-camp` subdirectory (arch-independent data).
+## dist directory in this scheme corresponds to either /usr or /usr/local.
+##
+## build/bin-<variant>-<arch> => /usr
+##   - bin => /usr/bin
+##      - goblin-camp
+##   - share => /usr/share
+##      - goblin-camp
+##         - <data files>
+###############################################################################
+
+rule get-dist-bin ( properties * ) {
+    local dir = [ get-dist-base $(properties) ] ;
+    return $(dir)/bin ;
+}
+
+rule get-dist-data ( properties * ) {
+    local dir = [ get-dist-base $(properties) ] ;
+    return $(dir)/share/goblin-camp ;
+}

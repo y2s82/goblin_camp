@@ -166,7 +166,7 @@ void StockManager::Update() {
 					difference -= bogIronJobs.size();
 					if (designatedBog.size() > 0) {
 						for (int i = bogIronJobs.size(); i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
-							unsigned cIndex = Random::Choose(designatedBog);
+							unsigned cIndex = Random::ChooseIndex(designatedBog);
 							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
 							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
 							ironJob->tasks.push_back(Task(MOVE, coord));
