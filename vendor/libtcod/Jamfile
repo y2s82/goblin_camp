@@ -1,0 +1,31 @@
+###############################################################################
+##### libtcod project
+###############################################################################
+
+import os ;
+
+path-constant HERE : . ;
+
+common-reqs =
+    <include>$(HERE)/include
+;
+
+###############################################################################
+##### Project definition
+###############################################################################
+
+project libtcod
+    : requirements
+      <link>static
+      $(common-reqs)
+    : usage-requirements
+      $(common-reqs)
+;
+
+sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
+
+if [ os.name ] = MACOSX {
+    sources += $(HERE)/src/macsupport.m ;
+}
+
+lib tcod : $(sources) ;

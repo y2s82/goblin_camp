@@ -59,6 +59,8 @@ namespace Globals {
 	bool noDumpMode;
 }
 
+extern "C" void TCOD_sys_startup(void);
+
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;
 	
@@ -73,6 +75,7 @@ int GCMain(std::vector<std::string>& args) {
 	//
 	// Load phase.
 	//
+	TCOD_sys_startup();
 	Data::LoadConfig();
 	Data::LoadFont();
 	

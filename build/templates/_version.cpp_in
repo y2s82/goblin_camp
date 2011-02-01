@@ -1,6 +1,0 @@
-#include "stdafx.hpp"
-#include "Version.hpp"
-
-namespace Globals {
-	const char *gameVersion = "Goblin Camp %GC_VERSION%";
-}

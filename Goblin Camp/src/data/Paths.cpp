@@ -115,7 +115,7 @@ namespace Globals {
 		\var modsDir
 			Path to user's mods directory (subdir of personalDir).
 
-		\var modsDir
+		\var tilesetsDir
 			Path to user's tilesets directory (subdir of personalDir).
 			
 		\var config
@@ -146,13 +146,13 @@ namespace Paths {
 		
 		PathsImpl::FindPersonalDirectory(personalDir);
 		
-		savesDir   = personalDir / "saves";
-		screensDir = personalDir / "screenshots";
-		modsDir    = personalDir / "mods";
+		savesDir    = personalDir / "saves";
+		screensDir  = personalDir / "screenshots";
+		modsDir     = personalDir / "mods";
 		tilesetsDir = personalDir / "tilesets";
 		
-		config     = personalDir / "config.py";
-		font       = personalDir / "terminal.png";
+		config      = personalDir / "config.py";
+		font        = personalDir / "terminal.png";
 		
 		PathsImpl::FindExecutableDirectory(exec, execDir, dataDir);
 		
