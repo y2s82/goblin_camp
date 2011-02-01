@@ -786,7 +786,7 @@ void Construction::Update() {
 	}
 }
 
-void Construction::Dismantle() {
+void Construction::Dismantle(Coordinate) {
 	if (!Construction::Presets[type].permanent && !dismantle) {
 		dismantle = true;
 		if (producer) {

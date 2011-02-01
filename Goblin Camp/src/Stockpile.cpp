@@ -538,3 +538,17 @@ int Stockpile::GetLimit(ItemCategory category) {
 void Stockpile::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
 }
+
+void Stockpile::Dismantle(Coordinate location) {
+	if (!Construction::Presets[type].permanent) {
+		if (Map::Inst()->GetConstruction(location.X(), location.Y()) == uid) {
+			Map::Inst()->SetConstruction(location.X(), location.Y(), -1);
+			Map::Inst()->SetBuildable(location.X(), location.Y(), true);
+			reserved.erase(location);
+			containers.erase(location);
+			colors.erase(location);
+		}
+
+		if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+	}
+}
