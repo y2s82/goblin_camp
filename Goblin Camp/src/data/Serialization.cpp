@@ -667,7 +667,7 @@ void Task::load(Archive & ar, const unsigned int version) {
 //
 // class Stockpile
 //
-BOOST_CLASS_VERSION(Stockpile, 0)
+BOOST_CLASS_VERSION(Stockpile, 1)
 
 template<class Archive>
 void Stockpile::save(Archive & ar, const unsigned int version) const {
@@ -678,7 +678,6 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 	ar & capacity;
 	ar & amount;
 	ar & allowed;
-	ar & used;
 	ar & reserved;
 	ar & containers;
 	int colorCount = colors.size();
@@ -694,30 +693,31 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Stockpile::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & symbol;
+	ar & a;
+	ar & b;
+	ar & capacity;
+	ar & amount;
+	ar & allowed;
 	if (version == 0) {
-		ar & boost::serialization::base_object<Construction>(*this);
-		ar & symbol;
-		ar & a;
-		ar & b;
-		ar & capacity;
-		ar & amount;
-		ar & allowed;
-		ar & used;
-		ar & reserved;
-		ar & containers;
-		int colorCount;
-		ar & colorCount;
-		for (int i = 0; i < colorCount; ++i) {
-			Coordinate location;
-			ar & location;
-			uint8 r, g, b;
-			ar & r;
-			ar & g;
-			ar & b;
-			colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
-		}
-		ar & limits;
+		std::map<Coordinate, bool> temp;
+		ar & temp
 	}
+	ar & reserved;
+	ar & containers;
+	int colorCount;
+	ar & colorCount;
+	for (int i = 0; i < colorCount; ++i) {
+		Coordinate location;
+		ar & location;
+		uint8 r, g, b;
+		ar & r;
+		ar & g;
+		ar & b;
+		colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
+	}
+	ar & limits;
 }
 
 //

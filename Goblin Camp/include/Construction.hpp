@@ -143,7 +143,7 @@ public:
 	virtual boost::weak_ptr<Container> Storage();
 	bool HasTag(ConstructionTag);
 	virtual void Update();
-	virtual void Dismantle();
+	virtual void Dismantle(Coordinate location=Coordinate(-1,-1));
 	bool DismantlingOrdered();
 	bool CheckMaterialsPresent();
 	void ReserveComponents(bool);

@@ -532,7 +532,7 @@ void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 			int construction = Map::Inst()->GetConstruction(x,y);
 			if (construction >= 0) {
 				if (instance->GetConstruction(construction).lock()) {
-					instance->GetConstruction(construction).lock()->Dismantle();
+					instance->GetConstruction(construction).lock()->Dismantle(Coordinate(x,y));
 				} else {
 					Map::Inst()->SetConstruction(x,y,-1);
 				}
