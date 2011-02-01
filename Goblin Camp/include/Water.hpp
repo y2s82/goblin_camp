@@ -41,6 +41,7 @@ private:
 	bool inert;
 	int timeFromRiverBed;
 	int filth;
+	bool coastal;
 public:
 	WaterNode(int x=0,int y=0,int depth=0,int time=0);
 	~WaterNode();
@@ -56,4 +57,5 @@ public:
 	int GetFilth();
 	int GetGraphic();
 	TCODColor GetColor();
+	bool IsCoastal();
 };

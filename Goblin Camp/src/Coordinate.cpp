@@ -73,3 +73,10 @@ int Distance(int x0, int y0, int x1, int y1) {
 int Distance(Coordinate a, Coordinate b) {
 	return Distance(a.X(), a.Y(), b.X(), b.Y());
 }
+
+std::size_t hash_value(Coordinate const& coord) {
+	std::size_t seed = 0;
+	boost::hash_combine(seed, coord.x);
+	boost::hash_combine(seed, coord.y);
+	return seed;
+}
