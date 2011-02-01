@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/functional/hash.hpp>
+
 #include "Coordinate.hpp"
 
 template <typename Archive>
@@ -27,4 +29,11 @@ template <typename Archive>
 void Coordinate::load(Archive& ar, unsigned int) {
 	ar & x;
 	ar & y;
+}
+
+std::size_t hash_value(const Coordinate& coord) {
+	std::size_t seed = 0;
+	boost::hash_combine(seed, coord.x);
+	boost::hash_combine(seed, coord.y);
+	return seed;
 }

@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/unordered_set.hpp>
+
 #include "Random.hpp"
 #include "Map.hpp"
 #include "Game.hpp"
@@ -496,4 +498,173 @@ std::string Map::GetWindAbbreviation() {
 	default:
 		return "?";
 	}
+}
+
+void Map::CalculateFlow(int px[4], int py[4]) {
+
+	Direction startDirectionA, startDirectionB;
+	Direction midDirectionA, midDirectionB;
+	Direction endDirectionA, endDirectionB;
+
+	if (px[0] < px[1]) startDirectionA = EAST;
+	else if (px[0] > px[1]) startDirectionA = WEST;
+	else startDirectionA = Random::GenerateBool() ? EAST : WEST;
+	if (py[0] < py[1]) startDirectionB = SOUTH;
+	else if (py[0] > py[1]) startDirectionB = NORTH;
+	else startDirectionB = Random::GenerateBool() ? SOUTH : NORTH;
+
+	if (px[1] < px[2]) midDirectionA = EAST;
+	else if (px[1] > px[2]) midDirectionA = WEST;
+	else midDirectionA = Random::GenerateBool() ? EAST : WEST;
+	if (py[1] < py[2]) midDirectionB = SOUTH;
+	else if (py[1] > py[2]) midDirectionB = NORTH;
+	else midDirectionB = Random::GenerateBool() ? SOUTH : NORTH;
+
+	if (px[2] < px[3]) endDirectionA = EAST;
+	else if (px[2] > px[3]) endDirectionA = WEST;
+	else endDirectionA = Random::GenerateBool() ? EAST : WEST;
+	if (py[2] < py[3]) endDirectionB = SOUTH;
+	else if (py[2] > py[3]) endDirectionB = NORTH;
+	else endDirectionB = Random::GenerateBool() ? SOUTH : NORTH;
+
+	if (Random::GenerateBool()) { //Reverse?
+		if (startDirectionA == EAST) startDirectionA = WEST;
+		else startDirectionA = EAST;
+		if (startDirectionB == SOUTH) startDirectionB = NORTH;
+		else startDirectionB = SOUTH;
+		if (midDirectionA == EAST) midDirectionA = WEST;
+		else midDirectionA = EAST;
+		if (midDirectionB == SOUTH) midDirectionB = NORTH;
+		else midDirectionB = SOUTH;
+		if (endDirectionA == EAST) endDirectionA = WEST;
+		else endDirectionA = EAST;
+		if (endDirectionB == SOUTH) endDirectionB = NORTH;
+		else endDirectionB = SOUTH;
+	}
+
+	Coordinate beginning(px[0], py[0]);
+
+	boost::unordered_set<Coordinate> touched;
+	std::priority_queue<std::pair<int, Coordinate> > unfinished;
+
+	unfinished.push(std::pair<int, Coordinate>(0, beginning));
+	touched.insert(beginning);
+
+	Direction flowDirectionA, flowDirectionB;
+	int stage = 0;
+	bool favorA = false;
+	bool favorB = false;
+	int distance1 = Distance(Coordinate(px[0], py[0]), Coordinate(px[1], py[1]));
+	int distance2 = Distance(Coordinate(px[1], py[1]), Coordinate(px[2], py[2]));
+
+	if (std::abs(px[0] - px[1]) - std::abs(py[0] - py[1]) > 15)
+		favorA = true;
+	else if (std::abs(px[0] - px[1]) - std::abs(py[0] - py[1]) < 15)
+		favorB = true;
+
+	while (!unfinished.empty()) {
+		Coordinate current = unfinished.top().second;
+		unfinished.pop();
+
+		switch (stage) {
+		case 0:
+			flowDirectionA = startDirectionA;
+			flowDirectionB = startDirectionB;
+			break;
+
+		case 1:
+			flowDirectionA = midDirectionA;
+			flowDirectionB = midDirectionB;
+			break;
+
+		case 2:
+			flowDirectionA = endDirectionA;
+			flowDirectionB = endDirectionB;
+			break;
+		}
+
+		int resultA = Random::Generate(favorA ? 3 : 1);
+		int resultB = Random::Generate(favorB ? 3 : 1);
+		if (resultA == resultB) Random::GenerateBool() ? resultA += 1 : resultB += 1;
+		if (resultA > resultB)
+			tileMap[current.X()][current.Y()].flow = flowDirectionA;
+		else
+			tileMap[current.X()][current.Y()].flow = flowDirectionB;
+
+		for (int y = current.Y()-1; y <= current.Y()+1; ++y) {
+			for (int x = current.X()-1; x <= current.X()+1; ++x) {
+				if (x > 0 && x < Width() &&
+					y > 0 && y < Height()) {
+						if (touched.find(Coordinate(x,y)) == touched.end() && tileMap[x][y].water) {
+							int distance = Distance(beginning, Coordinate(x,y));
+							touched.insert(Coordinate(x,y));
+							unfinished.push(std::pair<int, Coordinate>(INT_MAX - distance, Coordinate(x,y)));
+							if (stage == 0 && distance > distance1) {
+								stage = 1;
+								favorA = false;
+								favorB = false;
+								if (std::abs(px[1] - px[2]) - std::abs(py[1] - py[2]) > 15)
+									favorA = true;
+								else if (std::abs(px[1] - px[2]) - std::abs(py[1] - py[2]) < 15)
+									favorB = true;
+							}
+							if (stage == 1 && Distance(Coordinate(x,y), Coordinate(px[1], py[1])) > distance2) {
+								stage = 2;
+								favorA = false;
+								favorB = false;
+								if (std::abs(px[2] - px[3]) - std::abs(py[2] - py[3]) > 15)
+									favorA = true;
+								else if (std::abs(px[2] - px[3]) - std::abs(py[2] - py[3]) < 15)
+									favorB = true;
+							}
+						}
+				}
+			}
+		}
+	}
+
+	//Calculate flow for all ground tiles
+	for (int y = 0; y < Height(); ++y) {
+		for (int x = 0; x < Width(); ++x) {
+			if (tileMap[x][y].flow == NODIRECTION) {
+				Coordinate lowest(x,y);
+				for (int iy = y-1; iy <= y+1; ++iy) {
+					for (int ix = x-1; ix <= x+1; ++ix) {
+						if (iy >= 0 && iy < Height() && ix >= 0 && ix < Width()) {
+							if (heightMap->getValue(ix, iy) < heightMap->getValue(lowest.X(), lowest.Y())) {
+								lowest = Coordinate(ix, iy);
+							}
+						}
+					}
+				}
+
+				if (lowest.X() < x) {
+					if (lowest.Y() < y)
+						tileMap[x][y].flow = NORTHWEST;
+					else if (lowest.Y() == y)
+						tileMap[x][y].flow = WEST;
+					else 
+						tileMap[x][y].flow = SOUTHWEST;
+				} else if (lowest.X() == x) {
+					if (lowest.Y() < y)
+						tileMap[x][y].flow = NORTH;
+					else if (lowest.Y() > y)
+						tileMap[x][y].flow = SOUTH;
+				} else {
+					if (lowest.Y() < y)
+						tileMap[x][y].flow = NORTHEAST;
+					else if (lowest.Y() == y)
+						tileMap[x][y].flow = EAST;
+					else
+						tileMap[x][y].flow = SOUTHEAST;
+				}
+			}
+		}
+	}
+}
+
+Direction Map::GetFlow(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height)
+		return tileMap[x][y].flow;
+	return NODIRECTION;
 }

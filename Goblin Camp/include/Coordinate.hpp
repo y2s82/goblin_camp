@@ -18,9 +18,22 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/split_member.hpp>
 #include <cstdlib> // int abs(int)
 
+enum Direction {
+	NORTH,
+	NORTHEAST,
+	EAST,
+	SOUTHEAST,
+	SOUTH,
+	SOUTHWEST,
+	WEST,
+	NORTHWEST,
+	NODIRECTION
+};
+
 class Coordinate {
 	friend class boost::serialization::access;
 	friend int Distance(const Coordinate&, const Coordinate&);
+	friend std::size_t hash_value(const Coordinate&);
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;

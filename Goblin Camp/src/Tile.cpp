@@ -52,7 +52,8 @@ Tile::Tile(TileType newType, int newCost) :
 	walkedOver(0),
 	corruption(0),
 	territory(false),
-	burnt(0)
+	burnt(0),
+	flow(NODIRECTION)
 {
 	SetType(newType);
 }
@@ -82,6 +83,7 @@ void Tile::SetType(TileType newType) {
 		graphic = '_';
 		originalForeColor = TCODColor(125,50,0);
 		moveCost = Random::Generate(3, 5);
+		flow = NODIRECTION; //Reset flow
 	} else if (type == TILEBOG) {
 		vis = true; walkable = true; buildable = true; low = false;
 		switch (Random::Generate(9)) {

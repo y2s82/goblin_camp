@@ -26,17 +26,6 @@ class MapMarker;
 
 #define TERRITORY_OVERLAY (1 << 0)
 
-enum Direction {
-	NORTH,
-	NORTHEAST,
-	EAST,
-	SOUTHEAST,
-	SOUTH,
-	SOUTHWEST,
-	WEST,
-	NORTHWEST
-};
-
 class Map : public ITCODPathCallback {
 	friend class boost::serialization::access;
 private:
@@ -133,4 +122,7 @@ public:
 	void RandomizeWind();
 	void ShiftWind();
 	std::string GetWindAbbreviation();
+
+	void CalculateFlow(int px[4], int py[4]);
+	Direction GetFlow(int x, int y);
 };
