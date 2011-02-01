@@ -167,6 +167,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & bloodList;
 	ar & fireList;
 	ar & spellList;
+	ar & age;
 }
 
 template<class Archive>
@@ -214,6 +215,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	if (version >= 1) {
 		ar & fireList;
 		ar & spellList;
+		ar & age;
 	}
 }
 
