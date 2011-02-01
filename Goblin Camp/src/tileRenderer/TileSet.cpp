@@ -120,10 +120,11 @@ void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	blood.Draw(dst, dstRect);
 }
 
-void TileSet::DrawWater(int index, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	int i = std::min(index, boost::numeric_cast<int>(waterTiles.size()) - 1);
-	if (i > -1) {
-		waterTiles.at(i).Draw(dst, dstRect);
+void TileSet::DrawWater(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	if (waterTiles.size() >= 16) {
+		waterTiles.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+	} else if (waterTiles.size() > 0) {
+		waterTiles.at(0).Draw(dst, dstRect);
 	}
 }
 

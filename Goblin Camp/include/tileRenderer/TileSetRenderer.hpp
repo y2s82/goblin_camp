@@ -65,5 +65,17 @@ private:
 	void DrawSpells(int startTileX, int startTileY, int sizeX, int sizeY);
 	void DrawFires(int startTile, int startTileY, int sizeX, int sizeY);
 
+	int WaterLevelAt(Map * map, int tileX, int tileY) 
+	{
+		if (tileX < 0 || tileY < 0 || tileX >= map->Width() || tileY >= map->Height()) {
+			return 1000;
+		}
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(tileX, tileY).lock()) {
+			return water->Depth();
+		}
+		
+		return 0;
+	}
+
 	SDL_Rect CalcDest(int mapPosX, int mapPosY) { SDL_Rect dstRect = {tileSet->TileWidth() * (mapPosX - startTileX) + mapOffsetX, tileSet->TileHeight() * (mapPosY - startTileY) + mapOffsetY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
 };
