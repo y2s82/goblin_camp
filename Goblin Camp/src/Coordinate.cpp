@@ -19,18 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Coordinate.hpp"
 
-template <typename Archive>
-void Coordinate::save(Archive& ar, unsigned int) const {
-	ar & x;
-	ar & y;
-}
-
-template <typename Archive>
-void Coordinate::load(Archive& ar, unsigned int) {
-	ar & x;
-	ar & y;
-}
-
 std::size_t hash_value(const Coordinate& coord) {
 	std::size_t seed = 0;
 	boost::hash_combine(seed, coord.x);
