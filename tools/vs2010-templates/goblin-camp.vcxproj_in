@@ -23,6 +23,7 @@
 	<PropertyGroup Label="Globals">
 		<ProjectGuid>%PROJECT_UUID%</ProjectGuid>
 		<Keyword>MakeFileProj</Keyword>
+		<IncludePath>..\vendor\boost;..\vendor\libtcod\include;$(INCLUDE);$(IncludePath)</IncludePath>
 	</PropertyGroup>
 	
 	<ItemGroup>
