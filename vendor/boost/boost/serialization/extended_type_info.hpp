@@ -80,10 +80,7 @@ public:
     bool operator!=(const extended_type_info &rhs) const {
         return !(operator==(rhs));
     }
-    // note explicit "export" of static function to work around
-    // gcc 4.5 mingw error
-    static const extended_type_info *
-    find(const char *key);
+    static const extended_type_info * find(const char *key);
     // for plugins
     virtual void * construct(unsigned int /*count*/ = 0, ...) const = 0;
     virtual void destroy(void const * const /*p*/) const = 0;
