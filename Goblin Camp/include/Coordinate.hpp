@@ -16,32 +16,76 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/serialization/split_member.hpp>
+#include <cstdlib> // int abs(int)
 
 class Coordinate {
 	friend class boost::serialization::access;
+	friend int Distance(const Coordinate&, const Coordinate&);
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
 	template<class Archive>
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	
 	int x, y;
 public:
-	Coordinate(int valuex = 0,int = 0);
-
-	int X() const;
-	int X(int);
-	int Y() const;
-	int Y(int);
-	bool operator<(const Coordinate) const;
-	bool operator==(const Coordinate) const;
-	bool operator!=(const Coordinate) const;
-	Coordinate operator+(int) const;
-	Coordinate operator-(int) const;
-	Coordinate operator+(const Coordinate&) const;
-	Coordinate operator-(const Coordinate&) const;
+	Coordinate(int x = 0, int y = 0) : x(x), y(y) { }
+	
+	inline int X() const {
+		return x;
+	}
+	
+	inline int X(const int& v) {
+		return x = v;
+	}
+	
+	inline int Y() const {
+		return y;
+	}
+	
+	inline int Y(const int& v) {
+		return y = v;
+	}
+	
+	inline bool operator<(const Coordinate& other) const {
+		if (x != other.x) return x < other.x;
+		else return y < other.y;
+	}
+	
+	inline bool operator>(const Coordinate& other) const {
+		return !(operator<(other));
+	}
+	
+	inline bool operator==(const Coordinate& other) const {
+		return (x == other.x && y == other.y);
+	}
+	
+	inline bool operator!=(const Coordinate& other) const {
+		return !(operator==(other));
+	}
+	
+	inline Coordinate operator+(const int& scalar) const {
+		return Coordinate(x + scalar, y + scalar);
+	}
+	
+	inline Coordinate operator-(const int& scalar) const {
+		return Coordinate(x - scalar, y - scalar);
+	}
+	
+	inline Coordinate operator+(const Coordinate& other) const {
+		return Coordinate(x + other.x, y + other.y);
+	}
+	
+	inline Coordinate operator-(const Coordinate& other) const {
+		return Coordinate(x - other.x, y - other.y);
+	}
 };
 
-int Distance(int,int,int,int);
-int Distance(Coordinate,Coordinate);
+inline int Distance(const int& x0, const int& y0, const int& x1, const int& y1) {
+	return (abs(y1 - y0) + abs(x1 - x0));
+}
+
+inline int Distance(const Coordinate& a, const Coordinate& b) {
+	return Distance(a.x, a.y, b.x, b.y);
+}
