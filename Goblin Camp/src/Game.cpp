@@ -1457,13 +1457,76 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 		filth.lock()->Depth(std::min(5, filth.lock()->Depth() + amount));
 		amount -= 5 - originalDepth;
 	}
-	//If theres still remaining filth, it'll spill over into the surrounding tiles
+	//If theres still remaining filth, it'll spill over according to flow
 	while (amount > 0) {
-		Coordinate randomAdjacent = pos;
-		while (randomAdjacent == pos) {
-			randomAdjacent = Coordinate(pos.X() - 1 + Random::Generate(2), pos.Y() - 1 + Random::Generate(2));
+		Coordinate flowTo = pos;
+		switch (Map::Inst()->GetFlow(pos.X(), pos.Y())) {
+		case NORTH:
+			flowTo.Y(flowTo.Y() - 1);
+			flowTo.X(flowTo.X() + Random::Generate(-1, 1));
+			break;
+
+		case NORTHEAST:
+			if (Random::GenerateBool()) {
+				flowTo.Y(flowTo.Y() - 1);
+				flowTo.X(flowTo.X() + Random::Generate(0, 1));
+			} else {
+				flowTo.Y(flowTo.Y() + Random::Generate(-1, 0));
+				flowTo.X(flowTo.X() + 1);
+			}
+			break;
+
+		case NORTHWEST:
+			if (Random::GenerateBool()) {
+				flowTo.Y(flowTo.Y() - 1);
+				flowTo.X(flowTo.X() - Random::Generate(0, 1));
+			} else {
+				flowTo.Y(flowTo.Y() + Random::Generate(-1, 0));
+				flowTo.X(flowTo.X() - 1);
+			}
+			break;
+
+		case SOUTH:
+			flowTo.Y(flowTo.Y() + 1);
+			flowTo.X(flowTo.X() + Random::Generate(-1, 1));
+			break;
+
+		case SOUTHEAST:
+			if (Random::GenerateBool()) {
+				flowTo.Y(flowTo.Y() + 1);
+				flowTo.X(flowTo.X() + Random::Generate(0, 1));
+			} else {
+				flowTo.Y(flowTo.Y() + Random::Generate(1, 0));
+				flowTo.X(flowTo.X() + 1);
+			}
+			break;
+
+		case SOUTHWEST:
+			if (Random::GenerateBool()) {
+				flowTo.Y(flowTo.Y() + 1);
+				flowTo.X(flowTo.X() + Random::Generate(0, 1));
+			} else {
+				flowTo.Y(flowTo.Y() + Random::Generate(1, 0));
+				flowTo.X(flowTo.X() + 1);
+			}
+			break;
+
+		case WEST:
+			flowTo.Y(flowTo.Y() + Random::Generate(-1, 1));
+			flowTo.X(flowTo.X() - 1);
+			break;
+
+		case EAST:
+			flowTo.Y(flowTo.Y() + Random::Generate(-1, 1));
+			flowTo.X(flowTo.X() + 1);
+			break;
+
+		default: break;
 		}
-		Game::CreateFilth(randomAdjacent, 1);
+		while (flowTo == pos) { //Incase the tile's flow is NODIRECTION
+			flowTo = Coordinate(pos.X() - 1 + Random::Generate(2), pos.Y() - 1 + Random::Generate(2));
+		}
+		Game::CreateFilth(flowTo, 1);
 		--amount;
 	}
 }
