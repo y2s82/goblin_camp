@@ -51,7 +51,7 @@ public:
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawTerrain(TileType type, bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -74,7 +74,7 @@ public:
 	void SetAuthor(std::string auth);
 	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
-	void SetTerrain(TileType type, const Sprite& sprite);
+	void AddTerrain(TileType type, const Sprite& sprite);
 	void AddWater(const Sprite& sprite);
 	void SetFilthMinor(const Sprite& sprite);
 	void SetFilthMajor(const Sprite& sprite);
@@ -105,7 +105,7 @@ public:
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
 	
 private:
-	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef boost::array<std::vector<Sprite>, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
 	typedef boost::array<Sprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map<std::string, int, boost::hash<std::string>> LookupMap;
@@ -119,6 +119,7 @@ private:
 	std::string version;
 	std::string description;
 
+	Sprite defaultTerrainTile;
 	TileTypeSpriteArray terrainTiles;
 	std::vector<Sprite> waterTiles;
 	Sprite minorFilth;

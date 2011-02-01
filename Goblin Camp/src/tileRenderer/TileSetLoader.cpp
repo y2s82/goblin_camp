@@ -45,12 +45,12 @@ void TileSetLoader::SetupTilesetParser(TCODParser& parser) {
 
 	// Terrain tile types
 	tileTextureStruct->addProperty("unknown_terrain", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("grass_terrain", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("ditch_terrain", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("riverbed_terrain", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("bog_terrain", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("rock_terrain", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("mud_terrain", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("grass_terrain", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("ditch_terrain", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("riverbed_terrain", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("bog_terrain", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("rock_terrain", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("mud_terrain", TCOD_TYPE_INT, false);
 
 	// Terrain modifiers
 	tileTextureStruct->addListProperty("water", TCOD_TYPE_INT, false);
@@ -241,19 +241,25 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 		case SS_NONE:
 			// Terrain
 			if (boost::iequals(name, "unknown_terrain")) {
-				tileSet->SetTerrain(TILENONE, Sprite(value.i, currentTexture));
+				tileSet->AddTerrain(TILENONE, Sprite(value.i, currentTexture));
 			} else if (boost::iequals(name, "grass_terrain")) {
-				tileSet->SetTerrain(TILEGRASS, Sprite(value.i, currentTexture));
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddTerrain(TILEGRASS, Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "ditch_terrain")) {
-				tileSet->SetTerrain(TILEDITCH, Sprite(value.i, currentTexture));
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddTerrain(TILEDITCH, Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "riverbed_terrain")) {
-				tileSet->SetTerrain(TILERIVERBED, Sprite(value.i, currentTexture));
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddTerrain(TILERIVERBED, Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "bog_terrain")) {
-				tileSet->SetTerrain(TILEBOG, Sprite(value.i, currentTexture));
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddTerrain(TILEBOG, Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "rock_terrain")) {
-				tileSet->SetTerrain(TILEROCK, Sprite(value.i, currentTexture));
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddTerrain(TILEROCK, Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "mud_terrain")) {
-				tileSet->SetTerrain(TILEMUD, Sprite(value.i, currentTexture));
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tileSet->AddTerrain(TILEMUD, Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} 
 			
 			// Terrain Modifiers
