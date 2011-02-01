@@ -16,7 +16,10 @@ tileset_data "TestMedium" {
 		mud_terrain=6
 
 		// Terrain modifiers
-		water_levels=[7, 8, 9]
+		water=[84,85,86,87,
+		       100,101,102,103,
+			   116,117,118,119,
+			   132,133,134,135]
 		minor_filth=10
 		major_filth=11
 		marker=14

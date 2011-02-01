@@ -53,7 +53,7 @@ void TileSetLoader::SetupTilesetParser(TCODParser& parser) {
 	tileTextureStruct->addProperty("mud_terrain", TCOD_TYPE_INT, false);
 
 	// Terrain modifiers
-	tileTextureStruct->addListProperty("water_levels", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("water", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("minor_filth", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("major_filth", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marker", TCOD_TYPE_INT, false);
@@ -257,7 +257,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			} 
 			
 			// Terrain Modifiers
-			else if (boost::iequals(name, "water_levels")) {
+			else if (boost::iequals(name, "water")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tileSet->AddWater(Sprite((intptr_t)TCOD_list_get(value.list, i), currentTexture));
 			} else if (boost::iequals(name, "minor_filth")) {

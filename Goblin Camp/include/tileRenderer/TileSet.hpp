@@ -54,7 +54,7 @@ public:
 	void DrawTerrain(TileType type, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawWater(int index, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawWater(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMajor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
