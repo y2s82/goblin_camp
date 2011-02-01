@@ -931,7 +931,7 @@ void NatureObject::load(Archive & ar, const unsigned int version) {
 //
 // class JobManager
 //
-BOOST_CLASS_VERSION(JobManager, 0)
+BOOST_CLASS_VERSION(JobManager, 1)
 
 template<class Archive>
 void JobManager::save(Archive & ar, const unsigned int version) const {
@@ -940,16 +940,18 @@ void JobManager::save(Archive & ar, const unsigned int version) const {
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
 	ar & toolJobs;
+	ar & failList;
 }
 
 template<class Archive>
 void JobManager::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & availableList;
-		ar & waitingList;
-		ar & menialNPCsWaiting;
-		ar & expertNPCsWaiting;
-		ar & toolJobs;
+	ar & availableList;
+	ar & waitingList;
+	ar & menialNPCsWaiting;
+	ar & expertNPCsWaiting;
+	ar & toolJobs;
+	if (version >= 1) {
+		ar & failList;
 	}
 }
 
