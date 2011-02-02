@@ -897,3 +897,18 @@ void Construction::AcceptVisitor(ConstructionVisitor& visitor) {
 }
 
 bool Construction::IsFlammable() { return flammable; }
+
+int Construction::Repair() {
+	if (condition < maxCondition) ++condition;
+	return condition;
+}
+
+void Construction::SpawnRepairJob() {
+	if (condition < maxCondition && !repairJob.lock()) {
+		boost::shared_ptr<Job> repJob(new Job("Repair " + name));
+		repJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+		repJob->tasks.push_back(Task(REPAIR, Position(), shared_from_this()));
+		repairJob = repJob;
+		JobManager::Inst()->AddJob(repJob);
+	}
+}
