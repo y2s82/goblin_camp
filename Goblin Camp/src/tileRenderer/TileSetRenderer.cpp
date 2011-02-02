@@ -172,6 +172,10 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	SDL_SetClipRect(mapSurface.get(), NULL);
 }
 
+float TileSetRenderer::ScrollRate() const {
+	return 16.0f / (tileSet->TileWidth() + tileSet->TileHeight());
+}
+
 void TileSetRenderer::SetCursorMode(CursorType mode) {
 	cursorMode = mode;
 	cursorHint = -1;

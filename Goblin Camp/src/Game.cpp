@@ -1721,8 +1721,8 @@ void Game::CenterOn(Coordinate target) {
 }
 
 void Game::MoveCam(float x, float y) {
-	camX = std::min(std::max(x + camX, 0.0f), Map::Inst()->Width() + 1.0f);
-	camY = std::min(std::max(y + camY, 0.0f), Map::Inst()->Height() + 1.0f);
+	camX = std::min(std::max(x * renderer->ScrollRate() + camX, 0.0f), Map::Inst()->Width() + 1.0f);
+	camY = std::min(std::max(y * renderer->ScrollRate() + camY, 0.0f), Map::Inst()->Height() + 1.0f);
 }
 
 void Game::SetMark(int i) {
