@@ -41,7 +41,7 @@ JobManager *JobManager::Inst() {
 
 void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 	if (!newJob->Attempt() || newJob->OutsideTerritory()) {
-		newJob->Fail();
+		failList.push_back(newJob);
 		return;
 	}
 
@@ -224,6 +224,11 @@ void JobManager::Update() {
 				if (!jobi->lock()) jobi = toolJobs[i].erase(jobi);
 				else ++jobi;
 		}
+	}
+
+	while (!failList.empty()) {
+		failList.front()->Fail();
+		failList.pop_front();
 	}
 }
 

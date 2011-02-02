@@ -100,12 +100,13 @@ IMPORT modules : import : : import ;
     # level of qualification on imported names.
 
     local subdirs =
-      kernel        # only the most-intrinsic modules: modules, errors
-      util          # low-level substrate: string/number handling, etc.
-      build         # essential elements of the build system architecture
-      goblin-camp   # Goblin Camp-specific components and tools
-      tools         # toolsets for handling specific build jobs and targets
-      .             # build-system.jam lives here
+      kernel            # only the most-intrinsic modules: modules, errors
+      util              # low-level substrate: string/number handling, etc.
+      build             # essential elements of the build system architecture
+      goblin-camp       # Goblin Camp-specific components
+      goblin-camp/tools # Goblin Camp-specific tools
+      tools             # toolsets for handling specific build jobs and targets
+      .                 # build-system.jam lives here
       ;
     local whereami = [ NORMALIZE_PATH $(.bootstrap-file:DT) ] ;
     

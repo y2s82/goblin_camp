@@ -61,6 +61,7 @@ screenWidth(0),
 	screenHeight(0),
 	season(EarlySpring),
 	time(0),
+	age(0),
 	orcCount(0),
 	goblinCount(0),
 	peacefulFaunaCount(0),
@@ -538,7 +539,7 @@ void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 			int construction = Map::Inst()->GetConstruction(x,y);
 			if (construction >= 0) {
 				if (instance->GetConstruction(construction).lock()) {
-					instance->GetConstruction(construction).lock()->Dismantle();
+					instance->GetConstruction(construction).lock()->Dismantle(Coordinate(x,y));
 				} else {
 					Map::Inst()->SetConstruction(x,y,-1);
 				}
@@ -710,7 +711,7 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
 	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
-		unsigned filth = Random::Choose(filthList);
+		unsigned filth = Random::ChooseIndex(filthList);
 		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
 			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
 			if (potentialFilth.top().first < 10) break; //Near enough
@@ -750,12 +751,18 @@ void Game::Update() {
 
 		Map::Inst()->ShiftWind();
 
+		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = staticConstructionList.begin();
+			cons != staticConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
+		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = dynamicConstructionList.begin();
+			cons != dynamicConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
+
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 
 		switch (season) {
 		case EarlySpring:
 			Announce::Inst()->AddMsg("Spring has begun");
+			++age;
 		case Spring:
 		case LateSpring:
 			SpawnTillageJobs();
@@ -863,7 +870,7 @@ void Game::Update() {
 			}
 		} else {
 			for (unsigned int i = 0; i < std::max((size_t)100, freeItems.size()/4); ++i) {
-				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::Choose(freeItems));
+				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
 						StockpileItem(item);
@@ -1711,7 +1718,7 @@ NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 		}
 	}
 	if (npcList.size() > 0)
-		return npcList[Random::Choose(npcList)];
+		return Random::ChooseElement(npcList);
 	return -1;
 }
 
@@ -2017,3 +2024,5 @@ void Game::StartFire(Coordinate pos) {
 	fireJob->AddMapMarker(MapMarker(FLASHINGMARKER, 'F', pos, -1, TCODColor::red));
 	JobManager::Inst()->AddJob(fireJob);
 }
+
+int Game::GetAge() { return age; }

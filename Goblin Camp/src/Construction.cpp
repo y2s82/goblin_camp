@@ -787,7 +787,7 @@ void Construction::Update() {
 	}
 }
 
-void Construction::Dismantle() {
+void Construction::Dismantle(Coordinate) {
 	if (!Construction::Presets[type].permanent && !dismantle) {
 		dismantle = true;
 		if (producer) {
@@ -898,3 +898,21 @@ void Construction::AcceptVisitor(ConstructionVisitor& visitor) {
 }
 
 bool Construction::IsFlammable() { return flammable; }
+
+int Construction::Repair() {
+	if (condition < maxCondition) ++condition;
+	return condition < maxCondition ? 1 : 100;
+}
+
+void Construction::SpawnRepairJob() {
+	if (condition < maxCondition && !repairJob.lock()) {
+		boost::shared_ptr<Job> repJob(new Job("Repair " + name));
+		repJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), *boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials))));
+		repJob->tasks.push_back(Task(MOVE));
+		repJob->tasks.push_back(Task(TAKE));
+		repJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+		repJob->tasks.push_back(Task(REPAIR, Position(), shared_from_this()));
+		repairJob = repJob;
+		JobManager::Inst()->AddJob(repJob);
+	}
+}
