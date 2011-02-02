@@ -744,6 +744,11 @@ void Game::Update() {
 
 		Map::Inst()->ShiftWind();
 
+		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = staticConstructionList.begin();
+			cons != staticConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
+		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = dynamicConstructionList.begin();
+			cons != dynamicConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
+
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 

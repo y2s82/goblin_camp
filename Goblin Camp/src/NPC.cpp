@@ -1123,6 +1123,18 @@ CONTINUEEAT:
 				}
 				break;
 
+			case REPAIR:
+				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
+					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Repair();
+					AddEffect(WORKING);
+					if (tmp >= 100) {
+						TaskFinished(TASKSUCCESS);
+					} else if (tmp < 0) {
+						TaskFinished(TASKFAILFATAL, "(USE)Can not use (tmp<0)"); break;
+					}
+				} else { TaskFinished(TASKFAILFATAL, "(USE)Attempted to use non-construct"); break; }
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {

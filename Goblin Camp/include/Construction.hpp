@@ -32,6 +32,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "ConstructionVisitor.hpp"
 
+class Job;
+
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
 };
@@ -114,6 +116,7 @@ protected:
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 	bool flammable;
 	int smoke;
+	boost::weak_ptr<Job> repairJob;
 public:
 	virtual ~Construction();
 
@@ -153,6 +156,8 @@ public:
 	void Explode();
 	bool Built();
 	bool IsFlammable();
+	int Repair();
+	void SpawnRepairJob();
 
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	
