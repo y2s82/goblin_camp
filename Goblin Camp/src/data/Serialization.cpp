@@ -750,6 +750,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & AllowedAmount;
 	ar & built;
 	ar & flammable;
+	ar & repairJob;
 }
 
 template<class Archive>
@@ -778,6 +779,7 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & built;
 	if (version >= 1) {
 		ar & flammable;
+		ar & repairJob;
 	}
 }
 

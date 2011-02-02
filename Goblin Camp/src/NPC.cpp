@@ -1128,6 +1128,11 @@ CONTINUEEAT:
 					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Repair();
 					AddEffect(WORKING);
 					if (tmp >= 100) {
+						if (carried.lock()) { //Repairjobs usually require some material
+							inventory->RemoveItem(carried);
+							Game::Inst()->RemoveItem(carried);
+							carried.reset();
+						}
 						TaskFinished(TASKSUCCESS);
 					} else if (tmp < 0) {
 						TaskFinished(TASKFAILFATAL, "(USE)Can not use (tmp<0)"); break;
