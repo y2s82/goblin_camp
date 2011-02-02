@@ -15,7 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/numeric/conversion/cast.hpp> 
+#include <boost/numeric/conversion/cast.hpp>
 
-typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Floor<float>> FloorToInt;
-typedef boost::numeric::converter<int,double,boost::numeric::conversion_traits<int,double>,boost::numeric::def_overflow_handler,boost::numeric::Ceil<float>> CeilToInt;
+typedef boost::numeric::converter<
+	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Floor<float>
+> FloorToInt;
+typedef boost::numeric::converter<
+	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Ceil<float>
+> CeilToInt;

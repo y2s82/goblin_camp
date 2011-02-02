@@ -71,6 +71,7 @@ private:
 	int screenWidth, screenHeight;
 	Season season;
 	int time;
+	int age;
 	int orcCount, goblinCount;
 	unsigned int peacefulFaunaCount;
 	bool paused;
@@ -242,4 +243,6 @@ public:
 
 	boost::shared_ptr<Spell> CreateSpell(Coordinate, int type);
 	std::list<boost::shared_ptr<Spell> > spellList;
+
+	int GetAge();
 };

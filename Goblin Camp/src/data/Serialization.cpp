@@ -167,6 +167,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & bloodList;
 	ar & fireList;
 	ar & spellList;
+	ar & age;
 }
 
 template<class Archive>
@@ -190,7 +191,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	}
 	ar & marks;
 	if (version == 0) {
-		ar & Coordinate();
+		Coordinate c;
+		ar & c;
 		camX = 0;
 		camY = 0;
 	} else {
@@ -213,6 +215,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	if (version >= 1) {
 		ar & fireList;
 		ar & spellList;
+		ar & age;
 	}
 }
 
@@ -664,7 +667,7 @@ void Task::load(Archive & ar, const unsigned int version) {
 //
 // class Stockpile
 //
-BOOST_CLASS_VERSION(Stockpile, 0)
+BOOST_CLASS_VERSION(Stockpile, 1)
 
 template<class Archive>
 void Stockpile::save(Archive & ar, const unsigned int version) const {
@@ -675,7 +678,6 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 	ar & capacity;
 	ar & amount;
 	ar & allowed;
-	ar & used;
 	ar & reserved;
 	ar & containers;
 	int colorCount = colors.size();
@@ -691,30 +693,31 @@ void Stockpile::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Stockpile::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & symbol;
+	ar & a;
+	ar & b;
+	ar & capacity;
+	ar & amount;
+	ar & allowed;
 	if (version == 0) {
-		ar & boost::serialization::base_object<Construction>(*this);
-		ar & symbol;
-		ar & a;
-		ar & b;
-		ar & capacity;
-		ar & amount;
-		ar & allowed;
-		ar & used;
-		ar & reserved;
-		ar & containers;
-		int colorCount;
-		ar & colorCount;
-		for (int i = 0; i < colorCount; ++i) {
-			Coordinate location;
-			ar & location;
-			uint8 r, g, b;
-			ar & r;
-			ar & g;
-			ar & b;
-			colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
-		}
-		ar & limits;
+		std::map<Coordinate, bool> temp;
+		ar & temp;
 	}
+	ar & reserved;
+	ar & containers;
+	int colorCount;
+	ar & colorCount;
+	for (int i = 0; i < colorCount; ++i) {
+		Coordinate location;
+		ar & location;
+		uint8 r, g, b;
+		ar & r;
+		ar & g;
+		ar & b;
+		colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
+	}
+	ar & limits;
 }
 
 //
@@ -747,6 +750,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & AllowedAmount;
 	ar & built;
 	ar & flammable;
+	ar & repairJob;
 }
 
 template<class Archive>
@@ -775,6 +779,7 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & built;
 	if (version >= 1) {
 		ar & flammable;
+		ar & repairJob;
 	}
 }
 
@@ -930,7 +935,7 @@ void NatureObject::load(Archive & ar, const unsigned int version) {
 //
 // class JobManager
 //
-BOOST_CLASS_VERSION(JobManager, 0)
+BOOST_CLASS_VERSION(JobManager, 1)
 
 template<class Archive>
 void JobManager::save(Archive & ar, const unsigned int version) const {
@@ -939,16 +944,18 @@ void JobManager::save(Archive & ar, const unsigned int version) const {
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
 	ar & toolJobs;
+	ar & failList;
 }
 
 template<class Archive>
 void JobManager::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & availableList;
-		ar & waitingList;
-		ar & menialNPCsWaiting;
-		ar & expertNPCsWaiting;
-		ar & toolJobs;
+	ar & availableList;
+	ar & waitingList;
+	ar & menialNPCsWaiting;
+	ar & expertNPCsWaiting;
+	ar & toolJobs;
+	if (version >= 1) {
+		ar & failList;
 	}
 }
 

@@ -20,7 +20,9 @@ import gcamp.config
 import gcamp.events
 
 class Tutorial (gcamp.events.EventListener):
-
+	def __init__(self):
+		self.stage = -1
+	
 	def onGameStart(self):
 		if gcamp.config.getCVar("tutorial") == '1':
 			self.stage = 0

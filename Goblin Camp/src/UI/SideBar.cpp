@@ -69,9 +69,15 @@ void SideBar::Draw(TCODConsole* console) {
 		console->printFrame(edgeX - width, topY, width, height, false, TCOD_BKGND_DEFAULT, entity.lock()->Name().c_str());
 		Game::Inst()->Draw(console, entity.lock()->Center().X() + 0.5f, entity.lock()->Center().Y() + 0.5f, false, edgeX - (width - 4), topY + 2, 11, 11);
 		
-		if (npc) { //Draw health bar
-			boost::shared_ptr<NPC> creature = boost::static_pointer_cast<NPC>(entity.lock());
-			int health = (int)(((double)creature->GetHealth() / (double)std::max(1, creature->GetMaxHealth())) * 10);
+		if (npc || construction) { //Draw health bar
+			int health;
+			if (npc) {
+				boost::shared_ptr<NPC> creature = boost::static_pointer_cast<NPC>(entity.lock());
+				health = (int)(((double)creature->GetHealth() / (double)std::max(1, creature->GetMaxHealth())) * 10);
+			} else {
+				boost::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(entity.lock());
+				health = (int)(((double)construct->Condition() / (double)std::max(1, construct->GetMaxCondition())) * 10);
+			}
 			for (int i = 0; i < health; ++i) {
 				console->setChar(edgeX - (width-2), topY+12-i, 231);
 				TCODColor color;

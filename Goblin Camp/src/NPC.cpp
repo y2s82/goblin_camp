@@ -1123,6 +1123,23 @@ CONTINUEEAT:
 				}
 				break;
 
+			case REPAIR:
+				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
+					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Repair();
+					AddEffect(WORKING);
+					if (tmp >= 100) {
+						if (carried.lock()) { //Repairjobs usually require some material
+							inventory->RemoveItem(carried);
+							Game::Inst()->RemoveItem(carried);
+							carried.reset();
+						}
+						TaskFinished(TASKSUCCESS);
+					} else if (tmp < 0) {
+						TaskFinished(TASKFAILFATAL, "(USE)Can not use (tmp<0)"); break;
+					}
+				} else { TaskFinished(TASKFAILFATAL, "(USE)Attempted to use non-construct"); break; }
+				break;
+
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
@@ -1649,11 +1666,11 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 #ifdef DEBUG
 				std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
 #endif
-				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[SIZE]) {
+				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
 						Coordinate tar;
-						tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
-						tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[SIZE], 1));
+						tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
+						tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
 						npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
 						npc->pathIndex = -1;
 					}
@@ -1880,7 +1897,7 @@ class NPCListener : public ITCODParserListener {
 		} else if (boost::iequals(name,"strength")) {
 			NPC::Presets.back().stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"size")) {
-			NPC::Presets.back().stats[SIZE] = value.i;
+			NPC::Presets.back().stats[NPCSIZE] = value.i;
 			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"tier")) {
 			NPC::Presets.back().tier = value.i;
@@ -2081,7 +2098,7 @@ void NPC::UpdateVelocity() {
 								damage.addsub = (float)velocity/5;
 								damage.multiplier = 1;
 								damage.nb_dices = 1;
-								damage.nb_faces = 5 + effectiveStats[SIZE];
+								damage.nb_faces = 5 + effectiveStats[NPCSIZE];
 								construct->Damage(&attack);
 							}
 						}
