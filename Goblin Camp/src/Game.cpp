@@ -61,6 +61,7 @@ screenWidth(0),
 	screenHeight(0),
 	season(EarlySpring),
 	time(0),
+	age(0),
 	orcCount(0),
 	goblinCount(0),
 	peacefulFaunaCount(0),
@@ -531,7 +532,7 @@ void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 			int construction = Map::Inst()->GetConstruction(x,y);
 			if (construction >= 0) {
 				if (instance->GetConstruction(construction).lock()) {
-					instance->GetConstruction(construction).lock()->Dismantle();
+					instance->GetConstruction(construction).lock()->Dismantle(Coordinate(x,y));
 				} else {
 					Map::Inst()->SetConstruction(x,y,-1);
 				}
@@ -743,12 +744,18 @@ void Game::Update() {
 
 		Map::Inst()->ShiftWind();
 
+		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = staticConstructionList.begin();
+			cons != staticConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
+		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = dynamicConstructionList.begin();
+			cons != dynamicConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
+
 		if (season < LateWinter) season = (Season)((int)season + 1);
 		else season = EarlySpring;
 
 		switch (season) {
 		case EarlySpring:
 			Announce::Inst()->AddMsg("Spring has begun");
+			++age;
 		case Spring:
 		case LateSpring:
 			SpawnTillageJobs();
@@ -2010,3 +2017,5 @@ void Game::StartFire(Coordinate pos) {
 	fireJob->AddMapMarker(MapMarker(FLASHINGMARKER, 'F', pos, -1, TCODColor::red));
 	JobManager::Inst()->AddJob(fireJob);
 }
+
+int Game::GetAge() { return age; }
