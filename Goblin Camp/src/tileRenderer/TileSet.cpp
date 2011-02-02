@@ -108,7 +108,7 @@ void TileSet::DrawTerrain(TileType type, bool connectN, bool connectE, bool conn
 	} else if (terrainTiles.at(type).size() != 16) {
 		terrainTiles.at(type)[0].Draw(dst, dstRect);
 	} else {
-		if (connectN || connectS || connectE || connectW) {
+		if (!(connectN && connectS && connectE && connectW)) {
 			defaultTerrainTile.Draw(dst, dstRect);
 		}
 		terrainTiles.at(type).at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);

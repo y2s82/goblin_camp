@@ -151,6 +151,10 @@ Coordinate TCODMapRenderer::TileAt(int x, int y, float focusX, float focusY, int
 	return Coordinate(FloorToInt::convert(focusX) - (viewportW / 2) + (x - viewportX) / charX, FloorToInt::convert(focusY) - (viewportH / 2) + (y - viewportY) / charY);
 }
 
+float TCODMapRenderer::ScrollRate() const {
+	return 1.0f;
+}
+
 void TCODMapRenderer::SetCursorMode(CursorType mode) {
 	switch (mode){
 	case Cursor_Construct:

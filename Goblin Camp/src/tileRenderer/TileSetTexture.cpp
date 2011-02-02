@@ -45,14 +45,16 @@ int TileSetTexture::Count() const
 	return tileCount;
 }
 
-void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const
+void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, const SDL_Rect * dstRect) const
 {
 	if (tile < tileCount)
 	{
 		int xCoord = tile % tileXDim;
 		int yCoord = tile / tileXDim;
 		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, tileWidth, tileHeight};
-		SDL_BlitSurface(tiles.get(),&srcRect, dst, dstRect);
+		// Copy dstRect to prevent it changing.
+		SDL_Rect dstRectCp={dstRect->x, dstRect->y, dstRect->w, dstRect->h}; 
+		SDL_BlitSurface(tiles.get(),&srcRect, dst, &dstRectCp);
 	}
 }
 

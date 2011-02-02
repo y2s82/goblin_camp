@@ -66,6 +66,11 @@ public:
 	 **/
 	virtual Coordinate TileAt(int screenX, int screenY, float focusX, float focusY, int viewportX = 0, int viewportY = 0, int viewportW = -1, int viewportH = -1) const = 0;
 
+	/**
+	 * Returns the rate the camera should move at. This allows for it to be modified by zoom distance or tile size
+	 */
+	virtual float ScrollRate() const = 0;
+
 	virtual void SetCursorMode(CursorType mode) = 0;
 	virtual void SetCursorMode(const NPCPreset& preset) = 0;
 	virtual void SetCursorMode(const ItemPreset& preset) = 0;
