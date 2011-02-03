@@ -1472,8 +1472,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	if (npc->coward) {
 		npc->ScanSurroundings();
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if (( (npci->lock()->GetFaction() != npc->faction) || 
-				(npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) || 
+			if ((npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) || 
+				npci->lock() == npc->aggressor.lock() || 
 				npc->seenFire) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
