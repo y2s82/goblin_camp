@@ -420,7 +420,7 @@ void NPC::UpdateStatusEffects() {
 
 }
 
-AiThink NPC::Think() {
+void NPC::Think() {
 	Coordinate tmpCoord;
 	int tmp;
 	
@@ -434,7 +434,7 @@ AiThink NPC::Think() {
 		TaskFinished(TASKFAILFATAL, "Flying through the air");
 		JobManager::Inst()->NPCNotWaiting(uid);
 	}
-
+	
 	while (timeCount > UPDATES_PER_SECOND) {
 		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
@@ -836,7 +836,7 @@ CONTINUEEAT:
 					y == 0 || y == Map::Inst()->Height()-1) {
 						//We are at the edge, escape!
 						Escape();
-						return AIMOVE;
+						return;
 				}
 
 				//Find the closest edge and change into a MOVE task and a new FLEEMAP task
@@ -1175,7 +1175,7 @@ CONTINUEEAT:
 		}
 	}
 
-	return AINOTHING;
+	return;
 }
 
 void NPC::StartJob(boost::shared_ptr<Job> job) {
@@ -1801,8 +1801,10 @@ void NPC::Escape() {
 }
 
 void NPC::DestroyAllItems() {
-	for (std::set<boost::weak_ptr<Item> >::iterator it = inventory->begin(); it != inventory->end(); ++it) {
-		if (it->lock()) Game::Inst()->RemoveItem(*it);
+	while (!inventory->empty()) {
+		boost::weak_ptr<Item> item = inventory->GetFirstItem();
+		inventory->RemoveItem(item);
+		Game::Inst()->RemoveItem(item);
 	}
 }
 
