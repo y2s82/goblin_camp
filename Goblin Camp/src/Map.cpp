@@ -658,6 +658,35 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 					else
 						tileMap[x][y].flow = SOUTHEAST;
 				}
+
+				if (tileMap[x][y].flow == NODIRECTION) { //No slope here, so approximate towards river
+					boost::weak_ptr<WaterNode> randomWater = *boost::next(Game::Inst()->waterList.begin(), Random::ChooseIndex(Game::Inst()->waterList));
+					Coordinate coord(-1, -1);
+					if (randomWater.lock()) coord = randomWater.lock()->Position();
+					
+					if (coord != Coordinate(-1, -1)) {
+						if (coord.X() < x) {
+							if (coord.Y() < y)
+								tileMap[x][y].flow = NORTHWEST;
+							else if (coord.Y() == y)
+								tileMap[x][y].flow = WEST;
+							else 
+								tileMap[x][y].flow = SOUTHWEST;
+						} else if (coord.X() == x) {
+							if (coord.Y() < y)
+								tileMap[x][y].flow = NORTH;
+							else if (coord.Y() > y)
+								tileMap[x][y].flow = SOUTH;
+						} else {
+							if (coord.Y() < y)
+								tileMap[x][y].flow = NORTHEAST;
+							else if (coord.Y() == y)
+								tileMap[x][y].flow = EAST;
+							else
+								tileMap[x][y].flow = SOUTHEAST;
+						}
+					}
+				}
 			}
 		}
 	}
