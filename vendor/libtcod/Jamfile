@@ -18,8 +18,10 @@ project libtcod
     : requirements
       <link>static
       $(common-reqs)
+	  <use>/sdl <use>/zlib <use>/libpng
     : usage-requirements
       $(common-reqs)
+	  
 ;
 
 sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
