@@ -1753,11 +1753,13 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 	if (health <= 0) Kill();
 
-	if (damage > 0 && res == PHYSICAL_RES) {
-		Game::Inst()->CreateBlood(Coordinate(
-			Position().X() + Random::Generate(-1, 1),
-			Position().Y() + Random::Generate(-1, 1)),
-			Random::Generate(50, 50+damage*10));
+	if (damage > 0) {
+		if (res == PHYSICAL_RES) {
+			Game::Inst()->CreateBlood(Coordinate(
+				Position().X() + Random::Generate(-1, 1),
+				Position().Y() + Random::Generate(-1, 1)),
+				Random::Generate(50, 50+damage*10));
+		}
 		if (aggr.lock()) aggressor = aggr;
 	}
 }
