@@ -28,4 +28,7 @@ if [ os.name ] = MACOSX {
     sources += $(HERE)/src/macsupport.m ;
 }
 
-lib tcod : $(sources) ;
+lib tcod
+    : $(sources)
+    : <use>/libpng <use>/zlib
+;
