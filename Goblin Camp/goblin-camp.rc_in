@@ -1,4 +1,4 @@
-#include <winres.h>
+#include <winresrc.h>
 
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
