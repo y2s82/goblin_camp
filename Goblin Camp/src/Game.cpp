@@ -313,7 +313,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		++orcCount;
 		npc->AddTrait(FRESH);
 	}
-	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
+	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) {
+		++goblinCount;
+		if (Random::Generate(2) == 0) npc->AddTrait(CHICKENHEART);
+	}
 	else if (NPC::Presets[type].tags.find("localwildlife") != NPC::Presets[type].tags.end()) ++peacefulFaunaCount;
 
 	if (NPC::Presets[type].tags.find("flying") != NPC::Presets[type].tags.end()) {

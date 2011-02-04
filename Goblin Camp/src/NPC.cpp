@@ -1496,10 +1496,23 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	if (npc->coward) {
 		npc->ScanSurroundings();
+		
+		if (npc->HasTrait(CHICKENHEART) && npc->seenFire && (npc->jobs.empty() || npc->jobs.front()->name != "Aaaaaaaah!!")) {
+			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+			boost::shared_ptr<Job> runAroundLikeAHeadlessChickenJob(new Job("Aaaaaaaah!!"));
+			for (int i = 0; i < 30; ++i)
+				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, npc->Position() + Coordinate(Random::Generate(-2, 2), Random::Generate(-2, 2))));
+			runAroundLikeAHeadlessChickenJob->internal = true;
+			npc->jobs.push_back(runAroundLikeAHeadlessChickenJob);
+			npc->run = true;
+			npc->AddEffect(PANIC);
+			return;
+		}
+
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			if ((npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) || 
 				npci->lock() == npc->aggressor.lock() || 
-				npc->seenFire) {
+				(npc->seenFire && (npc->jobs.empty() || !boost::iequals(npc->jobs.front()->name,"Pour water")))) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
