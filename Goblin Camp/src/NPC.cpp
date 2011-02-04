@@ -420,7 +420,7 @@ void NPC::UpdateStatusEffects() {
 
 }
 
-AiThink NPC::Think() {
+void NPC::Think() {
 	Coordinate tmpCoord;
 	int tmp;
 	
@@ -434,7 +434,7 @@ AiThink NPC::Think() {
 		TaskFinished(TASKFAILFATAL, "Flying through the air");
 		JobManager::Inst()->NPCNotWaiting(uid);
 	}
-
+	
 	while (timeCount > UPDATES_PER_SECOND) {
 		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
@@ -836,7 +836,7 @@ CONTINUEEAT:
 					y == 0 || y == Map::Inst()->Height()-1) {
 						//We are at the edge, escape!
 						Escape();
-						return AIMOVE;
+						return;
 				}
 
 				//Find the closest edge and change into a MOVE task and a new FLEEMAP task
@@ -1175,7 +1175,7 @@ CONTINUEEAT:
 		}
 	}
 
-	return AINOTHING;
+	return;
 }
 
 void NPC::StartJob(boost::shared_ptr<Job> job) {
@@ -1472,8 +1472,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	if (npc->coward) {
 		npc->ScanSurroundings();
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if (( (npci->lock()->GetFaction() != npc->faction) || 
-				(npci->lock() == npc->aggressor.lock()) && npci->lock()->aggressive) || 
+			if ((npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) || 
+				npci->lock() == npc->aggressor.lock() || 
 				npc->seenFire) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
@@ -1753,11 +1753,13 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 	if (health <= 0) Kill();
 
-	if (damage > 0 && res == PHYSICAL_RES) {
-		Game::Inst()->CreateBlood(Coordinate(
-			Position().X() + Random::Generate(-1, 1),
-			Position().Y() + Random::Generate(-1, 1)),
-			Random::Generate(50, 50+damage*10));
+	if (damage > 0) {
+		if (res == PHYSICAL_RES) {
+			Game::Inst()->CreateBlood(Coordinate(
+				Position().X() + Random::Generate(-1, 1),
+				Position().Y() + Random::Generate(-1, 1)),
+				Random::Generate(50, 50+damage*10));
+		}
 		if (aggr.lock()) aggressor = aggr;
 	}
 }
@@ -1801,8 +1803,10 @@ void NPC::Escape() {
 }
 
 void NPC::DestroyAllItems() {
-	for (std::set<boost::weak_ptr<Item> >::iterator it = inventory->begin(); it != inventory->end(); ++it) {
-		if (it->lock()) Game::Inst()->RemoveItem(*it);
+	while (!inventory->empty()) {
+		boost::weak_ptr<Item> item = inventory->GetFirstItem();
+		inventory->RemoveItem(item);
+		Game::Inst()->RemoveItem(item);
 	}
 }
 

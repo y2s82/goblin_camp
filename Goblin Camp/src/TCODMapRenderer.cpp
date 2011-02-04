@@ -113,7 +113,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
-		if (markerX >= upleft.X() && markerY < upleft.X() + viewportW
+		if (markerX >= upleft.X() && markerX < upleft.X() + viewportW
 			&& markerY >= upleft.Y() && markerY < upleft.Y() + viewportH) {
 				minimap.putCharEx(markerX - upleft.X(), markerY - upleft.Y(), markeri->second.Graphic(), markeri->second.Color(), TCODColor::black);
 		}
