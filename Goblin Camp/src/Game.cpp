@@ -2026,3 +2026,12 @@ void Game::StartFire(Coordinate pos) {
 }
 
 int Game::GetAge() { return age; }
+
+void Game::BerserkCreature(Coordinate pos) {
+	for (std::set<int>::iterator npcuid = Map::Inst()->NPCList(pos.X(), pos.Y())->begin(); 
+		npcuid != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npcuid) {
+			boost::shared_ptr<NPC> npc;
+			if (npcList.find(*npcuid) != npcList.end()) npc = npcList[*npcuid];
+			if (npc) npc->GoBerserk();
+	}
+}

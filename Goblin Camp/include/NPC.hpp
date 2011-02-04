@@ -46,6 +46,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 typedef int NPCType;
 
+enum Trait {
+	FRESH,
+	CHICKENHEART,
+	VETERAN,
+	BOSS,
+	CRACKEDSKULL
+};
+
 enum Skill {
 	MASONRY,
 	CARPENTRY,
@@ -182,7 +190,8 @@ private:
 	Coordinate threatLocation;
 	bool seenFire;
 
-
+	std::set<Trait> traits;
+	int damageDealt, damageReceived;
 public:
 	~NPC();
 	SkillSet Skills;
@@ -263,6 +272,12 @@ public:
 
 	static unsigned int pathingThreadCount;
 	static boost::mutex threadCountMutex;
+
+	void AddTrait(Trait);
+	void RemoveTrait(Trait);
+	bool HasTrait(Trait);
+
+	void GoBerserk();
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::mutex*, bool*, bool*, bool);
