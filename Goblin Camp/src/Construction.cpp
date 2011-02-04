@@ -904,7 +904,7 @@ int Construction::Repair() {
 }
 
 void Construction::SpawnRepairJob() {
-	if (condition < maxCondition && !repairJob.lock()) {
+	if (built && condition < maxCondition && !repairJob.lock()) {
 		boost::shared_ptr<Job> repJob(new Job("Repair " + name));
 		repJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), *boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials))));
 		repJob->tasks.push_back(Task(MOVE));
