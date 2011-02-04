@@ -75,7 +75,7 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	for(; start != end; ++start) {
 		tiles.push_back(*start);
 	}
-	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 31) {
+	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 47) {
 		// Down grade to connection map
 		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_ConnectionMap);
 	}
@@ -93,7 +93,7 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	for(; start != end; ++start) {
 		tiles.push_back(*start);
 	}
-	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 31) {
+	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 47) {
 		// Down grade to connection map
 		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_ConnectionMap);
 	}

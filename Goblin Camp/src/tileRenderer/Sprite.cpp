@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "tileRenderer/Sprite.hpp"
-#include "tileRenderer/TileSetUtil.hpp"
 
 Sprite::Sprite() : tiles(), texture(), type(SPRITE_Single), frameTime(15) {}
 Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
@@ -49,6 +48,94 @@ bool Sprite::IsAnimated() const {
 	return type & SPRITE_Animated;
 }
 
+namespace {
+	inline int ConnectionIndex(bool connectNorth, bool connectEast, bool connectSouth, bool connectWest) {
+		int index = 0;
+		if (!connectSouth) index += 8;
+		if (connectSouth == connectNorth) index +=4;
+		if (connectWest) index += 2;
+		if (connectEast != connectWest) index += 1;
+		return index;
+	}
+
+	inline int ExtConnectionIndex(Sprite::ConnectedFunction connected) {
+		static boost::array<int,15> lookupTable4Sides =
+		{
+			34, // None
+			42, // NE
+			44, // SE
+			32, // NE + SE
+			43, // SW
+			46, // NE + SW
+			24, // SE + SW
+			22, // NE + SE + SW
+			41, // NW
+			29, // NE + NW
+			45, // SE + NW
+			27, // NE + SE + NW
+			33, // SW + NW
+			28, // NE + SW + NW
+			23  // SE + SW + NW
+		};
+		static boost::array<int,12> lookupTable3Sides =
+		{
+			19, // !N, !SE + !SW
+			17, // !N, !SW
+			18, // !N, !SE
+			35, // !E, !SW + !NW
+			25, // !E, !NW
+			30, // !E, !SW
+			39, // !S, !NE + !NW
+			37, // !S, !NW
+			38, // !S, !NE
+			31, // !W, !NE + !SE
+			26, // !W, !SE
+			21  // !W, !NE		
+		};
+
+		bool connectN = connected(NORTH);
+		bool connectE = connected(EAST);
+		bool connectS = connected(SOUTH);
+		bool connectW = connected(WEST);
+		bool connectNE = connected(NORTHEAST);
+		bool connectSE = connected(SOUTHEAST);
+		bool connectSW = connected(SOUTHWEST);
+		bool connectNW = connected(NORTHWEST);
+
+		if ((connectN && connectE && !connectNE) || 
+			(connectE && connectS && !connectSE) ||
+			(connectS && connectW && !connectSW) ||
+			(connectW && connectN && !connectNW))
+		{
+			int sides = ((connectN) ? 1 : 0) + ((connectS) ? 1 : 0) + ((connectE) ? 1 : 0) + ((connectW) ? 1 : 0);
+
+			if (sides == 4) {
+				int cornerScore = ((connectNE) ? 1 : 0) + ((connectSE) ? 2 : 0) + ((connectSW) ? 4 : 0) + ((connectNW) ? 8 : 0);
+				return lookupTable4Sides[cornerScore];
+			} else if (sides == 3) {
+				if (!connectN) {
+					return lookupTable3Sides[(connectSE ? 1 : 0) + (connectSW ? 2 : 0)];
+				} else if (!connectE) {
+					return lookupTable3Sides[3 + (connectSW ? 1 : 0) + (connectNW ? 2 : 0)];
+				} else if (!connectS) {
+					return lookupTable3Sides[6 + (connectNE ? 1 : 0) + (connectNW ? 2 : 0)];
+				} else {
+					return lookupTable3Sides[9 + (connectNE ? 1 : 0) + (connectSE ? 2 : 0)];
+				}
+			} else {
+				int index = 16;
+				if (connectW) index += 4;
+				if (connectN) index += 20;
+				return index;
+			}
+		}
+		else 
+		{
+			return ConnectionIndex(connectN, connectE, connectS, connectW);
+		}
+	}
+}
+
 void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (Exists()) {
 		if (IsAnimated()) {
@@ -63,10 +150,11 @@ void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
 void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (IsConnectionMap()) {
 		if (IsExtendedConnectionMap()) {
-
+			int index = ExtConnectionIndex(connected);
+			texture->DrawTile(tiles.at(index), dst, dstRect);
 		} else {
-			int index = TilesetUtil::CalcConnectionMapIndex(connected(NORTH), connected(EAST), connected(SOUTH), connected(WEST));
-			texture->DrawTile(tiles[index], dst, dstRect);
+			int index = ConnectionIndex(connected(NORTH), connected(EAST), connected(SOUTH), connected(WEST));
+			texture->DrawTile(tiles.at(index), dst, dstRect);
 		}
 	} else {
 		Draw(dst, dstRect);
