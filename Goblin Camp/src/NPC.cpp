@@ -1761,6 +1761,9 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 				Random::Generate(50, 50+damage*10));
 		}
 		if (aggr.lock()) aggressor = aggr;
+		if (!jobs.empty() && boost::iequals(jobs.front()->name, "Sleep")) {
+			TaskFinished(TASKFAILFATAL);
+		}
 	}
 }
 
