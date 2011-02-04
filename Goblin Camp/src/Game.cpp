@@ -309,7 +309,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		}
 	}
 
-	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
+	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) {
+		++orcCount;
+		npc->AddTrait(FRESH);
+	}
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
 	else if (NPC::Presets[type].tags.find("localwildlife") != NPC::Presets[type].tags.end()) ++peacefulFaunaCount;
 
@@ -2002,7 +2005,6 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 	}
 }
 
-/* Placeholder code before proper spells */
 boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
 	spellList.push_back(newSpell);
@@ -2026,12 +2028,3 @@ void Game::StartFire(Coordinate pos) {
 }
 
 int Game::GetAge() { return age; }
-
-void Game::BerserkCreature(Coordinate pos) {
-	for (std::set<int>::iterator npcuid = Map::Inst()->NPCList(pos.X(), pos.Y())->begin(); 
-		npcuid != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npcuid) {
-			boost::shared_ptr<NPC> npc;
-			if (npcList.find(*npcuid) != npcList.end()) npc = npcList[*npcuid];
-			if (npc) npc->GoBerserk();
-	}
-}
