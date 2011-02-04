@@ -52,7 +52,7 @@ void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, const SDL_Rect * dstR
 		int xCoord = tile % tileXDim;
 		int yCoord = tile / tileXDim;
 		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, tileWidth, tileHeight};
-		// Copy dstRect to prevent it changing.
+		// Copy dstRect to prevent it being changed.
 		SDL_Rect dstRectCp={dstRect->x, dstRect->y, dstRect->w, dstRect->h}; 
 		SDL_BlitSurface(tiles.get(),&srcRect, dst, &dstRectCp);
 	}
