@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "stdafx.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
-#include "tileRenderer/TileSetUtil.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Door.hpp"
