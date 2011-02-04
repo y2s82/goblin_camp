@@ -38,7 +38,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSet : private boost::noncopyable
 {
 public:
-	TileSet(std::string tileSetName, int tileW, int tileH);
+	explicit TileSet(std::string tileSetName, int tileW, int tileH);
 	~TileSet();
 
 	int TileWidth() const;
@@ -51,10 +51,10 @@ public:
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawTerrain(TileType type, bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const;
+	void DrawTerrain(TileType type, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawCorruption(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawWater(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawWater(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMajor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -77,8 +77,8 @@ public:
 	void SetAuthor(std::string auth);
 	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
-	void AddTerrain(TileType type, const Sprite& sprite);
-	void AddWater(const Sprite& sprite);
+	void SetTerrain(TileType type, const Sprite& sprite);
+	void SetWater(const Sprite& sprite);
 	void SetFilthMinor(const Sprite& sprite);
 	void SetFilthMajor(const Sprite& sprite);
 	void SetMarker(const Sprite& sprite);
@@ -86,12 +86,11 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
-	void AddCorruption(const Sprite& sprite);
+	void SetCorruption(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
-	void AddFireSprite(const Sprite& sprite);
-	void SetFireFrameRate(int fps);
+	void SetFireSprite(const Sprite& sprite);
 
 	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
 		
@@ -108,7 +107,7 @@ public:
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
 	
 private:
-	typedef boost::array<std::vector<Sprite>, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
 	typedef boost::array<Sprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
@@ -122,21 +121,20 @@ private:
 
 	Sprite defaultTerrainTile;
 	TileTypeSpriteArray terrainTiles;
-	std::vector<Sprite> waterTiles;
+	Sprite waterTile;
 	Sprite minorFilth;
 	Sprite majorFilth;
 	
 	Sprite nonTerritoryOverlay;
 	Sprite territoryOverlay;
 	Sprite markedOverlay;
-	std::vector<Sprite> corruptionTiles;
+	Sprite corruptionTile;
 
 	Sprite marker;
 	Sprite blood;
 
 	Sprite defaultUnderConstructionSprite;
-	std::vector<Sprite> fireTiles;
-	int fireFrameTime;
+	Sprite fireTile;
 
 	NPCSpriteSet defaultNPCSpriteSet;
 	std::vector<NPCSpriteSet> npcSpriteSets;
@@ -162,8 +160,5 @@ private:
 	CursorTypeSpriteArray nonplaceableCursors;
 
 	StatusEffectSpriteArray defaultStatusEffects;
-
-	bool ConstructionConnectTo(Construction * construction, int x, int y) const;
-
-	
+		
 };

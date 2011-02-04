@@ -45,6 +45,11 @@ private:
 public:
 	Coordinate(int x = 0, int y = 0) : x(x), y(y) { }
 	
+	static Coordinate DirectionToCoordinate(Direction dir) {
+		static boost::array<Coordinate,9> coordsToDirs = {Coordinate(0,-1), Coordinate(1,-1), Coordinate(1,0), Coordinate(1,1), Coordinate(0,1), Coordinate(-1,1), Coordinate(-1,0), Coordinate(-1,1), Coordinate(0,0)};
+		return coordsToDirs[dir];
+	}
+
 	inline int X() const {
 		return x;
 	}

@@ -31,13 +31,13 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	author(""),
 	description(""),
 	version(""),
-	waterTiles(),
+	waterTile(),
 	minorFilth(),
 	majorFilth(),
 	nonTerritoryOverlay(),
 	territoryOverlay(),
 	markedOverlay(),
-	corruptionTiles(),
+	corruptionTile(),
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
@@ -56,9 +56,11 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	defaultSpellSpriteSet(),
 	spellSpriteLookup(),
 	spellSpriteSets(),
-	fireTiles(),
-	fireFrameTime(100),
+	fireTile(),
 	defaultTerrainTile() {
+		for (int i = 0; i < terrainTiles.size(); ++i) {
+			terrainTiles[i] = Sprite();
+		}
 		for (int i = 0; i < placeableCursors.size(); ++i) {
 			placeableCursors[i] = Sprite();
 			nonplaceableCursors[i] = Sprite();
@@ -102,38 +104,27 @@ void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	marker.Draw(dst, dstRect);
 }
 
-void TileSet::DrawTerrain(TileType type, bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	if (type == TILENONE || terrainTiles.at(type).size() == 0) { 
+void TileSet::DrawTerrain(TileType type, Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	if (type == TILENONE || !terrainTiles.at(type).Exists()) { 
 		defaultTerrainTile.Draw(dst, dstRect);
-	} else if (terrainTiles.at(type).size() != 16) {
-		terrainTiles.at(type)[0].Draw(dst, dstRect);
 	} else {
-		if (!(connectN && connectS && connectE && connectW)) {
+		if (terrainTiles.at(type).IsConnectionMap()) {
 			defaultTerrainTile.Draw(dst, dstRect);
 		}
-		terrainTiles.at(type).at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+		terrainTiles.at(type).Draw(connected, dst, dstRect);
 	}
-	
 }
 
-void TileSet::DrawCorruption(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	if (corruptionTiles.size() >= 16) {
-		corruptionTiles.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
-	} else if (corruptionTiles.size() > 0) {
-		corruptionTiles[0].Draw(dst, dstRect);
-	}
+void TileSet::DrawCorruption(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	corruptionTile.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	blood.Draw(dst, dstRect);
 }
 
-void TileSet::DrawWater(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	if (waterTiles.size() >= 16) {
-		waterTiles.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
-	} else if (waterTiles.size() > 0) {
-		waterTiles.at(0).Draw(dst, dstRect);
-	}
+void TileSet::DrawWater(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	waterTile.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const {
@@ -216,12 +207,15 @@ void TileSet::DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface 
 	}
 }
 
-bool TileSet::ConstructionConnectTo(Construction * construction, int x, int y) const {
-	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x, y));
-	if (boost::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
-		return otherConstruct->Type() == construction->Type() && otherConstruct->Condition() > 0 == construction->Condition() > 0;
+namespace {
+	bool ConstructionConnectTo(ConstructionType type, Coordinate origin, Direction dir) {
+		Coordinate pos = origin + Coordinate::DirectionToCoordinate(dir);
+		boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(pos.X(), pos.Y()));
+		if (boost::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
+			return otherConstruct->Type() == type;
+		}
+		return false;
 	}
-	return false;
 }
 
 void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
@@ -229,11 +223,7 @@ void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate
 	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = construction->Type();
-		bool connectN = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() - 1);
-		bool connectE = ConstructionConnectTo(construction, worldPos.X() + 1, worldPos.Y());
-		bool connectS = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() + 1);
-		bool connectW = ConstructionConnectTo(construction, worldPos.X() - 1, worldPos.Y());
-		spriteSet.Draw(connectN, connectE, connectS, connectW, dst, dstRect);
+		spriteSet.Draw(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
 	} else {
 		spriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
 	}
@@ -245,11 +235,7 @@ void TileSet::DrawUnderConstruction(Construction * construction, const Coordinat
 	if (spriteSet.HasUnderConstructionSprites()) {
 		if (spriteSet.IsConnectionMap()) {
 			ConstructionType type = construction->Type();
-			bool connectN = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() - 1);
-			bool connectE = ConstructionConnectTo(construction, worldPos.X() + 1, worldPos.Y());
-			bool connectS = ConstructionConnectTo(construction, worldPos.X(), worldPos.Y() + 1);
-			bool connectW = ConstructionConnectTo(construction, worldPos.X() - 1, worldPos.Y());
-			spriteSet.DrawUnderConstruction(connectN, connectE, connectS, connectW, dst, dstRect);
+			spriteSet.DrawUnderConstruction(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
 		} else {
 			spriteSet.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
 		}
@@ -299,11 +285,7 @@ void TileSet::DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_R
 }
 
 void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const {
-	// Determine frame
-	if (fireTiles.size() > 0) {
-		int fireTile = (TCODSystem::getElapsedMilli() / fireFrameTime) % fireTiles.size();
-		fireTiles[fireTile].Draw(dst, dstRect);
-	}
+	fireTile.Draw(dst, dstRect);
 }
 
 int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
@@ -411,19 +393,19 @@ void TileSet::SetVersion(std::string ver) {
 	version = ver;
 }
 
-void TileSet::AddTerrain(TileType type, const Sprite& sprite) {
+void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
 	if (type < 0 || type >= TILE_TYPE_COUNT) 
 		return;
 
 	if (type == TILENONE) {
 		defaultTerrainTile = sprite;
 	} else {
-		terrainTiles[type].push_back(sprite);
+		terrainTiles[type] = sprite;
 	}
 }
 
-void TileSet::AddWater(const Sprite& sprite) {
-	waterTiles.push_back(sprite);
+void TileSet::SetWater(const Sprite& sprite) {
+	waterTile = sprite;
 }
 
 void TileSet::SetFilthMinor(const Sprite& sprite) {
@@ -454,8 +436,8 @@ void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 	markedOverlay = sprite;
 }
 
-void TileSet::AddCorruption(const Sprite& sprite) {
-	corruptionTiles.push_back(sprite);
+void TileSet::SetCorruption(const Sprite& sprite) {
+	corruptionTile = sprite;
 }
 
 void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
@@ -492,12 +474,8 @@ void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {
 	defaultUnderConstructionSprite = sprite;
 }
 
-void TileSet::AddFireSprite(const Sprite& sprite) {
-	fireTiles.push_back(sprite);
-}
-
-void TileSet::SetFireFrameRate(int fps) {
-	fireFrameTime = 1000 / fps;
+void TileSet::SetFireSprite(const Sprite& sprite) {
+	fireTile = sprite;
 }
 
 void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {

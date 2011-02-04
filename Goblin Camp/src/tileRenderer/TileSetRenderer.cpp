@@ -310,32 +310,59 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 	}
 }
 
+namespace {
+	bool TerrainConnectionTest(Map* map, Coordinate origin, TileType type, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->Type(coord.X(), coord.Y()) == type;
+	}
+
+	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
+	}
+
+	bool WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+			return true;
+		}
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+			return water->Depth() > 0;
+		}
+		return false;
+	}
+
+	int Test(int one, int two) {
+		return one + two;
+	}
+}
+
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	TileType type(map->Type(tileX, tileY));
-	bool connectN(map->Type(tileX, tileY - 1) == type);
-	bool connectE(map->Type(tileX + 1, tileY) == type);
-	bool connectS(map->Type(tileX, tileY + 1) == type);
-	bool connectW(map->Type(tileX - 1, tileY) == type);
-	tileSet->DrawTerrain(type, connectN, connectE, connectS, connectW, mapSurface.get(), dstRect);
+	Coordinate pos(tileX, tileY);
+
+	tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
 	
 	// Corruption
 	if (map->GetCorruption(tileX, tileY) >= 100) {
-		bool corruptN(map->GetCorruption(tileX, tileY - 1) >= 100);
-		bool corruptE(map->GetCorruption(tileX + 1, tileY) >= 100);
-		bool corruptS(map->GetCorruption(tileX, tileY + 1) >= 100);
-		bool corruptW(map->GetCorruption(tileX - 1, tileY) >= 100);
-		tileSet->DrawCorruption(corruptN, corruptE, corruptS, corruptW, mapSurface.get(), dstRect);
+		tileSet->DrawCorruption(boost::bind(&CorruptionConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 	}
+
+
 	// Water
 	boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
 	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
 		if (water->Depth() > 0)
 		{
-			bool waterN(WaterLevelAt(map, tileX, tileY - 1) > 0);
-			bool waterE(WaterLevelAt(map, tileX + 1, tileY) > 0);
-			bool waterS(WaterLevelAt(map, tileX, tileY + 1) > 0);
-			bool waterW(WaterLevelAt(map, tileX - 1, tileY) > 0);
-			tileSet->DrawWater(waterN, waterE, waterS, waterW, mapSurface.get(), dstRect);
+			tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 		}
 	}
 	if (map->GetBlood(tileX, tileY).lock())	{
