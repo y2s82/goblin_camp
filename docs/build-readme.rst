@@ -10,6 +10,13 @@ earlier ``build/README.rst``.
 
 .. contents:: Table of Contents
 
+-------------------------------
+Frequently encountered problems
+-------------------------------
+
+* Paths used in configuration file should always use slashes, not backslashes (even on Windows).
+* Library names should not include ``lib`` prefix when using GCC.
+
 ----------------------------
 Required tools and libraries
 ----------------------------
@@ -87,13 +94,13 @@ Available properties:
 
 Example::
 
-    using libpng : <library>C:\dev\libs\msvc10-x86\lib <include>C:\dev\libs\msvc10-x86\include <name>lpng14 ;
+    using libpng : <library>C:/dev/libs/msvc10-x86/lib <include>C:/dev/libs/msvc10-x86/include <name>lpng14 ;
 
 ~~~~~~~~~~~~~~~~~~
 Configuring OpenGL
 ~~~~~~~~~~~~~~~~~~
 
-..note::
+.. note::
     This tool is relevant only on \*nix systems, and ignored on Windows (as OpenGL libraries are part of the Windows SDK).
 
 Tool name:: ``opengl``.
@@ -124,16 +131,16 @@ Available properties:
 
 Example::
 
-    using python : <library>C:\dev\apps\Python27\libs <include>C:\dev\apps\Python27\include <exec>C:\dev\apps\Python27\python.exe <name>python27 ;
+    using python : <library>C:/dev/apps/Python27/libs <include>C:/dev/apps/Python27/include <exec>C:/dev/apps/Python27/python.exe <name>python27 ;
 
 ~~~~~~~~~~~~~~~
 Configuring SDL
 ~~~~~~~~~~~~~~~
 
-..note::
+.. note::
     This tool handles both SDL and SDL_image.
 
-..note::
+.. note::
     We're currently assuming SDL.h file is directly in the search path (i.e. not in
     the SDL subdirectory).
 
@@ -146,13 +153,13 @@ Available properties:
 
 Example::
 
-    using sdl : <library>C:\dev\libs\msvc10-x86\lib <include>C:\dev\libs\msvc10-x86\include\SDL ;
+    using sdl : <library>C:/dev/libs/msvc10-x86/lib <include>C:/dev/libs/msvc10-x86/include/SDL ;
 
 ~~~~~~~~~~~~~~~~~~~~~~~
 Configuring Windows SDK
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-..note::
+.. note::
     This tool is (obviously) used only on Windows.
 
 Tool name: ``winsdk``.
@@ -164,7 +171,7 @@ Available properties:
 
 Example::
 
-    using winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
+    using winsdk : <library>C:/dev/libs/WinSDK/v7.1/Lib <include>C:/dev/libs/WinSDK/v7.1/Include ;
 
 ~~~~~~~~~~~~~~~~
 Configuring zlib
@@ -180,7 +187,7 @@ Available properties:
 
 Example::
 
-    using winsdk : <library>C:\dev\libs\WinSDK\v7.1\Lib <include>C:\dev\libs\WinSDK\v7.1\Include ;
+    using zlib : <library>C:/dev/libs/msvc10-x86/lib <include>C:/dev/libs/msvc10-x86/include <name>zdll ;
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Configuring Goblin Camp — features

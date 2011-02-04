@@ -67,7 +67,9 @@ local rule define-targets ( ) {
         name = [ $(.options).get <name> ] ;
         local suffix = [ $(.options).get <suffix> ] ;
         
-        name = $(name)$(suffix) ;
+        if $(suffix) {
+            name = $(name)$(suffix) ;
+        }
     }
     
     name ?= python27 ;
