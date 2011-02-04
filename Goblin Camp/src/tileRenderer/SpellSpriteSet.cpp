@@ -17,22 +17,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
-SpellSpriteSet::SpellSpriteSet()
-	: tiles(), frameTime(15) {}
+SpellSpriteSet::SpellSpriteSet() : tile() {}
+
+SpellSpriteSet::SpellSpriteSet(Sprite sprite)
+	: tile(sprite) {}
 
 SpellSpriteSet::~SpellSpriteSet() {}
 
 void SpellSpriteSet::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
-	if (tiles.size() > 0) {
-		int frame = (TCODSystem::getElapsedMilli() / frameTime) % tiles.size();
-		tiles[frame].Draw(dst, dstRect);
-	}
-}
-
-void SpellSpriteSet::AddSprite(Sprite tile) {
-	tiles.push_back(tile);
-}
-
-void SpellSpriteSet::SetFrameRate(int fps) {
-	frameTime = 1000/fps;
+	tile.Draw(dst, dstRect);
 }

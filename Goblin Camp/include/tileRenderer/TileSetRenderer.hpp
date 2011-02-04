@@ -25,7 +25,7 @@ class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer, private boo
 {
 	friend class DrawConstructionVisitor;
 public:
-	TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet, TCODConsole * mapConsole = 0);
+	explicit TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet, TCODConsole * mapConsole = 0);
 	~TileSetRenderer();
 
 	Coordinate TileAt(int screenX, int screenY, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const;
@@ -65,18 +65,6 @@ private:
 	void DrawNPCs(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawSpells(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawFires(int startTile, int startTileY, int sizeX, int sizeY) const;
-
-	int WaterLevelAt(Map * map, int tileX, int tileY) const
-	{
-		if (tileX < 0 || tileY < 0 || tileX >= map->Width() || tileY >= map->Height()) {
-			return 1000;
-		}
-		else if (boost::shared_ptr<WaterNode> water = map->GetWater(tileX, tileY).lock()) {
-			return water->Depth();
-		}
-		
-		return 0;
-	}
 
 	SDL_Rect CalcDest(int mapPosX, int mapPosY) const { SDL_Rect dstRect = {tileSet->TileWidth() * (mapPosX - startTileX) + mapOffsetX, tileSet->TileHeight() * (mapPosY - startTileY) + mapOffsetY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
 };

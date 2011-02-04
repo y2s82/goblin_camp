@@ -29,7 +29,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSetTexture
 {
 public:
-	TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
+	explicit TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
 	~TileSetTexture();
 
 	int Count() const;

@@ -26,12 +26,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ConstructionSpriteSet.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
-
-
 class TileSetLoader : public ITCODParserListener, private boost::noncopyable
 {
 public:
-	TileSetLoader();
+	explicit TileSetLoader();
 	~TileSetLoader();
 
 	static void SetupTilesetParser(TCODParser& parser);
@@ -66,12 +64,37 @@ private:
 	int tileWidth;
 	int tileHeight;
 	boost::shared_ptr<TileSetTexture> currentTexture;
+
+	std::vector<int> fireSprites;
+	int fireFPS;
+
+	struct TempConstruction {
+		std::vector<int> mainSprites;
+		std::vector<int> underConstructionSprites;
+		bool connectionMapped;
+		int width;
+		Sprite openDoor;
+
+		TempConstruction() : mainSprites(), underConstructionSprites(), connectionMapped(false), width(1), openDoor() {}
+
+		ConstructionSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
+	};
+	TempConstruction tempConstruction;
+
+	struct TempSpell {
+		std::vector<int> sprites;
+		int fps;
+
+		TempSpell() : sprites(), fps(15) {}
+
+		SpellSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
+	};
+	TempSpell tempSpell;
+
 	TileSetLoader::SpriteSet currentSpriteSet;
 	NPCSpriteSet npcSpriteSet;
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSpriteSet itemSpriteSet;
-	ConstructionSpriteSet constructionSpriteSet;
-	SpellSpriteSet spellSpriteSet;
 	
 	static const char * uninitialisedTilesetError;
 	

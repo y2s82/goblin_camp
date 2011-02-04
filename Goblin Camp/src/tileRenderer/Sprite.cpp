@@ -16,25 +16,64 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "tileRenderer/Sprite.hpp"
+#include "tileRenderer/TileSetUtil.hpp"
 
-Sprite::Sprite()
-	: tile(-1), texture() {}
+Sprite::Sprite() : tiles(), texture(), type(SPRITE_Single), frameTime(15) {}
+Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
+	: tiles(),
+	  texture(tilesetTexture),
+	  type(SPRITE_Single),
+	  frameTime(15)
+{
+	tiles.push_back(tile);
+}
 
-Sprite::Sprite(int tileIndex, boost::shared_ptr<TileSetTexture> tileSetTexture)
-	: tile(tileIndex), texture(tileSetTexture) {}
+
 
 Sprite::~Sprite() {}
 
-void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const
-{
-	if (tile != -1)
-	{
-		texture->DrawTile(tile, dst, dstRect);
-	}
-}
-
 bool Sprite::Exists() const
 {
-	return tile != -1;
+	return tiles.size() > 0;
 }
+
+bool Sprite::IsConnectionMap() const {
+	return type & (SPRITE_ConnectionMap | SPRITE_ExtendedConnectionMap);
+}
+
+bool Sprite::IsExtendedConnectionMap() const {
+	return type & SPRITE_ExtendedConnectionMap;
+}
+
+bool Sprite::IsAnimated() const {
+	return type & SPRITE_Animated;
+}
+
+void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (Exists()) {
+		if (IsAnimated()) {
+			int frame = (TCODSystem::getElapsedMilli() / frameTime) % tiles.size();
+			texture->DrawTile(tiles[frame], dst, dstRect);
+		} else {
+			texture->DrawTile(tiles[0], dst, dstRect);
+		}
+	}
+}
+	
+void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (IsConnectionMap()) {
+		if (IsExtendedConnectionMap()) {
+
+		} else {
+			int index = TilesetUtil::CalcConnectionMapIndex(connected(NORTH), connected(EAST), connected(SOUTH), connected(WEST));
+			texture->DrawTile(tiles[index], dst, dstRect);
+		}
+	} else {
+		Draw(dst, dstRect);
+	}
+
+}
+
+
+
 

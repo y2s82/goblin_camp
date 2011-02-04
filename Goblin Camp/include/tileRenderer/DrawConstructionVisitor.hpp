@@ -33,7 +33,7 @@ private:
 	SDL_Rect * dstRect;
 	const Coordinate& coordinate;
 public:
-	DrawConstructionVisitor(const TileSetRenderer * tileSetRenderer, const TileSet * tileSet, Map * map, SDL_Surface * destination, SDL_Rect *destinationRect, const Coordinate& pos);
+	explicit DrawConstructionVisitor(const TileSetRenderer * tileSetRenderer, const TileSet * tileSet, Map * map, SDL_Surface * destination, SDL_Rect *destinationRect, const Coordinate& pos);
 	~DrawConstructionVisitor();
 
 	void Visit(FarmPlot * farmPlot);
