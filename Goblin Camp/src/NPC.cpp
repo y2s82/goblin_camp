@@ -1670,27 +1670,15 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 				if (npc) {
 					//First check if the target dodges the attack
 					if (Random::Generate(99) < npc->effectiveStats[DODGE]) {
-	#ifdef DEBUG
-						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
-	#endif
 						continue;
 					}
 				}
 
 				Attack attack = *attacki;
-#ifdef DEBUG
-				std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
-#endif
 
 				if (attack.Type() == DAMAGE_WIELDED) {
-#ifdef DEBUG
-					std::cout<<"Wielded attack\n";
-#endif
 					GetMainHandAttack(attack);
 				}
-#ifdef DEBUG
-				std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
-#endif
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
 						Coordinate tar;
@@ -1701,8 +1689,12 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 					}
 				}
 
-				if (npc) npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
-				else if (construction) construction->Damage(&attack);
+				if (npc) {
+					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
+					Random::Dice dice(attack.Amount());
+					damageDealt += dice.Roll();
+					if (HasTrait(FRESH) && damageDealt > 50) RemoveTrait(FRESH);
+				} else if (construction) construction->Damage(&attack);
 			}
 		}	
 	}
@@ -1769,6 +1761,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	double resistance = (100.0 - (float)effectiveResistances[res]) / 100.0;
 	int damage = (int)(Game::DiceToInt(attack->Amount()) * resistance);
 	health -= damage;
+	damageReceived += damage;
 
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
 		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
@@ -1787,7 +1780,6 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 			if (damage >= maxHealth / 3 && attack->Type() == DAMAGE_BLUNT && Random::Generate(10) == 0) {
 				AddTrait(CRACKEDSKULL);
-				AddEffect(CRACKEDSKULLEFFECT);
 			}
 		}
 		if (aggr.lock()) aggressor = aggr;
@@ -2281,8 +2273,28 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 	}
 }
 
-void NPC::AddTrait(Trait trait) { traits.insert(trait); }
-void NPC::RemoveTrait(Trait trait) { traits.erase(trait); }
+void NPC::AddTrait(Trait trait) { 
+	traits.insert(trait); 
+	switch (trait) {
+	case CRACKEDSKULL:
+		AddEffect(CRACKEDSKULLEFFECT);
+		break;
+
+	default: break;
+	}
+}
+
+void NPC::RemoveTrait(Trait trait) { 
+	traits.erase(trait); 
+	switch (trait) {
+	case FRESH:
+		_color.g = std::max(0, _color.g - 100);
+		break;
+		
+	default: break;
+	}
+}
+
 bool NPC::HasTrait(Trait trait) { return traits.find(trait) != traits.end(); }
 
 void NPC::GoBerserk() {
