@@ -320,6 +320,13 @@ void NPC::Update() {
 		}
 	}
 
+	if (Random::Generate(UPDATES_PER_SECOND) == 0) { //Recalculate bulk once a second, items may get unexpectedly destroyed
+		bulk = 0;
+		for (std::set<boost::weak_ptr<Item> >::iterator itemi = inventory->begin(); itemi != inventory->end(); ++itemi) {
+			if (itemi->lock())
+				bulk += itemi->lock()->GetBulk();
+		}
+	}
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
 	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 
@@ -1130,6 +1137,7 @@ CONTINUEEAT:
 					if (tmp >= 100) {
 						if (carried.lock()) { //Repairjobs usually require some material
 							inventory->RemoveItem(carried);
+							bulk -= carried.lock()->GetBulk();
 							Game::Inst()->RemoveItem(carried);
 							carried.reset();
 						}
