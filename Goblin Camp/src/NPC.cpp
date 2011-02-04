@@ -1973,7 +1973,8 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addStructure(resistancesStruct);
 	npcTypeStruct->addStructure(statsStruct);
 
-	parser.run(filename.c_str(), new NPCListener());
+	NPCListener listener = NPCListener();
+	parser.run(filename.c_str(), &listener);
 }
 
 std::string NPC::NPCTypeToString(NPCType type) {

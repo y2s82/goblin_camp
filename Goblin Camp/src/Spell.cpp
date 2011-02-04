@@ -222,5 +222,6 @@ void Spell::LoadPresets(std::string filename) {
 
 	spellTypeStruct->addStructure(attackTypeStruct);
 
-	parser.run(filename.c_str(), new SpellListener());
+	SpellListener listener = SpellListener();
+	parser.run(filename.c_str(), &listener);
 }

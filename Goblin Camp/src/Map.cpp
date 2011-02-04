@@ -41,6 +41,10 @@ windDirection(NORTH) {
 	waterlevel = -0.8f;
 };
 
+Map::~Map() {
+	delete heightMap;
+}
+
 Map* Map::instance = 0;
 
 Map* Map::Inst() {

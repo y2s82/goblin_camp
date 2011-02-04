@@ -29,11 +29,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSetTexture
 {
 public:
-	TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
+	explicit TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
 	~TileSetTexture();
 
 	int Count() const;
-	void DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void DrawTile(int tile, SDL_Surface * dst, const SDL_Rect * dstRect) const;
 	boost::shared_ptr<SDL_Surface> GetInternalSurface();
 
 private:

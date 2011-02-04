@@ -20,6 +20,7 @@ project libtcod
       $(common-reqs)
     : usage-requirements
       $(common-reqs)
+	  
 ;
 
 sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
@@ -28,4 +29,7 @@ if [ os.name ] = MACOSX {
     sources += $(HERE)/src/macsupport.m ;
 }
 
-lib tcod : $(sources) ;
+lib tcod
+    : $(sources)
+    : <use>/libpng <use>/zlib <use>/sdl
+;
