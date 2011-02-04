@@ -282,6 +282,9 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & addedTasksToCurrentJob;
 	ar & Skills;
 	ar & hasMagicRangedAttacks;
+	ar & traits;
+	ar & damageDealt;
+	ar & damageReceived;
 }
 
 template<class Archive>
@@ -344,6 +347,9 @@ void NPC::load(Archive & ar, const unsigned int version) {
 
 	if (version >= 1) {
 		ar & hasMagicRangedAttacks;
+		ar & traits;
+		ar & damageDealt;
+		ar & damageReceived;
 	}
 
 	InitializeAIFunctions();
@@ -582,6 +588,7 @@ void StatusEffect::save(Archive & ar, const unsigned int version) const {
 	ar & resistanceChanges;
 	ar & damage;
 	ar & damageType;
+	ar & visible;
 }
 
 template<class Archive>
@@ -602,6 +609,7 @@ void StatusEffect::load(Archive & ar, const unsigned int version) {
 			ar & temp;
 		} else if (version >= 1) {
 			ar & damageType;
+			ar & visible;
 		}
 }
 

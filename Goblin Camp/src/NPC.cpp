@@ -94,6 +94,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	hasMagicRangedAttacks(false),
 	threatLocation(Coordinate(-1,-1)),
 	seenFire(false),
+	traits(std::set<Trait>()),
+	damageDealt(0),
+	damageReceived(0),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -376,6 +379,8 @@ void NPC::Update() {
 	} else RemoveEffect(CARRYING);
 
 	if (health <= 0) Kill();
+
+	if (HasTrait(CRACKEDSKULL) && Random::Generate(MONTH_LENGTH * 6) == 0) GoBerserk();
 }
 
 void NPC::UpdateStatusEffects() {
@@ -423,8 +428,20 @@ void NPC::UpdateStatusEffects() {
 		statusGraphicCounter = 0;
 		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
 		else statusEffectIterator = statusEffects.begin();
-	}
 
+		if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) {
+			std::list<StatusEffect>::iterator oldIterator = statusEffectIterator;
+			++statusEffectIterator;
+			while (statusEffectIterator != oldIterator) {
+				if (statusEffectIterator != statusEffects.end()) {
+					if (statusEffectIterator->visible) break;
+					++statusEffectIterator;
+				}
+				else statusEffectIterator = statusEffects.begin();
+			}
+			if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) statusEffectIterator = statusEffects.end();
+		}
+	}
 }
 
 void NPC::Think() {
@@ -1767,6 +1784,11 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 				Position().X() + Random::Generate(-1, 1),
 				Position().Y() + Random::Generate(-1, 1)),
 				Random::Generate(50, 50+damage*10));
+
+			if (damage >= maxHealth / 3 && attack->Type() == DAMAGE_BLUNT && Random::Generate(10) == 0) {
+				AddTrait(CRACKEDSKULL);
+				AddEffect(CRACKEDSKULLEFFECT);
+			}
 		}
 		if (aggr.lock()) aggressor = aggr;
 		if (!jobs.empty() && boost::iequals(jobs.front()->name, "Sleep")) {
@@ -2257,4 +2279,38 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 			}
 		}
 	}
+}
+
+void NPC::AddTrait(Trait trait) { traits.insert(trait); }
+void NPC::RemoveTrait(Trait trait) { traits.erase(trait); }
+bool NPC::HasTrait(Trait trait) { return traits.find(trait) != traits.end(); }
+
+void NPC::GoBerserk() {
+	ScanSurroundings();
+	if (carried.lock()) {
+		inventory->RemoveItem(carried);
+		carried.lock()->PutInContainer();
+		carried.lock()->Position(Position());
+		Coordinate target(-1,-1);
+		if (!nearNpcs.empty()) {
+			boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
+			if (creature) target = creature->Position();
+		}
+		if (target.X() == -1) target = Coordinate(Random::Generate(x-7, x+7), Random::Generate(y-7, y+7));
+		carried.lock()->CalculateFlightPath(target, 50, GetHeight());
+	}
+	carried.reset();
+
+	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, "(FAIL)Gone berserk");
+
+	if (!nearNpcs.empty()) {
+		boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
+		boost::shared_ptr<Job> berserkJob(new Job("Berserk!"));
+		berserkJob->internal = true;
+		berserkJob->tasks.push_back(Task(KILL, creature->Position(), creature));
+		jobs.push_back(berserkJob);
+		run = true;
+	}
+
+	AddEffect(RAGE);
 }
