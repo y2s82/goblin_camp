@@ -850,12 +850,12 @@ CONTINUEEAT:
 				//Unfortunately this assumes that FLEEMAP is the last task in a job,
 				//which might not be.
 				tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
-				if (tmp > std::abs((signed int)y - Map::Inst()->Height() / 2)) {
+				if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
 					currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(x, 
 						(y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
 				} else {
 					currentJob().lock()->tasks[taskIndex] = Task(MOVE, 
-						Coordinate(((unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
+						Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
 						y));
 				}
 				currentJob().lock()->tasks.push_back(Task(FLEEMAP));
