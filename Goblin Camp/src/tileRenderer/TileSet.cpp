@@ -207,61 +207,6 @@ void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect 
 	}
 }
 
-
-class TileSet::DrawConstructionVisitor : public ConstructionVisitor  {
-private:
-	TileSet * tileSet;
-	SDL_Surface * dst;
-	SDL_Rect * dstRect;
-	const Coordinate& coordinate;
-public:
-	DrawConstructionVisitor(TileSet * t, SDL_Surface * destination, SDL_Rect *destinationRect, const Coordinate& pos)
-		: tileSet(t),
-		  dst(destination),
-		  dstRect(destinationRect),
-		  coordinate(pos)
-	{}
-
-
-	void Visit(FarmPlot * farmplot) { 
-		tileSet->DrawBaseConstruction(farmplot, coordinate, dst, dstRect);
-		tileSet->DrawStockpileContents(farmplot, coordinate, dst, dstRect);
-	}
-
-	void Visit(Stockpile * stockpile) {
-		tileSet->DrawBaseConstruction(stockpile, coordinate, dst, dstRect);
-		tileSet->DrawStockpileContents(stockpile, coordinate, dst, dstRect);
-	}
-
-	void Visit(Construction * construction) {
-		Coordinate internal_pos = coordinate - construction->Position();
-		int pos = internal_pos.X() + internal_pos.Y() * Construction::Blueprint(construction->Type()).X();
-		int maxPos = Construction::Blueprint(construction->Type()).X() * Construction::Blueprint(construction->Type()).Y();
-		if ((construction->GetMaxCondition() + construction->Condition()) * maxPos > (pos + 1) * construction->GetMaxCondition()) {
-			tileSet->DrawBaseConstruction(construction, coordinate, dst, dstRect);
-		} else {
-			tileSet->DrawUnderConstruction(construction, coordinate, dst, dstRect);
-		}
-	}
-
-	void Visit(SpawningPool * spawningPool) {
-		if (spawningPool->Condition() < 0) {
-			tileSet->DrawUnderConstruction(spawningPool, coordinate, dst, dstRect);
-		} else { 
-			tileSet->DrawBaseConstruction(spawningPool, coordinate, dst, dstRect);
-		}
-	}
-
-	void Visit(Door * door) {
-		if (door->Open()) {
-			tileSet->DrawOpenDoor(door, coordinate, dst, dstRect);
-		} else {
-			tileSet->DrawBaseConstruction(door, coordinate, dst, dstRect);
-		}
-	}
-
-};
-
 void TileSet::DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = door->GetGraphicsHint();
 	if (hint == -1 || hint >= constructionSpriteSets.size()) {
@@ -269,11 +214,6 @@ void TileSet::DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface 
 	} else {
 		constructionSpriteSets[hint].DrawOpen(worldPos - door->Position(), dst, dstRect);
 	}
-}
-
-void TileSet::DrawConstruction(boost::shared_ptr<Construction> construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) {
-	DrawConstructionVisitor visitor(this, dst, dstRect, worldPos);
-	construction->AcceptVisitor(visitor);
 }
 
 bool TileSet::ConstructionConnectTo(Construction * construction, int x, int y) const {

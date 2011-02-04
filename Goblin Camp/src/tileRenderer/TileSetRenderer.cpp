@@ -22,6 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "data/Paths.hpp"
 #include "MathEx.hpp"
 
+#include "tileRenderer/DrawConstructionVisitor.hpp"
+
 TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
 : tcodConsole(mapConsole),
   screenWidth(resolutionX), 
@@ -56,6 +58,7 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
    temp = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
    tempBuffer = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
    SDL_SetColorKey(tempBuffer.get(),SDL_SRCCOLORKEY, SDL_MapRGBA(tempBuffer->format, keyColor.r, keyColor.g, keyColor.b, 255));
+   // Make this a future option:
    //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
    SDL_FreeSurface(temp);
 
@@ -148,8 +151,13 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 			SDL_Rect dstRect(CalcDest(tileX, tileY));
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
 				DrawTerrain(map, tileX, tileY, &dstRect);
-				DrawConstruction(map, tileX, tileY, &dstRect);
-				DrawFilth(map, tileX, tileY, &dstRect);
+				if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(tileX,tileY))).lock()) {
+					DrawConstructionVisitor visitor(this, tileSet.get(), map, mapSurface.get(), &dstRect, Coordinate(tileX,tileY));
+					construction->AcceptVisitor(visitor);
+				} else  {
+					DrawFilth(map, tileX, tileY, &dstRect);
+				}
+
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
 					DrawTerritoryOverlay(map, tileX, tileY, &dstRect);
 				}
@@ -221,16 +229,7 @@ void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end,
 	
 }
 
-void TileSetRenderer::DrawConstruction(Map* map, int tileX, int tileY, SDL_Rect * dstRect)
-{
-	boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(map->GetConstruction(tileX, tileY));
-	boost::shared_ptr<Construction> construct = constructPtr.lock();
-	if (construct) {
-		tileSet->DrawConstruction(construct, Coordinate(tileX, tileY), mapSurface.get(), dstRect);
-	}
-}
-
-void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) const {
 	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
 		if (!itemi->second->ContainedIn().lock()) {
 			Coordinate itemPos = itemi->second->Position();
@@ -244,7 +243,7 @@ void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) {
 	}
 }
 
-void TileSetRenderer::DrawNatureObjects(int startX, int startY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawNatureObjects(int startX, int startY, int sizeX, int sizeY) const {
 	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator planti = Game::Inst()->natureList.begin(); planti != Game::Inst()->natureList.end(); ++planti) {
 		Coordinate plantPos = planti->second->Position();
 		if (plantPos.X() >= startX && plantPos.X() < startX + sizeX
@@ -260,7 +259,7 @@ void TileSetRenderer::DrawNatureObjects(int startX, int startY, int sizeX, int s
 	}
 }
 
-void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) const {
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
 		Coordinate npcPos = npci->second->Position();
 		if (npcPos.X() >= startX && npcPos.X() < startX + sizeX
@@ -272,7 +271,7 @@ void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) {
 	}
 }
 
-void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) const {
 	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
 		Coordinate spellPos = (*spelli)->Position();
 		if (spellPos.X() >= startX && spellPos.X() < startX + sizeX
@@ -284,7 +283,7 @@ void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) {
 	}
 }
 
-void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) {
+void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) const {
 	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (boost::shared_ptr<FireNode> fire = firei->lock())
 		{
@@ -299,8 +298,7 @@ void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) {
 	}
 }
 
-void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, int sizeY)
-{
+void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, int sizeY) const {
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
@@ -312,7 +310,7 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 	}
 }
 
-void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	TileType type(map->Type(tileX, tileY));
 	bool connectN(map->Type(tileX, tileY - 1) == type);
 	bool connectE(map->Type(tileX + 1, tileY) == type);
@@ -349,7 +347,7 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 	
 }
 
-void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	boost::weak_ptr<FilthNode> filth = map->GetFilth(tileX,tileY);
 	if (filth.lock() && filth.lock()->Depth() > 5) {
 		tileSet->DrawFilthMajor(mapSurface.get(), dstRect);
@@ -358,7 +356,7 @@ void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRe
 	}
 }
 
-void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) {
+void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
 }
 
@@ -371,3 +369,4 @@ void TileSetRenderer::render(void * surf) {
 	  SDL_BlitSurface(tempBuffer.get(),&srcRect,mapSurface.get(),&dstRect);
       SDL_BlitSurface(mapSurface.get(),&srcRect,screen,&dstRect);   
 }
+
