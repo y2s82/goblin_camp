@@ -1453,95 +1453,102 @@ void Game::CreateFilth(Coordinate pos) {
 }
 
 void Game::CreateFilth(Coordinate pos, int amount) {
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		int loops = -1;
+		while (amount > 0 && loops < 1000) {
+			++loops;
+			boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
 
-	if (water) { //If water exists here just add the filth there, no need for filthnodes
-		water->AddFilth(amount);
-		return;
-	}
-
-	boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.X(), pos.Y()));
-	if (!filth.lock()) { //No existing filth node so create one
-		boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), std::min(5, amount)));
-		amount -= 5;
-		filthList.push_back(boost::weak_ptr<FilthNode>(newFilth));
-		Map::Inst()->SetFilth(pos.X(), pos.Y(), newFilth);
-	} else {
-		int originalDepth = filth.lock()->Depth();
-		filth.lock()->Depth(std::min(5, filth.lock()->Depth() + amount));
-		amount -= 5 - originalDepth;
-	}
-	//If theres still remaining filth, it'll spill over according to flow
-	while (amount > 0) {
-		Coordinate flowTo = pos;
-		switch (Map::Inst()->GetFlow(pos.X(), pos.Y())) {
-		case NORTH:
-			flowTo.Y(flowTo.Y() - 1);
-			flowTo.X(flowTo.X() + Random::Generate(-1, 1));
-			break;
-
-		case NORTHEAST:
-			if (Random::GenerateBool()) {
-				flowTo.Y(flowTo.Y() - 1);
-				flowTo.X(flowTo.X() + Random::Generate(0, 1));
-			} else {
-				flowTo.Y(flowTo.Y() + Random::Generate(-1, 0));
-				flowTo.X(flowTo.X() + 1);
+			if (water) { //If water exists here just add the filth there, no need for filthnodes
+				water->AddFilth(amount);
+				return;
 			}
-			break;
 
-		case NORTHWEST:
-			if (Random::GenerateBool()) {
-				flowTo.Y(flowTo.Y() - 1);
-				flowTo.X(flowTo.X() - Random::Generate(0, 1));
+			boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.X(), pos.Y()));
+			if (!filth.lock()) { //No existing filth node so create one
+				boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), std::min(5, amount)));
+				amount -= 5;
+				filthList.push_back(boost::weak_ptr<FilthNode>(newFilth));
+				Map::Inst()->SetFilth(pos.X(), pos.Y(), newFilth);
 			} else {
-				flowTo.Y(flowTo.Y() + Random::Generate(-1, 0));
-				flowTo.X(flowTo.X() - 1);
+				int originalDepth = filth.lock()->Depth();
+				filth.lock()->Depth(std::min(5, filth.lock()->Depth() + amount));
+				amount -= (5 - originalDepth);
 			}
-			break;
+			//If theres still remaining filth, it'll spill over according to flow
+			if (amount > 0) {
+				Coordinate flowTo = pos;
+				int diff = std::max(1, loops / 100);
+				switch (Map::Inst()->GetFlow(pos.X(), pos.Y())) {
+				case NORTH:
+					flowTo.Y(flowTo.Y() - diff);
+					flowTo.X(flowTo.X() + Random::Generate(-diff, diff));
+					break;
 
-		case SOUTH:
-			flowTo.Y(flowTo.Y() + 1);
-			flowTo.X(flowTo.X() + Random::Generate(-1, 1));
-			break;
+				case NORTHEAST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() - diff);
+						flowTo.X(flowTo.X() + Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(-diff, 0));
+						flowTo.X(flowTo.X() + diff);
+					}
+					break;
 
-		case SOUTHEAST:
-			if (Random::GenerateBool()) {
-				flowTo.Y(flowTo.Y() + 1);
-				flowTo.X(flowTo.X() + Random::Generate(0, 1));
-			} else {
-				flowTo.Y(flowTo.Y() + Random::Generate(1, 0));
-				flowTo.X(flowTo.X() + 1);
+				case NORTHWEST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() - diff);
+						flowTo.X(flowTo.X() - Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(-diff, 0));
+						flowTo.X(flowTo.X() - diff);
+					}
+					break;
+
+				case SOUTH:
+					flowTo.Y(flowTo.Y() + diff);
+					flowTo.X(flowTo.X() + Random::Generate(-diff, diff));
+					break;
+
+				case SOUTHEAST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() + diff);
+						flowTo.X(flowTo.X() + Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(0, diff));
+						flowTo.X(flowTo.X() + diff);
+					}
+					break;
+
+				case SOUTHWEST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() + diff);
+						flowTo.X(flowTo.X() + Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(0, diff));
+						flowTo.X(flowTo.X() + diff);
+					}
+					break;
+
+				case WEST:
+					flowTo.Y(flowTo.Y() + Random::Generate(-diff, diff));
+					flowTo.X(flowTo.X() - diff);
+					break;
+
+				case EAST:
+					flowTo.Y(flowTo.Y() + Random::Generate(-diff, diff));
+					flowTo.X(flowTo.X() + diff);
+					break;
+
+				default: break;
+				}
+				while (flowTo == pos || (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
+					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height())) {
+						flowTo = Coordinate(pos.X() + Random::Generate(-diff, diff), pos.Y() + Random::Generate(-diff, diff));
+				}
+				pos = flowTo;
 			}
-			break;
-
-		case SOUTHWEST:
-			if (Random::GenerateBool()) {
-				flowTo.Y(flowTo.Y() + 1);
-				flowTo.X(flowTo.X() + Random::Generate(0, 1));
-			} else {
-				flowTo.Y(flowTo.Y() + Random::Generate(1, 0));
-				flowTo.X(flowTo.X() + 1);
-			}
-			break;
-
-		case WEST:
-			flowTo.Y(flowTo.Y() + Random::Generate(-1, 1));
-			flowTo.X(flowTo.X() - 1);
-			break;
-
-		case EAST:
-			flowTo.Y(flowTo.Y() + Random::Generate(-1, 1));
-			flowTo.X(flowTo.X() + 1);
-			break;
-
-		default: break;
 		}
-		while (flowTo == pos) { //Incase the tile's flow is NODIRECTION
-			flowTo = Coordinate(pos.X() - 1 + Random::Generate(2), pos.Y() - 1 + Random::Generate(2));
-		}
-		Game::CreateFilth(flowTo, 1);
-		--amount;
 	}
 }
 

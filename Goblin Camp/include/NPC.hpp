@@ -46,11 +46,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 typedef int NPCType;
 
-enum AiThink {
-	AINOTHING,
-	AIMOVE
-};
-
 enum Skill {
 	MASONRY,
 	CARPENTRY,
@@ -187,10 +182,11 @@ private:
 	Coordinate threatLocation;
 	bool seenFire;
 
+
 public:
 	~NPC();
 	SkillSet Skills;
-	AiThink Think();
+	void Think();
 	void Update();
 	void Draw(Coordinate, TCODConsole*);
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
