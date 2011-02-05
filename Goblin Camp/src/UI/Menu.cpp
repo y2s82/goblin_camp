@@ -270,6 +270,11 @@ Menu* Menu::DevMenu() {
 
 		call = boost::bind(&Game::CreateDitch, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseABPlacement, call, checkTree, '_')));
+
+		call = boost::bind(&Game::Thirstify, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Thirstify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
+		call = boost::bind(&Game::Badsleepify, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Badsleepify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
 	}
 	return devMenu;
 }
