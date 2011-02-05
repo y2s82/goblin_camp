@@ -341,6 +341,13 @@ namespace {
 		}
 		return false;
 	}
+
+	bool BloodConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
+			return blood->Depth() > 0;
+		}
+	}
 }
 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
@@ -363,8 +370,10 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 			tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 		}
 	}
-	if (map->GetBlood(tileX, tileY).lock())	{
-		tileSet->DrawBlood(mapSurface.get(), dstRect);
+	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(tileX, tileY).lock()) {
+		if (blood->Depth() > 0) {
+			tileSet->DrawBlood(boost::bind(&BloodConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+		}
 	}
 	if (map->GroundMarked(tileX, tileY)) {
 		tileSet->DrawMarkedOverlay(mapSurface.get(), dstRect);
