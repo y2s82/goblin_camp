@@ -381,6 +381,10 @@ void NPC::Update() {
 	if (health <= 0) Kill();
 
 	if (HasTrait(CRACKEDSKULL) && Random::Generate(MONTH_LENGTH * 6) == 0) GoBerserk();
+	if (HasEffect(BURNING) && Random::Generate(UPDATES_PER_SECOND * 3) == 0) {
+		boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
+		spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
+	}
 }
 
 void NPC::UpdateStatusEffects() {
