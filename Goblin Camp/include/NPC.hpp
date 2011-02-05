@@ -192,6 +192,7 @@ private:
 
 	std::set<Trait> traits;
 	int damageDealt, damageReceived;
+	bool statusEffectsChanged;
 public:
 	~NPC();
 	SkillSet Skills;
@@ -278,6 +279,7 @@ public:
 	bool HasTrait(Trait);
 
 	void GoBerserk();
+	void ApplyEffects(boost::shared_ptr<Item>);
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::mutex*, bool*, bool*, bool);

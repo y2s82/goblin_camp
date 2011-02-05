@@ -97,6 +97,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	traits(std::set<Trait>()),
 	damageDealt(0),
 	damageReceived(0),
+	statusEffectsChanged(false),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -190,6 +191,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		}
 	}
 	taskBegun = false;
+	run = true;
 }
 
 void NPC::HandleThirst() {
@@ -371,7 +373,7 @@ void NPC::Update() {
 		attacki->Update();
 	}
 
-	if (Random::Generate(UPDATES_PER_SECOND - 1) == 0 && health < maxHealth) ++health;
+	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
@@ -395,7 +397,7 @@ void NPC::UpdateStatusEffects() {
 		effectiveResistances[i] = baseResistances[i];
 	}
 	++statusGraphicCounter;
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end();) {
 		//Apply effects to stats
 		for (int i = 0; i < STAT_COUNT; ++i) {
 			effectiveStats[i] = (int)(effectiveStats[i] * statusEffectI->statChanges[i]);
@@ -417,6 +419,36 @@ void NPC::UpdateStatusEffects() {
 			Damage(&attack);
 		}
 
+		if (faction == 0 && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
+			statusEffectsChanged = false;
+			bool removalJobFound = false;
+			for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
+				if ((*jobi)->name.find("Get rid of") != std::string::npos) {
+					removalJobFound = true;
+					break;
+				}
+			}
+			if (!removalJobFound && Item::EffectRemovers.find((StatusEffectType)statusEffectI->type) != Item::EffectRemovers.end()) {
+				boost::shared_ptr<Item> fixItem;
+				for (std::multimap<StatusEffectType, ItemType>::iterator fixi = Item::EffectRemovers.equal_range((StatusEffectType)statusEffectI->type).first;
+					fixi != Item::EffectRemovers.equal_range((StatusEffectType)statusEffectI->type).second && !fixItem; ++fixi) {
+						fixItem = Game::Inst()->FindItemByTypeFromStockpiles(fixi->second, Position()).lock();
+				}
+				if (fixItem) {
+					boost::shared_ptr<Job> rEffJob(new Job("Get rid of "+statusEffectI->name));
+					rEffJob->internal = true;
+					rEffJob->ReserveEntity(fixItem);
+					rEffJob->tasks.push_back(Task(MOVE, fixItem->Position()));
+					rEffJob->tasks.push_back(Task(TAKE, fixItem->Position(), fixItem));
+					if (fixItem->IsCategory(Item::StringToItemCategory("drink")))
+						rEffJob->tasks.push_back(Task(DRINK));
+					else
+						rEffJob->tasks.push_back(Task(EAT));
+					jobs.push_back(rEffJob);
+				}
+			}
+		}
+
 		//Remove the statuseffect if its cooldown has run out
 		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
 			if (statusEffectI == statusEffectIterator) {
@@ -425,7 +457,7 @@ void NPC::UpdateStatusEffects() {
 			}
 			statusEffectI = statusEffects.erase(statusEffectI);
 			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
-		}
+		} else ++statusEffectI;
 	}
 	
 	if (statusGraphicCounter > 10) {
@@ -635,9 +667,10 @@ MOVENEARend:
 					timer = boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
 					bulk -= carried.lock()->GetBulk();
+					ApplyEffects(carried.lock());
 					Game::Inst()->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
-				} else { //Drink from a water tile
+				} else if (timer == 0) { //Drink from a water tile
 					if (std::abs((signed int)x - currentTarget().X()) <= 1 &&
 						std::abs((signed int)y - currentTarget().Y()) <= 1) {
 							if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(currentTarget().X(), currentTarget().Y()).lock()) {
@@ -668,10 +701,12 @@ MOVENEARend:
 			case EAT:
 				if (carried.lock()) {
 					//Set the nutrition to the timer variable
-					timer = boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+					if (boost::dynamic_pointer_cast<OrganicItem>(carried.lock())) {
+						timer = boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+					} else timer = 100;
 					inventory->RemoveItem(carried);
 					bulk -= carried.lock()->GetBulk();
-
+					ApplyEffects(carried.lock());
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[carried.lock()->Type()].fruits.begin(); fruiti != Item::Presets[carried.lock()->Type()].fruits.end(); ++fruiti) {
 						Game::Inst()->CreateItem(Position(), *fruiti, true);
 					}
@@ -1172,7 +1207,15 @@ CONTINUEEAT:
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
 			}
 		} else {
-			if (HasEffect(PANIC)) {
+			if (HasEffect(DRUNK)) {
+				JobManager::Inst()->NPCNotWaiting(uid);
+				boost::shared_ptr<Job> drunkJob(new Job("Huh?"));
+				drunkJob->internal = true;
+				run = false;
+				drunkJob->tasks.push_back(Task(MOVENEAR, Position()));
+				jobs.push_back(drunkJob);
+				if (Random::Generate(50) == 0) GoBerserk();
+			} else	if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
 				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
@@ -1646,6 +1689,7 @@ void NPC::AddEffect(StatusEffectType effect) {
 	}
 
 	statusEffects.push_back(StatusEffect(effect));
+	statusEffectsChanged = true;
 }
 
 void NPC::RemoveEffect(StatusEffectType effect) {
@@ -2344,4 +2388,19 @@ void NPC::GoBerserk() {
 	}
 
 	AddEffect(RAGE);
+}
+
+void NPC::ApplyEffects(boost::shared_ptr<Item> item) {
+	if (item) {
+		for (std::vector<std::pair<StatusEffectType, int> >::iterator addEffecti = Item::Presets[item->Type()].addsEffects.begin();
+			addEffecti != Item::Presets[item->Type()].addsEffects.end(); ++addEffecti) {
+				if (Random::Generate(99) < addEffecti->second)
+					AddEffect(addEffecti->first);
+		}
+		for (std::vector<std::pair<StatusEffectType, int> >::iterator remEffecti = Item::Presets[item->Type()].removesEffects.begin();
+			remEffecti != Item::Presets[item->Type()].removesEffects.end(); ++remEffecti) {
+				if (Random::Generate(99) < remEffecti->second)
+					RemoveEffect(remEffecti->first);
+		}
+	}
 }
