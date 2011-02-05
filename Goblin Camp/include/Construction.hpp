@@ -154,6 +154,7 @@ public:
 	Coordinate Center();
 	void Damage(Attack*);
 	void Explode();
+	void BurnToTheGround();
 	bool Built();
 	bool IsFlammable();
 	int Repair();
