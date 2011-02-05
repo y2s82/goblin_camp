@@ -72,3 +72,4 @@ docs\sphinx\_build
 userdata
 *.sln
 *.vcxproj
+relre:depend

@@ -320,23 +320,31 @@ earlier <tt class="docutils literal">build/README.rst</tt>.</p>
 <div class="contents topic" id="table-of-contents">
 <p class="topic-title first">Table of Contents</p>
 <ul class="simple">
-<li><a class="reference internal" href="#required-tools-and-libraries" id="id1">Required tools and libraries</a></li>
-<li><a class="reference internal" href="#configuring-the-build-configuration-file-and-features" id="id2">Configuring the build — configuration file and features</a><ul>
-<li><a class="reference internal" href="#configuring-libpng" id="id3">Configuring libpng</a></li>
-<li><a class="reference internal" href="#configuring-opengl" id="id4">Configuring OpenGL</a></li>
-<li><a class="reference internal" href="#configuring-python" id="id5">Configuring Python</a></li>
-<li><a class="reference internal" href="#configuring-sdl" id="id6">Configuring SDL</a></li>
-<li><a class="reference internal" href="#configuring-windows-sdk" id="id7">Configuring Windows SDK</a></li>
-<li><a class="reference internal" href="#configuring-zlib" id="id8">Configuring zlib</a></li>
-<li><a class="reference internal" href="#configuring-goblin-camp-features" id="id9">Configuring Goblin Camp — features</a></li>
+<li><a class="reference internal" href="#frequently-encountered-problems" id="id1">Frequently encountered problems</a></li>
+<li><a class="reference internal" href="#required-tools-and-libraries" id="id2">Required tools and libraries</a></li>
+<li><a class="reference internal" href="#configuring-the-build-configuration-file-and-features" id="id3">Configuring the build — configuration file and features</a><ul>
+<li><a class="reference internal" href="#configuring-libpng" id="id4">Configuring libpng</a></li>
+<li><a class="reference internal" href="#configuring-opengl" id="id5">Configuring OpenGL</a></li>
+<li><a class="reference internal" href="#configuring-python" id="id6">Configuring Python</a></li>
+<li><a class="reference internal" href="#configuring-sdl" id="id7">Configuring SDL</a></li>
+<li><a class="reference internal" href="#configuring-windows-sdk" id="id8">Configuring Windows SDK</a></li>
+<li><a class="reference internal" href="#configuring-zlib" id="id9">Configuring zlib</a></li>
+<li><a class="reference internal" href="#configuring-goblin-camp-features" id="id10">Configuring Goblin Camp — features</a></li>
 </ul>
 </li>
-<li><a class="reference internal" href="#using-the-build-system" id="id10">Using the build system</a></li>
-<li><a class="reference internal" href="#using-additional-tools" id="id11">Using additional tools</a></li>
+<li><a class="reference internal" href="#using-the-build-system" id="id11">Using the build system</a></li>
+<li><a class="reference internal" href="#using-additional-tools" id="id12">Using additional tools</a></li>
+</ul>
+</div>
+<div class="section" id="frequently-encountered-problems">
+<h1><a class="toc-backref" href="#id1">Frequently encountered problems</a></h1>
+<ul class="simple">
+<li>Paths used in configuration file should always use slashes, not backslashes (even on Windows).</li>
+<li>Library names should not include <tt class="docutils literal">lib</tt> prefix when using GCC.</li>
 </ul>
 </div>
 <div class="section" id="required-tools-and-libraries">
-<h1><a class="toc-backref" href="#id1">Required tools and libraries</a></h1>
+<h1><a class="toc-backref" href="#id2">Required tools and libraries</a></h1>
 <p>Goblin Camp, as any non-trivial piece of software, depends on several tools and external libraries.
 To build it, you will need:</p>
 <ul class="simple">
@@ -362,7 +370,7 @@ and while older are not tested against, they should work as well (Goblin Camp is
 and built automatically along with the game (you can find them in the <tt class="docutils literal">vendor</tt> subdirectory).</p>
 </div>
 <div class="section" id="configuring-the-build-configuration-file-and-features">
-<h1><a class="toc-backref" href="#id2">Configuring the build — configuration file and features</a></h1>
+<h1><a class="toc-backref" href="#id3">Configuring the build — configuration file and features</a></h1>
 <p>If your libraries live in non-standard location (e.g. outside paths specified in INCLUDE/LIB
 environment variables for MSVC2010), you will need to create a configuration file for the build.
 In this file you can also fine-tune compiler settings (e.g. tell the build system to use specific
@@ -382,7 +390,7 @@ using library : properties ;
 </pre>
 <p>The order of the <tt class="docutils literal">using</tt> directives does not matter.</p>
 <div class="section" id="configuring-libpng">
-<h2><a class="toc-backref" href="#id3">Configuring libpng</a></h2>
+<h2><a class="toc-backref" href="#id4">Configuring libpng</a></h2>
 <p>Tool name: <tt class="docutils literal">libpng</tt>.</p>
 <p>Available properties:</p>
 <ul class="simple">
@@ -392,15 +400,15 @@ using library : properties ;
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using libpng : &lt;library&gt;C:\dev\libs\msvc10-x86\lib &lt;include&gt;C:\dev\libs\msvc10-x86\include &lt;name&gt;lpng14 ;
+using libpng : &lt;library&gt;C:/dev/libs/msvc10-x86/lib &lt;include&gt;C:/dev/libs/msvc10-x86/include &lt;name&gt;lpng14 ;
 </pre>
 </div>
 <div class="section" id="configuring-opengl">
-<h2><a class="toc-backref" href="#id4">Configuring OpenGL</a></h2>
-<dl class="docutils">
-<dt>..note::</dt>
-<dd>This tool is relevant only on *nix systems, and ignored on Windows (as OpenGL libraries are part of the Windows SDK).</dd>
-</dl>
+<h2><a class="toc-backref" href="#id5">Configuring OpenGL</a></h2>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">This tool is relevant only on *nix systems, and ignored on Windows (as OpenGL libraries are part of the Windows SDK).</p>
+</div>
 <p>Tool name:: <tt class="docutils literal">opengl</tt>.</p>
 <p>Available properties:</p>
 <ul class="simple">
@@ -414,7 +422,7 @@ using opengl : &lt;name&gt;GL &lt;include&gt;/usr/local/include &lt;library&gt;/
 </pre>
 </div>
 <div class="section" id="configuring-python">
-<h2><a class="toc-backref" href="#id5">Configuring Python</a></h2>
+<h2><a class="toc-backref" href="#id6">Configuring Python</a></h2>
 <p>Tool name: <tt class="docutils literal">python</tt>.</p>
 <p>Available properties:</p>
 <ul class="simple">
@@ -426,18 +434,20 @@ using opengl : &lt;name&gt;GL &lt;include&gt;/usr/local/include &lt;library&gt;/
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using python : &lt;library&gt;C:\dev\apps\Python27\libs &lt;include&gt;C:\dev\apps\Python27\include &lt;exec&gt;C:\dev\apps\Python27\python.exe &lt;name&gt;python27 ;
+using python : &lt;library&gt;C:/dev/apps/Python27/libs &lt;include&gt;C:/dev/apps/Python27/include &lt;exec&gt;C:/dev/apps/Python27/python.exe &lt;name&gt;python27 ;
 </pre>
 </div>
 <div class="section" id="configuring-sdl">
-<h2><a class="toc-backref" href="#id6">Configuring SDL</a></h2>
-<dl class="docutils">
-<dt>..note::</dt>
-<dd>This tool handles both SDL and SDL_image.</dd>
-<dt>..note::</dt>
-<dd>We're currently assuming SDL.h file is directly in the search path (i.e. not in
-the SDL subdirectory).</dd>
-</dl>
+<h2><a class="toc-backref" href="#id7">Configuring SDL</a></h2>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">This tool handles both SDL and SDL_image.</p>
+</div>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">We're currently assuming SDL.h file is directly in the search path (i.e. not in
+the SDL subdirectory).</p>
+</div>
 <p>Tool name: <tt class="docutils literal">sdl</tt>.</p>
 <p>Available properties:</p>
 <ul class="simple">
@@ -446,15 +456,15 @@ the SDL subdirectory).</dd>
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using sdl : &lt;library&gt;C:\dev\libs\msvc10-x86\lib &lt;include&gt;C:\dev\libs\msvc10-x86\include\SDL ;
+using sdl : &lt;library&gt;C:/dev/libs/msvc10-x86/lib &lt;include&gt;C:/dev/libs/msvc10-x86/include/SDL ;
 </pre>
 </div>
 <div class="section" id="configuring-windows-sdk">
-<h2><a class="toc-backref" href="#id7">Configuring Windows SDK</a></h2>
-<dl class="docutils">
-<dt>..note::</dt>
-<dd>This tool is (obviously) used only on Windows.</dd>
-</dl>
+<h2><a class="toc-backref" href="#id8">Configuring Windows SDK</a></h2>
+<div class="note">
+<p class="first admonition-title">Note</p>
+<p class="last">This tool is (obviously) used only on Windows.</p>
+</div>
 <p>Tool name: <tt class="docutils literal">winsdk</tt>.</p>
 <p>Available properties:</p>
 <ul class="simple">
@@ -463,11 +473,11 @@ using sdl : &lt;library&gt;C:\dev\libs\msvc10-x86\lib &lt;include&gt;C:\dev\libs
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\libs\WinSDK\v7.1\Include ;
+using winsdk : &lt;library&gt;C:/dev/libs/WinSDK/v7.1/Lib &lt;include&gt;C:/dev/libs/WinSDK/v7.1/Include ;
 </pre>
 </div>
 <div class="section" id="configuring-zlib">
-<h2><a class="toc-backref" href="#id8">Configuring zlib</a></h2>
+<h2><a class="toc-backref" href="#id9">Configuring zlib</a></h2>
 <p>Tool name: <tt class="docutils literal">zlib</tt>.</p>
 <p>Available properties:</p>
 <ul class="simple">
@@ -477,11 +487,11 @@ using winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\
 </ul>
 <p>Example:</p>
 <pre class="literal-block">
-using winsdk : &lt;library&gt;C:\dev\libs\WinSDK\v7.1\Lib &lt;include&gt;C:\dev\libs\WinSDK\v7.1\Include ;
+using zlib : &lt;library&gt;C:/dev/libs/msvc10-x86/lib &lt;include&gt;C:/dev/libs/msvc10-x86/include &lt;name&gt;zdll ;
 </pre>
 </div>
 <div class="section" id="configuring-goblin-camp-features">
-<h2><a class="toc-backref" href="#id9">Configuring Goblin Camp — features</a></h2>
+<h2><a class="toc-backref" href="#id10">Configuring Goblin Camp — features</a></h2>
 <p>There are several aspects of the build that are tunable through so-called features,
 which are passed on the command line as <tt class="docutils literal">feature=value</tt>.</p>
 <p>Available features:</p>
@@ -505,7 +515,7 @@ this to <tt class="docutils literal">static</tt> is generally a bad idea, and is
 </div>
 </div>
 <div class="section" id="using-the-build-system">
-<h1><a class="toc-backref" href="#id10">Using the build system</a></h1>
+<h1><a class="toc-backref" href="#id11">Using the build system</a></h1>
 <p>To trigger the build, run <tt class="docutils literal">bjam</tt> with appropriate parameters:</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">--user-config=file</span></tt> — specifies user config to use. See <a class="reference internal" href="#configuring-the-build-configuration-file-and-features">Configuring the build — configuration file and features</a></li>
@@ -521,7 +531,7 @@ will be built automatically, even if you trigger the build of only one project.<
 on the variant and target address model of the build).</p>
 </div>
 <div class="section" id="using-additional-tools">
-<h1><a class="toc-backref" href="#id11">Using additional tools</a></h1>
+<h1><a class="toc-backref" href="#id12">Using additional tools</a></h1>
 <p>There are several tools bundled with the Goblin Camp, all in <tt class="docutils literal">tools</tt> subdirectory:</p>
 <ul class="simple">
 <li><tt class="docutils literal"><span class="pre">bundle-boost.py</span></tt> copies Boost headers used by the game into vendor directory</li>
