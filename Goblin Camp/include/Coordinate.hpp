@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/serialization/split_member.hpp>
+#include <boost/array.hpp>
 #include <cstdlib> // int abs(int)
 
 enum Direction {
@@ -45,6 +46,20 @@ private:
 public:
 	Coordinate(int x = 0, int y = 0) : x(x), y(y) { }
 	
+	static Coordinate DirectionToCoordinate(Direction dir) {
+		static boost::array<Coordinate,9> coordsToDirs = 
+			{Coordinate(0,-1),  // North
+			 Coordinate(1,-1),  // North-east
+			 Coordinate(1,0),   // East
+			 Coordinate(1,1),   // South-east
+			 Coordinate(0,1),   // South
+			 Coordinate(-1,1),  // South-west
+			 Coordinate(-1,0),  // West
+			 Coordinate(-1,-1),  // North-west
+			 Coordinate(0,0)};  // No direction
+		return coordsToDirs[dir];
+	}
+
 	inline int X() const {
 		return x;
 	}

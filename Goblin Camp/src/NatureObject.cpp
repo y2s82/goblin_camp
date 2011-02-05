@@ -163,7 +163,8 @@ void NatureObject::LoadPresets(std::string filename) {
 	natureObjectTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	natureObjectTypeStruct->addFlag("evil");
 
-	parser.run(filename.c_str(), new NatureObjectListener());
+	NatureObjectListener listener = NatureObjectListener();
+	parser.run(filename.c_str(), &listener);
 }
 
 

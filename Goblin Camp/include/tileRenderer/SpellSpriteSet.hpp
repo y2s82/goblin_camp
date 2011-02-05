@@ -21,14 +21,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class SpellSpriteSet
 {
 private:
-	std::vector<Sprite> tiles;
-	int frameTime;
+	Sprite tile;
 public:
-	SpellSpriteSet();
+	explicit SpellSpriteSet();
+	explicit SpellSpriteSet(Sprite tile);
 	~SpellSpriteSet();
-
-	void AddSprite(Sprite tile);
-	void SetFrameRate(int fps);
 
 	void Draw(SDL_Surface * dst, SDL_Rect * dstRect) const;
 };
