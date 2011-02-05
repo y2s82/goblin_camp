@@ -62,7 +62,9 @@ void DrawConstructionVisitor::Visit(SpawningPool * spawningPool) {
 }
 
 void DrawConstructionVisitor::Visit(Door * door) {
-	if (door->Open()) {
+	if (door->Condition() < 0) {
+		tileSet->DrawUnderConstruction(door, coordinate, dst, dstRect);
+	} else if (door->Open()) {
 		tileSet->DrawOpenDoor(door, coordinate, dst, dstRect);
 	} else {
 		tileSet->DrawBaseConstruction(door, coordinate, dst, dstRect);

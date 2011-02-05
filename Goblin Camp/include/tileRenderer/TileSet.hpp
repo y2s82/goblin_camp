@@ -56,7 +56,7 @@ public:
 	void DrawBlood(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawFilthMajor(SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawFilthMajor(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;

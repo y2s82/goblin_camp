@@ -340,8 +340,12 @@ namespace {
 		return false;
 	}
 
-	int Test(int one, int two) {
-		return one + two;
+	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
+			return filth->Depth() > 4;
+		}
+		return false;
 	}
 }
 
@@ -375,11 +379,12 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 }
 
 void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	boost::weak_ptr<FilthNode> filth = map->GetFilth(tileX,tileY);
-	if (filth.lock() && filth.lock()->Depth() > 5) {
-		tileSet->DrawFilthMajor(mapSurface.get(), dstRect);
-	} else if (filth.lock() && filth.lock()->Depth() > 0) {
-		tileSet->DrawFilthMinor(mapSurface.get(), dstRect);
+	if (boost::shared_ptr<FilthNode> filth = map->GetFilth(tileX, tileY).lock()) {
+		if (filth->Depth() > 4) {
+			tileSet->DrawFilthMajor(boost::bind(&MajorFilthConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), dstRect);
+		} else if (filth->Depth() > 0) {
+			tileSet->DrawFilthMinor(mapSurface.get(), dstRect);
+		}
 	}
 }
 
