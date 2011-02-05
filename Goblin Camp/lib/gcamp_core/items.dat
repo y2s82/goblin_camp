@@ -71,6 +71,10 @@ category_type "Fruit" {
 category_type "Drink" {
 }
 
+category_type "Wine" {
+	parent="Drink"
+}
+
 category_type "Plant" {
 	flammable
 }
@@ -547,8 +551,8 @@ item_type "Small corpse" {
 	nutrition = 10000
 }
 
-item_type "Wine" {
-	category = ["Drink"]
+item_type "Berry wine" {
+	category = ["Wine"]
 	graphic = 33
 	color = "127,0,0"
 	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
