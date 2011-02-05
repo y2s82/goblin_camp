@@ -247,7 +247,7 @@ Menu* Menu::DevMenu() {
 		call = boost::bind(&Game::CreateWater, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~')));
 		
-		call = boost::bind(&Map::Corrupt, Map::Inst(), _1, 2000);
+		call = boost::bind(&Map::Corrupt, Map::Inst(), _1, 500000);
 		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'C')));
 
 		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
