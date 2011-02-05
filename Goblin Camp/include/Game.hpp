@@ -89,6 +89,7 @@ private:
 	boost::shared_ptr<MapRenderer> renderer;
 public:
 	static Game* Inst();
+	~Game();
 	static bool LoadGame(const std::string&);
 	static bool SaveGame(const std::string&);
 	static void ToMainMenu(bool);

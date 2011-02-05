@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "stdafx.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
-#include "tileRenderer/TileSetUtil.hpp"
 #include "Stockpile.hpp"
 #include "Farmplot.hpp"
 #include "Door.hpp"
@@ -27,8 +26,7 @@ ConstructionSpriteSet::ConstructionSpriteSet()
 	: sprites(), 
 	underconstructionSprites(),
 	openSprite(),
-	width(1),
-	connectionMap() {}
+	width(1){}
 
 ConstructionSpriteSet::~ConstructionSpriteSet() {}
 
@@ -43,14 +41,17 @@ void ConstructionSpriteSet::Draw(const Coordinate& internalPos, SDL_Surface * ds
 }
 
 void ConstructionSpriteSet::DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
-	if (underconstructionSprites.size() == 1) {
-		underconstructionSprites[0].Draw(dst, dstRect);
-	} else {
-		int xOffset = internalPos.X() % width;
-		int yOffset = internalPos.Y() % (sprites.size() / width);
+	if (underconstructionSprites.size() > 0)
+	{
+		if (!IsConnectionMap() && underconstructionSprites.size() == sprites.size() && IsValid()) {
+			int xOffset = internalPos.X() % width;
+			int yOffset = internalPos.Y() % (sprites.size() / width);
 
-		int graphicIndex = xOffset + width * yOffset;
-		sprites.at(graphicIndex).Draw(dst, dstRect);
+			int graphicIndex = xOffset + width * yOffset;
+			underconstructionSprites.at(graphicIndex).Draw(dst, dstRect);
+		} else {
+			underconstructionSprites.at(0).Draw(dst, dstRect);
+		}
 	}
 }
 
@@ -62,27 +63,23 @@ void ConstructionSpriteSet::DrawOpen(const Coordinate& internalPos, SDL_Surface 
 	}
 }
 
-void ConstructionSpriteSet::Draw(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const {
-	if (IsValid() && connectionMap) {
-		sprites.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
+void ConstructionSpriteSet::Draw(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (IsValid() && IsConnectionMap()) {
+		sprites[0].Draw(connected, dst, dstRect);
 	}
 }
 
-void ConstructionSpriteSet::DrawUnderConstruction(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const {
-	if (HasUnderConstructionSprites() && connectionMap) {
-		if (underconstructionSprites.size() == 1) {
-			underconstructionSprites[0].Draw(dst, dstRect);
-		} else {
-			underconstructionSprites.at(TilesetUtil::CalcConnectionMapIndex(connectN, connectE, connectS, connectW)).Draw(dst, dstRect);
-		}
+void ConstructionSpriteSet::DrawUnderConstruction(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (underconstructionSprites.size() > 0) {
+		underconstructionSprites[0].Draw(connected, dst, dstRect);
 	}
 }
 
-void ConstructionSpriteSet::DrawOpen(bool connectN, bool connectE, bool connectS, bool connectW, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSpriteSet::DrawOpen(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
 	if (openSprite.Exists()) {
 		openSprite.Draw(dst, dstRect);
 	} else {
-		Draw(connectN, connectE, connectS, connectW, dst, dstRect);
+		Draw(connected, dst, dstRect);
 	}
 }
 
@@ -102,23 +99,15 @@ void ConstructionSpriteSet::SetWidth(int val) {
 	width = val;
 }
 
-void ConstructionSpriteSet::SetConnectionMap(bool connected) {
-	connectionMap = connected;
-}
-
 bool ConstructionSpriteSet::IsValid() const {
-	if (connectionMap) {
-		return sprites.size() == 16;
-	} else {
-		return (sprites.size() > 0 && width > 0 && width <= sprites.size() && (sprites.size() / width) * width == sprites.size());
-	}
+	return sprites.size() > 0 && (sprites[0].IsConnectionMap() || (width > 0 && width <= sprites.size() && (sprites.size() / width) * width == sprites.size()));
 }
 
 bool ConstructionSpriteSet::IsConnectionMap() const {
-	return connectionMap;
+	return sprites.size() > 0 && sprites[0].IsConnectionMap();
 }
 
 bool ConstructionSpriteSet::HasUnderConstructionSprites() const {
-	return (underconstructionSprites.size() == 1 || underconstructionSprites.size() == sprites.size());
+	return (underconstructionSprites.size() > 0);
 }
 

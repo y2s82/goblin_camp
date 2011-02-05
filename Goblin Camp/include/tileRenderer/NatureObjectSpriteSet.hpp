@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class NatureObjectSpriteSet
 {
 public:
-	NatureObjectSpriteSet();
+	explicit NatureObjectSpriteSet();
 	~NatureObjectSpriteSet();
 
 	Sprite tile;

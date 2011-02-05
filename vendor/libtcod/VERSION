@@ -16,3 +16,4 @@ This is a modified version of above revision. Most notable changes include:
 	- removed most of the sys functions, thread functions, and DLL init code
 	- forced static linkage
 	- renamed TCOD_dice_t::nb_rolls back to nb_dices
+        - custom rendering modified to render to a buffer and then provide both the buffer and screen to the custom renderer (kind of brittle at the moment, will need to be cleaned up at some point)

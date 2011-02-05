@@ -94,6 +94,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // SDL
 #	include <SDL.h>
 #	include <SDL_image.h>
+#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
+	#ifndef DBG_NEW
+      #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+      #define new DBG_NEW
+	#endif
+#endif
+
 #endif
 
 // Use with care.
