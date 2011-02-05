@@ -316,8 +316,14 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		}
 	}
 
-	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) ++orcCount;
-	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) ++goblinCount;
+	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) {
+		++orcCount;
+		npc->AddTrait(FRESH);
+	}
+	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) {
+		++goblinCount;
+		if (Random::Generate(2) == 0) npc->AddTrait(CHICKENHEART);
+	}
 	else if (NPC::Presets[type].tags.find("localwildlife") != NPC::Presets[type].tags.end()) ++peacefulFaunaCount;
 
 	if (NPC::Presets[type].tags.find("flying") != NPC::Presets[type].tags.end()) {
@@ -2009,7 +2015,6 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 	}
 }
 
-/* Placeholder code before proper spells */
 boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 	boost::shared_ptr<Spell> newSpell(new Spell(pos, type));
 	spellList.push_back(newSpell);

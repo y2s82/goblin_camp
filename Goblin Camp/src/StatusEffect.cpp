@@ -28,7 +28,8 @@ StatusEffect::StatusEffect(StatusEffectType typeval, int g, TCODColor col) :
 graphic(g),
 	color(col),
 	type(typeval),
-	damageType(DAMAGE_BLUNT)
+	damageType(DAMAGE_BLUNT),
+	visible(true)
 {
 	//Initialize changes to nothing, ie. 100%
 	for (int i = 0; i < STAT_COUNT; ++i) { statChanges[i] = 1.0; }
@@ -170,6 +171,13 @@ graphic(g),
 		damage.second = 7;
 		damageType = DAMAGE_FIRE;
 		break;
+
+	case CRACKEDSKULLEFFECT:
+		name = "Cracked skull";
+		cooldown = -1;
+		graphic = 168;
+		color = TCODColor::grey;
+		visible = false;
 	}
 	cooldownDefault = cooldown;
 }

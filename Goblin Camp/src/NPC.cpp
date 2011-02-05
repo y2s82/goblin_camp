@@ -94,6 +94,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	hasMagicRangedAttacks(false),
 	threatLocation(Coordinate(-1,-1)),
 	seenFire(false),
+	traits(std::set<Trait>()),
+	damageDealt(0),
+	damageReceived(0),
 	FindJob(findJob),
 	React(react),
 	escaped(false)
@@ -320,6 +323,13 @@ void NPC::Update() {
 		}
 	}
 
+	if (Random::Generate(UPDATES_PER_SECOND) == 0) { //Recalculate bulk once a second, items may get unexpectedly destroyed
+		bulk = 0;
+		for (std::set<boost::weak_ptr<Item> >::iterator itemi = inventory->begin(); itemi != inventory->end(); ++itemi) {
+			if (itemi->lock())
+				bulk += itemi->lock()->GetBulk();
+		}
+	}
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
 	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 
@@ -369,6 +379,8 @@ void NPC::Update() {
 	} else RemoveEffect(CARRYING);
 
 	if (health <= 0) Kill();
+
+	if (HasTrait(CRACKEDSKULL) && Random::Generate(MONTH_LENGTH * 6) == 0) GoBerserk();
 }
 
 void NPC::UpdateStatusEffects() {
@@ -416,8 +428,20 @@ void NPC::UpdateStatusEffects() {
 		statusGraphicCounter = 0;
 		if (statusEffectIterator != statusEffects.end()) ++statusEffectIterator;
 		else statusEffectIterator = statusEffects.begin();
-	}
 
+		if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) {
+			std::list<StatusEffect>::iterator oldIterator = statusEffectIterator;
+			++statusEffectIterator;
+			while (statusEffectIterator != oldIterator) {
+				if (statusEffectIterator != statusEffects.end()) {
+					if (statusEffectIterator->visible) break;
+					++statusEffectIterator;
+				}
+				else statusEffectIterator = statusEffects.begin();
+			}
+			if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) statusEffectIterator = statusEffects.end();
+		}
+	}
 }
 
 void NPC::Think() {
@@ -843,12 +867,12 @@ CONTINUEEAT:
 				//Unfortunately this assumes that FLEEMAP is the last task in a job,
 				//which might not be.
 				tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
-				if (tmp > std::abs((signed int)y - Map::Inst()->Height() / 2)) {
+				if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
 					currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(x, 
 						(y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
 				} else {
 					currentJob().lock()->tasks[taskIndex] = Task(MOVE, 
-						Coordinate(((unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
+						Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
 						y));
 				}
 				currentJob().lock()->tasks.push_back(Task(FLEEMAP));
@@ -1130,6 +1154,7 @@ CONTINUEEAT:
 					if (tmp >= 100) {
 						if (carried.lock()) { //Repairjobs usually require some material
 							inventory->RemoveItem(carried);
+							bulk -= carried.lock()->GetBulk();
 							Game::Inst()->RemoveItem(carried);
 							carried.reset();
 						}
@@ -1471,10 +1496,23 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	if (npc->coward) {
 		npc->ScanSurroundings();
+		
+		if (npc->HasTrait(CHICKENHEART) && npc->seenFire && (npc->jobs.empty() || npc->jobs.front()->name != "Aaaaaaaah!!")) {
+			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+			boost::shared_ptr<Job> runAroundLikeAHeadlessChickenJob(new Job("Aaaaaaaah!!"));
+			for (int i = 0; i < 30; ++i)
+				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, npc->Position() + Coordinate(Random::Generate(-2, 2), Random::Generate(-2, 2))));
+			runAroundLikeAHeadlessChickenJob->internal = true;
+			npc->jobs.push_back(runAroundLikeAHeadlessChickenJob);
+			npc->run = true;
+			npc->AddEffect(PANIC);
+			return;
+		}
+
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			if ((npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) || 
 				npci->lock() == npc->aggressor.lock() || 
-				npc->seenFire) {
+				(npc->seenFire && (npc->jobs.empty() || !boost::iequals(npc->jobs.front()->name,"Pour water")))) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 				npc->AddEffect(PANIC);
@@ -1645,27 +1683,15 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 				if (npc) {
 					//First check if the target dodges the attack
 					if (Random::Generate(99) < npc->effectiveStats[DODGE]) {
-	#ifdef DEBUG
-						std::cout<<npc->name<<"("<<npc->uid<<") dodged\n";
-	#endif
 						continue;
 					}
 				}
 
 				Attack attack = *attacki;
-#ifdef DEBUG
-				std::cout<<"attack.addsub: "<<attack.Amount().addsub<<"\n";
-#endif
 
 				if (attack.Type() == DAMAGE_WIELDED) {
-#ifdef DEBUG
-					std::cout<<"Wielded attack\n";
-#endif
 					GetMainHandAttack(attack);
 				}
-#ifdef DEBUG
-				std::cout<<"attack.addsub after: "<<attack.Amount().addsub<<"\n";
-#endif
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
 						Coordinate tar;
@@ -1676,8 +1702,12 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 					}
 				}
 
-				if (npc) npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
-				else if (construction) construction->Damage(&attack);
+				if (npc) {
+					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
+					Random::Dice dice(attack.Amount());
+					damageDealt += dice.Roll();
+					if (HasTrait(FRESH) && damageDealt > 50) RemoveTrait(FRESH);
+				} else if (construction) construction->Damage(&attack);
 			}
 		}	
 	}
@@ -1744,6 +1774,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	double resistance = (100.0 - (float)effectiveResistances[res]) / 100.0;
 	int damage = (int)(Game::DiceToInt(attack->Amount()) * resistance);
 	health -= damage;
+	damageReceived += damage;
 
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
 		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
@@ -1759,6 +1790,10 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 				Position().X() + Random::Generate(-1, 1),
 				Position().Y() + Random::Generate(-1, 1)),
 				Random::Generate(50, 50+damage*10));
+
+			if (damage >= maxHealth / 3 && attack->Type() == DAMAGE_BLUNT && Random::Generate(10) == 0) {
+				AddTrait(CRACKEDSKULL);
+			}
 		}
 		if (aggr.lock()) aggressor = aggr;
 		if (!jobs.empty() && boost::iequals(jobs.front()->name, "Sleep")) {
@@ -2250,4 +2285,58 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 			}
 		}
 	}
+}
+
+void NPC::AddTrait(Trait trait) { 
+	traits.insert(trait); 
+	switch (trait) {
+	case CRACKEDSKULL:
+		AddEffect(CRACKEDSKULLEFFECT);
+		break;
+
+	default: break;
+	}
+}
+
+void NPC::RemoveTrait(Trait trait) { 
+	traits.erase(trait); 
+	switch (trait) {
+	case FRESH:
+		_color.g = std::max(0, _color.g - 100);
+		break;
+		
+	default: break;
+	}
+}
+
+bool NPC::HasTrait(Trait trait) { return traits.find(trait) != traits.end(); }
+
+void NPC::GoBerserk() {
+	ScanSurroundings();
+	if (carried.lock()) {
+		inventory->RemoveItem(carried);
+		carried.lock()->PutInContainer();
+		carried.lock()->Position(Position());
+		Coordinate target(-1,-1);
+		if (!nearNpcs.empty()) {
+			boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
+			if (creature) target = creature->Position();
+		}
+		if (target.X() == -1) target = Coordinate(Random::Generate(x-7, x+7), Random::Generate(y-7, y+7));
+		carried.lock()->CalculateFlightPath(target, 50, GetHeight());
+	}
+	carried.reset();
+
+	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, "(FAIL)Gone berserk");
+
+	if (!nearNpcs.empty()) {
+		boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
+		boost::shared_ptr<Job> berserkJob(new Job("Berserk!"));
+		berserkJob->internal = true;
+		berserkJob->tasks.push_back(Task(KILL, creature->Position(), creature));
+		jobs.push_back(berserkJob);
+		run = true;
+	}
+
+	AddEffect(RAGE);
 }
