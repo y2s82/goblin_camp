@@ -1,0 +1,6 @@
+rule init ( options * ) {
+    ECHO "libtcod sources are now built alongside Goblin Camp, remove 'using libtcod' from your config file." ;
+}
+
+rule use-project ( ) {
+}
