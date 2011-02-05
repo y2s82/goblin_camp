@@ -589,6 +589,7 @@ void StatusEffect::save(Archive & ar, const unsigned int version) const {
 	ar & damage;
 	ar & damageType;
 	ar & visible;
+	ar & negative;
 }
 
 template<class Archive>
@@ -610,6 +611,7 @@ void StatusEffect::load(Archive & ar, const unsigned int version) {
 		} else if (version >= 1) {
 			ar & damageType;
 			ar & visible;
+			ar & negative;
 		}
 }
 

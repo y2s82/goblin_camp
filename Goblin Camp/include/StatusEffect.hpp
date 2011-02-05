@@ -57,6 +57,9 @@ enum StatusEffectType {
 	WORKING,
 	BURNING,
 	CRACKEDSKULLEFFECT,
+	INVIGORATED,
+	DRUNK,
+	HEALING,
 	STATUS_EFFECT_COUNT
 };
 
@@ -84,4 +87,5 @@ struct StatusEffect {
 	std::pair<int,int> damage; //First - counter, second - damage amount
 	int damageType;
 	bool visible;
+	bool negative; //Is this a negative effect? ie. one the creature wants to get rid of
 };
