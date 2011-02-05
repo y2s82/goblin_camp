@@ -831,13 +831,13 @@ void Construction::Damage(Attack* attack) {
 	int damage = (int)(Game::DiceToInt(attack->Amount()) * damageModifier);
 	condition -= damage;
 
-	#ifdef DEBUG
-	std::cout<<"Damagemod: "<<damageModifier<<"\n";
-	std::cout<<name<<"("<<uid<<") inflicted "<<damage<<" damage\n";
-	#endif
+	if (attack->Type() == DAMAGE_FIRE && Random::Generate(5) == 0) {
+		Game::Inst()->CreateFire(Center());
+	}
 
 	if (condition <= 0) {
-		Explode();
+		if (attack->Type() != DAMAGE_FIRE) Explode();
+		else BurnToTheGround();
 		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
@@ -914,4 +914,19 @@ void Construction::SpawnRepairJob() {
 		repairJob = repJob;
 		JobManager::Inst()->AddJob(repJob);
 	}
+}
+
+void Construction::BurnToTheGround() {
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		if (boost::shared_ptr<Item> item = itemi->lock()) {
+			item->PutInContainer(); //Set container to none
+			Coordinate randomTarget;
+			randomTarget.X(Position().X() + Random::Generate(-2, 2));
+			randomTarget.Y(Position().Y() + Random::Generate(-2, 2));
+			item->Position(randomTarget);
+			if (item->Type() != Item::StringToItemType("debris")) item->SetFaction(0); //Return item to player faction
+			Game::Inst()->CreateFire(randomTarget);
+		}
+	}
+	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 }
