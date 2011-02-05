@@ -204,6 +204,7 @@ npc_type "killer bee" {
 		damage="1d5"
 		cooldown=15
 		statusEffects=["poison"]
+		effectChances=[   10   ]
 	}
 	spawnAsGroup="1d20+10"
 	death="Filth"
