@@ -604,8 +604,9 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
-
-	parser.run(filename.c_str(), new ConstructionListener());
+	
+	ConstructionListener listener = ConstructionListener();
+	parser.run(filename.c_str(), &listener);
 }
 
 bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string& name) {

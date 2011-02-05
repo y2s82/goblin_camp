@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class ItemSpriteSet
 {
 public:
-	ItemSpriteSet();
+	explicit ItemSpriteSet();
 	~ItemSpriteSet();
 
 	Sprite tile;

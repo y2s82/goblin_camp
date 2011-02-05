@@ -45,14 +45,37 @@ int TileSetTexture::Count() const
 	return tileCount;
 }
 
-void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const
+void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, const SDL_Rect * dstRect) const
 {
 	if (tile < tileCount)
 	{
 		int xCoord = tile % tileXDim;
 		int yCoord = tile / tileXDim;
 		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, tileWidth, tileHeight};
-		SDL_BlitSurface(tiles.get(),&srcRect, dst, dstRect);
+		// Copy dstRect to prevent it being changed.
+		SDL_Rect dstRectCp={dstRect->x, dstRect->y, dstRect->w, dstRect->h}; 
+		SDL_BlitSurface(tiles.get(),&srcRect, dst, &dstRectCp);
+	}
+}
+
+void TileSetTexture::DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, const SDL_Rect * dstRect) const {
+	if (tile < tileCount) {
+		int xCoord = tile % tileXDim;
+		int yCoord = tile / tileXDim;
+		int halfWidth = tileWidth >> 1;
+		int halfHeight = tileHeight >> 1;
+		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, halfWidth, halfHeight};
+		SDL_Rect dstRectCp={dstRect->x, dstRect->y, halfWidth, halfHeight}; 
+		if (corner & 0x1) {
+			srcRect.x += halfWidth;
+			dstRectCp.x += halfWidth;
+		}
+		if (corner & 0x2) {
+			srcRect.y += halfHeight;
+			dstRectCp.y += halfHeight;
+		}
+		
+		SDL_BlitSurface(tiles.get(),&srcRect, dst, &dstRectCp);
 	}
 }
 

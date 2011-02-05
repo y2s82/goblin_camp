@@ -239,7 +239,7 @@ void NPC::HandleHunger() {
 	Coordinate tmpCoord;
 	bool found = false;
 
-	if (hunger > 48000 && jobs.front()->name.find("Eat") == std::string::npos) { //Starving and doing something else
+	if (hunger > 48000 && !jobs.empty() &&  jobs.front()->name.find("Eat") == std::string::npos) { //Starving and doing something else
 		TaskFinished(TASKFAILNONFATAL);
 	}
 		
@@ -2058,7 +2058,8 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addStructure(resistancesStruct);
 	npcTypeStruct->addStructure(statsStruct);
 
-	parser.run(filename.c_str(), new NPCListener());
+	NPCListener listener = NPCListener();
+	parser.run(filename.c_str(), &listener);
 }
 
 std::string NPC::NPCTypeToString(NPCType type) {
