@@ -121,9 +121,11 @@ TCODColor Item::Color() {return color;}
 void Item::Color(TCODColor col) {color = col;}
 
 void Item::Position(Coordinate pos) {
-	if (!internal) Map::Inst()->ItemList(x,y)->erase(uid);
-	x = pos.X(); y = pos.Y();
-	if (!internal) Map::Inst()->ItemList(x,y)->insert(uid);
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		if (!internal) Map::Inst()->ItemList(x,y)->erase(uid);
+		x = pos.X(); y = pos.Y();
+		if (!internal) Map::Inst()->ItemList(x,y)->insert(uid);
+	}
 }
 Coordinate Item::Position() {
 	if (container.lock()) return container.lock()->Position();
