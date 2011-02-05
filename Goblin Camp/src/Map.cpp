@@ -279,28 +279,38 @@ bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
 
 void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); }
 void Map::Corrupt(int x, int y, int magnitude) {
-	while (magnitude > 40) {
-		magnitude -= 40;
-		Corrupt(x, y, 40);
-	}
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].Corrupt(magnitude);
-		if (tileMap[x][y].corruption >= 100) {
-			if (tileMap[x][y].natureObject >= 0 && 
-				!NatureObject::Presets[Game::Inst()->natureList[tileMap[x][y].natureObject]->Type()].evil &&
-				!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
-					bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
-					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-					if (createTree && Random::Generate(3) < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+	int loops = 0;
+	while (magnitude > 0 && loops < 2000) {
+		++loops;
+
+		if (x < 0) x = 0;
+		if (x >= Width()) x = Width()-1;
+		if (y < 0) y = 0;
+		if (y >= Height()) y = Height()-1;
+
+		if (tileMap[x][y].corruption < 300) {
+			int difference = 300 - tileMap[x][y].corruption;
+			if (magnitude - difference <= 0) {
+				tileMap[x][y].Corrupt(magnitude);
+				magnitude = 0;
+			} else {
+				tileMap[x][y].Corrupt(difference);
+				magnitude -= difference;
+			}
+
+			if (tileMap[x][y].corruption >= 100) {
+				if (tileMap[x][y].natureObject >= 0 && 
+					!NatureObject::Presets[Game::Inst()->natureList[tileMap[x][y].natureObject]->Type()].evil &&
+					!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
+						bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
+						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
+						if (createTree && Random::Generate(3) < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+				}
 			}
 		}
-		if (tileMap[x][y].corruption > 300) {
-			tileMap[x][y].Corrupt(-40);
-			Corrupt(x-1, y, 10);
-			Corrupt(x+1, y, 10);
-			Corrupt(x, y-1, 10);
-			Corrupt(x, y+1, 10);
-		}
+
+		x += Random::Generate(-1, 1);
+		y += Random::Generate(-1, 1);
 	}
 }
 
