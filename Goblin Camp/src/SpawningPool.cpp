@@ -60,7 +60,7 @@ void SpawningPool::Update() {
 		//Generate jobs
 
 		if (jobCount < 4) {
-			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
+			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 5) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
 					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
 					filthDumpJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
@@ -79,7 +79,7 @@ void SpawningPool::Update() {
 				}
 			}
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
-				Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
+				Random::Generate(UPDATES_PER_SECOND * 5) == 0) {
 					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
 					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
@@ -97,7 +97,7 @@ void SpawningPool::Update() {
 		if (Map::Inst()->GetFilth(x, y).lock() && Map::Inst()->GetFilth(x, y).lock()->Depth() > 0) {
 			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
 			filth += filthNode->Depth();
-			for (int i = 0; i < filthNode->Depth(); ++i) Map::Inst()->Corrupt(x, y);
+			Map::Inst()->Corrupt(x, y, filthNode->Depth() * std::min(100 * filth, (unsigned int)10000));
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
@@ -105,7 +105,7 @@ void SpawningPool::Update() {
 			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
-			for (int i = 0; i < 1 + Random::Generate(9); ++i) Map::Inst()->Corrupt(x, y);
+			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(corpses, (unsigned int)50));
 		}
 
 		if (corpses + filth > std::min(2 + 2*spawns, (unsigned int)10)) {
@@ -162,7 +162,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (Random::Generate(int(std::sqrt((double)spawns))) == 0) Expand();
+				if (Random::Generate(std::min(expansion, unsigned int(10))) == 0) Expand();
 			}
 		}
 	}
@@ -251,11 +251,11 @@ void SpawningPool::Expand(bool message) {
 		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
 		Map::Inst()->SetTerritory(location.X(), location.Y(), true);
 
-		for (int i = 0; i < 5 + Random::Generate(4); ++i) Map::Inst()->Corrupt(location.X(), location.Y());
+		Map::Inst()->Corrupt(location.X(), location.Y(), 2000 * std::min(expansion, (unsigned int)100));
 
 	} else {
 		if (message) Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
-		for (int i = 0; i < 5; ++i) Map::Inst()->Corrupt(x, y);
+		Map::Inst()->Corrupt(x, y, 4000 * std::min(expansion, (unsigned int)100));
 	}
 
 }
