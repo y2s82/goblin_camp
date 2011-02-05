@@ -1798,6 +1798,8 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 			if (damage >= maxHealth / 3 && attack->Type() == DAMAGE_BLUNT && Random::Generate(10) == 0) {
 				AddTrait(CRACKEDSKULL);
 			}
+		} else if (res == FIRE_RES && Random::Generate(2) == 0) {
+			AddEffect(BURNING);
 		}
 		if (aggr.lock()) aggressor = aggr;
 		if (!jobs.empty() && boost::iequals(jobs.front()->name, "Sleep")) {
