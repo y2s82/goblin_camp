@@ -37,7 +37,7 @@ tileset_data "Default Tileset" {
 		minor_filth=6
 		major_filth=[7,8,9,10,11]
 		marker=14
-		blood=16
+		blood=[16]
 
 		// Overlays
 		non_territory=13

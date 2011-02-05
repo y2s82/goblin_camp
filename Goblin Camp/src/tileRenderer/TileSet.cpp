@@ -115,8 +115,8 @@ void TileSet::DrawCorruption(Sprite::ConnectedFunction connected, SDL_Surface *d
 	corruptionTile.Draw(connected, dst, dstRect);
 }
 
-void TileSet::DrawBlood(SDL_Surface *dst, SDL_Rect* dstRect) const {
-	blood.Draw(dst, dstRect);
+void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	blood.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawWater(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
