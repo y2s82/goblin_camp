@@ -33,6 +33,11 @@ category_type "Firewood" {
 	flammable
 }
 
+category_type "Oil" {
+	parent="Fuel"
+	flammable
+}
+
 category_type "Stone" {
 }
 
@@ -68,10 +73,26 @@ category_type "Fruit" {
 	flammable
 }
 
+category_type "Leaf" {
+	parent="Food"
+}
+
+category_type "Nut" {
+	parent="Food"
+}
+
+category_type "Vegetable" {
+	parent="Food"
+}
+
 category_type "Drink" {
 }
 
 category_type "Wine" {
+	parent="Drink"
+}
+
+category_type "Tincture" {
 	parent="Drink"
 }
 
@@ -226,6 +247,33 @@ category_type "Axe" {
 
 category_type "Bucket" {
 	parent="Tool"
+}
+
+category_type "Alchemy" {
+}
+
+category_type "Tonic" {
+	parent="Alchemy"
+}
+
+category_type "Poison" {
+	parent="Alchemy"
+}
+
+category_type "Root" {
+	parent="Alchemy"
+}
+
+category_type "Vine" {
+	parent="Alchemy"
+}
+
+category_type "Shoot" {
+	parent="Alchemy"
+}
+
+category_type "Branch" {
+	parent="Alchemy"
 }
 
 category_type "Garbage" {
@@ -710,6 +758,22 @@ item_type "Bone Dagger" {
 	fitsin = "Crate"
 }
 
+item_type "Poisoned dagger" {
+	category = [ "Piercing weapon" ]
+	graphic = 41
+	color = "0,200,14"
+	components = [ "Bone", "Poison" ]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d10+7"
+		cooldown=25
+		statusEffects=["Bleeding", "Poison"]
+		effectChances=[    10    ,    50   ]
+	}
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+}
+
 item_type "Wooden arrow" {
 	category = ["Arrow"]
 	graphic = 41
@@ -952,4 +1016,409 @@ item_type "Wooden bucket" {
 	components = [ "Plank", "Plank" ]
 	constructedin = "Carpenter"
 	bulk = 2
+}
+
+item_type "Meat pie" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "127,0,0"
+	components = ["Meat", "Flour", "Flour", "Firewood"]
+	nutrition = 50000
+	constructedin = "Kitchen"
+	decaySpeed = 12
+	decay = ["Filth"]
+}	
+
+item_type "Chillweed leaf" {
+	category = [ "Leaf" ]
+	graphic = 248
+	color = "221,234,234"
+	nutrition = 2000
+	decay = [ "Filth" ]
+	decaySpeed = 9
+	fitsin = "Sack"
+}
+
+item_type "Chillweed seed" {
+	category = [ "Seed" ]
+	graphic = 250
+	color = "221,234,234"
+	growth = "Young chillweed"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Young chillweed" {
+	category = [ "Misc." ]
+	graphic = 42
+	color = "221,234,234"
+	growth = "Chillweed bush"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Chillweed bush" {
+	category = [ "Misc." ]
+	graphic = 35
+	color = "221,234,234"
+	fruits = [ "Chillweed leaf", "Chillweed leaf", "Chillweed seed", "Chillweed seed" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Chillwine" {
+	category = [ "Tincture" ]
+	graphic = 33
+	color = "221,234,234"
+	components = [ "Wine", "Leaf" ]
+	containIn = "Barrel"
+	nutrition = 80000
+	multiplier = 10
+	constructedin = "Winery"
+	fitsin = "Barrel"
+}
+
+item_type "Poison antidote" {
+	category = [ "Tonic" ]
+	graphic = 33
+	color="0,240,240"
+	components = [ "Branch", "Wine" ]
+	constructedin = "Alchemist"
+}
+
+item_type "Healing tonic" {
+	category = [ "Tonic" ]
+	graphic = 33
+	color="0,136,14"
+	components = [ "Shoot", "Shoot" ]
+	constructedin = "Alchemist"
+}
+
+item_type "Hognut" {
+	category = [ "Nut" ]
+	graphic = 248
+	color = "153,87,38"
+	nutrition = 3000
+	fruits = [ "Hognut seed" ]
+	decay = [ "Hognut seed", "Filth" ]
+	decaySpeed = 12
+	fitsin = "Basket"
+}
+
+item_type "Hognut seed" {
+	category = ["Seed"]
+	graphic = 250
+	color = "153,87,38"
+	growth = "Young hognut bush"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Young hognut bush" {
+	category = ["Misc."]
+	graphic = 42
+	color = "153,87,38"
+	growth = "Hognut bush"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Hognut bush" {
+	category = ["Misc."]
+	graphic = 42
+	color = "153,87,38"
+	fruits = [ "Hognut", "Hognut", "Hognut" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Hognut oil" {
+	category = [ "Oil" ]
+	graphic = 33
+	color = "153,87,38"
+	components = [ "Nut", "Nut", "Nut", "Nut", "Nut" ]
+	containIn = "Barrel"
+	multiplier = 10
+	constructedin = "Oil press"
+	fitsin = "Barrel"
+}	
+
+item_type "Vegetable oil" {
+	category = [ "Oil" ]
+	graphic = 33
+	color = "153,87,38"
+	components = [ "Vegetable", "Vegetable", "Vegetable", "Vegetable", "Vegetable" ]
+	containIn = "Barrel"
+	multiplier = 10
+	constructedin = "Oil press"
+	fitsin = "Barrel"
+}
+
+item_type "Mandrake root" {
+	category = [ "Root" ]
+	graphic = 249
+	color = "127,50,0"
+	fruits = [ "Mandrake seed" ]
+	decay = [ "Mandrake seed", "Filth" ]
+	decaySpeed = 12
+	fitsin = "Sack"
+}
+
+item_type "Mandrake poison" {
+	category = [ "Poison" ]
+	graphic = 33
+	color = "0,200,14"
+	components = [ "Root" ]
+	constructedin = "Alchemist"
+}
+
+item_type "Mandrake seed" {
+	category = [ "Seed" ]
+	graphic = 250
+	color = "127,50,0"
+	growth = "Young Mandrake"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Young Mandrake" {
+	category = [ "Misc." ]
+	graphic = 42
+	color = "127,50,0"
+	growth = "Mandrake"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Mandrake" {
+	category = [ "Misc." ]
+	graphic = 42
+	color = "127,50,0"
+	fruits = [ "Mandrake root" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Lichfruit" {
+	category = [ "Fruit" ]
+	graphic = 248
+	color = "255,255,0"
+	nutrition = 5000
+	fruits = [ "Lichfruit seed" ]
+	decay = [ "Lichfruit seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Lichfruit leaf" {
+	category = [ "Fiber" ]
+	graphic = 216
+	color = "255,255,0"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+	fitsin = "Crate"
+}
+
+item_type "Lichfruit seed" {
+	category = [ "Seed" ]
+	graphic = 250
+	color = "255,255,0"
+	growth = "Lichfruit sapling"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Lichfruit shrub" {
+	category = ["Misc."]
+	graphic = 214
+	color = "255,255,0"
+	growth = "Stunted lichfruit tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Lichfruit bush" {
+	category = ["Misc."]
+	graphic = 215
+	color = "255,255,0"
+	fruits = [ "Lichfruit", "Lichfruit" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Ghost cabbage" {
+	category = [ "Vegetable" ]
+	graphic = 248
+	color="183,177,174"
+	nutrition = 4000
+	fruits = [ "Cabbage seed" ]
+	decay = [ "Cabbage seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Ghost cabbage seed" {
+	category = [ "Seed" ]
+	graphic = 250
+	color="183,177,174"
+	growth = "Ghost cabbage shoot"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Ghost cabbage shoot" {
+	category = [ "Misc." ]
+	graphic = 35
+	color="225,222,221"
+	growth = "Ghost cabbage plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Ghost cabbage plant" {
+	category = [ "Misc." ]
+	graphic = 35
+	color = "183,177,174"
+	fruits = [ "Ghost cabbage", "Ghost cabbage" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Radish" {
+	category = [ "Vegetable" ]
+	graphic = 248
+	color="237,21,85"
+	nutrition = 3000
+	fruits = [ "Radish seed" ]
+	decay = [ "Radish seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Radish seed" {
+	category = [ "Seed" ]
+	graphic = 250
+	color="237,21,85"
+	growth = "Young radish plant"
+	fitsin = "Sack"
+	bulk=0
+}
+
+item_type "Young radish plant" {
+	category = [ "Misc." ]
+	graphic = 42
+	color="237,21,85"
+	growth = "Radish plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Radish plant" {
+	category = [ "Misc." ]
+	graphic = 42
+	color="237,21,85"
+	fruits = [ "Radish", "Radish" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Marshmerrow seed" {
+	category = ["Seed"]
+	graphic = 250
+	color = "0,136,14"
+	growth = "Young marshmerrow"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Young marshmerrow" {
+	category = ["Misc."]
+	graphic = 42
+	color = "0,136,14"
+	growth = "Marshmerrow"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Marshmerrow plant" {
+	category = ["Misc."]
+	graphic = 35
+	color = "0,136,14"
+	fruits = [ "Marshmerrow shoot", "Marshmerrow seed", "Marshmerrow seed" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Marshmerrow shoot" {
+	category = [ "Shoot" ]
+	graphic = 47
+	color = "0,136,14"
+}
+
+item_type "Dreamvine seed" {
+	category = [ "Seed" ]
+	graphic=250
+	color="77,234,81"
+	growth="Young dreamvine"
+	fitsin= "Sack"
+	bulk=0
+}
+
+item_type "Young dreamvine plant" {
+	category = ["Misc."]
+	graphic = 42
+	color="77,234,81"
+	growth = "Dreamvine plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Dreamvine plant" {
+	category = ["Misc."]
+	graphic = 35
+	color="77,234,81"
+	fruits = [ "Dreamvine", "Dreamvine seed", "Dreamvine seed" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Dreamvine" {
+	category = [ "Vine" ]
+	graphic = 167
+	color="77,234,81"
+}
+
+item_type "Marubium" {
+	category = [ "Branch" ]
+	graphic = 47
+	color="0,240,240"
+	fruits= [ "Marubium seed" ]
+	fitsin="Sack"
+}
+
+item_type "Marubium seed" {
+	category = [ "Seed" ]
+	graphic = 250
+	color="0,240,240"
+	growth = "Young marubium"
+	fitsin="Sack"
+	bulk=0
+}
+
+item_type "Young marubium" {
+	category = [ "Misc." ]
+	graphic = 42
+	color="0,240,240"
+	growth = "Marubium plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Marubium plant" {
+	category = [ "Misc." ]
+	graphic = 35
+	color="0,240,240"
+	fruits = [ "Marubium", "Marubium" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
 }

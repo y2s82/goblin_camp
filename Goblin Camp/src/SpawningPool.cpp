@@ -193,7 +193,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("imp"));
+				Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
 			}
 		}
 	}

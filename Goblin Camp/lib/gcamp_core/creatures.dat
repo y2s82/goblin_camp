@@ -664,7 +664,7 @@ npc_type "imp" {
 		cooldown=50
 	}
 	attack "Fireball" {
-		cooldown=30
+		cooldown=125
 		projectile="fireball"
 	}
 	spawnAsGroup="1d4"
@@ -699,4 +699,259 @@ npc_type "treeman" {
 	    strength=25
 	}
 	death="Wood log"
+}
+
+npc_type "werewolf" {
+	name="Werewolf"
+	tier = 4
+	plural="Werewolves"
+	tags = ["attacksRandomly", "hasHands"]
+	color="255,0,0"
+	graphic='@'
+	AI="HostileAnimal"
+	stats {
+		speed=20
+		health=350
+		dodge=5
+		size=10
+	}
+	resistances {
+		physical=10
+		magic=10
+		poison=50
+	}
+	attack "bite" {
+		type="slashing"
+		damage="5d4+6"
+		cooldown=30
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+	}
+	spawnAsGroup="1d2"
+	death="Corpse"
+}
+
+npc_type "feral vampire" {
+	name="Feral vampire"
+	tier = 5
+	tags = ["attacksRandomly", "hasHands"]
+	color="41,209,54"
+	graphic='V'
+	AI="HostileAnimal"
+	stats {
+		speed=25
+		health=400
+		dodge=10
+		size=10
+	}
+	resistances {
+		physical=10
+		magic=10
+		poison=100
+		cold=25
+
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="2d20+10"
+		cooldown=40
+		statusEffects=["Bleeding"]
+		effectChances=[    75    ]
+	}
+	spawnAsGroup="1d4"
+	death="Corpse"
+}
+
+npc_type "wild boar" {
+	name="Wild Boar"
+	tags=["localWildlife", "angers"]
+	color="128,64,0"
+	graphic='q'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=80
+		dodge=5
+		size=7
+	}
+	resistances {
+		physical=10
+	}
+	attack "Charge" {
+		type="piercing"
+		damage="2d20+10"
+		cooldown=100
+	}
+	attack "Bite" {
+		type="slashing"
+		damage="5d4+6"
+		cooldown=50
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
+	}
+	death="Corpse"
+}
+
+npc_type "salamander" { 
+	name="Salamander"
+	tags=["underground"]
+	color="255,140,0"
+	graphic='S'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=200
+		dodge=3
+		size=10
+		strength=15
+	}
+	resistances {
+		physical=10
+		fire=100
+	}
+	attack "Fiery bite" {
+		type="fire"
+		damage="2d10"
+		cooldown=50
+	}
+	spawnAsGroup="1d2"
+	death="Corpse"
+}
+
+npc_type "raptor" { 
+	name="Raptor"
+	tier=4
+	tags=["attacksRandomly", "hasHands"]
+	color="128,128,0"
+	graphic='S'
+	AI="HostileAnimal"
+	stats {
+		speed=30
+		health=75
+		dodge=15
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d20+4"
+		cooldown=25
+	}
+	spawnAsGroup="1d6+4"
+	death="Corpse"
+}
+
+
+npc_type "manticore" {
+	name="Manticore"
+	tier=6
+	tags=["attacksRandomly", "flying"]
+	color="220,204,5"
+	graphic='B'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=500
+		dodge=10
+		size=20
+	}
+	resistances {
+		physical=10
+	}
+	attack "Stinger" {
+		type="piercing"
+		damage="1d50+25"
+		cooldown=120
+		statusEffects=["Poison"]
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="2d20+10"
+		cooldown=30
+	}
+	spawnAsGroup="1d2"
+	death="Corpse"
+}
+
+npc_type "cave worm" {
+	name="Cave worm"
+	tags=["claypit"]
+	color = "220,60,20"
+	graphic='S'
+	AI="HostileAnimal"
+	stats {
+		speed=25
+		health=50
+		dodge=10
+		size=5
+	}
+	resistances {
+		physical=5
+		magic=20
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d10+5"
+		cooldown=25
+	}
+	spawnAsGroup="1d10+5"
+	death="Filth"
+}
+
+npc_type "fire elemental" {
+	name="Fire Elemental"
+	color = "255,0,0"
+	graphic='E'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=300
+		dodge=3
+		size=35
+	}
+	resistances {
+		physical=50
+		fire=100
+	}
+	spawnAsGroup="1d2"
+	attack "Burn" {
+		type="fire"
+		damage="1d100+10"
+		cooldown=80
+	}
+	attack "Fireball" {
+		cooldown=50
+		projectile="large fireball"
+	}
+	stats {
+	    strength=25
+	}
+}
+
+npc_type "netch" { 
+	name="Netch"
+	plural="Netches"
+	tags=["localWildlife", "angers", "flying"]
+	color="255,159,64"
+	graphic=78
+	AI="PeacefulAnimal"
+	stats {
+		speed=5
+		health=500
+		dodge=5
+		size=25
+	}
+	resistances {
+		physical=15
+		poison=100
+	}
+	spawnAsGroup="1d2"
+	attack "Poison" {
+		type="poison"
+		damage="2d10+20"
+		cooldown=60
+	}
+	death="Hide"
 }

@@ -331,6 +331,20 @@ construction_type "Mill" {
 	description="Used to grind seeds into flour, for use in baking"
 }
 
+construction_type "Duckboard" {
+	tier=2
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=30
+	materials=["Plank","Plank","Plank","Plank"]
+	graphicLength=1
+	graphic=[19]
+	tileReqs=["grass", "rock", "mud", "bog"]
+	placementType=2
+	description="A wooden platform for easier travel over muddy terrain"
+}
+
 construction_type "Clay pit" {
 	tier=3
 	category="Permanent"
@@ -404,20 +418,6 @@ construction_type "Clay kiln" {
 	chimneyy=2
 }
 
-construction_type "Duckboard" {
-	tier=2
-	category="Basics"
-	bridge
-	walkable
-	maxCondition=30
-	materials=["Plank","Plank","Plank","Plank"]
-	graphicLength=1
-	graphic=[19]
-	tileReqs=["grass", "rock", "mud", "bog"]
-	placementType=2
-	description="A wooden platform for easier travel over muddy terrain"
-}
-
 construction_type "Brick Wall" {
 	tier=3
 	category="Basics"
@@ -449,3 +449,32 @@ construction_type "Charcoal burning clamp" {
 	chimneyy=2
 }
 
+construction_type "Oil press" {
+	tier=3
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10,  9, 46,231,
+			  35, 153,  9,231]
+	walkable
+	maxCondition=120
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=1
+	description="Creates oil from nuts and vegetables."
+}
+
+construction_type "Alchemist" {
+	tier=4
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  33, 95, 127]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank"]
+	productionx=2
+	productiony=0
+	description="The alchemist creates potions, tinctures and poisons."
+}
