@@ -36,6 +36,7 @@ std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
 std::vector<ItemCat> Item::ParentCategories = std::vector<ItemCat>();
 boost::unordered_map<std::string, ItemType> Item::itemTypeNames = boost::unordered_map<std::string, ItemType>();
 boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::unordered_map<std::string, ItemType>();
+std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
 
 Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
 	type(typeval),
@@ -385,6 +386,22 @@ private:
 			Item::Presets.back().bulk = value.i;
 		} else if (boost::iequals(name,"durability")) {
 			Item::Presets.back().condition = value.i;
+		} else if (boost::iequals(name,"addStatusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().addsEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"addEffectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().addsEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+			}
+		} else if (boost::iequals(name,"removeStatusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().removesEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"removeEffectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Item::Presets.back().removesEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+			}
 		}
 		return true;
 	}
@@ -428,6 +445,10 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("bulk", TCOD_TYPE_INT, false);
 	itemTypeStruct->addProperty("durability", TCOD_TYPE_INT, false);
 	itemTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addListProperty("addStatusEffects", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addListProperty("addEffectChances", TCOD_TYPE_INT, false);
+	itemTypeStruct->addListProperty("removeStatusEffects", TCOD_TYPE_STRING, false);
+	itemTypeStruct->addListProperty("removeEffectChances", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", "ranged", NULL };
@@ -451,6 +472,7 @@ void Item::LoadPresets(std::string filename) {
 	ItemListener* itemListener = new ItemListener();
 	parser.run(filename.c_str(), itemListener);
 	itemListener->translateNames();
+	UpdateEffectRemovers();
 }
 
 void Item::ResolveContainers() {
@@ -579,6 +601,17 @@ void Item::Impact(int speedChange) {
 }
 
 bool Item::IsFlammable() { return flammable; }
+
+void Item::UpdateEffectRemovers() {
+	int index = -1;
+	for (std::vector<ItemPreset>::iterator itemi = Presets.begin(); itemi != Presets.end(); ++itemi) {
+		++index;
+		for (std::vector<std::pair<StatusEffectType, int> >::iterator remEffi = itemi->removesEffects.begin();
+			remEffi != itemi->removesEffects.end(); ++remEffi) {
+				EffectRemovers.insert(std::make_pair(remEffi->first, (ItemType)index));
+		}
+	}
+}
 
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),

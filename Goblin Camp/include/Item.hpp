@@ -76,6 +76,8 @@ struct ItemPreset {
 	int condition;
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
+	std::vector<std::pair<StatusEffectType, int> > addsEffects;
+	std::vector<std::pair<StatusEffectType, int> > removesEffects;
 };
 
 class Item : public Entity {
@@ -122,10 +124,12 @@ public:
 
 	static void LoadPresets(std::string);
 	static void ResolveContainers();
+	static void UpdateEffectRemovers();
 
 	static std::vector<ItemCat> Categories;
 	static std::vector<ItemCat> ParentCategories;
 	static std::vector<ItemPreset> Presets;
+	static std::multimap<StatusEffectType, ItemType> EffectRemovers;
 
 	virtual ~Item();
 
