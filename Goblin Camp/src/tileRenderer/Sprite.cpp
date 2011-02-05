@@ -37,11 +37,7 @@ bool Sprite::Exists() const
 }
 
 bool Sprite::IsConnectionMap() const {
-	return type & (SPRITE_ConnectionMap | SPRITE_ExtendedConnectionMap);
-}
-
-bool Sprite::IsExtendedConnectionMap() const {
-	return type & SPRITE_ExtendedConnectionMap;
+	return type & (SPRITE_SimpleConnectionMap | SPRITE_NormalConnectionMap | SPRITE_ExtendedConnectionMap);
 }
 
 bool Sprite::IsAnimated() const {
@@ -149,17 +145,36 @@ void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
 	
 void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (IsConnectionMap()) {
-		if (IsExtendedConnectionMap()) {
+		if (type & SPRITE_ExtendedConnectionMap) {
 			int index = ExtConnectionIndex(connected);
 			texture->DrawTile(tiles.at(index), dst, dstRect);
-		} else {
+		} else if (type & SPRITE_NormalConnectionMap) {
 			int index = ConnectionIndex(connected(NORTH), connected(EAST), connected(SOUTH), connected(WEST));
 			texture->DrawTile(tiles.at(index), dst, dstRect);
+		} else {
+			DrawSimpleConnected(connected, dst, dstRect);
 		}
 	} else {
 		Draw(dst, dstRect);
 	}
 
+}
+
+void Sprite::DrawSimpleConnected(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	boost::array<bool, 2> vertConnected = {connected(NORTH), connected(SOUTH)};
+	boost::array<bool, 2> horizConnected = {connected(WEST), connected(EAST)};
+	boost::array<bool, 4> cornerConnected = {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)};
+	
+	for (int vertDirection = 0; vertDirection < 2; ++vertDirection) {
+		for (int horizDirection = 0; horizDirection < 2; ++horizDirection) {
+			TileSetTexture::Corner corner = static_cast<TileSetTexture::Corner>(horizDirection + 2 * vertDirection);
+			int index = (vertConnected[vertDirection] ? 1 : 0) + (horizConnected[horizDirection] ? 2 : 0);
+			if (index == 3 && cornerConnected[corner]) {
+				index ++;
+			} 
+			texture->DrawTileCorner(tiles[index], corner, dst, dstRect);
+		}
+	}
 }
 
 
