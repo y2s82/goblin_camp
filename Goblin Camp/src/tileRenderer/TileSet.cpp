@@ -130,8 +130,8 @@ void TileSet::DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const {
 	minorFilth.Draw(dst, dstRect);
 }
 
-void TileSet::DrawFilthMajor(SDL_Surface *dst, SDL_Rect * dstRect) const {
-	majorFilth.Draw(dst, dstRect);
+void TileSet::DrawFilthMajor(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	majorFilth.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const {

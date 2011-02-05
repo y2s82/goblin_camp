@@ -35,7 +35,7 @@ tileset_data "Default Tileset" {
 			   169,170,
 			   185,186]
 		minor_filth=10
-		major_filth=11
+		major_filth=[11]
 		marker=14
 		blood=16
 

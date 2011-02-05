@@ -55,7 +55,7 @@ void TileSetLoader::SetupTilesetParser(TCODParser& parser) {
 	// Terrain modifiers
 	tileTextureStruct->addListProperty("water", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("minor_filth", TCOD_TYPE_INT, false);
-	tileTextureStruct->addProperty("major_filth", TCOD_TYPE_INT, false);
+	tileTextureStruct->addListProperty("major_filth", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("marker", TCOD_TYPE_INT, false);
 	tileTextureStruct->addProperty("blood", TCOD_TYPE_INT, false);
 
@@ -266,7 +266,7 @@ bool TileSetLoader::parserProperty(TCODParser *parser,const char *name, TCOD_val
 			} else if (boost::iequals(name, "minor_filth")) {
 				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "major_filth")) {
-				tileSet->SetFilthMajor(Sprite(currentTexture, value.i));
+				tileSet->SetFilthMajor(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list)));
 			} else if (boost::iequals(name, "marker")) {
 				tileSet->SetMarker(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "blood")) {
