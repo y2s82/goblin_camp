@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
+std::vector<ItemCat> Item::ParentCategories = std::vector<ItemCat>();
 boost::unordered_map<std::string, ItemType> Item::itemTypeNames = boost::unordered_map<std::string, ItemType>();
 boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::unordered_map<std::string, ItemType>();
 
@@ -390,6 +391,10 @@ private:
 #ifdef DEBUG
 		std::cout<<(boost::format("end of %s structure\n") % str->getName()).str();
 #endif
+		if (boost::iequals(str->getName(), "category_type")) {
+			if (presetCategoryParent.back() == "")
+				Item::ParentCategories.push_back(Item::Categories.back());
+		}
 		return true;
 	}
 	void error(const char *msg) {
