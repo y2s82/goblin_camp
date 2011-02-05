@@ -2045,3 +2045,28 @@ void Game::UpdateFarmPlotSeedAllowances(ItemType type) {
 			}
 	}
 }
+
+void Game::Thirstify(Coordinate pos) {
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
+			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->thirst = THIRST_THRESHOLD + 500;
+				}
+		}
+	}
+}
+void Game::Badsleepify(Coordinate pos) {
+	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
+			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->AddEffect(BADSLEEP);
+				}
+		}
+	}
+}
