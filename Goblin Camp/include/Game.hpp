@@ -171,6 +171,7 @@ public:
 	boost::weak_ptr<Construction> GetConstruction(int);
 	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag, Coordinate closeTo=Coordinate(-1,-1));
 	void Damage(Coordinate);
+	void UpdateFarmPlotSeedAllowances(ItemType);
 
 	/*      ITEMS       ITEMS       ITEMS       */
 	int CreateItem(Coordinate, ItemType, bool stockpile = false,

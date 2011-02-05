@@ -21,18 +21,22 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "GCamp.hpp"
 #include "JobManager.hpp"
+#include "StockManager.hpp"
 
 FarmPlot::FarmPlot(ConstructionType type, int symbol, Coordinate target) : Stockpile(type, symbol, target),
 	tilled(false),
 	growth(std::map<Coordinate, int>())
 {
+	//Farmplots are a form of stockpile, disallow all items so they don't get stored here
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		allowed[i] = false;
 	}
 
+	//Allow all discovered seeds
 	for (int i = 0; i < Game::ItemTypeCount; ++i) {
 		if (Item::Presets[i].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[i].categories.end()) {
-			allowedSeeds.insert(std::pair<ItemType,bool>(i, false));
+			if (StockManager::Inst()->TypeQuantity((ItemType)i) >= 0)
+				allowedSeeds.insert(std::pair<ItemType,bool>(i, false));
 		}
 	}
 }

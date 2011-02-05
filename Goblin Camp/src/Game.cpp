@@ -2031,3 +2031,17 @@ void Game::StartFire(Coordinate pos) {
 }
 
 int Game::GetAge() { return age; }
+
+void Game::UpdateFarmPlotSeedAllowances(ItemType type) {
+	for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end();
+		++cati) {
+			if (boost::iequals(Item::Categories[*cati].name, "seed")) {
+				for (std::map<int, boost::shared_ptr<Construction> >::iterator dynamicConsi = dynamicConstructionList.begin();
+					dynamicConsi != dynamicConstructionList.end(); ++dynamicConsi) {
+						if (dynamicConsi->second->HasTag(FARMPLOT)) {
+							boost::static_pointer_cast<FarmPlot>(dynamicConsi->second)->AllowedSeeds()->insert(std::pair<ItemType,bool>(type, false));
+						}
+				}
+			}
+	}
+}
