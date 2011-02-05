@@ -60,7 +60,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(Construction* cons) {
 			dialog->AddComponent(new ScrollPanel(2, 8, 23, 31,
 				new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
 				boost::bind(&ConstructionDialog::DrawCategory, cons, _1, _2, _3, _4, _5, _6, _7),
-				boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, true)), true));
+				boost::bind(&Stockpile::SwitchAllowed, static_cast<Stockpile *>(cons), _1, true, false)), true));
 			dialog->AddComponent(new Label("Limits", 30, 7));
 			//Construct list of spinners for container limits
 			Grid *grid = new Grid(std::vector<Drawable *>(), 1, 0, 0, 48, 46);
@@ -123,6 +123,13 @@ void ConstructionDialog::Expand() {
 
 void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
 	Stockpile *sp = static_cast<Stockpile*>(construct);
+	if (category != Item::Categories[i]) {
+		i = 0;
+		for (std::vector<ItemCat>::iterator cati = Item::Categories.begin(); cati != Item::Categories.end(); ++cati) {
+			if ((*cati) == category) break;
+			++i;
+		}
+	}
 	console->setDefaultForeground(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
 	if (category.parent < 0) {
 		console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-3).c_str());

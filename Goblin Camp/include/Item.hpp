@@ -38,6 +38,14 @@ public:
 	std::string name;
 	std::string GetName();
 	ItemCategory parent;
+	inline bool operator==(const ItemCat& other) const {
+		return (flammable == other.flammable &&
+			name == other.name &&
+			parent == other.parent);
+	}
+	inline bool operator!=(const ItemCat& other) const {
+		return !(operator==(other));
+	}
 };
 
 struct ItemPreset {
@@ -116,6 +124,7 @@ public:
 	static void ResolveContainers();
 
 	static std::vector<ItemCat> Categories;
+	static std::vector<ItemCat> ParentCategories;
 	static std::vector<ItemPreset> Presets;
 
 	virtual ~Item();

@@ -410,7 +410,16 @@ boost::weak_ptr<Container> Stockpile::Storage(Coordinate pos) {
 	return containers[pos];
 }
 
-void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso) {
+void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso, bool countParentsOnly) {
+	if (countParentsOnly) { //the itemcategory passed in is actually an index in this case, so it has to be modified
+		int index = (int)cat;
+		cat = -1;
+		for (int i = 0; i <= index; ++i) {
+			++cat;
+			while (Item::Categories[cat].parent != -1)
+				++cat;
+		}
+	}
 	allowed[cat] = !allowed[cat];
 	if (childrenAlso) {
 		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
