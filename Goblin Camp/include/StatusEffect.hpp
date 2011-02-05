@@ -56,6 +56,7 @@ enum StatusEffectType {
 	CARRYING,
 	WORKING,
 	BURNING,
+	CRACKEDSKULLEFFECT,
 	STATUS_EFFECT_COUNT
 };
 
@@ -82,4 +83,5 @@ struct StatusEffect {
 	double resistanceChanges[RES_COUNT]; //These are percentage values of the original value (100% = no change)
 	std::pair<int,int> damage; //First - counter, second - damage amount
 	int damageType;
+	bool visible;
 };
