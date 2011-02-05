@@ -609,6 +609,8 @@ item_type "Berry wine" {
 	multiplier = 10
 	constructedin = "Winery"
 	fitsin = "Barrel"
+	addStatusEffects=["Invigorated", "Drunk", "Sluggish"]
+	addEffectChances=[     75,          10,       10    ]
 }
 
 item_type "Pie" {
@@ -1037,6 +1039,7 @@ item_type "Chillweed leaf" {
 	decay = [ "Filth" ]
 	decaySpeed = 9
 	fitsin = "Sack"
+	removeStatusEffects=["Sluggish"]
 }
 
 item_type "Chillweed seed" {
@@ -1076,6 +1079,9 @@ item_type "Chillwine" {
 	multiplier = 10
 	constructedin = "Winery"
 	fitsin = "Barrel"
+	addStatusEffects=["Invigorated", "Drunk"]
+	addEffectChances=[     75,          10  ]
+	removeStatusEffects=["Drowsy"]
 }
 
 item_type "Poison antidote" {
@@ -1084,6 +1090,9 @@ item_type "Poison antidote" {
 	color="0,240,240"
 	components = [ "Branch", "Wine" ]
 	constructedin = "Alchemist"
+	addStatusEffects=["Drunk"]
+	addEffectChances=[   1   ]
+	removeStatusEffects=["Poison"]
 }
 
 item_type "Healing tonic" {
@@ -1092,6 +1101,7 @@ item_type "Healing tonic" {
 	color="0,136,14"
 	components = [ "Shoot", "Shoot" ]
 	constructedin = "Alchemist"
+	addStatusEffects=["Healing"]
 }
 
 item_type "Hognut" {
