@@ -86,8 +86,8 @@ void TCODSystem::getCharSize(int *w, int *h) {
 
 // custom post-renderer
 static ITCODSDLRenderer *renderer=NULL;
-extern "C" void TCOD_CRenderer(void *sdl_surface) {
-	if ( renderer ) renderer->render(sdl_surface);
+extern "C" void TCOD_CRenderer(void *sdl_surface, void *sdl_screen) {
+	if ( renderer ) renderer->render(sdl_surface, sdl_screen);
 }
 void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer) {
 	::renderer = renderer;

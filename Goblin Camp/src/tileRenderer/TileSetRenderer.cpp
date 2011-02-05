@@ -30,7 +30,6 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
   mapSurface(),
-  tempBuffer(),
   tileSet(ts),
   mapOffsetX(0),
   mapOffsetY(0),
@@ -55,14 +54,9 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
    mapSurface = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
    SDL_FreeSurface(temp);
 
-   temp = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
-   tempBuffer = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
-   SDL_SetColorKey(tempBuffer.get(),SDL_SRCCOLORKEY, SDL_MapRGBA(tempBuffer->format, keyColor.r, keyColor.g, keyColor.b, 255));
    // Make this a future option:
    //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
-   SDL_FreeSurface(temp);
-
-   if (!mapSurface || !tempBuffer)
+   if (!mapSurface)
    {
 	   LOG(SDL_GetError());
    }
@@ -120,7 +114,7 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		for (int x = offsetX; x < offsetX + sizeX; x++) {
 			for (int y = offsetY; y < offsetY + sizeY; y++) {
 				tcodConsole->putCharEx(x, y, ' ', TCODColor::black, keyColor);
-				tcodConsole->setDirty(x,y,1,1);
+				//tcodConsole->setDirty(x,y,1,1);
 			}
 		}
 	}
@@ -392,13 +386,16 @@ void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_R
 	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
 }
 
-void TileSetRenderer::render(void * surf) {
-	  SDL_Surface *screen = (SDL_Surface *)surf;
+void TileSetRenderer::render(void * surf,void * sdl_screen) {
+	  SDL_Surface *tcod = (SDL_Surface *)surf;
+	  SDL_Surface *screen = (SDL_Surface *)sdl_screen;
 
       SDL_Rect srcRect={0,0,screenWidth,screenHeight};
       SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	  SDL_BlitSurface(screen,&srcRect,tempBuffer.get(),&dstRect);
-	  SDL_BlitSurface(tempBuffer.get(),&srcRect,mapSurface.get(),&dstRect);
-      SDL_BlitSurface(mapSurface.get(),&srcRect,screen,&dstRect);   
+	  SDL_BlitSurface(mapSurface.get(), &srcRect, screen, &dstRect);
+	  SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
+	  // TODO: Make this an option
+	  //SDL_SetAlpha(tcod, SDL_SRCALPHA, 196);
+	  SDL_BlitSurface(tcod, &srcRect, screen, &dstRect);
 }
 

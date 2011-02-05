@@ -40,14 +40,13 @@ public:
 	void DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable);
 	void DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable);
 
-	void render(void *sdlSurface);
+	void render(void *sdlSurface, void*sdlScreen);
 private:
 	TCODConsole * tcodConsole;
 
 	// the font characters size
 	int screenWidth, screenHeight;
 	boost::shared_ptr<SDL_Surface> mapSurface;
-	boost::shared_ptr<SDL_Surface> tempBuffer;
 	boost::shared_ptr<TileSet> tileSet;
 	TCODColor keyColor;
 	int mapOffsetX, mapOffsetY; // This is the pixel offset when drawing to the viewport

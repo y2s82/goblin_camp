@@ -82,6 +82,6 @@ TCODLIB_API void TCOD_condition_broadcast(TCOD_cond_t sem);
 TCODLIB_API void TCOD_condition_wait(TCOD_cond_t sem, TCOD_mutex_t mut);
 TCODLIB_API void TCOD_condition_delete( TCOD_cond_t sem);
 /* SDL renderer callback */
-typedef void (*SDL_renderer_t) (void *sdl_surface);
+typedef void (*SDL_renderer_t) (void*sdl_surface, void *sdl_screen);
 TCODLIB_API void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer);
 #endif
