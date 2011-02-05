@@ -38,7 +38,7 @@
 class TCODLIB_API ITCODSDLRenderer {
 public :
 	virtual ~ITCODSDLRenderer() {}
-	virtual void render(void *sdlSurface) = 0;
+	virtual void render(void *sdlSurface, void*sdlScreen) = 0;
 };
 
 class TCODLIB_API TCODSystem {

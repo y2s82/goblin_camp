@@ -60,6 +60,7 @@ static image_support_t image_type[] = {
 	{ NULL, NULL, NULL, NULL },
 };
 
+static SDL_Surface* renderTarget=NULL;
 static SDL_Surface* screen=NULL;
 static SDL_Surface* charmap=NULL;
 static char_t *consoleBuffer=NULL;
@@ -144,6 +145,16 @@ static void check_ascii_to_tcod() {
 
 void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
 	TCOD_ctx.sdl_cbk=renderer;
+	if (renderer && !renderTarget) {
+		Uint8 rmask, gmask, bmask, amask;
+		SDL_Surface * temp = SDL_CreateRGBSurface(0, screen->w, screen->h, 32, screen->format->Rmask, screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
+		SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
+		renderTarget = SDL_DisplayFormat(temp);
+		SDL_FreeSurface(temp);
+	} else if (!renderer && renderTarget) {
+		SDL_FreeSurface(renderTarget);
+		renderTarget = NULL;
+	}
 }
 
 void TCOD_sys_map_ascii_to_font(asciiCode, fontCharX, fontCharY) {
@@ -321,7 +332,7 @@ static void TCOD_sys_render(void *vbitmap, int console_width, int console_height
 	if ( TCOD_ctx.renderer == TCOD_RENDERER_SDL ) {
 		TCOD_sys_console_to_bitmap(vbitmap, console_width, console_height, console_buffer, prev_console_buffer);
 		if ( TCOD_ctx.sdl_cbk ) {
-			TCOD_ctx.sdl_cbk((void *)screen);
+			TCOD_ctx.sdl_cbk(vbitmap, (void *)screen);
 		}
 		SDL_Flip(screen);
 	}
@@ -795,7 +806,11 @@ void TCOD_sys_flush(bool render) {
 	static uint32 old_time,new_time=0, elapsed=0;
 	int32 frame_time,time_to_wait;
 	if ( render ) {
-		TCOD_sys_render(screen,TCOD_console_get_width(NULL),TCOD_console_get_height(NULL),consoleBuffer, prevConsoleBuffer);
+		if (renderTarget != NULL) {
+			TCOD_sys_render(renderTarget, TCOD_console_get_width(NULL),TCOD_console_get_height(NULL),consoleBuffer, prevConsoleBuffer);
+		} else {
+			TCOD_sys_render(screen, TCOD_console_get_width(NULL),TCOD_console_get_height(NULL),consoleBuffer, prevConsoleBuffer);
+		}
 	}
 	old_time=new_time;
 	new_time=TCOD_sys_elapsed_milli();
