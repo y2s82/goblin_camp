@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "JobManager.hpp"
 #include "Map.hpp"
+#include "Game.hpp"
 
 #ifdef DEBUG
 #include <iostream>
@@ -243,7 +244,10 @@ void StockManager::UpdateQuantity(ItemType type, int quantity) {
 	std::cout<<"Quantity update "<<Item::ItemTypeToString(type)<<"\n";
 #endif
 
-	if (typeQuantities[type] == -1) typeQuantities[type] = 0;
+	if (typeQuantities[type] == -1) {
+		typeQuantities[type] = 0;
+		Game::Inst()->UpdateFarmPlotSeedAllowances(type);
+	}
 
 	typeQuantities[type] += quantity;
 #ifdef DEBUG
