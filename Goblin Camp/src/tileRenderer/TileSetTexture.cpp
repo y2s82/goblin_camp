@@ -58,6 +58,27 @@ void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, const SDL_Rect * dstR
 	}
 }
 
+void TileSetTexture::DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, const SDL_Rect * dstRect) const {
+	if (tile < tileCount) {
+		int xCoord = tile % tileXDim;
+		int yCoord = tile / tileXDim;
+		int halfWidth = tileWidth >> 1;
+		int halfHeight = tileHeight >> 1;
+		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, halfWidth, halfHeight};
+		SDL_Rect dstRectCp={dstRect->x, dstRect->y, halfWidth, halfHeight}; 
+		if (corner & 0x1) {
+			srcRect.x += halfWidth;
+			dstRectCp.x += halfWidth;
+		}
+		if (corner & 0x2) {
+			srcRect.y += halfHeight;
+			dstRectCp.y += halfHeight;
+		}
+		
+		SDL_BlitSurface(tiles.get(),&srcRect, dst, &dstRectCp);
+	}
+}
+
 boost::shared_ptr<SDL_Surface> TileSetTexture::GetInternalSurface() {
 	return tiles;
 }

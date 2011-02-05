@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/filesystem.hpp>
 #include <SDL.h>
 
+
 /*******************
 // TileSetTexture
 //
@@ -29,11 +30,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSetTexture
 {
 public:
+	enum Corner {
+		TopLeft = 0x0,
+		TopRight = 0x1,
+		BottomLeft = 0x2,
+		BottomRight = 0x3
+	};
+
 	explicit TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
 	~TileSetTexture();
 
 	int Count() const;
 	void DrawTile(int tile, SDL_Surface * dst, const SDL_Rect * dstRect) const;
+	void DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, const SDL_Rect * dstRect) const;
 	boost::shared_ptr<SDL_Surface> GetInternalSurface();
 
 private:

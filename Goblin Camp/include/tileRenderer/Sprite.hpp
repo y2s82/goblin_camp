@@ -24,9 +24,9 @@ enum SpriteType
 {
 	SPRITE_Single = 0x0,
 	SPRITE_Animated = 0x1,
-	SPRITE_ConnectionMap = 0x2,
-	SPRITE_ExtendedConnectionMap = 0x4,
-	SPRITE_Pattern = 0x8
+	SPRITE_SimpleConnectionMap = 0x2,
+	SPRITE_NormalConnectionMap = 0x4,
+	SPRITE_ExtendedConnectionMap = 0x8
 };
 
 /****************
@@ -54,7 +54,6 @@ public:
 
 	bool Exists() const;
 	bool IsConnectionMap() const;
-	bool IsExtendedConnectionMap() const;
 	bool IsAnimated() const;
 
 	// Standard Tile Drawing
@@ -64,6 +63,8 @@ public:
 	typedef boost::function<bool (Direction)> ConnectedFunction;
 	void Draw(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
+private:
+	void DrawSimpleConnected(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
 };
 
 template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, SpriteType spriteType)
@@ -77,10 +78,13 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	}
 	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 47) {
 		// Down grade to connection map
-		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_ConnectionMap);
+		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_NormalConnectionMap);
 	}
-	if ((type & SPRITE_ConnectionMap) && tiles.size() < 16) {
-		type = static_cast<SpriteType>(type & ~SPRITE_ConnectionMap);
+	if ((type & SPRITE_NormalConnectionMap) && tiles.size() < 16) {
+		type = static_cast<SpriteType>((type & ~SPRITE_NormalConnectionMap) | SPRITE_SimpleConnectionMap);
+	}
+	if ((type & SPRITE_SimpleConnectionMap) && tiles.size() < 5) {
+		type = static_cast<SpriteType>(type & ~SPRITE_SimpleConnectionMap);
 	}
 }
 
@@ -95,9 +99,12 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	}
 	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 47) {
 		// Down grade to connection map
-		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_ConnectionMap);
+		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_NormalConnectionMap);
 	}
-	if ((type & SPRITE_ConnectionMap) && tiles.size() < 16) {
-		type = static_cast<SpriteType>(type & ~SPRITE_ConnectionMap);
+	if ((type & SPRITE_NormalConnectionMap) && tiles.size() < 16) {
+		type = static_cast<SpriteType>((type & ~SPRITE_NormalConnectionMap) | SPRITE_SimpleConnectionMap);
+	}
+	if ((type & SPRITE_SimpleConnectionMap) && tiles.size() < 5) {
+		type = static_cast<SpriteType>(type & ~SPRITE_SimpleConnectionMap);
 	}
 }
