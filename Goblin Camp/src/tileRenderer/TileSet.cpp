@@ -107,9 +107,6 @@ void TileSet::DrawTerrain(TileType type, Sprite::ConnectedFunction connected, SD
 	if (type == TILENONE || !terrainTiles.at(type).Exists()) { 
 		defaultTerrainTile.Draw(dst, dstRect);
 	} else {
-		if (terrainTiles.at(type).IsConnectionMap()) {
-			defaultTerrainTile.Draw(dst, dstRect);
-		}
 		terrainTiles.at(type).Draw(connected, dst, dstRect);
 	}
 }
