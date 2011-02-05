@@ -41,6 +41,8 @@ void DrawConstructionVisitor::Visit(Stockpile * stockpile) {
 }
 
 void DrawConstructionVisitor::Visit(Construction * construction) {
+	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
+
 	Coordinate internal_pos = coordinate - construction->Position();
 	int pos = internal_pos.X() + internal_pos.Y() * Construction::Blueprint(construction->Type()).X();
 	int maxPos = Construction::Blueprint(construction->Type()).X() * Construction::Blueprint(construction->Type()).Y();
@@ -49,19 +51,19 @@ void DrawConstructionVisitor::Visit(Construction * construction) {
 	} else {
 		tileSet->DrawUnderConstruction(construction, coordinate, dst, dstRect);
 	}
-	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
 }
 
 void DrawConstructionVisitor::Visit(SpawningPool * spawningPool) {
+	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
 	if (spawningPool->Condition() < 0) {
 		tileSet->DrawUnderConstruction(spawningPool, coordinate, dst, dstRect);
 	} else { 
 		tileSet->DrawBaseConstruction(spawningPool, coordinate, dst, dstRect);
 	}
-	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
 }
 
 void DrawConstructionVisitor::Visit(Door * door) {
+	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
 	if (door->Condition() < 0) {
 		tileSet->DrawUnderConstruction(door, coordinate, dst, dstRect);
 	} else if (door->Open()) {
@@ -69,5 +71,5 @@ void DrawConstructionVisitor::Visit(Door * door) {
 	} else {
 		tileSet->DrawBaseConstruction(door, coordinate, dst, dstRect);
 	}
-	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
+	
 }
