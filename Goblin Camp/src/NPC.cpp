@@ -192,6 +192,18 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 	}
 	taskBegun = false;
 	run = true;
+
+	//If we're wielding a container (ie. a tool) spill it's contents
+	if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
+		boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(mainHand.lock()));
+		if (cont->ContainsWater() > 0) {
+			Game::Inst()->CreateWater(Position(), cont->ContainsWater());
+			cont->RemoveWater(cont->ContainsWater());
+		} else if (cont->ContainsFilth() > 0) {
+			Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
+			cont->RemoveFilth(cont->ContainsFilth());
+		}
+	}
 }
 
 void NPC::HandleThirst() {
