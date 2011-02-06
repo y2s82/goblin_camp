@@ -124,12 +124,13 @@ public:
 
 	static void LoadPresets(std::string);
 	static void ResolveContainers();
-	static void UpdateEffectRemovers();
+	static void UpdateEffectItems();
 
 	static std::vector<ItemCat> Categories;
 	static std::vector<ItemCat> ParentCategories;
 	static std::vector<ItemPreset> Presets;
 	static std::multimap<StatusEffectType, ItemType> EffectRemovers;
+	static std::multimap<StatusEffectType, ItemType> GoodEffectAdders;
 
 	virtual ~Item();
 
