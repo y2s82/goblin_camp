@@ -378,6 +378,7 @@ void NPC::Update() {
 			boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
 			if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
 				AddEffect(SWIM);
+				RemoveEffect(BURNING);
 			} else { RemoveEffect(SWIM); }
 		} else { RemoveEffect(SWIM); }
 	}
