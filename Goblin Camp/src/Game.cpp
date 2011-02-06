@@ -71,6 +71,7 @@ screenWidth(0),
 	safeMonths(9),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
+	gameOver(false),
 	camX(0),
 	camY(0),
 	buffer(0)
@@ -351,7 +352,6 @@ int Game::OrcCount() const { return orcCount; }
 void Game::OrcCount(int add) { orcCount += add; }
 int Game::GoblinCount() const { return goblinCount; }
 void Game::GoblinCount(int add) { goblinCount += add; }
-
 
 //Moves the entity to a valid walkable tile
 void Game::BumpEntity(int uid) {
@@ -915,7 +915,10 @@ void Game::Update() {
 		} else ++delit;
 	}
 
-	if (orcCount == 0 && goblinCount == 0) GameOver();
+	if (!gameOver && orcCount == 0 && goblinCount == 0) {
+		gameOver = true;
+		MessageBox::ShowMessageBox("All your orcs and goblins have died.", boost::bind(&Game::GameOver, Game::Inst()), "Main Menu", NULL, "Keep watching");
+	}
 
 	for (std::list<boost::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
 		if (boost::shared_ptr<FireNode> fire = fireit->lock()) {
@@ -1719,6 +1722,7 @@ void Game::Reset() {
 	renderer->PreparePrefabs();
 	fireList.clear();
 	spellList.clear();
+	gameOver = false;
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
@@ -1995,7 +1999,6 @@ void Game::AddDelay(int delay, boost::function<void()> callback) {
 }
 
 void Game::GameOver() {
-	MessageBox::ShowMessageBox("All your orcs and goblins have died.");
 	running = false;
 }
 

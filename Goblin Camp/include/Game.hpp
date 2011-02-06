@@ -87,6 +87,7 @@ private:
 	std::list<std::pair<int, boost::function<void()> > > delays;
 
 	boost::shared_ptr<MapRenderer> renderer;
+	bool gameOver;
 public:
 	static Game* Inst();
 	~Game();
