@@ -193,6 +193,8 @@ private:
 	std::set<Trait> traits;
 	int damageDealt, damageReceived;
 	bool statusEffectsChanged;
+
+	void UpdateHealth();
 public:
 	~NPC();
 	SkillSet Skills;

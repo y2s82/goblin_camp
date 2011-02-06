@@ -288,6 +288,7 @@ void NPC::HandleWeariness() {
 	bool found = false;
 	for (std::deque<boost::shared_ptr<Job> >::iterator jobIter = jobs.begin(); jobIter != jobs.end(); ++jobIter) {
 		if ((*jobIter)->name.find("Sleep") != std::string::npos) found = true;
+		else if ((*jobIter)->name.find("Get rid of") != std::string::npos) found = true;
 	}
 	if (!found) {
 		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED, Position());
@@ -356,7 +357,7 @@ void NPC::Update() {
 
 		if (weariness >= WEARY_THRESHOLD) { 
 			AddEffect(DROWSY);
-			HandleWeariness();
+			if (weariness > WEARY_THRESHOLD) HandleWeariness(); //Give the npc a chance to find a sleepiness curing item
 		} else RemoveEffect(DROWSY);
 	}
 
@@ -373,20 +374,19 @@ void NPC::Update() {
 		attacki->Update();
 	}
 
-	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
 	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
 		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
 	} else RemoveEffect(CARRYING);
 
-	if (health <= 0) Kill();
-
 	if (HasTrait(CRACKEDSKULL) && Random::Generate(MONTH_LENGTH * 6) == 0) GoBerserk();
 	if (HasEffect(BURNING) && Random::Generate(UPDATES_PER_SECOND * 3) == 0) {
 		boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
 		spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
 	}
+
+	UpdateHealth();
 }
 
 void NPC::UpdateStatusEffects() {
@@ -406,7 +406,7 @@ void NPC::UpdateStatusEffects() {
 			effectiveResistances[i] = (int)(effectiveResistances[i] * statusEffectI->resistanceChanges[i]);
 		}
 
-		if (statusEffectI->damage.second > 0 && --statusEffectI->damage.first <= 0) {
+		if (statusEffectI->damage.second != 0 && --statusEffectI->damage.first <= 0) {
 			statusEffectI->damage.first = UPDATES_PER_SECOND;
 			TCOD_dice_t dice;
 			dice.addsub = (float)statusEffectI->damage.second;
@@ -1822,7 +1822,6 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	double resistance = (100.0 - (float)effectiveResistances[res]) / 100.0;
 	int damage = (int)(Game::DiceToInt(attack->Amount()) * resistance);
 	health -= damage;
-	damageReceived += damage;
 
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
 		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
@@ -1833,6 +1832,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	if (health <= 0) Kill();
 
 	if (damage > 0) {
+		damageReceived += damage;
 		if (res == PHYSICAL_RES) {
 			Game::Inst()->CreateBlood(Coordinate(
 				Position().X() + Random::Generate(-1, 1),
@@ -2400,8 +2400,46 @@ void NPC::ApplyEffects(boost::shared_ptr<Item> item) {
 		}
 		for (std::vector<std::pair<StatusEffectType, int> >::iterator remEffecti = Item::Presets[item->Type()].removesEffects.begin();
 			remEffecti != Item::Presets[item->Type()].removesEffects.end(); ++remEffecti) {
-				if (Random::Generate(99) < remEffecti->second)
+				if (Random::Generate(99) < remEffecti->second) {
 					RemoveEffect(remEffecti->first);
+					if (remEffecti->first == DROWSY) weariness = 0; //Special case, the effect would come straight back otherwise
+				}
+		}
+	}
+}
+
+void NPC::UpdateHealth() {
+	if (health <= 0) {Kill(); return;}
+
+	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
+
+	if (faction == 0 && health < maxHealth / 2 && !HasEffect(HEALING)) {
+		bool healJobFound = false;
+		for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
+			if ((*jobi)->name.find("Heal") != std::string::npos) {
+				healJobFound = true;
+				break;
+			}
+		}
+
+		if (!healJobFound && Item::GoodEffectAdders.find(HEALING) != Item::GoodEffectAdders.end()) {
+			boost::shared_ptr<Item> healItem;
+			for (std::multimap<StatusEffectType, ItemType>::iterator fixi = Item::GoodEffectAdders.equal_range(HEALING).first;
+				fixi != Item::GoodEffectAdders.equal_range(HEALING).second && !healItem; ++fixi) {
+					healItem = Game::Inst()->FindItemByTypeFromStockpiles(fixi->second, Position()).lock();
+			}
+			if (healItem) {
+				boost::shared_ptr<Job> healJob(new Job("Heal"));
+				healJob->internal = true;
+				healJob->ReserveEntity(healItem);
+				healJob->tasks.push_back(Task(MOVE, healItem->Position()));
+				healJob->tasks.push_back(Task(TAKE, healItem->Position(), healItem));
+				if (healItem->IsCategory(Item::StringToItemCategory("drink")))
+					healJob->tasks.push_back(Task(DRINK));
+				else
+					healJob->tasks.push_back(Task(EAT));
+				jobs.push_back(healJob);
+			}
 		}
 	}
 }
