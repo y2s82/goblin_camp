@@ -2410,6 +2410,7 @@ void NPC::ApplyEffects(boost::shared_ptr<Item> item) {
 
 void NPC::UpdateHealth() {
 	if (health <= 0) {Kill(); return;}
+	if (health > maxHealth) health = maxHealth;
 
 	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
 
