@@ -1986,7 +1986,7 @@ void Game::Tire(Coordinate pos) {
 				boost::shared_ptr<NPC> npc;
 				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
 				if (npc) {
-					npc->weariness = (int)(WEARY_THRESHOLD * 1.5);
+					npc->weariness = (int)(WEARY_THRESHOLD-1);
 				}
 		}
 	}
