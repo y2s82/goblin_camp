@@ -37,6 +37,7 @@ std::vector<ItemCat> Item::ParentCategories = std::vector<ItemCat>();
 boost::unordered_map<std::string, ItemType> Item::itemTypeNames = boost::unordered_map<std::string, ItemType>();
 boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::unordered_map<std::string, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
+std::multimap<StatusEffectType, ItemType> Item::GoodEffectAdders = std::multimap<StatusEffectType, ItemType>();
 
 Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
 	type(typeval),
@@ -472,7 +473,7 @@ void Item::LoadPresets(std::string filename) {
 	ItemListener itemListener = ItemListener();
 	parser.run(filename.c_str(), &itemListener);
 	itemListener.translateNames();
-	UpdateEffectRemovers();
+	UpdateEffectItems();
 }
 
 void Item::ResolveContainers() {
@@ -602,13 +603,20 @@ void Item::Impact(int speedChange) {
 
 bool Item::IsFlammable() { return flammable; }
 
-void Item::UpdateEffectRemovers() {
+void Item::UpdateEffectItems() {
 	int index = -1;
 	for (std::vector<ItemPreset>::iterator itemi = Presets.begin(); itemi != Presets.end(); ++itemi) {
 		++index;
 		for (std::vector<std::pair<StatusEffectType, int> >::iterator remEffi = itemi->removesEffects.begin();
 			remEffi != itemi->removesEffects.end(); ++remEffi) {
 				EffectRemovers.insert(std::make_pair(remEffi->first, (ItemType)index));
+		}
+		for (std::vector<std::pair<StatusEffectType, int> >::iterator addEffi = itemi->addsEffects.begin();
+			addEffi != itemi->addsEffects.end(); ++addEffi) {
+				StatusEffect effect(addEffi->first);
+				if (!effect.negative) {
+					GoodEffectAdders.insert(std::make_pair(addEffi->first, (ItemType)index));
+				}
 		}
 	}
 }
