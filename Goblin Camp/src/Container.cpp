@@ -35,10 +35,10 @@ Container::Container(
 }
 
 Container::~Container() {
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-		if (itemi->lock()) {
-			itemi->lock()->PutInContainer(container);
-		}
+	while (!items.empty()) {
+		boost::weak_ptr<Item> item = GetFirstItem();
+		RemoveItem(item);
+		if (item.lock()) item.lock()->PutInContainer();
 	}
 }
 
