@@ -39,8 +39,14 @@ public:
 	bool ShowItem() {
 		if (boost::icontains(Item::Presets[itemType].name, owner->GetFilter()))
 			return StockManager::Inst()->TypeQuantity(itemType) > -1;
-		else
-			return false;
+		else {
+			for (std::set<ItemCategory>::iterator cati = Item::Presets[itemType].categories.begin();
+				cati != Item::Presets[itemType].categories.end(); ++cati) {
+					if (boost::icontains(Item::Categories[*cati].name, owner->GetFilter()))
+						return StockManager::Inst()->TypeQuantity(itemType) > -1;
+			}
+		}
+		return false;
 	}
 	
 	void _GetTooltip(int x, int y, Tooltip *tooltip) {
