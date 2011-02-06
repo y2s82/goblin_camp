@@ -394,9 +394,25 @@ void NPC::Update() {
 	} else RemoveEffect(CARRYING);
 
 	if (HasTrait(CRACKEDSKULL) && Random::Generate(MONTH_LENGTH * 6) == 0) GoBerserk();
-	if (HasEffect(BURNING) && Random::Generate(UPDATES_PER_SECOND * 3) == 0) {
-		boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
-		spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
+	if (HasEffect(BURNING)) {
+		if (Random::Generate(UPDATES_PER_SECOND * 3) == 0) {
+			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
+			spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
+		}
+		if (!HasEffect(RAGE) && (jobs.empty() || jobs.front()->name != "Jump into water")) {
+			if (Random::Generate(UPDATES_PER_SECOND) == 0) {
+				RemoveEffect(PANIC);
+				while (!jobs.empty()) TaskFinished(TASKFAILFATAL);
+				boost::shared_ptr<Job> jumpJob(new Job("Jump into water"));
+				jumpJob->internal = true;
+				Coordinate waterPos = Game::Inst()->FindWater(Position());
+				if (waterPos.X() != -1) {
+					jumpJob->tasks.push_back(Task(MOVE, waterPos));
+					jobs.push_back(jumpJob);
+				}
+			} else if (!coward && boost::iequals(NPC::NPCTypeToString(type), "orc") && Random::Generate(2) == 0) {RemoveEffect(PANIC); GoBerserk();}
+			else {AddEffect(PANIC);}
+		}
 	}
 
 	UpdateHealth();
