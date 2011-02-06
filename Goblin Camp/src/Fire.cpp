@@ -162,6 +162,7 @@ void FireNode::Update() {
 							boost::shared_ptr<Item> item = container->GetFirstItem().lock();
 							if (item && item->IsFlammable()) {
 								container->RemoveItem(item);
+								item->PutInContainer();
 								Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
 								Game::Inst()->RemoveItem(item);
 								temperature += 250;
