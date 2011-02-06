@@ -33,10 +33,10 @@ void MessageBox::ShowMessageBox(std::string text, boost::function<void()> firstA
 	} while (i < text.length());
 
 	if (secondButton == "") {
-		contents->AddComponent(new Button(firstButton, firstAction, 22, (i/50)+3, 10, firstButton.at(0), true));
+		contents->AddComponent(new Button(firstButton, firstAction, 22, (i/50)+3, 15, firstButton.at(0), true));
 	} else {
-		contents->AddComponent(new Button(firstButton, firstAction, 12, (i/50)+3, 10, firstButton.at(0), true));
-		contents->AddComponent(new Button(secondButton, secondAction, 33, (i/50)+3, 10, secondButton.at(0), true));
+		contents->AddComponent(new Button(firstButton, firstAction, 8, (i/50)+3, 15, firstButton.at(0), true));
+		contents->AddComponent(new Button(secondButton, secondAction, 31, (i/50)+3, 15, secondButton.at(0), true));
 	}
 	dialog->ShowModal();
 }
