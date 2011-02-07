@@ -253,8 +253,8 @@ void StartNewGame() {
 		}
 	}
 
-	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, spawnBottomCorner);
-	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
+	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner+Coordinate(15,15), spawnBottomCorner-Coordinate(15,15));
+	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner+Coordinate(15,15), spawnBottomCorner-Coordinate(15,15));
 
 	game->CreateItems(30, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(5, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
