@@ -217,7 +217,6 @@ plant_type "Chillweed" {
 plant_type "Mandrake shrub" {
 	evil
 	graphic=42
-
 	color="127,50,0"
 	components=[ "Mandrake root" ]
 	rarity=50
