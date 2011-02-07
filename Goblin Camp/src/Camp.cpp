@@ -126,6 +126,7 @@ void Camp::UpdateTier() {
 	default: tier = 0; break;
 	}
 
+	std::string oldName = name;
 	if (tier == 0) {
 		article = "a";
 		name = "Clearing";
@@ -150,7 +151,7 @@ void Camp::UpdateTier() {
 	}
 	
 	if (tier != oldTier) {
-		Announce::Inst()->AddMsg("Your camp advanced to a higher tier and is now " + article + " " + name + "!", TCODColor::lightGreen);
+		Announce::Inst()->AddMsg("Your "+oldName+" is now " + article + " " + name + "!", TCODColor::lightGreen);
 		Script::Event::TierChanged(tier, name);
 	}
 }
