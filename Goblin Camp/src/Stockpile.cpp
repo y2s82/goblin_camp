@@ -421,11 +421,15 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso, bool countPar
 		}
 	}
 	allowed[cat] = !allowed[cat];
+
+	if (allowed[cat] && limits.find(cat) != limits.end() && limits[cat] == 0) limits[cat] = 10;
+
 	if (childrenAlso) {
 		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
 			if (Item::Categories[alli->first].parent >= 0 &&
 				Item::Categories[Item::Categories[alli->first].parent].name == Item::Categories[cat].name) {
 				alli->second = allowed[cat];
+				if (alli->second && limits.find(alli->first) != limits.end() && limits[alli->first] == 0) limits[alli->first] = 10;
 			} else {
 				break;
 			}
@@ -536,6 +540,9 @@ void Stockpile::TranslateInternalContainerListeners() {
 }
 
 void Stockpile::AdjustLimit(ItemCategory category, int amount) {
+	if (amount > 0 && !allowed[category]) allowed[category] = true;
+	else if (amount == 0 && allowed[category]) allowed[category] = false;
+
 	if (limits.find(category) != limits.end()) {
 		limits[category] = amount;
 	}
