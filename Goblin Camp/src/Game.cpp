@@ -343,6 +343,24 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->isTunneler = true;
 	}
 
+	for (int equipIndex = 0; equipIndex < NPC::Presets[type].possibleEquipment.size(); ++equipIndex) {
+		int itemType = Random::ChooseElement(NPC::Presets[type].possibleEquipment[equipIndex]);
+		if (itemType > 0 && itemType < Item::Presets.size()) {
+			if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("weapon")) != Item::Presets[itemType].categories.end()
+				&& !npc->Wielding().lock()) {
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					boost::shared_ptr<Item> item = itemList[itemUid];
+					npc->mainHand = item;
+			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("armor")) != Item::Presets[itemType].categories.end()
+				&& !npc->Wearing().lock()) {
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					boost::shared_ptr<Item> item = itemList[itemUid];
+					npc->armor = item;
+			} else {
+				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+			}
+		}
+	}
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();

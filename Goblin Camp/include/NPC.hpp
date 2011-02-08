@@ -99,6 +99,7 @@ struct NPCPreset {
 	ItemType deathItem;
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
+	std::vector<std::vector<int> > possibleEquipment;
 };
 
 class NPC : public Entity {
