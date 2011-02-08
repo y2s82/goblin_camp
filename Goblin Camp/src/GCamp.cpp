@@ -277,10 +277,12 @@ void StartNewGame() {
 		game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
 		int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
 		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
-		corpse->Name("Human corpse");
+		corpse->Name("Corpse(Human woodsman)");
+		corpse->Color(TCODColor::white);
 		corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
 		corpse = game->itemList[corpseuid];
-		corpse->Name("Human corpse");
+		corpse->Name("Corpse(Human woodsman)");
+		corpse->Color(TCODColor::white);
 		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + Random::Generate(2), corpseLoc1.Y() - 1 + Random::Generate(2)));
 		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + Random::Generate(2), corpseLoc2.Y() - 1 + Random::Generate(2)));
 	}
