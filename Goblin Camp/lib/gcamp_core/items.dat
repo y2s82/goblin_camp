@@ -309,7 +309,7 @@ item_type "Wood log" {
 	category = ["Log"]
 	graphic = 22
 	color = "153,87,38"
-	multiplier = 10
+	multiplier = 5
 	bulk = 3
 }
 
@@ -328,7 +328,7 @@ item_type "Wicker" {
     graphic = 42
     color = "127,106,0"
     fitsin = "Crate"
-	multiplier = 10
+	multiplier = 5
 }
 
 item_type "Wood charcoal" {
@@ -692,6 +692,7 @@ item_type "Wooden club" {
 	}
 	constructedin = "Carpenter"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Stone maul" {
@@ -709,6 +710,7 @@ item_type "Stone maul" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 2
+	durability = 15
 }
 
 item_type "Stone axe" {
@@ -726,6 +728,7 @@ item_type "Stone axe" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 2
+	durability = 15
 }
 
 item_type "Stone spear" {
@@ -742,6 +745,7 @@ item_type "Stone spear" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	durability = 15
 }
 
 item_type "Bone Dagger" {
@@ -758,6 +762,7 @@ item_type "Bone Dagger" {
 	}
 	constructedin = "Bone carver"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Poisoned dagger" {
@@ -774,6 +779,7 @@ item_type "Poisoned dagger" {
 	}
 	constructedin = "Bone carver"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Wooden arrow" {
@@ -993,6 +999,7 @@ item_type "Shovel" {
 	components = [ "Plank", "Metal bar" ]
 	constructedin = "Smithy"
 	fitsin = "Crate"
+	durability = 20
 }
 
 item_type "Debris" {
@@ -1018,6 +1025,7 @@ item_type "Wooden bucket" {
 	components = [ "Plank", "Plank" ]
 	constructedin = "Carpenter"
 	bulk = 2
+	durability = 4
 }
 
 item_type "Meat pie" {
