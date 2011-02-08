@@ -1415,10 +1415,14 @@ void NPC::Kill() {
 		}
 
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
-		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
-			weapon->Position(Position());
-			weapon->PutInContainer();
-			mainHand.reset();
+
+		while (!inventory->empty()) {
+			boost::weak_ptr<Item> witem = inventory->GetFirstItem();
+			if (boost::shared_ptr<Item> item = witem.lock()) {
+				item->Position(Position());
+				item->PutInContainer();
+			}
+			inventory->RemoveItem(witem);
 		}
 
 		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
