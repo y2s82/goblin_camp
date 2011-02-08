@@ -1,8 +1,8 @@
 tileset_data "Default Tileset" {
 	tileWidth=16
 	tileHeight=16
-	description="Test tileset with various tiles sourced from Goblin Camp Forum"
-	author="onionknight, hutze, apostrophest"
+	description="Test tileset with various tiles sourced from Goblin Camp Forum, as well as crawl-tiles"
+	author="onionknight, hutze, apostrophest, Crawl Stone Soup artists"
 
 	tile_texture_data "tileset.png"
 	{
@@ -121,6 +121,78 @@ tileset_data "Default Tileset" {
 			sprite=60
 		}
 		
+		creature_sprite_data "giant snail" {
+			sprite=207
+		}
+		
+		creature_sprite_data "rabid albino rat" {
+			sprite=217
+		}
+		
+		creature_sprite_data "snake" {
+			sprite=218
+		}
+		
+		creature_sprite_data "killer bee" {
+			sprite=220
+		}
+		
+		creature_sprite_data "harpy" {
+			sprite=221
+		}
+		
+		creature_sprite_data "kobold" {
+			sprite=222
+		}
+		
+		creature_sprite_data "ogre" {
+			sprite=223
+		}
+		
+		creature_sprite_data "troll" {
+			sprite=233
+		}
+		
+		creature_sprite_data "skeleton" {
+			sprite=234
+		}
+		
+		creature_sprite_data "minotaur" {
+			sprite=235
+		}
+		
+		creature_sprite_data "cyclops" {
+			sprite=236
+		}
+		
+		creature_sprite_data "giant" {
+			sprite=237
+		}
+		
+		creature_sprite_data "griffon" {
+			sprite=238
+		}
+		
+		creature_sprite_data "will o wisp" {
+			sprite=239
+		}
+		
+		creature_sprite_data "imp" {
+			sprite=249
+		}
+		
+		creature_sprite_data "salamander" {
+			sprite=250
+		}
+		
+		creature_sprite_data "fire elemental" {
+			sprite=251
+		}
+		
+		creature_sprite_data "treeman" {
+			sprite=29
+		}
+		
 		plant_sprite_data "Pine"{
 			sprite=29
 		}
@@ -162,11 +234,11 @@ tileset_data "Default Tileset" {
 		}
 
 		plant_sprite_data "Silvervine" {
-			sprite=27
+			sprite=156
 		}
 
 		plant_sprite_data "Thornbush" {
-			sprite=22
+			sprite=155
 		}
 
 		plant_sprite_data "Withering tree" {
@@ -210,7 +282,7 @@ tileset_data "Default Tileset" {
 		}
 
 		item_sprite_data "Bread" {
-			sprite=35
+			sprite=189
 		}
 
 		item_sprite_data "Crate" {
@@ -241,6 +313,66 @@ tileset_data "Default Tileset" {
 			sprite=61
 		}
 		
+		item_sprite_data "Nightbloom" {
+			sprite=158
+		}
+		
+		item_sprite_data "Dried fruit" {
+			sprite=159
+		}
+		
+		item_sprite_data "Meat" {
+			sprite=174
+		}
+		
+		item_sprite_data "Berry wine" {
+			sprite=174
+		}
+		
+		item_sprite_data "Chillwine" {
+			sprite=175
+		}
+		
+		item_sprite_data "Healing tonic" {
+			sprite=187
+		}
+		
+		item_sprite_data "Poison antidote" {
+			sprite=188
+		}
+		
+		item_sprite_data "Wooden club" {
+			sprite=190
+		}
+		
+		item_sprite_data "Stone maul" {
+			sprite=191
+		}
+		
+		item_sprite_data "Stone axe" {
+			sprite=201
+		}
+		
+		item_sprite_data "Stone spear" {
+			sprite=202
+		}
+		
+		item_sprite_data "Bone dagger" {
+			sprite=203
+		}
+		
+		item_sprite_data "Wooden arrow" {
+			sprite=204
+		}
+		
+		item_sprite_data "Stone-tipped arrow" {
+			sprite=205
+		}
+		
+		item_sprite_data "Wooden bow" {
+			sprite=206
+		}
+		
 		construction_sprite_data "Farm plot" {
 			sprites=[43]
 		}
@@ -266,6 +398,56 @@ tileset_data "Default Tileset" {
 					 112,113,114,115]
 		}
 
+		construction_sprite_data "Stockpile" {
+			sprites=[232]
+		}
+		
+		construction_sprite_data "Saw pit" {
+			sprites=[242,242,242,
+					 242,242,242,
+					 242,242,242]
+			underconstruction_sprites=[18]
+			width=3
+		}
+		
+		construction_sprite_data "Spawning pool" {
+			sprites=[227]
+			underconstruction_sprites=[226]
+		}
+		
+		construction_sprite_data "Carpenter" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstruction_sprites=[18]
+			width=3
+		}
+		construction_sprite_data "Weaver" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstruction_sprites=[18]
+			width=3
+		}
+		construction_sprite_data "Basket Weaver" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstruction_sprites=[18]
+			width=3
+		}
+		construction_sprite_data "Kitchen" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstruction_sprites=[18]
+			width=3
+		}
+		
+		construction_sprite_data "Bed" {
+			sprites=[42]
+		}
+		
 		spell_sprite_data "smoke" {
 			sprites=[63]
 		}
