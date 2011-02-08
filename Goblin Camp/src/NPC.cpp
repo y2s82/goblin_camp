@@ -835,7 +835,7 @@ CONTINUEEAT:
 			case FELL:
 				if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = tree->Fell(); //This'll be called about 100-150 times per tree
-					if (mainHand.lock() && Random::Generate(150) == 0) DecreaseItemCondition(mainHand);
+					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
@@ -1171,6 +1171,7 @@ CONTINUEEAT:
 					taskBegun = true;
 				} else {
 					AddEffect(WORKING);
+					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
