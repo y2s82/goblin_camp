@@ -2028,6 +2028,12 @@ class NPCListener : public ITCODParserListener {
 		} else if (boost::iequals(name,"death")) {
 			if (boost::iequals(value.s,"filth")) NPC::Presets.back().deathItem = -1;
 			else NPC::Presets.back().deathItem = Item::StringToItemType(value.s);
+		} else if (boost::iequals(name,"equipOneOf")) {
+			NPC::Presets.back().possibleEquipment.push_back(std::vector<int>());
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				std::string item = (char*)TCOD_list_get(value.list,i);
+				NPC::Presets.back().possibleEquipment.back().push_back(Item::StringToItemType(item));
+			}
 		}
 		return true;
 	}
@@ -2061,6 +2067,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addListProperty("equipOneOf", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
