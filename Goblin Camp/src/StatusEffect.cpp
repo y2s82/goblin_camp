@@ -89,7 +89,7 @@ graphic(g),
 		name = "Poisoned";
 		graphic = '#';
 		color = TCODColor::green;
-		cooldown = MONTH_LENGTH*3;
+		cooldown = (int)(MONTH_LENGTH*1.5);
 		damage.second = 1;
 		damageType = DAMAGE_POISON;
 		break;
