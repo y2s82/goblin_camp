@@ -356,6 +356,16 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
 					boost::shared_ptr<Item> item = itemList[itemUid];
 					npc->armor = item;
+			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("quiver")) != Item::Presets[itemType].categories.end()
+				&& !npc->quiver.lock()) {
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					boost::shared_ptr<Item> item = itemList[itemUid];
+					npc->quiver = boost::static_pointer_cast<Container>(item); //Quivers = containers
+			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("ammunition")) != Item::Presets[itemType].categories.end()
+				&& npc->quiver.lock() && npc->quiver.lock()->empty()) {
+					for (int i = 0; i < 10 && !npc->quiver.lock()->Full(); ++i) {
+						CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->quiver.lock());
+					}
 			} else {
 				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
 			}
