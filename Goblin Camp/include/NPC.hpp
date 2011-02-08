@@ -252,6 +252,7 @@ public:
 	bool IsTunneler();
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
+	void DecreaseItemCondition(boost::weak_ptr<Item>);
 
 	int GetHealth();
 	int GetMaxHealth();

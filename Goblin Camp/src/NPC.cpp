@@ -834,7 +834,8 @@ CONTINUEEAT:
 
 			case FELL:
 				if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
-					tmp = tree->Fell();
+					tmp = tree->Fell(); //This'll be called about 100-150 times per tree
+					if (mainHand.lock() && Random::Generate(150) == 0) DecreaseItemCondition(mainHand);
 					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
@@ -1768,6 +1769,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 
 				if (attack.Type() == DAMAGE_WIELDED) {
 					GetMainHandAttack(attack);
+					if (mainHand.lock() && Random::Generate(9) == 0) mainHand.lock()->DecreaseCondition();
 				}
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
@@ -2470,6 +2472,30 @@ void NPC::UpdateHealth() {
 					healJob->tasks.push_back(Task(EAT));
 				jobs.push_back(healJob);
 			}
+		}
+	}
+}
+
+/*I opted to place this in NPC instead of it being a method of Item mainly because Item won't know
+if it's being wielded, worn or whatever, and that's important information when an axe breaks in an
+orc's hand, for exmple*/
+void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
+		int condition = item->DecreaseCondition();
+		if (condition == 0) { //< 0 == does not break, > 0 == not broken
+			inventory->RemoveItem(item);
+			if (carried.lock() == item) carried.reset();
+			if (mainHand.lock() == item) {
+				mainHand.reset();
+				if (currentJob().lock() && currentJob().lock()->RequiresTool()) {
+					TaskFinished(TASKFAILFATAL, "(FAIL)Wielded item broken");
+				}
+			}
+			if (offHand.lock() == item) offHand.reset();
+			if (armor.lock() == item) armor.reset();
+			if (quiver.lock() == item) quiver.reset();
+			std::vector<boost::weak_ptr<Item> > component(1, item);
+			Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
 		}
 	}
 }
