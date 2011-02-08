@@ -2,8 +2,7 @@ plant_type "Pine" {
 	tree
 	graphic=6
 	color="0,200,14"
-	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
-				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
 	minheight=-0.07
@@ -81,8 +80,7 @@ plant_type "Willow" {
 	tree
 	graphic=5
 	color="140,198,14"
-	components=["Wicker", "Wicker", "Wicker", "Wicker", "Wicker",
-                "Wicker", "Wicker", "Wicker", "Wicker", "Wicker"]
+	components=["Wicker", "Wicker", "Wicker", "Wicker", "Wicker"]
 	rarity=300
 	condition=100
 	minheight=-5.0
@@ -93,8 +91,7 @@ plant_type "Birch" {
 	tree
 	graphic=215
 	color="224,224,224"
-	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
-				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=30
 	condition=150
 	minheight=-0.07
@@ -105,8 +102,7 @@ plant_type "Spruce" {
 	tree
 	graphic=6
 	color="0,136,14"
-	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log", 
-				"Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
 	minheight=-0.07
@@ -148,7 +144,7 @@ plant_type "Redhollow" {
 	evil
 	graphic=6
 	color="200,30,30"
-	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
 	minheight=-5.0
@@ -160,7 +156,7 @@ plant_type "Darkroot" {
 	evil
 	graphic=5
 	color="100,30,30"
-	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
 	minheight=-5.0
