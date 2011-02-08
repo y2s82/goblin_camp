@@ -592,7 +592,7 @@ void Item::Impact(int speedChange) {
 	SetVelocity(0);
 	flightPath.clear();
 
-	if (speedChange >= 10 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
+	if (speedChange >= 10 && Random::Generate(9) < 7) DecreaseCondition(); //A sudden impact will damage the item
 	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
 		//The item has impacted and broken. Create debris owned by no one
 		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
@@ -619,6 +619,11 @@ void Item::UpdateEffectItems() {
 				}
 		}
 	}
+}
+
+int Item::DecreaseCondition() {
+	if (condition > 0) --condition;
+	return condition;
 }
 
 ItemCat::ItemCat() : flammable(false),
