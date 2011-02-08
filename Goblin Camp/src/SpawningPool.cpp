@@ -226,16 +226,21 @@ void SpawningPool::Expand(bool message) {
 		}
 		//Destroy buildings
 		if (Map::Inst()->GetConstruction(location.X(), location.Y()) >= 0) {
-			Attack attack;
-			attack.Type(DAMAGE_MAGIC);
-			TCOD_dice_t damage;
-			damage.nb_dices = 100;
-			damage.nb_faces = 100;
-			damage.multiplier = 100;
-			damage.addsub = 1000;
-			attack.Amount(damage);
-			if (Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) 
-				Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()->Damage(&attack);
+			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) {
+				if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
+					construct->Dismantle(location);
+				} else {
+					Attack attack;
+					attack.Type(DAMAGE_MAGIC);
+					TCOD_dice_t damage;
+					damage.nb_dices = 100;
+					damage.nb_faces = 100;
+					damage.multiplier = 100;
+					damage.addsub = 1000;
+					attack.Amount(damage);
+					construct->Damage(&attack);
+				}
+			}
 		}
 
 		//Swallow items
