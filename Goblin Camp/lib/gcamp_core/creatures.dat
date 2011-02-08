@@ -956,3 +956,28 @@ npc_type "netch" {
 	}
 	death="Hide"
 }
+
+npc_type "human woodsman" {
+	tags = ["hasHands"]
+	name="Human woodsman"
+	color="255,255,255"
+	graphic='@'
+	AI="PeacefulAnimal"
+	stats {
+		speed=12
+		health=100
+		dodge=8
+		size=8
+	}
+	resistances {
+		physical=5
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d5+3"
+		cooldown=25
+	}
+	death="Corpse"
+	equipOneOf=["leather armor", "nothing", "nothing"]
+	equipOneOf=["stone axe", "stone axe", "stone spear"]
+}
