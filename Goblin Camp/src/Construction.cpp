@@ -389,10 +389,12 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
-		Construction::Presets.push_back(ConstructionPreset());
-		Construction::Presets.back().name = name;
-		Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
-		Construction::AllowedAmount.push_back(-1);
+		if (boost::iequals(str->getName(), "construction_type")) {
+			Construction::Presets.push_back(ConstructionPreset());
+			Construction::Presets.back().name = name;
+			Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
+			Construction::AllowedAmount.push_back(-1);
+		}
 		return true;
 	}
 
@@ -521,6 +523,22 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets.back().chimney.X(value.i);
 		} else if (boost::iequals(name, "chimneyy")) {
 			Construction::Presets.back().chimney.Y(value.i);
+		} else if (boost::iequals(name,"type")) {
+			Construction::Presets.back().trapAttack.Type(Attack::StringToDamageType(value.s));
+			Construction::Presets.back().dynamic = true;
+			Construction::Presets.back().tags[TRAP] = true;
+		} else if (boost::iequals(name,"damage")) {
+			Construction::Presets.back().trapAttack.Amount(value.dice);
+		} else if (boost::iequals(name,"statusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets.back().trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+			}
+		} else if (boost::iequals(name,"effectChances")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets.back().trapAttack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+			}
+		} else if (boost::iequals(name,"reloadItem")) {
+			Construction::Presets.back().trapReloadItem = Item::StringToItemCategory(value.s);
 		}
 
 		return true;
@@ -530,39 +548,41 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("end of %s structure\n") % name).str();
 #endif
-		Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
-			(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
-		
-		if (Construction::Presets.back().tileReqs.empty()) {
-			Construction::Presets.back().tileReqs.insert(TILEGRASS);
-			Construction::Presets.back().tileReqs.insert(TILEMUD);
-			Construction::Presets.back().tileReqs.insert(TILEROCK);
-		}
+		if (boost::iequals(str->getName(), "construction_type")) {
+			Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
+				(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
 
-		//Add material information to the description
-		if (Construction::Presets.back().materials.size() > 0) {
-			if (Construction::Presets.back().description.length() > 0 && Construction::Presets.back().description.length() % 25 != 0)
-				Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
-			ItemCategory item = -1;
-			int multiplier = 0;
-
-			for (std::list<ItemCategory>::iterator mati = Construction::Presets.back().materials.begin(); 
-				mati != Construction::Presets.back().materials.end(); ++mati) {
-					if (item == *mati) ++multiplier;
-					else { 
-						if (multiplier > 0) {
-							Construction::Presets.back().description += 
-								(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
-							if (Construction::Presets.back().description.length() % 25 != 0)
-								Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
-						}
-						item = *mati;
-						multiplier = 1;
-					}
+			if (Construction::Presets.back().tileReqs.empty()) {
+				Construction::Presets.back().tileReqs.insert(TILEGRASS);
+				Construction::Presets.back().tileReqs.insert(TILEMUD);
+				Construction::Presets.back().tileReqs.insert(TILEROCK);
 			}
-			Construction::Presets.back().description += 
-				(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
-			
+
+			//Add material information to the description
+			if (Construction::Presets.back().materials.size() > 0) {
+				if (Construction::Presets.back().description.length() > 0 && Construction::Presets.back().description.length() % 25 != 0)
+					Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
+				ItemCategory item = -1;
+				int multiplier = 0;
+
+				for (std::list<ItemCategory>::iterator mati = Construction::Presets.back().materials.begin(); 
+					mati != Construction::Presets.back().materials.end(); ++mati) {
+						if (item == *mati) ++multiplier;
+						else { 
+							if (multiplier > 0) {
+								Construction::Presets.back().description += 
+									(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+								if (Construction::Presets.back().description.length() % 25 != 0)
+									Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
+							}
+							item = *mati;
+							multiplier = 1;
+						}
+				}
+				Construction::Presets.back().description += 
+					(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+
+			}
 		}
 		return true;
 	}
@@ -604,7 +624,17 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
-	
+
+	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
+	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", NULL };
+	attackTypeStruct->addValueList("type", damageTypes, true);
+	attackTypeStruct->addProperty("damage", TCOD_TYPE_DICE, false);
+	attackTypeStruct->addListProperty("statusEffects", TCOD_TYPE_STRING, false);
+	attackTypeStruct->addListProperty("effectChances", TCOD_TYPE_INT, false);	
+	attackTypeStruct->addProperty("reloadItem", TCOD_TYPE_STRING, false);
+
+	constructionTypeStruct->addStructure(attackTypeStruct);
+
 	ConstructionListener listener = ConstructionListener();
 	parser.run(filename.c_str(), &listener);
 }
@@ -888,7 +918,9 @@ ConstructionPreset::ConstructionPreset() :
 	description(""),
 	graphicsHint(-1),
 	fallbackGraphicsSet(""),
-	chimney(Coordinate(-1,-1))
+	chimney(Coordinate(-1,-1)),
+	trapAttack(Attack()),
+	trapReloadItem(-1)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }

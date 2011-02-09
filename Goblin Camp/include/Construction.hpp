@@ -51,6 +51,7 @@ enum ConstructionTag {
 	CENTERSCAMP,
 	SPAWNINGPOOL,
 	BRIDGE,
+	TRAP,
 	TAGCOUNT
 };
 
@@ -80,6 +81,8 @@ struct ConstructionPreset {
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
 	Coordinate chimney;
+	Attack trapAttack;
+	ItemCategory trapReloadItem;
 };
 
 class Construction : public Entity {
