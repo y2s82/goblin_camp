@@ -61,6 +61,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Entity.hpp"
 #include "Attack.hpp"
 #include "SpawningPool.hpp"
+#include "Faction.hpp"
 
 // IMPORTANT
 // Implementing class versioning properly is an effort towards backward compatibility for saves,
@@ -1378,6 +1379,22 @@ void MapMarker::load(Archive & ar, const unsigned int version) {
 	ar & counter;
 }
 
+//
+// class Faction
+//
+BOOST_CLASS_VERSION(Faction, 0)
+
+template<class Archive>
+void Faction::save(Archive & ar, const unsigned int version) const {
+	ar & members;
+	ar & trapVisible;
+}
+
+template<class Archive>
+void Faction::load(Archive & ar, const unsigned int version) {
+	ar & members;
+	ar & trapVisible;
+}
 
 //
 // Save/load entry points

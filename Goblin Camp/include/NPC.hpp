@@ -284,6 +284,8 @@ public:
 
 	void GoBerserk();
 	void ApplyEffects(boost::shared_ptr<Item>);
+
+	void MapChanged(Coordinate);
 };
 
 void tFindPath(TCODPath*, int, int, int, int, boost::mutex*, bool*, bool*, bool);
