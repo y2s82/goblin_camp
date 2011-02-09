@@ -1347,18 +1347,22 @@ TaskResult NPC::Move(TaskResult oldResult) {
 unsigned int NPC::pathingThreadCount = 0;
 boost::mutex NPC::threadCountMutex;
 void NPC::findPath(Coordinate target) {
+	pathMutex.lock();
 	findPathWorking = true;
 	pathIndex = 0;
 	
 	delete path;
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
+	threadCountMutex.lock();
 	if (pathingThreadCount < 12) {
-		threadCountMutex.lock();
 		++pathingThreadCount;
 		threadCountMutex.unlock();
+		pathMutex.unlock();
 		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, true));
 	} else {
+		threadCountMutex.unlock();
+		pathMutex.unlock();
 		tFindPath(path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, false);
 	}
 }
