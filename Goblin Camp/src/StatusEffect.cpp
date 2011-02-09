@@ -218,6 +218,15 @@ graphic(g),
 		negative=false;
 		break;
 
+	case HELPLESS:
+		name = "Helpless";
+		cooldown = UPDATES_PER_SECOND*10;
+		graphic = 168;
+		color = TCODColor(130,240,255);
+		statChanges[MOVESPEED] = 0;
+		statChanges[DODGE] = 0;
+		break;
+
 	default: break;
 	}
 	cooldownDefault = cooldown;
@@ -250,6 +259,8 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return DRUNK;
 	} else if (boost::iequals(str, "healing")) {
 		return HEALING;
+	} else if (boost::iequals(str, "helpless")) {
+		return HELPLESS;
 	}
 	return HUNGER;
 }
@@ -269,6 +280,7 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case INVIGORATED: return "invigorated";
 	case DRUNK: return "drunk";
 	case HEALING: return "healing";
+	case HELPLESS: return "helpless";
 	default: return "";
 	}
 }
