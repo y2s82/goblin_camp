@@ -41,6 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "MapMarker.hpp"
 #include "UI/MessageBox.hpp"
+#include "Trap.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -141,6 +142,8 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		newCons = boost::shared_ptr<Construction>(new Door(construct, target));
 	} else if (Construction::Presets[construct].tags[SPAWNINGPOOL]) {
 		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
+	} else if (Construction::Presets[construct].tags[TRAP]) {
+		newCons = boost::shared_ptr<Construction>(new Trap(construct, target));
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
