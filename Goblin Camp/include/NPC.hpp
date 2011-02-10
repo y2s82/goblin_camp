@@ -106,6 +106,7 @@ class NPC : public Entity {
 	friend class boost::serialization::access;
 	friend class Game;
 	friend class NPCListener;
+	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 
 private:
 	template<class Archive>
@@ -290,4 +291,4 @@ public:
 	void DumpContainer(Coordinate);
 };
 
-void tFindPath(TCODPath*, int, int, int, int, boost::mutex*, bool*, bool*, bool);
+void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
