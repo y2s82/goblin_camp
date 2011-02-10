@@ -480,8 +480,8 @@ construction_type "Alchemist" {
 }
 
 construction_type "Spiked pit" {
-	tier=0
-	category="Workshops"
+	tier=1
+	category="Traps"
 	graphicLength=1
 	graphic=[94]
 	color="255,255,255"
