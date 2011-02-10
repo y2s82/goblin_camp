@@ -45,7 +45,7 @@ void Trap::Update() {
 }
 
 int Trap::GetMoveCostModifier(bool visible) {
-	return visible ? 1000 : -(Map::Inst()->GetTerrainMoveCost(x,y)-1); //-1 because a movecost of 0 = unwalkable
+	return visible ? 100 : -(Map::Inst()->GetTerrainMoveCost(x,y)-1); //-1 because a movecost of 0 = unwalkable
 }
 
 int Trap::Use() {
