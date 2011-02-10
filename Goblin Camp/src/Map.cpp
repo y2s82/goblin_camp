@@ -716,7 +716,7 @@ Direction Map::GetFlow(int x, int y) {
 bool Map::IsDangerous(int x, int y, int faction) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		if (tileMap[x][y].fire) return true;
-		if (Game::Inst()->GetFaction(faction)->IsTrapVisible(Coordinate(x,y))) return true;
+		return Game::Inst()->GetFaction(faction)->IsTrapVisible(Coordinate(x,y));
 	}
 	return false;
 }
