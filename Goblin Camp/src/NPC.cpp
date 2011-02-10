@@ -1366,21 +1366,11 @@ void NPC::findPath(Coordinate target) {
 		++pathingThreadCount;
 		threadCountMutex.unlock();
 		pathMutex.unlock();
-		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, true));
+		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), this, true));
 	} else {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
-		tFindPath(path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, false);
-	}
-
-	boost::mutex::scoped_lock pathLock(pathMutex);
-	for (int i = 0; i < path->size(); ++i) {
-		int pathX, pathY;
-		path->get(i, &pathX, &pathY);
-		if (Map::Inst()->IsDangerous(pathX, pathY, faction)) {
-			pathIsDangerous = true;
-			return;//One dangerous tile = whole path considered dangerous
-		}
+		tFindPath(path, x, y, target.X(), target.Y(), this, false);
 	}
 }
 
@@ -1486,10 +1476,20 @@ boost::weak_ptr<Entity> NPC::currentEntity() {
 }
 
 
-void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex *pathMutex, bool *nopath, bool *findPathWorking, bool threaded) {
-	boost::mutex::scoped_lock pathLock(*pathMutex);
-	*nopath = !path->compute(x0, y0, x1, y1);
-	*findPathWorking = false;
+void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool threaded) {
+	boost::mutex::scoped_lock pathLock(npc->pathMutex);
+	npc->nopath = !path->compute(x0, y0, x1, y1);
+
+	for (int i = 0; i < path->size(); ++i) {
+		int pathX, pathY;
+		path->get(i, &pathX, &pathY);
+		if (Map::Inst()->IsDangerous(pathX, pathY, npc->faction)) {
+			npc->pathIsDangerous = true;
+			break;//One dangerous tile = whole path considered dangerous
+		}
+	}
+
+	npc->findPathWorking = false;
 	if (threaded) {
 		NPC::threadCountMutex.lock();
 		--NPC::pathingThreadCount;
