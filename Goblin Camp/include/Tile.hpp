@@ -111,4 +111,5 @@ public:
 	void Corrupt(int magnitude);
 	static TileType StringToTileType(std::string);
 	void Burn(int magnitude);
+	int GetTerrainMoveCost() const;
 };
