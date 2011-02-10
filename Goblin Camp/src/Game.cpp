@@ -42,6 +42,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "UI/MessageBox.hpp"
 #include "Trap.hpp"
+#include "Faction.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -79,6 +80,10 @@ screenWidth(0),
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
+	}
+
+	for (int i = 0; i < FACTION_COUNT; ++i) {
+		factions.push_back(boost::shared_ptr<Faction>(new Faction()));
 	}
 }
 
@@ -144,6 +149,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
 	} else if (Construction::Presets[construct].tags[TRAP]) {
 		newCons = boost::shared_ptr<Construction>(new Trap(construct, target));
+		instance->factions[PLAYERFACTION]->TrapSet(target, true);
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
@@ -2108,4 +2114,9 @@ void Game::Badsleepify(Coordinate pos) {
 				}
 		}
 	}
+}
+
+boost::shared_ptr<Faction> Game::GetFaction(int num) {
+	if (num < factions.size()) return factions[num];
+	return boost::shared_ptr<Faction>();
 }
