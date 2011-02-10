@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NPC.hpp"
 #include "GCamp.hpp"
 #include "JobManager.hpp"
+#include "Faction.hpp"
 
 Trap::Trap(ConstructionType vtype, Coordinate pos) : Construction(vtype, pos),
 ready(true){
@@ -35,6 +36,7 @@ void Trap::Update() {
 			boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
 			npc->AddEffect(Construction::Presets[type].trapAttack.StatusEffects()->front().first);
 			npc->Damage(&Construction::Presets[type].trapAttack);
+			Game::Inst()->GetFaction(npc->GetFaction())->TrapDiscovered(Position());
 		}
 	}
 }
@@ -49,6 +51,10 @@ int Trap::Use() {
 			ready = true;
 			graphic[1] = readyGraphic;
 			progress = 0;
+			//Hide the trap from everyone but the player faction
+			for (int i = 0; i < FACTION_COUNT; ++i) {
+				Game::Inst()->GetFaction(i)->TrapSet(Position(), i == PLAYERFACTION);
+			}
 			return 100;
 		}
 		return progress;
