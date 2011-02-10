@@ -73,7 +73,7 @@ void FireNode::Update() {
 		if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(1, 7));
 		direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
 		steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
-		} else if (temperature > 0) {
+	} else if (temperature > 0) {
 		if (Random::Generate(10) == 0) { 
 			--temperature;
 			Map::Inst()->Burn(x, y);
@@ -82,7 +82,7 @@ void FireNode::Update() {
 		if (Map::Inst()->Type(x, y) != TILEGRASS) --temperature;
 		if (Map::Inst()->Burnt(x, y) >= 10) --temperature;
 
-		int inverseSparkChance = 100 - std::max(0, ((temperature - 50) / 8));
+		int inverseSparkChance = 150 - std::max(0, ((temperature - 50) / 8));
 
 		if (Random::Generate(inverseSparkChance) == 0) {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("spark"));
@@ -153,7 +153,7 @@ void FireNode::Update() {
 							fire.Type(DAMAGE_FIRE);
 							construct->Damage(&fire);
 						}
-						temperature += 15;
+						if (temperature < 15) temperature += 5;
 					} else if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 						/*Stockpiles are a special case. Not being an actual building, fire won't touch them.
 						Instead fire should be able to burn the items stored in the stockpile*/
@@ -170,7 +170,7 @@ void FireNode::Update() {
 						}
 					} else if (construct->HasTag(SPAWNINGPOOL)) {
 						boost::static_pointer_cast<SpawningPool>(construct)->Burn();
-						temperature += 25;
+						if (temperature < 15) temperature += 5;
 					}
 				}
 			}
@@ -178,13 +178,13 @@ void FireNode::Update() {
 			//Burn plantlife
 			int natureObject = Map::Inst()->GetNatureObject(x, y);
 			if (natureObject >= 0 && 
-			!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
-				bool tree = Game::Inst()->natureList[natureObject]->Tree();
-				Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
-				if (tree && Random::Generate(4) == 0) {
-					Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
-				}
-				temperature += tree ? 500 : 100;
+				!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
+					bool tree = Game::Inst()->natureList[natureObject]->Tree();
+					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
+					if (tree && Random::Generate(4) == 0) {
+						Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
+					}
+					temperature += tree ? 500 : 100;
 			}
 
 		}
