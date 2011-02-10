@@ -34,5 +34,4 @@ public:
 	void Update(bool safe = false);
 	void SpawnHostileMonsters();
 	void SpawnBenignFauna();
-	void SpawnHumanWoodsman();
 };

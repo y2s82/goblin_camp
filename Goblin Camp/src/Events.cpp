@@ -51,10 +51,6 @@ void Events::Update(bool safe) {
 	if (Random::Generate(UPDATES_PER_SECOND * 60 * 2 - 1) == 0) {
 		SpawnBenignFauna();
 	}
-
-	if (Random::Generate(MONTH_LENGTH * 6) == 0) {
-		SpawnHumanWoodsman(); //A special event in case the player runs out of axes
-	}
 }
 
 void Events::SpawnHostileMonsters() {
@@ -133,22 +129,5 @@ void Events::SpawnBenignFauna() {
 				|| map->Type(target.X(), target.Y()) != TILEGRASS);
 			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);
 		}
-	}
-}
-
-void Events::SpawnHumanWoodsman() {
-	if (StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Axe")) <= 0) {
-		for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin();
-			npci != Game::Inst()->npcList.end(); ++npci) {
-				if (npci->second->Wielding().lock() && npci->second->Wielding().lock()->IsCategory(Item::StringToItemCategory("Axe")))
-					return; //Some monster is wielding an axe so we don't need to spawn another
-		}
-		Coordinate target;
-		do {
-			target.X(Random::Generate(map->Width() - 1));
-			target.Y(Random::Generate(map->Height() - 1));
-		} while (!map->IsWalkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
-			|| map->Type(target.X(), target.Y()) != TILEGRASS);
-		Game::Inst()->CreateNPC(target, NPC::StringToNPCType("human woodsman"));
 	}
 }
