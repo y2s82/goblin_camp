@@ -478,3 +478,21 @@ construction_type "Alchemist" {
 	productiony=0
 	description="The alchemist creates potions, tinctures and poisons."
 }
+
+construction_type "Spiked pit" {
+	tier=0
+	category="Workshops"
+	graphicLength=1
+	graphic=[94]
+	color="255,255,255"
+	walkable
+	maxCondition=10
+	materials=["Plank"]
+	description="Spiked pit"
+	attack "Spikes" {
+		type="piercing"
+		damage="1d50+10"
+		statusEffects=["Helpless"]
+	}
+	tileReqs=["ditch"]
+}
