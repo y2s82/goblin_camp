@@ -127,6 +127,7 @@ private:
 	int pathIndex;
 	bool nopath;
 	bool findPathWorking;
+	bool pathIsDangerous;
 	int timer;
 	unsigned int nextMove;
 	TaskResult lastMoveResult;

@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Construction.hpp"
 #include "Door.hpp"
 #include "MapMarker.hpp"
+#include "Faction.hpp"
 
 Map::Map() :
 overlayFlags(0), markerids(0),
@@ -54,7 +55,7 @@ Map* Map::Inst() {
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
-	return (float)tileMap[x0][y0].GetMoveCost(ptr);
+	return (float)tileMap[x1][y1].GetMoveCost(ptr);
 }
 
 //Simple version that doesn't take npc information into account
@@ -710,4 +711,18 @@ Direction Map::GetFlow(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height)
 		return tileMap[x][y].flow;
 	return NODIRECTION;
+}
+
+bool Map::IsDangerous(int x, int y, int faction) const {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		if (tileMap[x][y].fire) return true;
+		if (Game::Inst()->GetFaction(faction)->IsTrapVisible(Coordinate(x,y))) return true;
+	}
+	return false;
+}
+
+int Map::GetTerrainMoveCost(int x, int y) const {
+	if (x >= 0 && x < width && y >= 0 && y < height)
+		return tileMap[x][y].GetTerrainMoveCost();
+	return 0;
 }

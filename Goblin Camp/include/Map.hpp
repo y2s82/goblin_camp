@@ -126,4 +126,7 @@ public:
 
 	void CalculateFlow(int px[4], int py[4]);
 	Direction GetFlow(int x, int y);
+
+	bool IsDangerous(int x, int y, int faction) const;
+	int GetTerrainMoveCost(int x, int y) const;
 };

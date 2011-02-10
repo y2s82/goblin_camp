@@ -59,6 +59,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
+	pathIsDangerous(false),
 	timer(0),
 	nextMove(0),
 	lastMoveResult(TASKCONTINUE),
@@ -1349,6 +1350,7 @@ boost::mutex NPC::threadCountMutex;
 void NPC::findPath(Coordinate target) {
 	pathMutex.lock();
 	findPathWorking = true;
+	pathIsDangerous = false;
 	pathIndex = 0;
 	
 	delete path;
@@ -1364,6 +1366,16 @@ void NPC::findPath(Coordinate target) {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
 		tFindPath(path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, false);
+	}
+
+	boost::mutex::scoped_lock pathLock(pathMutex);
+	for (int i = 0; i < path->size(); ++i) {
+		int pathX, pathY;
+		path->get(i, &pathX, &pathY);
+		if (Map::Inst()->IsDangerous(pathX, pathY, faction)) {
+			pathIsDangerous = true;
+			return;//One dangerous tile = whole path considered dangerous
+		}
 	}
 }
 
