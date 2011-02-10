@@ -161,7 +161,7 @@ public:
 	bool Built();
 	bool IsFlammable();
 	int Repair();
-	void SpawnRepairJob();
+	virtual void SpawnRepairJob();
 
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	

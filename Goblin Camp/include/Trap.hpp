@@ -33,10 +33,12 @@ private:
 
 	bool ready;
 	boost::weak_ptr<Job> reloadJob;
+	int readyGraphic;
 
 public:
 	Trap(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	virtual void Update();
 	int GetMoveCostModifier(bool visible);
 	virtual int Use();
+	virtual void SpawnRepairJob();
 };
