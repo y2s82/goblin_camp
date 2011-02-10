@@ -62,6 +62,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "Attack.hpp"
 #include "SpawningPool.hpp"
 #include "Faction.hpp"
+#include "Trap.hpp"
 
 // IMPORTANT
 // Implementing class versioning properly is an effort towards backward compatibility for saves,
@@ -144,6 +145,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar.template register_type<FarmPlot>();
 	ar.template register_type<Door>();
 	ar.template register_type<SpawningPool>();
+	ar.template register_type<Trap>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -169,6 +171,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
+	ar & factions;
 }
 
 template<class Archive>
@@ -180,6 +183,8 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<FarmPlot>();
 	ar.template register_type<Door>();
 	ar.template register_type<SpawningPool>();
+	if (version >= 1)
+		ar.template register_type<Trap>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -217,6 +222,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 		ar & fireList;
 		ar & spellList;
 		ar & age;
+		ar & factions;
 	}
 }
 
@@ -1394,6 +1400,25 @@ template<class Archive>
 void Faction::load(Archive & ar, const unsigned int version) {
 	ar & members;
 	ar & trapVisible;
+}
+
+//
+// class Trap
+//
+BOOST_CLASS_VERSION(Trap, 0)
+
+template<class Archive>
+void Trap::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & ready;
+	ar & reloadJob;
+}
+
+template<class Archive>
+void Trap::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & ready;
+	ar & reloadJob;
 }
 
 //
