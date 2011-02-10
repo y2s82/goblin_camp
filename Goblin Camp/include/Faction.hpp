@@ -23,6 +23,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class NPC;
 class Coordinate;
 
+enum Factions {
+	PLAYERFACTION,
+	RANDOMMONSTERFACTION,
+	PEACEFULFAUNAFACTION,
+	UNDERGROUNDFACTION,
+	FIREFACTION,
+	FACTION_COUNT
+};
+
 class Faction {
 	friend class boost::serialization::access;
 
