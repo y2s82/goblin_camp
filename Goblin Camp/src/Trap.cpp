@@ -23,20 +23,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 
 Trap::Trap(ConstructionType vtype, Coordinate pos) : Construction(vtype, pos),
-ready(false){
+ready(true){
+	readyGraphic = graphic[1];
 }
 
 void Trap::Update() {
 	if (built) {
-		if (!ready && !reloadJob.lock()) { //Spawn reload job if one doesn't already exist
-			boost::shared_ptr<Job> reload(new Job("Reset "+name));
-			reload->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
-			reload->tasks.push_back(Task(USE, Position(), shared_from_this()));
-			reload->DisregardTerritory();
-			JobManager::Inst()->AddJob(reload);
-			reloadJob = reload;
-		} else if (ready && !Map::Inst()->NPCList(x, y)->empty()) {
+		if (ready && !Map::Inst()->NPCList(x, y)->empty()) {
 			ready = false;
+			graphic[1] = 62;
 			boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
 			npc->AddEffect(Construction::Presets[type].trapAttack.StatusEffects()->front().first);
 			npc->Damage(&Construction::Presets[type].trapAttack);
@@ -52,10 +47,23 @@ int Trap::Use() {
 	if (!ready) {
 		if (++progress == 75) {
 			ready = true;
+			graphic[1] = readyGraphic;
 			progress = 0;
 			return 100;
 		}
 		return progress;
 	}
 	return -1;
+}
+
+void Trap::SpawnRepairJob() {
+	Construction::SpawnRepairJob();
+	if (!ready && !reloadJob.lock()) { //Spawn reload job if one doesn't already exist
+		boost::shared_ptr<Job> reload(new Job("Reset "+name));
+		reload->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+		reload->tasks.push_back(Task(USE, Position(), shared_from_this()));
+		reload->DisregardTerritory();
+		JobManager::Inst()->AddJob(reload);
+		reloadJob = reload;
+	}
 }
