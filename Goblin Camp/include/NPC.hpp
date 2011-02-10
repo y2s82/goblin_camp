@@ -287,7 +287,6 @@ public:
 	void GoBerserk();
 	void ApplyEffects(boost::shared_ptr<Item>);
 
-	void MapChanged(Coordinate);
 	void DumpContainer(Coordinate);
 };
 

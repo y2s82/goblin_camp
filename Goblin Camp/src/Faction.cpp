@@ -38,11 +38,7 @@ void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
 }
 
 void Faction::TrapDiscovered(Coordinate trapLocation) {
-	for (std::list<boost::weak_ptr<NPC> >::iterator membi = members.begin(); membi != members.end(); ++membi) {
-		if (membi->lock()) {
-			membi->lock()->MapChanged(trapLocation);
-		}
-	}
+	trapVisible[trapLocation] = true;
 }
 
 bool Faction::IsTrapVisible(Coordinate trapLocation) {

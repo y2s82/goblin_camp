@@ -2549,22 +2549,6 @@ void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
 	}
 }
 
-/* The map information has changed. Usually this is called when another member of this NPC's faction
-has discovered a trap */
-void NPC::MapChanged(Coordinate changeLocation) {
-	boost::mutex::scoped_lock pathLock(pathMutex);
-	if (!path->isEmpty() && pathIndex > 0) {
-		while (pathIndex < path->size()) {
-			int pathX, pathY;
-			path->get(pathIndex, &pathX, &pathY);
-
-			//If trap at (pathX,pathY) repath
-
-			++pathIndex;
-		}
-	}
-}
-
 void NPC::DumpContainer(Coordinate location) {
 	boost::shared_ptr<Container> sourceContainer;
 	if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
