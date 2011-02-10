@@ -194,15 +194,17 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 	taskBegun = false;
 	run = true;
 
-	//If we're wielding a container (ie. a tool) spill it's contents
-	if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
-		boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(mainHand.lock()));
-		if (cont->ContainsWater() > 0) {
-			Game::Inst()->CreateWater(Position(), cont->ContainsWater());
-			cont->RemoveWater(cont->ContainsWater());
-		} else if (cont->ContainsFilth() > 0) {
-			Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
-			cont->RemoveFilth(cont->ContainsFilth());
+	if (result != TASKSUCCESS) {
+		//If we're wielding a container (ie. a tool) spill it's contents
+		if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
+			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(mainHand.lock()));
+			if (cont->ContainsWater() > 0) {
+				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
+				cont->RemoveWater(cont->ContainsWater());
+			} else if (cont->ContainsFilth() > 0) {
+				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
+				cont->RemoveFilth(cont->ContainsFilth());
+			}
 		}
 	}
 }
@@ -1104,7 +1106,7 @@ CONTINUEEAT:
 					boost::weak_ptr<WaterNode> wnode = Map::Inst()->GetWater(currentTarget().X(), 
 						currentTarget().Y());
 					if (wnode.lock() && wnode.lock()->Depth() > 0 && cont->ContainsFilth() == 0) {
-						int waterAmount = std::min(10, wnode.lock()->Depth());
+						int waterAmount = std::min(50, wnode.lock()->Depth());
 						wnode.lock()->Depth(wnode.lock()->Depth()-waterAmount);
 						cont->AddWater(waterAmount);
 						TaskFinished(TASKSUCCESS);
@@ -1325,6 +1327,9 @@ TaskResult NPC::Move(TaskResult oldResult) {
 					the same tile and slowing down*/
 					Map::Inst()->FindEquivalentMoveTarget(x, y, moveX, moveY, nextX, nextY, (void*)this);
 				}
+
+				//If we're about to step on a dangerous tile that we didn't plan to, repath
+				if (!pathIsDangerous && Map::Inst()->IsDangerous(moveX, moveY, faction)) return TASKFAILNONFATAL;
 
 				if (Map::Inst()->IsWalkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
 					Position(Coordinate(moveX,moveY));
@@ -1592,8 +1597,21 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
+	bool surroundingsScanned = false;
+
+	//If carrying a bucket and adjacent to fire, dump it on it immediately
+	if (npc->Carrying().lock() && npc->Carrying().lock()->IsCategory(Item::StringToItemCategory("bucket"))) {
+		npc->ScanSurroundings(true);
+		surroundingsScanned = true;
+		if (npc->seenFire && Game::Inst()->Adjacent(npc->threatLocation, npc->Position())) {
+			npc->DumpContainer(npc->threatLocation);
+			npc->TaskFinished(TASKFAILNONFATAL);
+		}
+	}
+
 	if (npc->coward) {
-		npc->ScanSurroundings();
+		if (!surroundingsScanned) npc->ScanSurroundings();
+		surroundingsScanned = true;
 		
 		if (npc->HasTrait(CHICKENHEART) && npc->seenFire && (npc->jobs.empty() || npc->jobs.front()->name != "Aaaaaaaah!!")) {
 			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
@@ -1619,7 +1637,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	} else {
 		if (npc->aggressive) {
 			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
-				npc->ScanSurroundings(true);
+				if (!surroundingsScanned) npc->ScanSurroundings(true);
+				surroundingsScanned = true;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 					if (npci->lock()->faction != npc->faction) {
 						JobManager::Inst()->NPCNotWaiting(npc->uid);
@@ -1635,7 +1654,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			}
 		}
 		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
-			npc->ScanSurroundings();
+			if (!surroundingsScanned) npc->ScanSurroundings();
+			surroundingsScanned = true;
 			if (npc->seenFire) {
 				npc->AddEffect(PANIC);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL);
@@ -2540,6 +2560,28 @@ void NPC::MapChanged(Coordinate changeLocation) {
 			//If trap at (pathX,pathY) repath
 
 			++pathIndex;
+		}
+	}
+}
+
+void NPC::DumpContainer(Coordinate location) {
+	boost::shared_ptr<Container> sourceContainer;
+	if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+		sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
+	} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+		sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
+	}
+
+	if (sourceContainer) {
+		if (location.X() >= 0 && location.Y() >= 0 && 
+			location.X() < Map::Inst()->Width() && location.Y() < Map::Inst()->Height()) {
+				if (sourceContainer->ContainsWater() > 0) {
+					Game::Inst()->CreateWater(location, sourceContainer->ContainsWater());
+					sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+				} else {
+					Game::Inst()->CreateFilth(location, sourceContainer->ContainsFilth());
+					sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+				}
 		}
 	}
 }
