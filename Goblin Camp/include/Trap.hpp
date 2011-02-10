@@ -19,6 +19,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Construction.hpp"
 
+class Job;
+
 class Trap : public Construction {
 	friend class boost::serialization::access;
 
@@ -29,7 +31,12 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
+	bool ready;
+	boost::weak_ptr<Job> reloadJob;
+
 public:
 	Trap(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	virtual void Update();
+	int GetMoveCostModifier(bool visible);
+	virtual int Use();
 };
