@@ -241,7 +241,7 @@ npc_type "harpy" {
 npc_type "kobold" { 
 	name="Kobold"
 	tier=2
-	tags=["attacksRandomly"]
+	tags=["attacksRandomly", "hasHands"]
 	color="128,128,0"
 	graphic='k'
 	AI="HostileAnimal"
@@ -259,7 +259,33 @@ npc_type "kobold" {
 		damage="1d4+1"
 		cooldown=20
 	}
+	equipOneOf=["Wooden club"]
 	spawnAsGroup="1d3+1"
+	death="Corpse"
+}
+
+npc_type "kobold raider" {
+	name="Kobold raider"
+	tags=["underground", "hasHands"]
+	color="234,0,0"
+	graphic='k'
+	AI="HostileAnimal"
+	stats {
+			speed=15
+			health=40
+			dodge=10
+			size=5
+	}
+	resistances {
+			physical=10
+	}
+	attack "attack" {
+			type="wielded"
+			damage="1d6+1"
+			cooldown=20
+	}
+	equipOneOf=["Wooden club"]
+	spawnAsGroup="1d6+2"
 	death="Corpse"
 }
 
@@ -750,7 +776,6 @@ npc_type "feral vampire" {
 		magic=10
 		poison=100
 		cold=25
-
 	}
 	attack "Bite" {
 		type="piercing"
@@ -795,7 +820,7 @@ npc_type "wild boar" {
 
 npc_type "salamander" { 
 	name="Salamander"
-	tags=["underground"]
+	tags=[]
 	color="255,140,0"
 	graphic='S'
 	AI="HostileAnimal"
