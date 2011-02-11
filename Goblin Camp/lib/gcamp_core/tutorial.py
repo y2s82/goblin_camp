@@ -45,7 +45,9 @@ class Tutorial (gcamp.events.EventListener):
 			gcamp.ui.messageBox("Good work! Now left-click on the stockpile, and   " +
 						"click on the 'All' button to allow all item       " +
 						"categories. Your goblins should get to work       " +
-						"storing everything in there.")
+						"storing everything in there.                      " +
+						"Remember though that setting up more specialised  " +
+						"stockpiles is key to an efficient camp")
 
 			gcamp.delay(400, lambda : gcamp.ui.messageBox( "Next you should do two things:                    " +
 						"                                                  " +
@@ -55,7 +57,14 @@ class Tutorial (gcamp.events.EventListener):
 						"+-sign underneath 'Wood log' a few times.         " +
 						"                                                  " +
 						"Soon you should see two of your goblins grab the  " +
-						"two axes and go forth to chop some trees down.    "))
+						"two axes and go forth to chop some trees down.    " +
+						"The axes will degrade as they're used, and        " +
+						"eventually break, so you'll need a stone quarry   " +
+						"once you're established to be able to keep felling" +
+						"trees.                                            " +
+						"You can also filter the stockmanager by typing in " +
+						"part of an items name or category, allowing you   " +
+						"to quickly find what you need. "))
 			self.stage = 10
 		elif self.stage == 20 and construct.getTypeString().lower() == "saw pit":
 			gcamp.ui.messageBox("Now order up some planks from the                 " +
@@ -71,15 +80,19 @@ class Tutorial (gcamp.events.EventListener):
 						"Place it somewhere convenient"))
 			gcamp.delay(450, lambda : gcamp.ui.messageBox("Now would be a good time to designate a farmplot. " +
 						"Choose some suitable place, designate it, and     " +
-						"enable planting of all three seed types by        " +
+						"enable planting of all seed types by              " +
 						"left-clicking the farmplot and clicking the boxes " +
-						"in the sidebar."))
+						"in the sidebar.                                   " +
+						"Perhaps consider building a dedicated seed        " +
+						"stockpile somewhere near your farmplots?"))
 			self.stage = 20
 			
 		elif self.stage == 30 and item.getTypeString().lower() == "wood plank":
 			gcamp.delay(75, lambda : gcamp.ui.messageBox( "Now build a carpenter, it'll allow you to build   " +
 						"crates to store most items and wooden clubs for   " +
-						"your future military"))
+						"your future military. Remember to build buckets,  " +
+						"you'll need them to transport filth to the        " +
+						"spawning pool and water to put out fires"))
 			gcamp.delay(250, lambda : gcamp.ui.messageBox("It's a good idea to check out what your territory " +
 						"looks like time to time.                          " +
 						"        Territory->Toggle territory overlay       " +
@@ -90,14 +103,16 @@ class Tutorial (gcamp.events.EventListener):
 						"inside your territory as well"))
 			gcamp.delay(450, lambda : gcamp.ui.messageBox("This is the end of the tutorial.                  " +
 						"It's a good idea to choose a site for the spawning" +
-						"pool soon. Most constructions will have a         " +
-						"description in their tooltip, so look through the " +
-						"menus for what you can build. As you build more,  " +
-						"and get more orcs and goblins from the spawning   " +
-						"pool you'll advance through tiers and gain access " +
-						"to more advanced buildings.                       " +
-						"Also don't forget about defenses. Build a palisade" +
-						"and establish some guard squads!"))
+						"pool soon (Remember to activate filth and corpse  " +
+						"dumping jobs by right-clicking the spawning pool) " +
+						"Most constructions will have a description in     " +
+						"their tooltip, so look through the menus for what " +
+						"you can build. As you build more, and get more    " +
+						"orcs and goblins from the spawning pool you'll    " +
+						"advance through tiers and gain access to more     " +
+						"advanced buildings. Also don't forget about       " +
+						"defenses. Build a palisade, traps, and  establish " +
+						"some guard squads!"))
 
 			self.stage = 40
 
