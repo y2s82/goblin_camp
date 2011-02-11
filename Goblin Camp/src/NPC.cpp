@@ -1844,7 +1844,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 
 				if (attack.Type() == DAMAGE_WIELDED) {
 					GetMainHandAttack(attack);
-					if (mainHand.lock() && Random::Generate(9) == 0) mainHand.lock()->DecreaseCondition();
+					if (mainHand.lock() && Random::Generate(9) == 0) DecreaseItemCondition(mainHand);
 				}
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
