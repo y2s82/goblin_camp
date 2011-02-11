@@ -975,6 +975,8 @@ CONTINUEEAT:
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
+				} else {
+					TaskFinished(TASKFAILFATAL, "(DISMANTLE)Construction does not exist!");
 				}
 				break;
 
@@ -1179,6 +1181,7 @@ CONTINUEEAT:
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						Game::Inst()->CreateItem(Position(), Item::StringToItemType("earth"));
 						TaskFinished(TASKSUCCESS);
 					}
 				}
@@ -1237,6 +1240,36 @@ CONTINUEEAT:
 						TaskFinished(TASKFAILFATAL, "(USE)Can not use (tmp<0)"); break;
 					}
 				} else { TaskFinished(TASKFAILFATAL, "(USE)Attempted to use non-construct"); break; }
+				break;
+
+			case FILLDITCH:
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("earth"))) {
+					if (Map::Inst()->Type(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
+						TaskFinished(TASKFAILFATAL, "(FILLDITCH)Target not a ditch");
+						break;
+					}
+
+					if (!taskBegun) {
+						taskBegun = true;
+						timer = 0;
+					} else {
+						AddEffect(WORKING);
+						if (++timer >= 50) {
+							inventory->RemoveItem(carried);
+							bulk -= carried.lock()->GetBulk();
+							Game::Inst()->RemoveItem(carried);
+							carried.reset();
+
+							Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEMUD);
+
+							TaskFinished(TASKSUCCESS);
+							break;
+						}
+					}
+				} else {
+					TaskFinished(TASKFAILFATAL, "(FILLDITCH)Not carrying earth");
+					break;
+				}
 				break;
 
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;

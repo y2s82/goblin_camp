@@ -220,6 +220,7 @@ public:
 	static void DesignateBog(Coordinate, Coordinate);
 	static bool CheckTileType(TileType, Coordinate, Coordinate);
 	static void Dig(Coordinate, Coordinate);
+	static void FillDitch(Coordinate, Coordinate);
 	Coordinate FindClosestAdjacent(Coordinate, Coordinate);
 	static bool Adjacent(Coordinate, Coordinate);
 	void CreateNatureObject(Coordinate);

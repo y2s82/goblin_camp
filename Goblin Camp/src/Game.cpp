@@ -2120,3 +2120,27 @@ boost::shared_ptr<Faction> Game::GetFaction(int num) {
 	if (num < factions.size()) return factions[num];
 	return boost::shared_ptr<Faction>();
 }
+
+void Game::FillDitch(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
+				if (Map::Inst()->Type(x, y) == TILEDITCH) {
+					boost::shared_ptr<Job> ditchFillJob(new Job("Fill ditch"));
+					ditchFillJob->DisregardTerritory();
+					ditchFillJob->Attempts(2);
+					ditchFillJob->SetRequiredTool(Item::StringToItemCategory("shovel"));
+					ditchFillJob->MarkGround(Coordinate(x,y));
+					ditchFillJob->tasks.push_back(Task(FIND, Coordinate(x,y), boost::weak_ptr<Entity>(),
+						Item::StringToItemCategory("earth")));
+					ditchFillJob->tasks.push_back(Task(MOVE));
+					ditchFillJob->tasks.push_back(Task(TAKE));
+					ditchFillJob->tasks.push_back(Task(FORGET));
+					ditchFillJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
+					ditchFillJob->tasks.push_back(Task(FILLDITCH, Coordinate(x,y)));
+					JobManager::Inst()->AddJob(ditchFillJob);
+				}
+			}
+		}
+	}
+}
