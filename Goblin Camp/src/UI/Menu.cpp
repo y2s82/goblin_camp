@@ -213,21 +213,26 @@ Menu* Menu::ordersMenu = 0;
 Menu* Menu::OrdersMenu() {
 	if (!ordersMenu) {
 		ordersMenu = new Menu(std::vector<MenuChoice>());
+
+		boost::function<bool(Coordinate, Coordinate)> checkDitch = boost::bind(Game::CheckTileType, TILEDITCH, _1, _2);
+		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(Game::FillDitch, _1, _2);
+
 		ordersMenu->AddChoice(MenuChoice("Fell trees", boost::bind(UI::ChooseTreeFelling)));
 		ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
 		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
 		ordersMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseDig)));
+		ordersMenu->AddChoice(MenuChoice("Fill ditches", boost::bind(UI::ChooseRectPlacement, rectCall, checkDitch, 178)));
 		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", boost::bind(UI::ChooseDesignateBog)));
-		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
 		ordersMenu->AddChoice(MenuChoice("Gather items", boost::bind(UI::ChooseGatherItems)));
 
 		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
-		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
+		rectCall = boost::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
 		ordersMenu->AddChoice(MenuChoice("Pour water", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W')));
 
 		boost::function<void(Coordinate)> call = boost::bind(&Game::StartFire, Game::Inst(), _1);
 		ordersMenu->AddChoice(MenuChoice("Start fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'F')));
 
+		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
 	}
 	return ordersMenu;
 }

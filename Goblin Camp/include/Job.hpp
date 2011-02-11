@@ -76,7 +76,8 @@ enum Action {
 	GETANGRY,
 	CALMDOWN,
 	STARTFIRE,
-	REPAIR
+	REPAIR,
+	FILLDITCH
 };
 
 enum TaskResult {
