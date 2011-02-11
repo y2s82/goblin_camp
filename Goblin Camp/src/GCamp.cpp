@@ -275,6 +275,8 @@ void StartNewGame() {
 	{
 		game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
 		game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
+		game->CreateItem(corpseLoc1, Item::StringToItemType("shovel"));
+		game->CreateItem(corpseLoc2, Item::StringToItemType("shovel"));
 		int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
 		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
 		corpse->Name("Corpse(Human woodsman)");
