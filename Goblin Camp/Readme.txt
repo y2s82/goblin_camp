@@ -24,7 +24,7 @@ and destroy all things flammable. It's pretty great.
 *Basic offensive spells have been added, and can be modded in pretty easily.
 *Buckets, which is an important change because goblins can now use them to douse flames if they get too close.
 Also dumping filth is done with buckets now instead of barrels.
-*Chimenys. Constructions which use fuel to produce their products, such as kitchens, will produce smoke as the orcs
+*Chimneys. Constructions which use fuel to produce their products, such as kitchens, will produce smoke as the orcs
 work and really add to the atmosphere. Mind you, working with fire always has its risks...
 *Slope is calculated for the entire map depending on the heightmap used to create it, which will make filth
 flow downwards. Most of the time this means that filth flows from your camp towards the river, but rocky
@@ -32,7 +32,7 @@ outcroppings may cause it go elsewhere.
 *Rivers have a current, which can be observed when you have filth flowing into it. The filth will be taken by the
 current and move downriver, accumulating on the banks and eventually flowing offmap to be someone else's problem
 *The game now tracks how many years have gone by in gametime
-*Stockpiles and farmplots can now be dismantled only partially, allowing you to use that and expansion to fine tune
+*Stockpiles and farmplots can now be dismantled only partially, allowing you to use that and expansion to fine-tune
 them to just your liking
 *Constructions will be automatically repaired in the event that they get damaged by fighting or fire (constructions
 also display their condition in the sidebar now, like creatures)
