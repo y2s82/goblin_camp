@@ -90,6 +90,7 @@ category_type "Drink" {
 
 category_type "Wine" {
 	parent="Drink"
+	flammable
 }
 
 category_type "Tincture" {
@@ -262,18 +263,22 @@ category_type "Poison" {
 
 category_type "Root" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Vine" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Shoot" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Branch" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Garbage" {
@@ -296,6 +301,10 @@ category_type "Fibrous material" {
 category_type "Hide" {
 	parent="Garbage"
 	flammable
+}
+
+category_type "Earth" {
+	parent="Garbage"
 }
 
 category_type "Misc." {
@@ -1439,4 +1448,10 @@ item_type "Marubium plant" {
 	fruits = [ "Marubium", "Marubium" ]
 	decay = [ "Filth" ]
 	decaySpeed = 12
+}
+
+item_type "Earth" {
+	category = [ "Earth" ]
+	graphic = 177
+	color = "127,50,0"
 }
