@@ -89,9 +89,10 @@ graphic(g),
 		name = "Poisoned";
 		graphic = '#';
 		color = TCODColor::green;
-		cooldown = (int)(MONTH_LENGTH*1.5);
-		damage.second = 1;
-		damageType = DAMAGE_POISON;
+		cooldown = (int)(MONTH_LENGTH*2);
+		statChanges[STRENGTH] = 0.5;
+		statChanges[MOVESPEED] = 0.8;
+		statChanges[DODGE] = 0.5;
 		break;
 
 	case BLEEDING:
