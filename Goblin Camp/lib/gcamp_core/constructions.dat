@@ -63,7 +63,7 @@ construction_type "Carpenter" {
 			 178, 46,177]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=1
 	description="A carpenter's workshop allows your orcs to create basic wooden items"
@@ -80,7 +80,7 @@ construction_type "Basket Weaver" {
 	maxCondition=90
 	productionx=1
 	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	description="Baskets are mainly used to store berries and fruit"
 }
 
@@ -92,7 +92,7 @@ construction_type "Winery" {
 			  10, 33, 35,231]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
 }
@@ -131,7 +131,7 @@ construction_type "Kitchen" {
 			 127,  95, 95, 127]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 	description="Dry fruits to keep longer, make bread, pies etc"
@@ -150,7 +150,7 @@ construction_type "Weaver" {
 	maxCondition=90
 	productionx=1
 	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	description="Make cloth, sacks and rope"
 }
 
@@ -163,7 +163,7 @@ construction_type "Bone Carver" {
 			  41,  42, 42, 40]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 	description="Bones can be carved into weapons, furniture and decorations"
@@ -178,7 +178,7 @@ construction_type "Butcher" {
 			  37, 42, 42, 37]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 }
@@ -285,7 +285,7 @@ construction_type "Stone mason" {
 	maxCondition=90
 	productionx=2
 	productiony=1
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Weapon crafter" {
@@ -300,7 +300,7 @@ construction_type "Weapon crafter" {
 	maxCondition=90
 	productionx=1
 	productiony=2
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Leather Crafter" {
@@ -315,7 +315,7 @@ construction_type "Leather Crafter" {
 	maxCondition=80
 	productionx=1
 	productiony=2
-	materials=["Plank","Plank","Plank","Plank", "Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Tanner" {
@@ -327,7 +327,7 @@ construction_type "Tanner" {
 			  35, 35,  9,231]
 	walkable
 	maxCondition=120
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=1
 	description="Tanners create leather from animal hides"
@@ -492,7 +492,7 @@ construction_type "Oil press" {
 			  35, 153,  9,231]
 	walkable
 	maxCondition=120
-	materials=["Plank","Plank","Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=1
 	description="Creates oil from nuts and vegetables."
@@ -507,7 +507,7 @@ construction_type "Alchemist" {
 			 127,  33, 95, 127]
 	walkable
 	maxCondition=90
-	materials=["Plank","Plank","Plank"]
+	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
 	description="The alchemist creates potions, tinctures and poisons."
