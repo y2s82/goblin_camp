@@ -64,6 +64,7 @@ void SpawningPool::Update() {
 				if (Game::Inst()->filthList.size() > 0) {
 					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
 					filthDumpJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
+					filthDumpJob->Attempts(1);
 					Coordinate filthLocation = Game::Inst()->FindFilth(Position());
 					filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
 					filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
@@ -168,7 +169,7 @@ void SpawningPool::Update() {
 	}
 	if (burn > 0) {
 		if (Random::Generate(2) == 0) --burn;
-		if (burn > 500) {
+		if (burn > 5000) {
 			Expand(false);
 			Game::Inst()->CreateFire(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())));
 			if (Random::Generate(9) == 0) {
@@ -193,7 +194,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
+				if (Random::Generate(20) == 0) Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
 			}
 		}
 	}
@@ -294,9 +295,6 @@ void SpawningPool::AcceptVisitor(ConstructionVisitor& visitor) {
 
 void SpawningPool::Burn() {
 	burn += 5;
-#ifdef DEBUG
-	std::cout<<"SPBURN: "<<burn<<'\n';
-#endif
 	if (burn > 30000) {
 		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
