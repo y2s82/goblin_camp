@@ -2578,6 +2578,7 @@ void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
 			if (quiver.lock() == item) quiver.reset();
 			std::vector<boost::weak_ptr<Item> > component(1, item);
 			Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
+			Game::Inst()->RemoveItem(item);
 		}
 	}
 }
