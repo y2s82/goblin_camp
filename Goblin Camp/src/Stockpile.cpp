@@ -563,14 +563,27 @@ void Stockpile::AcceptVisitor(ConstructionVisitor& visitor) {
 
 void Stockpile::Dismantle(Coordinate location) {
 	if (!Construction::Presets[type].permanent) {
-		if (Map::Inst()->GetConstruction(location.X(), location.Y()) == uid) {
-			Map::Inst()->SetConstruction(location.X(), location.Y(), -1);
-			Map::Inst()->SetBuildable(location.X(), location.Y(), true);
-			reserved.erase(location);
-			containers.erase(location);
-			colors.erase(location);
+		if (location.X() == -1 && location.Y() == -1) {
+			for (int ix = a.X(); ix <= b.X(); ++ix) {
+				for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+					if (Map::Inst()->GetConstruction(ix, iy) == uid) {
+						Map::Inst()->SetConstruction(ix, iy, -1);
+						Map::Inst()->SetBuildable(ix, iy, true);
+						reserved.erase(Coordinate(ix, iy));
+						containers.erase(Coordinate(ix, iy));
+						colors.erase(Coordinate(ix, iy));
+					}
+				}
+			}
+		} else {
+			if (Map::Inst()->GetConstruction(location.X(), location.Y()) == uid) {
+				Map::Inst()->SetConstruction(location.X(), location.Y(), -1);
+				Map::Inst()->SetBuildable(location.X(), location.Y(), true);
+				reserved.erase(location);
+				containers.erase(location);
+				colors.erase(location);
+			}
 		}
-
 		if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
