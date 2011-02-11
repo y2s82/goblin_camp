@@ -9,6 +9,48 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.14 --
+
+0.14 brings the long awaited tilesupport with it (thanks to Immortius). Also, fire, which adds a whole new
+aspect to the game. Lot's of background work too by PiotrLegnica as always.
+
+*Bugfixes, one which was an especially subtle one affecting only some mods on some computers.
+*Tilesupport! Long awaited, it's now here. The tileset that comes with v0.14 has been gathered from the forums as
+well as crawl-tiles, but is lacking quite a few things, so help is really appreciated if anyone can contribute more
+tiles.
+*Fire. Imps throw fireballs and orcs can start fires themselves. Fire will burn through the forest pretty quickly
+and destroy all things flammable. It's pretty great.
+*Wind. Wind direction will affect which way fire will spread, and which way smoke moves
+*Basic offensive spells have been added, and can be modded in pretty easily.
+*Buckets, which is an important change because goblins can now use them to douse flames if they get too close.
+Also dumping filth is done with buckets now instead of barrels.
+*Chimenys. Constructions which use fuel to produce their products, such as kitchens, will produce smoke as the orcs
+work and really add to the atmosphere. Mind you, working with fire always has its risks...
+*Slope is calculated for the entire map depending on the heightmap used to create it, which will make filth
+flow downwards. Most of the time this means that filth flows from your camp towards the river, but rocky
+outcroppings may cause it go elsewhere.
+*Rivers have a current, which can be observed when you have filth flowing into it. The filth will be taken by the
+current and move downriver, accumulating on the banks and eventually flowing offmap to be someone else's problem
+*The game now tracks how many years have gone by in gametime
+*Stockpiles and farmplots can now be dismantled only partially, allowing you to use that and expansion to fine tune
+them to just your liking
+*Constructions will be automatically repaired in the event that they get damaged by fighting or fire (constructions
+also display their condition in the sidebar now, like creatures)
+*Traits have been added. This is mostly just the framework for future things, but for now some goblins are born
+less prepared to meet fire, and orcs change appearence depending on if they're fresh from the pool or if they've
+already seen some fighting.
+*A lot of new content has been added, many items, constructions, creatures and plants
+*You can now create poison antidotes, healing tonics and even chillwine to stave weariness off. Creatures will
+know to look for drinks and food to fix their ailments by themselves.
+*Having all your goblins and orcs die no longer throws you back into the menu straight away, you can opt to watch
+the carnage continue if you wish.
+*Weapons and tools now take damage as they are used, and will eventually break.
+*Creatures can be defined to spawn with equipment, so you can have elves attacked armed with bows and quivers full
+of arrows
+*The first trap has been added: the spiked pit. It'll help greatly in defence, though your creatures can fall
+in too if they step too close, so think about where you place them.
+
+
 -- Version 0.13 --
 
 0.13 is a big update, lot's of changes. Proper heightmap based map
