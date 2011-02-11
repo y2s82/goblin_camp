@@ -163,15 +163,17 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
 			Map::Inst()->SetBuildable(x,y,false);
 			Map::Inst()->SetConstruction(x,y,newCons->Uid());
-			Map::Inst()->SetTerritory(x,y,true);
+			if (!Construction::Presets[construct].tags[TRAP]) Map::Inst()->SetTerritory(x,y,true);
 		}
 	}
 
 	boost::shared_ptr<Job> buildJob(new Job("Build " + Construction::Presets[construct].name, MED, 0, false));
+	buildJob->DisregardTerritory();
 
 	for (std::list<ItemCategory>::iterator materialIter = newCons->MaterialList()->begin(); materialIter != newCons->MaterialList()->end(); ++materialIter) {
 		boost::shared_ptr<Job> pickupJob(new Job("Pickup " + Item::ItemCategoryToString(*materialIter) + " for " + Construction::Presets[construct].name, MED, 0, true));
 		pickupJob->Parent(buildJob);
+		pickupJob->DisregardTerritory();
 		buildJob->PreReqs()->push_back(pickupJob);
 
 		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter, EMPTY));
