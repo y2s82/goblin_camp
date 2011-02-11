@@ -314,10 +314,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->health = NPC::Presets[type].health;
 	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = NPC::Presets[type].stats[i] + (int)Random::Sign(NPC::Presets[type].stats[i] * 0.1);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + (int)Random::Sign(NPC::Presets[type].stats[i] * (Random::Generate(0, 10) / 100));
 	}
 	for (int i = 0; i < RES_COUNT; ++i) {
-		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + (int)Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + (int)Random::Sign(NPC::Presets[type].resistances[i] * (Random::Generate(0, 10) / 100));
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
