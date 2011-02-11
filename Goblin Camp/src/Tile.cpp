@@ -65,7 +65,7 @@ TileType Tile::GetType() { return type; }
 void Tile::SetType(TileType newType) {
 	type = newType;
 	if (type == TILEGRASS) {
-		vis = true; walkable = true; buildable = true;
+		vis = true; walkable = true; buildable = true; low = false;
 		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
 		backColor = TCODColor(0, 0, 0);
 		switch (Random::Generate(9)) {
