@@ -375,16 +375,18 @@ bool Stockpile::Full(ItemType type) {
 }
 
 Coordinate Stockpile::FreePosition() {
-	//First attempt to find a random position
-	for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
-		std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
-		if (conti->second->empty() && !reserved[conti->first]) return conti->first;
-	}
-	//If that fails still iterate through each position because a free position _should_ exist
-	for (int ix = a.X(); ix <= b.X(); ++ix) {
-		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
-				if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+	if (containers.size() > 0) {
+		//First attempt to find a random position
+		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
+			std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
+			if (conti->second->empty() && !reserved[conti->first]) return conti->first;
+		}
+		//If that fails still iterate through each position because a free position _should_ exist
+		for (int ix = a.X(); ix <= b.X(); ++ix) {
+			for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+				if (Map::Inst()->GetConstruction(ix,iy) == uid) {
+					if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+				}
 			}
 		}
 	}
