@@ -249,6 +249,15 @@ construction_type "Spiked pit" {
 	tileReqs=["ditch"]
 }
 
+construction_type "Breastwork" {
+	tier=1
+	category="Basics"
+	wall
+	maxCondition=30
+	materials=["Earth", "Earth", "Earth", "Earth", "Earth"]
+	placementType=2
+}
+
 construction_type "Stone quarry" {
 	tier=2
 	category="Permanent"
