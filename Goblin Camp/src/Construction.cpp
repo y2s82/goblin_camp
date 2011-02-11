@@ -828,6 +828,7 @@ void Construction::Dismantle(Coordinate) {
 		if (built) {
 			boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
 			dismantleJob->ConnectToEntity(shared_from_this());
+			dismantleJob->Attempts(3);
 			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
 			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
 			JobManager::Inst()->AddJob(dismantleJob);
