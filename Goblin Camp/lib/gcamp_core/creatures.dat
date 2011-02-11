@@ -76,7 +76,7 @@ npc_type "giant snail" {
 		cooldown=75
 	}
 	spawnAsGroup="1d3"
-	death="Filth"
+	death="Arthropod corpse"
 }
 
 npc_type "starving wolf" {
@@ -180,7 +180,7 @@ npc_type "soldier ant" {
 	}
 	spawnAsGroup="1d7+3"
 	tags=["underground", "tunneler"]
-	death="Corpse"
+	death="Arthropod corpse"
 }
 
 npc_type "killer bee" {
