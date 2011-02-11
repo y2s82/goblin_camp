@@ -820,7 +820,6 @@ npc_type "wild boar" {
 
 npc_type "salamander" { 
 	name="Salamander"
-	tags=[]
 	color="255,140,0"
 	graphic='S'
 	AI="HostileAnimal"
