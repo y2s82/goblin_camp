@@ -386,7 +386,7 @@ item_type "Wood plank" {
 	color = "255,73,7"
 	components = ["Log"]
 	fitsin = "Crate"
-	multiplier = 10
+	multiplier = 5
 	constructedin = "Saw pit"
 }
 
@@ -587,7 +587,7 @@ item_type "Nightbloom tree" {
 }
 
 item_type "Dried fruit" {
-	category = ["Food"]
+	category = ["Fruit"]
 	graphic = 42
 	color = "190,195,130"
 	components = ["Fruit","Fruit","Fruit"]
