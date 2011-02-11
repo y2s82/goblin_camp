@@ -402,7 +402,7 @@ void NPC::Update() {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
 			spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
 		}
-		if (!HasEffect(RAGE) && (jobs.empty() || jobs.front()->name != "Jump into water")) {
+		if (effectiveResistances[FIRE_RES] < 90 && !HasEffect(RAGE) && (jobs.empty() || jobs.front()->name != "Jump into water")) {
 			if (Random::Generate(UPDATES_PER_SECOND) == 0) {
 				RemoveEffect(PANIC);
 				while (!jobs.empty()) TaskFinished(TASKFAILFATAL);
