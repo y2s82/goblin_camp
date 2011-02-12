@@ -1597,7 +1597,7 @@ item_type "Lichfruit seed" {
 	bulk = 0
 }
 
-item_type "Lichfruit shrub" {
+item_type "Lichfruit sapling" {
 	category = ["Misc."]
 	graphic = 214
 	color = "255,255,0"
@@ -1606,7 +1606,7 @@ item_type "Lichfruit shrub" {
 	decaySpeed = 12
 }
 
-item_type "Lichfruit bush" {
+item_type "Stunted lichfruit tree" {
 	category = ["Misc."]
 	graphic = 215
 	color = "255,255,0"
