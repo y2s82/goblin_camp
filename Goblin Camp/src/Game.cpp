@@ -909,7 +909,7 @@ void Game::Update() {
 		if (freeItems.size() < 100) {
 			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
-					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
 				}
 			}
@@ -917,7 +917,7 @@ void Game::Update() {
 			for (unsigned int i = 0; i < std::max((size_t)100, freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
-					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
 				}
 			}
@@ -983,7 +983,7 @@ void Game::Update() {
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == 0) {
+		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -1630,7 +1630,7 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
 
 int Game::FindMilitaryRecruit() {
 	for (std::map<int, boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
-		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == 0 && !npci->second->squad.lock()) {
+		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == PLAYERFACTION && !npci->second->squad.lock()) {
 			return npci->second->uid;
 		}
 	}

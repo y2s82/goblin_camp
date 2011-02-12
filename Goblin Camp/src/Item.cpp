@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 #include "StockManager.hpp"
 #include "Attack.hpp"
+#include "Faction.hpp"
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
@@ -100,7 +101,7 @@ Item::~Item() {
 #ifdef DEBUG
 	std::cout<<name<<"("<<uid<<") destroyed\n";
 #endif
-	if (faction == 0) {
+	if (faction == PLAYERFACTION) {
 		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 }
@@ -495,9 +496,9 @@ void Item::ResolveContainers() {
 }
 
 void Item::SetFaction(int val) {
-	if (val == 0 && faction != 0) { //Transferred to player
+	if (val == PLAYERFACTION && faction != PLAYERFACTION) { //Transferred to player
 		StockManager::Inst()->UpdateQuantity(type, 1);
-	} else if (val != 0 && faction == 0) { //Transferred from player
+	} else if (val != PLAYERFACTION && faction == PLAYERFACTION) { //Transferred from player
 		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 	faction = val;
