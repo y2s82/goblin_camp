@@ -1025,6 +1025,7 @@ item_type "Wooden bow" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Quiver" {
