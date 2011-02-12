@@ -1,0 +1,4 @@
+Boost 1.45.0.
+
+!! NOTE !!
+archive/serialization are 1.44. Using any other version will most likely break saves.

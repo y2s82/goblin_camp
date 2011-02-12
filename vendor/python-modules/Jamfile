@@ -1,0 +1,20 @@
+###############################################################################
+##### Python modules project
+############################################################################### 
+
+path-constant HERE : . ;
+
+project python-modules ;
+
+###############################################################################
+##### python-modules
+## Goblin Camp depends on several Python modules written in C. Instead
+## of hoping they'll be either linked in, or finding proper path to dynamic
+## libs in runtime, we link them in to the game and initialise them explicitly.
+############################################################################### 
+
+lib python-modules
+    : [ glob $(HERE)/*.c ]
+    : <link>static
+      <use>/python <use>/zlib
+;
