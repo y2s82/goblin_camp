@@ -41,6 +41,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/ConstructionDialog.hpp"
 #include "Item.hpp"
 #include "scripting/Event.hpp"
+#include "Faction.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -107,7 +108,7 @@ Construction::~Construction() {
 	
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (itemi->lock()) {
-			itemi->lock()->SetFaction(0); //Return item to player faction
+			itemi->lock()->SetFaction(PLAYERFACTION); //Return item to player faction
 			itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
 		}
 	}
@@ -882,7 +883,7 @@ void Construction::Explode() {
 			randomTarget.X(Position().X() + Random::Generate(-5, 5));
 			randomTarget.Y(Position().Y() + Random::Generate(-5, 5));
 			item->CalculateFlightPath(randomTarget, 50, GetHeight());
-			if (item->Type() != Item::StringToItemType("debris")) item->SetFaction(0); //Return item to player faction
+			if (item->Type() != Item::StringToItemType("debris")) item->SetFaction(PLAYERFACTION); //Return item to player faction
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
@@ -958,7 +959,7 @@ void Construction::BurnToTheGround() {
 			randomTarget.X(Position().X() + Random::Generate(-2, 2));
 			randomTarget.Y(Position().Y() + Random::Generate(-2, 2));
 			item->Position(randomTarget);
-			if (item->Type() != Item::StringToItemType("debris")) item->SetFaction(0); //Return item to player faction
+			if (item->Type() != Item::StringToItemType("debris")) item->SetFaction(PLAYERFACTION); //Return item to player faction
 			Game::Inst()->CreateFire(randomTarget);
 		}
 	}
