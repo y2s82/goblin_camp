@@ -1405,13 +1405,14 @@ void Faction::load(Archive & ar, const unsigned int version) {
 //
 // class Trap
 //
-BOOST_CLASS_VERSION(Trap, 0)
+BOOST_CLASS_VERSION(Trap, 1)
 
 template<class Archive>
 void Trap::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Construction>(*this);
 	ar & ready;
 	ar & reloadJob;
+	ar & readyGraphic;
 }
 
 template<class Archive>
@@ -1419,6 +1420,11 @@ void Trap::load(Archive & ar, const unsigned int version) {
 	ar & boost::serialization::base_object<Construction>(*this);
 	ar & ready;
 	ar & reloadJob;
+	if (version == 0) {
+		readyGraphic = 94;
+	} else {
+		ar & readyGraphic;
+	}
 }
 
 //
