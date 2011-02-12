@@ -1710,7 +1710,7 @@ item_type "Young marshmerrow" {
 	decaySpeed = 12
 }
 
-item_type "Marshmerrow plant" {
+item_type "Marshmerrow" {
 	category = ["Misc."]
 	graphic = 35
 	color = "0,136,14"
@@ -1734,7 +1734,7 @@ item_type "Dreamvine seed" {
 	bulk=0
 }
 
-item_type "Young dreamvine plant" {
+item_type "Young dreamvine" {
 	category = ["Misc."]
 	graphic = 42
 	color="77,234,81"
