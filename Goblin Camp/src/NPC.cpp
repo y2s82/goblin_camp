@@ -1805,6 +1805,20 @@ void NPC::RemoveEffect(StatusEffectType effect) {
 			if (statusEffectIterator == statusEffectI) ++statusEffectIterator;
 			statusEffects.erase(statusEffectI);
 			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+
+			if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) {
+				std::list<StatusEffect>::iterator oldIterator = statusEffectIterator;
+				++statusEffectIterator;
+				while (statusEffectIterator != oldIterator) {
+					if (statusEffectIterator != statusEffects.end()) {
+						if (statusEffectIterator->visible) break;
+						++statusEffectIterator;
+					}
+					else statusEffectIterator = statusEffects.begin();
+				}
+				if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) statusEffectIterator = statusEffects.end();
+			}
+
 			return;
 		}
 	}
