@@ -54,8 +54,9 @@ namespace {
 		return index;
 	}
 
-	inline int ExtConnectionIndex(Sprite::ConnectedFunction connected) {
-		static boost::array<int,15> lookupTable4Sides =
+	static boost::array<short, 256> BuildExtendedConnectionLookupTable()
+	{
+		boost::array<short,15> lookupTable4Sides =
 		{
 			34, // None
 			42, // NE
@@ -73,7 +74,7 @@ namespace {
 			28, // NE + SW + NW
 			23  // SE + SW + NW
 		};
-		static boost::array<int,12> lookupTable3Sides =
+		boost::array<short,12> lookupTable3Sides =
 		{
 			19, // !N, !SE + !SW
 			17, // !N, !SW
@@ -89,46 +90,64 @@ namespace {
 			21  // !W, !NE		
 		};
 
-		bool connectN = connected(NORTH);
-		bool connectE = connected(EAST);
-		bool connectS = connected(SOUTH);
-		bool connectW = connected(WEST);
-		bool connectNE = connected(NORTHEAST);
-		bool connectSE = connected(SOUTHEAST);
-		bool connectSW = connected(SOUTHWEST);
-		bool connectNW = connected(NORTHWEST);
-
-		if ((connectN && connectE && !connectNE) || 
-			(connectE && connectS && !connectSE) ||
-			(connectS && connectW && !connectSW) ||
-			(connectW && connectN && !connectNW))
+		boost::array<short, 256> result;
+		for (int i = 0; i < 256; i++)
 		{
-			int sides = ((connectN) ? 1 : 0) + ((connectS) ? 1 : 0) + ((connectE) ? 1 : 0) + ((connectW) ? 1 : 0);
+			bool connectN = i & 0x1;
+			bool connectE = i & 0x2;
+			bool connectS = i & 0x4;
+			bool connectW = i & 0x8;
+			bool connectNE = i & 0x10;
+			bool connectSE = i & 0x20;
+			bool connectSW = i & 0x40;
+			bool connectNW = i & 0x80;
 
-			if (sides == 4) {
-				int cornerScore = ((connectNE) ? 1 : 0) + ((connectSE) ? 2 : 0) + ((connectSW) ? 4 : 0) + ((connectNW) ? 8 : 0);
-				return lookupTable4Sides[cornerScore];
-			} else if (sides == 3) {
-				if (!connectN) {
-					return lookupTable3Sides[(connectSE ? 1 : 0) + (connectSW ? 2 : 0)];
-				} else if (!connectE) {
-					return lookupTable3Sides[3 + (connectSW ? 1 : 0) + (connectNW ? 2 : 0)];
-				} else if (!connectS) {
-					return lookupTable3Sides[6 + (connectNE ? 1 : 0) + (connectNW ? 2 : 0)];
+			if ((connectN && connectE && !connectNE) || 
+				(connectE && connectS && !connectSE) ||
+				(connectS && connectW && !connectSW) ||
+				(connectW && connectN && !connectNW))
+			{
+				int sides = ((connectN) ? 1 : 0) + ((connectS) ? 1 : 0) + ((connectE) ? 1 : 0) + ((connectW) ? 1 : 0);
+
+				if (sides == 4) {
+					int cornerScore = ((connectNE) ? 1 : 0) + ((connectSE) ? 2 : 0) + ((connectSW) ? 4 : 0) + ((connectNW) ? 8 : 0);
+					result[i] = lookupTable4Sides[cornerScore];
+				} else if (sides == 3) {
+					if (!connectN) {
+						result[i] = lookupTable3Sides[(connectSE ? 1 : 0) + (connectSW ? 2 : 0)];
+					} else if (!connectE) {
+						result[i] = lookupTable3Sides[3 + (connectSW ? 1 : 0) + (connectNW ? 2 : 0)];
+					} else if (!connectS) {
+						result[i] = lookupTable3Sides[6 + (connectNE ? 1 : 0) + (connectNW ? 2 : 0)];
+					} else {
+						result[i] = lookupTable3Sides[9 + (connectNE ? 1 : 0) + (connectSE ? 2 : 0)];
+					}
 				} else {
-					return lookupTable3Sides[9 + (connectNE ? 1 : 0) + (connectSE ? 2 : 0)];
+					int index = 16;
+					if (connectW) index += 4;
+					if (connectN) index += 20;
+					result[i] = index;
 				}
-			} else {
-				int index = 16;
-				if (connectW) index += 4;
-				if (connectN) index += 20;
-				return index;
+			}
+			else 
+			{
+				result[i] = ConnectionIndex(connectN, connectE, connectS, connectW);
 			}
 		}
-		else 
-		{
-			return ConnectionIndex(connectN, connectE, connectS, connectW);
-		}
+		return result;
+	}
+
+	inline int ExtConnectionIndex(Sprite::ConnectedFunction connected) {
+		static boost::array<short,256> lookupTable(BuildExtendedConnectionLookupTable());
+		int index = (connected(NORTH) << 0) +
+					(connected(EAST) << 1) +
+					(connected(SOUTH) << 2) +
+					(connected(WEST) << 3) +
+					(connected(NORTHEAST) << 4) +
+					(connected(SOUTHEAST) << 5) +
+					(connected(SOUTHWEST) << 6) +
+					(connected(NORTHWEST) << 7);
+		return lookupTable[index];
 	}
 }
 

@@ -347,6 +347,7 @@ namespace {
 		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
 			return blood->Depth() > 0;
 		}
+		return false;
 	}
 }
 
