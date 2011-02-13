@@ -2192,7 +2192,9 @@ void NPC::LoadPresets(std::string filename) {
 }
 
 std::string NPC::NPCTypeToString(NPCType type) {
-	return Presets[type].typeName;
+	if (type >= 0 && type < Presets.size())
+		return Presets[type].typeName;
+	return "Nobody";
 }
 
 NPCType NPC::StringToNPCType(std::string typeName) {
