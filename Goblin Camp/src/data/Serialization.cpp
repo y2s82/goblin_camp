@@ -110,7 +110,7 @@ and I couldn't come up with a coherent answer just by googling. */
 const boost::uint32_t saveMagicConst = 0x47434d50;
 
 // File format version (8-bit, because it should not change too often).
-const boost::uint8_t fileFormatConst = 0x00;
+const boost::uint8_t fileFormatConst = 0x01;
 
 //
 // class Coordinate
@@ -134,7 +134,7 @@ void Coordinate::load(Archive & ar, const unsigned int version) {
 //
 // class Game
 //
-BOOST_CLASS_VERSION(Game, 1)
+BOOST_CLASS_VERSION(Game, 0)
 
 template<class Archive>
 void Game::save(Archive & ar, const unsigned int version) const  {
@@ -183,28 +183,16 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<FarmPlot>();
 	ar.template register_type<Door>();
 	ar.template register_type<SpawningPool>();
-	if (version >= 1)
-		ar.template register_type<Trap>();
+	ar.template register_type<Trap>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
 	ar & goblinCount;
 	ar & peacefulFaunaCount;
 	ar & safeMonths;
-	if (version == 0) {
-		bool notUsed;
-		ar & notUsed;
-	}
 	ar & marks;
-	if (version == 0) {
-		Coordinate c;
-		ar & c;
-		camX = 0;
-		camY = 0;
-	} else {
-		ar & camX;
-		ar & camY;
-	}
+	ar & camX;
+	ar & camY;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;
@@ -218,18 +206,16 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & waterList;
 	ar & filthList;
 	ar & bloodList;
-	if (version >= 1) {
-		ar & fireList;
-		ar & spellList;
-		ar & age;
-		ar & factions;
-	}
+	ar & fireList;
+	ar & spellList;
+	ar & age;
+	ar & factions;
 }
 
 //
 // class NPC
 //
-BOOST_CLASS_VERSION(NPC, 1)
+BOOST_CLASS_VERSION(NPC, 0)
 
 template<class Archive>
 void NPC::save(Archive & ar, const unsigned int version) const {
@@ -238,7 +224,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & type;
+	ar & NPC::NPCTypeToString(type);
 	ar & timeCount;
 	ar & jobs;
 	ar & taskIndex;
@@ -301,7 +287,16 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & type;
+	std::string typeName;
+	ar & typeName;
+	type = -1;
+	bool failedToFindType = false;
+	type = NPC::StringToNPCType(typeName);
+	if (type == -1) { //Apparently a creature type that doesn't exist
+		type = 2; //Whatever the first monster happens to be
+		failedToFindType = true; //We'll allow loading, this creature will just immediately die
+	}
+
 	ar & timeCount;
 	ar & jobs;
 	ar & taskIndex;
@@ -331,6 +326,7 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & thinkSpeed;
 	ar & statusEffects;
 	ar & health;
+	if (failedToFindType) health = 0;
 	ar & maxHealth;
 	ar & foundItem;
 	ar & inventory;
@@ -351,13 +347,10 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & escaped;
 	ar & addedTasksToCurrentJob;
 	ar & Skills;
-
-	if (version >= 1) {
-		ar & hasMagicRangedAttacks;
-		ar & traits;
-		ar & damageDealt;
-		ar & damageReceived;
-	}
+	ar & hasMagicRangedAttacks;
+	ar & traits;
+	ar & damageDealt;
+	ar & damageReceived;
 
 	InitializeAIFunctions();
 }
@@ -371,11 +364,15 @@ template<class Archive>
 void Item::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & graphic;
-	ar & type;
+	ar & Item::ItemTypeToString(type);
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & categories;
+	int categoryCount = (int)categories.size();
+	ar & categoryCount;
+	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+		ar & Item::ItemCategoryToString(*cati);
+	}
 	ar & flammable;
 	ar & attemptedStore;
 	ar & decayCounter;
@@ -388,23 +385,37 @@ void Item::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Item::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Entity>(*this);
-		ar & graphic;
-		ar & type;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-		ar & categories;
-		ar & flammable;
-		ar & attemptedStore;
-		ar & decayCounter;
-		ar & attack;
-		ar & resistances;
-		ar & condition;
-		ar & container;
-		ar & internal;
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & graphic;
+	bool failedToFindType = false;
+	std::string typeName;
+	ar & typeName;
+	type = Item::StringToItemType(typeName);
+	if (type == -1) {
+		type = Item::StringToItemType("debris");
+		failedToFindType = true;
 	}
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	int categoryCount = 0;
+	ar & categoryCount;
+	for (int i = 0; i < categoryCount; ++i) {
+		std::string categoryName;
+		ar & categoryName;
+		int categoryType = Item::StringToItemCategory(categoryName);
+		if (categoryType >= 0 && categoryType < Item::Categories.size()) categories.insert(categoryType);
+	}
+	if (categories.empty()) categories.insert(Item::StringToItemCategory("garbage"));
+	ar & flammable;
+	if (failedToFindType) flammable = true; //Just so you can get rid of it
+	ar & attemptedStore;
+	ar & decayCounter;
+	ar & attack;
+	ar & resistances;
+	ar & condition;
+	ar & container;
+	ar & internal;
 }
 
 //
@@ -420,11 +431,9 @@ void OrganicItem::save(Archive & ar, const unsigned int version) const {
 }
 template<class Archive>
 void OrganicItem::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Item>(*this);
-		ar & nutrition;
-		ar & growth;
-	}
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & nutrition;
+	ar & growth;
 }
 
 //
@@ -437,7 +446,6 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & x;
 	ar & y;
 	ar & uid;
-	ar & uids;
 	ar & zone;
 	ar & reserved;
 	ar & name;
@@ -450,26 +458,23 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Entity::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & x;
-		ar & y;
-		ar & uid;
-		ar & uids;
-		ar & zone;
-		ar & reserved;
-		ar & name;
-		ar & faction;
-		ar & velocity;
-		ar & nextVelocityMove;
-		ar & velocityTarget;
-		ar & bulk;
-	}
+	ar & x;
+	ar & y;
+	ar & uid;
+	ar & zone;
+	ar & reserved;
+	ar & name;
+	ar & faction;
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
+	ar & bulk;
 }
 
 //
 // class Job
 //
-BOOST_CLASS_VERSION(Job, 1)
+BOOST_CLASS_VERSION(Job, 0)
 
 template<class Archive>
 void Job::save(Archive & ar, const unsigned int version) const {
@@ -541,10 +546,8 @@ void Job::load(Archive & ar, const unsigned int version) {
 	ar & name;
 	ar & tasks;
 	ar & internal;
-	if (version >= 1) {
-		ar & markedGround;
-		ar & obeyTerritory;
-	}
+	ar & markedGround;
+	ar & obeyTerritory;
 }
 
 //
@@ -565,21 +568,19 @@ void Container::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Container::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Item>(*this);
-		ar & items;
-		ar & capacity;
-		ar & reservedSpace;
-		ar & listenersAsUids;
-		ar & water;
-		ar & filth;
-	}
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & items;
+	ar & capacity;
+	ar & reservedSpace;
+	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
 }
 
 //
 // class StatusEffect
 //
-BOOST_CLASS_VERSION(StatusEffect, 1)
+BOOST_CLASS_VERSION(StatusEffect, 0)
 
 template<class Archive>
 void StatusEffect::save(Archive & ar, const unsigned int version) const {
@@ -601,25 +602,20 @@ void StatusEffect::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void StatusEffect::load(Archive & ar, const unsigned int version) {
-		ar & graphic;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-		ar & name;
-		ar & type;
-		ar & cooldown;
-		ar & cooldownDefault;
-		ar & statChanges;
-		ar & resistanceChanges;
-		ar & damage;
-		if (version == 0) {
-			bool temp;
-			ar & temp;
-		} else if (version >= 1) {
-			ar & damageType;
-			ar & visible;
-			ar & negative;
-		}
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & name;
+	ar & type;
+	ar & cooldown;
+	ar & cooldownDefault;
+	ar & statChanges;
+	ar & resistanceChanges;
+	ar & damage;
+	ar & damageType;
+	ar & visible;
+	ar & negative;
 }
 
 //
@@ -643,18 +639,16 @@ void Squad::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Squad::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & name;
-		ar & memberReq;
-		ar & members;
-		ar & generalOrder;
-		ar & orders;
-		ar & targetCoordinates;
-		ar & targetEntities;
-		ar & priority;
-		ar & weapon;
-		ar & armor;
-	}
+	ar & name;
+	ar & memberReq;
+	ar & members;
+	ar & generalOrder;
+	ar & orders;
+	ar & targetCoordinates;
+	ar & targetEntities;
+	ar & priority;
+	ar & weapon;
+	ar & armor;
 }
 
 //
@@ -672,19 +666,17 @@ void Task::save(Archive & ar, const unsigned int version) const {
 }
 template<class Archive>
 void Task::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & target;
-		ar & entity;
-		ar & action;
-		ar & item;
-		ar & flags;
-	}
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
 }
 
 //
 // class Stockpile
 //
-BOOST_CLASS_VERSION(Stockpile, 1)
+BOOST_CLASS_VERSION(Stockpile, 0)
 
 template<class Archive>
 void Stockpile::save(Archive & ar, const unsigned int version) const {
@@ -717,10 +709,6 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 	ar & capacity;
 	ar & amount;
 	ar & allowed;
-	if (version == 0) {
-		std::map<Coordinate, bool> temp;
-		ar & temp;
-	}
 	ar & reserved;
 	ar & containers;
 	int colorCount;
@@ -740,7 +728,7 @@ void Stockpile::load(Archive & ar, const unsigned int version) {
 //
 // class Construction
 //
-BOOST_CLASS_VERSION(Construction, 1)
+BOOST_CLASS_VERSION(Construction, 0)
 
 template<class Archive>
 void Construction::save(Archive & ar, const unsigned int version) const {
@@ -751,7 +739,7 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & type;
+	ar & Construction::ConstructionTypeToString(type);
 	ar & walkable;
 	ar & materials;
 	ar & producer;
@@ -779,7 +767,14 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & type;
+	bool failedToFindType = false;
+	std::string typeName;
+	ar & typeName;
+	type = Construction::StringToConstructionType(typeName);
+	if (type == -1) {
+		type = Construction::StringToConstructionType("Saw pit");
+		failedToFindType = true;
+	}
 	ar & walkable;
 	ar & materials;
 	ar & producer;
@@ -794,10 +789,9 @@ void Construction::load(Archive & ar, const unsigned int version) {
 	ar & time;
 	ar & AllowedAmount;
 	ar & built;
-	if (version >= 1) {
-		ar & flammable;
-		ar & repairJob;
-	}
+	ar & flammable;
+	if (failedToFindType) flammable = true; //So you can burn these constructions
+	ar & repairJob;
 }
 
 //
@@ -813,16 +807,14 @@ void Door::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void Door::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Construction>(*this);
-		ar & closedGraphic;
-	}
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & closedGraphic;
 }
 
 //
 // class WaterNode
 //
-BOOST_CLASS_VERSION(WaterNode, 1)
+BOOST_CLASS_VERSION(WaterNode, 0)
 
 template<class Archive>
 void WaterNode::save(Archive & ar, const unsigned int version) const {
@@ -851,9 +843,7 @@ void WaterNode::load(Archive & ar, const unsigned int version) {
 	ar & inertCounter;
 	ar & inert;
 	ar & timeFromRiverBed;
-	if (version >= 1) {
-		ar & filth;
-	}
+	ar & filth;
 }
 
 //
@@ -874,15 +864,13 @@ void FilthNode::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void FilthNode::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & x;
-		ar & y;
-		ar & depth;
-		ar & graphic;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-	}
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
 }
 
 //
@@ -903,15 +891,13 @@ void BloodNode::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void BloodNode::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & x;
-		ar & y;
-		ar & depth;
-		ar & graphic;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-	}
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
 }
 
 //
@@ -922,7 +908,7 @@ BOOST_CLASS_VERSION(NatureObject, 0)
 template<class Archive>
 void NatureObject::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & type;
+	ar & NatureObject::Presets[type].name;
 	ar & graphic;
 	ar & color.r;
 	ar & color.g;
@@ -935,24 +921,33 @@ void NatureObject::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void NatureObject::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Entity>(*this);
-		ar & type;
-		ar & graphic;
-		ar & color.r;
-		ar & color.g;
-		ar & color.b;
-		ar & marked;
-		ar & condition;
-		ar & tree;
-		ar & harvestable;
+	ar & boost::serialization::base_object<Entity>(*this);
+	std::string typeName;
+	ar & typeName;
+	bool failedToFindType = true;
+	type = 0; //Default to whatever is the first wildplant
+	for (int i = 0; i < NatureObject::Presets.size(); ++i) {
+		if (boost::iequals(NatureObject::Presets[i].name, typeName)) {
+			type = i;
+			failedToFindType = false;
+			break;
+		}
 	}
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & marked;
+	ar & condition;
+	ar & tree;
+	ar & harvestable;
+	if (failedToFindType) harvestable = true;
 }
 
 //
 // class JobManager
 //
-BOOST_CLASS_VERSION(JobManager, 1)
+BOOST_CLASS_VERSION(JobManager, 0)
 
 template<class Archive>
 void JobManager::save(Archive & ar, const unsigned int version) const {
@@ -971,15 +966,13 @@ void JobManager::load(Archive & ar, const unsigned int version) {
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
 	ar & toolJobs;
-	if (version >= 1) {
-		ar & failList;
-	}
+	ar & failList;
 }
 
 //
 // class Camp
 //
-BOOST_CLASS_VERSION(Camp, 1)
+BOOST_CLASS_VERSION(Camp, 0)
 
 template<class Archive>
 void Camp::save(Archive & ar, const unsigned int version) const {
@@ -1019,12 +1012,10 @@ void Camp::load(Archive & ar, const unsigned int version) {
 	ar & upperCorner;
 	ar & lowerCorner;
 	ar & autoTerritory;
-	if (version >= 1) {
-		ar & article;
-		ar & waterZones;
-		ar & menialWaterJobs;
-		ar & expertWaterJobs;
-	}
+	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
 }
 
 //
@@ -1050,26 +1041,24 @@ void StockManager::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void StockManager::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & categoryQuantities;
-		ar & typeQuantities;
-		ar & minimums;
-		ar & producables;
-		ar & producers;
-		ar & workshops;
-		ar & fromTrees;
-		ar & fromEarth;
-		ar & designatedTrees;
-		ar & treeFellingJobs;
-		ar & designatedBog;
-		ar & bogIronJobs;
-	}
+	ar & categoryQuantities;
+	ar & typeQuantities;
+	ar & minimums;
+	ar & producables;
+	ar & producers;
+	ar & workshops;
+	ar & fromTrees;
+	ar & fromEarth;
+	ar & designatedTrees;
+	ar & treeFellingJobs;
+	ar & designatedBog;
+	ar & bogIronJobs;
 }
 
 //
 // class Map
 //
-BOOST_CLASS_VERSION(Map, 1)
+BOOST_CLASS_VERSION(Map, 0)
 
 template<class Archive>
 void Map::save(Archive & ar, const unsigned int version) const {
@@ -1094,17 +1083,15 @@ void Map::load(Archive & ar, const unsigned int version) {
 	}
 	ar & width;
 	ar & height;
-	if (version >= 1) {
-		ar & mapMarkers;
-		ar & markerids;
-		ar & windDirection;
-	}
+	ar & mapMarkers;
+	ar & markerids;
+	ar & windDirection;
 }
 
 //
 // class Tile
 //
-BOOST_CLASS_VERSION(Tile, 1)
+BOOST_CLASS_VERSION(Tile, 0)
 
 template<class Archive>
 void Tile::save(Archive & ar, const unsigned int version) const {
@@ -1171,11 +1158,9 @@ void Tile::load(Archive & ar, const unsigned int version) {
 	ar & walkedOver;
 	ar & corruption;
 	ar & territory;
-	if (version >= 1) {
-		ar & burnt;
-		ar & fire;
-		ar & flow;
-	}
+	ar & burnt;
+	ar & fire;
+	ar & flow;
 }
 
 //
@@ -1193,18 +1178,16 @@ void FarmPlot::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void FarmPlot::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & boost::serialization::base_object<Stockpile>(*this);
-		ar & tilled;
-		ar & allowedSeeds;
-		ar & growth;
-	}
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeds;
+	ar & growth;
 }
 
 //
 // class Attack
 //
-BOOST_CLASS_VERSION(Attack, 1)
+BOOST_CLASS_VERSION(Attack, 0)
 
 template<class Archive>
 void Attack::save(Archive & ar, const unsigned int version) const {
@@ -1231,9 +1214,7 @@ void Attack::load(Archive & ar, const unsigned int version) {
 	ar & cooldownMax;
 	ar & statusEffects;
 	ar & projectile;
-	if (version >= 1) {
-		ar & magicProjectile;
-	}
+	ar & magicProjectile;
 }
 
 //
@@ -1248,15 +1229,13 @@ void SkillSet::save(Archive & ar, const unsigned int version) const {
 
 template<class Archive>
 void SkillSet::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & skills;
-	}
+	ar & skills;
 }
 
 //
 // class SpawningPool
 //
-BOOST_CLASS_VERSION(SpawningPool, 1)
+BOOST_CLASS_VERSION(SpawningPool, 0)
 
 	template<class Archive>
 void SpawningPool::save(Archive & ar, const unsigned int version) const {
@@ -1287,9 +1266,7 @@ void SpawningPool::load(Archive & ar, const unsigned int version) {
 	ar & spawns;
 	ar & corpseContainer;
 	ar & jobCount;
-	if (version >= 1) {
-		ar & burn;
-	}
+	ar & burn;
 }
 
 //
@@ -1329,7 +1306,7 @@ void Spell::save(Archive & ar, const unsigned int version) const {
 	ar & color.g;
 	ar & color.b;
 	ar & graphic;
-	ar & type;
+	ar & Spell::SpellTypeToString(type);
 	ar & dead;
 	ar & attacks;
 	ar & immaterial;
@@ -1342,7 +1319,10 @@ void Spell::load(Archive & ar, const unsigned int version) {
 	ar & color.g;
 	ar & color.b;
 	ar & graphic;
-	ar & type;
+	std::string typeName;
+	ar & typeName;
+	type = Spell::StringToSpellType(typeName);
+	if (type == -1) type = 0;
 	ar & dead;
 	ar & attacks;
 	ar & immaterial;
@@ -1405,7 +1385,7 @@ void Faction::load(Archive & ar, const unsigned int version) {
 //
 // class Trap
 //
-BOOST_CLASS_VERSION(Trap, 1)
+BOOST_CLASS_VERSION(Trap, 0)
 
 template<class Archive>
 void Trap::save(Archive & ar, const unsigned int version) const {
@@ -1420,11 +1400,7 @@ void Trap::load(Archive & ar, const unsigned int version) {
 	ar & boost::serialization::base_object<Construction>(*this);
 	ar & ready;
 	ar & reloadJob;
-	if (version == 0) {
-		readyGraphic = 94;
-	} else {
-		ar & readyGraphic;
-	}
+	ar & readyGraphic;
 }
 
 //
@@ -1504,6 +1480,7 @@ bool Game::SaveGame(const std::string& filename) {
 		
 		// Write the payload
 		boost::archive::binary_oarchive oarch(ofs);
+		oarch << Entity::uids;
 		oarch << *instance;
 		oarch << *JobManager::Inst();
 		oarch << *Camp::Inst();
@@ -1541,6 +1518,7 @@ bool Game::LoadGame(const std::string& filename) {
 		
 		// Read the payload
 		boost::archive::binary_iarchive iarch(ifs);
+		iarch >> Entity::uids;
 		iarch >> *instance;
 		iarch >> *JobManager::Inst();
 		iarch >> *Camp::Inst();
