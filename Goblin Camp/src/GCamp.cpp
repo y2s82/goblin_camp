@@ -640,7 +640,7 @@ void SettingsMenu() {
 
 	TCOD_mouse_t mouse;
 	TCOD_key_t   key;
-	bool         clicked;
+	bool         clicked(false);
 
 	while (true) {
 		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
