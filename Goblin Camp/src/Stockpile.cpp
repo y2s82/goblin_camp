@@ -379,7 +379,8 @@ Coordinate Stockpile::FreePosition() {
 		//First attempt to find a random position
 		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
 			std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
-			if (conti->second->empty() && !reserved[conti->first]) return conti->first;
+			if (conti != containers.end() && conti->second->empty() && !reserved[conti->first]) 
+				return conti->first;
 		}
 		//If that fails still iterate through each position because a free position _should_ exist
 		for (int ix = a.X(); ix <= b.X(); ++ix) {
