@@ -839,7 +839,7 @@ void Construction::Dismantle(Coordinate) {
 }
 
 Panel *Construction::GetContextMenu() {
-	return ConstructionDialog::ConstructionInfoDialog(this);
+	return ConstructionDialog::ConstructionInfoDialog(boost::static_pointer_cast<Construction>(shared_from_this()));
 }
 	
 void Construction::Damage(Attack* attack) {
