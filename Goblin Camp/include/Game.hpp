@@ -112,7 +112,7 @@ public:
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
 	void Init();
-	void TilesetChanged();
+	void ResetRenderer();
 	void LoadingScreen();
 	void ErrorScreen();
 	void GenerateMap(uint32 seed = 0);
