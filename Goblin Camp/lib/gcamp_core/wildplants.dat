@@ -251,7 +251,7 @@ plant_type "Lichfruit growth" {
 plant_type "Wild dreamvine" {
 	graphic=35
 	color="77,234,81"
-	components = [ "Dreamvine shoot" ]
+	components = [ "Dreamvine seed" ]
 	rarity=20
 	condition=50
 	cluster=1
