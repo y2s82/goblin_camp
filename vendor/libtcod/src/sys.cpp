@@ -91,9 +91,5 @@ extern "C" void TCOD_CRenderer(void *sdl_surface, void *sdl_screen) {
 }
 void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer) {
 	::renderer = renderer;
-	if (renderer) {
-		TCOD_sys_register_SDL_renderer(TCOD_CRenderer);
-	} else {
-		TCOD_sys_register_SDL_renderer(0);
-	}
+	TCOD_sys_register_SDL_renderer(TCOD_CRenderer);
 }
