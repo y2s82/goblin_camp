@@ -254,7 +254,7 @@ construction_type "Breastwork" {
 	category="Basics"
 	wall
 	maxCondition=30
-	materials=["Earth", "Earth", "Earth", "Earth", "Earth"]
+	materials=["Earth", "Earth"]
 	placementType=2
 }
 
@@ -519,7 +519,7 @@ construction_type "Alchemist" {
 	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
-	description="The alchemist creates potions, tinctures and poisons."
+	description="The alchemist creates tonics, tinctures and poisons."
 }
 
 construction_type "Brick road" {
