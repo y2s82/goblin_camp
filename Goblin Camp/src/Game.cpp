@@ -528,6 +528,7 @@ void Game::Init() {
 void Game::TilesetChanged() {
 	// For now just recreate the whole renderer
 	bool useTileset = Config::GetCVar<bool>("useTileset");
+	TCODSystem::registerSDLRenderer(0);
 
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_SDL && useTileset) {
 		TileSetLoader loader;
