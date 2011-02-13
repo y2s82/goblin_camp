@@ -39,6 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StatusEffect.hpp"
 #include "Camp.hpp"
 #include "Stockpile.hpp"
+#include "Faction.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -390,7 +391,7 @@ void NPC::Update() {
 		attacki->Update();
 	}
 
-	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
+	if (faction == PLAYERFACTION && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
 		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
@@ -451,7 +452,7 @@ void NPC::UpdateStatusEffects() {
 			Damage(&attack);
 		}
 
-		if (faction == 0 && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
+		if (faction == PLAYERFACTION && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
 			statusEffectsChanged = false;
 			bool removalJobFound = false;
 			for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
@@ -788,7 +789,7 @@ CONTINUEEAT:
 					TaskFinished(TASKFAILFATAL, "(FIND)Failed"); 
 					break;
 				} else {
-					if (faction == 0) currentJob().lock()->ReserveEntity(foundItem);
+					if (faction == PLAYERFACTION) currentJob().lock()->ReserveEntity(foundItem);
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
@@ -1425,7 +1426,7 @@ void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 
 void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
 	Entity::GetTooltip(x, y, tooltip);
-	if(faction == 0 && !jobs.empty()) {
+	if(faction == PLAYERFACTION && !jobs.empty()) {
 		boost::shared_ptr<Job> job = jobs.front();
 		if(job->name != "Idle") {
 			tooltip->AddEntry(TooltipEntry((boost::format("  %s") % job->name).str(), TCODColor::grey));
@@ -1466,6 +1467,7 @@ void NPC::Kill() {
 			if (boost::shared_ptr<Item> item = witem.lock()) {
 				item->Position(Position());
 				item->PutInContainer();
+				item->SetFaction(PLAYERFACTION);
 			}
 			inventory->RemoveItem(witem);
 		}
@@ -1541,7 +1543,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		//Priority #1, if the creature can wield a weapon get one if possible
 		/*TODO: Right now this only makes friendlies take a weapon from a stockpile
 		It should be expanded to allow all npc's to search for nearby weapons lying around. */
-		if (!npc->mainHand.lock() && npc->GetFaction() == 0 && squad->Weapon() >= 0) {
+		if (!npc->mainHand.lock() && npc->GetFaction() == PLAYERFACTION && squad->Weapon() >= 0) {
 			for (std::list<Attack>::iterator attacki = npc->attacks.begin(); attacki != npc->attacks.end();
 				++attacki) {
 					if (attacki->Type() == DAMAGE_WIELDED) {
@@ -1590,7 +1592,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			}
 		}
 
-		if (!npc->armor.lock() && npc->GetFaction() == 0 && squad->Armor() >= 0) {
+		if (!npc->armor.lock() && npc->GetFaction() == PLAYERFACTION && squad->Armor() >= 0) {
 			npc->FindNewArmor();
 		}
 
@@ -1715,7 +1717,7 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 
 	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
 		//Turn into a hostile animal if attacked by the player's creatures
-		if (animal->aggressor.lock()->GetFaction() == 0){
+		if (animal->aggressor.lock()->GetFaction() == PLAYERFACTION){
 			animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 			animal->React = boost::bind(NPC::HostileAnimalReact, _1);
 		}
@@ -1803,6 +1805,20 @@ void NPC::RemoveEffect(StatusEffectType effect) {
 			if (statusEffectIterator == statusEffectI) ++statusEffectIterator;
 			statusEffects.erase(statusEffectI);
 			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+
+			if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) {
+				std::list<StatusEffect>::iterator oldIterator = statusEffectIterator;
+				++statusEffectIterator;
+				while (statusEffectIterator != oldIterator) {
+					if (statusEffectIterator != statusEffects.end()) {
+						if (statusEffectIterator->visible) break;
+						++statusEffectIterator;
+					}
+					else statusEffectIterator = statusEffects.begin();
+				}
+				if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) statusEffectIterator = statusEffects.end();
+			}
+
 			return;
 		}
 	}
@@ -2192,19 +2208,19 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-		faction = 0;
+		faction = PLAYERFACTION;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		faction = 1;
+		faction = PEACEFULFAUNAFACTION;
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
 		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = 2;
+		faction = RANDOMMONSTERFACTION;
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
 		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = 2;
+		faction = RANDOMMONSTERFACTION;
 	}
 }
 
@@ -2527,7 +2543,7 @@ void NPC::UpdateHealth() {
 
 	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
 
-	if (faction == 0 && health < maxHealth / 2 && !HasEffect(HEALING)) {
+	if (faction == PLAYERFACTION && health < maxHealth / 2 && !HasEffect(HEALING)) {
 		bool healJobFound = false;
 		for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
 			if ((*jobi)->name.find("Heal") != std::string::npos) {

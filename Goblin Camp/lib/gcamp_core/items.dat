@@ -1025,6 +1025,7 @@ item_type "Wooden bow" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Quiver" {
@@ -1597,7 +1598,7 @@ item_type "Lichfruit seed" {
 	bulk = 0
 }
 
-item_type "Lichfruit shrub" {
+item_type "Lichfruit sapling" {
 	category = ["Misc."]
 	graphic = 214
 	color = "255,255,0"
@@ -1606,7 +1607,7 @@ item_type "Lichfruit shrub" {
 	decaySpeed = 12
 }
 
-item_type "Lichfruit bush" {
+item_type "Stunted lichfruit tree" {
 	category = ["Misc."]
 	graphic = 215
 	color = "255,255,0"
@@ -1709,7 +1710,7 @@ item_type "Young marshmerrow" {
 	decaySpeed = 12
 }
 
-item_type "Marshmerrow plant" {
+item_type "Marshmerrow" {
 	category = ["Misc."]
 	graphic = 35
 	color = "0,136,14"
@@ -1733,7 +1734,7 @@ item_type "Dreamvine seed" {
 	bulk=0
 }
 
-item_type "Young dreamvine plant" {
+item_type "Young dreamvine" {
 	category = ["Misc."]
 	graphic = 42
 	color="77,234,81"
