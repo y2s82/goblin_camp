@@ -39,6 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StatusEffect.hpp"
 #include "Camp.hpp"
 #include "Stockpile.hpp"
+#include "Faction.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -1466,6 +1467,7 @@ void NPC::Kill() {
 			if (boost::shared_ptr<Item> item = witem.lock()) {
 				item->Position(Position());
 				item->PutInContainer();
+				item->SetFaction(PLAYERFACTION);
 			}
 			inventory->RemoveItem(witem);
 		}
