@@ -161,7 +161,9 @@ int Item::GetGraphic() {return graphic;}
 Attack Item::GetAttack() const {return attack;}
 
 std::string Item::ItemTypeToString(ItemType type) {
-	return Item::Presets[type].name;
+	if (type >= 0 && type < Item::Presets.size())
+		return Item::Presets[type].name;
+	return "None";
 }
 
 ItemType Item::StringToItemType(std::string str) {
@@ -173,7 +175,9 @@ ItemType Item::StringToItemType(std::string str) {
 }
 
 std::string Item::ItemCategoryToString(ItemCategory category) {
-	return category == -1 ? "None" : Item::Categories[category].name;
+	if (category >= 0 && category < Item::Categories.size())
+		return Item::Categories[category].name;
+	return "None";
 }
 
 ItemCategory Item::StringToItemCategory(std::string str) {
