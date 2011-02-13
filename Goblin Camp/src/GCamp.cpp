@@ -831,14 +831,14 @@ void TilesetsMenu() {
 
 	int listWidth = screenWidth / 3;
 
-	const std::vector<Tilesets::Metadata> tilesetsList = Tilesets::LoadTilesetMetadata();
+	const std::vector<TileSetMetadata> tilesetsList = Tilesets::LoadTilesetMetadata();
 	
 	const int subH = tilesetsList.size();
 	TCODConsole sub(listWidth - 2, std::max(1, subH));
 
 	int currentY = 0;
 	
-	BOOST_FOREACH(Tilesets::Metadata tileset, tilesetsList) {
+	BOOST_FOREACH(TileSetMetadata tileset, tilesetsList) {
 		sub.setDefaultBackground(TCODColor::black);
 		
 		sub.setAlignment(TCOD_LEFT);
@@ -850,16 +850,17 @@ void TilesetsMenu() {
 	TCOD_key_t   key;
 	TCOD_mouse_t mouse;
 
-	int originalSelection = 0;
+	int originalSelection = -1;
 	int selection = 0;
 	std::string tilesetDir = Config::GetStringCVar("tileset");
-	if (tilesetDir.size() > 0) {
-		for (int i = 0; i < tilesetsList.size(); ++i) {
-			if (boost::iequals(tilesetDir, tilesetsList.at(i).basePath.filename().string())) {
-				selection = i;
-				originalSelection = i;
-				break;
-			}
+	if (tilesetDir.size() == 0) {
+		tilesetDir = "default";
+	}
+	for (int i = 0; i < tilesetsList.size(); ++i) {
+		if (boost::iequals(tilesetDir, tilesetsList.at(i).path.filename().string())) {
+			selection = i;
+			originalSelection = i;
+			break;
 		}
 	}
 
@@ -892,12 +893,15 @@ void TilesetsMenu() {
 		TCODConsole::root->printFrame(listWidth, 0, screenWidth - listWidth, screenHeight, true, TCOD_BKGND_SET, "Details");
 
 		int currentY = 2;
-		TCODConsole::root->print(listWidth + 3, 2,      "Name:    %s", tilesetsList.at(selection).name.c_str());
-		TCODConsole::root->print(listWidth + 3, 4,      "Size:    %dx%d", tilesetsList.at(selection).width, tilesetsList.at(selection).height);
-		TCODConsole::root->print(listWidth + 3, 6,      "Author:  %s", tilesetsList.at(selection).author.c_str());
-		TCODConsole::root->print(listWidth + 3, 8,      "Version: %s", tilesetsList.at(selection).version.c_str());
-		TCODConsole::root->print(listWidth + 3, 10,     "Description:");
-		TCODConsole::root->printRect(listWidth + 3, 12, screenWidth - listWidth - 6, screenHeight - 19, "%s", tilesetsList.at(selection).description.c_str());
+		if (selection < tilesetsList.size())
+		{
+			TCODConsole::root->print(listWidth + 3, 2,      "Name:    %s", tilesetsList.at(selection).name.c_str());
+			TCODConsole::root->print(listWidth + 3, 4,      "Size:    %dx%d", tilesetsList.at(selection).width, tilesetsList.at(selection).height);
+			TCODConsole::root->print(listWidth + 3, 6,      "Author:  %s", tilesetsList.at(selection).author.c_str());
+			TCODConsole::root->print(listWidth + 3, 8,      "Version: %s", tilesetsList.at(selection).version.c_str());
+			TCODConsole::root->print(listWidth + 3, 10,     "Description:");
+			TCODConsole::root->printRect(listWidth + 3, 12, screenWidth - listWidth - 6, screenHeight - 19, "%s", tilesetsList.at(selection).description.c_str());
+		}
 				
 		// Buttons
 		int buttonDist = (screenWidth - listWidth) / 3;
@@ -927,13 +931,9 @@ void TilesetsMenu() {
 			else if (mouse.cy >= screenHeight - 6 && mouse.cy < screenHeight - 3) {
 				if (mouse.cx >= listWidth + buttonDist - 4 && mouse.cx < listWidth + buttonDist + 4) {
 					if (selection != originalSelection) {
-						if (tilesetsList.at(selection).defaultTileset) {
-							Config::SetStringCVar("tileset", "");
-						} else {
-							Config::SetStringCVar("tileset", tilesetsList.at(selection).basePath.filename().string());
-						}
+						Config::SetStringCVar("tileset", tilesetsList.at(selection).path.filename().string());
 					}
-					Game::Inst()->TilesetChanged();
+					Game::Inst()->ResetRenderer();
 					return;
 				} else if (mouse.cx >= listWidth + 2 * buttonDist - 4 && mouse.cx < listWidth + 2 * buttonDist + 4) {
 					return;
