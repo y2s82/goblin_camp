@@ -67,6 +67,11 @@ category_type "Prepared food" {
 	flammable
 }
 
+category_type "Preserved food" {
+	parent="Food"
+	flammable
+}
+
 category_type "Berry" {
 	parent="Food"
 	flammable
@@ -587,7 +592,7 @@ item_type "Nightbloom tree" {
 }
 
 item_type "Dried fruit" {
-	category = ["Fruit"]
+	category = ["Preserved food"]
 	graphic = 42
 	color = "190,195,130"
 	components = ["Fruit","Fruit","Fruit"]
