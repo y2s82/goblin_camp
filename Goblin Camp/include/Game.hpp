@@ -40,6 +40,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 2)
 
+class Faction;
+
 enum Season {
 	EarlySpring,
 	Spring,
@@ -88,6 +90,8 @@ private:
 
 	boost::shared_ptr<MapRenderer> renderer;
 	bool gameOver;
+
+	std::vector<boost::shared_ptr<Faction> > factions;
 public:
 	static Game* Inst();
 	~Game();
@@ -160,6 +164,7 @@ public:
 	void Thirstify(Coordinate);
 	void Tire(Coordinate);
 	void Badsleepify(Coordinate);
+	boost::shared_ptr<Faction> GetFaction(int);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());
@@ -215,6 +220,7 @@ public:
 	static void DesignateBog(Coordinate, Coordinate);
 	static bool CheckTileType(TileType, Coordinate, Coordinate);
 	static void Dig(Coordinate, Coordinate);
+	static void FillDitch(Coordinate, Coordinate);
 	Coordinate FindClosestAdjacent(Coordinate, Coordinate);
 	static bool Adjacent(Coordinate, Coordinate);
 	void CreateNatureObject(Coordinate);

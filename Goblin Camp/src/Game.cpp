@@ -41,6 +41,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "MapMarker.hpp"
 #include "UI/MessageBox.hpp"
+#include "Trap.hpp"
+#include "Faction.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -78,6 +80,10 @@ screenWidth(0),
 {
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
+	}
+
+	for (int i = 0; i < FACTION_COUNT; ++i) {
+		factions.push_back(boost::shared_ptr<Faction>(new Faction()));
 	}
 }
 
@@ -141,6 +147,9 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		newCons = boost::shared_ptr<Construction>(new Door(construct, target));
 	} else if (Construction::Presets[construct].tags[SPAWNINGPOOL]) {
 		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
+	} else if (Construction::Presets[construct].tags[TRAP]) {
+		newCons = boost::shared_ptr<Construction>(new Trap(construct, target));
+		instance->factions[PLAYERFACTION]->TrapSet(target, true);
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
@@ -154,15 +163,17 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
 			Map::Inst()->SetBuildable(x,y,false);
 			Map::Inst()->SetConstruction(x,y,newCons->Uid());
-			Map::Inst()->SetTerritory(x,y,true);
+			if (!Construction::Presets[construct].tags[TRAP]) Map::Inst()->SetTerritory(x,y,true);
 		}
 	}
 
 	boost::shared_ptr<Job> buildJob(new Job("Build " + Construction::Presets[construct].name, MED, 0, false));
+	buildJob->DisregardTerritory();
 
 	for (std::list<ItemCategory>::iterator materialIter = newCons->MaterialList()->begin(); materialIter != newCons->MaterialList()->end(); ++materialIter) {
 		boost::shared_ptr<Job> pickupJob(new Job("Pickup " + Item::ItemCategoryToString(*materialIter) + " for " + Construction::Presets[construct].name, MED, 0, true));
 		pickupJob->Parent(buildJob);
+		pickupJob->DisregardTerritory();
 		buildJob->PreReqs()->push_back(pickupJob);
 
 		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter, EMPTY));
@@ -303,10 +314,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	npc->health = NPC::Presets[type].health;
 	npc->maxHealth = NPC::Presets[type].health;
 	for (int i = 0; i < STAT_COUNT; ++i) {
-		npc->baseStats[i] = NPC::Presets[type].stats[i] + (int)Random::Sign(NPC::Presets[type].stats[i] * 0.1);
+		npc->baseStats[i] = NPC::Presets[type].stats[i] + (int)Random::Sign(NPC::Presets[type].stats[i] * (Random::Generate(0, 10) / 100));
 	}
 	for (int i = 0; i < RES_COUNT; ++i) {
-		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + (int)Random::Sign(NPC::Presets[type].resistances[i] * 0.1);
+		npc->baseResistances[i] = NPC::Presets[type].resistances[i] + (int)Random::Sign(NPC::Presets[type].resistances[i] * (Random::Generate(0, 10) / 100));
 	}
 
 	npc->attacks = NPC::Presets[type].attacks;
@@ -343,6 +354,34 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->isTunneler = true;
 	}
 
+	for (int equipIndex = 0; equipIndex < NPC::Presets[type].possibleEquipment.size(); ++equipIndex) {
+		int itemType = Random::ChooseElement(NPC::Presets[type].possibleEquipment[equipIndex]);
+		if (itemType > 0 && itemType < Item::Presets.size()) {
+			if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("weapon")) != Item::Presets[itemType].categories.end()
+				&& !npc->Wielding().lock()) {
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					boost::shared_ptr<Item> item = itemList[itemUid];
+					npc->mainHand = item;
+			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("armor")) != Item::Presets[itemType].categories.end()
+				&& !npc->Wearing().lock()) {
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					boost::shared_ptr<Item> item = itemList[itemUid];
+					npc->armor = item;
+			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("quiver")) != Item::Presets[itemType].categories.end()
+				&& !npc->quiver.lock()) {
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					boost::shared_ptr<Item> item = itemList[itemUid];
+					npc->quiver = boost::static_pointer_cast<Container>(item); //Quivers = containers
+			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("ammunition")) != Item::Presets[itemType].categories.end()
+				&& npc->quiver.lock() && npc->quiver.lock()->empty()) {
+					for (int i = 0; i < 10 && !npc->quiver.lock()->Full(); ++i) {
+						CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->quiver.lock());
+					}
+			} else {
+				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+			}
+		}
+	}
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();
@@ -870,7 +909,7 @@ void Game::Update() {
 		if (freeItems.size() < 100) {
 			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
-					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
 				}
 			}
@@ -878,7 +917,7 @@ void Game::Update() {
 			for (unsigned int i = 0; i < std::max((size_t)100, freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
-					if (!item->Reserved() && item->GetFaction() == 0 && item->GetVelocity() == 0) 
+					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
 				}
 			}
@@ -944,7 +983,7 @@ void Game::Update() {
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == 0) {
+		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
@@ -1591,7 +1630,7 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
 
 int Game::FindMilitaryRecruit() {
 	for (std::map<int, boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
-		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == 0 && !npci->second->squad.lock()) {
+		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == PLAYERFACTION && !npci->second->squad.lock()) {
 			return npci->second->uid;
 		}
 	}
@@ -2075,6 +2114,35 @@ void Game::Badsleepify(Coordinate pos) {
 				if (npc) {
 					npc->AddEffect(BADSLEEP);
 				}
+		}
+	}
+}
+
+boost::shared_ptr<Faction> Game::GetFaction(int num) {
+	if (num < factions.size()) return factions[num];
+	return boost::shared_ptr<Faction>();
+}
+
+void Game::FillDitch(Coordinate a, Coordinate b) {
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
+				if (Map::Inst()->Type(x, y) == TILEDITCH) {
+					boost::shared_ptr<Job> ditchFillJob(new Job("Fill ditch"));
+					ditchFillJob->DisregardTerritory();
+					ditchFillJob->Attempts(2);
+					ditchFillJob->SetRequiredTool(Item::StringToItemCategory("shovel"));
+					ditchFillJob->MarkGround(Coordinate(x,y));
+					ditchFillJob->tasks.push_back(Task(FIND, Coordinate(x,y), boost::weak_ptr<Entity>(),
+						Item::StringToItemCategory("earth")));
+					ditchFillJob->tasks.push_back(Task(MOVE));
+					ditchFillJob->tasks.push_back(Task(TAKE));
+					ditchFillJob->tasks.push_back(Task(FORGET));
+					ditchFillJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
+					ditchFillJob->tasks.push_back(Task(FILLDITCH, Coordinate(x,y)));
+					JobManager::Inst()->AddJob(ditchFillJob);
+				}
+			}
 		}
 	}
 }

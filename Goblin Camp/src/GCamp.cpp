@@ -253,8 +253,8 @@ void StartNewGame() {
 		}
 	}
 
-	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner, spawnBottomCorner);
-	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner, spawnBottomCorner);
+	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner+Coordinate(15,15), spawnBottomCorner-Coordinate(15,15));
+	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner+Coordinate(15,15), spawnBottomCorner-Coordinate(15,15));
 
 	game->CreateItems(30, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(5, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
@@ -275,12 +275,16 @@ void StartNewGame() {
 	{
 		game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
 		game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
+		game->CreateItem(corpseLoc1, Item::StringToItemType("shovel"));
+		game->CreateItem(corpseLoc2, Item::StringToItemType("shovel"));
 		int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
 		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
-		corpse->Name("Human corpse");
+		corpse->Name("Corpse(Human woodsman)");
+		corpse->Color(TCODColor::white);
 		corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
 		corpse = game->itemList[corpseuid];
-		corpse->Name("Human corpse");
+		corpse->Name("Corpse(Human woodsman)");
+		corpse->Color(TCODColor::white);
 		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + Random::Generate(2), corpseLoc1.Y() - 1 + Random::Generate(2)));
 		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + Random::Generate(2), corpseLoc2.Y() - 1 + Random::Generate(2)));
 	}

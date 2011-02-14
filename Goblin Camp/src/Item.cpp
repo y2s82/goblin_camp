@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 #include "StockManager.hpp"
 #include "Attack.hpp"
+#include "Faction.hpp"
 
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
@@ -100,7 +101,7 @@ Item::~Item() {
 #ifdef DEBUG
 	std::cout<<name<<"("<<uid<<") destroyed\n";
 #endif
-	if (faction == 0) {
+	if (faction == PLAYERFACTION) {
 		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 }
@@ -160,7 +161,9 @@ int Item::GetGraphic() {return graphic;}
 Attack Item::GetAttack() const {return attack;}
 
 std::string Item::ItemTypeToString(ItemType type) {
-	return Item::Presets[type].name;
+	if (type >= 0 && type < Item::Presets.size())
+		return Item::Presets[type].name;
+	return "None";
 }
 
 ItemType Item::StringToItemType(std::string str) {
@@ -172,7 +175,9 @@ ItemType Item::StringToItemType(std::string str) {
 }
 
 std::string Item::ItemCategoryToString(ItemCategory category) {
-	return category == -1 ? "None" : Item::Categories[category].name;
+	if (category >= 0 && category < Item::Categories.size())
+		return Item::Categories[category].name;
+	return "None";
 }
 
 ItemCategory Item::StringToItemCategory(std::string str) {
@@ -495,9 +500,9 @@ void Item::ResolveContainers() {
 }
 
 void Item::SetFaction(int val) {
-	if (val == 0 && faction != 0) { //Transferred to player
+	if (val == PLAYERFACTION && faction != PLAYERFACTION) { //Transferred to player
 		StockManager::Inst()->UpdateQuantity(type, 1);
-	} else if (val != 0 && faction == 0) { //Transferred from player
+	} else if (val != PLAYERFACTION && faction == PLAYERFACTION) { //Transferred from player
 		StockManager::Inst()->UpdateQuantity(type, -1);
 	}
 	faction = val;
@@ -592,7 +597,7 @@ void Item::Impact(int speedChange) {
 	SetVelocity(0);
 	flightPath.clear();
 
-	if (speedChange >= 10 && condition > 0 && Random::Generate(9) < 7) --condition; //A sudden impact will damage the item
+	if (speedChange >= 10 && Random::Generate(9) < 7) DecreaseCondition(); //A sudden impact will damage the item
 	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
 		//The item has impacted and broken. Create debris owned by no one
 		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
@@ -619,6 +624,11 @@ void Item::UpdateEffectItems() {
 				}
 		}
 	}
+}
+
+int Item::DecreaseCondition() {
+	if (condition > 0) --condition;
+	return condition;
 }
 
 ItemCat::ItemCat() : flammable(false),

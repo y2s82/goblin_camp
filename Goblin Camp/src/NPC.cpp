@@ -39,6 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StatusEffect.hpp"
 #include "Camp.hpp"
 #include "Stockpile.hpp"
+#include "Faction.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -59,6 +60,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
+	pathIsDangerous(false),
 	timer(0),
 	nextMove(0),
 	lastMoveResult(TASKCONTINUE),
@@ -193,15 +195,17 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 	taskBegun = false;
 	run = true;
 
-	//If we're wielding a container (ie. a tool) spill it's contents
-	if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
-		boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(mainHand.lock()));
-		if (cont->ContainsWater() > 0) {
-			Game::Inst()->CreateWater(Position(), cont->ContainsWater());
-			cont->RemoveWater(cont->ContainsWater());
-		} else if (cont->ContainsFilth() > 0) {
-			Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
-			cont->RemoveFilth(cont->ContainsFilth());
+	if (result != TASKSUCCESS) {
+		//If we're wielding a container (ie. a tool) spill it's contents
+		if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
+			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(mainHand.lock()));
+			if (cont->ContainsWater() > 0) {
+				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
+				cont->RemoveWater(cont->ContainsWater());
+			} else if (cont->ContainsFilth() > 0) {
+				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
+				cont->RemoveFilth(cont->ContainsFilth());
+			}
 		}
 	}
 }
@@ -346,7 +350,7 @@ void NPC::Update() {
 		}
 	}
 	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
-	effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
+	if (effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 
 	if (needsNutrition) {
 		++thirst; ++hunger;
@@ -387,7 +391,7 @@ void NPC::Update() {
 		attacki->Update();
 	}
 
-	if (faction == 0 && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
+	if (faction == PLAYERFACTION && Random::Generate(MONTH_LENGTH - 1) == 0) Game::Inst()->CreateFilth(Position());
 
 	if (carried.lock()) {
 		AddEffect(StatusEffect(CARRYING, carried.lock()->GetGraphic(), carried.lock()->Color()));
@@ -399,7 +403,7 @@ void NPC::Update() {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
 			spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
 		}
-		if (!HasEffect(RAGE) && (jobs.empty() || jobs.front()->name != "Jump into water")) {
+		if (effectiveResistances[FIRE_RES] < 90 && !HasEffect(RAGE) && (jobs.empty() || jobs.front()->name != "Jump into water")) {
 			if (Random::Generate(UPDATES_PER_SECOND) == 0) {
 				RemoveEffect(PANIC);
 				while (!jobs.empty()) TaskFinished(TASKFAILFATAL);
@@ -448,7 +452,7 @@ void NPC::UpdateStatusEffects() {
 			Damage(&attack);
 		}
 
-		if (faction == 0 && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
+		if (faction == PLAYERFACTION && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
 			statusEffectsChanged = false;
 			bool removalJobFound = false;
 			for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
@@ -578,7 +582,8 @@ void NPC::Think() {
 						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
 						if (tarY < 0) tarY = 0;
 						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-						if (Map::Inst()->IsWalkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY)) {
+						if (Map::Inst()->IsWalkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY) 
+							&& !Map::Inst()->IsDangerous(tarX, tarY, faction)) {
 							if (!checkLOS || (checkLOS && 
 								Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y()))) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
@@ -784,7 +789,7 @@ CONTINUEEAT:
 					TaskFinished(TASKFAILFATAL, "(FIND)Failed"); 
 					break;
 				} else {
-					if (faction == 0) currentJob().lock()->ReserveEntity(foundItem);
+					if (faction == PLAYERFACTION) currentJob().lock()->ReserveEntity(foundItem);
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
@@ -834,7 +839,8 @@ CONTINUEEAT:
 
 			case FELL:
 				if (boost::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
-					tmp = tree->Fell();
+					tmp = tree->Fell(); //This'll be called about 100-150 times per tree
+					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
@@ -970,6 +976,8 @@ CONTINUEEAT:
 						TaskFinished(TASKSUCCESS);
 						break;
 					}
+				} else {
+					TaskFinished(TASKFAILFATAL, "(DISMANTLE)Construction does not exist!");
 				}
 				break;
 
@@ -1102,7 +1110,7 @@ CONTINUEEAT:
 					boost::weak_ptr<WaterNode> wnode = Map::Inst()->GetWater(currentTarget().X(), 
 						currentTarget().Y());
 					if (wnode.lock() && wnode.lock()->Depth() > 0 && cont->ContainsFilth() == 0) {
-						int waterAmount = std::min(10, wnode.lock()->Depth());
+						int waterAmount = std::min(50, wnode.lock()->Depth());
 						wnode.lock()->Depth(wnode.lock()->Depth()-waterAmount);
 						cont->AddWater(waterAmount);
 						TaskFinished(TASKSUCCESS);
@@ -1170,9 +1178,11 @@ CONTINUEEAT:
 					taskBegun = true;
 				} else {
 					AddEffect(WORKING);
+					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						Game::Inst()->CreateItem(Position(), Item::StringToItemType("earth"));
 						TaskFinished(TASKSUCCESS);
 					}
 				}
@@ -1231,6 +1241,36 @@ CONTINUEEAT:
 						TaskFinished(TASKFAILFATAL, "(USE)Can not use (tmp<0)"); break;
 					}
 				} else { TaskFinished(TASKFAILFATAL, "(USE)Attempted to use non-construct"); break; }
+				break;
+
+			case FILLDITCH:
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("earth"))) {
+					if (Map::Inst()->Type(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
+						TaskFinished(TASKFAILFATAL, "(FILLDITCH)Target not a ditch");
+						break;
+					}
+
+					if (!taskBegun) {
+						taskBegun = true;
+						timer = 0;
+					} else {
+						AddEffect(WORKING);
+						if (++timer >= 50) {
+							inventory->RemoveItem(carried);
+							bulk -= carried.lock()->GetBulk();
+							Game::Inst()->RemoveItem(carried);
+							carried.reset();
+
+							Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEMUD);
+
+							TaskFinished(TASKSUCCESS);
+							break;
+						}
+					}
+				} else {
+					TaskFinished(TASKFAILFATAL, "(FILLDITCH)Not carrying earth");
+					break;
+				}
 				break;
 
 			default: TaskFinished(TASKFAILFATAL, "*BUG*Unknown task*BUG*"); break;
@@ -1323,6 +1363,9 @@ TaskResult NPC::Move(TaskResult oldResult) {
 					Map::Inst()->FindEquivalentMoveTarget(x, y, moveX, moveY, nextX, nextY, (void*)this);
 				}
 
+				//If we're about to step on a dangerous tile that we didn't plan to, repath
+				if (!pathIsDangerous && Map::Inst()->IsDangerous(moveX, moveY, faction)) return TASKFAILNONFATAL;
+
 				if (Map::Inst()->IsWalkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
 					Position(Coordinate(moveX,moveY));
 					Map::Inst()->WalkOver(moveX, moveY);
@@ -1345,19 +1388,24 @@ TaskResult NPC::Move(TaskResult oldResult) {
 unsigned int NPC::pathingThreadCount = 0;
 boost::mutex NPC::threadCountMutex;
 void NPC::findPath(Coordinate target) {
+	pathMutex.lock();
 	findPathWorking = true;
+	pathIsDangerous = false;
 	pathIndex = 0;
 	
 	delete path;
 	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
 
+	threadCountMutex.lock();
 	if (pathingThreadCount < 12) {
-		threadCountMutex.lock();
 		++pathingThreadCount;
 		threadCountMutex.unlock();
-		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, true));
+		pathMutex.unlock();
+		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), this, true));
 	} else {
-		tFindPath(path, x, y, target.X(), target.Y(), &pathMutex, &nopath, &findPathWorking, false);
+		threadCountMutex.unlock();
+		pathMutex.unlock();
+		tFindPath(path, x, y, target.X(), target.Y(), this, false);
 	}
 }
 
@@ -1378,7 +1426,7 @@ void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 
 void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
 	Entity::GetTooltip(x, y, tooltip);
-	if(faction == 0 && !jobs.empty()) {
+	if(faction == PLAYERFACTION && !jobs.empty()) {
 		boost::shared_ptr<Job> job = jobs.front();
 		if(job->name != "Idle") {
 			tooltip->AddEntry(TooltipEntry((boost::format("  %s") % job->name).str(), TCODColor::grey));
@@ -1413,10 +1461,15 @@ void NPC::Kill() {
 		}
 
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
-		if (boost::shared_ptr<Item> weapon = mainHand.lock()) {
-			weapon->Position(Position());
-			weapon->PutInContainer();
-			mainHand.reset();
+
+		while (!inventory->empty()) {
+			boost::weak_ptr<Item> witem = inventory->GetFirstItem();
+			if (boost::shared_ptr<Item> item = witem.lock()) {
+				item->Position(Position());
+				item->PutInContainer();
+				item->SetFaction(PLAYERFACTION);
+			}
+			inventory->RemoveItem(witem);
 		}
 
 		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
@@ -1459,10 +1512,20 @@ boost::weak_ptr<Entity> NPC::currentEntity() {
 }
 
 
-void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, boost::try_mutex *pathMutex, bool *nopath, bool *findPathWorking, bool threaded) {
-	boost::mutex::scoped_lock pathLock(*pathMutex);
-	*nopath = !path->compute(x0, y0, x1, y1);
-	*findPathWorking = false;
+void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool threaded) {
+	boost::mutex::scoped_lock pathLock(npc->pathMutex);
+	npc->nopath = !path->compute(x0, y0, x1, y1);
+
+	for (int i = 0; i < path->size(); ++i) {
+		int pathX, pathY;
+		path->get(i, &pathX, &pathY);
+		if (Map::Inst()->IsDangerous(pathX, pathY, npc->faction)) {
+			npc->pathIsDangerous = true;
+			break;//One dangerous tile = whole path considered dangerous
+		}
+	}
+
+	npc->findPathWorking = false;
 	if (threaded) {
 		NPC::threadCountMutex.lock();
 		--NPC::pathingThreadCount;
@@ -1480,7 +1543,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		//Priority #1, if the creature can wield a weapon get one if possible
 		/*TODO: Right now this only makes friendlies take a weapon from a stockpile
 		It should be expanded to allow all npc's to search for nearby weapons lying around. */
-		if (!npc->mainHand.lock() && npc->GetFaction() == 0 && squad->Weapon() >= 0) {
+		if (!npc->mainHand.lock() && npc->GetFaction() == PLAYERFACTION && squad->Weapon() >= 0) {
 			for (std::list<Attack>::iterator attacki = npc->attacks.begin(); attacki != npc->attacks.end();
 				++attacki) {
 					if (attacki->Type() == DAMAGE_WIELDED) {
@@ -1529,7 +1592,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			}
 		}
 
-		if (!npc->armor.lock() && npc->GetFaction() == 0 && squad->Armor() >= 0) {
+		if (!npc->armor.lock() && npc->GetFaction() == PLAYERFACTION && squad->Armor() >= 0) {
 			npc->FindNewArmor();
 		}
 
@@ -1570,8 +1633,21 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 }
 
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
+	bool surroundingsScanned = false;
+
+	//If carrying a bucket and adjacent to fire, dump it on it immediately
+	if (npc->Carrying().lock() && npc->Carrying().lock()->IsCategory(Item::StringToItemCategory("bucket"))) {
+		npc->ScanSurroundings(true);
+		surroundingsScanned = true;
+		if (npc->seenFire && Game::Inst()->Adjacent(npc->threatLocation, npc->Position())) {
+			npc->DumpContainer(npc->threatLocation);
+			npc->TaskFinished(TASKFAILNONFATAL);
+		}
+	}
+
 	if (npc->coward) {
-		npc->ScanSurroundings();
+		if (!surroundingsScanned) npc->ScanSurroundings();
+		surroundingsScanned = true;
 		
 		if (npc->HasTrait(CHICKENHEART) && npc->seenFire && (npc->jobs.empty() || npc->jobs.front()->name != "Aaaaaaaah!!")) {
 			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
@@ -1597,7 +1673,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	} else {
 		if (npc->aggressive) {
 			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
-				npc->ScanSurroundings(true);
+				if (!surroundingsScanned) npc->ScanSurroundings(true);
+				surroundingsScanned = true;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 					if (npci->lock()->faction != npc->faction) {
 						JobManager::Inst()->NPCNotWaiting(npc->uid);
@@ -1613,7 +1690,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			}
 		}
 		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
-			npc->ScanSurroundings();
+			if (!surroundingsScanned) npc->ScanSurroundings();
+			surroundingsScanned = true;
 			if (npc->seenFire) {
 				npc->AddEffect(PANIC);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL);
@@ -1639,7 +1717,7 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 
 	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
 		//Turn into a hostile animal if attacked by the player's creatures
-		if (animal->aggressor.lock()->GetFaction() == 0){
+		if (animal->aggressor.lock()->GetFaction() == PLAYERFACTION){
 			animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 			animal->React = boost::bind(NPC::HostileAnimalReact, _1);
 		}
@@ -1727,6 +1805,20 @@ void NPC::RemoveEffect(StatusEffectType effect) {
 			if (statusEffectIterator == statusEffectI) ++statusEffectIterator;
 			statusEffects.erase(statusEffectI);
 			if (statusEffectIterator == statusEffects.end()) statusEffectIterator = statusEffects.begin();
+
+			if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) {
+				std::list<StatusEffect>::iterator oldIterator = statusEffectIterator;
+				++statusEffectIterator;
+				while (statusEffectIterator != oldIterator) {
+					if (statusEffectIterator != statusEffects.end()) {
+						if (statusEffectIterator->visible) break;
+						++statusEffectIterator;
+					}
+					else statusEffectIterator = statusEffects.begin();
+				}
+				if (statusEffectIterator != statusEffects.end() && !statusEffectIterator->visible) statusEffectIterator = statusEffects.end();
+			}
+
 			return;
 		}
 	}
@@ -1768,6 +1860,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 
 				if (attack.Type() == DAMAGE_WIELDED) {
 					GetMainHandAttack(attack);
+					if (mainHand.lock() && Random::Generate(9) == 0) DecreaseItemCondition(mainHand);
 				}
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
@@ -2025,6 +2118,12 @@ class NPCListener : public ITCODParserListener {
 		} else if (boost::iequals(name,"death")) {
 			if (boost::iequals(value.s,"filth")) NPC::Presets.back().deathItem = -1;
 			else NPC::Presets.back().deathItem = Item::StringToItemType(value.s);
+		} else if (boost::iequals(name,"equipOneOf")) {
+			NPC::Presets.back().possibleEquipment.push_back(std::vector<int>());
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				std::string item = (char*)TCOD_list_get(value.list,i);
+				NPC::Presets.back().possibleEquipment.back().push_back(Item::StringToItemType(item));
+			}
 		}
 		return true;
 	}
@@ -2058,6 +2157,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addProperty("tier", TCOD_TYPE_INT, false);
 	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addListProperty("equipOneOf", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -2092,7 +2192,9 @@ void NPC::LoadPresets(std::string filename) {
 }
 
 std::string NPC::NPCTypeToString(NPCType type) {
-	return Presets[type].typeName;
+	if (type >= 0 && type < Presets.size())
+		return Presets[type].typeName;
+	return "Nobody";
 }
 
 NPCType NPC::StringToNPCType(std::string typeName) {
@@ -2108,19 +2210,19 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-		faction = 0;
+		faction = PLAYERFACTION;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		faction = 1;
+		faction = PEACEFULFAUNAFACTION;
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
 		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = 2;
+		faction = RANDOMMONSTERFACTION;
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
 		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = 2;
+		faction = RANDOMMONSTERFACTION;
 	}
 }
 
@@ -2443,7 +2545,7 @@ void NPC::UpdateHealth() {
 
 	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
 
-	if (faction == 0 && health < maxHealth / 2 && !HasEffect(HEALING)) {
+	if (faction == PLAYERFACTION && health < maxHealth / 2 && !HasEffect(HEALING)) {
 		bool healJobFound = false;
 		for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
 			if ((*jobi)->name.find("Heal") != std::string::npos) {
@@ -2470,6 +2572,53 @@ void NPC::UpdateHealth() {
 					healJob->tasks.push_back(Task(EAT));
 				jobs.push_back(healJob);
 			}
+		}
+	}
+}
+
+/*I opted to place this in NPC instead of it being a method of Item mainly because Item won't know
+if it's being wielded, worn or whatever, and that's important information when an axe breaks in an
+orc's hand, for exmple*/
+void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
+		int condition = item->DecreaseCondition();
+		if (condition == 0) { //< 0 == does not break, > 0 == not broken
+			inventory->RemoveItem(item);
+			if (carried.lock() == item) carried.reset();
+			if (mainHand.lock() == item) {
+				mainHand.reset();
+				if (currentJob().lock() && currentJob().lock()->RequiresTool()) {
+					TaskFinished(TASKFAILFATAL, "(FAIL)Wielded item broken");
+				}
+			}
+			if (offHand.lock() == item) offHand.reset();
+			if (armor.lock() == item) armor.reset();
+			if (quiver.lock() == item) quiver.reset();
+			std::vector<boost::weak_ptr<Item> > component(1, item);
+			Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
+			Game::Inst()->RemoveItem(item);
+		}
+	}
+}
+
+void NPC::DumpContainer(Coordinate location) {
+	boost::shared_ptr<Container> sourceContainer;
+	if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+		sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
+	} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+		sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
+	}
+
+	if (sourceContainer) {
+		if (location.X() >= 0 && location.Y() >= 0 && 
+			location.X() < Map::Inst()->Width() && location.Y() < Map::Inst()->Height()) {
+				if (sourceContainer->ContainsWater() > 0) {
+					Game::Inst()->CreateWater(location, sourceContainer->ContainsWater());
+					sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+				} else {
+					Game::Inst()->CreateFilth(location, sourceContainer->ContainsFilth());
+					sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+				}
 		}
 	}
 }

@@ -62,8 +62,9 @@ void SpawningPool::Update() {
 		if (jobCount < 4) {
 			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 5) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
-					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", LOW));
+					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", MED));
 					filthDumpJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
+					filthDumpJob->Attempts(1);
 					Coordinate filthLocation = Game::Inst()->FindFilth(Position());
 					filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
 					filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
@@ -80,7 +81,7 @@ void SpawningPool::Update() {
 			}
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
 				Random::Generate(UPDATES_PER_SECOND * 5) == 0) {
-					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", LOW));
+					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", MED));
 					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
 					corpseDumpJob->tasks.push_back(Task(TAKE));
@@ -168,7 +169,7 @@ void SpawningPool::Update() {
 	}
 	if (burn > 0) {
 		if (Random::Generate(2) == 0) --burn;
-		if (burn > 500) {
+		if (burn > 5000) {
 			Expand(false);
 			Game::Inst()->CreateFire(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())));
 			if (Random::Generate(9) == 0) {
@@ -193,7 +194,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
+				if (Random::Generate(20) == 0) Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
 			}
 		}
 	}
@@ -226,16 +227,21 @@ void SpawningPool::Expand(bool message) {
 		}
 		//Destroy buildings
 		if (Map::Inst()->GetConstruction(location.X(), location.Y()) >= 0) {
-			Attack attack;
-			attack.Type(DAMAGE_MAGIC);
-			TCOD_dice_t damage;
-			damage.nb_dices = 100;
-			damage.nb_faces = 100;
-			damage.multiplier = 100;
-			damage.addsub = 1000;
-			attack.Amount(damage);
-			if (Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) 
-				Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()->Damage(&attack);
+			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) {
+				if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
+					construct->Dismantle(location);
+				} else {
+					Attack attack;
+					attack.Type(DAMAGE_MAGIC);
+					TCOD_dice_t damage;
+					damage.nb_dices = 100;
+					damage.nb_faces = 100;
+					damage.multiplier = 100;
+					damage.addsub = 1000;
+					attack.Amount(damage);
+					construct->Damage(&attack);
+				}
+			}
 		}
 
 		//Swallow items
@@ -289,9 +295,6 @@ void SpawningPool::AcceptVisitor(ConstructionVisitor& visitor) {
 
 void SpawningPool::Burn() {
 	burn += 5;
-#ifdef DEBUG
-	std::cout<<"SPBURN: "<<burn<<'\n';
-#endif
 	if (burn > 30000) {
 		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}

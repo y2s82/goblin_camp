@@ -149,6 +149,11 @@ int Spell::StringToSpellType (std::string spell) {
 	return -1;
 }
 
+std::string Spell::SpellTypeToString(SpellType type) {
+	if (type >= 0 && type < Presets.size()) return Presets[type].name;
+	return "";
+}
+
 class SpellListener : public ITCODParserListener {
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 		if (boost::iequals(str->getName(), "spell_type")) {

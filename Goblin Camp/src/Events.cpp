@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "GCamp.hpp"
 #include "Camp.hpp"
+#include "StockManager.hpp"
 
 Events::Events(Map* vmap) :
 map(vmap),

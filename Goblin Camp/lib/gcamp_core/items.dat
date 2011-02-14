@@ -45,6 +45,10 @@ category_type "Rough stone" {
 	parent="Stone"
 }
 
+category_type "Dressed stone" {
+	parent="Stone"
+}
+
 category_type "Sharpened stone" {
 	parent="Stone"
 }
@@ -59,6 +63,11 @@ category_type "Meat" {
 }
 
 category_type "Prepared food" {
+	parent="Food"
+	flammable
+}
+
+category_type "Preserved food" {
 	parent="Food"
 	flammable
 }
@@ -90,6 +99,7 @@ category_type "Drink" {
 
 category_type "Wine" {
 	parent="Drink"
+	flammable
 }
 
 category_type "Tincture" {
@@ -160,6 +170,10 @@ category_type "Statue" {
 	parent="Furniture"
 }
 
+category_type "Rope" {
+	flammable
+}
+
 category_type "Leather" {
 	flammable
 }
@@ -185,6 +199,48 @@ category_type "Metal bar" {
 	parent="Metal"
 }
 
+category_type "Weapon component" {
+}
+
+category_type "Axe head" {
+	parent="Weapon component"
+}
+
+category_type "Blade" {
+	parent="Weapon component"
+}
+
+category_type "Hilt" {
+	parent="Weapon component"
+}
+
+category_type "Metal spearhead" {
+	parent="Weapon component"
+}
+
+category_type "Metal arrow head" {
+	parent="Weapon component"
+}
+
+category_type "Armor component" {
+}
+
+category_type "Metal plate" {
+	parent="Armor component"
+}
+
+category_type "Chitin plate" {
+	parent="Armor component"
+}
+
+category_type "Bone plate" {
+	parent="Armor component"
+}
+
+category_type "Metal rings" {
+	parent="Armor component"
+}
+
 category_type "Weapon" {
 }
 
@@ -204,10 +260,6 @@ category_type "Ranged weapon" {
 	parent="Weapon"
 }
 
-category_type "Rope" {
-	flammable
-}
-
 category_type "Quiver" {
 	flammable
 }
@@ -220,6 +272,10 @@ category_type "Arrow" {
 }
 
 category_type "Armor" {
+}
+
+category_type "Padded clothing" {
+	parent="Armor"
 }
 
 category_type "Light armor" {
@@ -249,6 +305,10 @@ category_type "Bucket" {
 	parent="Tool"
 }
 
+category_type "Anvil" {
+	parent="Tool"
+}
+
 category_type "Alchemy" {
 }
 
@@ -262,18 +322,22 @@ category_type "Poison" {
 
 category_type "Root" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Vine" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Shoot" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Branch" {
 	parent="Alchemy"
+	flammable
 }
 
 category_type "Garbage" {
@@ -298,6 +362,14 @@ category_type "Hide" {
 	flammable
 }
 
+category_type "Earth" {
+	parent="Garbage"
+}
+
+category_type "Chitin" {
+	parent="Garbage"
+}
+
 category_type "Misc." {
 	parent="Garbage"
 	flammable
@@ -309,7 +381,7 @@ item_type "Wood log" {
 	category = ["Log"]
 	graphic = 22
 	color = "153,87,38"
-	multiplier = 10
+	multiplier = 5
 	bulk = 3
 }
 
@@ -319,7 +391,7 @@ item_type "Wood plank" {
 	color = "255,73,7"
 	components = ["Log"]
 	fitsin = "Crate"
-	multiplier = 10
+	multiplier = 5
 	constructedin = "Saw pit"
 }
 
@@ -328,7 +400,7 @@ item_type "Wicker" {
     graphic = 42
     color = "127,106,0"
     fitsin = "Crate"
-	multiplier = 10
+	multiplier = 5
 }
 
 item_type "Wood charcoal" {
@@ -520,7 +592,7 @@ item_type "Nightbloom tree" {
 }
 
 item_type "Dried fruit" {
-	category = ["Food"]
+	category = ["Preserved food"]
 	graphic = 42
 	color = "190,195,130"
 	components = ["Fruit","Fruit","Fruit"]
@@ -554,6 +626,15 @@ item_type "Bones" {
 	color = "192,192,192"
 	decay = [ "Filth" ]
 	decaySpeed = 18
+	fitsin = "Crate"
+}
+
+item_type "Chitin fragment" {
+	category = ["Chitin"]
+	graphic = 235
+	color = "100,100,175"
+	decay = ["Filth"]
+	decaySpeed = 8
 	fitsin = "Crate"
 }
 
@@ -597,6 +678,18 @@ item_type "Small corpse" {
 	bulk = 3
 	durability = 5
 	nutrition = 10000
+}
+
+item_type "Arthropod corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Chitin fragment", "Filth"]
+	decaySpeed = 4
+	fruits = [ "Chitin fragment", "Chitin fragment" ]
+	bulk = 4
+	durability = 5
+	nutrition = 12000
 }
 
 item_type "Berry wine" {
@@ -692,6 +785,7 @@ item_type "Wooden club" {
 	}
 	constructedin = "Carpenter"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Stone maul" {
@@ -709,6 +803,7 @@ item_type "Stone maul" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 2
+	durability = 15
 }
 
 item_type "Stone axe" {
@@ -726,6 +821,7 @@ item_type "Stone axe" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 2
+	durability = 15
 }
 
 item_type "Stone spear" {
@@ -742,6 +838,7 @@ item_type "Stone spear" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	durability = 15
 }
 
 item_type "Bone Dagger" {
@@ -758,6 +855,7 @@ item_type "Bone Dagger" {
 	}
 	constructedin = "Bone carver"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Poisoned dagger" {
@@ -774,6 +872,77 @@ item_type "Poisoned dagger" {
 	}
 	constructedin = "Bone carver"
 	fitsin = "Crate"
+	durability = 10
+}
+
+item_type "Iron spear" {
+	category = ["Piercing weapon"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Plank", "Metal spearhead"]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d30+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    25    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	durability = 30
+}
+
+item_type "Iron war hammer" {
+	category = ["Blunt weapon"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Metal bar", "Metal bar", "Metal bar", "Charcoal", "Charcoal"]
+	attack "Crush" {
+		type="blunt"
+		damage="1d20+15"
+		cooldown=35
+		statusEffects=["Concussion"]
+		effectChances=[    50    ]
+	}
+	constructedin = "Weaponsmith"
+	fitsin = "Crate"
+	bulk = 2
+	durability = 30
+}
+
+item_type "Iron axe" {
+	category = ["Slashing weapon", "Axe"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Plank", "Axe head"]
+	attack "Hack" {
+		type="slashing"
+		damage="2d15+15"
+		cooldown=35
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 2
+	durability = 30
+}
+
+item_type "Iron sword" {
+	category = ["Slashing weapon"]
+	graphic = 41
+    color = "155,128,128"
+    components = ["Hilt", "Blade"]
+    attack "Slash" {
+    	type="slashing"
+		damage="3d15+15"
+		cooldown=35
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+    }
+    constructedin = "Weapon crafter"
+    fitsin = "Crate"
+	durability = 30
 }
 
 item_type "Wooden arrow" {
@@ -810,6 +979,42 @@ item_type "Stone-tipped arrow" {
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
 	bulk = 0
+}
+
+item_type "Bone arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "200,200,200"
+	components = [ "Plank", "Bone" ]
+	multiplier = 5
+	attack "Pierce" {
+		type="piercing"
+		damage="1d15+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 0
+}
+
+item_type "Iron arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Plank", "Metal arrow head"]
+	multiplier = 5
+	attack "Pierce" {
+		type="piercing"
+		damage="1d25+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    40    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 0
 	durability = 2
 }
 
@@ -825,6 +1030,7 @@ item_type "Wooden bow" {
 	}
 	constructedin = "Weapon crafter"
 	fitsin = "Crate"
+	durability = 10
 }
 
 item_type "Quiver" {
@@ -853,6 +1059,15 @@ item_type "Sharpened stone" {
 	components = ["Rough stone"]
 	constructedin = "Stone mason"
 	bulk = 2
+}
+
+item_type "Stone block" {
+	category = ["Dressed stone"]
+	graphic = 254
+	color = "192,192,192"
+	components = ["Rough stone"]
+	constructedin = "Stone mason"
+	bulk = 3
 }
 
 item_type "Blueleaf boll" {
@@ -910,11 +1125,34 @@ item_type "Cloth sack" {
 	constructedin = "Weaver"
 }
 
+item_type "Padded jack" {
+	category = ["Padded clothing"]
+	graphic = 91
+	color = "255,255,255"
+	components = [ "Cloth", "Cloth", "Cloth", "Cloth", "Cloth" ]
+	resistances {
+		physical = 5
+	}
+	constructedin = "Weaver"
+}
+
 item_type "Leather armor" {
 	category = ["Light armor"]
 	graphic = 91
 	color = "160,82,45"
 	components = ["Leather", "Leather", "Leather", "Cloth"]
+	resistances {
+		physical = 10
+	}
+	constructedin = "Leather Crafter"
+	bulk = 2
+}
+
+item_type "Chitin plate coat" {
+	category = ["Light armor"]
+	graphic = 91
+	color = "100,100,175"
+	components = ["Leather", "Leather", "Leather", "Cloth", "Chitin plate", "Chitin plate"]
 	resistances {
 		physical = 15
 	}
@@ -922,28 +1160,144 @@ item_type "Leather armor" {
 	bulk = 2
 }
 
-item_type "Chainmail" {
+item_type "Bone armor" {
+	category = ["Light armor"]
+	graphic = 91
+	color = "255,255,255"
+	components = ["Leather", "Leather", "Leather", "Cloth", "Bone plate", "Bone plate", "Bone plate"]
+	resistances {
+		physical = 15
+	}
+	constructedin = "Leather Crafter"
+	bulk = 3
+}
+
+item_type "Brigandine" {
 	category = ["Medium armor"]
 	graphic = 91
-	color = "112,138,144"
-	components = ["Metal bar", "Metal bar", "Metal bar", "Cloth", "Charcoal", "Charcoal"]
+	color = "140,95,90"
+	components = ["Leather", "Leather", "Leather", "Leather", "Cloth", "Metal plate", "Metal plate", "Padded clothing"]
 	resistances {
-		physical = 25
+		physical = 20
 	}
-	constructedin = "Smithy"
+	constructedin = "Leather Crafter"
 	bulk = 4
 }
 
-item_type "Platemail" {
+item_type "Mail hauberk" {
+	category = ["Medium armor"]
+	graphic = 91
+	color = "112,138,144"
+	components = ["Metal rings", "Metal rings", "Metal rings", "Metal rings", "Metal rings", "Padded clothing", "Charcoal", "Charcoal"]
+	resistances {
+		physical = 25
+	}
+	constructedin = "Armorsmith"
+	bulk = 4
+}
+
+item_type "Plate armor" {
 	category = ["Heavy armor"]
 	graphic = 91
 	color = "190,190,190"
-	components = ["Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Cloth", "Cloth", "Charcoal", "Charcoal", "Charcoal"]
+	components = ["Metal plate", "Metal plate", "Metal plate", "Metal plate", "Metal plate", "Metal rings", "Padded clothing", "Cloth", "Leather", "Charcoal", "Charcoal", "Charcoal"]
 	resistances {
 		physical = 40
 	}
-	constructedin = "Smithy"
+	constructedin = "Armorsmith"
 	bulk = 6
+}
+
+item_type "Chitin plate" {
+	category = ["Chitin plate"]
+	graphic = 189
+	color = "100,100,175"
+	components = ["Chitin"]
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+}
+
+item_type "Bone plate" {
+	category = ["Bone plate"]
+	graphic = 189
+	color = "255,255,255"
+	components = ["Bone", "Bone"]
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+}
+
+item_type "Iron plate" {
+	category = ["Metal plate"]
+	graphic = 189
+	color = "110,110,110"
+	components = ["Metal bar", "Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron rings" {
+	category = ["Metal rings"]
+	graphic = 111
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+//weapon components
+
+item_type "Iron axe head" {
+	category = ["Axe head"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron spearhead" {
+	category = ["Metal spearhead"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron arrow heads" {
+	category = ["Metal arrow head"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron sword blade" {
+	category = ["Blade"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Metal bar", "Charcoal", "Charcoal"]
+	constructedin = "Weaponsmith"
+	fitsin = "Crate"
+}
+
+item_type "Wooden hilt" {
+	category = ["Hilt"]
+	graphic = 92
+	color = "153,87,38"
+	components = ["Plank"]
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+}
+
+item_type "Bone hilt" {
+	category = ["Hilt"]
+	graphic = 92
+	color = "255,255,255"
+	components = ["Bone"]
+	constructedin = "Bone carver"
+	fitsin = "Crate"
 }
 
 item_type "Bog iron" {
@@ -958,16 +1312,25 @@ item_type "Sponge iron" {
 	color = "230,135,80"
 	components = ["Metal ore", "Metal ore", "Metal ore", "Charcoal", "Charcoal", "Charcoal", "Charcoal"]
 	constructedin = "Bloomery"
-	bulk = 2
+	bulk = 3
 }
 
 item_type "Wrought iron" {
 	category = ["Metal bar"]
 	graphic = 170
 	color = "110,110,110"
-	components = ["Impure metal", "Impure metal", "Charcoal"]
-	constructedin = "Smithy"
+	components = ["Impure metal", "Charcoal"]
+	constructedin = "Blacksmith"
 	bulk = 3
+}
+
+item_type "Iron anvil" {
+	category = ["Anvil"]
+	graphic = 254
+	color = "155,128,128"
+	components = [ "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Charcoal", "Charcoal", "Charcoal"]
+	constructedin = "Blacksmith"
+	bulk = 5
 }
 
 item_type "Red clay" {
@@ -991,8 +1354,9 @@ item_type "Shovel" {
 	graphic = 93
 	color = "155,128,128"
 	components = [ "Plank", "Metal bar" ]
-	constructedin = "Smithy"
+	constructedin = "Blacksmith"
 	fitsin = "Crate"
+	durability = 20
 }
 
 item_type "Debris" {
@@ -1018,6 +1382,7 @@ item_type "Wooden bucket" {
 	components = [ "Plank", "Plank" ]
 	constructedin = "Carpenter"
 	bulk = 2
+	durability = 4
 }
 
 item_type "Meat pie" {
@@ -1238,7 +1603,7 @@ item_type "Lichfruit seed" {
 	bulk = 0
 }
 
-item_type "Lichfruit shrub" {
+item_type "Lichfruit sapling" {
 	category = ["Misc."]
 	graphic = 214
 	color = "255,255,0"
@@ -1247,7 +1612,7 @@ item_type "Lichfruit shrub" {
 	decaySpeed = 12
 }
 
-item_type "Lichfruit bush" {
+item_type "Stunted lichfruit tree" {
 	category = ["Misc."]
 	graphic = 215
 	color = "255,255,0"
@@ -1350,7 +1715,7 @@ item_type "Young marshmerrow" {
 	decaySpeed = 12
 }
 
-item_type "Marshmerrow plant" {
+item_type "Marshmerrow" {
 	category = ["Misc."]
 	graphic = 35
 	color = "0,136,14"
@@ -1374,7 +1739,7 @@ item_type "Dreamvine seed" {
 	bulk=0
 }
 
-item_type "Young dreamvine plant" {
+item_type "Young dreamvine" {
 	category = ["Misc."]
 	graphic = 42
 	color="77,234,81"
@@ -1431,4 +1796,10 @@ item_type "Marubium plant" {
 	fruits = [ "Marubium", "Marubium" ]
 	decay = [ "Filth" ]
 	decaySpeed = 12
+}
+
+item_type "Earth" {
+	category = [ "Earth" ]
+	graphic = 177
+	color = "127,50,0"
 }

@@ -87,34 +87,6 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 	}
 }
 
-void JobManager::RemoveJob(boost::weak_ptr<Entity> entity) {
-	if (boost::shared_ptr<Entity> cancelledEntity = entity.lock()) {
-		for (int i=0; i<PRIORITY_COUNT; i++) {
-			for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end();) {
-				boost::shared_ptr<Entity> jobEntity = (*jobi)->ConnectedEntity().lock();
-				boost::shared_ptr<Entity> jobParentEntity;
-				if ((*jobi)->Parent().lock()) { 
-					jobParentEntity = (*jobi)->Parent().lock()->ConnectedEntity().lock(); 
-				}
-				// Cancel the job if the job or its parent is connected to the entity requesting cancellation
-				if ((jobEntity && jobEntity->Uid() == cancelledEntity->Uid()) ||
-					(jobParentEntity && jobParentEntity->Uid() == cancelledEntity->Uid())) {
-						std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
-						(*jobi)->Attempts(0); //Set attempts to 0 so the job gets removed
-						jobi = availableList[i].erase(jobi); /*Move iterator forward, it'll get invalidated by
-															 AbortCurrentJob() otherwise*/
-						if (npc != Game::Inst()->npcList.end()) { 
-							npc->second->AbortJob(*jobi); /*When an NPC aborts a job it cancels it through
-																 JobManager::CancelJob()*/
-						}
-				} else {
-					++jobi;
-				}
-			}
-		}
-	}
-}
-
 void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConsole* console) {
 	int skip = 0;
 	int y = pos.Y();

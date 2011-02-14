@@ -375,16 +375,19 @@ bool Stockpile::Full(ItemType type) {
 }
 
 Coordinate Stockpile::FreePosition() {
-	//First attempt to find a random position
-	for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
-		std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
-		if (conti->second->empty() && !reserved[conti->first]) return conti->first;
-	}
-	//If that fails still iterate through each position because a free position _should_ exist
-	for (int ix = a.X(); ix <= b.X(); ++ix) {
-		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
-				if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+	if (containers.size() > 0) {
+		//First attempt to find a random position
+		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
+			std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
+			if (conti != containers.end() && conti->second->empty() && !reserved[conti->first]) 
+				return conti->first;
+		}
+		//If that fails still iterate through each position because a free position _should_ exist
+		for (int ix = a.X(); ix <= b.X(); ++ix) {
+			for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+				if (Map::Inst()->GetConstruction(ix,iy) == uid) {
+					if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+				}
 			}
 		}
 	}
@@ -421,11 +424,15 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso, bool countPar
 		}
 	}
 	allowed[cat] = !allowed[cat];
+
+	if (allowed[cat] && limits.find(cat) != limits.end() && limits[cat] == 0) limits[cat] = 10;
+
 	if (childrenAlso) {
 		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
 			if (Item::Categories[alli->first].parent >= 0 &&
 				Item::Categories[Item::Categories[alli->first].parent].name == Item::Categories[cat].name) {
 				alli->second = allowed[cat];
+				if (alli->second && limits.find(alli->first) != limits.end() && limits[alli->first] == 0) limits[alli->first] = 10;
 			} else {
 				break;
 			}
@@ -536,6 +543,9 @@ void Stockpile::TranslateInternalContainerListeners() {
 }
 
 void Stockpile::AdjustLimit(ItemCategory category, int amount) {
+	if (amount > 0 && !allowed[category]) allowed[category] = true;
+	else if (amount == 0 && allowed[category]) allowed[category] = false;
+
 	if (limits.find(category) != limits.end()) {
 		limits[category] = amount;
 	}
@@ -554,14 +564,27 @@ void Stockpile::AcceptVisitor(ConstructionVisitor& visitor) {
 
 void Stockpile::Dismantle(Coordinate location) {
 	if (!Construction::Presets[type].permanent) {
-		if (Map::Inst()->GetConstruction(location.X(), location.Y()) == uid) {
-			Map::Inst()->SetConstruction(location.X(), location.Y(), -1);
-			Map::Inst()->SetBuildable(location.X(), location.Y(), true);
-			reserved.erase(location);
-			containers.erase(location);
-			colors.erase(location);
+		if (location.X() == -1 && location.Y() == -1) {
+			for (int ix = a.X(); ix <= b.X(); ++ix) {
+				for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+					if (Map::Inst()->GetConstruction(ix, iy) == uid) {
+						Map::Inst()->SetConstruction(ix, iy, -1);
+						Map::Inst()->SetBuildable(ix, iy, true);
+						reserved.erase(Coordinate(ix, iy));
+						containers.erase(Coordinate(ix, iy));
+						colors.erase(Coordinate(ix, iy));
+					}
+				}
+			}
+		} else {
+			if (Map::Inst()->GetConstruction(location.X(), location.Y()) == uid) {
+				Map::Inst()->SetConstruction(location.X(), location.Y(), -1);
+				Map::Inst()->SetBuildable(location.X(), location.Y(), true);
+				reserved.erase(location);
+				containers.erase(location);
+				colors.erase(location);
+			}
 		}
-
 		if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }

@@ -76,7 +76,7 @@ npc_type "giant snail" {
 		cooldown=75
 	}
 	spawnAsGroup="1d3"
-	death="Filth"
+	death="Arthropod corpse"
 }
 
 npc_type "starving wolf" {
@@ -180,7 +180,7 @@ npc_type "soldier ant" {
 	}
 	spawnAsGroup="1d7+3"
 	tags=["underground", "tunneler"]
-	death="Corpse"
+	death="Arthropod corpse"
 }
 
 npc_type "killer bee" {
@@ -241,7 +241,7 @@ npc_type "harpy" {
 npc_type "kobold" { 
 	name="Kobold"
 	tier=2
-	tags=["attacksRandomly"]
+	tags=["attacksRandomly", "hasHands"]
 	color="128,128,0"
 	graphic='k'
 	AI="HostileAnimal"
@@ -259,7 +259,33 @@ npc_type "kobold" {
 		damage="1d4+1"
 		cooldown=20
 	}
+	equipOneOf=["Wooden club"]
 	spawnAsGroup="1d3+1"
+	death="Corpse"
+}
+
+npc_type "kobold raider" {
+	name="Kobold raider"
+	tags=["underground", "hasHands"]
+	color="234,0,0"
+	graphic='k'
+	AI="HostileAnimal"
+	stats {
+			speed=15
+			health=40
+			dodge=10
+			size=5
+	}
+	resistances {
+			physical=10
+	}
+	attack "attack" {
+			type="wielded"
+			damage="1d6+1"
+			cooldown=20
+	}
+	equipOneOf=["Wooden club"]
+	spawnAsGroup="1d6+2"
 	death="Corpse"
 }
 
@@ -750,7 +776,6 @@ npc_type "feral vampire" {
 		magic=10
 		poison=100
 		cold=25
-
 	}
 	attack "Bite" {
 		type="piercing"
@@ -795,7 +820,6 @@ npc_type "wild boar" {
 
 npc_type "salamander" { 
 	name="Salamander"
-	tags=["underground"]
 	color="255,140,0"
 	graphic='S'
 	AI="HostileAnimal"
@@ -955,4 +979,29 @@ npc_type "netch" {
 		cooldown=60
 	}
 	death="Hide"
+}
+
+npc_type "human woodsman" {
+	tags = ["hasHands"]
+	name="Human woodsman"
+	color="255,255,255"
+	graphic='@'
+	AI="PeacefulAnimal"
+	stats {
+		speed=12
+		health=100
+		dodge=8
+		size=8
+	}
+	resistances {
+		physical=5
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d5+3"
+		cooldown=25
+	}
+	death="Corpse"
+	equipOneOf=["leather armor", "nothing", "nothing"]
+	equipOneOf=["stone axe", "stone axe", "stone spear"]
 }

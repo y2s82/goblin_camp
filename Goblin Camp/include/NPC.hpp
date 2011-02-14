@@ -99,12 +99,14 @@ struct NPCPreset {
 	ItemType deathItem;
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
+	std::vector<std::vector<int> > possibleEquipment;
 };
 
 class NPC : public Entity {
 	friend class boost::serialization::access;
 	friend class Game;
 	friend class NPCListener;
+	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 
 private:
 	template<class Archive>
@@ -126,6 +128,7 @@ private:
 	int pathIndex;
 	bool nopath;
 	bool findPathWorking;
+	bool pathIsDangerous;
 	int timer;
 	unsigned int nextMove;
 	TaskResult lastMoveResult;
@@ -252,6 +255,7 @@ public:
 	bool IsTunneler();
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
+	void DecreaseItemCondition(boost::weak_ptr<Item>);
 
 	int GetHealth();
 	int GetMaxHealth();
@@ -282,6 +286,8 @@ public:
 
 	void GoBerserk();
 	void ApplyEffects(boost::shared_ptr<Item>);
+
+	void DumpContainer(Coordinate);
 };
 
-void tFindPath(TCODPath*, int, int, int, int, boost::mutex*, bool*, bool*, bool);
+void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);

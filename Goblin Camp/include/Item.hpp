@@ -157,6 +157,7 @@ public:
 	int GetDecay() const;
 	void Impact(int speedChange);
 	bool IsFlammable();
+	int DecreaseCondition(); //Only decreases condition, does NOT handle item removal or debris creation!
 };
 
 class OrganicItem : public Item {

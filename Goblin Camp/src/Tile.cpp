@@ -28,6 +28,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 #include "Game.hpp"
 #include "Construction.hpp"
+#include "Faction.hpp"
+#include "Trap.hpp"
 
 Tile::Tile(TileType newType, int newCost) :
 	vis(true),
@@ -63,7 +65,7 @@ TileType Tile::GetType() { return type; }
 void Tile::SetType(TileType newType) {
 	type = newType;
 	if (type == TILEGRASS) {
-		vis = true; walkable = true; buildable = true;
+		vis = true; walkable = true; buildable = true; low = false;
 		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
 		backColor = TCODColor(0, 0, 0);
 		switch (Random::Generate(9)) {
@@ -142,14 +144,20 @@ bool Tile::BlocksWater() const { return blocksWater; }
 void Tile::SetBlocksWater(bool value) { blocksWater = value; }
 
 int Tile::GetMoveCost(void* ptr) const {
-	if (!static_cast<NPC*>(ptr)->HasHands()) {
-		if (construction >= 0) {
-			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(construction).lock()) {
+	if (construction >= 0) {
+		if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(construction).lock()) {
+			if (!static_cast<NPC*>(ptr)->HasHands()) {
 				if (cons->HasTag(DOOR)) return GetMoveCost()+50;
+			}
+			if (cons->HasTag(TRAP)) { 
+				return GetMoveCost()+boost::static_pointer_cast<Trap>(cons)->GetMoveCostModifier(
+					Game::Inst()->GetFaction(static_cast<NPC*>(ptr)->GetFaction())->IsTrapVisible(cons->Position()));
 			}
 		}
 	}
+
 	int cost = GetMoveCost();
+	//cost == 0 normally means unwalkable, but tunnellers can, surprise surprise, tunnel through
 	if (cost == 0 && construction >= 0 && static_cast<NPC*>(ptr)->IsTunneler()) return 50;
 	return cost;
 }
@@ -159,7 +167,7 @@ int Tile::GetMoveCost() const {
 	int cost = moveCost;
 	if (construction >= 0) cost += 2;
 
-	if (fire) cost += 100; //Walking through fire... not such a good idea.
+	if (fire) cost += 200; //Walking through fire... not such a good idea.
 
 	//If a construction exists here, and it's a bridge, then movecost = 1 (disregards mud/ditch/etc)
 	if (construction > 0 && Game::Inst()->GetConstruction(construction).lock() && 
@@ -171,6 +179,13 @@ int Tile::GetMoveCost() const {
 
 	return cost;
 }
+
+int Tile::GetTerrainMoveCost() const {
+	int cost = moveCost;
+	if (construction >= 0) cost += 2;
+	return cost;
+}
+
 void Tile::SetMoveCost(int value) { moveCost = value; }
 
 void Tile::SetBuildable(bool value) { buildable = value; }
