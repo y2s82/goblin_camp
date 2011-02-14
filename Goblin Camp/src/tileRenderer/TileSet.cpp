@@ -240,6 +240,17 @@ void TileSet::DrawUnderConstruction(Construction * construction, const Coordinat
 	}
 }
 
+void TileSet::DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = trap->GetGraphicsHint();
+	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (spriteSet.IsConnectionMap()) {
+		ConstructionType type = trap->Type();
+		spriteSet.DrawUnreadyTrap(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
+	} else {
+		spriteSet.DrawUnreadyTrap(worldPos - trap->Position(), dst, dstRect);
+	}
+}
+
 void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
 	if (storage && !storage->empty()) {

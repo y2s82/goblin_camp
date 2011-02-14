@@ -30,6 +30,7 @@ public:
 
 	void AddSprite(const Sprite& sprite);
 	void AddUnderConstructionSprite(const Sprite& sprite);
+	void AddUnreadyTrapSprite(const Sprite& sprite);
 	void SetWidth(int width);
 	void SetOpenSprite(const Sprite& sprite);
 
@@ -40,15 +41,18 @@ public:
 	// Normal draw
 	void Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
 	void DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	void DrawUnreadyTrap(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
 	void DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
 	// Connection map draw
 	void Draw(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
 	void DrawUnderConstruction(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	void DrawUnreadyTrap(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
 	void DrawOpen(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
 private:	
 	std::vector<Sprite> sprites;
 	std::vector<Sprite> underconstructionSprites;
+	std::vector<Sprite> unreadyTrapSprites;
 	Sprite openSprite;
 	int width;
 };

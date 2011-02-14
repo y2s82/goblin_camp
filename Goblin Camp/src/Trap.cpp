@@ -73,3 +73,11 @@ void Trap::SpawnRepairJob() {
 		reloadJob = reload;
 	}
 }
+
+void Trap::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}
+
+bool Trap::IsReady() const {
+	return ready;
+}

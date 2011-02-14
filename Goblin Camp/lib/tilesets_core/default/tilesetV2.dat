@@ -447,6 +447,11 @@ tileset_data "Default Tileset" {
 		construction_sprite_data "Bed" {
 			sprites=[42]
 		}
+
+		construction_sprite_data "Spiked pit" {
+			sprites=[26]
+			unreadytrap_sprites=[25]
+		}
 		
 		spell_sprite_data "smoke" {
 			sprites=[63]

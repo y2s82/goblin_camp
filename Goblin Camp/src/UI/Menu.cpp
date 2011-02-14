@@ -60,8 +60,8 @@ void Menu::CalculateSize() {
 void Menu::Draw(int x, int y, TCODConsole* console) {
 	console->setAlignment(TCOD_LEFT);
 	//Draw the box
-	if (x + width >= console->getWidth()) x = console->getWidth() - width - 1;
-	if (y + height >= console->getHeight()) y = console->getHeight() - height - 1;
+	if (x + width >= console->getWidth()) x = std::max(console->getWidth() - width - 1,0);
+	if (y + height >= console->getHeight()) y = std::max(console->getHeight() - height - 1,0);
 	_x = x; _y = y; //Save coordinates of menu top-left corner
 	console->printFrame(x, y, width, height, true, TCOD_BKGND_SET, title.empty() ? 0 : title.c_str());
 	console->setBackgroundFlag(TCOD_BKGND_SET);

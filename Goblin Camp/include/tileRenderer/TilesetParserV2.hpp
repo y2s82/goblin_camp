@@ -27,11 +27,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ConstructionSpriteSet.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
-class TileSetParserV1 : public ITCODParserListener
+class TileSetParserV2 : public ITCODParserListener
 {
 public:
-	explicit TileSetParserV1();
-	~TileSetParserV1();
+	explicit TileSetParserV2();
+	~TileSetParserV2();
 
 	boost::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
 
@@ -44,6 +44,9 @@ public:
 private:
 	TCODParser parser;
 
+	boost::shared_ptr<TileSet> tileSet;
+	bool success;
+
 	enum SpriteSet
 	{
 		SS_NONE,
@@ -53,16 +56,15 @@ private:
 		SS_CONSTRUCTION,
 		SS_SPELL
 	};
-
-	boost::shared_ptr<TileSet> tileSet;
-	bool success;
-
+	TileSetParserV2::SpriteSet currentSpriteSet;
+	
+	// Path where textures are found
 	boost::filesystem::path tileSetPath;
+	boost::shared_ptr<TileSetTexture> currentTexture;
 
 	std::string tileSetName;
 	int tileWidth;
-	int tileHeight;
-	boost::shared_ptr<TileSetTexture> currentTexture;
+	int tileHeight;	
 
 	std::vector<int> fireSprites;
 	int fireFPS;
@@ -70,11 +72,18 @@ private:
 	struct TempConstruction {
 		std::vector<int> mainSprites;
 		std::vector<int> underConstructionSprites;
+		std::vector<int> unreadyTrapSprites;
 		bool connectionMapped;
 		int width;
 		Sprite openDoor;
 
-		TempConstruction() : mainSprites(), underConstructionSprites(), connectionMapped(false), width(1), openDoor() {}
+		TempConstruction() 
+		: mainSprites(), 
+		  underConstructionSprites(), 
+		  unreadyTrapSprites(),
+		  connectionMapped(false), 
+		  width(1), 
+		  openDoor() {}
 
 		ConstructionSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
@@ -90,7 +99,7 @@ private:
 	};
 	TempSpell tempSpell;
 
-	TileSetParserV1::SpriteSet currentSpriteSet;
+	
 	NPCSpriteSet npcSpriteSet;
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSpriteSet itemSpriteSet;
@@ -100,9 +109,9 @@ private:
 	void SetCursorSprites(CursorType type, TCOD_list_t cursors);
 };
 
-class TileSetMetadataParserV1 : public ITCODParserListener {
+class TileSetMetadataParserV2 : public ITCODParserListener {
 public:
-	TileSetMetadataParserV1();
+	TileSetMetadataParserV2();
 
 	TileSetMetadata Run(boost::filesystem::path path);
 
