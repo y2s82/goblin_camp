@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 ConstructionSpriteSet::ConstructionSpriteSet()
 	: sprites(), 
 	underconstructionSprites(),
+	unreadyTrapSprites(),
 	openSprite(),
 	width(1){}
 
@@ -55,6 +56,23 @@ void ConstructionSpriteSet::DrawUnderConstruction(const Coordinate& internalPos,
 	}
 }
 
+void ConstructionSpriteSet::DrawUnreadyTrap(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (unreadyTrapSprites.size() > 0)
+	{
+		if (!IsConnectionMap() && unreadyTrapSprites.size() == sprites.size() && IsValid()) {
+			int xOffset = internalPos.X() % width;
+			int yOffset = internalPos.Y() % (sprites.size() / width);
+
+			int graphicIndex = xOffset + width * yOffset;
+			unreadyTrapSprites.at(graphicIndex).Draw(dst, dstRect);
+		} else {
+			unreadyTrapSprites.at(0).Draw(dst, dstRect);
+		}
+	} else { 
+		Draw(internalPos, dst, dstRect);
+	}
+}
+
 void ConstructionSpriteSet::DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (openSprite.Exists()) {
 		openSprite.Draw(dst, dstRect);
@@ -75,6 +93,14 @@ void ConstructionSpriteSet::DrawUnderConstruction(Sprite::ConnectedFunction conn
 	}
 }
 
+void ConstructionSpriteSet::DrawUnreadyTrap(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+	if (unreadyTrapSprites.size() > 0) {
+		unreadyTrapSprites[0].Draw(connected, dst, dstRect);
+	} else {
+		Draw(connected, dst, dstRect);
+	}
+}
+
 void ConstructionSpriteSet::DrawOpen(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
 	if (openSprite.Exists()) {
 		openSprite.Draw(dst, dstRect);
@@ -89,6 +115,10 @@ void ConstructionSpriteSet::AddSprite(const Sprite& sprite) {
 
 void ConstructionSpriteSet::AddUnderConstructionSprite(const Sprite& sprite) {
 	underconstructionSprites.push_back(sprite);
+}
+
+void ConstructionSpriteSet::AddUnreadyTrapSprite(const Sprite& sprite) {
+	unreadyTrapSprites.push_back(sprite);
 }
 
 void ConstructionSpriteSet::SetOpenSprite(const Sprite& sprite) {

@@ -15,10 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "tileRenderer/TilesetParserV1.hpp"
+#include "tileRenderer/TilesetParserV2.hpp"
 #include "Logger.hpp"
 
-const char* TileSetParserV1::uninitialisedTilesetError = "tileset_data must be defined and tileWidth & tileHeight must be provided first";
+const char* TileSetParserV2::uninitialisedTilesetError = "tileset_data must be defined and tileWidth & tileHeight must be provided first";
 
 namespace {
 	void SetupTilesetParser(TCODParser& parser) {
@@ -39,6 +39,7 @@ namespace {
 		constructionSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
 		constructionSpriteStruct->addListProperty("underconstruction_sprites", TCOD_TYPE_INT, false);
 		constructionSpriteStruct->addProperty("openSprite", TCOD_TYPE_INT, false);
+		constructionSpriteStruct->addListProperty("unreadytrap_sprites", TCOD_TYPE_INT, false);
 		constructionSpriteStruct->addProperty("width", TCOD_TYPE_INT, false);
 		constructionSpriteStruct->addFlag("connection_map");
 	
@@ -119,7 +120,7 @@ namespace {
 	}
 }
 
-TileSetParserV1::TileSetParserV1() :
+TileSetParserV2::TileSetParserV2() :
 	parser(),
 	tileSet(),
 	success(true),
@@ -140,11 +141,11 @@ TileSetParserV1::TileSetParserV1() :
 	SetupTilesetParser(parser);
 }
 
-TileSetParserV1::~TileSetParserV1() {
+TileSetParserV2::~TileSetParserV2() {
 	
 }
 
-boost::shared_ptr<TileSet> TileSetParserV1::Run(boost::filesystem::path dataFilePath) {
+boost::shared_ptr<TileSet> TileSetParserV2::Run(boost::filesystem::path dataFilePath) {
 	tileSetName = "";
 	tileWidth = -1;
 	tileHeight = -1;
@@ -161,7 +162,7 @@ boost::shared_ptr<TileSet> TileSetParserV1::Run(boost::filesystem::path dataFile
 	return boost::shared_ptr<TileSet>();
 }
 
-void TileSetParserV1::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
+void TileSetParserV2::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
 	int size = TCOD_list_size(cursors);
 	if (size == 1) {
 		tileSet->SetCursorSprites(type, Sprite(currentTexture, (intptr_t)TCOD_list_get(cursors, 0)));
@@ -170,7 +171,7 @@ void TileSetParserV1::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
 	}
 }
 
-bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+bool TileSetParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 	// TileSet data (should be first and root)	
 	if (boost::iequals(str->getName(), "tileset_data"))
 	{
@@ -223,7 +224,7 @@ bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 	return success;
 }
 
-bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
+bool TileSetParserV2::parserFlag(TCODParser *parser,const char *name) {
 	if (currentTexture) {
 		switch (currentSpriteSet) {
 		case SS_CONSTRUCTION:
@@ -235,7 +236,7 @@ bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
 	return success;
 }
 
-bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 	// Tile Texture Properties
 	if (currentTexture) {
 		switch (currentSpriteSet) {
@@ -373,24 +374,22 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			}
 			break;
 		case SS_CONSTRUCTION:
-			// TODO:
-			// Record sprites, under construction sprites for later assembly once width/connection map flag is known
 			if (boost::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tempConstruction.mainSprites.push_back((intptr_t)TCOD_list_get(value.list, i));
 			} else if (boost::iequals(name, "underconstruction_sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tempConstruction.underConstructionSprites.push_back((intptr_t)TCOD_list_get(value.list, i));
-			} 
-			else if (boost::iequals(name, "openSprite")) {
+			} else if (boost::iequals(name, "unreadytrap_sprites")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i)
+					tempConstruction.unreadyTrapSprites.push_back((intptr_t)TCOD_list_get(value.list, i));
+			} else if (boost::iequals(name, "openSprite")) {
 				tempConstruction.openDoor = Sprite(currentTexture, value.i);
 			} else if (boost::iequals(name, "width")) {
 				tempConstruction.width = value.i;
 			}
 			break;
 		case SS_SPELL:
-			// TODO:
-			// Record sprites for later construction once both sprites and framerate is determined
 			if (boost::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tempSpell.sprites.push_back((intptr_t)TCOD_list_get(value.list, i));
@@ -434,7 +433,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 	return success;
 }
 
-bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
+bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
 	if (boost::iequals(str->getName(), "tile_texture_data")) {
 		if (fireSprites.size() > 0) {
 			tileSet->SetFireSprite(Sprite(currentTexture, fireSprites.begin(), fireSprites.end(), fireFPS));
@@ -490,12 +489,12 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 	return success;
 }
 
-void TileSetParserV1::error(const char *msg) {
+void TileSetParserV2::error(const char *msg) {
 	LOG(msg);
 	success = false;
 }
 
-ConstructionSpriteSet TileSetParserV1::TempConstruction::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
+ConstructionSpriteSet TileSetParserV2::TempConstruction::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
 	ConstructionSpriteSet spriteSet = ConstructionSpriteSet();
 	if (connectionMapped) {
 		if (mainSprites.size() > 0) {
@@ -504,6 +503,9 @@ ConstructionSpriteSet TileSetParserV1::TempConstruction::Build(boost::shared_ptr
 		if (underConstructionSprites.size() > 0) {
 			spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, underConstructionSprites.begin(), underConstructionSprites.end()));
 		}
+		if (unreadyTrapSprites.size() > 0) {
+			spriteSet.AddUnreadyTrapSprite(Sprite(currentTexture, unreadyTrapSprites.begin(), unreadyTrapSprites.end()));
+		}
 	} else {
 		for (std::vector<int>::iterator iter = mainSprites.begin(); iter != mainSprites.end(); ++iter) {
 			spriteSet.AddSprite(Sprite(currentTexture, *iter));
@@ -511,18 +513,21 @@ ConstructionSpriteSet TileSetParserV1::TempConstruction::Build(boost::shared_ptr
 		for (std::vector<int>::iterator iter = underConstructionSprites.begin(); iter != underConstructionSprites.end(); ++iter) {
 			spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, *iter));
 		}
+		for (std::vector<int>::iterator iter = unreadyTrapSprites.begin(); iter != unreadyTrapSprites.end(); ++iter) {
+			spriteSet.AddUnreadyTrapSprite(Sprite(currentTexture, *iter));
+		}
 		spriteSet.SetWidth(width);
 	}
 	spriteSet.SetOpenSprite(openDoor);
 	return spriteSet;
 }
 
-SpellSpriteSet TileSetParserV1::TempSpell::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
+SpellSpriteSet TileSetParserV2::TempSpell::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
 	return SpellSpriteSet(Sprite(currentTexture, sprites.begin(), sprites.end(), fps));
 }
 
 
-TileSetMetadataParserV1::TileSetMetadataParserV1()
+TileSetMetadataParserV2::TileSetMetadataParserV2()
 	: metadata(),
 	  parser()
 {
@@ -530,7 +535,7 @@ TileSetMetadataParserV1::TileSetMetadataParserV1()
 	
 }
 
-TileSetMetadata TileSetMetadataParserV1::Run(boost::filesystem::path dataFilePath) {
+TileSetMetadata TileSetMetadataParserV2::Run(boost::filesystem::path dataFilePath) {
 	metadata = TileSetMetadata(dataFilePath.branch_path());
 	metadata.valid = true;
 
@@ -539,7 +544,7 @@ TileSetMetadata TileSetMetadataParserV1::Run(boost::filesystem::path dataFilePat
 	return metadata;
 }
 
-bool TileSetMetadataParserV1::parserProperty(TCODParser*, const char *name, TCOD_value_type_t, TCOD_value_t value) {
+bool TileSetMetadataParserV2::parserProperty(TCODParser*, const char *name, TCOD_value_type_t, TCOD_value_t value) {
 	if (boost::iequals(name, "author")) {
 		metadata.author = value.s;
 	} else if (boost::iequals(name, "version")) {
@@ -555,12 +560,12 @@ bool TileSetMetadataParserV1::parserProperty(TCODParser*, const char *name, TCOD
 	return true;
 }
 		
-void TileSetMetadataParserV1::error(const char *err) {
+void TileSetMetadataParserV2::error(const char *err) {
 	LOG_FUNC("TilesetsMetadataListener: " << err, "TilesetsMetadataListener::error");
 	metadata.valid = false;
 }
 		
-bool TileSetMetadataParserV1::parserNewStruct(TCODParser*, const TCODParserStruct* str, const char* val) 
+bool TileSetMetadataParserV2::parserNewStruct(TCODParser*, const TCODParserStruct* str, const char* val) 
 { 
 	if (boost::iequals(str->getName(), "tileset_data")) {
 		metadata.name = val;
@@ -568,5 +573,5 @@ bool TileSetMetadataParserV1::parserNewStruct(TCODParser*, const TCODParserStruc
 	return true; 
 }
 
-bool TileSetMetadataParserV1::parserFlag(TCODParser*, const char*) { return true; }
-bool TileSetMetadataParserV1::parserEndStruct(TCODParser*, const TCODParserStruct*, const char*) { return true; }
+bool TileSetMetadataParserV2::parserFlag(TCODParser*, const char*) { return true; }
+bool TileSetMetadataParserV2::parserEndStruct(TCODParser*, const TCODParserStruct*, const char*) { return true; }

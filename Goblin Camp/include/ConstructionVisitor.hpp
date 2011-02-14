@@ -22,6 +22,7 @@ class Door;
 class Stockpile;
 class SpawningPool;
 class FarmPlot;
+class Trap;
 
 class ConstructionVisitor
 {
@@ -31,4 +32,5 @@ public:
 	virtual void Visit(SpawningPool * spawningPool) = 0;
 	virtual void Visit(Door * door) = 0;
 	virtual void Visit(Construction * construction) = 0;
+	virtual void Visit(Trap * trap) = 0;
 };

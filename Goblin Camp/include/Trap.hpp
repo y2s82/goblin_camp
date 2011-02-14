@@ -41,4 +41,7 @@ public:
 	int GetMoveCostModifier(bool visible);
 	virtual int Use();
 	virtual void SpawnRepairJob();
+	virtual void AcceptVisitor(ConstructionVisitor& visitor);
+
+	bool IsReady() const;
 };
