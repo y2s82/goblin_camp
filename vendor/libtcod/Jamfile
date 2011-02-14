@@ -20,7 +20,6 @@ project libtcod
       $(common-reqs)
     : usage-requirements
       $(common-reqs)
-	  
 ;
 
 sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
