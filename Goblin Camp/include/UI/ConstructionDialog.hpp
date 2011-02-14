@@ -29,12 +29,12 @@
 
 class ConstructionDialog : public UIContainer {
 private:
-	Construction* construct;
+	boost::weak_ptr<Construction> construct;
 	class ProductList : public Scrollable {
 	private:
-		Construction* construct;
+		boost::weak_ptr<Construction> construct;
 	public:
-		ProductList(Construction* nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
+		ProductList(boost::weak_ptr<Construction> nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
 		int height;
 		std::vector<int> productPlacement;
 		void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
@@ -45,9 +45,9 @@ public:
 	ConstructionDialog(int nwidth, int nheight):
 	UIContainer(std::vector<Drawable *>(), 0, 0, nwidth, nheight) {}
 	static Dialog* constructionInfoDialog;
-	static Construction* cachedConstruct;
-	static Dialog* ConstructionInfoDialog(Construction*);
-	void Construct(Construction*);
+	static boost::weak_ptr<Construction> cachedConstruct;
+	static Dialog* ConstructionInfoDialog(boost::weak_ptr<Construction>);
+	void Construct(boost::weak_ptr<Construction>);
 	void Rename();
 	void Dismantle();
 	static void DrawCategory(Construction *, ItemCat, int, int, int, int, bool, TCODConsole *);

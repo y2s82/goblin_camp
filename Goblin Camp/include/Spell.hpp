@@ -69,6 +69,7 @@ public:
 	int GetGraphicsHint() const;
 
 	static int StringToSpellType(std::string);
+	static std::string SpellTypeToString(SpellType);
 
 	static void LoadPresets(std::string);
 };
