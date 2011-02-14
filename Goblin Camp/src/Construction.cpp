@@ -824,7 +824,6 @@ void Construction::Dismantle(Coordinate) {
 		if (producer) {
 			jobList.clear();
 		}
-		JobManager::Inst()->RemoveJob(shared_from_this()); //Remove jobs connected to this construction
 
 		if (built) {
 			boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
@@ -840,7 +839,7 @@ void Construction::Dismantle(Coordinate) {
 }
 
 Panel *Construction::GetContextMenu() {
-	return ConstructionDialog::ConstructionInfoDialog(this);
+	return ConstructionDialog::ConstructionInfoDialog(boost::static_pointer_cast<Construction>(shared_from_this()));
 }
 	
 void Construction::Damage(Attack* attack) {
