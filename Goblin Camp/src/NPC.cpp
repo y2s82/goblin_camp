@@ -612,8 +612,8 @@ MOVENEARend:
 					}
 				}
 				if (!taskBegun) {
-					if (currentEntity().lock()) tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
-					else tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentTarget());
+					if (currentEntity().lock()) tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity(), GetFaction());
+					else tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentTarget(), GetFaction());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
 					} else { TaskFinished(TASKFAILFATAL, std::string("(MOVEADJACENT)No walkable adjacent tiles")); break; }
@@ -912,7 +912,7 @@ CONTINUEEAT:
 				}
 
 				if (!taskBegun || Random::Generate(UPDATES_PER_SECOND * 2 - 1) == 0) { //Repath every ~2 seconds
-					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity(), GetFaction());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
 					}
@@ -922,7 +922,7 @@ CONTINUEEAT:
 
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) { TaskFinished(lastMoveResult, std::string("(KILL)Could not find path to target")); break; }
 				else if (lastMoveResult == PATHEMPTY) {
-					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity());
+					tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity(), GetFaction());
 					if (tmpCoord.X() >= 0) {
 						findPath(tmpCoord);
 					}
