@@ -225,6 +225,7 @@ void Camp::RemoveWaterZone(Coordinate from, Coordinate to) {
 
 inline void CreateWaterJob(boost::shared_ptr<Job> waterJob, Coordinate location) {
 	waterJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
+	waterJob->Attempts(1);
 	Coordinate waterLocation = Game::Inst()->FindWater(location);
 	waterJob->tasks.push_back(Task(MOVEADJACENT, waterLocation));
 	waterJob->tasks.push_back(Task(FILL, waterLocation));
