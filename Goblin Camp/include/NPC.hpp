@@ -288,6 +288,7 @@ public:
 	void ApplyEffects(boost::shared_ptr<Item>);
 
 	void DumpContainer(Coordinate);
+	void ValidateCurrentJob();
 };
 
 void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);

@@ -1335,6 +1335,7 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 
 	jobs.push_back(job);
 	run = true;
+	ValidateCurrentJob();
 }
 
 TaskResult NPC::Move(TaskResult oldResult) {
@@ -2610,6 +2611,35 @@ void NPC::DumpContainer(Coordinate location) {
 					Game::Inst()->CreateFilth(location, sourceContainer->ContainsFilth());
 					sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
 				}
+		}
+	}
+}
+
+//Checks all the current job's tasks to see if they are potentially doable
+void NPC::ValidateCurrentJob() {
+	if (!jobs.empty()) {
+		//Only check tasks from the current one onwards
+		for (int i = taskIndex; i < jobs.front()->tasks.size(); ++i) {
+			switch (jobs.front()->tasks[i].action) {
+
+			case FELL:
+			case HARVESTWILDPLANT:
+				if (!Map::Inst()->GroundMarked(jobs.front()->tasks[i].target.X(), jobs.front()->tasks[i].target.Y())) {
+					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target not designated");
+					return;
+				}
+				break;
+
+			case POUR:
+				if (!jobs.front()->tasks[i].entity.lock() && !Map::Inst()->GroundMarked(jobs.front()->tasks[i].target.X(), jobs.front()->tasks[i].target.Y())) {
+					TaskFinished(TASKFAILFATAL, "(POUR)Target does not exist");
+					return;
+				}
+				break;
+
+
+			default: break; //Non-validatable tasks
+			}
 		}
 	}
 }
