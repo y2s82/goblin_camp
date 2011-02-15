@@ -952,14 +952,18 @@ int Construction::Repair() {
 
 void Construction::SpawnRepairJob() {
 	if (built && condition < maxCondition && !repairJob.lock()) {
-		boost::shared_ptr<Job> repJob(new Job("Repair " + name));
-		repJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), *boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials))));
-		repJob->tasks.push_back(Task(MOVE));
-		repJob->tasks.push_back(Task(TAKE));
-		repJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
-		repJob->tasks.push_back(Task(REPAIR, Position(), shared_from_this()));
-		repairJob = repJob;
-		JobManager::Inst()->AddJob(repJob);
+		boost::shared_ptr<Item> repairItem = Game::Inst()->FindItemByCategoryFromStockpiles(*boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials)),
+			Position()).lock();
+		if (repairItem) {
+			boost::shared_ptr<Job> repJob(new Job("Repair " + name));
+			repJob->ReserveEntity(repairItem);
+			repJob->tasks.push_back(Task(MOVE, repairItem->Position()));
+			repJob->tasks.push_back(Task(TAKE, repairItem->Position(), repairItem));
+			repJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+			repJob->tasks.push_back(Task(REPAIR, Position(), shared_from_this()));
+			repairJob = repJob;
+			JobManager::Inst()->AddJob(repJob);
+		}
 	}
 }
 
