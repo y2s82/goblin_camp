@@ -68,43 +68,44 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 
 		bulk = Item::Presets[type].bulk;
 		condition = Item::Presets[type].condition;
-	}
 
-	//Calculate flammability based on categorical flammability, and then modify it based on components
-	int flame = 0;
-	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
-		if (Item::Categories[*cati].flammable) flame += 2;
-		else --flame;
-	}
+		//Calculate flammability based on categorical flammability, and then modify it based on components
+		int flame = 0;
+		for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+			if (Item::Categories[*cati].flammable) flame += 2;
+			else --flame;
+		}
 
-	if (components.size() > 0) {
-		for (int i = 0; i < (signed int)components.size(); ++i) {
-			if (components[i].lock()) {
-				color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
-				if (components[i].lock()->IsFlammable()) flame += 2;
+		if (components.size() > 0) {
+			for (int i = 0; i < (signed int)components.size(); ++i) {
+				if (components[i].lock()) {
+					color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
+					if (components[i].lock()->IsFlammable()) flame += 2;
+					else --flame;
+				}
+			}
+		} else if (Item::Presets[type].components.size() > 0) { /*This item was created without real components
+																ie. not in a workshop. We still should approximate
+																flammability so that it behaves like on built in a 
+																workshop would*/
+			for (int i = 0; i < (signed int)Item::Presets[type].components.size(); ++i) {
+				if (Item::Categories[Item::Presets[type].components[i]].flammable) flame += 3;
 				else --flame;
 			}
 		}
-	} else if (Item::Presets[type].components.size() > 0) { /*This item was created without real components
-															ie. not in a workshop. We still should approximate
-															flammability so that it behaves like on built in a 
-															workshop would*/
-		for (int i = 0; i < (signed int)Item::Presets[type].components.size(); ++i) {
-			if (Item::Categories[Item::Presets[type].components[i]].flammable) flame += 3;
-			else --flame;
+
+		if (flame > 0) {
+			flammable = true;
+#ifdef DEBUG
+			std::cout<<"Created flammable object "<<flame<<"\n";
+#endif
+		} else {
+#ifdef DEBUG
+			std::cout<<"Created not flammable object "<<flame<<"\n";
+#endif
 		}
 	}
 
-	if (flame > 0) {
-		flammable = true;
-#ifdef DEBUG
-		std::cout<<"Created flammable object "<<flame<<"\n";
-#endif
-	} else {
-#ifdef DEBUG
-		std::cout<<"Created not flammable object "<<flame<<"\n";
-#endif
-	}
 }
 
 Item::~Item() {
@@ -117,7 +118,9 @@ Item::~Item() {
 }
 
 int Item::GetGraphicsHint() const {
-	return Presets[type].graphicsHint;
+	if (type > 0)
+		return Presets[type].graphicsHint;
+	return 0;
 }
 
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
@@ -199,11 +202,15 @@ ItemCategory Item::StringToItemCategory(std::string str) {
 }
 
 std::vector<ItemCategory> Item::Components(ItemType type) {
-	return Item::Presets[type].components;
+	if (type > 0) 
+		return Item::Presets[type].components;
+	return std::vector<ItemCategory>();
 }
 
 ItemCategory Item::Components(ItemType type, int index) {
-	return Item::Presets[type].components[index];
+	if (type > 0)
+		return Item::Presets[type].components[index];
+	return 0;
 }
 
 class ItemListener : public ITCODParserListener {
