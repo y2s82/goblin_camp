@@ -165,15 +165,20 @@ int Tile::GetMoveCost(void* ptr) const {
 int Tile::GetMoveCost() const {
 	if (!IsWalkable()) return 0;
 	int cost = moveCost;
-	if (construction >= 0) cost += 2;
 
 	if (fire) cost += 200; //Walking through fire... not such a good idea.
 
-	//If a construction exists here, and it's a bridge, then movecost = 1 (disregards mud/ditch/etc)
-	if (construction > 0 && Game::Inst()->GetConstruction(construction).lock() && 
-		Game::Inst()->GetConstruction(construction).lock()->HasTag(BRIDGE)) {
-			cost = 1;
-	} else if (water) { //Otherwise take water depth into account
+	//If a construction exists here take it into consideration
+	bool bridge = false;
+	if (construction > 0) {
+		if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(construction).lock()) {
+			if (construct->HasTag(BRIDGE) && construct->Built()) {
+				cost = 1;
+				bridge = true;
+			} else cost += construct->GetMoveSpeedModifier();
+		}
+	}
+	if (!bridge && water) { //If no built bridge here take water depth into account
 		cost += std::min(20, water->Depth());
 	}
 

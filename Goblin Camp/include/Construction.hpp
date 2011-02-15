@@ -83,6 +83,7 @@ struct ConstructionPreset {
 	Coordinate chimney;
 	Attack trapAttack;
 	ItemCategory trapReloadItem;
+	int moveSpeedModifier;
 };
 
 class Construction : public Entity {
@@ -162,6 +163,7 @@ public:
 	bool IsFlammable();
 	int Repair();
 	virtual void SpawnRepairJob();
+	int GetMoveSpeedModifier();
 
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	
