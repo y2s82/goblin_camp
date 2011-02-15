@@ -553,6 +553,10 @@ class ConstructionListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name,"reloadItem")) {
 			Construction::Presets[constructionIndex].trapReloadItem = Item::StringToItemCategory(value.s);
+		} else if (boost::iequals(name,"slowMovement")) {
+			Construction::Presets[constructionIndex].moveSpeedModifier = value.i;
+			Construction::Presets[constructionIndex].walkable = true;
+			Construction::Presets[constructionIndex].blocksLight = false;
 		}
 
 		return true;
@@ -638,6 +642,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("slowMovement", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", NULL };
@@ -934,7 +939,8 @@ ConstructionPreset::ConstructionPreset() :
 	fallbackGraphicsSet(""),
 	chimney(Coordinate(-1,-1)),
 	trapAttack(Attack()),
-	trapReloadItem(-1)
+	trapReloadItem(-1),
+	moveSpeedModifier(2)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
@@ -981,3 +987,5 @@ void Construction::BurnToTheGround() {
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 }
+
+int Construction::GetMoveSpeedModifier() { return Construction::Presets[type].moveSpeedModifier; }
