@@ -2642,6 +2642,12 @@ void NPC::ValidateCurrentJob() {
 				}
 				break;
 
+			case PUTIN:
+				if (!jobs.front()->tasks[i].entity.lock()) {
+					TaskFinished(TASKFAILFATAL, "(PUTIN)Target doesn't exist");
+					return;
+				}
+				break;
 
 			default: break; //Non-validatable tasks
 			}
