@@ -1821,7 +1821,11 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
-			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
+			std::set<TileType> allowedTypes;
+			allowedTypes.insert(TILEGRASS);
+			allowedTypes.insert(TILEMUD);
+			allowedTypes.insert(TILEBOG);
+			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
