@@ -2634,9 +2634,11 @@ void NPC::ValidateCurrentJob() {
 				break;
 
 			case POUR:
-				if (!jobs.front()->tasks[i].entity.lock() && !Map::Inst()->GroundMarked(jobs.front()->tasks[i].target.X(), jobs.front()->tasks[i].target.Y())) {
-					TaskFinished(TASKFAILFATAL, "(POUR)Target does not exist");
-					return;
+				if (!boost::iequals(jobs.front()->name, "Dump filth")) { //Filth dumping is the one time we want to pour liquid onto an unmarked tile
+					if (!jobs.front()->tasks[i].entity.lock() && !Map::Inst()->GroundMarked(jobs.front()->tasks[i].target.X(), jobs.front()->tasks[i].target.Y())) {
+						TaskFinished(TASKFAILFATAL, "(POUR)Target does not exist");
+						return;
+					}
 				}
 				break;
 
