@@ -242,7 +242,8 @@ construction_type "Spiked pit" {
 construction_type "Breastwork" {
 	tier=1
 	category="Basics"
-	wall
+	graphicLength=1
+	graphic=[178]
 	slowMovement=5
 	maxCondition=30
 	materials=["Earth"]
