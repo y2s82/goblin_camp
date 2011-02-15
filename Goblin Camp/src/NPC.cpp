@@ -2023,106 +2023,97 @@ void NPC::DestroyAllItems() {
 bool NPC::Escaped() { return escaped; }
 
 class NPCListener : public ITCODParserListener {
+
+	int npcIndex;
+
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<boost::format("new %s structure: ") % str->getName();
-#endif
 		if (boost::iequals(str->getName(), "npc_type")) {
-			NPC::Presets.push_back(NPCPreset(name));
-			NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
-#ifdef DEBUG
-			std::cout<<name<<"\n";
-#endif
+			if (NPC::NPCTypeNames.find(name) != NPC::NPCTypeNames.end()) {
+				npcIndex = NPC::NPCTypeNames[name];
+				NPC::Presets[npcIndex] = NPCPreset(name);
+			} else {
+				NPC::Presets.push_back(NPCPreset(name));
+				NPC::NPCTypeNames[name] = NPC::Presets.size()-1;
+				npcIndex = NPC::Presets.size() - 1;
+			}
 		} else if (boost::iequals(str->getName(), "attack")) {
-			NPC::Presets.back().attacks.push_back(Attack());
-#ifdef DEBUG
-			std::cout<<name<<"\n";
-#endif
+			NPC::Presets[npcIndex].attacks.push_back(Attack());
 		} else if (boost::iequals(str->getName(), "resistances")) {
-#ifdef DEBUG
-			std::cout<<"\n";
-#endif
 		}
 		return true;
 	}
 	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name,"generateName")) { NPC::Presets.back().generateName = true; }
-		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets.back().needsNutrition = true; }
-		else if (boost::iequals(name,"needsSleep")) { NPC::Presets.back().needsSleep = true; }
-		else if (boost::iequals(name,"expert")) { NPC::Presets.back().expert = true; }
+		if (boost::iequals(name,"generateName")) { NPC::Presets[npcIndex].generateName = true; }
+		else if (boost::iequals(name,"needsNutrition")) { NPC::Presets[npcIndex].needsNutrition = true; }
+		else if (boost::iequals(name,"needsSleep")) { NPC::Presets[npcIndex].needsSleep = true; }
+		else if (boost::iequals(name,"expert")) { NPC::Presets[npcIndex].expert = true; }
 		return true;
 	}
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
-		if (boost::iequals(name,"name")) { NPC::Presets.back().name = value.s; }
-		else if (boost::iequals(name,"plural")) { NPC::Presets.back().plural = value.s; }
-		else if (boost::iequals(name,"speed")) { NPC::Presets.back().stats[MOVESPEED] = value.i; }
-		else if (boost::iequals(name,"color")) { NPC::Presets.back().color = value.col; }
-		else if (boost::iequals(name,"graphic")) { NPC::Presets.back().graphic = value.c; }
-		else if (boost::iequals(name,"fallbackGraphicsSet")) { NPC::Presets.back().fallbackGraphicsSet = value.s; }
-		else if (boost::iequals(name,"health")) { NPC::Presets.back().health = value.i; }
-		else if (boost::iequals(name,"AI")) { NPC::Presets.back().ai = value.s; }
-		else if (boost::iequals(name,"dodge")) { NPC::Presets.back().stats[DODGE] = value.i; }
+		if (boost::iequals(name,"name")) { NPC::Presets[npcIndex].name = value.s; }
+		else if (boost::iequals(name,"plural")) { NPC::Presets[npcIndex].plural = value.s; }
+		else if (boost::iequals(name,"speed")) { NPC::Presets[npcIndex].stats[MOVESPEED] = value.i; }
+		else if (boost::iequals(name,"color")) { NPC::Presets[npcIndex].color = value.col; }
+		else if (boost::iequals(name,"graphic")) { NPC::Presets[npcIndex].graphic = value.c; }
+		else if (boost::iequals(name,"fallbackGraphicsSet")) { NPC::Presets[npcIndex].fallbackGraphicsSet = value.s; }
+		else if (boost::iequals(name,"health")) { NPC::Presets[npcIndex].health = value.i; }
+		else if (boost::iequals(name,"AI")) { NPC::Presets[npcIndex].ai = value.s; }
+		else if (boost::iequals(name,"dodge")) { NPC::Presets[npcIndex].stats[DODGE] = value.i; }
 		else if (boost::iequals(name,"spawnAsGroup")) { 
-			NPC::Presets.back().spawnAsGroup = true;
-			NPC::Presets.back().group = value.dice;
+			NPC::Presets[npcIndex].spawnAsGroup = true;
+			NPC::Presets[npcIndex].group = value.dice;
 		} else if (boost::iequals(name,"type")) {
-			NPC::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
+			NPC::Presets[npcIndex].attacks.back().Type(Attack::StringToDamageType(value.s));
 		} else if (boost::iequals(name,"damage")) {
-			NPC::Presets.back().attacks.back().Amount(value.dice);
+			NPC::Presets[npcIndex].attacks.back().Amount(value.dice);
 		} else if (boost::iequals(name,"cooldown")) {
-			NPC::Presets.back().attacks.back().CooldownMax(value.i);
+			NPC::Presets[npcIndex].attacks.back().CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				NPC::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				NPC::Presets[npcIndex].attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				NPC::Presets.back().attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+				NPC::Presets[npcIndex].attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		} else if (boost::iequals(name,"projectile")) {
-			NPC::Presets.back().attacks.back().Projectile(Item::StringToItemType(value.s));
-			if (NPC::Presets.back().attacks.back().Projectile() == -1) {
+			NPC::Presets[npcIndex].attacks.back().Projectile(Item::StringToItemType(value.s));
+			if (NPC::Presets[npcIndex].attacks.back().Projectile() == -1) {
 				//No item found, probably a spell then
-				NPC::Presets.back().attacks.back().Projectile(Spell::StringToSpellType(value.s));
-				if (NPC::Presets.back().attacks.back().Projectile() >= 0) 
-					NPC::Presets.back().attacks.back().SetMagicProjectile();
+				NPC::Presets[npcIndex].attacks.back().Projectile(Spell::StringToSpellType(value.s));
+				if (NPC::Presets[npcIndex].attacks.back().Projectile() >= 0) 
+					NPC::Presets[npcIndex].attacks.back().SetMagicProjectile();
 			}
 		} else if (boost::iequals(name,"physical")) {
-			NPC::Presets.back().resistances[PHYSICAL_RES] = value.i;
+			NPC::Presets[npcIndex].resistances[PHYSICAL_RES] = value.i;
 		} else if (boost::iequals(name,"magic")) {
-			NPC::Presets.back().resistances[MAGIC_RES] = value.i;
+			NPC::Presets[npcIndex].resistances[MAGIC_RES] = value.i;
 		} else if (boost::iequals(name,"cold")) {
-			NPC::Presets.back().resistances[COLD_RES] = value.i;
+			NPC::Presets[npcIndex].resistances[COLD_RES] = value.i;
 		} else if (boost::iequals(name,"fire")) {
-			NPC::Presets.back().resistances[FIRE_RES] = value.i;
+			NPC::Presets[npcIndex].resistances[FIRE_RES] = value.i;
 		} else if (boost::iequals(name,"poison")) {
-			NPC::Presets.back().resistances[POISON_RES] = value.i;
+			NPC::Presets[npcIndex].resistances[POISON_RES] = value.i;
 		} else if (boost::iequals(name,"tags")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				std::string tag = (char*)TCOD_list_get(value.list,i);
-				NPC::Presets.back().tags.insert(boost::to_lower_copy(tag));
+				NPC::Presets[npcIndex].tags.insert(boost::to_lower_copy(tag));
 			}
 		} else if (boost::iequals(name,"strength")) {
-			NPC::Presets.back().stats[STRENGTH] = value.i;
+			NPC::Presets[npcIndex].stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"size")) {
-			NPC::Presets.back().stats[NPCSIZE] = value.i;
-			if (NPC::Presets.back().stats[STRENGTH] == 1) NPC::Presets.back().stats[STRENGTH] = value.i;
+			NPC::Presets[npcIndex].stats[NPCSIZE] = value.i;
+			if (NPC::Presets[npcIndex].stats[STRENGTH] == 1) NPC::Presets[npcIndex].stats[STRENGTH] = value.i;
 		} else if (boost::iequals(name,"tier")) {
-			NPC::Presets.back().tier = value.i;
+			NPC::Presets[npcIndex].tier = value.i;
 		} else if (boost::iequals(name,"death")) {
-			if (boost::iequals(value.s,"filth")) NPC::Presets.back().deathItem = -1;
-			else NPC::Presets.back().deathItem = Item::StringToItemType(value.s);
+			if (boost::iequals(value.s,"filth")) NPC::Presets[npcIndex].deathItem = -1;
+			else NPC::Presets[npcIndex].deathItem = Item::StringToItemType(value.s);
 		} else if (boost::iequals(name,"equipOneOf")) {
-			NPC::Presets.back().possibleEquipment.push_back(std::vector<int>());
+			NPC::Presets[npcIndex].possibleEquipment.push_back(std::vector<int>());
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				std::string item = (char*)TCOD_list_get(value.list,i);
-				NPC::Presets.back().possibleEquipment.back().push_back(Item::StringToItemType(item));
+				NPC::Presets[npcIndex].possibleEquipment.back().push_back(Item::StringToItemType(item));
 			}
 		}
 		return true;
@@ -2131,7 +2122,7 @@ class NPCListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<boost::format("end of %s\n") % str->getName();
 #endif
-		if (NPC::Presets.back().plural == "") NPC::Presets.back().plural = NPC::Presets.back().name + "s";
+		if (NPC::Presets[npcIndex].plural == "") NPC::Presets[npcIndex].plural = NPC::Presets[npcIndex].name + "s";
 		return true;
 	}
 	void error(const char *msg) {

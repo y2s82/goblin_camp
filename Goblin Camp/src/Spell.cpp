@@ -155,12 +155,19 @@ std::string Spell::SpellTypeToString(SpellType type) {
 }
 
 class SpellListener : public ITCODParserListener {
+	int spellIndex;
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 		if (boost::iequals(str->getName(), "spell_type")) {
-			Spell::Presets.push_back(SpellPreset(name));
-			Spell::spellTypeNames[name] = Spell::Presets.size()-1;
+			if (Spell::spellTypeNames.find(name) != Spell::spellTypeNames.end()) {
+				spellIndex = Spell::spellTypeNames[name];
+				Spell::Presets[spellIndex] = SpellPreset(name);
+			} else {
+				Spell::Presets.push_back(SpellPreset(name));
+				Spell::spellTypeNames[name] = Spell::Presets.size()-1;
+				spellIndex = Spell::Presets.size() - 1;
+			}
 		} else if (boost::iequals(str->getName(), "attack")) {
-			Spell::Presets.back().attacks.push_back(Attack());
+			Spell::Presets[spellIndex].attacks.push_back(Attack());
 		}
 		return true;
 	}
@@ -168,31 +175,31 @@ class SpellListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
-		if (boost::iequals(name,"immaterial")) { Spell::Presets.back().immaterial = true; }
+		if (boost::iequals(name,"immaterial")) { Spell::Presets[spellIndex].immaterial = true; }
 		return true;
 	}
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 #ifdef DEBUG
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
-		if (boost::iequals(name,"name")) { Spell::Presets.back().name = value.s; }
-		else if (boost::iequals(name,"speed")) { Spell::Presets.back().speed = value.i; }
-		else if (boost::iequals(name,"color")) { Spell::Presets.back().color = value.col; }
-		else if (boost::iequals(name,"graphic")) { Spell::Presets.back().graphic = value.i; }
-		else if (boost::iequals(name,"fallbackGraphicsSet")) { Spell::Presets.back().fallbackGraphicsSet = value.s; }
+		if (boost::iequals(name,"name")) { Spell::Presets[spellIndex].name = value.s; }
+		else if (boost::iequals(name,"speed")) { Spell::Presets[spellIndex].speed = value.i; }
+		else if (boost::iequals(name,"color")) { Spell::Presets[spellIndex].color = value.col; }
+		else if (boost::iequals(name,"graphic")) { Spell::Presets[spellIndex].graphic = value.i; }
+		else if (boost::iequals(name,"fallbackGraphicsSet")) { Spell::Presets[spellIndex].fallbackGraphicsSet = value.s; }
 		else if (boost::iequals(name,"type")) {
-			Spell::Presets.back().attacks.back().Type(Attack::StringToDamageType(value.s));
+			Spell::Presets[spellIndex].attacks.back().Type(Attack::StringToDamageType(value.s));
 		} else if (boost::iequals(name,"damage")) {
-			Spell::Presets.back().attacks.back().Amount(value.dice);
+			Spell::Presets[spellIndex].attacks.back().Amount(value.dice);
 		} else if (boost::iequals(name,"cooldown")) {
-			Spell::Presets.back().attacks.back().CooldownMax(value.i);
+			Spell::Presets[spellIndex].attacks.back().CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Spell::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				Spell::Presets[spellIndex].attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Spell::Presets.back().attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+				Spell::Presets[spellIndex].attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		}
 		return true;

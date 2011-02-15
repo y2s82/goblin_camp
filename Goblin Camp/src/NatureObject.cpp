@@ -81,13 +81,23 @@ void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
 void NatureObject::Update() {}
 
 class NatureObjectListener : public ITCODParserListener {
-
+	int natureIndex;
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
-#endif
-		NatureObject::Presets.push_back(NatureObjectPreset());
-		NatureObject::Presets.back().name = name;
+		natureIndex = -1;
+		for (int i = 0; i < NatureObject::Presets.size(); ++i) {
+			if (boost::iequals(NatureObject::Presets[i].name, name)) {
+				natureIndex = i;
+				NatureObject::Presets[natureIndex] = NatureObjectPreset();
+				NatureObject::Presets[natureIndex].name = name;
+				break;
+			}
+		}
+
+		if (natureIndex == -1) {
+			NatureObject::Presets.push_back(NatureObjectPreset());
+			NatureObject::Presets.back().name = name;
+			natureIndex = NatureObject::Presets.size() - 1;
+		}
 		return true;
 	}
 
@@ -96,13 +106,13 @@ class NatureObjectListener : public ITCODParserListener {
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name, "walkable")) {
-			NatureObject::Presets.back().walkable = true;
+			NatureObject::Presets[natureIndex].walkable = true;
 		} else if (boost::iequals(name, "harvestable")) {
-			NatureObject::Presets.back().harvestable = true;
+			NatureObject::Presets[natureIndex].harvestable = true;
 		} else if (boost::iequals(name, "tree")) {
-			NatureObject::Presets.back().tree = true;
+			NatureObject::Presets[natureIndex].tree = true;
 		} else if (boost::iequals(name, "evil")) {
-			NatureObject::Presets.back().evil = true;
+			NatureObject::Presets[natureIndex].evil = true;
 		}
 		return true;
 	}
@@ -112,25 +122,25 @@ class NatureObjectListener : public ITCODParserListener {
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name, "graphic")) {
-			NatureObject::Presets.back().graphic = value.i;
+			NatureObject::Presets[natureIndex].graphic = value.i;
 		} else if (boost::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				NatureObject::Presets.back().components.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
+				NatureObject::Presets[natureIndex].components.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
 			}
 		} else if (boost::iequals(name, "color")) {
-			NatureObject::Presets.back().color = value.col;
+			NatureObject::Presets[natureIndex].color = value.col;
 		} else if (boost::iequals(name, "rarity")) {
-			NatureObject::Presets.back().rarity = value.i;
+			NatureObject::Presets[natureIndex].rarity = value.i;
 		} else if (boost::iequals(name, "cluster")) {
-			NatureObject::Presets.back().cluster = value.i;
+			NatureObject::Presets[natureIndex].cluster = value.i;
 		} else if (boost::iequals(name, "condition")) {
-			NatureObject::Presets.back().condition = value.i;
+			NatureObject::Presets[natureIndex].condition = value.i;
 		} else if (boost::iequals(name, "minheight")) {
-			NatureObject::Presets.back().minHeight = value.f;
+			NatureObject::Presets[natureIndex].minHeight = value.f;
 		} else if (boost::iequals(name, "maxheight")) {
-			NatureObject::Presets.back().maxHeight = value.f;
+			NatureObject::Presets[natureIndex].maxHeight = value.f;
 		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
-			NatureObject::Presets.back().fallbackGraphicsSet = value.s;
+			NatureObject::Presets[natureIndex].fallbackGraphicsSet = value.s;
 		}
 		return true;
 	}
