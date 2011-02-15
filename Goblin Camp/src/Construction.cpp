@@ -278,6 +278,8 @@ int Construction::Use() {
 					break;
 				}
 			}
+			if (Item::Presets[jobList[0]].categories.find(Item::StringToItemCategory("charcoal")) != Item::Presets[jobList[0]].categories.end())
+				smoke = 2;
 		}
 
 		if (smoke == 2 && Construction::Presets[type].chimney.X() != -1 && Construction::Presets[type].chimney.Y() != -1) {
