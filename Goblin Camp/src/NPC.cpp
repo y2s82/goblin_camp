@@ -2624,8 +2624,11 @@ void NPC::ValidateCurrentJob() {
 
 			case FELL:
 			case HARVESTWILDPLANT:
-				if (!Map::Inst()->GroundMarked(jobs.front()->tasks[i].target.X(), jobs.front()->tasks[i].target.Y())) {
-					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target not designated");
+				if (!jobs.front()->tasks[i].entity.lock() || !boost::dynamic_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())) {
+					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target doesn't exist");
+					return;
+				} else if (!boost::static_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())->Marked()) {
+					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target not marked");
 					return;
 				}
 				break;
