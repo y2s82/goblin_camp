@@ -72,8 +72,8 @@ Construction::Construction(ConstructionType vtype, Coordinate target) : Entity()
 	type(vtype),
 	producer(false),
 	progress(0),
-	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
-	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, 0, 1000, -1))),
+	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, -1, 1000, -1))),
+	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, -1, 1000, -1))),
 	dismantle(false),
 	time(0),
 	built(false),
@@ -278,6 +278,8 @@ int Construction::Use() {
 					break;
 				}
 			}
+			if (Item::Presets[jobList[0]].categories.find(Item::StringToItemCategory("charcoal")) != Item::Presets[jobList[0]].categories.end())
+				smoke = 2;
 		}
 
 		if (smoke == 2 && Construction::Presets[type].chimney.X() != -1 && Construction::Presets[type].chimney.Y() != -1) {
@@ -386,15 +388,28 @@ std::vector<ConstructionPreset> Construction::Presets = std::vector<Construction
 
 class ConstructionListener : public ITCODParserListener {
 
+	int constructionIndex;
+
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
 		if (boost::iequals(str->getName(), "construction_type")) {
-			Construction::Presets.push_back(ConstructionPreset());
-			Construction::Presets.back().name = name;
-			Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
-			Construction::AllowedAmount.push_back(-1);
+
+			//Figure out the index, whether this is a new construction or a redefinition
+			if (Construction::constructionNames.find(name) != Construction::constructionNames.end()) {
+				constructionIndex = Construction::constructionNames[name];
+				//A redefinition, so wipe out the earlier one
+				Construction::Presets[constructionIndex] = ConstructionPreset();
+				Construction::Presets[constructionIndex].name = name;
+				Construction::AllowedAmount[constructionIndex] = -1;
+			} else { //New construction
+				Construction::Presets.push_back(ConstructionPreset());
+				Construction::Presets.back().name = name;
+				Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
+				Construction::AllowedAmount.push_back(-1);
+				constructionIndex = Construction::Presets.size() - 1;
+			}
 		}
 		return true;
 	}
@@ -404,39 +419,39 @@ class ConstructionListener : public ITCODParserListener {
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name, "walkable")) {
-			Construction::Presets.back().walkable = true;
-			Construction::Presets.back().blocksLight = false;
+			Construction::Presets[constructionIndex].walkable = true;
+			Construction::Presets[constructionIndex].blocksLight = false;
 		} else if (boost::iequals(name, "wall")) {
-			Construction::Presets.back().graphic.push_back(1);
-			Construction::Presets.back().graphic.push_back('W');
-			Construction::Presets.back().tags[WALL] = true;
+			Construction::Presets[constructionIndex].graphic.push_back(1);
+			Construction::Presets[constructionIndex].graphic.push_back('W');
+			Construction::Presets[constructionIndex].tags[WALL] = true;
 		} else if (boost::iequals(name, "stockpile")) {
-			Construction::Presets.back().tags[STOCKPILE] = true;
+			Construction::Presets[constructionIndex].tags[STOCKPILE] = true;
 		} else if (boost::iequals(name, "farmplot")) {
-			Construction::Presets.back().tags[FARMPLOT] = true;
-			Construction::Presets.back().dynamic = true;
+			Construction::Presets[constructionIndex].tags[FARMPLOT] = true;
+			Construction::Presets[constructionIndex].dynamic = true;
 		} else if (boost::iequals(name, "door")) {
-			Construction::Presets.back().tags[DOOR] = true;
-			Construction::Presets.back().tags[FURNITURE] = true;
-			Construction::Presets.back().dynamic = true;
+			Construction::Presets[constructionIndex].tags[DOOR] = true;
+			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
+			Construction::Presets[constructionIndex].dynamic = true;
 		} else if (boost::iequals(name, "bed")) {
-			Construction::Presets.back().tags[BED] = true;
-			Construction::Presets.back().tags[FURNITURE] = true;
+			Construction::Presets[constructionIndex].tags[BED] = true;
+			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
 		} else if (boost::iequals(name, "furniture")) {
-			Construction::Presets.back().tags[FURNITURE] = true;
+			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
 		} else if (boost::iequals(name, "permanent")) {
-			Construction::Presets.back().permanent = true;
+			Construction::Presets[constructionIndex].permanent = true;
 		} else if (boost::iequals(name, "blocksLight")) {
-			Construction::Presets.back().blocksLight = true;
+			Construction::Presets[constructionIndex].blocksLight = true;
 		} else if (boost::iequals(name, "unique")) {
-			Construction::AllowedAmount.back() = 1;
+			Construction::AllowedAmount[constructionIndex] = 1;
 		} else if (boost::iequals(name, "centersCamp")) {
-			Construction::Presets.back().tags[CENTERSCAMP] = true;
+			Construction::Presets[constructionIndex].tags[CENTERSCAMP] = true;
 		} else if (boost::iequals(name, "spawningPool")) {
-			Construction::Presets.back().tags[SPAWNINGPOOL] = true;
-			Construction::Presets.back().dynamic = true;
+			Construction::Presets[constructionIndex].tags[SPAWNINGPOOL] = true;
+			Construction::Presets[constructionIndex].dynamic = true;
 		} else if (boost::iequals(name, "bridge")) {
-			Construction::Presets.back().tags[BRIDGE] = true;
+			Construction::Presets[constructionIndex].tags[BRIDGE] = true;
 		}
 		return true;
 	}
@@ -446,49 +461,49 @@ class ConstructionListener : public ITCODParserListener {
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name, "graphicLength")) {
-			if (Construction::Presets.back().graphic.size() == 0)
-				Construction::Presets.back().graphic.push_back(value.i);
+			if (Construction::Presets[constructionIndex].graphic.size() == 0)
+				Construction::Presets[constructionIndex].graphic.push_back(value.i);
 			else
-				Construction::Presets.back().graphic[0] = value.i;
+				Construction::Presets[constructionIndex].graphic[0] = value.i;
 		} else if (boost::iequals(name, "graphic")) {
-			if (Construction::Presets.back().graphic.size() == 0) //In case graphicLength hasn't been parsed yet
-				Construction::Presets.back().graphic.push_back(1);
+			if (Construction::Presets[constructionIndex].graphic.size() == 0) //In case graphicLength hasn't been parsed yet
+				Construction::Presets[constructionIndex].graphic.push_back(1);
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
+				Construction::Presets[constructionIndex].graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
 		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
-			Construction::Presets.back().fallbackGraphicsSet = value.s;
+			Construction::Presets[constructionIndex].fallbackGraphicsSet = value.s;
 		} else if (boost::iequals(name, "category")) {
-			Construction::Presets.back().category = value.s;
+			Construction::Presets[constructionIndex].category = value.s;
 			Construction::Categories.insert(value.s);
 		} else if (boost::iequals(name, "placementType")) {
-			Construction::Presets.back().placementType = value.i;
+			Construction::Presets[constructionIndex].placementType = value.i;
 		} else if (boost::iequals(name, "materials")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
+				Construction::Presets[constructionIndex].materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
 			}
 		} else if (boost::iequals(name, "maxCondition")) {
-			Construction::Presets.back().maxCondition = value.i;
+			Construction::Presets[constructionIndex].maxCondition = value.i;
 		} else if (boost::iequals(name, "productionx")) {
-			Construction::Presets.back().productionSpot.X(value.i);
+			Construction::Presets[constructionIndex].productionSpot.X(value.i);
 		} else if (boost::iequals(name, "productiony")) {
-			Construction::Presets.back().productionSpot.Y(value.i);
+			Construction::Presets[constructionIndex].productionSpot.Y(value.i);
 		} else if (boost::iequals(name, "spawnsCreatures")) {
-			Construction::Presets.back().spawnCreaturesTag = value.s;
-			Construction::Presets.back().dynamic = true;
+			Construction::Presets[constructionIndex].spawnCreaturesTag = value.s;
+			Construction::Presets[constructionIndex].dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
-			Construction::Presets.back().spawnFrequency = value.i * UPDATES_PER_SECOND;
+			Construction::Presets[constructionIndex].spawnFrequency = value.i * UPDATES_PER_SECOND;
 		} else if (boost::iequals(name, "color")) {
-			Construction::Presets.back().color = value.col;
+			Construction::Presets[constructionIndex].color = value.col;
 		} else if (boost::iequals(name, "tileReqs")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
+				Construction::Presets[constructionIndex].tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
 #ifdef DEBUG
-				std::cout<<"("<<Construction::Presets.back().name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
+				std::cout<<"("<<Construction::Presets[constructionIndex].name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
 #endif
 			}
 		} else if (boost::iequals(name, "tier")) {
-			Construction::Presets.back().tier = value.i;
+			Construction::Presets[constructionIndex].tier = value.i;
 		} else if (boost::iequals(name, "description")) {
 			/*Tokenize the description string and add/remove spaces to make it fit nicely
 			into the 25-width tooltip*/
@@ -506,42 +521,46 @@ class ConstructionListener : public ITCODParserListener {
 			int width = 0;
 			for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
 				if (width > 0 && width < 25 && width + it->length() >= 25) {
-					Construction::Presets.back().description += std::string(25 - width, ' ');
+					Construction::Presets[constructionIndex].description += std::string(25 - width, ' ');
 					width = 0;
 				} 
 
 				while (width >= 25) width -= 25;
 				if (width > 0) {
-					Construction::Presets.back().description += " ";
+					Construction::Presets[constructionIndex].description += " ";
 					++width;
 				}
 
-				Construction::Presets.back().description += *it;
+				Construction::Presets[constructionIndex].description += *it;
 				width += it->length();
 			}
 
 		} else if (boost::iequals(name, "chimneyx")) {
-			Construction::Presets.back().chimney.X(value.i);
+			Construction::Presets[constructionIndex].chimney.X(value.i);
 		} else if (boost::iequals(name, "chimneyy")) {
-			Construction::Presets.back().chimney.Y(value.i);
+			Construction::Presets[constructionIndex].chimney.Y(value.i);
 		} else if (boost::iequals(name,"type")) {
-			Construction::Presets.back().trapAttack.Type(Attack::StringToDamageType(value.s));
-			Construction::Presets.back().dynamic = true;
-			Construction::Presets.back().tags[TRAP] = true;
+			Construction::Presets[constructionIndex].trapAttack.Type(Attack::StringToDamageType(value.s));
+			Construction::Presets[constructionIndex].dynamic = true;
+			Construction::Presets[constructionIndex].tags[TRAP] = true;
 		} else if (boost::iequals(name,"damage")) {
-			Construction::Presets.back().trapAttack.Amount(value.dice);
+			Construction::Presets[constructionIndex].trapAttack.Amount(value.dice);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
-					Construction::Presets.back().trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
+					Construction::Presets[constructionIndex].trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets.back().trapAttack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+				Construction::Presets[constructionIndex].trapAttack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		} else if (boost::iequals(name,"reloadItem")) {
-			Construction::Presets.back().trapReloadItem = Item::StringToItemCategory(value.s);
+			Construction::Presets[constructionIndex].trapReloadItem = Item::StringToItemCategory(value.s);
+		} else if (boost::iequals(name,"slowMovement")) {
+			Construction::Presets[constructionIndex].moveSpeedModifier = value.i;
+			Construction::Presets[constructionIndex].walkable = true;
+			Construction::Presets[constructionIndex].blocksLight = false;
 		}
 
 		return true;
@@ -552,37 +571,37 @@ class ConstructionListener : public ITCODParserListener {
 		std::cout<<(boost::format("end of %s structure\n") % name).str();
 #endif
 		if (boost::iequals(str->getName(), "construction_type")) {
-			Construction::Presets.back().blueprint = Coordinate(Construction::Presets.back().graphic[0],
-				(Construction::Presets.back().graphic.size()-1)/Construction::Presets.back().graphic[0]);
+			Construction::Presets[constructionIndex].blueprint = Coordinate(Construction::Presets[constructionIndex].graphic[0],
+				(Construction::Presets[constructionIndex].graphic.size()-1)/Construction::Presets[constructionIndex].graphic[0]);
 
-			if (Construction::Presets.back().tileReqs.empty()) {
-				Construction::Presets.back().tileReqs.insert(TILEGRASS);
-				Construction::Presets.back().tileReqs.insert(TILEMUD);
-				Construction::Presets.back().tileReqs.insert(TILEROCK);
+			if (Construction::Presets[constructionIndex].tileReqs.empty()) {
+				Construction::Presets[constructionIndex].tileReqs.insert(TILEGRASS);
+				Construction::Presets[constructionIndex].tileReqs.insert(TILEMUD);
+				Construction::Presets[constructionIndex].tileReqs.insert(TILEROCK);
 			}
 
 			//Add material information to the description
-			if (Construction::Presets.back().materials.size() > 0) {
-				if (Construction::Presets.back().description.length() > 0 && Construction::Presets.back().description.length() % 25 != 0)
-					Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
+			if (Construction::Presets[constructionIndex].materials.size() > 0) {
+				if (Construction::Presets[constructionIndex].description.length() > 0 && Construction::Presets[constructionIndex].description.length() % 25 != 0)
+					Construction::Presets[constructionIndex].description += std::string(25 - Construction::Presets[constructionIndex].description.length() % 25, ' ');
 				ItemCategory item = -1;
 				int multiplier = 0;
 
-				for (std::list<ItemCategory>::iterator mati = Construction::Presets.back().materials.begin(); 
-					mati != Construction::Presets.back().materials.end(); ++mati) {
+				for (std::list<ItemCategory>::iterator mati = Construction::Presets[constructionIndex].materials.begin(); 
+					mati != Construction::Presets[constructionIndex].materials.end(); ++mati) {
 						if (item == *mati) ++multiplier;
 						else { 
 							if (multiplier > 0) {
-								Construction::Presets.back().description += 
+								Construction::Presets[constructionIndex].description += 
 									(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
-								if (Construction::Presets.back().description.length() % 25 != 0)
-									Construction::Presets.back().description += std::string(25 - Construction::Presets.back().description.length() % 25, ' ');
+								if (Construction::Presets[constructionIndex].description.length() % 25 != 0)
+									Construction::Presets[constructionIndex].description += std::string(25 - Construction::Presets[constructionIndex].description.length() % 25, ' ');
 							}
 							item = *mati;
 							multiplier = 1;
 						}
 				}
-				Construction::Presets.back().description += 
+				Construction::Presets[constructionIndex].description += 
 					(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
 
 			}
@@ -627,6 +646,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addProperty("slowMovement", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", NULL };
@@ -923,7 +943,8 @@ ConstructionPreset::ConstructionPreset() :
 	fallbackGraphicsSet(""),
 	chimney(Coordinate(-1,-1)),
 	trapAttack(Attack()),
-	trapReloadItem(-1)
+	trapReloadItem(-1),
+	moveSpeedModifier(2)
 {
 	for (int i = 0; i < TAGCOUNT; ++i) { tags[i] = false; }
 }
@@ -941,14 +962,18 @@ int Construction::Repair() {
 
 void Construction::SpawnRepairJob() {
 	if (built && condition < maxCondition && !repairJob.lock()) {
-		boost::shared_ptr<Job> repJob(new Job("Repair " + name));
-		repJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), *boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials))));
-		repJob->tasks.push_back(Task(MOVE));
-		repJob->tasks.push_back(Task(TAKE));
-		repJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
-		repJob->tasks.push_back(Task(REPAIR, Position(), shared_from_this()));
-		repairJob = repJob;
-		JobManager::Inst()->AddJob(repJob);
+		boost::shared_ptr<Item> repairItem = Game::Inst()->FindItemByCategoryFromStockpiles(*boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials)),
+			Position()).lock();
+		if (repairItem) {
+			boost::shared_ptr<Job> repJob(new Job("Repair " + name));
+			repJob->ReserveEntity(repairItem);
+			repJob->tasks.push_back(Task(MOVE, repairItem->Position()));
+			repJob->tasks.push_back(Task(TAKE, repairItem->Position(), repairItem));
+			repJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
+			repJob->tasks.push_back(Task(REPAIR, Position(), shared_from_this()));
+			repairJob = repJob;
+			JobManager::Inst()->AddJob(repJob);
+		}
 	}
 }
 
@@ -966,3 +991,5 @@ void Construction::BurnToTheGround() {
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 }
+
+int Construction::GetMoveSpeedModifier() { return Construction::Presets[type].moveSpeedModifier; }

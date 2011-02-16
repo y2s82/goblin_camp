@@ -240,29 +240,31 @@ void StockManager::Update() {
 void StockManager::UpdateQuantity(ItemType type, int quantity) {
 	//If we receive an update about a new type, it should be made available
 	//Constructions issue a 0 quantity update when they are built
+	if (type >= 0 && type < Item::Presets.size()) {
 #ifdef DEBUG
-	std::cout<<"Quantity update "<<Item::ItemTypeToString(type)<<"\n";
+		std::cout<<"Quantity update "<<Item::ItemTypeToString(type)<<"\n";
 #endif
 
-	if (typeQuantities[type] == -1) {
-		typeQuantities[type] = 0;
-		Game::Inst()->UpdateFarmPlotSeedAllowances(type);
-	}
+		if (typeQuantities[type] == -1) {
+			typeQuantities[type] = 0;
+			Game::Inst()->UpdateFarmPlotSeedAllowances(type);
+		}
 
-	typeQuantities[type] += quantity;
+		typeQuantities[type] += quantity;
 #ifdef DEBUG
-	std::cout<<"Type "<<type<<" quantity now "<<typeQuantities[type]<<"\n";
+		std::cout<<"Type "<<type<<" quantity now "<<typeQuantities[type]<<"\n";
 #endif
-	for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
-		if (categoryQuantities[*cati] == -1) categoryQuantities[*cati] = 0;
-		categoryQuantities[*cati] += quantity;
+		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end(); ++cati) {
+			if (categoryQuantities[*cati] == -1) categoryQuantities[*cati] = 0;
+			categoryQuantities[*cati] += quantity;
 #ifdef DEBUG
-		std::cout<<Item::ItemCategoryToString(*cati)<<" "<<quantity<<"\n";
+			std::cout<<Item::ItemCategoryToString(*cati)<<" "<<quantity<<"\n";
+#endif
+		}
+#ifdef DEBUG
+		std::cout<<Item::ItemTypeToString(type)<<" "<<quantity<<"\n";
 #endif
 	}
-#ifdef DEBUG
-	std::cout<<Item::ItemTypeToString(type)<<" "<<quantity<<"\n";
-#endif
 }
 
 int StockManager::CategoryQuantity(ItemCategory cat) { return categoryQuantities[cat]; }

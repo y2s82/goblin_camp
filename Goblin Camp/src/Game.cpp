@@ -230,8 +230,9 @@ ContinuePlaceStockpile:
 }
 
 //Returns Coordinate(<0,<0) if not found
-Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
-	Coordinate closest(-9999, -9999);
+Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent, int faction) {
+	Coordinate closest(-1, -1);
+	int leastDistance = -1;
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
@@ -240,24 +241,18 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 					if (ix == construct->X()-1 || ix == construct->X() + Construction::Blueprint(construct->Type()).X() ||
 						iy == construct->Y()-1 || iy == construct->Y() + Construction::Blueprint(construct->Type()).Y()) {
 							if (Map::Inst()->IsWalkable(ix,iy)) {
-								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
+								int distance = Distance(pos.X(), pos.Y(), ix, iy);
+								if (faction >= 0 && Map::Inst()->IsDangerous(ix, iy, faction)) distance += 100;
+								if (leastDistance == -1 || distance < leastDistance) {
 									closest = Coordinate(ix,iy);
+									leastDistance = distance;
+								}
 							}
 					}
 				}
 			}
 		} else {
-			for (int ix = ent.lock()->X()-1; ix <= ent.lock()->X()+1; ++ix) {
-				for (int iy = ent.lock()->Y()-1; iy <= ent.lock()->Y()+1; ++iy) {
-					if (ix == ent.lock()->X()-1 || ix == ent.lock()->X()+1 ||
-						iy == ent.lock()->Y()-1 || iy == ent.lock()->Y()+1) {
-							if (Map::Inst()->IsWalkable(ix,iy)) {
-								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
-									closest = Coordinate(ix,iy);
-							}
-					}
-				}
-			}
+			return FindClosestAdjacent(pos, ent.lock()->Position(), faction);
 		}
 	}
 	return closest;
@@ -1809,7 +1804,11 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
-			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
+			std::set<TileType> allowedTypes;
+			allowedTypes.insert(TILEGRASS);
+			allowedTypes.insert(TILEMUD);
+			allowedTypes.insert(TILEBOG);
+			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
@@ -1823,15 +1822,20 @@ void Game::Dig(Coordinate a, Coordinate b) {
 	}
 }
 
-Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target) {
+Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target, int faction) {
 	Coordinate closest = Coordinate(-9999, -9999);
+	int leastDistance = -1;
 	for (int ix = target.X()-1; ix <= target.X()+1; ++ix) {
 		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
 			if (ix == target.X()-1 || ix == target.X()+1 ||
 				iy == target.Y()-1 || iy == target.Y()+1) {
 					if (Map::Inst()->IsWalkable(ix,iy)) {
-						if (Distance(from.X(), from.Y(), ix, iy) < Distance(from.X(), from.Y(), closest.X(), closest.Y()))
+						int distance = Distance(from.X(), from.Y(), ix, iy);
+						if (faction >= 0 && Map::Inst()->IsDangerous(ix, iy, faction)) distance += 100;
+						if (leastDistance == -1 || distance < leastDistance) {
 							closest = Coordinate(ix,iy);
+							leastDistance = distance;
+						}
 					}
 			}
 		}

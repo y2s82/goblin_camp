@@ -400,6 +400,7 @@ void Item::load(Archive & ar, const unsigned int version) {
 	ar & color.b;
 	int categoryCount = 0;
 	ar & categoryCount;
+	categories.clear();
 	for (int i = 0; i < categoryCount; ++i) {
 		std::string categoryName;
 		ar & categoryName;
