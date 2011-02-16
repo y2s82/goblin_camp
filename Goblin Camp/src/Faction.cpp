@@ -19,7 +19,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Faction.hpp"
 #include "NPC.hpp"
 
-Faction::Faction() {}
+std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
+std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::shared_ptr<Faction> >();
+
+Faction::Faction(std::string vname) : name(vname) {}
 
 void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
 	members.push_back(newMember);
@@ -47,4 +50,19 @@ bool Faction::IsTrapVisible(Coordinate trapLocation) {
 
 void Faction::TrapSet(Coordinate trapLocation, bool visible) {
 	trapVisible[trapLocation] = visible;
+}
+
+FactionType Faction::StringToFactionType(std::string name) {
+	if (factionNames.find(name) == factionNames.end()) {
+		factions.push_back(boost::shared_ptr<Faction>(new Faction(name)));
+		factionNames[name] = factions.size() - 1;
+	}
+	return factionNames[name];
+}
+
+std::string Faction::FactionTypeToString(FactionType faction) {
+	if (faction >= 0 && faction < factions.size()) {
+		return factions[faction]->name;
+	}
+	return "Faction name not found";
 }
