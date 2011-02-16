@@ -56,7 +56,7 @@ void Events::Update(bool safe) {
 void Events::SpawnHostileMonsters() {
 	std::vector<NPCType> possibleMonsters;
 	for (std::vector<int>::iterator hosti = hostileSpawningMonsters.begin(); hosti != hostileSpawningMonsters.end(); ++hosti) {
-		if (NPC::Presets[*hosti].tier <= (signed int)Camp::Inst()->GetTier() - 2) {
+		if (NPC::Presets[*hosti].tier <= Camp::Inst()->GetTier() - 2) {
 			possibleMonsters.push_back((NPCType)*hosti);
 		} else if (NPC::Presets[*hosti].tier <= Camp::Inst()->GetTier()) {
 			possibleMonsters.push_back((NPCType)*hosti); // This is intentional, it raises the odds that monsters at or lower
