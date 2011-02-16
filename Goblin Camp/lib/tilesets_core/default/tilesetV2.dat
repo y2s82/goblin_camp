@@ -64,25 +64,73 @@ tileset_data "Default Tileset" {
 		remove_territory_cursor=[12]
 		gather_cursor=[12,13]
 
-		// Status Effects
-		default_hungry=46
-		default_thirsty=47
-		default_panic=48
-		default_concussion=49
-		default_drowsy=50
-		default_asleep=51
-		default_poison=52
-		default_bleeding=53
-		default_sluggish=54
-		default_rage=55
-		default_eating=56
-		default_drinking=57
-		default_swimming=58
-		default_burning=70
-
 		default_underconstruction=18
 		fire=[68,69]
 		fireFPS=10
+
+		status_effect_sprite "hunger" {
+			sprites=[46]
+		}
+
+		status_effect_sprite "thirst" {
+			sprites=[47]
+		}
+
+		status_effect_sprite "panic" {
+			sprites=[48]
+			flashRate=5
+		}
+
+		status_effect_sprite "concussion" {
+			sprites=[49]
+		}
+
+		status_effect_sprite "drowsy" {
+			sprites=[50]
+		}
+
+		status_effect_sprite "sleeping" {
+			sprites=[51]
+		}
+
+		status_effect_sprite "poison" {
+			sprites=[52]
+		}
+
+		status_effect_sprite "bleeding" {
+			sprites=[53]
+		}
+
+		status_effect_sprite "sluggish" {
+			sprites=[54]
+			flashRate=1
+		}
+
+		status_effect_sprite "rage" {
+			sprites=[55]
+			flashRate=3
+		}
+
+		status_effect_sprite "eating" {
+			sprites=[56]
+		}
+
+		status_effect_sprite "drinking" {
+			sprites=[57]
+		}
+
+		status_effect_sprite "swimming" {
+			sprites=[58]
+			flashRate=0
+			alwaysOn
+		}
+
+		status_effect_sprite "burning" {
+			sprites=[68,69]
+			fps=10
+			flashRate=0
+			alwaysOn
+		}
 	
 		creature_sprite_data {
 			sprite=21

@@ -29,6 +29,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Spell.hpp"
 #include "Fire.hpp"
 #include "tileRenderer/Sprite.hpp"
+#include "tileRenderer/StatusEffectSprite.hpp"
 #include "tileRenderer/NPCSpriteSet.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
 #include "tileRenderer/ItemSpriteSet.hpp"
@@ -93,7 +94,7 @@ public:
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
 	void SetFireSprite(const Sprite& sprite);
 
-	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
+	void SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite);
 		
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
@@ -110,7 +111,7 @@ public:
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
-	typedef boost::array<Sprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
+	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
 	
 	int tileWidth;
