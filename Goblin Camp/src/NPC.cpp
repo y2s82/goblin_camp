@@ -2206,15 +2206,15 @@ void NPC::InitializeAIFunctions() {
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		faction = PEACEFULFAUNAFACTION;
+		faction = Faction::StringToFactionType("Peaceful animal");
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
 		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = RANDOMMONSTERFACTION;
+		faction = faction = Faction::StringToFactionType("Hungry monster");
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
 		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = RANDOMMONSTERFACTION;
+		faction = faction = Faction::StringToFactionType("Hostile monster");
 	}
 }
 

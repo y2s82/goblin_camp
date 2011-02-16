@@ -91,7 +91,6 @@ private:
 	boost::shared_ptr<MapRenderer> renderer;
 	bool gameOver;
 
-	std::vector<boost::shared_ptr<Faction> > factions;
 public:
 	static Game* Inst();
 	~Game();
@@ -164,7 +163,6 @@ public:
 	void Thirstify(Coordinate);
 	void Tire(Coordinate);
 	void Badsleepify(Coordinate);
-	boost::shared_ptr<Faction> GetFaction(int);
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());

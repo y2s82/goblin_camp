@@ -82,9 +82,8 @@ screenWidth(0),
 		marks[i] = Coordinate(-1, -1);
 	}
 
-	for (int i = 0; i < FACTION_COUNT; ++i) {
-		factions.push_back(boost::shared_ptr<Faction>(new Faction()));
-	}
+	Faction::factions.clear();
+	Faction::factions.push_back(boost::shared_ptr<Faction>(new Faction("Player faction")));
 }
 
 Game::~Game() {
@@ -149,7 +148,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
 	} else if (Construction::Presets[construct].tags[TRAP]) {
 		newCons = boost::shared_ptr<Construction>(new Trap(construct, target));
-		instance->factions[PLAYERFACTION]->TrapSet(target, true);
+		Faction::factions[PLAYERFACTION]->TrapSet(target, true);
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
@@ -1741,6 +1740,7 @@ void Game::Reset() {
 	JobManager::Inst()->Reset();
 	StockManager::Inst()->Reset();
 	time = 0;
+	age = 0;
 	orcCount = 0;
 	goblinCount = 0;
 	paused = false;
@@ -2120,11 +2120,6 @@ void Game::Badsleepify(Coordinate pos) {
 				}
 		}
 	}
-}
-
-boost::shared_ptr<Faction> Game::GetFaction(int num) {
-	if (num < factions.size()) return factions[num];
-	return boost::shared_ptr<Faction>();
 }
 
 void Game::FillDitch(Coordinate a, Coordinate b) {

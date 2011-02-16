@@ -151,7 +151,7 @@ int Tile::GetMoveCost(void* ptr) const {
 			}
 			if (cons->HasTag(TRAP)) { 
 				return GetMoveCost()+boost::static_pointer_cast<Trap>(cons)->GetMoveCostModifier(
-					Game::Inst()->GetFaction(static_cast<NPC*>(ptr)->GetFaction())->IsTrapVisible(cons->Position()));
+					Faction::factions[static_cast<NPC*>(ptr)->GetFaction()]->IsTrapVisible(cons->Position()));
 			}
 		}
 	}
