@@ -199,6 +199,8 @@ private:
 
 	void UpdateHealth();
 public:
+	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
+
 	~NPC();
 	SkillSet Skills;
 	void Think();

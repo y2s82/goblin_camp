@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ItemSpriteSet.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
+#include "tileRenderer/StatusEffectSprite.hpp"
 
 class TileSetParserV2 : public ITCODParserListener
 {
@@ -54,7 +55,8 @@ private:
 		SS_ITEM,
 		SS_NATURE,
 		SS_CONSTRUCTION,
-		SS_SPELL
+		SS_SPELL,
+		SS_STATUS_EFFECT
 	};
 	TileSetParserV2::SpriteSet currentSpriteSet;
 	
@@ -69,7 +71,7 @@ private:
 	std::vector<int> fireSprites;
 	int fireFPS;
 
-	struct TempConstruction {
+	struct ConstructionSpriteFactory {
 		std::vector<int> mainSprites;
 		std::vector<int> underConstructionSprites;
 		std::vector<int> unreadyTrapSprites;
@@ -77,7 +79,7 @@ private:
 		int width;
 		Sprite openDoor;
 
-		TempConstruction() 
+		ConstructionSpriteFactory() 
 		: mainSprites(), 
 		  underConstructionSprites(), 
 		  unreadyTrapSprites(),
@@ -87,19 +89,20 @@ private:
 
 		ConstructionSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
-	TempConstruction tempConstruction;
+	ConstructionSpriteFactory constructionFactory;
 
-	struct TempSpell {
+	struct SpellSpriteFactory {
 		std::vector<int> sprites;
 		int fps;
 
-		TempSpell() : sprites(), fps(15) {}
+		SpellSpriteFactory() : sprites(), fps(15) {}
 
 		SpellSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
-	TempSpell tempSpell;
+	SpellSpriteFactory spellFactory;
 
-	
+	StatusEffectSpriteFactory statusEffectFactory;
+		
 	NPCSpriteSet npcSpriteSet;
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSpriteSet itemSpriteSet;

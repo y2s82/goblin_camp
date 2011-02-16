@@ -233,6 +233,28 @@ graphic(g),
 	cooldownDefault = cooldown;
 }
 
+bool StatusEffect::IsApplyableStatusEffect(StatusEffectType type) {
+	switch (type) {
+	case HUNGER:
+	case THIRST:
+	case PANIC: 
+	case CONCUSSION:
+	case DROWSY: 
+	case SLEEPING: 
+	case POISON: 
+	case BLEEDING: 
+	case BURNING: 
+	case BADSLEEP: 
+	case INVIGORATED: 
+	case DRUNK: 
+	case HEALING: 
+	case HELPLESS: 
+		return true;
+	default: 
+		return false;
+	}
+}
+
 StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 	if (boost::iequals(str, "hunger")) {
 		return HUNGER;
@@ -250,10 +272,26 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return POISON;
 	} else if (boost::iequals(str, "bleeding")) {
 		return BLEEDING;
-	} else if (boost::iequals(str, "burning")) {
-		return BURNING;
+	} else if (boost::iequals(str, "flying")) {
+		return FLYING;
 	} else if (boost::iequals(str, "sluggish")) {
 		return BADSLEEP;
+	} else if (boost::iequals(str, "rage")) {
+		return RAGE;
+	} else if (boost::iequals(str, "swimming")) {
+		return SWIM;
+	} else if (boost::iequals(str, "eating")) {
+		return EATING;
+	} else if (boost::iequals(str, "drinking")) {
+		return DRINKING;
+	} else if (boost::iequals(str, "carrying")) {
+		return CARRYING;
+	} else if (boost::iequals(str, "working")) {
+		return WORKING;
+	} else if (boost::iequals(str, "burning")) {
+		return BURNING;
+	} else if (boost::iequals(str, "crackedskull")) {
+		return CRACKEDSKULLEFFECT;
 	} else if (boost::iequals(str, "invigorated")) {
 		return INVIGORATED;
 	} else if (boost::iequals(str, "drunk")) {
@@ -276,8 +314,16 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case SLEEPING: return "sleeping";
 	case POISON: return "poison";
 	case BLEEDING: return "bleeding";
-	case BURNING: return "burning";
+	case FLYING: return "flying";
 	case BADSLEEP: return "sluggish";
+	case RAGE: return "rage";
+	case SWIM: return "swimming";
+	case EATING: return "eating";
+	case DRINKING: return "drinking";
+	case CARRYING: return "carrying";
+	case WORKING: return "working";
+	case BURNING: return "burning";
+	case CRACKEDSKULLEFFECT: return "crackedskull";
 	case INVIGORATED: return "invigorated";
 	case DRUNK: return "drunk";
 	case HEALING: return "healing";

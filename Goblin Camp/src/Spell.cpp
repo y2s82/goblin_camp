@@ -188,7 +188,9 @@ class SpellListener : public ITCODParserListener {
 			Spell::Presets.back().attacks.back().CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Spell::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Spell::Presets.back().attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {

@@ -65,7 +65,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 			nonplaceableCursors[i] = Sprite();
 		}
 		for (int i = 0; i < defaultStatusEffects.size(); ++i) {
-			defaultStatusEffects[i] = Sprite();
+			defaultStatusEffects[i] = StatusEffectSprite();
 		}
 }
 
@@ -153,27 +153,34 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 				DrawItem(carriedItem, dst, dstRect);
 			}
 		}
+		// TODO: Possibly draw wielded item based on item flag
 	}
 
-	int numEffects = npc->StatusEffects()->size();
-	if (npc->HasEffect(CARRYING)) numEffects--; // Already handled
-	if (npc->HasEffect(WORKING)) numEffects--;  // Don't draw
-	if (npc->HasEffect(FLYING)) numEffects--;   // Don't draw
-	if (npc->HasEffect(SWIM)) {
-		numEffects--;
-		defaultStatusEffects.at(SWIM).Draw(dst, dstRect);
-	}
-	
-	if (numEffects > 0) {
-		int effect = (TCODSystem::getElapsedMilli() % (250 * numEffects)) / 250;
-		int atEffect = 0;
-		for (std::list<StatusEffect>::iterator effecti(npc->StatusEffects()->begin()); effecti != npc->StatusEffects()->end(); ++effecti) {
-			if (effect == atEffect++) {
-				defaultStatusEffects.at(effecti->type).Draw(dst, dstRect);
-				break;
-			}
+	int numActiveEffects = 0;
+	for (NPC::StatusEffectIterator iter = npc->StatusEffects()->begin(); iter != npc->StatusEffects()->end(); ++iter) {
+		if (defaultStatusEffects.at(iter->type).IsAlwaysVisible()) {
+			defaultStatusEffects.at(iter->type).Draw(false, dst, dstRect);
+		} else if (defaultStatusEffects.at(iter->type).Exists()) {
+			numActiveEffects++;
 		}
 	}
+		
+	if (numActiveEffects > 0) {
+		int activeEffect = (TCODSystem::getElapsedMilli() / 250) % numActiveEffects;
+		int count = 0;
+		for (NPC::StatusEffectIterator iter = npc->StatusEffects()->begin(); iter != npc->StatusEffects()->end(); ++iter) {
+			const StatusEffectSprite& sprite = defaultStatusEffects.at(iter->type);
+			if (sprite.Exists() && !sprite.IsAlwaysVisible())
+			{
+				if (count == activeEffect)
+				{
+					sprite.Draw(numActiveEffects > 1, dst, dstRect);
+					break;
+				}
+				++count;
+			}
+		}	
+	} 
 }
 
 void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const {
@@ -473,7 +480,7 @@ void TileSet::SetCursorSprites(CursorType type, const Sprite& placeableSprite, c
 	}
 }
 
-void TileSet::SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite) {
+void TileSet::SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite) {
 	defaultStatusEffects[statusEffect] = sprite;
 }
 

@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "tileRenderer/TilesetParserV1.hpp"
+#include "tileRenderer/StatusEffectSprite.hpp"
 #include "Logger.hpp"
 
 const char* TileSetParserV1::uninitialisedTilesetError = "tileset_data must be defined and tileWidth & tileHeight must be provided first";
@@ -314,33 +315,33 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			
 			// Status Effects
 			else if (boost::iequals(name, "default_hungry")) {
-				tileSet->SetStatusSprite(HUNGER, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(HUNGER, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_thirsty")) {
-				tileSet->SetStatusSprite(THIRST, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(THIRST, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_panic")) {
-				tileSet->SetStatusSprite(PANIC, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(PANIC, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_concussion")) {
-				tileSet->SetStatusSprite(CONCUSSION, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(CONCUSSION, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_drowsy")) {
-				tileSet->SetStatusSprite(DROWSY, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(DROWSY, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_asleep")) {
-				tileSet->SetStatusSprite(SLEEPING, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(SLEEPING, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_poison")) {
-				tileSet->SetStatusSprite(POISON, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(POISON, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_bleeding")) {
-				tileSet->SetStatusSprite(BLEEDING, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(BLEEDING, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_sluggish")) {
-				tileSet->SetStatusSprite(BADSLEEP, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(BADSLEEP, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_rage")) {
-				tileSet->SetStatusSprite(RAGE, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(RAGE, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_eating")) {
-				tileSet->SetStatusSprite(EATING, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(EATING, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_drinking")) {
-				tileSet->SetStatusSprite(DRINKING, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(DRINKING, StatusEffectSprite(Sprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_swimming")) {
-				tileSet->SetStatusSprite(SWIM, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(SWIM, StatusEffectSprite(Sprite(currentTexture, value.i), 0, true));
 			} else if (boost::iequals(name, "default_burning")) {
-				tileSet->SetStatusSprite(BURNING, Sprite(currentTexture, value.i));
+				tileSet->SetStatusSprite(BURNING, StatusEffectSprite(Sprite(currentTexture, value.i), 0, true));
 			}
 			
 			else if (boost::iequals(name, "default_underconstruction")) {
