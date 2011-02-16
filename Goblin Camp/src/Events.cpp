@@ -71,10 +71,10 @@ void Events::SpawnHostileMonsters() {
 
 	std::string msg;
 	if (hostileSpawnCount > 1) 
-		msg = (boost::format("%s have been sighted outside your settlement!") 
-		% NPC::Presets[monsterType].plural).str();
-	else msg = (boost::format("A %s has been sighted outside your settlement!")
-		% NPC::Presets[monsterType].name).str();
+		msg = (boost::format("%s have been sighted outside your %s!") 
+		% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
+	else msg = (boost::format("A %s has been sighted outside your %s!")
+		% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
 
 	Coordinate a,b;
 	int counter = 0;

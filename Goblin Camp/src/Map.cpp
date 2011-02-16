@@ -270,7 +270,7 @@ int Map::GetMoveModifier(int x, int y) {
 	}
 
 	//Constructions (except bridges) slow down movement
-	if (construction && !bridge) modifier += 2;
+	if (construction && !bridge) modifier += construction->GetMoveSpeedModifier();
 
 	//Other critters slow down movement
 	if (tileMap[x][y].npcList.size() > 0) modifier += 2 + Random::Generate(tileMap[x][y].npcList.size() - 1);
@@ -404,7 +404,8 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	for (int x = left; x <= right; ++x) {
 		for (int y = up; y <= down; ++y) {
 			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
-				if (IsWalkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y)) {
+				if (IsWalkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y) &&
+					!IsDangerous(x, y, static_cast<NPC*>(npc)->GetFaction())) {
 					Coordinate xy(x,y);
 					if (Game::Adjacent(xy, current) && Game::Adjacent(xy, move) && Game::Adjacent(xy, next)) {
 						moveX = x;

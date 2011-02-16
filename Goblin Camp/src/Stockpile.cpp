@@ -32,7 +32,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 {
 	condition = maxCondition;
 	reserved.insert(std::pair<Coordinate,bool>(target,false));
-	Container *container = new Container(target, 0, 1000, -1);
+	Container *container = new Container(target, -1, 1000, -1);
 	container->AddListener(this);
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
 	colors.insert(std::pair<Coordinate, TCODColor>(target, TCODColor::lerp(color, Map::Inst()->GetColor(target.X(), target.Y()), 0.75f)));
@@ -294,7 +294,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							if (iy < a.Y()) a.Y(iy);
 							if (iy > b.Y()) b.Y(iy);
 							reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-							Container *container = new Container(Coordinate(ix,iy), 0, 1000, -1);
+							Container *container = new Container(Coordinate(ix,iy), -1, 1000, -1);
 							container->AddListener(this);
 							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
 

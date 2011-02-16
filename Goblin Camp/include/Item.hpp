@@ -108,7 +108,7 @@ protected:
 	int condition;
 	TCODColor color;
 	int graphic;
-	Item(Coordinate = Coordinate(0,0), ItemType = 0, int owner = 0,
+	Item(Coordinate = Coordinate(0,0), ItemType = -1, int owner = -1,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 	boost::weak_ptr<Item> container;
 	bool internal;
