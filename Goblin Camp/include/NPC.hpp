@@ -100,7 +100,7 @@ struct NPCPreset {
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
 	std::vector<std::vector<int> > possibleEquipment;
-	std::string faction;
+	int faction;
 };
 
 class NPC : public Entity {
