@@ -2116,6 +2116,8 @@ class NPCListener : public ITCODParserListener {
 				std::string item = (char*)TCOD_list_get(value.list,i);
 				NPC::Presets[npcIndex].possibleEquipment.back().push_back(Item::StringToItemType(item));
 			}
+		} else if (boost::iequals(name,"faction")) {
+			NPC::Presets[npcIndex].faction = Faction::StringToFactionType(value.s);
 		}
 		return true;
 	}
@@ -2150,6 +2152,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addListProperty("equipOneOf", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("faction", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -2202,19 +2205,19 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-		faction = PLAYERFACTION;
+		if (faction == -1) faction = PLAYERFACTION;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		faction = Faction::StringToFactionType("Peaceful animal");
+		if (faction == -1) faction = Faction::StringToFactionType("Peaceful animal");
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
 		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = faction = Faction::StringToFactionType("Hungry monster");
+		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
 		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = faction = Faction::StringToFactionType("Hostile monster");
+		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	}
 }
 
@@ -2383,7 +2386,8 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	tier(0),
 	deathItem(-2),
 	fallbackGraphicsSet(),
-	graphicsHint(-1)
+	graphicsHint(-1),
+	faction(-1)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;

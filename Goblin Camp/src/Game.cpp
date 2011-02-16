@@ -83,7 +83,7 @@ screenWidth(0),
 	}
 
 	Faction::factions.clear();
-	Faction::factions.push_back(boost::shared_ptr<Faction>(new Faction("Player faction")));
+	Faction::factions.push_back(boost::shared_ptr<Faction>(new Faction("Player")));
 }
 
 Game::~Game() {
@@ -294,6 +294,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
+	npc->faction = NPC::Presets[type].faction;
 	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
@@ -376,6 +377,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			}
 		}
 	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();
