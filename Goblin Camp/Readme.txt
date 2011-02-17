@@ -9,6 +9,30 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.141 --
+
+Version v0.141 fixes (hopefully) all of the crash bugs found in v0.14, as well as the content that was sligthly 
+off. Even though this is only a minor version number change the save game format was changed in a major enough 
+way that backwards compatibility was broken. This is unfortunate, but the change allows future saves to handle 
+.dat file changes gracefully, unlike before, and backwards save compatibility shouldn’t get broken as often.
+
+Also I’ve given many creatures their own factions, so you won’t see bees, giants and wolves living in harmony 
+anymore.
+
+*Creatures items are now transferred to the player faction on death, so that you can stockpile the clubs 
+kobolds drop for example
+*Content fixed
+*Dismantling related crashes fixed
+*Spawning pool dumping job priority bumped up a notch
+*Breastwork is no longer a wall, it is now a construction that simply slows down movement. 
+It was dropped down a tier, made cheaper to build, and palisades were bumped up a tier.
+*Jobs are cancelled more proactively now by npcs
+*Tweaked some messages
+*Disallowed digging ditches in rock
+*Camp tier can now decrease if your population falls dramatically enough
+*Creatures now have more varied factions resulting in more infighting between species
+
+
 -- Version 0.14 --
 
 0.14 brings the long awaited tilesupport with it (thanks to Immortius). Also, fire, which adds a whole new
