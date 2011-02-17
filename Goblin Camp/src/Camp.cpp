@@ -111,8 +111,7 @@ void Camp::UpdateTier() {
 	else if (production > 10000 && population >= 200)
 		newTier = 6;
 
-	if (newTier <= tier-2) ++newTier; //Only drop the camp tier down by one.
-	else newTier = tier;
+	if (newTier < tier) ++newTier; //Only drop the camp tier down if newtier <= tier-2
 
 	if (newTier != tier) {
 		bool positive = newTier > tier;
