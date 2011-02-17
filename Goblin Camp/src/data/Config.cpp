@@ -97,6 +97,8 @@ namespace Config {
 			("Pause",         ' ')
 			("Jobs",          'j')
 			("DevConsole",    '`')
+			("TerrainOverlay",'t')
+			("Permanent",     'p')
 		;
 	}
 	

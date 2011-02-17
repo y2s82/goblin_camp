@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class MapMarker;
 
 #define TERRITORY_OVERLAY (1 << 0)
+#define TERRAIN_OVERLAY (2 << 0)
 
 class Map : public ITCODPathCallback {
 	friend class boost::serialization::access;
