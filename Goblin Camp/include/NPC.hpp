@@ -277,6 +277,7 @@ public:
 	static void HostileAnimalReact(boost::shared_ptr<NPC>);
 	static bool HostileAnimalFindJob(boost::shared_ptr<NPC>);
 	static bool HungryAnimalFindJob(boost::shared_ptr<NPC>);
+	static void HungryAnimalReact(boost::shared_ptr<NPC>);
 
 	static unsigned int pathingThreadCount;
 	static boost::mutex threadCountMutex;

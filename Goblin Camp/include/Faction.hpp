@@ -58,4 +58,6 @@ public:
 	static FactionType StringToFactionType(std::string);
 	static std::string FactionTypeToString(FactionType);
 	static std::vector<boost::shared_ptr<Faction> > factions;
+
+	void Reset();
 };

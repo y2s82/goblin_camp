@@ -868,6 +868,7 @@ CONTINUEEAT:
 			case HARVESTWILDPLANT:
 				if (boost::shared_ptr<NatureObject> plant = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = plant->Harvest();
+					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
@@ -1182,7 +1183,13 @@ CONTINUEEAT:
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
-						Game::Inst()->CreateItem(Position(), Item::StringToItemType("earth"));
+						int amount = 0;
+						int chance = Random::Generate(9);
+						if (chance < 4) amount = 1;
+						else if (chance < 8) amount = 2;
+						else amount = 3;
+						for (int i = 0; i < amount; ++i)
+							Game::Inst()->CreateItem(Position(), Item::StringToItemType("earth"));
 						TaskFinished(TASKSUCCESS);
 					}
 				}
@@ -1307,7 +1314,7 @@ CONTINUEEAT:
 				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
-				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
+				idleJob->tasks.push_back(Task(MOVENEAR, faction == PLAYERFACTION ? Camp::Inst()->Center() : Position()));
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(9), 0)));
 				jobs.push_back(idleJob);
 				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
@@ -1788,6 +1795,16 @@ bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
 	return false;
 }
 
+void NPC::HungryAnimalReact(boost::shared_ptr<NPC> animal) {
+	animal->aggressive = true;
+	animal->ScanSurroundings();
+	if (animal->seenFire) {
+		animal->AddEffect(PANIC);
+		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
+		return;
+	}
+}
+
 void NPC::AddEffect(StatusEffectType effect) {
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
@@ -2212,7 +2229,7 @@ void NPC::InitializeAIFunctions() {
 		if (faction == -1) faction = Faction::StringToFactionType("Peaceful animal");
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
 		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
-		React = boost::bind(NPC::HostileAnimalReact, _1);
+		React = boost::bind(NPC::HungryAnimalReact, _1);
 		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
 		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
