@@ -676,7 +676,8 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 				}
 
 				if (tileMap[x][y].flow == NODIRECTION) { //No slope here, so approximate towards river
-					boost::weak_ptr<WaterNode> randomWater = *boost::next(Game::Inst()->waterList.begin(), Random::ChooseIndex(Game::Inst()->waterList));
+					boost::weak_ptr<WaterNode> randomWater;
+					if (Game::Inst()->waterList.size() > 0) randomWater = *boost::next(Game::Inst()->waterList.begin(), Random::ChooseIndex(Game::Inst()->waterList));
 					Coordinate coord(-1, -1);
 					if (randomWater.lock()) coord = randomWater.lock()->Position();
 					
