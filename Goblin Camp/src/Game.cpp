@@ -866,7 +866,7 @@ void Game::Update() {
 			wati = nextwati;
 		}
 	}
-
+	
 	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		npci->second->Update();
@@ -874,11 +874,11 @@ void Game::Update() {
 		if (npci->second->Dead() || npci->second->Escaped()) npcsWaitingForRemoval.push_back(npci->second);
 	}
 	JobManager::Inst()->AssignJobs();
-
+	
 	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
 		RemoveNPC(*remNpci);
 	}
-
+	
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
 		consi->second->Update();
 	}
@@ -1153,7 +1153,7 @@ void Game::GenerateMap(uint32 seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, 30, -5, 30, -5);
+	map->heightMap->digBezier(px, py, Config::GetCVar<int>("riverWidth"), -5, Config::GetCVar<int>("riverWidth"), -5);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
