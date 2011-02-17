@@ -19,6 +19,10 @@ way that backwards compatibility was broken. This is unfortunate, but the change
 Also I’ve given many creatures their own factions, so you won’t see bees, giants and wolves living in harmony 
 anymore.
 
+Another fairly major change was how mod information is loaded. Now creatures/items/construction/etc can be 
+overwritten by mods just by defining an entity with the same name as an existing one.  No more mods that need 
+to change core .dats!
+
 *Creatures items are now transferred to the player faction on death, so that you can stockpile the clubs 
 kobolds drop for example
 *Content fixed
@@ -31,7 +35,7 @@ It was dropped down a tier, made cheaper to build, and palisades were bumped up 
 *Disallowed digging ditches in rock
 *Camp tier can now decrease if your population falls dramatically enough
 *Creatures now have more varied factions resulting in more infighting between species
-
+*Mods allowed to overwrite existing data
 
 -- Version 0.14 --
 
