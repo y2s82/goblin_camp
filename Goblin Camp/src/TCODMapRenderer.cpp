@@ -92,6 +92,10 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 						if (filth->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
 					}
+					int natNum = map->GetNatureObject(x,y);
+					if (natNum >= 0) {
+						Game::Inst()->natureList[natNum]->Draw(upleft,&minimap);
+					}
 				}
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
 					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor::darkGreen : TCODColor::darkRed);
@@ -110,7 +114,6 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
 			if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &minimap);
 		}
-		InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
 	}
 
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
