@@ -70,7 +70,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
-	safeMonths(9),
+	safeMonths(6),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
@@ -83,7 +83,7 @@ screenWidth(0),
 	}
 
 	Faction::factions.clear();
-	Faction::factions.push_back(boost::shared_ptr<Faction>(new Faction("Player")));
+	Faction::StringToFactionType("Player");
 }
 
 Game::~Game() {
@@ -1752,13 +1752,16 @@ void Game::Reset() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
-	safeMonths = 9;
+	safeMonths = 6;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
 	renderer->PreparePrefabs();
 	fireList.clear();
 	spellList.clear();
 	gameOver = false;
+	for (int i = 0; i < Faction::factions.size(); ++i) {
+		Faction::factions[i]->Reset();
+	}
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
