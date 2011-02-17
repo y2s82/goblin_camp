@@ -262,7 +262,7 @@ npc_type "kobold" {
 		damage="1d4+1"
 		cooldown=20
 	}
-	equipOneOf=["Wooden club"]
+	equipOneOf=["Wooden club", "nothing", "nothing"]
 	spawnAsGroup="1d3+1"
 	death="Corpse"
 	faction="Kobolds"
@@ -288,7 +288,7 @@ npc_type "kobold raider" {
 			damage="1d6+1"
 			cooldown=20
 	}
-	equipOneOf=["Wooden club"]
+	equipOneOf=["Wooden club", "nothing", "nothing"]
 	spawnAsGroup="1d6+2"
 	death="Corpse"
 	faction="Kobolds"
