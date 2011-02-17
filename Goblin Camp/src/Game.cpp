@@ -1153,7 +1153,9 @@ void Game::GenerateMap(uint32 seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, Config::GetCVar<int>("riverWidth"), -5, Config::GetCVar<int>("riverWidth"), -5);
+	float depth = Config::GetCVar<float>("riverDepth");
+	float width = Config::GetCVar<float>("riverWidth");
+	map->heightMap->digBezier(px, py, width, -depth, width, -depth);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
