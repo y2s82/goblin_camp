@@ -82,6 +82,7 @@ namespace Config {
 			("tileset",     "")
 			("tutorial",    "1")
 			("riverWidth",  "30")
+			("riverDepth",  "5")
 		;
 		
 		insert(Globals::keys)
