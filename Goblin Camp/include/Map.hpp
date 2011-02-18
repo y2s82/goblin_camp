@@ -17,7 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/multi_array.hpp>
 #include <boost/serialization/split_member.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"
@@ -133,3 +132,39 @@ public:
 	int GetTerrainMoveCost(int x, int y) const;
 	boost::shared_ptr<Weather> weather;
 };
+
+BOOST_CLASS_VERSION(Map, 1)
+
+template<class Archive>
+void Map::save(Archive & ar, const unsigned int version) const {
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
+		}
+	}
+	ar & width;
+	ar & height;
+	ar & mapMarkers;
+	ar & markerids;
+	ar & weather;
+}
+
+template<class Archive>
+void Map::load(Archive & ar, const unsigned int version) {
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
+		}
+	}
+	ar & width;
+	ar & height;
+	ar & mapMarkers;
+	ar & markerids;
+	if (version == 0) {
+		Direction unused;
+		ar & unused;
+	}
+	if (version >= 1) {
+		ar & weather;
+	}
+}

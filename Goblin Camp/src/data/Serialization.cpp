@@ -1060,45 +1060,6 @@ void StockManager::load(Archive & ar, const unsigned int version) {
 }
 
 //
-// class Map
-//
-BOOST_CLASS_VERSION(Map, 1)
-
-template<class Archive>
-void Map::save(Archive & ar, const unsigned int version) const {
-	for (int x = 0; x < tileMap.size(); ++x) {
-		for (int y = 0; y < tileMap[x].size(); ++y) {
-			ar & tileMap[x][y];
-		}
-	}
-	ar & width;
-	ar & height;
-	ar & mapMarkers;
-	ar & markerids;
-	ar & weather;
-}
-
-template<class Archive>
-void Map::load(Archive & ar, const unsigned int version) {
-	for (int x = 0; x < tileMap.size(); ++x) {
-		for (int y = 0; y < tileMap[x].size(); ++y) {
-			ar & tileMap[x][y];
-		}
-	}
-	ar & width;
-	ar & height;
-	ar & mapMarkers;
-	ar & markerids;
-	if (version == 0) {
-		Direction unused;
-		ar & unused;
-	}
-	if (version >= 1) {
-		ar & weather;
-	}
-}
-
-//
 // class Tile
 //
 BOOST_CLASS_VERSION(Tile, 0)
