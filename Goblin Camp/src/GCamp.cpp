@@ -149,7 +149,9 @@ void MainLoop() {
 	}
 	game->Running(true);
 
-	bool update = false;
+	int update = -1;
+	if (Config::GetCVar<int>("halfRendering")) update = 0;
+
 	int elapsedMilli;
 	int targetMilli = 1000 / (UPDATES_PER_SECOND);
 	int startMilli = TCODSystem::getElapsedMilli();
@@ -166,8 +168,11 @@ void MainLoop() {
 			Announce::Inst()->Update();
 		}
 
-		game->Draw();
-		game->FlipBuffer();
+		if (update <= 0) {
+			game->Draw();
+			game->FlipBuffer();
+			if (update == 0) update = 1;
+		} else if (update == 1) update = 0;
 
 		elapsedMilli = TCODSystem::getElapsedMilli() - startMilli;
 		startMilli = TCODSystem::getElapsedMilli();
