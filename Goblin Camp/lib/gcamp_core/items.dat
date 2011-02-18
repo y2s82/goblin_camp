@@ -1626,8 +1626,8 @@ item_type "Ghost cabbage" {
 	graphic = 248
 	color="183,177,174"
 	nutrition = 4000
-	fruits = [ "Cabbage seed" ]
-	decay = [ "Cabbage seed", "Filth" ]
+	fruits = [ "Ghost cabbage seed" ]
+	decay = [ "Ghost cabbage seed", "Filth" ]
 	decaySpeed = 6
 	fitsin = "Basket"
 }
