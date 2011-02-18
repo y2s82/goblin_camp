@@ -370,7 +370,7 @@ void Item::save(Archive & ar, const unsigned int version) const {
 	ar & color.b;
 	int categoryCount = (int)categories.size();
 	ar & categoryCount;
-	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+	for (std::set<ItemCategory>::const_iterator cati = categories.begin(); cati != categories.end(); ++cati) {
 		ar & Item::ItemCategoryToString(*cati);
 	}
 	ar & flammable;
