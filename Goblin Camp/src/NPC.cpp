@@ -1291,7 +1291,7 @@ CONTINUEEAT:
 				run = false;
 				drunkJob->tasks.push_back(Task(MOVENEAR, Position()));
 				jobs.push_back(drunkJob);
-				if (Random::Generate(50) == 0) GoBerserk();
+				if (Random::Generate(75) == 0) GoBerserk();
 			} else	if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
 				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {

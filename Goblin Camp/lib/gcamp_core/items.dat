@@ -703,7 +703,7 @@ item_type "Berry wine" {
 	constructedin = "Winery"
 	fitsin = "Barrel"
 	addStatusEffects=["Invigorated", "Drunk", "Sluggish"]
-	addEffectChances=[     75,          10,       10    ]
+	addEffectChances=[     75,          5,        5     ]
 }
 
 item_type "Pie" {
@@ -1445,7 +1445,7 @@ item_type "Chillwine" {
 	constructedin = "Winery"
 	fitsin = "Barrel"
 	addStatusEffects=["Invigorated", "Drunk"]
-	addEffectChances=[     75,          10  ]
+	addEffectChances=[     75,          5   ]
 	removeStatusEffects=["Drowsy"]
 }
 
