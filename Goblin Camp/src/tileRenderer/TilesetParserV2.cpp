@@ -101,6 +101,11 @@ namespace {
 		tileTextureStruct->addStructure(spellSpriteStruct);
 		tileTextureStruct->addStructure(statusEffectSpriteStruct);
 
+		TCODParserStruct* tilesetExtensionStruct = parser.newStructure("tileset_extension");
+		tilesetExtensionStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
+		tilesetExtensionStruct->addProperty("tileHeight", TCOD_TYPE_INT, true);
+		tilesetExtensionStruct->addStructure(tileTextureStruct);
+
 		TCODParserStruct* tilesetStruct = parser.newStructure("tileset_data");
 		tilesetStruct->addProperty("tileWidth", TCOD_TYPE_INT, true);
 		tilesetStruct->addProperty("tileHeight", TCOD_TYPE_INT, true);
@@ -113,6 +118,8 @@ namespace {
 
 TileSetParserV2::TileSetParserV2() :
 	parser(),
+	readTexture(false),
+	extendingExisting(false),
 	tileSet(),
 	success(true),
 	currentSpriteSet(SS_NONE),
@@ -145,6 +152,7 @@ boost::shared_ptr<TileSet> TileSetParserV2::Run(boost::filesystem::path dataFile
 	tileSetPath = dataFilePath.branch_path();
 	statusEffectFactory.Reset();
 	success = true;
+	readTexture = false;
 
 	parser.run(dataFilePath.string().c_str(), this);
 
@@ -153,6 +161,23 @@ boost::shared_ptr<TileSet> TileSetParserV2::Run(boost::filesystem::path dataFile
 	if (success)
 		return result;
 	return boost::shared_ptr<TileSet>();
+}
+
+void TileSetParserV2::Modify(boost::shared_ptr<TileSet> target, boost::filesystem::path dataFilePath) {
+	tileWidth = target->TileWidth();
+	tileHeight = target->TileHeight();
+	currentTexture = boost::shared_ptr<TileSetTexture>();
+	tileSetPath = dataFilePath.branch_path();
+	statusEffectFactory.Reset();
+	success = true;
+	readTexture = false;
+	tileSet = target;
+	extendingExisting = true;
+
+	parser.run(dataFilePath.string().c_str(), this);
+
+	extendingExisting = false;
+	tileSet.reset();
 }
 
 void TileSetParserV2::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
@@ -179,6 +204,16 @@ bool TileSetParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 		parser->error(uninitialisedTilesetError);
 		return false;
 	}
+
+	// Tileset extension
+	if (boost::iequals(str->getName(), "tileset_extension"))
+	{
+		readTexture = true;
+		return success;
+	}
+
+	if (!readTexture)
+		return success;
 
 	// Texture structure
 	if (boost::iequals(str->getName(), "tile_texture_data")) {
@@ -384,15 +419,29 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 
 	// Mandatory tile set properties
 	if (boost::iequals(name, "tileWidth")) {
-		tileWidth = value.i;
-		if (tileWidth != -1 && tileHeight != -1)  {
-			tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+		if (extendingExisting) {
+			if (tileWidth != value.i) {
+				readTexture = false;
+			}
+		} else {
+			tileWidth = value.i;
+			if (tileWidth != -1 && tileHeight != -1)  {
+				tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+				readTexture = true;
+			}
 		}
 		return success;
 	} else if (boost::iequals(name, "tileHeight")) {
-		tileHeight = value.i;
-		if (tileWidth != -1 && tileHeight != -1)  {
-			tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+		if (extendingExisting) {
+			if (tileHeight != value.i) {
+				readTexture = false;
+			}
+		} else {
+			tileHeight = value.i;
+			if (tileWidth != -1 && tileHeight != -1)  {
+				tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+				readTexture = true;
+			}
 		}
 		return success;
 	}
@@ -415,12 +464,21 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 }
 
 bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
-	if (boost::iequals(str->getName(), "tile_texture_data")) {
+	if (boost::iequals(str->getName(), "tileset_extension")) {
+		readTexture = false;
+		return success;
+	} else if (boost::iequals(str->getName(), "tile_texture_data")) {
 		if (fireSprites.size() > 0) {
 			tileSet->SetFireSprite(Sprite(currentTexture, fireSprites.begin(), fireSprites.end(), fireFPS));
 		}
 		currentTexture = boost::shared_ptr<TileSetTexture>();
-	} else if (boost::iequals(str->getName(), "creature_sprite_data")) {
+		return success;
+	} 
+	
+	if (!readTexture)
+		return success;
+	
+	if (boost::iequals(str->getName(), "creature_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultNPCSpriteSet(npcSpriteSet);
 		} else {
@@ -548,7 +606,7 @@ bool TileSetMetadataParserV2::parserProperty(TCODParser*, const char *name, TCOD
 }
 		
 void TileSetMetadataParserV2::error(const char *err) {
-	LOG_FUNC("TilesetsMetadataListener: " << err, "TilesetsMetadataListener::error");
+	LOG_FUNC("TileSetMetadataParserV2: " << err, "TileSetMetadataParserV2::error");
 	metadata.valid = false;
 }
 		
@@ -562,3 +620,44 @@ bool TileSetMetadataParserV2::parserNewStruct(TCODParser*, const TCODParserStruc
 
 bool TileSetMetadataParserV2::parserFlag(TCODParser*, const char*) { return true; }
 bool TileSetMetadataParserV2::parserEndStruct(TCODParser*, const TCODParserStruct*, const char*) { return true; }
+
+TileSetModMetadataParserV2::TileSetModMetadataParserV2() 
+	: parser(),
+      metadata() {
+		  SetupTilesetParser(parser);
+}
+
+std::list<TilesetModMetadata> TileSetModMetadataParserV2::Run(boost::filesystem::path path) {
+	metadata.clear();
+	location = path.branch_path();
+	parser.run(path.string().c_str(), this);
+	return metadata;
+}
+
+bool TileSetModMetadataParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+	if (boost::iequals(str->getName(), "tileset_extension")) {
+		metadata.push_back(TilesetModMetadata(location));
+	}
+	return true;
+}
+
+bool TileSetModMetadataParserV2::parserFlag(TCODParser *parser,const char *name) {
+	return true;
+}
+
+bool TileSetModMetadataParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+	if (boost::iequals(name, "tileWidth")) {
+		metadata.back().width = value.i;
+	} else if (boost::iequals(name, "tileHeight")) {
+		metadata.back().height = value.i;
+	}
+	return true;
+}
+
+bool TileSetModMetadataParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
+	return true;
+}
+
+void TileSetModMetadataParserV2::error(const char *msg) {
+	LOG_FUNC("TileSetModMetadataParserV2: " << msg, "TileSetModMetadataParserV2::error");
+}

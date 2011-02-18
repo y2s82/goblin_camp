@@ -37,6 +37,7 @@ namespace Globals {
 		List of loaded mods. NB: removing an entry from this list does not unload the mod.
 	*/
 	std::list<Mods::Metadata> loadedMods;
+	std::list<TilesetModMetadata> availableTilesetMods;
 }
 
 namespace {
@@ -151,6 +152,10 @@ namespace {
 			LOG_FUNC("Failed to load mod due to std::runtime_error: " << e.what(), "LoadMod");
 			if (required) Game::Inst()->ErrorScreen();
 		}
+		std::list<TilesetModMetadata> tilesetMods = TileSetLoader::LoadTilesetModMetadata(dir);
+		for (std::list<TilesetModMetadata>::iterator iter = tilesetMods.begin(); iter != tilesetMods.end(); ++iter) {
+			Globals::availableTilesetMods.push_back(*iter);
+		}
 		
 		if (metadata.apiVersion != -1) {
 			if (metadata.apiVersion != Script::version) {
@@ -179,6 +184,11 @@ namespace Mods {
 	*/
 	const std::list<Metadata>& GetLoaded() {
 		return Globals::loadedMods;
+	}
+	
+
+	const std::list<TilesetModMetadata>& GetAvailableTilesetMods() {
+		return Globals::availableTilesetMods;
 	}
 	
 	/**

@@ -37,8 +37,16 @@ struct TileSetMetadata
 	explicit TileSetMetadata(boost::filesystem::path tilesetPath);
 };
 
+struct TilesetModMetadata {
+	boost::filesystem::path location;
+	int width, height;
+	
+	explicit TilesetModMetadata(boost::filesystem::path loc);
+};
+
 namespace TileSetLoader
 {
 	boost::shared_ptr<TileSet> LoadTileSet(boost::filesystem::path path);
 	TileSetMetadata LoadTileSetMetadata(boost::filesystem::path path);
+	std::list<TilesetModMetadata> LoadTilesetModMetadata(boost::filesystem::path path);
 };
