@@ -17,12 +17,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/multi_array.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"
 #include "Coordinate.hpp"
 
 class MapMarker;
+class Weather;
 
 #define TERRITORY_OVERLAY (1 << 0)
 #define TERRAIN_OVERLAY (2 << 0)
@@ -44,7 +46,6 @@ private:
 	int overlayFlags;
 	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
-	Direction windDirection;
 
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
@@ -130,4 +131,5 @@ public:
 
 	bool IsDangerous(int x, int y, int faction) const;
 	int GetTerrainMoveCost(int x, int y) const;
+	boost::shared_ptr<Weather> weather;
 };
