@@ -91,67 +91,57 @@ void Camp::LockCenter(Coordinate newCenter) {
 
 void Camp::UnlockCenter() { locked = false; }
 
-unsigned Camp::GetTier() { return tier; }
+int Camp::GetTier() { return tier; }
 
 void Camp::UpdateTier() {
-	unsigned oldTier = tier;
 	
-	switch (tier) {
-	case 0:
-		if (farmplots > 0 && workshops > 1 && production > 20 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 20)
-			++tier;
-		break;
+	int population = Game::Inst()->OrcCount() + Game::Inst()->GoblinCount();
 
-	case 1:
-		if (workshops > 5 && production > 100 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 30)
-			++tier;
-		break;
-	case 2: 
-		if (workshops > 10 && production > 500 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 40)
-			++tier;
-		break;
-	case 3: 
-		if (production > 1000 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 60)
-			++tier;
-		break;
-	case 4: 
-		if (production > 3000 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 100)
-			++tier;
-		break;
-	case 5: 
-		if (production > 10000 && Game::Inst()->OrcCount() + Game::Inst()->GoblinCount() > 200)
-			++tier;
-		break;
-	case 6: break;
-	default: tier = 0; break;
-	}
+	int newTier = tier;
+	if (farmplots > 0 && workshops > 1 && production > 20 && population >= 20 && population < 30)
+		newTier = 1;
+	else if (workshops > 5 && production > 100 && population >= 30 && population < 40)
+		newTier = 2;
+	else if (workshops > 10 && production > 500 && population >= 40 && population < 60)
+		newTier = 3;
+	else if (production > 1000 && population >= 60 && population < 100)
+		newTier = 4;
+	else if (production > 3000 && population >= 100 && population < 200)
+		newTier = 5;
+	else if (production > 10000 && population >= 200)
+		newTier = 6;
 
-	std::string oldName = name;
-	if (tier == 0) {
-		article = "a";
-		name = "Clearing";
-	} else if (tier == 1) {
-		article = "a";
-		name = "Camp";
-	} else if (tier == 2) { 
-		article = "a";
-		name = "Settlement";
-	} else if (tier == 3) {
-		article = "an";
-		name = "Outpost";
-	} else if (tier == 4) {
-		article = "a";
-		name = "Fort";
-	} else if (tier == 5) {
-		article = "a";
-		name = "Stronghold";
-	} else if (tier == 6) {
-		article = "a";
-		name = "Citadel";
-	}
+	if (newTier < tier) ++newTier; //Only drop the camp tier down if newtier <= tier-2
+
+	if (newTier != tier) {
+		bool positive = newTier > tier;
+		tier = newTier;
+		std::string oldName = name;
+		if (tier == 0) {
+			article = "a";
+			name = "Clearing";
+		} else if (tier == 1) {
+			article = "a";
+			name = "Camp";
+		} else if (tier == 2) { 
+			article = "a";
+			name = "Settlement";
+		} else if (tier == 3) {
+			article = "an";
+			name = "Outpost";
+		} else if (tier == 4) {
+			article = "a";
+			name = "Fort";
+		} else if (tier == 5) {
+			article = "a";
+			name = "Stronghold";
+		} else if (tier == 6) {
+			article = "a";
+			name = "Citadel";
+		}
 	
-	if (tier != oldTier) {
-		Announce::Inst()->AddMsg("Your "+oldName+" is now " + article + " " + name + "!", TCODColor::lightGreen);
+		Announce::Inst()->AddMsg("Your "+oldName+" is now " + article + " " + name + "!", 
+			positive ? TCODColor::lightGreen : TCODColor::yellow);
 		Script::Event::TierChanged(tier, name);
 	}
 }

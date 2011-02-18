@@ -36,7 +36,7 @@ void Trap::Update() {
 			boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
 			npc->AddEffect(Construction::Presets[type].trapAttack.StatusEffects()->front().first);
 			npc->Damage(&Construction::Presets[type].trapAttack);
-			Game::Inst()->GetFaction(npc->GetFaction())->TrapDiscovered(Position());
+			Faction::factions[npc->GetFaction()]->TrapDiscovered(Position());
 		}
 	}
 }
@@ -52,8 +52,8 @@ int Trap::Use() {
 			graphic[1] = readyGraphic;
 			progress = 0;
 			//Hide the trap from everyone but the player faction
-			for (int i = 0; i < FACTION_COUNT; ++i) {
-				Game::Inst()->GetFaction(i)->TrapSet(Position(), i == PLAYERFACTION);
+			for (int i = 0; i < Faction::factions.size(); ++i) {
+				Faction::factions[i]->TrapSet(Position(), i == PLAYERFACTION);
 			}
 			return 100;
 		}

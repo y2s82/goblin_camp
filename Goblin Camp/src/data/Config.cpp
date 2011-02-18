@@ -81,6 +81,8 @@ namespace Config {
 			("useTileset",  "0")
 			("tileset",     "")
 			("tutorial",    "1")
+			("riverWidth",  "30")
+			("riverDepth",  "5")
 		;
 		
 		insert(Globals::keys)
@@ -97,6 +99,8 @@ namespace Config {
 			("Pause",         ' ')
 			("Jobs",          'j')
 			("DevConsole",    '`')
+			("TerrainOverlay",'t')
+			("Permanent",     'p')
 		;
 	}
 	

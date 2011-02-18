@@ -100,6 +100,7 @@ struct NPCPreset {
 	std::string fallbackGraphicsSet;
 	int graphicsHint;
 	std::vector<std::vector<int> > possibleEquipment;
+	int faction;
 };
 
 class NPC : public Entity {
@@ -278,6 +279,7 @@ public:
 	static void HostileAnimalReact(boost::shared_ptr<NPC>);
 	static bool HostileAnimalFindJob(boost::shared_ptr<NPC>);
 	static bool HungryAnimalFindJob(boost::shared_ptr<NPC>);
+	static void HungryAnimalReact(boost::shared_ptr<NPC>);
 
 	static unsigned int pathingThreadCount;
 	static boost::mutex threadCountMutex;
