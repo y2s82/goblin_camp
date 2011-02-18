@@ -394,11 +394,11 @@ void JobManager::AssignJobs() {
 								npc = Game::Inst()->npcList[npcNum];
 							if (job && npc) {
 								job->Assign(npcNum);
-								npc->StartJob(job);
 								menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
 								n--;
 								if (job->RequiresTool())
 									toolJobs[job->GetRequiredTool()].push_back(job);
+								npc->StartJob(job);
 							}
 						}
 					}
@@ -415,11 +415,11 @@ void JobManager::AssignJobs() {
 								npc = Game::Inst()->npcList[npcNum];
 							if (job && npc) {
 								job->Assign(npcNum);
-								npc->StartJob(job);
 								expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
 								n--;
 								if (job->RequiresTool())
 									toolJobs[job->GetRequiredTool()].push_back(job);
+								npc->StartJob(job);
 							}
 						}
 					}

@@ -868,6 +868,7 @@ CONTINUEEAT:
 			case HARVESTWILDPLANT:
 				if (boost::shared_ptr<NatureObject> plant = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = plant->Harvest();
+					AddEffect(WORKING);
 					if (tmp <= 0) {
 						bool stockpile = false;
 						if (nextTask() && nextTask()->action == STOCKPILEITEM) stockpile = true;
@@ -1182,7 +1183,13 @@ CONTINUEEAT:
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
 						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
-						Game::Inst()->CreateItem(Position(), Item::StringToItemType("earth"));
+						int amount = 0;
+						int chance = Random::Generate(9);
+						if (chance < 4) amount = 1;
+						else if (chance < 8) amount = 2;
+						else amount = 3;
+						for (int i = 0; i < amount; ++i)
+							Game::Inst()->CreateItem(Position(), Item::StringToItemType("earth"));
 						TaskFinished(TASKSUCCESS);
 					}
 				}
@@ -1307,7 +1314,7 @@ CONTINUEEAT:
 				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
-				idleJob->tasks.push_back(Task(MOVENEAR, faction == 0 ? Camp::Inst()->Center() : Position()));
+				idleJob->tasks.push_back(Task(MOVENEAR, faction == PLAYERFACTION ? Camp::Inst()->Center() : Position()));
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(9), 0)));
 				jobs.push_back(idleJob);
 				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
@@ -1788,6 +1795,16 @@ bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
 	return false;
 }
 
+void NPC::HungryAnimalReact(boost::shared_ptr<NPC> animal) {
+	animal->aggressive = true;
+	animal->ScanSurroundings();
+	if (animal->seenFire) {
+		animal->AddEffect(PANIC);
+		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
+		return;
+	}
+}
+
 void NPC::AddEffect(StatusEffectType effect) {
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
@@ -2118,6 +2135,8 @@ class NPCListener : public ITCODParserListener {
 				std::string item = (char*)TCOD_list_get(value.list,i);
 				NPC::Presets[npcIndex].possibleEquipment.back().push_back(Item::StringToItemType(item));
 			}
+		} else if (boost::iequals(name,"faction")) {
+			NPC::Presets[npcIndex].faction = Faction::StringToFactionType(value.s);
 		}
 		return true;
 	}
@@ -2152,6 +2171,7 @@ void NPC::LoadPresets(std::string filename) {
 	npcTypeStruct->addProperty("death", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addProperty("fallbackGraphicsSet", TCOD_TYPE_STRING, false);
 	npcTypeStruct->addListProperty("equipOneOf", TCOD_TYPE_STRING, false);
+	npcTypeStruct->addProperty("faction", TCOD_TYPE_STRING, false);
 	
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", "wielded", NULL };
@@ -2204,19 +2224,19 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-		faction = PLAYERFACTION;
+		if (faction == -1) faction = PLAYERFACTION;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		faction = PEACEFULFAUNAFACTION;
+		if (faction == -1) faction = Faction::StringToFactionType("Peaceful animal");
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
 		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
-		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = RANDOMMONSTERFACTION;
+		React = boost::bind(NPC::HungryAnimalReact, _1);
+		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
 		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		faction = RANDOMMONSTERFACTION;
+		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	}
 }
 
@@ -2385,7 +2405,8 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	tier(0),
 	deathItem(-2),
 	fallbackGraphicsSet(),
-	graphicsHint(-1)
+	graphicsHint(-1),
+	faction(-1)
 {
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		stats[i] = 1;

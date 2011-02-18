@@ -16,6 +16,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <list>
+#include <map>
+#include <vector>
+#include <string>
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/shared_ptr.hpp>
@@ -23,14 +26,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class NPC;
 class Coordinate;
 
-enum Factions {
-	PLAYERFACTION,
-	PEACEFULFAUNAFACTION,
-	RANDOMMONSTERFACTION,
-	UNDERGROUNDFACTION,
-	FIREFACTION,
-	FACTION_COUNT
-};
+#define PLAYERFACTION 0
+
+typedef int FactionType;
 
 class Faction {
 	friend class boost::serialization::access;
@@ -45,11 +43,21 @@ private:
 	std::list<boost::weak_ptr<NPC> > members;
 	std::map<Coordinate, bool> trapVisible;
 
+	std::string name;
+
+	static std::map<std::string, int> factionNames;
+
 public:
-	Faction();
+	Faction(std::string = "Noname faction");
 	void AddMember(boost::weak_ptr<NPC>);
 	void RemoveMember(boost::weak_ptr<NPC>);
 	void TrapDiscovered(Coordinate);
 	bool IsTrapVisible(Coordinate);
 	void TrapSet(Coordinate, bool visible);
+
+	static FactionType StringToFactionType(std::string);
+	static std::string FactionTypeToString(FactionType);
+	static std::vector<boost::shared_ptr<Faction> > factions;
+
+	void Reset();
 };

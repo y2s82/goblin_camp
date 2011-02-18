@@ -70,7 +70,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
-	safeMonths(9),
+	safeMonths(6),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
@@ -82,9 +82,8 @@ screenWidth(0),
 		marks[i] = Coordinate(-1, -1);
 	}
 
-	for (int i = 0; i < FACTION_COUNT; ++i) {
-		factions.push_back(boost::shared_ptr<Faction>(new Faction()));
-	}
+	Faction::factions.clear();
+	Faction::StringToFactionType("Player");
 }
 
 Game::~Game() {
@@ -149,7 +148,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
 	} else if (Construction::Presets[construct].tags[TRAP]) {
 		newCons = boost::shared_ptr<Construction>(new Trap(construct, target));
-		instance->factions[PLAYERFACTION]->TrapSet(target, true);
+		Faction::factions[PLAYERFACTION]->TrapSet(target, true);
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
@@ -295,6 +294,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
+	npc->faction = NPC::Presets[type].faction;
 	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
@@ -377,6 +377,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			}
 		}
 	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();
@@ -848,7 +849,7 @@ void Game::Update() {
 			wati = nextwati;
 		}
 	}
-
+	
 	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		npci->second->Update();
@@ -856,11 +857,11 @@ void Game::Update() {
 		if (npci->second->Dead() || npci->second->Escaped()) npcsWaitingForRemoval.push_back(npci->second);
 	}
 	JobManager::Inst()->AssignJobs();
-
+	
 	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
 		RemoveNPC(*remNpci);
 	}
-
+	
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
 		consi->second->Update();
 	}
@@ -1135,7 +1136,9 @@ void Game::GenerateMap(uint32 seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, 30, -5, 30, -5);
+	float depth = Config::GetCVar<float>("riverDepth");
+	float width = Config::GetCVar<float>("riverWidth");
+	map->heightMap->digBezier(px, py, width, -depth, width, -depth);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
@@ -1724,6 +1727,7 @@ void Game::Reset() {
 	JobManager::Inst()->Reset();
 	StockManager::Inst()->Reset();
 	time = 0;
+	age = 0;
 	orcCount = 0;
 	goblinCount = 0;
 	paused = false;
@@ -1733,13 +1737,16 @@ void Game::Reset() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
-	safeMonths = 9;
+	safeMonths = 6;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
 	renderer->PreparePrefabs();
 	fireList.clear();
 	spellList.clear();
 	gameOver = false;
+	for (int i = 0; i < Faction::factions.size(); ++i) {
+		Faction::factions[i]->Reset();
+	}
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
@@ -2103,11 +2110,6 @@ void Game::Badsleepify(Coordinate pos) {
 				}
 		}
 	}
-}
-
-boost::shared_ptr<Faction> Game::GetFaction(int num) {
-	if (num < factions.size()) return factions[num];
-	return boost::shared_ptr<Faction>();
 }
 
 void Game::FillDitch(Coordinate a, Coordinate b) {

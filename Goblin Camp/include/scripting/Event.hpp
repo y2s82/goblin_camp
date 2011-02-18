@@ -30,7 +30,7 @@ namespace Script {
 		void BuildingCreated(boost::weak_ptr<Construction>, int, int);
 		void BuildingDestroyed(boost::weak_ptr<Construction>, int, int);
 		void ItemCreated(boost::weak_ptr<Item>, int, int);
-		void TierChanged(unsigned, const std::string&);
+		void TierChanged(int, const std::string&);
 		/*void ItemDestroyed(Item*, int, int);
 		void NPCSpawned(NPC*, Construction*, int, int);
 		void NPCKilled(NPC*, NPC*, int, int);*/
