@@ -35,6 +35,7 @@ public:
 	~TileSetParserV2();
 
 	boost::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
+	void Modify(boost::shared_ptr<TileSet> tileset, boost::filesystem::path modPath);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
@@ -47,6 +48,8 @@ private:
 
 	boost::shared_ptr<TileSet> tileSet;
 	bool success;
+	bool readTexture;
+	bool extendingExisting;
 
 	enum SpriteSet
 	{
@@ -127,5 +130,24 @@ public:
 private:
 	TCODParser parser;
 	TileSetMetadata metadata;
+
+};
+
+class TileSetModMetadataParserV2 : public ITCODParserListener {
+public:
+	TileSetModMetadataParserV2();
+
+	std::list<TilesetModMetadata> Run(boost::filesystem::path path);
+
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
+	bool parserFlag(TCODParser *parser,const char *name);
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value);
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name);
+	void error(const char *msg);
+
+private:
+	TCODParser parser;
+	std::list<TilesetModMetadata> metadata;
+	boost::filesystem::path location;
 
 };

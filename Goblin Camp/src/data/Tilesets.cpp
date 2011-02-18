@@ -34,7 +34,7 @@ namespace {
 	/**
 		Reads in the metadata for the given tileset.
 		\param[in] dir      Tileset's directory.
-		\param[in] metadataList The metadata list top populate on a successful read
+		\param[in] metadataList The metadata list to populate on a successful read
 	*/
 	void LoadMetadata(const fs::path& dir, std::vector<TileSetMetadata>& metadataList) {
 		LOG_FUNC("Trying to load tileset metadata from " << dir.string(), "Tilesets::LoadMetadata");

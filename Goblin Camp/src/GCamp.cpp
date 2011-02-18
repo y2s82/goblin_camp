@@ -91,14 +91,12 @@ int GCMain(std::vector<std::string>& args) {
 	TCOD_sys_startup();
 	Data::LoadConfig();
 	Data::LoadFont();
-	
+	Mods::Load();
 	Game::Inst()->Init();
 	#ifdef MACOSX
 	Data::LoadFont();
 	#endif
-	
-	Mods::Load();
-	
+		
 	//
 	// Parse command line.
 	//

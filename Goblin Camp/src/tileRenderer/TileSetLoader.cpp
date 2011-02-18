@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TilesetParserV1.hpp"
 #include "tileRenderer/TilesetParserV2.hpp"
 #include "Logger.hpp"
+#include "data/Mods.hpp"
 
 TileSetMetadata::TileSetMetadata()
 	: path(),
@@ -44,19 +45,44 @@ TileSetMetadata::TileSetMetadata(boost::filesystem::path tilesetPath)
 {
 }
 
+TilesetModMetadata::TilesetModMetadata(boost::filesystem::path loc)
+	: location(loc),
+	  width(0),
+	  height(0)
+{
+}
+
 boost::shared_ptr<TileSet> TileSetLoader::LoadTileSet(boost::filesystem::path path) {
 	namespace fs = boost::filesystem;
 	fs::path tileSetV1Path(path / "tileset.dat");
 	fs::path tileSetV2Path(path / "tilesetV2.dat");
 
+	boost::shared_ptr<TileSet> tileset;
+
 	if (fs::exists(tileSetV2Path)) {
 		TileSetParserV2 parser = TileSetParserV2();
-		return parser.Run(tileSetV2Path);
+		tileset = parser.Run(tileSetV2Path);
 	} else if (fs::exists(tileSetV1Path)) {
 		TileSetParserV1 parser = TileSetParserV1();
-		return parser.Run(tileSetV1Path);
+		tileset = parser.Run(tileSetV1Path);
+	} else {
+		return boost::shared_ptr<TileSet>();
 	}
-	return boost::shared_ptr<TileSet>();
+
+	if (tileset)
+	{
+		for (std::list<TilesetModMetadata>::const_iterator iter = Mods::GetAvailableTilesetMods().begin(); iter != Mods::GetAvailableTilesetMods().end(); ++iter) {
+			if (iter->height == tileset->TileHeight() && iter->width == tileset->TileWidth())
+			{
+				fs::path tileSetModV2Path(iter->location / "tilesetModV2.dat");
+				if (fs::exists(tileSetModV2Path)) {
+					TileSetParserV2 parser = TileSetParserV2();
+					parser.Modify(tileset, tileSetModV2Path);
+				}
+			}
+		}
+	}
+	return tileset; 
 }
 
 TileSetMetadata TileSetLoader::LoadTileSetMetadata(boost::filesystem::path path) {
@@ -72,6 +98,16 @@ TileSetMetadata TileSetLoader::LoadTileSetMetadata(boost::filesystem::path path)
 		return parser.Run(tileSetV1Path);
 	}
 	return TileSetMetadata();
+}
+
+std::list<TilesetModMetadata> TileSetLoader::LoadTilesetModMetadata(boost::filesystem::path path) {
+	namespace fs = boost::filesystem;
+	fs::path tileSetV2Path(path / "tilesetModV2.dat");
+	if (fs::exists(tileSetV2Path)) {
+		TileSetModMetadataParserV2 parser = TileSetModMetadataParserV2();
+		return parser.Run(tileSetV2Path);
+	}
+	return std::list<TilesetModMetadata>();
 }
 
 
