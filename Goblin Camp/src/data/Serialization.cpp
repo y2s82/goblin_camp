@@ -155,6 +155,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & marks;
 	ar & camX;
 	ar & camY;
+	ar & Faction::factions;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;
@@ -171,7 +172,6 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
-	ar & factions;
 }
 
 template<class Archive>
@@ -193,6 +193,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & marks;
 	ar & camX;
 	ar & camY;
+	ar & Faction::factions;
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;
@@ -209,7 +210,6 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
-	ar & factions;
 }
 
 //
@@ -400,6 +400,7 @@ void Item::load(Archive & ar, const unsigned int version) {
 	ar & color.b;
 	int categoryCount = 0;
 	ar & categoryCount;
+	categories.clear();
 	for (int i = 0; i < categoryCount; ++i) {
 		std::string categoryName;
 		ar & categoryName;
@@ -449,7 +450,7 @@ void Entity::save(Archive & ar, const unsigned int version) const {
 	ar & zone;
 	ar & reserved;
 	ar & name;
-	ar & faction;
+	ar & Faction::FactionTypeToString(faction);
 	ar & velocity;
 	ar & nextVelocityMove;
 	ar & velocityTarget;
@@ -464,7 +465,9 @@ void Entity::load(Archive & ar, const unsigned int version) {
 	ar & zone;
 	ar & reserved;
 	ar & name;
-	ar & faction;
+	std::string factionName;
+	ar & factionName;
+	faction = Faction::StringToFactionType(factionName);
 	ar & velocity;
 	ar & nextVelocityMove;
 	ar & velocityTarget;
@@ -1374,12 +1377,14 @@ template<class Archive>
 void Faction::save(Archive & ar, const unsigned int version) const {
 	ar & members;
 	ar & trapVisible;
+	ar & name;
 }
 
 template<class Archive>
 void Faction::load(Archive & ar, const unsigned int version) {
 	ar & members;
 	ar & trapVisible;
+	ar & name;
 }
 
 //

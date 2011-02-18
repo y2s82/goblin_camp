@@ -56,7 +56,7 @@ void Events::Update(bool safe) {
 void Events::SpawnHostileMonsters() {
 	std::vector<NPCType> possibleMonsters;
 	for (std::vector<int>::iterator hosti = hostileSpawningMonsters.begin(); hosti != hostileSpawningMonsters.end(); ++hosti) {
-		if (NPC::Presets[*hosti].tier <= (signed int)Camp::Inst()->GetTier() - 2) {
+		if (NPC::Presets[*hosti].tier <= Camp::Inst()->GetTier() - 2) {
 			possibleMonsters.push_back((NPCType)*hosti);
 		} else if (NPC::Presets[*hosti].tier <= Camp::Inst()->GetTier()) {
 			possibleMonsters.push_back((NPCType)*hosti); // This is intentional, it raises the odds that monsters at or lower
@@ -71,10 +71,10 @@ void Events::SpawnHostileMonsters() {
 
 	std::string msg;
 	if (hostileSpawnCount > 1) 
-		msg = (boost::format("%s have been sighted outside your settlement!") 
-		% NPC::Presets[monsterType].plural).str();
-	else msg = (boost::format("A %s has been sighted outside your settlement!")
-		% NPC::Presets[monsterType].name).str();
+		msg = (boost::format("%s have been sighted outside your %s!") 
+		% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
+	else msg = (boost::format("A %s has been sighted outside your %s!")
+		% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
 
 	Coordinate a,b;
 	int counter = 0;

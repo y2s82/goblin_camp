@@ -102,6 +102,10 @@ void UI::HandleKeyboard() {
 				menuX = mouseInput.cx;
 				menuY = mouseInput.cy;
 				ChangeMenu(Menu::WorkshopsMenu());
+			} else if (key.c == keyMap["Permanent"]) {
+				menuX = mouseInput.cx;
+				menuY = mouseInput.cy;
+				ChangeMenu(Menu::ConstructionCategoryMenu("Permanent"));
 			} else if (key.c == keyMap["Orders"]) {
 				menuX = mouseInput.cx;
 				menuY = mouseInput.cy;
@@ -126,6 +130,9 @@ void UI::HandleKeyboard() {
 				ChangeMenu(JobDialog::JobListingDialog());
 			} else if (Game::Inst()->DevMode() && key.c == keyMap["DevConsole"]) {
 				ShowDevConsole();
+			} else if (key.c == keyMap["TerrainOverlay"]) {
+				if (Map::Inst()->GetOverlayFlags() & TERRAIN_OVERLAY) Map::Inst()->RemoveOverlay(TERRAIN_OVERLAY);
+				else Map::Inst()->AddOverlay(TERRAIN_OVERLAY);
 			}
 
 			int addition = 1;

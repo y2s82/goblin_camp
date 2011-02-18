@@ -70,7 +70,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
-	safeMonths(9),
+	safeMonths(6),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
@@ -82,9 +82,8 @@ screenWidth(0),
 		marks[i] = Coordinate(-1, -1);
 	}
 
-	for (int i = 0; i < FACTION_COUNT; ++i) {
-		factions.push_back(boost::shared_ptr<Faction>(new Faction()));
-	}
+	Faction::factions.clear();
+	Faction::StringToFactionType("Player");
 }
 
 Game::~Game() {
@@ -149,7 +148,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		newCons = boost::shared_ptr<Construction>(new SpawningPool(construct, target));
 	} else if (Construction::Presets[construct].tags[TRAP]) {
 		newCons = boost::shared_ptr<Construction>(new Trap(construct, target));
-		instance->factions[PLAYERFACTION]->TrapSet(target, true);
+		Faction::factions[PLAYERFACTION]->TrapSet(target, true);
 	} else {
 		newCons = boost::shared_ptr<Construction>(new Construction(construct, target));
 	}
@@ -230,8 +229,9 @@ ContinuePlaceStockpile:
 }
 
 //Returns Coordinate(<0,<0) if not found
-Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
-	Coordinate closest(-9999, -9999);
+Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent, int faction) {
+	Coordinate closest(-1, -1);
+	int leastDistance = -1;
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
@@ -240,24 +240,18 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 					if (ix == construct->X()-1 || ix == construct->X() + Construction::Blueprint(construct->Type()).X() ||
 						iy == construct->Y()-1 || iy == construct->Y() + Construction::Blueprint(construct->Type()).Y()) {
 							if (Map::Inst()->IsWalkable(ix,iy)) {
-								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
+								int distance = Distance(pos.X(), pos.Y(), ix, iy);
+								if (faction >= 0 && Map::Inst()->IsDangerous(ix, iy, faction)) distance += 100;
+								if (leastDistance == -1 || distance < leastDistance) {
 									closest = Coordinate(ix,iy);
+									leastDistance = distance;
+								}
 							}
 					}
 				}
 			}
 		} else {
-			for (int ix = ent.lock()->X()-1; ix <= ent.lock()->X()+1; ++ix) {
-				for (int iy = ent.lock()->Y()-1; iy <= ent.lock()->Y()+1; ++iy) {
-					if (ix == ent.lock()->X()-1 || ix == ent.lock()->X()+1 ||
-						iy == ent.lock()->Y()-1 || iy == ent.lock()->Y()+1) {
-							if (Map::Inst()->IsWalkable(ix,iy)) {
-								if (Distance(pos.X(), pos.Y(), ix, iy) < Distance(pos.X(), pos.Y(), closest.X(), closest.Y()))
-									closest = Coordinate(ix,iy);
-							}
-					}
-				}
-			}
+			return FindClosestAdjacent(pos, ent.lock()->Position(), faction);
 		}
 	}
 	return closest;
@@ -300,6 +294,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
+	npc->faction = NPC::Presets[type].faction;
 	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
@@ -382,6 +377,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			}
 		}
 	}
+
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
 
 	return npc->Uid();
@@ -870,7 +866,7 @@ void Game::Update() {
 			wati = nextwati;
 		}
 	}
-
+	
 	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		npci->second->Update();
@@ -878,11 +874,11 @@ void Game::Update() {
 		if (npci->second->Dead() || npci->second->Escaped()) npcsWaitingForRemoval.push_back(npci->second);
 	}
 	JobManager::Inst()->AssignJobs();
-
+	
 	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
 		RemoveNPC(*remNpci);
 	}
-
+	
 	for (std::map<int,boost::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
 		consi->second->Update();
 	}
@@ -1157,7 +1153,9 @@ void Game::GenerateMap(uint32 seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	map->heightMap->digBezier(px, py, 30, -5, 30, -5);
+	float depth = Config::GetCVar<float>("riverDepth");
+	float width = Config::GetCVar<float>("riverWidth");
+	map->heightMap->digBezier(px, py, width, -depth, width, -depth);
 
 	int hills = 0;
 	//infinityCheck is just there to make sure our while loop doesn't become an infinite one
@@ -1746,6 +1744,7 @@ void Game::Reset() {
 	JobManager::Inst()->Reset();
 	StockManager::Inst()->Reset();
 	time = 0;
+	age = 0;
 	orcCount = 0;
 	goblinCount = 0;
 	paused = false;
@@ -1755,13 +1754,16 @@ void Game::Reset() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
-	safeMonths = 9;
+	safeMonths = 6;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
 	renderer->PreparePrefabs();
 	fireList.clear();
 	spellList.clear();
 	gameOver = false;
+	for (int i = 0; i < Faction::factions.size(); ++i) {
+		Faction::factions[i]->Reset();
+	}
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
@@ -1826,7 +1828,11 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
-			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1)) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
+			std::set<TileType> allowedTypes;
+			allowedTypes.insert(TILEGRASS);
+			allowedTypes.insert(TILEMUD);
+			allowedTypes.insert(TILEBOG);
+			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
@@ -1840,15 +1846,20 @@ void Game::Dig(Coordinate a, Coordinate b) {
 	}
 }
 
-Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target) {
+Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target, int faction) {
 	Coordinate closest = Coordinate(-9999, -9999);
+	int leastDistance = -1;
 	for (int ix = target.X()-1; ix <= target.X()+1; ++ix) {
 		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
 			if (ix == target.X()-1 || ix == target.X()+1 ||
 				iy == target.Y()-1 || iy == target.Y()+1) {
 					if (Map::Inst()->IsWalkable(ix,iy)) {
-						if (Distance(from.X(), from.Y(), ix, iy) < Distance(from.X(), from.Y(), closest.X(), closest.Y()))
+						int distance = Distance(from.X(), from.Y(), ix, iy);
+						if (faction >= 0 && Map::Inst()->IsDangerous(ix, iy, faction)) distance += 100;
+						if (leastDistance == -1 || distance < leastDistance) {
 							closest = Coordinate(ix,iy);
+							leastDistance = distance;
+						}
 					}
 			}
 		}
@@ -2116,11 +2127,6 @@ void Game::Badsleepify(Coordinate pos) {
 				}
 		}
 	}
-}
-
-boost::shared_ptr<Faction> Game::GetFaction(int num) {
-	if (num < factions.size()) return factions[num];
-	return boost::shared_ptr<Faction>();
 }
 
 void Game::FillDitch(Coordinate a, Coordinate b) {
