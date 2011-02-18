@@ -224,7 +224,8 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & NPC::NPCTypeToString(type);
+	std::string npcType = NPC::NPCTypeToString(type);
+	ar & npcType;
 	ar & timeCount;
 	ar & jobs;
 	ar & taskIndex;
@@ -364,14 +365,16 @@ template<class Archive>
 void Item::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & graphic;
-	ar & Item::ItemTypeToString(type);
+	std::string itemType = Item::ItemTypeToString(type);
+	ar & itemType;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
 	int categoryCount = (int)categories.size();
 	ar & categoryCount;
 	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
-		ar & Item::ItemCategoryToString(*cati);
+		std::string category = Item::ItemCategoryToString(*cati);
+		ar & category;
 	}
 	ar & flammable;
 	ar & attemptedStore;
@@ -742,7 +745,8 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & Construction::ConstructionTypeToString(type);
+	std::string constructionType = Construction::ConstructionTypeToString(type);
+	ar & constructionType;
 	ar & walkable;
 	ar & materials;
 	ar & producer;
@@ -1309,7 +1313,8 @@ void Spell::save(Archive & ar, const unsigned int version) const {
 	ar & color.g;
 	ar & color.b;
 	ar & graphic;
-	ar & Spell::SpellTypeToString(type);
+	std::string spellType = Spell::SpellTypeToString(type);
+	ar & spellType;
 	ar & dead;
 	ar & attacks;
 	ar & immaterial;
