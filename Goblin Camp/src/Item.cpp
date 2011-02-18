@@ -68,33 +68,44 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 
 		bulk = Item::Presets[type].bulk;
 		condition = Item::Presets[type].condition;
-	}
 
-	//Calculate flammability based on categorical flammability, and then modify it based on components
-	int flame = 0;
-	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
-		if (Item::Categories[*cati].flammable) ++flame;
-		else --flame;
-	}
-
-	for (int i = 0; i < (signed int)components.size(); ++i) {
-		if (components[i].lock()) {
-			color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
-			if (components[i].lock()->IsFlammable()) ++flame;
+		//Calculate flammability based on categorical flammability, and then modify it based on components
+		int flame = 0;
+		for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+			if (Item::Categories[*cati].flammable) flame += 2;
 			else --flame;
+		}
+
+		if (components.size() > 0) {
+			for (int i = 0; i < (signed int)components.size(); ++i) {
+				if (components[i].lock()) {
+					color = TCODColor::lerp(color, components[i].lock()->Color(), 0.35f);
+					if (components[i].lock()->IsFlammable()) flame += 2;
+					else --flame;
+				}
+			}
+		} else if (Item::Presets[type].components.size() > 0) { /*This item was created without real components
+																ie. not in a workshop. We still should approximate
+																flammability so that it behaves like on built in a 
+																workshop would*/
+			for (int i = 0; i < (signed int)Item::Presets[type].components.size(); ++i) {
+				if (Item::Categories[Item::Presets[type].components[i]].flammable) flame += 3;
+				else --flame;
+			}
+		}
+
+		if (flame > 0) {
+			flammable = true;
+#ifdef DEBUG
+			std::cout<<"Created flammable object "<<flame<<"\n";
+#endif
+		} else {
+#ifdef DEBUG
+			std::cout<<"Created not flammable object "<<flame<<"\n";
+#endif
 		}
 	}
 
-	if (flame > 0) {
-		flammable = true;
-#ifdef DEBUG
-		std::cout<<"Created flammable object "<<flammable<<"\n";
-#endif
-	} else {
-#ifdef DEBUG
-		std::cout<<"Created not flammable object "<<flammable<<"\n";
-#endif
-	}
 }
 
 Item::~Item() {
@@ -107,7 +118,9 @@ Item::~Item() {
 }
 
 int Item::GetGraphicsHint() const {
-	return Presets[type].graphicsHint;
+	if (type > 0)
+		return Presets[type].graphicsHint;
+	return 0;
 }
 
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
@@ -189,87 +202,80 @@ ItemCategory Item::StringToItemCategory(std::string str) {
 }
 
 std::vector<ItemCategory> Item::Components(ItemType type) {
-	return Item::Presets[type].components;
+	if (type > 0) 
+		return Item::Presets[type].components;
+	return std::vector<ItemCategory>();
 }
 
 ItemCategory Item::Components(ItemType type, int index) {
-	return Item::Presets[type].components[index];
+	if (type > 0)
+		return Item::Presets[type].components[index];
+	return 0;
 }
 
-enum ItemListenerMode {
-	ITEMMODE,
-	CATEGORYMODE,
-	COMPONENTMODE
-};
-
 class ItemListener : public ITCODParserListener {
-	ItemListenerMode mode;
 	/*preset[x] holds item names as strings untill all items have been
 	read, and then they are converted into ItemTypes */
-	std::vector<std::string> presetGrowth;
-	std::vector<std::vector<std::string> > presetFruits;
-	std::vector<std::vector<std::string> > presetDecay;
-	std::vector<std::string> presetProjectile;
-	std::vector<std::string> presetCategoryParent;
-	int firstCategoryIndex;
-	int firstItemIndex;
+	std::map<int, std::string> presetGrowth;
+	std::map<int, std::vector<std::string> > presetFruits;
+	std::map<int, std::vector<std::string> > presetDecay;
+	std::map<int, std::string> presetProjectile;
+	std::map<int, std::string> presetCategoryParent;
+	int itemIndex, categoryIndex;
 
 public:
-	ItemListener() : ITCODParserListener(),
-		mode(CATEGORYMODE),
-		firstCategoryIndex(Item::Categories.size()),
-		firstItemIndex(Item::Presets.size())
-	{
-	}
+	ItemListener() : ITCODParserListener() {}
 
 	void translateNames() {
-		for (unsigned int i = 0; i < presetCategoryParent.size(); ++i) {
-			if (presetCategoryParent[i] != "") {
-				Item::Categories[firstCategoryIndex+i].parent = Item::StringToItemCategory(presetCategoryParent[i]);
+		//Translate category parents
+		for (std::map<int, std::string>::iterator pati = presetCategoryParent.begin(); 
+			pati != presetCategoryParent.end(); ++pati) {
+			if (pati->second != "") {
+				Item::Categories[pati->first].parent = Item::StringToItemCategory(pati->second);
 			}
 		}
 
-		/*Misleading to iterate through presetGrowth because we're handling everything else here,
-		but presetGrowth.size() = the amount of items read in. Just remember to add firstItemIndex,
-		because this items.dat may not be the first one read in, and we don't want to overwrite
-		existing items*/
-		for (unsigned int i = 0; i < presetGrowth.size(); ++i) {
-			for (std::set<ItemCategory>::iterator cati = Item::Presets[firstItemIndex+i].categories.begin();
-				cati != Item::Presets[firstItemIndex+i].categories.end(); ++cati) {
-					if (Item::Categories[*cati].parent >= 0 && 
-						Item::Presets[firstItemIndex+i].categories.find(Item::Categories[*cati].parent) == 
-						Item::Presets[firstItemIndex+i].categories.end()) {
-#ifdef DEBUG
-						std::cout<<"Item has a parent ->"<<Item::Categories[Item::Categories[*cati].parent].name;
-						std::cout<<" = ("<<Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name)<<")\n";
-#endif
-						Item::Presets[firstItemIndex+i].categories.insert(Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name));
-						cati = Item::Presets[firstItemIndex+i].categories.begin(); //Start from the beginning, inserting into a set invalidates the iterator
-					}
-			}
+		//Growth items
+		for (std::map<int, std::string>::iterator growthi = presetGrowth.begin();
+			growthi != presetGrowth.end(); ++growthi) {
+				if (growthi->second != "") Item::Presets[growthi->first].growth = Item::StringToItemType(growthi->second);
+				//We'll handle the items categories' parent categories while we're at it
+				for (std::set<ItemCategory>::iterator cati = Item::Presets[growthi->first].categories.begin();
+					cati != Item::Presets[growthi->first].categories.end(); ++cati) {
+						if (Item::Categories[*cati].parent >= 0 && 
+							Item::Presets[growthi->first].categories.find(Item::Categories[*cati].parent) == 
+							Item::Presets[growthi->first].categories.end()) {
+								Item::Presets[growthi->first].categories.insert(Item::StringToItemCategory(Item::Categories[Item::Categories[*cati].parent].name));
+								cati = Item::Presets[growthi->first].categories.begin(); //Start from the beginning, inserting into a set invalidates the iterator
+						}
+				}
+		}
 
-#ifdef DEBUG
-			if (presetGrowth[i] != "") {
-				Item::Presets[firstItemIndex+i].growth = Item::StringToItemType(presetGrowth[i]);
-				std::cout<<"Translating "<<presetGrowth[i]<<" into growth id "<<Item::StringToItemType(presetGrowth[i])<<"\n";
-			} else {
-				std::cout<<"No growth defined for "<<Item::Presets[firstItemIndex+i].name<<"\n";
-			}
-			std::cout<<"Growth id = "<<Item::Presets[firstItemIndex+i].growth<<"\n";
-#else
-			if (presetGrowth[i] != "") Item::Presets[firstItemIndex+i].growth = Item::StringToItemType(presetGrowth[i]);
-#endif
-			for (unsigned int fruit = 0; fruit < presetFruits[i].size(); ++fruit) {
-				Item::Presets[firstItemIndex+i].fruits.push_back(Item::StringToItemType(presetFruits[i][fruit]));
-			}
-			for (unsigned int decay = 0; decay < presetDecay[i].size(); ++decay) {
-				if (boost::iequals(presetDecay[i][decay], "Filth"))
-					Item::Presets[firstItemIndex+i].decayList.push_back(-1);
-				else
-					Item::Presets[firstItemIndex+i].decayList.push_back(Item::StringToItemType(presetDecay[i][decay]));
-			}
+		//Fruits
+		for (std::map<int, std::vector<std::string> >::iterator itemi = presetFruits.begin();
+			itemi != presetFruits.end(); ++itemi) {
+				for (std::vector<std::string>::iterator fruiti = itemi->second.begin(); 
+					fruiti != itemi->second.end(); ++fruiti) {
+						Item::Presets[itemi->first].fruits.push_back(Item::StringToItemType(*fruiti));
+				}
+		}
 
-			if (presetProjectile[i] != "") Item::Presets[firstItemIndex+i].attack.Projectile(Item::StringToItemCategory(presetProjectile[i]));
+		//Decay
+		for (std::map<int, std::vector<std::string> >::iterator itemi = presetDecay.begin();
+			itemi != presetDecay.end(); ++itemi) {
+				for (std::vector<std::string>::iterator decayi = itemi->second.begin(); 
+					decayi != itemi->second.end(); ++decayi) {
+						if (boost::iequals(*decayi, "Filth"))
+							Item::Presets[itemi->first].decayList.push_back(-1);
+						else
+							Item::Presets[itemi->first].decayList.push_back(Item::StringToItemType(*decayi));
+				}
+		}
+
+		//Projectiles
+		for (std::map<int, std::string>::iterator proji = presetProjectile.begin(); 
+			proji != presetProjectile.end(); ++proji) {
+				Item::Presets[proji->first].attack.Projectile(Item::StringToItemCategory(proji->second));
 		}
 	}
 
@@ -279,22 +285,39 @@ private:
 		std::cout<<(boost::format("new %s structure\n") % str->getName()).str();
 #endif
 		if (boost::iequals(str->getName(), "category_type")) {
-			mode = CATEGORYMODE;
-			Item::Categories.push_back(ItemCat());
-			++Game::ItemCatCount;
-			Item::Categories.back().name = name;
-			Item::itemCategoryNames.insert(std::make_pair(boost::to_upper_copy(Item::Categories.back().name), Game::ItemCatCount-1));
-			presetCategoryParent.push_back("");
+			if (Item::itemCategoryNames.find(name) != Item::itemCategoryNames.end()) {
+				categoryIndex = Item::itemCategoryNames[name];
+				Item::Categories[categoryIndex] = ItemCat();
+				Item::Categories[categoryIndex].name = name;
+				presetCategoryParent[categoryIndex] = "";
+			} else { //New category
+				Item::Categories.push_back(ItemCat());
+				categoryIndex = Item::Categories.size() - 1;
+				++Game::ItemCatCount;
+				Item::Categories.back().name = name;
+				Item::itemCategoryNames.insert(std::make_pair(boost::to_upper_copy(Item::Categories.back().name), Game::ItemCatCount-1));
+				presetCategoryParent.insert(std::make_pair(categoryIndex, ""));
+			}
 		} else if (boost::iequals(str->getName(), "item_type")) {
-			mode = ITEMMODE;
-			Item::Presets.push_back(ItemPreset());
-			presetGrowth.push_back("");
-			presetFruits.push_back(std::vector<std::string>());
-			presetDecay.push_back(std::vector<std::string>());
-			++Game::ItemTypeCount;
-			Item::Presets.back().name = name;
-			Item::itemTypeNames.insert(std::make_pair(boost::to_upper_copy(Item::Presets.back().name), Game::ItemTypeCount-1));
-			presetProjectile.push_back("");
+			if (Item::itemTypeNames.find(name) != Item::itemTypeNames.end()) {
+				itemIndex = Item::itemTypeNames[name];
+				Item::Presets[itemIndex] = ItemPreset();
+				Item::Presets[itemIndex].name = name;
+				presetGrowth[itemIndex] = "";
+				presetFruits[itemIndex] = std::vector<std::string>();
+				presetDecay[itemIndex] = std::vector<std::string>();
+				presetProjectile[itemIndex] = "";
+			} else { //New item
+				Item::Presets.push_back(ItemPreset());
+				itemIndex = Item::Presets.size() - 1;
+				presetGrowth.insert(std::make_pair(itemIndex, ""));
+				presetFruits.insert(std::make_pair(itemIndex, std::vector<std::string>()));
+				presetDecay.insert(std::make_pair(itemIndex, std::vector<std::string>()));
+				++Game::ItemTypeCount;
+				Item::Presets.back().name = name;
+				Item::itemTypeNames.insert(std::make_pair(boost::to_upper_copy(Item::Presets.back().name), Game::ItemTypeCount-1));
+				presetProjectile.insert(std::make_pair(itemIndex, ""));
+			}
 		} else if (boost::iequals(str->getName(), "attack")) {
 		}
 
@@ -306,7 +329,7 @@ private:
 		std::cout<<(boost::format("%s\n") % name).str();
 #endif
 		if (boost::iequals(name, "flammable")) {
-			Item::Categories.back().flammable = true;
+			Item::Categories[categoryIndex].flammable = true;
 		}
 		return true;
 	}
@@ -318,95 +341,95 @@ private:
 		if (boost::iequals(name, "category")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
-				Item::Presets.back().categories.insert(cat);
-				Item::Presets.back().specificCategories.insert(cat);
+				Item::Presets[itemIndex].categories.insert(cat);
+				Item::Presets[itemIndex].specificCategories.insert(cat);
 			}
 		} else if (boost::iequals(name, "graphic")) {
-			Item::Presets.back().graphic = value.i;
+			Item::Presets[itemIndex].graphic = value.i;
 		} else if (boost::iequals(name, "color")) {
-			Item::Presets.back().color = value.col;
+			Item::Presets[itemIndex].color = value.col;
 		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
-			Item::Presets.back().fallbackGraphicsSet = value.s;
+			Item::Presets[itemIndex].fallbackGraphicsSet = value.s;
 		}else if (boost::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
+				Item::Presets[itemIndex].components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
 			}
 		} else if (boost::iequals(name, "containin")) {
-			Item::Presets.back().containInRaw = value.s;
+			Item::Presets[itemIndex].containInRaw = value.s;
 		} else if (boost::iequals(name, "nutrition")) {
-			Item::Presets.back().nutrition = value.i;
-			Item::Presets.back().organic = true;
+			Item::Presets[itemIndex].nutrition = value.i;
+			Item::Presets[itemIndex].organic = true;
 		} else if (boost::iequals(name, "growth")) {
-			presetGrowth.back() = value.s;
-			Item::Presets.back().organic = true;
+			presetGrowth[itemIndex] = value.s;
+			Item::Presets[itemIndex].organic = true;
 		} else if (boost::iequals(name, "fruits")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				presetFruits.back().push_back((char*)TCOD_list_get(value.list,i));
+				presetFruits[itemIndex].push_back((char*)TCOD_list_get(value.list,i));
 			}
-			Item::Presets.back().organic = true;
+			Item::Presets[itemIndex].organic = true;
 		} else if (boost::iequals(name, "multiplier")) {
-			Item::Presets.back().multiplier = value.i;
+			Item::Presets[itemIndex].multiplier = value.i;
 		} else if (boost::iequals(name, "containerSize")) {
-			Item::Presets.back().container = value.i;
+			Item::Presets[itemIndex].container = value.i;
 		} else if (boost::iequals(name, "fitsin")) {
-			Item::Presets.back().fitsInRaw = value.s;
+			Item::Presets[itemIndex].fitsInRaw = value.s;
 		} else if (boost::iequals(name, "constructedin")) {
-			Item::Presets.back().constructedInRaw = value.s;
+			Item::Presets[itemIndex].constructedInRaw = value.s;
 		} else if (boost::iequals(name, "decay")) {
-			Item::Presets.back().decays = true;
+			Item::Presets[itemIndex].decays = true;
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				presetDecay.back().push_back((char*)TCOD_list_get(value.list,i));
+				presetDecay[itemIndex].push_back((char*)TCOD_list_get(value.list,i));
 			}
 		} else if (boost::iequals(name, "decaySpeed")) {
-			Item::Presets.back().decaySpeed = value.i;
-			Item::Presets.back().decays = true;
+			Item::Presets[itemIndex].decaySpeed = value.i;
+			Item::Presets[itemIndex].decays = true;
 		} else if (boost::iequals(name,"type")) {
-			Item::Presets.back().attack.Type(Attack::StringToDamageType(value.s));
+			Item::Presets[itemIndex].attack.Type(Attack::StringToDamageType(value.s));
 		} else if (boost::iequals(name,"damage")) {
-			Item::Presets.back().attack.Amount(value.dice);
+			Item::Presets[itemIndex].attack.Amount(value.dice);
 		} else if (boost::iequals(name,"cooldown")) {
-			Item::Presets.back().attack.CooldownMax(value.i);
+			Item::Presets[itemIndex].attack.CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().attack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+				Item::Presets[itemIndex].attack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		} else if (boost::iequals(name,"ammo")) {
-			presetProjectile.back() = value.s;
+			presetProjectile[itemIndex] = value.s;
 		} else if (boost::iequals(name,"parent")) {
-			presetCategoryParent.back() = value.s;
+			presetCategoryParent[categoryIndex] = value.s;
 		} else if (boost::iequals(name,"physical")) {
-			Item::Presets.back().resistances[PHYSICAL_RES] = value.i;
+			Item::Presets[itemIndex].resistances[PHYSICAL_RES] = value.i;
 		} else if (boost::iequals(name,"magic")) {
-			Item::Presets.back().resistances[MAGIC_RES] = value.i;
+			Item::Presets[itemIndex].resistances[MAGIC_RES] = value.i;
 		} else if (boost::iequals(name,"cold")) {
-			Item::Presets.back().resistances[COLD_RES] = value.i;
+			Item::Presets[itemIndex].resistances[COLD_RES] = value.i;
 		} else if (boost::iequals(name,"fire")) {
-			Item::Presets.back().resistances[FIRE_RES] = value.i;
+			Item::Presets[itemIndex].resistances[FIRE_RES] = value.i;
 		} else if (boost::iequals(name,"poison")) {
-			Item::Presets.back().resistances[POISON_RES] = value.i;
+			Item::Presets[itemIndex].resistances[POISON_RES] = value.i;
 		} else if (boost::iequals(name,"bulk")) {
-			Item::Presets.back().bulk = value.i;
+			Item::Presets[itemIndex].bulk = value.i;
 		} else if (boost::iequals(name,"durability")) {
-			Item::Presets.back().condition = value.i;
+			Item::Presets[itemIndex].condition = value.i;
 		} else if (boost::iequals(name,"addStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().addsEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
 			}
 		} else if (boost::iequals(name,"addEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().addsEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+				Item::Presets[itemIndex].addsEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		} else if (boost::iequals(name,"removeStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().removesEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
 			}
 		} else if (boost::iequals(name,"removeEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets.back().removesEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
+				Item::Presets[itemIndex].removesEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
 		}
 		return true;
@@ -417,8 +440,8 @@ private:
 		std::cout<<(boost::format("end of %s structure\n") % str->getName()).str();
 #endif
 		if (boost::iequals(str->getName(), "category_type")) {
-			if (presetCategoryParent.back() == "")
-				Item::ParentCategories.push_back(Item::Categories.back());
+			if (presetCategoryParent[categoryIndex] == "")
+				Item::ParentCategories.push_back(Item::Categories[categoryIndex]);
 		}
 		return true;
 	}

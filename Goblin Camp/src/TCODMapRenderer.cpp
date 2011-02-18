@@ -81,17 +81,22 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->GetGraphic(x,y), map->GetForeColor(x,y), map->GetBackColor(x,y));
 
-				boost::weak_ptr<WaterNode> wwater = map->GetWater(x,y);
-				if (boost::shared_ptr<WaterNode> water = wwater.lock()) {
-					if (water->Depth() > 0)
-						minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water->GetGraphic(), water->GetColor(), TCODColor::black);
+				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+					boost::weak_ptr<WaterNode> wwater = map->GetWater(x,y);
+					if (boost::shared_ptr<WaterNode> water = wwater.lock()) {
+						if (water->Depth() > 0)
+							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water->GetGraphic(), water->GetColor(), TCODColor::black);
+					}
+					boost::weak_ptr<FilthNode> wfilth = map->GetFilth(x,y);
+					if (boost::shared_ptr<FilthNode> filth = wfilth.lock()) {
+						if (filth->Depth() > 0)
+							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
+					}
+					int natNum = map->GetNatureObject(x,y);
+					if (natNum >= 0) {
+						Game::Inst()->natureList[natNum]->Draw(upleft,&minimap);
+					}
 				}
-				boost::weak_ptr<FilthNode> wfilth = map->GetFilth(x,y);
-				if (boost::shared_ptr<FilthNode> filth = wfilth.lock()) {
-					if (filth->Depth() > 0)
-						minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
-				}
-
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
 					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor::darkGreen : TCODColor::darkRed);
 				}
@@ -102,13 +107,14 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		}
 	}
 
-	InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
-	InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
+	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+		InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
+		InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
 		//TODO: Make this consistent
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
-		if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &minimap);
+		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
+			if (!itemi->second->ContainedIn().lock()) itemi->second->Draw(upleft, &minimap);
+		}
 	}
-	InternalDrawMapItems("nature objects",        Game::Inst()->natureList, upleft, &minimap);
 
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();

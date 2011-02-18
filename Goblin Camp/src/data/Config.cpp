@@ -74,13 +74,16 @@ namespace Config {
 		using boost::assign::insert;
 		
 		insert(Globals::cvars)
-			("resolutionX", "800")
-			("resolutionY", "600")
-			("fullscreen",  "0")
-			("renderer",    "0")
-			("useTileset",  "0")
-			("tileset",     "")
-			("tutorial",    "1")
+			("resolutionX",  "800")
+			("resolutionY",  "600")
+			("fullscreen",   "0")
+			("renderer",     "0")
+			("useTileset",   "0")
+			("tileset",      "")
+			("tutorial",     "1")
+			("riverWidth",   "30")
+			("riverDepth",   "5")
+			("halfRendering","0")
 		;
 		
 		insert(Globals::keys)
@@ -97,6 +100,8 @@ namespace Config {
 			("Pause",         ' ')
 			("Jobs",          'j')
 			("DevConsole",    '`')
+			("TerrainOverlay",'t')
+			("Permanent",     'p')
 		;
 	}
 	

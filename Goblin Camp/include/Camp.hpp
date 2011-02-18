@@ -41,7 +41,7 @@ private:
 	unsigned int buildingCount;
 	bool locked;
 	Coordinate lockedCenter;
-	unsigned tier;
+	int tier;
 	std::string name;
 	std::string article;
 	int workshops, farmplots, production;
@@ -58,7 +58,7 @@ public:
 	void SetCenter(Coordinate);
 	void LockCenter(Coordinate);
 	void UnlockCenter();
-	unsigned GetTier();
+	int GetTier();
 	void UpdateTier();
 	std::string GetName();
 	void ConstructionBuilt(int type);

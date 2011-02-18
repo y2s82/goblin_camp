@@ -106,6 +106,7 @@ npc_type "starving wolf" {
 	}
 	spawnAsGroup="1d4+3"
 	death="Corpse"
+	faction="Wolves"
 }
 
 npc_type "rabid albino rat" {
@@ -181,6 +182,7 @@ npc_type "soldier ant" {
 	spawnAsGroup="1d7+3"
 	tags=["underground", "tunneler"]
 	death="Arthropod corpse"
+	faction="Ants"
 }
 
 npc_type "killer bee" {
@@ -208,6 +210,7 @@ npc_type "killer bee" {
 	}
 	spawnAsGroup="1d20+10"
 	death="Filth"
+	faction="Bees"
 }
 
 npc_type "harpy" { 
@@ -259,9 +262,10 @@ npc_type "kobold" {
 		damage="1d4+1"
 		cooldown=20
 	}
-	equipOneOf=["Wooden club"]
+	equipOneOf=["Wooden club", "nothing", "nothing"]
 	spawnAsGroup="1d3+1"
 	death="Corpse"
+	faction="Kobolds"
 }
 
 npc_type "kobold raider" {
@@ -284,9 +288,10 @@ npc_type "kobold raider" {
 			damage="1d6+1"
 			cooldown=20
 	}
-	equipOneOf=["Wooden club"]
+	equipOneOf=["Wooden club", "nothing", "nothing"]
 	spawnAsGroup="1d6+2"
 	death="Corpse"
+	faction="Kobolds"
 }
 
 npc_type "ogre" {
@@ -374,6 +379,7 @@ npc_type "skeleton" {
 		cooldown=75
 	}
 	death="Bones"
+	faction="Undead"
 }
 
 npc_type "bandersnatch" { 
@@ -475,6 +481,7 @@ npc_type "minotaur" {
 		effectChances=[     33     ]
 	}
 	death="Corpse"
+	faction="Minotaurs"
 }
 
 npc_type "cyclops" { 
@@ -501,6 +508,7 @@ npc_type "cyclops" {
 		statusEffects=["Concussion"]
 	}
 	death="Corpse"
+	faction="Giants"
 }
 
 npc_type "giant" { 
@@ -531,6 +539,7 @@ npc_type "giant" {
 	    strength=25
 	}
 	death="Corpse"
+	faction="Giants"
 }
 
 npc_type "griffon" { 
@@ -638,6 +647,7 @@ npc_type "raw golem" {
 		effectChances=[     70     ]
 	}
 	death="Red clay"
+	faction="Golems"
 }
 
 
@@ -666,6 +676,7 @@ npc_type "fired golem" {
 		effectChances=[     80     ]
 	}
 	death="Red clay"
+	faction="Golems"
 }
 
 npc_type "imp" {
@@ -756,6 +767,7 @@ npc_type "werewolf" {
 	}
 	spawnAsGroup="1d2"
 	death="Corpse"
+	faction="Wolves"
 }
 
 npc_type "feral vampire" {
@@ -786,6 +798,7 @@ npc_type "feral vampire" {
 	}
 	spawnAsGroup="1d4"
 	death="Corpse"
+	faction="Undead"
 }
 
 npc_type "wild boar" {
@@ -953,6 +966,7 @@ npc_type "fire elemental" {
 	stats {
 	    strength=25
 	}
+	faction="Elementals"
 }
 
 npc_type "netch" { 

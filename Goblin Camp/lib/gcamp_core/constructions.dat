@@ -207,16 +207,6 @@ construction_type "Totem Pole" {
 	description="The Totem Pole represents the center of your camp"
 }
 
-construction_type "Palisade" {
-	tier=1
-	category="Basics"
-	wall
-	maxCondition=50
-	materials=["Log","Log","Log","Log","Log"]
-	placementType=2
-	description="A palisade will stop most monsters from gaining free access to your camp"
-}
-
 construction_type "Pontoon bridge" {
 	tier=1
 	category="Basics"
@@ -252,10 +242,23 @@ construction_type "Spiked pit" {
 construction_type "Breastwork" {
 	tier=1
 	category="Basics"
-	wall
+	graphicLength=1
+	graphic=[178]
+	slowMovement=5
 	maxCondition=30
-	materials=["Earth", "Earth", "Earth", "Earth", "Earth"]
+	materials=["Earth"]
 	placementType=2
+	description="Breastwork helps slow down creatures"
+}
+
+construction_type "Palisade" {
+	tier=2
+	category="Basics"
+	wall
+	maxCondition=50
+	materials=["Log","Log","Log","Log","Log"]
+	placementType=2
+	description="A palisade will stop most monsters from gaining free access to your camp"
 }
 
 construction_type "Stone quarry" {
@@ -519,7 +522,7 @@ construction_type "Alchemist" {
 	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
-	description="The alchemist creates potions, tinctures and poisons."
+	description="The alchemist creates tonics, tinctures and poisons."
 }
 
 construction_type "Brick road" {
