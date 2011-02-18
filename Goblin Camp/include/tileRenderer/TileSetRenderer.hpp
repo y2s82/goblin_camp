@@ -60,7 +60,6 @@ private:
 	
 	void DrawMarkers(Map * map, int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawItems(int startTileX, int startTileY, int sizeX, int sizeY) const;
-	void DrawNatureObjects(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawNPCs(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawSpells(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawFires(int startTile, int startTileY, int sizeX, int sizeY) const;

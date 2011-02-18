@@ -33,7 +33,6 @@ namespace {
 		val = (val >> 4) | val;
 		val = (val >> 8) | val;
 		val = (val >> 16) | val;
-		val = (val >> 32) | val;
 		val++;
 		return val;
 	}
@@ -168,6 +167,16 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 					DrawFilth(map, tileX, tileY, &dstRect);
 				}
 
+				int natNum = map->GetNatureObject(tileX, tileY);
+				if (natNum >= 0) {
+					boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
+					if (natureObj->Marked())
+					{
+						tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
+					}
+					tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+				}
+
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
 					DrawTerritoryOverlay(map, tileX, tileY, &dstRect);
 				}
@@ -181,7 +190,6 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 	DrawMarkers(map, startTileX, startTileY, tilesX, tilesY);
 
-	DrawNatureObjects(startTileX, startTileY, tilesX, tilesY);
 	DrawItems(startTileX, startTileY, tilesX, tilesY);
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
 	DrawFires(startTileX, startTileY, tilesX, tilesY);
@@ -249,22 +257,6 @@ void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) co
 				SDL_Rect dstRect(CalcDest(itemPos.X(), itemPos.Y()));
 				tileSet->DrawItem(itemi->second, mapSurface.get(), &dstRect);
 			}
-		}
-	}
-}
-
-void TileSetRenderer::DrawNatureObjects(int startX, int startY, int sizeX, int sizeY) const {
-	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator planti = Game::Inst()->natureList.begin(); planti != Game::Inst()->natureList.end(); ++planti) {
-		Coordinate plantPos = planti->second->Position();
-		if (plantPos.X() >= startX && plantPos.X() < startX + sizeX
-				&& plantPos.Y() >= startY && plantPos.Y() < startY + sizeY)
-		{
-			SDL_Rect dstRect(CalcDest(plantPos.X(), plantPos.Y()));
-			if (planti->second->Marked())
-			{
-				tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
-			}
-			tileSet->DrawNatureObject(planti->second, mapSurface.get(), &dstRect);
 		}
 	}
 }
