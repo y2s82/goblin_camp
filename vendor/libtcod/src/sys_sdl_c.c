@@ -147,7 +147,6 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
 	TCOD_ctx.sdl_cbk=renderer;
 	if (renderer && !renderTarget) {
 		int w, h;
-		Uint8 rmask, gmask, bmask, amask;
 		SDL_Surface * temp;
 		// Width and height to next power of two
 		w = screen->w;
@@ -157,7 +156,6 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
 		w = (w >> 4) | w;
 		w = (w >> 8) | w;
 		w = (w >> 16) | w;
-		w = (w >> 32) | w;
 		w++;
 		h  = screen->h;
 		h--;
@@ -166,7 +164,6 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
 		h = (h >> 4) | h;
 		h = (h >> 8) | h;
 		h = (h >> 16) | h;
-		h = (h >> 32) | h;
 		h++;
 
 		temp = SDL_CreateRGBSurface(0, w, h, 32, screen->format->Rmask, screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
