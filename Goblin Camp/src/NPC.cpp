@@ -353,7 +353,8 @@ void NPC::Update() {
 	if (effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 
 	if (needsNutrition) {
-		++thirst; ++hunger;
+		thirst += 2; //These are +2 now that UPDATES_PER_SECOND was lowered from 50 to 25 
+		hunger += 2; //This way we don't need to change the original nutrition values
 
 		if (thirst >= THIRST_THRESHOLD) AddEffect(THIRST);
 		else RemoveEffect(THIRST);
@@ -1290,7 +1291,7 @@ CONTINUEEAT:
 				run = false;
 				drunkJob->tasks.push_back(Task(MOVENEAR, Position()));
 				jobs.push_back(drunkJob);
-				if (Random::Generate(50) == 0) GoBerserk();
+				if (Random::Generate(75) == 0) GoBerserk();
 			} else	if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
 				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {

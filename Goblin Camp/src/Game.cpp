@@ -582,36 +582,38 @@ boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
 
 int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction, 
 	std::vector<boost::weak_ptr<Item> > comps, boost::shared_ptr<Container> container) {
+		if (type >= 0 && type < Item::Presets.size()) {
+			boost::shared_ptr<Item> newItem;
+			if (Item::Presets[type].organic) {
+				boost::shared_ptr<OrganicItem> orgItem(new OrganicItem(pos, type));
+				newItem = boost::static_pointer_cast<Item>(orgItem);
+				orgItem->Nutrition(Item::Presets[type].nutrition);
+				orgItem->Growth(Item::Presets[type].growth);
+				orgItem->SetFaction(ownerFaction);
+			} else if (Item::Presets[type].container > 0) {
+				newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, ownerFaction, comps)));
+			} else {
+				newItem.reset(new Item(pos, type, ownerFaction, comps));
+			}
 
-		boost::shared_ptr<Item> newItem;
-		if (Item::Presets[type].organic) {
-			boost::shared_ptr<OrganicItem> orgItem(new OrganicItem(pos, type));
-			newItem = boost::static_pointer_cast<Item>(orgItem);
-			orgItem->Nutrition(Item::Presets[type].nutrition);
-			orgItem->Growth(Item::Presets[type].growth);
-			orgItem->SetFaction(ownerFaction);
-		} else if (Item::Presets[type].container > 0) {
-			newItem.reset(static_cast<Item*>(new Container(pos, type, Item::Presets[type].container, ownerFaction, comps)));
-		} else {
-			newItem.reset(new Item(pos, type, ownerFaction, comps));
-		}
+			if (!container) {
+				freeItems.insert(newItem);
+				Map::Inst()->ItemList(newItem->X(), newItem->Y())->insert(newItem->Uid());
+			} else {
+				container->AddItem(newItem);
+			}
+			itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
+			if (store) StockpileItem(newItem, false, true);
 
-		if (!container) {
-			freeItems.insert(newItem);
-			Map::Inst()->ItemList(newItem->X(), newItem->Y())->insert(newItem->Uid());
-		} else {
-			container->AddItem(newItem);
-		}
-		itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
-		if (store) StockpileItem(newItem, false, true);
-
-		Script::Event::ItemCreated(newItem, pos.X(), pos.Y());
+			Script::Event::ItemCreated(newItem, pos.X(), pos.Y());
 
 #ifdef DEBUG
-		std::cout<<newItem->name<<"("<<newItem->Uid()<<") created\n";
+			std::cout<<newItem->name<<"("<<newItem->Uid()<<") created\n";
 #endif
 
-		return newItem->Uid();
+			return newItem->Uid();
+		}
+		return -1;
 }
 
 void Game::RemoveItem(boost::weak_ptr<Item> witem) {
