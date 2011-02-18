@@ -63,6 +63,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include "SpawningPool.hpp"
 #include "Faction.hpp"
 #include "Trap.hpp"
+#include "Weather.hpp"
 
 // IMPORTANT
 // Implementing class versioning properly is an effort towards backward compatibility for saves,
@@ -1061,7 +1062,7 @@ void StockManager::load(Archive & ar, const unsigned int version) {
 //
 // class Map
 //
-BOOST_CLASS_VERSION(Map, 0)
+BOOST_CLASS_VERSION(Map, 1)
 
 template<class Archive>
 void Map::save(Archive & ar, const unsigned int version) const {
@@ -1074,7 +1075,7 @@ void Map::save(Archive & ar, const unsigned int version) const {
 	ar & height;
 	ar & mapMarkers;
 	ar & markerids;
-	ar & windDirection;
+	ar & weather;
 }
 
 template<class Archive>
@@ -1088,7 +1089,13 @@ void Map::load(Archive & ar, const unsigned int version) {
 	ar & height;
 	ar & mapMarkers;
 	ar & markerids;
-	ar & windDirection;
+	if (version == 0) {
+		Direction unused;
+		ar & unused;
+	}
+	if (version >= 1) {
+		ar & weather;
+	}
 }
 
 //

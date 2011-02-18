@@ -26,10 +26,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Door.hpp"
 #include "MapMarker.hpp"
 #include "Faction.hpp"
+#include "Weather.hpp"
 
 Map::Map() :
-overlayFlags(0), markerids(0),
-windDirection(NORTH) {
+overlayFlags(0), markerids(0) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
@@ -40,6 +40,7 @@ windDirection(NORTH) {
 	height = tileMap[0].size();
 	heightMap = new TCODHeightMap(500,500);
 	waterlevel = -0.8f;
+	weather = boost::shared_ptr<Weather>(new Weather(this));
 };
 
 Map::~Map() {
@@ -247,6 +248,7 @@ void Map::Reset(int x, int y) {
 	overlayFlags = 0;
 	mapMarkers.clear();
 	markerids = 0;
+	weather.reset(new Weather(this));
 }
 
 void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
@@ -479,42 +481,10 @@ Map::MarkerIterator Map::MarkerEnd()
 	return mapMarkers.end();
 }
 
-Direction Map::GetWindDirection() { return windDirection; }
-
-void Map::RandomizeWind() {
-	windDirection = (Direction)Random::Generate(7);
-}
-
-void Map::ShiftWind() {
-	if (Random::Generate(2) == 0) {
-		windDirection = (Direction)(windDirection + Random::Generate(-1, 1));
-		if (windDirection < 0) windDirection = NORTHWEST;
-		if (windDirection > NORTHWEST) windDirection = NORTH;
-	}
-}
-
-std::string Map::GetWindAbbreviation() {
-	switch (windDirection) {
-	case NORTH:
-		return "N";
-	case NORTHEAST:
-		return "NE";
-	case EAST:
-		return "E";
-	case SOUTHEAST:
-		return "SE";
-	case SOUTH:
-		return "S";
-	case SOUTHWEST:
-		return "SW";
-	case WEST:
-		return "W";
-	case NORTHWEST:
-		return "NW";
-	default:
-		return "?";
-	}
-}
+Direction Map::GetWindDirection() { return weather->GetWindDirection(); }
+void Map::RandomizeWind() { weather->RandomizeWind(); }
+void Map::ShiftWind() { weather->ShiftWind(); }
+std::string Map::GetWindAbbreviation() { return weather->GetWindAbbreviation(); }
 
 void Map::CalculateFlow(int px[4], int py[4]) {
 
