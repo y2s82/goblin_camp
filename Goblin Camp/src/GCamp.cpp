@@ -151,7 +151,7 @@ void MainLoop() {
 
 	bool update = false;
 	int elapsedMilli;
-	int targetMilli = 1000 / (UPDATES_PER_SECOND*2);
+	int targetMilli = 1000 / (UPDATES_PER_SECOND);
 	int startMilli = TCODSystem::getElapsedMilli();
 	while (game->Running()) {
 
@@ -161,16 +161,13 @@ void MainLoop() {
 		}
 
 		UI::Inst()->Update();
-		if (update) {
-			if (!game->Paused()) {
-				game->Update();
-				Announce::Inst()->Update();
-			}
-
-			game->Draw();
-			game->FlipBuffer();
+		if (!game->Paused()) {
+			game->Update();
+			Announce::Inst()->Update();
 		}
-		update = !update;
+
+		game->Draw();
+		game->FlipBuffer();
 
 		elapsedMilli = TCODSystem::getElapsedMilli() - startMilli;
 		startMilli = TCODSystem::getElapsedMilli();
