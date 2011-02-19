@@ -21,6 +21,9 @@ tileset_data "Default Tileset" {
 					  140,141,142,143]
 		mud_terrain=[5]
 
+		details=[192,193,194,195,208,209,210,211]
+		detailRange=128
+
 		// Terrain modifiers
 		water=[84,85,86,87,
 		       100,101,102,103,
