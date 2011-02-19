@@ -94,19 +94,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // SDL
 #	include <SDL.h>
 #	include <SDL_image.h>
-#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
-	#ifndef DBG_NEW
-      #define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-      #define new DBG_NEW
-	#endif
-#endif
-
 #endif
 
 // Use with care.
 #if defined(_MSC_VER) && defined(DEBUG)
 #	define GC_DEBUG_INDUCE_CRASH() *((short*)0xDEADC0DE) = 0xDEAD
-#	define GC_DEBUG_BREAKPOINT()   __asm int 3
+#	define GC_DEBUG_BREAKPOINT()   __asm { int 3 }
 #else
 #	define GC_DEBUG_INDUCE_CRASH()
 #	define GC_DEBUG_BREAKPOINT()
@@ -129,4 +122,25 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	pragma warning(1: 4996 4995) // Ensure that deprecation warnings will be shown
 #	include <cstdlib>
 #	pragma deprecated(rand, srand)
+#endif
+
+// Intrinsics.
+#ifdef _MSC_VER
+#	include <intrin.h>
+#endif
+
+// Assert.
+#if defined(_MSC_VER) && defined(DEBUG)
+	bool GCAssert(const char*, const char*, const char*, int);
+#	define GC_ASSERT(Exp) do { if (!(Exp) && GCAssert(#Exp, __FUNCTION__, __FILE__, __LINE__)) GC_DEBUG_BREAKPOINT(); } while (0)
+#else
+#	define GC_ASSERT BOOST_ASSERT
+#endif
+
+// Memory debugging.
+#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
+#	ifndef DBG_NEW
+#		define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#		define new DBG_NEW
+#	endif
 #endif
