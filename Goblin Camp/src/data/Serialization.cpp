@@ -43,7 +43,13 @@ and I couldn't come up with a coherent answer just by googling. */
 #include <fstream>
 #include <boost/cstdint.hpp>
 
+#include <boost/iostreams/filtering_stream.hpp>
+#include <boost/iostreams/filter/zlib.hpp>
+
+namespace io = boost::iostreams;
+
 #include "Logger.hpp"
+#include "data/Config.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
 #include "Coordinate.hpp"
@@ -100,7 +106,13 @@ and I couldn't come up with a coherent answer just by googling. */
 //        and should never be used in production branches.
 //
 //  These fields are specific to current file format version:
-//    - 0x00 (uint64_t, reserved, little endian)
+//    - compression flag (uint8_t, little endian)
+//        0x00 = uncompressed save (backwards compatible)
+//        If other than 0x00, then specifies the algorithm.
+//           0x01 = zlib deflate
+//        Other values are invalid and MUST be rejected.
+//    - 0x00 (uint8_t,  reserved, little endian)
+//    - 0x00 (uint32_t, reserved, little endian)
 //    - 0x00 (uint64_t, reserved, little endian)
 //    - 0x00 (uint64_t, reserved, little endian)
 //    - 0x00 (uint64_t, reserved, little endian)
@@ -174,6 +186,28 @@ namespace {
 	void WriteUInt<boost::uint8_t>(std::ofstream& stream, boost::uint8_t value) {
 		stream.put((char)value);
 	}
+	
+	template <typename T>
+	void WritePayload(T& ofs) {
+		boost::archive::binary_oarchive oarch(ofs);
+		oarch << Entity::uids;
+		oarch << *Game::Inst();
+		oarch << *JobManager::Inst();
+		oarch << *Camp::Inst();
+		oarch << *StockManager::Inst();
+		oarch << *Map::Inst();
+	}
+	
+	template <typename T>
+	void ReadPayload(T& ifs) {
+		boost::archive::binary_iarchive iarch(ifs);
+		iarch >> Entity::uids;
+		iarch >> *Game::Inst();
+		iarch >> *JobManager::Inst();
+		iarch >> *Camp::Inst();
+		iarch >> *StockManager::Inst();
+		iarch >> *Map::Inst();
+	}
 }
 
 bool Game::SaveGame(const std::string& filename) {
@@ -183,19 +217,28 @@ bool Game::SaveGame(const std::string& filename) {
 		// Write the file header
 		WriteUInt<boost::uint32_t>(ofs, saveMagicConst);
 		WriteUInt<boost::uint8_t> (ofs, fileFormatConst);
-		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
+		
+		bool compress = Config::GetCVar<bool>("compressSaves");
+		// compression flag
+		WriteUInt<boost::uint8_t>(ofs, (compress ? 0x01 : 0x00));
+		
+		// reserved
+		WriteUInt<boost::uint8_t> (ofs, 0x00);
+		WriteUInt<boost::uint32_t>(ofs, 0x00UL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
 		
 		// Write the payload
-		boost::archive::binary_oarchive oarch(ofs);
-		oarch << Entity::uids;
-		oarch << *instance;
-		oarch << *JobManager::Inst();
-		oarch << *Camp::Inst();
-		oarch << *StockManager::Inst();
-		oarch << *Map::Inst();
+		if (compress) {
+			io::filtering_ostream cfs;
+			io::zlib_params params(6); // level
+			cfs.push(io::zlib_compressor(params));
+			cfs.push(ofs);
+			WritePayload(cfs);
+		} else {
+			WritePayload(ofs);
+		}
 		
 		return true;
 	} catch (const std::exception& e) {
@@ -217,23 +260,42 @@ bool Game::LoadGame(const std::string& filename) {
 			throw std::runtime_error("Invalid file format value.");
 		}
 		
+		// compression
+		boost::uint8_t compressed = ReadUInt<boost::uint8_t>(ifs);
+		
+		if (compressed > 1) {
+			throw std::runtime_error("Invalid compression algorithm.");
+		}
+		
 		// reserved values
-		ReadUInt<boost::uint64_t>(ifs);
-		ReadUInt<boost::uint64_t>(ifs);
-		ReadUInt<boost::uint64_t>(ifs);
-		ReadUInt<boost::uint64_t>(ifs);
+		if (ReadUInt<boost::uint8_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #1 not 0x00.");
+		}
+		if (ReadUInt<boost::uint32_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #2 not 0x00000000.");
+		}
+		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #3 not 0x0000000000000000.");
+		}
+		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #4 not 0x0000000000000000.");
+		}
+		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #5 not 0x0000000000000000.");
+		}
 		
 		Game::Inst()->Reset();
 		Game::Inst()->LoadingScreen();
 		
 		// Read the payload
-		boost::archive::binary_iarchive iarch(ifs);
-		iarch >> Entity::uids;
-		iarch >> *instance;
-		iarch >> *JobManager::Inst();
-		iarch >> *Camp::Inst();
-		iarch >> *StockManager::Inst();
-		iarch >> *Map::Inst();
+		if (compressed) {
+			io::filtering_istream cfs;
+			cfs.push(io::zlib_decompressor());
+			cfs.push(ifs);
+			ReadPayload(cfs);
+		} else {
+			ReadPayload(ifs);
+		}
 		
 		Game::Inst()->TranslateContainerListeners();
 		
