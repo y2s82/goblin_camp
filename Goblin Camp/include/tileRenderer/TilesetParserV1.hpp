@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/NPCSpriteSet.hpp"
-#include "tileRenderer/ItemSpriteSet.hpp"
+#include "tileRenderer/ItemSprite.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
@@ -93,7 +93,7 @@ private:
 	TileSetParserV1::SpriteSet currentSpriteSet;
 	NPCSpriteSet npcSpriteSet;
 	NatureObjectSpriteSet natureObjectSpriteSet;
-	ItemSpriteSet itemSpriteSet;
+	ItemSprite itemSprite;
 	
 	static const char * uninitialisedTilesetError;
 	

@@ -341,6 +341,11 @@ tileset_data "Default Tileset" {
 			sprite=41
 		}
 
+		item_sprite_data "Bucket" {
+			sprite=74
+			drawWhenWielded
+		}
+
 		item_sprite_data "Sack" {
 			sprite=20
 		}
