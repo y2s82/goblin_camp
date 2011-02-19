@@ -132,7 +132,7 @@ TileSetParserV1::TileSetParserV1() :
 	tileSetPath(),
 	npcSpriteSet(),
 	natureObjectSpriteSet(),
-	itemSpriteSet(),
+	itemSprite(),
 	tempConstruction(),
 	tempSpell(),
 	fireSprites(),
@@ -211,7 +211,7 @@ bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 		natureObjectSpriteSet = NatureObjectSpriteSet();
 		currentSpriteSet = SS_NATURE;
 	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
-		itemSpriteSet = ItemSpriteSet();
+		itemSprite = ItemSprite();
 		currentSpriteSet = SS_ITEM;
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
 		currentSpriteSet = SS_CONSTRUCTION;
@@ -365,7 +365,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			break;
 		case SS_ITEM:
 			if (boost::iequals(name, "sprite")) {
-				itemSpriteSet.tile = Sprite(currentTexture, value.i);
+				itemSprite.tile = Sprite(currentTexture, value.i);
 			}
 			break;
 		case SS_NATURE:
@@ -457,9 +457,9 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
 		if (name == 0) {
-			tileSet->SetDefaultItemSpriteSet(itemSpriteSet);
+			tileSet->SetDefaultItemSprite(itemSprite);
 		} else {
-			tileSet->AddItemSpriteSet(std::string(name), itemSpriteSet);
+			tileSet->AddItemSprite(std::string(name), itemSprite);
 		}
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {

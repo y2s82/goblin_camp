@@ -46,9 +46,9 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	defaultNatureObjectSpriteSet(),
 	natureObjectSpriteSets(),
 	natureObjectSpriteLookup(),
-	itemSpriteSets(),
+	itemSprites(),
 	itemSpriteLookup(),
-	defaultItemSpriteSet(),
+	defaultItemSprite(),
 	constructionSpriteSets(),
 	constructionSpriteLookup(),
 	defaultConstructionSpriteSet(),
@@ -153,7 +153,14 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 				DrawItem(carriedItem, dst, dstRect);
 			}
 		}
-		// TODO: Possibly draw wielded item based on item flag
+		else if (boost::shared_ptr<Item> wielded = npc->Wielding().lock())
+		{
+			int itemHint = wielded->GetGraphicsHint();
+			if (itemHint != -1 && itemSprites[itemHint].renderWhenWielded)
+			{
+				DrawItem(wielded, dst, dstRect);
+			}
+		}
 	}
 
 	int numActiveEffects = 0;
@@ -194,10 +201,10 @@ void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surfac
 
 void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = item->GetGraphicsHint();
-	if (hint == -1 || hint >= itemSpriteSets.size()) {
-		defaultItemSpriteSet.tile.Draw(dst, dstRect);
+	if (hint == -1 || hint >= itemSprites.size()) {
+		defaultItemSprite.tile.Draw(dst, dstRect);
 	} else {
-		itemSpriteSets[hint].tile.Draw(dst, dstRect);
+		itemSprites[hint].tile.Draw(dst, dstRect);
 	}
 }
 
@@ -270,10 +277,10 @@ void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& wor
 void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	if (type == Cursor_Item_Mode)
 	{
-		if (cursorHint == -1 || cursorHint >= itemSpriteSets.size()) {
-			defaultItemSpriteSet.tile.Draw(dst, dstRect);
+		if (cursorHint == -1 || cursorHint >= itemSprites.size()) {
+			defaultItemSprite.tile.Draw(dst, dstRect);
 		} else {
-			itemSpriteSets[cursorHint].tile.Draw(dst, dstRect);
+			itemSprites[cursorHint].tile.Draw(dst, dstRect);
 		}
 	} else if (type == Cursor_NPC_Mode) {
 		if (cursorHint == -1 || cursorHint >= npcSpriteSets.size()) {
@@ -512,14 +519,14 @@ void TileSet::SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set) 
 	defaultNatureObjectSpriteSet = set;
 }
 
-void TileSet::AddItemSpriteSet(std::string name, const ItemSpriteSet& set) {
-	int index = itemSpriteSets.size();
-	itemSpriteSets.push_back(set);
+void TileSet::AddItemSprite(std::string name, const ItemSprite& set) {
+	int index = itemSprites.size();
+	itemSprites.push_back(set);
 	itemSpriteLookup[name] = index;
 }
 
-void TileSet::SetDefaultItemSpriteSet(const ItemSpriteSet& set) {
-	defaultItemSpriteSet = set;
+void TileSet::SetDefaultItemSprite(const ItemSprite& set) {
+	defaultItemSprite = set;
 }
 
 void TileSet::AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set) {

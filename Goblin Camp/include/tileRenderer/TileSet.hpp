@@ -32,7 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/StatusEffectSprite.hpp"
 #include "tileRenderer/NPCSpriteSet.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
-#include "tileRenderer/ItemSpriteSet.hpp"
+#include "tileRenderer/ItemSprite.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
@@ -98,13 +98,13 @@ public:
 		
 	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
-	void AddItemSpriteSet(std::string name, const ItemSpriteSet& set);
+	void AddItemSprite(std::string name, const ItemSprite& set);
 	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
 	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
 	
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
-	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
+	void SetDefaultItemSprite(const ItemSprite& set);
 	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
 	
@@ -146,8 +146,8 @@ private:
 	std::vector<NatureObjectSpriteSet> natureObjectSpriteSets;
 	LookupMap natureObjectSpriteLookup;
 
-	ItemSpriteSet defaultItemSpriteSet;
-	std::vector<ItemSpriteSet> itemSpriteSets;
+	ItemSprite defaultItemSprite;
+	std::vector<ItemSprite> itemSprites;
 	LookupMap itemSpriteLookup;
 
 	ConstructionSpriteSet defaultConstructionSpriteSet;

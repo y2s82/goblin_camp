@@ -30,6 +30,7 @@ namespace {
 
 		TCODParserStruct* itemSpriteStruct = parser.newStructure("item_sprite_data");
 		itemSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
+		itemSpriteStruct->addFlag("drawWhenWielded");
 
 		TCODParserStruct* spellSpriteStruct = parser.newStructure("spell_sprite_data");
 		spellSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
@@ -135,7 +136,7 @@ TileSetParserV2::TileSetParserV2() :
 	statusEffectFactory(),
 	npcSpriteSet(),
 	natureObjectSpriteSet(),
-	itemSpriteSet()
+	itemSprite()
 {
 	SetupTilesetParser(parser);
 }
@@ -239,7 +240,7 @@ bool TileSetParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 		natureObjectSpriteSet = NatureObjectSpriteSet();
 		currentSpriteSet = SS_NATURE;
 	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
-		itemSpriteSet = ItemSpriteSet();
+		itemSprite = ItemSprite();
 		currentSpriteSet = SS_ITEM;
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
 		currentSpriteSet = SS_CONSTRUCTION;
@@ -268,6 +269,10 @@ bool TileSetParserV2::parserFlag(TCODParser *parser,const char *name) {
 				statusEffectFactory.SetAlwaysOn(true);
 			}
 			break;
+		case SS_ITEM:
+			if (boost::iequals(name, "drawWhenWielded")) {
+				itemSprite.renderWhenWielded = true;
+			}
 		}
 	}
 	return success;
@@ -371,7 +376,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			break;
 		case SS_ITEM:
 			if (boost::iequals(name, "sprite")) {
-				itemSpriteSet.tile = Sprite(currentTexture, value.i);
+				itemSprite.tile = Sprite(currentTexture, value.i);
 			}
 			break;
 		case SS_NATURE:
@@ -494,9 +499,9 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
 		if (name == 0) {
-			tileSet->SetDefaultItemSpriteSet(itemSpriteSet);
+			tileSet->SetDefaultItemSprite(itemSprite);
 		} else {
-			tileSet->AddItemSpriteSet(std::string(name), itemSpriteSet);
+			tileSet->AddItemSprite(std::string(name), itemSprite);
 		}
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {

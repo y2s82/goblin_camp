@@ -82,7 +82,6 @@ screenWidth(0),
 		marks[i] = Coordinate(-1, -1);
 	}
 
-	Faction::factions.clear();
 	Faction::StringToFactionType("Player");
 }
 
