@@ -44,3 +44,27 @@ public:
 	int GetGraphic();
 	TCODColor GetColor();
 };
+
+BOOST_CLASS_VERSION(FilthNode, 0)
+
+template<class Archive>
+void FilthNode::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}
+
+template<class Archive>
+void FilthNode::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}

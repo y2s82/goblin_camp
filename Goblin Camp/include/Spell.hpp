@@ -73,3 +73,34 @@ public:
 
 	static void LoadPresets(std::string);
 };
+
+BOOST_CLASS_VERSION(Spell, 0)
+
+template<class Archive>
+void Spell::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & graphic;
+	ar & Spell::SpellTypeToString(type);
+	ar & dead;
+	ar & attacks;
+	ar & immaterial;
+}
+
+template<class Archive>
+void Spell::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & graphic;
+	std::string typeName;
+	ar & typeName;
+	type = Spell::StringToSpellType(typeName);
+	if (type == -1) type = 0;
+	ar & dead;
+	ar & attacks;
+	ar & immaterial;
+}

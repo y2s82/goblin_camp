@@ -48,3 +48,37 @@ public:
 	int Graphic() const;
 	TCODColor Color() const;
 };
+
+BOOST_CLASS_VERSION(MapMarker, 0)
+
+template<class Archive>
+void MapMarker::save(Archive & ar, const unsigned int version) const {
+	ar & type;
+	ar & origColor.r;
+	ar & origColor.g;
+	ar & origColor.b;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & duration;
+	ar & graphic;
+	ar & x;
+	ar & y;
+	ar & counter;
+}
+
+template<class Archive>
+void MapMarker::load(Archive & ar, const unsigned int version) {
+	ar & type;
+	ar & origColor.r;
+	ar & origColor.g;
+	ar & origColor.b;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & duration;
+	ar & graphic;
+	ar & x;
+	ar & y;
+	ar & counter;
+}

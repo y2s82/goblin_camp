@@ -50,3 +50,25 @@ public:
 	void ClearWaitingNpcs();
 	void AssignJobs();
 };
+
+BOOST_CLASS_VERSION(JobManager, 0)
+
+template<class Archive>
+void JobManager::save(Archive & ar, const unsigned int version) const {
+	ar & availableList;
+	ar & waitingList;
+	ar & menialNPCsWaiting;
+	ar & expertNPCsWaiting;
+	ar & toolJobs;
+	ar & failList;
+}
+
+template<class Archive>
+void JobManager::load(Archive & ar, const unsigned int version) {
+	ar & availableList;
+	ar & waitingList;
+	ar & menialNPCsWaiting;
+	ar & expertNPCsWaiting;
+	ar & toolJobs;
+	ar & failList;
+}
