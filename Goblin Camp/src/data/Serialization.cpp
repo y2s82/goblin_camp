@@ -223,7 +223,8 @@ bool Game::SaveGame(const std::string& filename) {
 		WriteUInt<boost::uint8_t>(ofs, (compress ? 0x01 : 0x00));
 		
 		// reserved
-		WriteUInt<boost::uint8_t> (ofs, 0x00);
+		WriteUInt<boost::uint8_t> (ofs, 0x00U);
+		WriteUInt<boost::uint16_t>(ofs, 0x00U);
 		WriteUInt<boost::uint32_t>(ofs, 0x00UL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
 		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
@@ -271,17 +272,20 @@ bool Game::LoadGame(const std::string& filename) {
 		if (ReadUInt<boost::uint8_t>(ifs) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #1 not 0x00.");
 		}
-		if (ReadUInt<boost::uint32_t>(ifs) != 0) {
-			throw std::runtime_error("Forward compatibility: reserved value #2 not 0x00000000.");
+		if (ReadUInt<boost::uint16_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #2 not 0x0000.");
 		}
-		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
-			throw std::runtime_error("Forward compatibility: reserved value #3 not 0x0000000000000000.");
+		if (ReadUInt<boost::uint32_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #3 not 0x00000000.");
 		}
 		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #4 not 0x0000000000000000.");
 		}
 		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #5 not 0x0000000000000000.");
+		}
+		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+			throw std::runtime_error("Forward compatibility: reserved value #6 not 0x0000000000000000.");
 		}
 		
 		Game::Inst()->Reset();
