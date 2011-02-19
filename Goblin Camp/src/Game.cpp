@@ -792,8 +792,6 @@ void Game::Update() {
 	if (time == MONTH_LENGTH) {
 		if (safeMonths > 0) --safeMonths;
 
-		Map::Inst()->ShiftWind();
-
 		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = staticConstructionList.begin();
 			cons != staticConstructionList.end(); ++cons) { cons->second->SpawnRepairJob(); }
 		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = dynamicConstructionList.begin();
@@ -935,11 +933,9 @@ void Game::Update() {
 
 	events->Update(safeMonths > 0);
 
-	if (time % (UPDATES_PER_SECOND * 1) == 0) Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
+	Map::Inst()->Update();
 
 	if (time % (UPDATES_PER_SECOND * 1) == 0) Camp::Inst()->Update();
-
-	Map::Inst()->UpdateMarkers();
 
 	for (std::list<std::pair<int, boost::function<void()> > >::iterator delit = delays.begin(); delit != delays.end();) {
 		if (--delit->first <= 0) {

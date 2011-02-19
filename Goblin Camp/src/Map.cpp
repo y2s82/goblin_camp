@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "Faction.hpp"
 #include "Weather.hpp"
+#include "GCamp.hpp"
 
 Map::Map() :
 overlayFlags(0), markerids(0) {
@@ -697,4 +698,10 @@ int Map::GetTerrainMoveCost(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height)
 		return tileMap[x][y].GetTerrainMoveCost();
 	return 0;
+}
+
+void Map::Update() {
+	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0) Naturify(Random::Generate(Width() - 1), Random::Generate(Height() - 1));
+	UpdateMarkers();
+	weather->Update();
 }

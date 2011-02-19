@@ -131,6 +131,7 @@ public:
 	bool IsDangerous(int x, int y, int faction) const;
 	int GetTerrainMoveCost(int x, int y) const;
 	boost::shared_ptr<Weather> weather;
+	void Update();
 };
 
 BOOST_CLASS_VERSION(Map, 1)
