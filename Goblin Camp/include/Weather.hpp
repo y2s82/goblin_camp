@@ -42,6 +42,7 @@ public:
 	void RandomizeWind();
 	void ShiftWind();
 	std::string GetWindAbbreviation();
+	void Update();
 };
 
 BOOST_CLASS_VERSION(Weather, 0)

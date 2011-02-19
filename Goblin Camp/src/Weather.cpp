@@ -17,6 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Weather.hpp"
 #include "Random.hpp"
+#include "Game.hpp"
+#include "GCamp.hpp"
 
 Weather::Weather(Map* vmap) : map(vmap), windDirection(NORTH) {
 }
@@ -56,4 +58,8 @@ std::string Weather::GetWindAbbreviation() {
 	default:
 		return "?";
 	}
+}
+
+void Weather::Update() {
+	if (Random::Generate(MONTH_LENGTH) == 0) ShiftWind();
 }
