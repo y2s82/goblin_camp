@@ -103,6 +103,7 @@ Construction::~Construction() {
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
 			Map::Inst()->SetBlocksLight(ix,iy,false);
+			Map::Inst()->SetBlocksWater(ix,iy,false);
 		}
 	}
 	
