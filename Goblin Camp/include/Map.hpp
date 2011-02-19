@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 
 class MapMarker;
+class Weather;
 
 #define TERRITORY_OVERLAY (1 << 0)
 #define TERRAIN_OVERLAY (2 << 0)
@@ -44,7 +45,6 @@ private:
 	int overlayFlags;
 	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
-	Direction windDirection;
 
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
@@ -130,4 +130,41 @@ public:
 
 	bool IsDangerous(int x, int y, int faction) const;
 	int GetTerrainMoveCost(int x, int y) const;
+	boost::shared_ptr<Weather> weather;
 };
+
+BOOST_CLASS_VERSION(Map, 1)
+
+template<class Archive>
+void Map::save(Archive & ar, const unsigned int version) const {
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
+		}
+	}
+	ar & width;
+	ar & height;
+	ar & mapMarkers;
+	ar & markerids;
+	ar & weather;
+}
+
+template<class Archive>
+void Map::load(Archive & ar, const unsigned int version) {
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
+		}
+	}
+	ar & width;
+	ar & height;
+	ar & mapMarkers;
+	ar & markerids;
+	if (version == 0) {
+		Direction unused;
+		ar & unused;
+	}
+	if (version >= 1) {
+		ar & weather;
+	}
+}

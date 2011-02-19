@@ -254,3 +254,81 @@ public:
 
 	int GetAge();
 };
+
+BOOST_CLASS_VERSION(Game, 0)
+
+template<class Archive>
+void Game::save(Archive & ar, const unsigned int version) const  {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
+	ar.template register_type<Trap>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
+	ar & marks;
+	ar & camX;
+	ar & camY;
+	ar & Faction::factions;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
+	ar & age;
+}
+
+template<class Archive>
+void Game::load(Archive & ar, const unsigned int version) {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
+	ar.template register_type<Trap>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
+	ar & marks;
+	ar & camX;
+	ar & camY;
+	ar & Faction::factions;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
+	ar & age;
+}

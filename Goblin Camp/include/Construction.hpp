@@ -171,3 +171,70 @@ public:
 	static ConstructionType StringToConstructionType(std::string);
 	static std::string ConstructionTypeToString(ConstructionType);
 };
+
+BOOST_CLASS_VERSION(Construction, 0)
+
+template<class Archive>
+void Construction::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & condition;
+	ar & maxCondition;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	std::string constructionType(Construction::ConstructionTypeToString(type));
+	ar & constructionType;
+	ar & walkable;
+	ar & materials;
+	ar & producer;
+	ar & products;
+	ar & jobList;
+	ar & progress;
+	ar & container;
+	ar & materialsUsed;
+	ar & stockpile;
+	ar & farmplot;
+	ar & dismantle;
+	ar & time;
+	ar & AllowedAmount;
+	ar & built;
+	ar & flammable;
+	ar & repairJob;
+}
+
+template<class Archive>
+void Construction::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & condition;
+	ar & maxCondition;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	bool failedToFindType = false;
+	std::string typeName;
+	ar & typeName;
+	type = Construction::StringToConstructionType(typeName);
+	if (type == -1) {
+		type = Construction::StringToConstructionType("Saw pit");
+		failedToFindType = true;
+	}
+	ar & walkable;
+	ar & materials;
+	ar & producer;
+	ar & products;
+	ar & jobList;
+	ar & progress;
+	ar & container;
+	ar & materialsUsed;
+	ar & stockpile;
+	ar & farmplot;
+	ar & dismantle;
+	ar & time;
+	ar & AllowedAmount;
+	ar & built;
+	ar & flammable;
+	if (failedToFindType) flammable = true; //So you can burn these constructions
+	ar & repairJob;
+}

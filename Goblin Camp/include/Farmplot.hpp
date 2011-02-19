@@ -45,3 +45,21 @@ public:
 	std::map<ItemType, bool>* AllowedSeeds();
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };
+
+BOOST_CLASS_VERSION(FarmPlot, 0)
+
+template<class Archive>
+void FarmPlot::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeds;
+	ar & growth;
+}
+
+template<class Archive>
+void FarmPlot::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeds;
+	ar & growth;
+}

@@ -106,6 +106,25 @@ public:
 	int flags;
 };
 
+BOOST_CLASS_VERSION(Task, 0)
+
+template<class Archive>
+void Task::save(Archive & ar, const unsigned int version) const {
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
+}
+template<class Archive>
+void Task::load(Archive & ar, const unsigned int version) {
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
+}
+
 class Job {
 	friend class boost::serialization::access;
 private:
@@ -187,3 +206,79 @@ public:
 
 	void AddMapMarker(MapMarker);
 };
+
+BOOST_CLASS_VERSION(Job, 0)
+
+template<class Archive>
+void Job::save(Archive & ar, const unsigned int version) const {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	ar & reservedSpot.get<0>();
+	ar & reservedSpot.get<1>();
+	ar & reservedSpot.get<2>();
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
+}
+
+template<class Archive>
+void Job::load(Archive & ar, const unsigned int version) {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	boost::weak_ptr<Stockpile> sp;
+	ar & sp;
+	Coordinate location;
+	ar & location;
+	ItemType type;
+	ar & type;
+	reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
+}

@@ -69,3 +69,37 @@ public:
 	void UpdateTreeDesignations(boost::weak_ptr<NatureObject>, bool add);
 	void UpdateBogDesignations(Coordinate, bool add);
 };
+
+BOOST_CLASS_VERSION(StockManager, 0)
+
+template<class Archive>
+void StockManager::save(Archive & ar, const unsigned int version) const {
+	ar & categoryQuantities;
+	ar & typeQuantities;
+	ar & minimums;
+	ar & producables;
+	ar & producers;
+	ar & workshops;
+	ar & fromTrees;
+	ar & fromEarth;
+	ar & designatedTrees;
+	ar & treeFellingJobs;
+	ar & designatedBog;
+	ar & bogIronJobs;
+}
+
+template<class Archive>
+void StockManager::load(Archive & ar, const unsigned int version) {
+	ar & categoryQuantities;
+	ar & typeQuantities;
+	ar & minimums;
+	ar & producables;
+	ar & producers;
+	ar & workshops;
+	ar & fromTrees;
+	ar & fromEarth;
+	ar & designatedTrees;
+	ar & treeFellingJobs;
+	ar & designatedBog;
+	ar & bogIronJobs;
+}

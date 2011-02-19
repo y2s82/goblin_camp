@@ -43,3 +43,27 @@ public:
 	void Depth(int);
 	Coordinate Position();
 };
+
+BOOST_CLASS_VERSION(BloodNode, 0)
+
+template<class Archive>
+void BloodNode::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}
+
+template<class Archive>
+void BloodNode::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}

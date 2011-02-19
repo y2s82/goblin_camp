@@ -82,3 +82,33 @@ public:
 	void Reequip();
 	void SetGeneralOrder(Order);
 };
+
+BOOST_CLASS_VERSION(Squad, 0)
+
+template<class Archive>
+void Squad::save(Archive & ar, const unsigned int version) const {
+	ar & name;
+	ar & memberReq;
+	ar & members;
+	ar & generalOrder;
+	ar & orders;
+	ar & targetCoordinates;
+	ar & targetEntities;
+	ar & priority;
+	ar & weapon;
+	ar & armor;
+}
+
+template<class Archive>
+void Squad::load(Archive & ar, const unsigned int version) {
+	ar & name;
+	ar & memberReq;
+	ar & members;
+	ar & generalOrder;
+	ar & orders;
+	ar & targetCoordinates;
+	ar & targetEntities;
+	ar & priority;
+	ar & weapon;
+	ar & armor;
+}

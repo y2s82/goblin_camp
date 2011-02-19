@@ -76,3 +76,27 @@ public:
 	void Draw(Coordinate, TCODConsole*);
 	int GetReservedSpace();
 };
+
+BOOST_CLASS_VERSION(::Container, 0)
+
+template<class Archive>
+void Container::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & items;
+	ar & capacity;
+	ar & reservedSpace;
+	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
+}
+
+template<class Archive>
+void Container::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & items;
+	ar & capacity;
+	ar & reservedSpace;
+	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
+}

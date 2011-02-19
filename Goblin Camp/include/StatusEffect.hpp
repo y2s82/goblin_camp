@@ -91,3 +91,41 @@ struct StatusEffect {
 	bool visible;
 	bool negative; //Is this a negative effect? ie. one the creature wants to get rid of
 };
+
+BOOST_CLASS_VERSION(StatusEffect, 0)
+
+template<class Archive>
+void StatusEffect::save(Archive & ar, const unsigned int version) const {
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & name;
+	ar & type;
+	ar & cooldown;
+	ar & cooldownDefault;
+	ar & statChanges;
+	ar & resistanceChanges;
+	ar & damage;
+	ar & damageType;
+	ar & visible;
+	ar & negative;
+}
+
+template<class Archive>
+void StatusEffect::load(Archive & ar, const unsigned int version) {
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & name;
+	ar & type;
+	ar & cooldown;
+	ar & cooldownDefault;
+	ar & statChanges;
+	ar & resistanceChanges;
+	ar & damage;
+	ar & damageType;
+	ar & visible;
+	ar & negative;
+}

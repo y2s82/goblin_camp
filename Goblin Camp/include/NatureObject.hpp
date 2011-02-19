@@ -80,3 +80,44 @@ public:
 	bool Tree();
 	bool Harvestable();
 };
+
+BOOST_CLASS_VERSION(NatureObject, 0)
+
+template<class Archive>
+void NatureObject::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & NatureObject::Presets[type].name;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & marked;
+	ar & condition;
+	ar & tree;
+	ar & harvestable;
+}
+
+template<class Archive>
+void NatureObject::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	std::string typeName;
+	ar & typeName;
+	bool failedToFindType = true;
+	type = 0; //Default to whatever is the first wildplant
+	for (int i = 0; i < NatureObject::Presets.size(); ++i) {
+		if (boost::iequals(NatureObject::Presets[i].name, typeName)) {
+			type = i;
+			failedToFindType = false;
+			break;
+		}
+	}
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & marked;
+	ar & condition;
+	ar & tree;
+	ar & harvestable;
+	if (failedToFindType) harvestable = true;
+}
