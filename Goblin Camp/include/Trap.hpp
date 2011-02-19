@@ -42,3 +42,21 @@ public:
 	virtual int Use();
 	virtual void SpawnRepairJob();
 };
+
+BOOST_CLASS_VERSION(Trap, 0)
+
+template<class Archive>
+void Trap::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & ready;
+	ar & reloadJob;
+	ar & readyGraphic;
+}
+
+template<class Archive>
+void Trap::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & ready;
+	ar & reloadJob;
+	ar & readyGraphic;
+}

@@ -59,3 +59,35 @@ public:
 	TCODColor GetColor();
 	bool IsCoastal();
 };
+
+BOOST_CLASS_VERSION(WaterNode, 0)
+
+template<class Archive>
+void WaterNode::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & inertCounter;
+	ar & inert;
+	ar & timeFromRiverBed;
+	ar & filth;
+}
+
+template<class Archive>
+void WaterNode::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & inertCounter;
+	ar & inert;
+	ar & timeFromRiverBed;
+	ar & filth;
+}

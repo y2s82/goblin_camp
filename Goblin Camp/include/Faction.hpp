@@ -61,3 +61,19 @@ public:
 
 	void Reset();
 };
+
+BOOST_CLASS_VERSION(Faction, 0)
+
+template<class Archive>
+void Faction::save(Archive & ar, const unsigned int version) const {
+	ar & members;
+	ar & trapVisible;
+	ar & name;
+}
+
+template<class Archive>
+void Faction::load(Archive & ar, const unsigned int version) {
+	ar & members;
+	ar & trapVisible;
+	ar & name;
+}

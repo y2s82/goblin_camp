@@ -688,7 +688,7 @@ npc_type "imp" {
 	AI="HostileAnimal"
 	stats {
 		speed=20
-		health=150
+		health=100
 		dodge=15
 		size=5
 	}

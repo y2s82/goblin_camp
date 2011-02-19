@@ -46,3 +46,25 @@ public:
 	int GetHeat();
 	void SetHeat(int);
 };
+
+BOOST_CLASS_VERSION(FireNode, 0)
+
+template<class Archive>
+void FireNode::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}
+
+template<class Archive>
+void FireNode::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}

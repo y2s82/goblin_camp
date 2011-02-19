@@ -160,6 +160,68 @@ public:
 	int DecreaseCondition(); //Only decreases condition, does NOT handle item removal or debris creation!
 };
 
+BOOST_CLASS_VERSION(Item, 0)
+
+template<class Archive>
+void Item::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & graphic;
+	ar & Item::ItemTypeToString(type);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	int categoryCount = (int)categories.size();
+	ar & categoryCount;
+	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+		ar & Item::ItemCategoryToString(*cati);
+	}
+	ar & flammable;
+	ar & attemptedStore;
+	ar & decayCounter;
+	ar & attack;
+	ar & resistances;
+	ar & condition;
+	ar & container;
+	ar & internal;
+}
+
+template<class Archive>
+void Item::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & graphic;
+	bool failedToFindType = false;
+	std::string typeName;
+	ar & typeName;
+	type = Item::StringToItemType(typeName);
+	if (type == -1) {
+		type = Item::StringToItemType("debris");
+		failedToFindType = true;
+	}
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	int categoryCount = 0;
+	ar & categoryCount;
+	categories.clear();
+	for (int i = 0; i < categoryCount; ++i) {
+		std::string categoryName;
+		ar & categoryName;
+		int categoryType = Item::StringToItemCategory(categoryName);
+		if (categoryType >= 0 && categoryType < Item::Categories.size()) categories.insert(categoryType);
+	}
+	if (categories.empty()) categories.insert(Item::StringToItemCategory("garbage"));
+	ar & flammable;
+	if (failedToFindType) flammable = true; //Just so you can get rid of it
+	ar & attemptedStore;
+	ar & decayCounter;
+	ar & attack;
+	ar & resistances;
+	ar & condition;
+	ar & container;
+	ar & internal;
+}
+
+
 class OrganicItem : public Item {
 	friend class boost::serialization::access;
 	friend class game;
@@ -181,3 +243,18 @@ public:
 	ItemType Growth();
 	void Growth(ItemType);
 };
+
+BOOST_CLASS_VERSION(OrganicItem, 0)
+
+template<class Archive>
+void OrganicItem::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & nutrition;
+	ar & growth;
+}
+template<class Archive>
+void OrganicItem::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & nutrition;
+	ar & growth;
+}

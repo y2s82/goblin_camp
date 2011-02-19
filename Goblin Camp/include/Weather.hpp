@@ -15,9 +15,16 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Construction.hpp"
+#include "Coordinate.hpp"
 
-class Door : public Construction {
+#include <boost/archive/binary_iarchive.hpp>
+#include <boost/archive/binary_oarchive.hpp>
+#include <boost/serialization/version.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
+class Map;
+
+class Weather {
 	friend class boost::serialization::access;
 private:
 	template<class Archive>
@@ -25,24 +32,28 @@ private:
 	template<class Archive>
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
-	int closedGraphic;
+
+	Map* map;
+	Direction windDirection;
+
 public:
-	Door(ConstructionType = 0, Coordinate = Coordinate(0,0));
-	virtual void Update();
-	bool Open();
-	virtual void AcceptVisitor(ConstructionVisitor& visitor);
+	Weather(Map* map = 0);
+	Direction GetWindDirection();
+	void RandomizeWind();
+	void ShiftWind();
+	std::string GetWindAbbreviation();
 };
 
-BOOST_CLASS_VERSION(Door, 0)
+BOOST_CLASS_VERSION(Weather, 0)
 
 template<class Archive>
-void Door::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object <Construction>(*this);
-	ar & closedGraphic;
+void Weather::save(Archive & ar, const unsigned int version) const {
+	ar & map;
+	ar & windDirection;
 }
 
 template<class Archive>
-void Door::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & closedGraphic;
+void Weather::load(Archive & ar, const unsigned int version) {
+	ar & map;
+	ar & windDirection;
 }

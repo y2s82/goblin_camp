@@ -76,3 +76,33 @@ public:
 	bool IsProjectileMagic();
 	void SetMagicProjectile();
 };
+
+BOOST_CLASS_VERSION(Attack, 0)
+
+template<class Archive>
+void Attack::save(Archive & ar, const unsigned int version) const {
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & projectile;
+	ar & magicProjectile;
+}
+
+template<class Archive>
+void Attack::load(Archive & ar, const unsigned int version) {
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & projectile;
+	ar & magicProjectile;
+}

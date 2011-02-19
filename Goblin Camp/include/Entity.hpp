@@ -86,3 +86,37 @@ public:
 	void AddBulk(int);
 	void RemoveBulk(int);
 };
+
+BOOST_CLASS_VERSION(Entity, 0)
+
+template<class Archive>
+void Entity::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & uid;
+	ar & zone;
+	ar & reserved;
+	ar & name;
+	ar & Faction::FactionTypeToString(faction);
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
+	ar & bulk;
+}
+
+template<class Archive>
+void Entity::load(Archive & ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & uid;
+	ar & zone;
+	ar & reserved;
+	ar & name;
+	std::string factionName;
+	ar & factionName;
+	faction = Faction::StringToFactionType(factionName);
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
+	ar & bulk;
+}
