@@ -32,3 +32,17 @@ public:
 	bool Open();
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };
+
+BOOST_CLASS_VERSION(Door, 0)
+
+template<class Archive>
+void Door::save(Archive & ar, const unsigned int version) const {
+	ar & boost::serialization::base_object <Construction>(*this);
+	ar & closedGraphic;
+}
+
+template<class Archive>
+void Door::load(Archive & ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & closedGraphic;
+}

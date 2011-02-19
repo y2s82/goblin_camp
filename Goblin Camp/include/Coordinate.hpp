@@ -117,3 +117,19 @@ inline int Distance(const int& x0, const int& y0, const int& x1, const int& y1) 
 inline int Distance(const Coordinate& a, const Coordinate& b) {
 	return Distance(a.x, a.y, b.x, b.y);
 }
+
+BOOST_CLASS_VERSION(Coordinate, 0)
+
+template<class Archive>
+void Coordinate::save(Archive & ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+}
+
+template<class Archive>
+void Coordinate::load(Archive & ar, const unsigned int version) {
+	if (version == 0) {
+		ar & x;
+		ar & y;
+	}
+}
