@@ -56,7 +56,10 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	spellSpriteLookup(),
 	spellSpriteSets(),
 	fireTile(),
-	defaultTerrainTile() {
+	defaultTerrainTile(),
+	detailRange(0),
+	detailSprites()
+	{
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -309,6 +312,12 @@ void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_
 	fireTile.Draw(dst, dstRect);
 }
 
+void TileSet::DrawDetail(int detailIndex, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (detailIndex < detailSprites.size()) {
+		detailSprites[detailIndex].Draw(dst, dstRect);
+	}
+}
+
 int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
 	LookupMap::const_iterator set;
 
@@ -547,4 +556,16 @@ void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& set) {
 
 void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& set) {
 	defaultSpellSpriteSet = set;
+}
+
+void TileSet::AddDetailSprite(const Sprite& sprite) {
+	detailSprites.push_back(sprite);
+}
+
+void TileSet::SetDetailRange(int range) {
+	detailRange = range;
+}
+
+int TileSet::GetDetailRange() {
+	return detailRange;
 }

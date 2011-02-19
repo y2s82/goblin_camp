@@ -69,6 +69,7 @@ public:
 	void DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRecT) const;
 	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawDetail(int detailIndex, SDL_Surface *dst, SDL_Rect * dstRect) const;
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
@@ -101,6 +102,10 @@ public:
 	void AddItemSprite(std::string name, const ItemSprite& set);
 	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
 	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
+	
+	void AddDetailSprite(const Sprite& sprite);
+	void SetDetailRange(int range);
+	int GetDetailRange();
 	
 	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
 	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
@@ -137,6 +142,9 @@ private:
 
 	Sprite defaultUnderConstructionSprite;
 	Sprite fireTile;
+
+	int detailRange;
+	std::vector<Sprite> detailSprites;
 
 	NPCSpriteSet defaultNPCSpriteSet;
 	std::vector<NPCSpriteSet> npcSpriteSets;

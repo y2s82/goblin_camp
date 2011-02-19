@@ -61,6 +61,9 @@ namespace {
 		tileTextureStruct->addListProperty("rock_terrain", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("mud_terrain", TCOD_TYPE_INT, false);
 
+		tileTextureStruct->addListProperty("details", TCOD_TYPE_INT, false);
+		tileTextureStruct->addProperty("detailRange", TCOD_TYPE_INT, false);
+
 		// Terrain modifiers
 		tileTextureStruct->addListProperty("water", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("minor_filth", TCOD_TYPE_INT, false);
@@ -299,6 +302,14 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} else if (boost::iequals(name, "mud_terrain")) {
 				tileSet->SetTerrain(TILEMUD, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list)));
 			} 
+
+			else if (boost::iequals(name, "details")) {
+				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
+					tileSet->AddDetailSprite(Sprite(currentTexture, *iter));
+				}
+			} else if (boost::iequals(name, "detailRange")) {
+				tileSet->SetDetailRange(value.i);
+			}
 			
 			// Terrain Modifiers
 			else if (boost::iequals(name, "water")) {
