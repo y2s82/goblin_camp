@@ -46,9 +46,9 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	defaultNatureObjectSpriteSet(),
 	natureObjectSpriteSets(),
 	natureObjectSpriteLookup(),
-	itemSpriteSets(),
+	itemSprites(),
 	itemSpriteLookup(),
-	defaultItemSpriteSet(),
+	defaultItemSprite(),
 	constructionSpriteSets(),
 	constructionSpriteLookup(),
 	defaultConstructionSpriteSet(),
@@ -56,7 +56,10 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	spellSpriteLookup(),
 	spellSpriteSets(),
 	fireTile(),
-	defaultTerrainTile() {
+	defaultTerrainTile(),
+	detailRange(0),
+	detailSprites()
+	{
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = Sprite();
 		}
@@ -65,7 +68,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 			nonplaceableCursors[i] = Sprite();
 		}
 		for (int i = 0; i < defaultStatusEffects.size(); ++i) {
-			defaultStatusEffects[i] = Sprite();
+			defaultStatusEffects[i] = StatusEffectSprite();
 		}
 }
 
@@ -153,27 +156,41 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 				DrawItem(carriedItem, dst, dstRect);
 			}
 		}
-	}
-
-	int numEffects = npc->StatusEffects()->size();
-	if (npc->HasEffect(CARRYING)) numEffects--; // Already handled
-	if (npc->HasEffect(WORKING)) numEffects--;  // Don't draw
-	if (npc->HasEffect(FLYING)) numEffects--;   // Don't draw
-	if (npc->HasEffect(SWIM)) {
-		numEffects--;
-		defaultStatusEffects.at(SWIM).Draw(dst, dstRect);
-	}
-	
-	if (numEffects > 0) {
-		int effect = (TCODSystem::getElapsedMilli() % (250 * numEffects)) / 250;
-		int atEffect = 0;
-		for (std::list<StatusEffect>::iterator effecti(npc->StatusEffects()->begin()); effecti != npc->StatusEffects()->end(); ++effecti) {
-			if (effect == atEffect++) {
-				defaultStatusEffects.at(effecti->type).Draw(dst, dstRect);
-				break;
+		else if (boost::shared_ptr<Item> wielded = npc->Wielding().lock())
+		{
+			int itemHint = wielded->GetGraphicsHint();
+			if (itemHint != -1 && itemSprites[itemHint].renderWhenWielded)
+			{
+				DrawItem(wielded, dst, dstRect);
 			}
 		}
 	}
+
+	int numActiveEffects = 0;
+	for (NPC::StatusEffectIterator iter = npc->StatusEffects()->begin(); iter != npc->StatusEffects()->end(); ++iter) {
+		if (defaultStatusEffects.at(iter->type).IsAlwaysVisible()) {
+			defaultStatusEffects.at(iter->type).Draw(false, dst, dstRect);
+		} else if (defaultStatusEffects.at(iter->type).Exists()) {
+			numActiveEffects++;
+		}
+	}
+		
+	if (numActiveEffects > 0) {
+		int activeEffect = (TCODSystem::getElapsedMilli() / 250) % numActiveEffects;
+		int count = 0;
+		for (NPC::StatusEffectIterator iter = npc->StatusEffects()->begin(); iter != npc->StatusEffects()->end(); ++iter) {
+			const StatusEffectSprite& sprite = defaultStatusEffects.at(iter->type);
+			if (sprite.Exists() && !sprite.IsAlwaysVisible())
+			{
+				if (count == activeEffect)
+				{
+					sprite.Draw(numActiveEffects > 1, dst, dstRect);
+					break;
+				}
+				++count;
+			}
+		}	
+	} 
 }
 
 void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const {
@@ -187,10 +204,10 @@ void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surfac
 
 void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = item->GetGraphicsHint();
-	if (hint == -1 || hint >= itemSpriteSets.size()) {
-		defaultItemSpriteSet.tile.Draw(dst, dstRect);
+	if (hint == -1 || hint >= itemSprites.size()) {
+		defaultItemSprite.tile.Draw(dst, dstRect);
 	} else {
-		itemSpriteSets[hint].tile.Draw(dst, dstRect);
+		itemSprites[hint].tile.Draw(dst, dstRect);
 	}
 }
 
@@ -240,6 +257,17 @@ void TileSet::DrawUnderConstruction(Construction * construction, const Coordinat
 	}
 }
 
+void TileSet::DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	int hint = trap->GetGraphicsHint();
+	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	if (spriteSet.IsConnectionMap()) {
+		ConstructionType type = trap->Type();
+		spriteSet.DrawUnreadyTrap(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
+	} else {
+		spriteSet.DrawUnreadyTrap(worldPos - trap->Position(), dst, dstRect);
+	}
+}
+
 void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
 	if (storage && !storage->empty()) {
@@ -252,10 +280,10 @@ void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& wor
 void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	if (type == Cursor_Item_Mode)
 	{
-		if (cursorHint == -1 || cursorHint >= itemSpriteSets.size()) {
-			defaultItemSpriteSet.tile.Draw(dst, dstRect);
+		if (cursorHint == -1 || cursorHint >= itemSprites.size()) {
+			defaultItemSprite.tile.Draw(dst, dstRect);
 		} else {
-			itemSpriteSets[cursorHint].tile.Draw(dst, dstRect);
+			itemSprites[cursorHint].tile.Draw(dst, dstRect);
 		}
 	} else if (type == Cursor_NPC_Mode) {
 		if (cursorHint == -1 || cursorHint >= npcSpriteSets.size()) {
@@ -282,6 +310,12 @@ void TileSet::DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_R
 
 void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const {
 	fireTile.Draw(dst, dstRect);
+}
+
+void TileSet::DrawDetail(int detailIndex, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (detailIndex < detailSprites.size()) {
+		detailSprites[detailIndex].Draw(dst, dstRect);
+	}
 }
 
 int TileSet::GetGraphicsHintFor(const NPCPreset& npcPreset) const {
@@ -462,7 +496,7 @@ void TileSet::SetCursorSprites(CursorType type, const Sprite& placeableSprite, c
 	}
 }
 
-void TileSet::SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite) {
+void TileSet::SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite) {
 	defaultStatusEffects[statusEffect] = sprite;
 }
 
@@ -494,14 +528,14 @@ void TileSet::SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set) 
 	defaultNatureObjectSpriteSet = set;
 }
 
-void TileSet::AddItemSpriteSet(std::string name, const ItemSpriteSet& set) {
-	int index = itemSpriteSets.size();
-	itemSpriteSets.push_back(set);
+void TileSet::AddItemSprite(std::string name, const ItemSprite& set) {
+	int index = itemSprites.size();
+	itemSprites.push_back(set);
 	itemSpriteLookup[name] = index;
 }
 
-void TileSet::SetDefaultItemSpriteSet(const ItemSpriteSet& set) {
-	defaultItemSpriteSet = set;
+void TileSet::SetDefaultItemSprite(const ItemSprite& set) {
+	defaultItemSprite = set;
 }
 
 void TileSet::AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set) {
@@ -522,4 +556,16 @@ void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& set) {
 
 void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& set) {
 	defaultSpellSpriteSet = set;
+}
+
+void TileSet::AddDetailSprite(const Sprite& sprite) {
+	detailSprites.push_back(sprite);
+}
+
+void TileSet::SetDetailRange(int range) {
+	detailRange = range;
+}
+
+int TileSet::GetDetailRange() {
+	return detailRange;
 }

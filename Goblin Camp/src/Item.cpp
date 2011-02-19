@@ -391,7 +391,9 @@ private:
 			Item::Presets[itemIndex].attack.CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -417,7 +419,9 @@ private:
 			Item::Presets[itemIndex].condition = value.i;
 		} else if (boost::iequals(name,"addStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"addEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -425,7 +429,9 @@ private:
 			}
 		} else if (boost::iequals(name,"removeStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"removeEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {

@@ -18,11 +18,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/Sprite.hpp"
 
-class ItemSpriteSet
+class ItemSprite
 {
 public:
-	explicit ItemSpriteSet();
-	~ItemSpriteSet();
+	explicit ItemSprite();
+	~ItemSprite();
 
 	Sprite tile;
+	bool renderWhenWielded;
 };

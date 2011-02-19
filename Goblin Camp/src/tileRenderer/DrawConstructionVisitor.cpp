@@ -73,3 +73,18 @@ void DrawConstructionVisitor::Visit(Door * door) {
 	}
 	
 }
+
+void DrawConstructionVisitor::Visit(Trap * trap) {
+	tileSetRenderer->DrawFilth(map, coordinate.X(), coordinate.Y(), dstRect);
+	Coordinate internal_pos = coordinate - trap->Position();
+
+	int pos = internal_pos.X() + internal_pos.Y() * Construction::Blueprint(trap->Type()).X();
+	int maxPos = Construction::Blueprint(trap->Type()).X() * Construction::Blueprint(trap->Type()).Y();
+	if ((trap->GetMaxCondition() + trap->Condition()) * maxPos <= (pos + 1) * trap->GetMaxCondition()) {
+		tileSet->DrawUnderConstruction(trap, coordinate, dst, dstRect);
+	} else if (trap->IsReady()) {
+		tileSet->DrawBaseConstruction(trap, coordinate, dst, dstRect);
+	} else {
+		tileSet->DrawUnreadyTrap(trap, coordinate, dst, dstRect);
+	}
+}

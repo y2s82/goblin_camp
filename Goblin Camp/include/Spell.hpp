@@ -83,7 +83,8 @@ void Spell::save(Archive & ar, const unsigned int version) const {
 	ar & color.g;
 	ar & color.b;
 	ar & graphic;
-	ar & Spell::SpellTypeToString(type);
+	std::string spellType(Spell::SpellTypeToString(type));
+	ar & spellType;
 	ar & dead;
 	ar & attacks;
 	ar & immaterial;

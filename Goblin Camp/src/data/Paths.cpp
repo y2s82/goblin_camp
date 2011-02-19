@@ -53,6 +53,9 @@ namespace fs = boost::filesystem;
 	\var Paths::Path::ExecutableDir
 		\see Globals::execDir
 
+	\var Paths::Path::CoreTilesets
+	    \see Globals::coreTilesetsDir
+
 	\var Paths::Path::Tilesets
 	    \see Globals::tilesetsDir
 */
@@ -115,6 +118,9 @@ namespace Globals {
 		\var modsDir
 			Path to user's mods directory (subdir of personalDir).
 
+		\var coreTilesetsDir
+		    Path to core tilesets directory (subdir of dataDir).
+
 		\var tilesetsDir
 			Path to user's tilesets directory (subdir of personalDir).
 			
@@ -124,7 +130,7 @@ namespace Globals {
 		\var font
 			Path to user's bitmap font.
 	*/
-	fs::path personalDir, exec, execDir, dataDir;
+	fs::path personalDir, exec, execDir, dataDir, coreTilesetsDir;
 	fs::path savesDir, screensDir, modsDir, tilesetsDir;
 	fs::path config, font;
 }
@@ -155,6 +161,8 @@ namespace Paths {
 		font        = personalDir / "terminal.png";
 		
 		PathsImpl::FindExecutableDirectory(exec, execDir, dataDir);
+
+		coreTilesetsDir = dataDir / "lib" / "tilesets_core";
 		
 		fs::create_directory(personalDir);
 		Logger::OpenLogFile((personalDir / "goblin-camp.log").string());
@@ -170,6 +178,7 @@ namespace Paths {
 		LOG("Saves directory: " << Globals::savesDir);
 		LOG("Screenshots directory: " << Globals::screensDir);
 		LOG("Mods directory: " << Globals::modsDir);
+		LOG("CoreTilesets directory: " << Globals::coreTilesetsDir);
 		LOG("Tilesets directory: " << Globals::tilesetsDir);
 		LOG("Executable directory: " << Globals::execDir);
 		LOG("Global data directory: " << Globals::dataDir);
@@ -211,6 +220,7 @@ namespace Paths {
 			case Font:          return Globals::font;
 			case Config:        return Globals::config;
 			case ExecutableDir: return Globals::execDir;
+			case CoreTilesets:  return Globals::coreTilesetsDir;
 			case Tilesets:		return Globals::tilesetsDir;
 		}
 		

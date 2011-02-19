@@ -82,7 +82,6 @@ screenWidth(0),
 		marks[i] = Coordinate(-1, -1);
 	}
 
-	Faction::factions.clear();
 	Faction::StringToFactionType("Player");
 }
 
@@ -464,7 +463,6 @@ void Game::Init() {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
-	bool useTileset = Config::GetCVar<bool>("useTileset");
 
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
@@ -488,29 +486,7 @@ void Game::Init() {
 	TCODConsole::setKeyboardRepeat(500, 10);
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
-	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
-		TileSetLoader loader;
-		std::string tilesetName = Config::GetStringCVar("tileset");
-		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
-		bool foundTileset = false;
-		if (tilesetName.size() > 0) {
-			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
-		}
-		if (!foundTileset) {
-			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
-		}
-
-		if (foundTileset)
-		{
-			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, loader.LoadedTileSet(), buffer));
-		}
-		else
-		{
-			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
-		}
-	} else {
-		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
-	}
+	ResetRenderer();
 
 	LoadingScreen();
 
@@ -521,34 +497,40 @@ void Game::Init() {
 	camY = 180;
 }
 
-void Game::TilesetChanged() {
+void Game::ResetRenderer() {
 	// For now just recreate the whole renderer
+	int width, height;
+	TCODSystem::getCurrentResolution(&width, &height);
+
 	bool useTileset = Config::GetCVar<bool>("useTileset");
+	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
 
-	if (TCODSystem::getRenderer() == TCOD_RENDERER_SDL && useTileset) {
-		TileSetLoader loader;
+	TCODSystem::registerSDLRenderer(0);
+	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
+		if (tilesetName.size() == 0) tilesetName = "default";
+		
+		// Resolve path
+		boost::filesystem::path tilesetPath(Paths::Get(Paths::CoreTilesets) / tilesetName);
+		if (!boost::filesystem::is_directory(tilesetPath)) {
+			tilesetPath = Paths::Get(Paths::Tilesets) / tilesetName;
+		}
+		
 		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
-		bool foundTileset = false;
-		if (tilesetName.size() > 0) {
-			foundTileset = loader.LoadTileSet(Paths::Get(Paths::Tilesets) / tilesetName / "tileset.dat");
-		}
-		if (!foundTileset) {
-			foundTileset = loader.LoadTileSet(Paths::Get(Paths::GlobalData) / "tiles" / "tileset.dat");
-		}
-
-		int screenWidth, screenHeight;
-		TCODSystem::getCurrentResolution(&screenWidth, &screenHeight);
-
-		if (foundTileset)
+		boost::shared_ptr<TileSet> tileSet = TileSetLoader::LoadTileSet(tilesetPath);
+		if (tileSet)
 		{
-			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(screenWidth, screenHeight, loader.LoadedTileSet(), buffer));
+			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, tileSet, buffer));
 		}
 		else
 		{
 			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
 		}
+	} else {
+		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
 	}
+
+	buffer->setDirty(0,0,buffer->getWidth(), buffer->getHeight());
 	if (running) {
 		renderer->PreparePrefabs();
 	}

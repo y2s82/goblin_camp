@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 // Data refactoring: mods.
 #include <list>
+#include "tileRenderer\TileSetLoader.hpp"
 
 namespace Mods {
 	struct Metadata {
@@ -25,8 +26,9 @@ namespace Mods {
 		
 		Metadata(const std::string&, const std::string&, const std::string&, const std::string&, short);
 	};
-	
+		
 	const std::list<Metadata>& GetLoaded();
+	const std::list<TilesetModMetadata>& GetAvailableTilesetMods();
 	
 	void Load();
 }
