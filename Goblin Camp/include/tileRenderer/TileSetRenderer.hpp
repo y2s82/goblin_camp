@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapRenderer.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/TileSet.hpp"
+#include "tileRenderer/PermutationTable.hpp"
 #include <SDL.h>
 
 class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer, private boost::noncopyable
@@ -43,6 +44,7 @@ public:
 	void render(void *sdlSurface, void*sdlScreen);
 private:
 	TCODConsole * tcodConsole;
+	PermutationTable permutationTable;
 
 	// the font characters size
 	int screenWidth, screenHeight;
