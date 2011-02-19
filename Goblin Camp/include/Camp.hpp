@@ -72,3 +72,49 @@ public:
 	void RemoveWaterZone(Coordinate from, Coordinate to);
 	void UpdateWaterJobs();
 };
+
+BOOST_CLASS_VERSION(Camp, 0)
+
+template<class Archive>
+void Camp::save(Archive & ar, const unsigned int version) const {
+	ar.template register_type<Coordinate>();
+	ar & centerX;
+	ar & centerY;
+	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
+	ar & tier;
+	ar & name;
+	ar & workshops;
+	ar & farmplots;
+	ar & production;
+	ar & upperCorner;
+	ar & lowerCorner;
+	ar & autoTerritory;
+	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
+}
+
+template<class Archive>
+void Camp::load(Archive & ar, const unsigned int version) {
+	ar.template register_type<Coordinate>();
+	ar & centerX;
+	ar & centerY;
+	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
+	ar & tier;
+	ar & name;
+	ar & workshops;
+	ar & farmplots;
+	ar & production;
+	ar & upperCorner;
+	ar & lowerCorner;
+	ar & autoTerritory;
+	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
+}
