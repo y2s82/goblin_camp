@@ -548,13 +548,12 @@ void NPC::Think() {
 		}
 
 		timeCount -= UPDATES_PER_SECOND;
+		if (!jobs.empty() && !jobBegun) {
+			jobBegun = true;
+			ValidateCurrentJob();
+		}
+
 		if (!jobs.empty()) {
-
-			if (!jobBegun) {
-				ValidateCurrentJob();
-				jobBegun = true;
-			}
-
 			switch(currentTask()->action) {
 			case MOVE:
 				if (!Map::Inst()->IsWalkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
