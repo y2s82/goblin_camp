@@ -197,9 +197,13 @@ void WaterNode::Update() {
 				depth = 1; //All of the water has flown to a low tile
 			}
 
-		} else if (Random::Generate(500) == 0) {
-			if (depth > 0) { 
-				--depth;
+		} else {
+			int soakage = 500;
+			TileType type = Map::Inst()->Type(x,y);
+			if (type == TILEGRASS) soakage = 10;
+			else if (type == TILEBOG) soakage = 0;
+			if (Random::Generate(soakage) == 0) {
+				depth = 0;
 				Game::Inst()->RemoveWater(Coordinate(x,y)); //Water has evaporated
 			}
 		}
