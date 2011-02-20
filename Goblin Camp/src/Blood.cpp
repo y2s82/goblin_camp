@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include "Blood.hpp"
+#include "Coordinate.hpp"
 
 BloodNode::BloodNode(int nx, int ny, int ndep) : x(nx), y(ny), depth(ndep)
 {
