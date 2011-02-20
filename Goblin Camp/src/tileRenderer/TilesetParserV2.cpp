@@ -23,7 +23,12 @@ const char* TileSetParserV2::uninitialisedTilesetError = "tileset_data must be d
 namespace {
 	void SetupTilesetParser(TCODParser& parser) {
 		TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite_data");
-		creatureSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
+		creatureSpriteStruct->addListProperty("sprite", TCOD_TYPE_INT, true);
+		creatureSpriteStruct->addProperty("fps", TCOD_TYPE_INT, false);
+		creatureSpriteStruct->addFlag("equipmentMap");
+		creatureSpriteStruct->addListProperty("weaponTypes", TCOD_TYPE_STRING, false);
+		creatureSpriteStruct->addListProperty("armorTypes", TCOD_TYPE_STRING, false);
+		creatureSpriteStruct->addListProperty("armourTypes", TCOD_TYPE_STRING, false);
 
 		TCODParserStruct* natureObjectSpriteStruct = parser.newStructure("plant_sprite_data");
 		natureObjectSpriteStruct->addProperty("sprite", TCOD_TYPE_INT, true);
@@ -137,7 +142,7 @@ TileSetParserV2::TileSetParserV2() :
 	constructionFactory(),
 	spellFactory(),
 	statusEffectFactory(),
-	npcSpriteSet(),
+	npcSpriteFactory(),
 	natureObjectSpriteSet(),
 	itemSprite()
 {
@@ -237,7 +242,7 @@ bool TileSetParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 	
 	// Sprite Sets
 	if (boost::iequals(str->getName(), "creature_sprite_data")) {
-		npcSpriteSet = NPCSpriteSet();
+		npcSpriteFactory.Reset();
 		currentSpriteSet = SS_NPC;
 	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
 		natureObjectSpriteSet = NatureObjectSpriteSet();
@@ -276,6 +281,12 @@ bool TileSetParserV2::parserFlag(TCODParser *parser,const char *name) {
 			if (boost::iequals(name, "drawWhenWielded")) {
 				itemSprite.renderWhenWielded = true;
 			}
+			break;
+		case SS_NPC:
+			if (boost::iequals(name, "equipmentMap")) {
+				npcSpriteFactory.SetEquipmentMap(true);
+			}
+			break;
 		}
 	}
 	return success;
@@ -370,7 +381,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(currentTexture, value.i));
 			}
 
-			// TODO: Capture fps/sprite set and build fire from this later
+			// Capture fps/sprite set and build fire from this later
 			else if (boost::iequals(name, "fireFPS")) {
 				fireFPS = value.i;
 			}
@@ -380,10 +391,23 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				}
 			}
 			break;
-		case SS_NPC:
+		case SS_NPC: 
 			if (boost::iequals(name, "sprite")) {
-				npcSpriteSet.tile = Sprite(currentTexture, value.i);
+				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
+					npcSpriteFactory.AddSpriteFrame(*iter);
+				}
+			} else if (boost::iequals(name, "fps")) {
+				npcSpriteFactory.SetFPS(value.i);
+			} else if (boost::iequals(name, "weaponTypes")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+					npcSpriteFactory.AddWeaponType(std::string((char*)TCOD_list_get(value.list, i)));
+				}
+			} else if (boost::iequals(name, "armourTypes") || boost::iequals(name, "armorTypes")) {
+				for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+					npcSpriteFactory.AddArmourType(std::string((char*)TCOD_list_get(value.list, i)));
+				}
 			}
+
 			break;
 		case SS_ITEM:
 			if (boost::iequals(name, "sprite")) {
@@ -496,9 +520,9 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 	
 	if (boost::iequals(str->getName(), "creature_sprite_data")) {
 		if (name == 0) {
-			tileSet->SetDefaultNPCSpriteSet(npcSpriteSet);
+			tileSet->SetDefaultNPCSprite(npcSpriteFactory.Build(currentTexture));
 		} else {
-			tileSet->AddNPCSpriteSet(std::string(name), npcSpriteSet);
+			tileSet->AddNPCSprite(std::string(name), npcSpriteFactory.Build(currentTexture));
 		}
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {

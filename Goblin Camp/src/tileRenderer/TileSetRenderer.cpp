@@ -368,8 +368,10 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 
 	tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
 	
-	int detailIndex = permutationTable.Hash(permutationTable.Hash(tileX) + tileY) % tileSet->GetDetailRange(); 
-	tileSet->DrawDetail(detailIndex, mapSurface.get(), dstRect);
+	if (tileSet->HasTerrainDetails()) {
+		int detailIndex = permutationTable.Hash(permutationTable.Hash(tileX) + tileY) % tileSet->GetDetailRange(); 
+		tileSet->DrawDetail(detailIndex, mapSurface.get(), dstRect);
+	}
 
 	// Corruption
 	if (map->GetCorruption(tileX, tileY) >= 100) {

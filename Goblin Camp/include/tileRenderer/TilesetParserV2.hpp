@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
-#include "tileRenderer/NPCSpriteSet.hpp"
+#include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/ItemSprite.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
@@ -105,8 +105,8 @@ private:
 	SpellSpriteFactory spellFactory;
 
 	StatusEffectSpriteFactory statusEffectFactory;
+	NPCSpriteFactory npcSpriteFactory;
 		
-	NPCSpriteSet npcSpriteSet;
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSprite itemSprite;
 	

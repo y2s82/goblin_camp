@@ -136,7 +136,7 @@ tileset_data "Default Tileset" {
 		}
 	
 		creature_sprite_data {
-			sprite=21
+			sprite=[21]
 		}
 
 		plant_sprite_data {
@@ -157,91 +157,91 @@ tileset_data "Default Tileset" {
 		}
 
 		creature_sprite_data "goblin" {
-			sprite=23
+			sprite=[23]
 		}
 
 		creature_sprite_data "orc" {
-			sprite=24
+			sprite=[24]
 		}		
 
 		creature_sprite_data "soldier ant" {
-			sprite=59
+			sprite=[59]
 		}
 		
 		creature_sprite_data "starving wolf" {
-			sprite=60
+			sprite=[60]
 		}
 		
 		creature_sprite_data "giant snail" {
-			sprite=207
+			sprite=[207]
 		}
 		
 		creature_sprite_data "rabid albino rat" {
-			sprite=217
+			sprite=[217]
 		}
 		
 		creature_sprite_data "snake" {
-			sprite=218
+			sprite=[218]
 		}
 		
 		creature_sprite_data "killer bee" {
-			sprite=220
+			sprite=[220]
 		}
 		
 		creature_sprite_data "harpy" {
-			sprite=221
+			sprite=[221]
 		}
 		
 		creature_sprite_data "kobold" {
-			sprite=222
+			sprite=[222]
 		}
 		
 		creature_sprite_data "ogre" {
-			sprite=223
+			sprite=[223]
 		}
 		
 		creature_sprite_data "troll" {
-			sprite=233
+			sprite=[233]
 		}
 		
 		creature_sprite_data "skeleton" {
-			sprite=234
+			sprite=[234]
 		}
 		
 		creature_sprite_data "minotaur" {
-			sprite=235
+			sprite=[235]
 		}
 		
 		creature_sprite_data "cyclops" {
-			sprite=236
+			sprite=[236]
 		}
 		
 		creature_sprite_data "giant" {
-			sprite=237
+			sprite=[237]
 		}
 		
 		creature_sprite_data "griffon" {
-			sprite=238
+			sprite=[238]
 		}
 		
 		creature_sprite_data "will o wisp" {
-			sprite=239
+			sprite=[239]
 		}
 		
 		creature_sprite_data "imp" {
-			sprite=249
+			sprite=[249]
 		}
 		
 		creature_sprite_data "salamander" {
-			sprite=250
+			sprite=[250]
 		}
 		
 		creature_sprite_data "fire elemental" {
-			sprite=251
+			sprite=[251]
 		}
 		
 		creature_sprite_data "treeman" {
-			sprite=29
+			sprite=[29]
 		}
 		
 		plant_sprite_data "Pine"{
@@ -521,5 +521,20 @@ tileset_data "Default Tileset" {
 			sprites=[72]
 		}
 	}
+
+	tile_texture_data "orcTiles.png"
+	{
+		creature_sprite_data "orc" {
+			sprite=[0,1,2,3,4,
+			        5,6,7,8,9,
+					10,11,12,13,14,
+					15,16,17,18,19,
+					20,21,22,23,24]
+			equipmentMap
+			weaponTypes=["Blunt weapon", "Slashing weapon", "Piercing weapon", "Ranged weapon"]
+			armorTypes=["Padded clothing", "Light armor", "Medium armor", "Heavy armor"]
+		}	
+	}
 }
+
 
