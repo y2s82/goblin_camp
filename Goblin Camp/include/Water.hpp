@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 
-#include "Coordinate.hpp"
+class Coordinate;
 
 #define RIVERDEPTH 5000
 

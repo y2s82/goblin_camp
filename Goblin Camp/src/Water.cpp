@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Map.hpp"
 #include "GCamp.hpp"
+#include "Coordinate.hpp"
 
 WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 	x(vx), y(vy), depth(vdepth),

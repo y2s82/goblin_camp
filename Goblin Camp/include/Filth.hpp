@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
 
-#include "Coordinate.hpp"
+class Coordinate;
 
 class FilthNode : public boost::enable_shared_from_this<FilthNode> {
 	friend class boost::serialization::access;

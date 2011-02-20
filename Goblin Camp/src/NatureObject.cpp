@@ -19,13 +19,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 #include "NatureObject.hpp"
-#include "Game.hpp"
-#include "Logger.hpp"
-#include "StockManager.hpp"
+#include "Map.hpp"
+#include "Item.hpp"
 
 NatureObjectPreset::NatureObjectPreset() :
 	name("NATUREOBJECT PRESET"),
