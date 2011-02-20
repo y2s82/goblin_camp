@@ -396,10 +396,10 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
-		if (boost::iequals(str->getName(), "construction_type")) {
+		if (name && boost::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
-			std::string strName = name;
+			std::string strName(name);
 			boost::to_upper(strName);
 			if (Construction::constructionNames.find(strName) != Construction::constructionNames.end()) {
 				constructionIndex = Construction::constructionNames[strName];

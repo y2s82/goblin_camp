@@ -284,9 +284,9 @@ private:
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure\n") % str->getName()).str();
 #endif
-		std::string strName = name;
-		boost::to_upper(strName);
-		if (boost::iequals(str->getName(), "category_type")) {
+		if (name && boost::iequals(str->getName(), "category_type")) {
+			std::string strName(name);
+			boost::to_upper(strName);
 			if (Item::itemCategoryNames.find(strName) != Item::itemCategoryNames.end()) {
 				categoryIndex = Item::itemCategoryNames[strName];
 				Item::Categories[categoryIndex] = ItemCat();
@@ -300,7 +300,9 @@ private:
 				Item::itemCategoryNames.insert(std::make_pair(strName, Game::ItemCatCount-1));
 				presetCategoryParent.insert(std::make_pair(categoryIndex, ""));
 			}
-		} else if (boost::iequals(str->getName(), "item_type")) {
+		} else if (name && boost::iequals(str->getName(), "item_type")) {
+			std::string strName(name);
+			boost::to_upper(strName);
 			if (Item::itemTypeNames.find(strName) != Item::itemTypeNames.end()) {
 				itemIndex = Item::itemTypeNames[strName];
 				Item::Presets[itemIndex] = ItemPreset();
