@@ -70,3 +70,7 @@ void Weather::Update() {
 	}
 	if (currentWeather == RAIN) Game::Inst()->CreateWater(Coordinate(Random::Generate(map->Width()-1),Random::Generate(map->Height()-1)),1);
 }
+
+void Weather::ChangeWeather(WeatherType newWeather) {
+	currentWeather = newWeather;
+}

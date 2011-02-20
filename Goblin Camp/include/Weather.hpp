@@ -49,6 +49,7 @@ public:
 	void ShiftWind();
 	std::string GetWindAbbreviation();
 	void Update();
+	void ChangeWeather(WeatherType);
 };
 
 BOOST_CLASS_VERSION(Weather, 0)
