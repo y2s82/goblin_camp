@@ -399,8 +399,10 @@ class ConstructionListener : public ITCODParserListener {
 		if (boost::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
-			if (Construction::constructionNames.find(name) != Construction::constructionNames.end()) {
-				constructionIndex = Construction::constructionNames[name];
+			std::string strName = name;
+			boost::to_upper(strName);
+			if (Construction::constructionNames.find(strName) != Construction::constructionNames.end()) {
+				constructionIndex = Construction::constructionNames[strName];
 				//A redefinition, so wipe out the earlier one
 				Construction::Presets[constructionIndex] = ConstructionPreset();
 				Construction::Presets[constructionIndex].name = name;
@@ -408,7 +410,7 @@ class ConstructionListener : public ITCODParserListener {
 			} else { //New construction
 				Construction::Presets.push_back(ConstructionPreset());
 				Construction::Presets.back().name = name;
-				Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
+				Construction::constructionNames.insert(std::make_pair(strName, Construction::Presets.size() - 1));
 				Construction::AllowedAmount.push_back(-1);
 				constructionIndex = Construction::Presets.size() - 1;
 			}
