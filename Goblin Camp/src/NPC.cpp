@@ -66,6 +66,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	lastMoveResult(TASKCONTINUE),
 	run(true),
 	taskBegun(false),
+	jobBegun(false),
 	expert(false),
 	carried(boost::weak_ptr<Item>()),
 	mainHand(boost::weak_ptr<Item>()),
@@ -177,6 +178,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 				taskIndex = 0;
 				foundItem = boost::weak_ptr<Item>();
 				addedTasksToCurrentJob = 0;
+				jobBegun = false;
 			}
 		} else {
 			//Remove any tasks this NPC added onto the front before sending it back to the JobManager
@@ -190,6 +192,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 			carried.reset();
 			foundItem = boost::weak_ptr<Item>();
 			addedTasksToCurrentJob = 0;
+			jobBegun = false;
 		}
 	}
 	taskBegun = false;
@@ -546,6 +549,12 @@ void NPC::Think() {
 
 		timeCount -= UPDATES_PER_SECOND;
 		if (!jobs.empty()) {
+
+			if (!jobBegun) {
+				ValidateCurrentJob();
+				jobBegun = true;
+			}
+
 			switch(currentTask()->action) {
 			case MOVE:
 				if (!Map::Inst()->IsWalkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
@@ -1343,7 +1352,6 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 
 	jobs.push_back(job);
 	run = true;
-	ValidateCurrentJob();
 }
 
 TaskResult NPC::Move(TaskResult oldResult) {
