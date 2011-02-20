@@ -20,7 +20,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "GCamp.hpp"
 
-Weather::Weather(Map* vmap) : map(vmap), windDirection(NORTH) {
+Weather::Weather(Map* vmap) : map(vmap), windDirection(NORTH),
+currentWeather(NORMALWEATHER) {
 }
 
 Direction Weather::GetWindDirection() { return windDirection; }
@@ -62,4 +63,10 @@ std::string Weather::GetWindAbbreviation() {
 
 void Weather::Update() {
 	if (Random::Generate(MONTH_LENGTH) == 0) ShiftWind();
+	if (Random::Generate(MONTH_LENGTH) == 0) {
+		if (Random::Generate(2) < 2) {
+			currentWeather = NORMALWEATHER;
+		} else currentWeather = RAIN;
+	}
+	if (currentWeather == RAIN) Game::Inst()->CreateWater(Coordinate(Random::Generate(map->Width()-1),Random::Generate(map->Height()-1)),1);
 }
