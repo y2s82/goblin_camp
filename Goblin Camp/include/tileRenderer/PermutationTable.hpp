@@ -21,8 +21,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class PermutationTable {
 public:
-	PermutationTable(int power);
-	PermutationTable(int power, uint32 seed);
+	explicit PermutationTable(int power);
+	explicit PermutationTable(int power, uint32 seed);
 	~PermutationTable();
 
 	inline int Hash(int val) const {

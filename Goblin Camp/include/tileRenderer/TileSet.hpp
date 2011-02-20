@@ -30,7 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Fire.hpp"
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/StatusEffectSprite.hpp"
-#include "tileRenderer/NPCSpriteSet.hpp"
+#include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
 #include "tileRenderer/ItemSprite.hpp"
 #include "tileRenderer/ConstructionSpriteSet.hpp"
@@ -97,19 +97,20 @@ public:
 
 	void SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite);
 		
-	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
+	void AddNPCSprite(std::string name, const NPCSprite& sprite);
 	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
-	void AddItemSprite(std::string name, const ItemSprite& set);
+	void AddItemSprite(std::string name, const ItemSprite& sprite);
 	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
 	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
 	
 	void AddDetailSprite(const Sprite& sprite);
 	void SetDetailRange(int range);
-	int GetDetailRange();
+	int GetDetailRange() const;
+	bool HasTerrainDetails() const;
 	
-	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
+	void SetDefaultNPCSprite(const NPCSprite& sprite);
 	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
-	void SetDefaultItemSprite(const ItemSprite& set);
+	void SetDefaultItemSprite(const ItemSprite& sprite);
 	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
 	
@@ -146,8 +147,8 @@ private:
 	int detailRange;
 	std::vector<Sprite> detailSprites;
 
-	NPCSpriteSet defaultNPCSpriteSet;
-	std::vector<NPCSpriteSet> npcSpriteSets;
+	NPCSprite defaultNPCSprite;
+	std::vector<NPCSprite> npcSprites;
 	LookupMap npcSpriteLookup;
 
 	NatureObjectSpriteSet defaultNatureObjectSpriteSet;

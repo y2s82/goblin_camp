@@ -40,8 +40,8 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
-	defaultNPCSpriteSet(),
-	npcSpriteSets(),
+	defaultNPCSprite(),
+	npcSprites(),
 	npcSpriteLookup(),
 	defaultNatureObjectSpriteSet(),
 	natureObjectSpriteSets(),
@@ -144,10 +144,10 @@ void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstR
 
 void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = npc->GetGraphicsHint();
-	if (hint == -1 || hint >= npcSpriteSets.size()) {
-		defaultNPCSpriteSet.tile.Draw(dst, dstRect);
+	if (hint == -1 || hint >= npcSprites.size()) {
+		defaultNPCSprite.Draw(npc, dst, dstRect);
 	} else {
-		npcSpriteSets[hint].tile.Draw(dst, dstRect);
+		npcSprites[hint].Draw(npc, dst, dstRect);
 	}
 
 	if ((TCODSystem::getElapsedMilli() % 1000 < 700)) {
@@ -286,10 +286,10 @@ void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Su
 			itemSprites[cursorHint].tile.Draw(dst, dstRect);
 		}
 	} else if (type == Cursor_NPC_Mode) {
-		if (cursorHint == -1 || cursorHint >= npcSpriteSets.size()) {
-			defaultNPCSpriteSet.tile.Draw(dst, dstRect);
+		if (cursorHint == -1 || cursorHint >= npcSprites.size()) {
+			defaultNPCSprite.Draw(dst, dstRect);
 		} else {
-			npcSpriteSets[cursorHint].tile.Draw(dst, dstRect);
+			npcSprites[cursorHint].Draw(dst, dstRect);
 		}
 	} else {
 		if (placeable) {
@@ -508,14 +508,14 @@ void TileSet::SetFireSprite(const Sprite& sprite) {
 	fireTile = sprite;
 }
 
-void TileSet::AddNPCSpriteSet(std::string name, const NPCSpriteSet& set) {
-	int index = npcSpriteSets.size();
-	npcSpriteSets.push_back(set);
+void TileSet::AddNPCSprite(std::string name, const NPCSprite& set) {
+	int index = npcSprites.size();
+	npcSprites.push_back(set);
 	npcSpriteLookup[name] = index;
 }
 
-void TileSet::SetDefaultNPCSpriteSet(const NPCSpriteSet& set) {
-	defaultNPCSpriteSet = set;
+void TileSet::SetDefaultNPCSprite(const NPCSprite& set) {
+	defaultNPCSprite = set;
 }
 
 void TileSet::AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set) {
@@ -566,6 +566,10 @@ void TileSet::SetDetailRange(int range) {
 	detailRange = range;
 }
 
-int TileSet::GetDetailRange() {
+int TileSet::GetDetailRange() const {
 	return detailRange;
+}
+
+bool TileSet::HasTerrainDetails() const {
+	return detailRange > 0 && detailSprites.size() > 0;
 }

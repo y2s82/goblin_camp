@@ -130,7 +130,7 @@ TileSetParserV1::TileSetParserV1() :
 	currentTexture(),
 	currentSpriteSet(SS_NONE),
 	tileSetPath(),
-	npcSpriteSet(),
+	npcSprite(),
 	natureObjectSpriteSet(),
 	itemSprite(),
 	tempConstruction(),
@@ -205,7 +205,7 @@ bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 	
 	// Sprite Sets
 	if (boost::iequals(str->getName(), "creature_sprite_data")) {
-		npcSpriteSet = NPCSpriteSet();
+		npcSprite = NPCSprite();
 		currentSpriteSet = SS_NPC;
 	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
 		natureObjectSpriteSet = NatureObjectSpriteSet();
@@ -360,7 +360,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			break;
 		case SS_NPC:
 			if (boost::iequals(name, "sprite")) {
-				npcSpriteSet.tile = Sprite(currentTexture, value.i);
+				npcSprite = NPCSprite(Sprite(currentTexture, value.i));
 			}
 			break;
 		case SS_ITEM:
@@ -443,9 +443,9 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		currentTexture = boost::shared_ptr<TileSetTexture>();
 	} else if (boost::iequals(str->getName(), "creature_sprite_data")) {
 		if (name == 0) {
-			tileSet->SetDefaultNPCSpriteSet(npcSpriteSet);
+			tileSet->SetDefaultNPCSprite(npcSprite);
 		} else {
-			tileSet->AddNPCSpriteSet(std::string(name), npcSpriteSet);
+			tileSet->AddNPCSprite(std::string(name), npcSprite);
 		}
 		currentSpriteSet = SS_NONE;
 	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
