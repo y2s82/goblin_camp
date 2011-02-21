@@ -62,8 +62,8 @@ public:
 	bool IsBuildable(int,int) const;
 	void SetBuildable(int,int,bool);
 	TileType GetType(int,int);
-	void ResetType(int,int,TileType);  //ResetType() resets all tile variables to defaults
-	void ChangeType(int,int,TileType); //ChangeType() preserves information such as buildability
+	void ResetType(int,int,TileType,float tileHeight = 0.0);  //ResetType() resets all tile variables to defaults
+	void ChangeType(int,int,TileType,float tileHeight = 0.0); //ChangeType() preserves information such as buildability
 	void MoveTo(int,int,int);
 	void MoveFrom(int,int,int);
 	void SetConstruction(int,int,int);

@@ -62,11 +62,20 @@ Tile::Tile(TileType newType, int newCost) :
 
 TileType Tile::GetType() { return type; }
 
-void Tile::ResetType(TileType newType) {
+void Tile::ResetType(TileType newType, float height) {
 	type = newType;
 	if (type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true; low = false;
 		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
+		if (Random::Generate(9) < 9) {
+			if (height < -0.01f) {
+				originalForeColor = TCODColor(Random::Generate(100,192),127,0);
+			} else if (height < 0.0f) {
+				originalForeColor = TCODColor(Random::Generate(20,170),127,0);
+			} else if (height > 4.0f) {
+				originalForeColor = TCODColor(90, Random::Generate(120,150), 90);
+			}
+		}
 		backColor = TCODColor(0, 0, 0);
 		switch (Random::Generate(9)) {
 		case 0:
@@ -134,13 +143,13 @@ void Tile::ResetType(TileType newType) {
 	foreColor = originalForeColor;
 }
 
-void Tile::ChangeType(TileType newType) {
+void Tile::ChangeType(TileType newType,float height) {
 	bool oldBuildable = buildable;
 	bool oldVis = vis; 
 	bool oldWalkable = walkable; 
 	int oldGraphic = graphic;
 	bool keepGraphic = (type == TILEGRASS || type == TILESNOW) && (newType == TILEGRASS || type == TILESNOW);
-	ResetType(newType);
+	ResetType(newType,height);
 	buildable = oldBuildable;
 	vis = oldVis;
 	walkable = oldWalkable;

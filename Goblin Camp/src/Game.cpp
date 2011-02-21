@@ -1237,15 +1237,6 @@ void Game::GenerateMap(uint32 seed) {
 				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
 				map->ResetType(x,y,TILEGRASS);
-				if (random.Generate(9) < 9) {
-					if (height < -0.01f) {
-						map->ForeColor(x,y, TCODColor(random.Generate(100,192),127,0));
-					} else if (height < 0.0f) {
-						map->ForeColor(x,y, TCODColor(random.Generate(20,170),127,0));
-					} else if (height > 4.0f) {
-						map->ForeColor(x,y, TCODColor(90, random.Generate(120,150), 90));
-					}
-				}
 			} else {
 				map->ResetType(x,y,TILEROCK);
 			}
