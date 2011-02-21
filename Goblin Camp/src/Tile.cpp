@@ -114,6 +114,22 @@ void Tile::ResetType(TileType newType) {
 		originalForeColor = TCODColor(Random::Generate(120, 130), Random::Generate(80, 90), 0);
 		backColor = TCODColor(0, 0, 0);
 		moveCost = 5;
+	} else if (type == TILESNOW) {
+		vis = true; walkable = true; buildable = true; low = false;
+		originalForeColor = TCODColor(Random::Generate(225, 255), Random::Generate(225, 255), Random::Generate(225, 255));
+		backColor = TCODColor(0, 0, 0);
+		switch (Random::Generate(9)) {
+		case 0:
+		case 1:
+		case 2:
+		case 3: graphic = '.'; break;
+		case 4:
+		case 5:
+		case 6:
+		case 7:
+		case 8: graphic = ','; break;
+		case 9: graphic = '\''; break;
+		}
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
 }
@@ -122,10 +138,16 @@ void Tile::ChangeType(TileType newType) {
 	bool oldBuildable = buildable;
 	bool oldVis = vis; 
 	bool oldWalkable = walkable; 
+	int oldGraphic = graphic;
+	bool keepGraphic = (type == TILEGRASS || type == TILESNOW) && (newType == TILEGRASS || type == TILESNOW);
 	ResetType(newType);
 	buildable = oldBuildable;
 	vis = oldVis;
 	walkable = oldWalkable;
+	if (keepGraphic) {
+		graphic = oldGraphic;
+		Corrupt(0); //Recalculates color
+	}
 }
 
 bool Tile::BlocksLight() const { return !vis; }
