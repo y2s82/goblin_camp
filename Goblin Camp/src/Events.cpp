@@ -126,7 +126,8 @@ void Events::SpawnBenignFauna() {
 				target.X(Random::Generate(map->Width() - 1));
 				target.Y(Random::Generate(map->Height() - 1));
 			} while (!map->IsWalkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
-				|| map->GetType(target.X(), target.Y()) != TILEGRASS);
+				|| (map->GetType(target.X(), target.Y()) != TILEGRASS && map->GetType(target.X(), target.Y()) != TILESNOW
+				&& map->GetType(target.X(), target.Y()) != TILEMUD));
 			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);
 		}
 	}
