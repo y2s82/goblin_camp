@@ -75,8 +75,8 @@ private:
 public:
 	Tile(TileType = TILEGRASS, int = 1);
 	TileType GetType();
-	void ResetType(TileType);
-	void ChangeType(TileType);
+	void ResetType(TileType,float height = 0.0);
+	void ChangeType(TileType,float height = 0.0);
 	bool BlocksLight() const;
 	void SetBlocksLight(bool);
 	bool IsWalkable() const;

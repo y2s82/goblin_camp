@@ -97,12 +97,12 @@ TileType Map::GetType(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
 	return TILENONE;
 }
-void Map::ResetType(int x, int y, TileType ntype) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ResetType(ntype); 
+void Map::ResetType(int x, int y, TileType ntype, float tileHeight) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ResetType(ntype, tileHeight); 
 }
 
-void Map::ChangeType(int x, int y, TileType ntype) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ChangeType(ntype); 
+void Map::ChangeType(int x, int y, TileType ntype, float tileHeight) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ChangeType(ntype, tileHeight); 
 }
 
 void Map::MoveTo(int x, int y, int uid) {
