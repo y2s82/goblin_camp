@@ -505,6 +505,8 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 				for (iprop=(TCOD_struct_prop_t **)TCOD_list_begin(def->props); iprop!=(TCOD_struct_prop_t **)TCOD_list_end(def->props);iprop++) {
 					if ( strcmp((*iprop)->name,lex->tok) == 0 ) {
 						char propname[BIG_NAME_LEN];
+						TCOD_value_t ret;
+						bool result;
 						string_copy(propname,lex->tok,BIG_NAME_LEN);
 						TCOD_lex_parse(lex);
 						if ( strcmp(lex->tok,"=") != 0 ) {
@@ -512,8 +514,12 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 							return false;
 						}
 						TCOD_lex_parse(lex);
-						if (!listener->new_property(propname,TCOD_struct_get_type(def,propname),
-							TCOD_parse_property_value(parser, (TCOD_parser_struct_t *)def,propname,true))) return false;
+						ret = TCOD_parse_property_value(parser, (TCOD_parser_struct_t *)def,propname,true);
+						result = listener->new_property(propname,TCOD_struct_get_type(def,propname),ret);
+						if (TCOD_struct_get_type(def, propname) == TCOD_TYPE_STRING) {
+							free(ret.s);
+						}
+						if (!result) return false;
 						if ( lex->token_type == TCOD_LEX_ERROR ) return false;
 						found=true;
 						break;
@@ -653,11 +659,15 @@ void TCOD_parser_delete(TCOD_parser_t parser) {
 
  	for (idef=(TCOD_struct_int_t **)TCOD_list_begin(p->structs); idef!= (TCOD_struct_int_t **)TCOD_list_end(p->structs); idef++) {
 		free((*idef)->name);
-
+		TCOD_list_clear_and_delete((*idef)->flags);
+		TCOD_list_delete((*idef)->flags);
+		TCOD_list_delete((*idef)->structs);
+		
 		for ( propCleanup = (TCOD_struct_prop_t**) TCOD_list_begin((*idef)->props); propCleanup != (TCOD_struct_prop_t**)TCOD_list_end((*idef)->props); propCleanup++ ) {
 			free((*propCleanup)->name);
 		}
  		TCOD_list_clear_and_delete((*idef)->props);
+		TCOD_list_delete((*idef)->props);
 
 
 		for ( listCleanup = (char ***) TCOD_list_begin((*idef)->lists); listCleanup != (char ***)TCOD_list_end((*idef)->lists); listCleanup++ ) {
@@ -667,14 +677,18 @@ void TCOD_parser_delete(TCOD_parser_t parser) {
 			}
 		}
 		TCOD_list_clear_and_delete((*idef)->lists);
+		TCOD_list_delete((*idef)->lists);
 	}
 	TCOD_list_clear_and_delete(p->structs);
+	TCOD_list_delete(p->structs);
+	free(p);
 }
 
 /* parse a file */
 static TCOD_list_t *default_props;
 /* triggers callbacks in the listener for each event during parsing */
 void TCOD_parser_run(TCOD_parser_t parser,  const char *filename, TCOD_parser_listener_t *_listener) {
+	bool run=true;
 	TCOD_parser_int_t *p=(TCOD_parser_int_t *)parser;
 	if (! _listener && ! p->props ) p->props=TCOD_list_new();
 	listener=_listener ? _listener : &default_listener;
@@ -684,9 +698,9 @@ void TCOD_parser_run(TCOD_parser_t parser,  const char *filename, TCOD_parser_li
 		char buf[1024];
 		sprintf(buf,"Fatal error : %s\n",TCOD_lex_get_last_error());
 		listener->error(buf);
-		return;
+		run = false;
 	}
-	while (1) {
+	while (run) {
 		bool named=false;
 		char id[ BIG_NAME_LEN*2 + 2 ];
 		char type[ BIG_NAME_LEN ];
@@ -695,7 +709,13 @@ void TCOD_parser_run(TCOD_parser_t parser,  const char *filename, TCOD_parser_li
 		TCOD_struct_int_t **idef;
 		bool dynStruct=false;
 		TCOD_lex_parse(lex);
-		if ( lex->token_type == TCOD_LEX_EOF || lex->token_type == TCOD_LEX_ERROR ) break;
+		if (lex->token_type == TCOD_LEX_ERROR) {
+			TCOD_parser_error("Parser::parse : error while parsing");
+			break;
+		}
+		if ( lex->token_type == TCOD_LEX_EOF ) {
+			break;
+		}
 		if ( lex->token_type == TCOD_LEX_KEYWORD ) {
 			if ( strcmp(lex->tok,"struct") == 0) {
 				/* level 0 dynamic structure declaration */
@@ -703,13 +723,13 @@ void TCOD_parser_run(TCOD_parser_t parser,  const char *filename, TCOD_parser_li
 				TCOD_lex_parse(lex);
 			} else {
 				TCOD_parser_error("Parser::parse : unexpected keyword '%s'",lex->tok);
-				return;
+				break;
 			}
 		}
 		/* get entity type */
 		if ( lex->token_type != TCOD_LEX_IDEN ) {
 			TCOD_parser_error("Parser::parse : identifier token expected");
-			return;
+			break;
 		}
 		string_copy(type,lex->tok,BIG_NAME_LEN);
 		strcpy(id,type);
@@ -720,7 +740,7 @@ void TCOD_parser_run(TCOD_parser_t parser,  const char *filename, TCOD_parser_li
 			if ( strlen(lex->tok) >= BIG_NAME_LEN ) {
 				TCOD_parser_error("Parser::parse : name %s too long. Max %d characters",
 					lex->tok,BIG_NAME_LEN-1);
-				return;
+				break;
 			}
 			strcat(id,lex->tok);
 			named=true;
@@ -750,16 +770,17 @@ void TCOD_parser_run(TCOD_parser_t parser,  const char *filename, TCOD_parser_li
 		} while ( def == NULL && dynStruct );
 		if (def == NULL ) {
 			TCOD_parser_error("Parser::parse : unknown entity type %s",type);
-			return;
+			break;
 		} else {
-			if (!listener->new_struct((TCOD_parser_struct_t)def,named ? strchr(id,'#')+1 : NULL )) return;
-			if (!TCOD_parser_parse_entity(p,def)) return;
+			if (!listener->new_struct((TCOD_parser_struct_t)def,named ? strchr(id,'#')+1 : NULL )) {
+				break;
+			}
+			if (!TCOD_parser_parse_entity(p,def)) {
+				break;
+			}
 		}
 	}
-	if (lex->token_type == TCOD_LEX_ERROR) {
-		TCOD_parser_error("Parser::parse : error while parsing");
-		return;
-	}
+	
 	TCOD_lex_delete(lex);
 }
 /* default parser listener */

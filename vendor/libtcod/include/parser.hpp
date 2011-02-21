@@ -185,7 +185,7 @@ public :
 	void run(const char *filename, ITCODParserListener *listener = NULL);
 
 	/**
-	@PageName parser_run
+	@PageName parser_delete
 	@FuncTitle Destroying the parser
 	@FuncDesc Once you've done with the file parsing, you can release the resources used by the parser :
 	@Cpp TCODParser::~TCODParser()
@@ -193,6 +193,7 @@ public :
 	@Py parser_delete(parser)
 	@Param parser	In the C version, the parser handler, returned by TCOD_parser_new.
 	*/
+	~TCODParser();
 
 	// error during parsing. can be called by the parser listener
 	void error(const char *msg, ...);
@@ -214,6 +215,7 @@ private :
 // a parser structure
 class TCODLIB_API TCODParserStruct {
 public :
+
 	/**
 	@PageName parser_str
 	@FuncTitle Adding a new flag

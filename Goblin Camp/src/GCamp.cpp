@@ -74,7 +74,7 @@ int GCMain(std::vector<std::string>& args) {
 
 	#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
 		_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-		//_CrtSetBreakAlloc(954);
+		_CrtSetBreakAlloc(1461);
 	#endif
 
 	//
