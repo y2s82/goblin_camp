@@ -21,9 +21,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/weak_ptr.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include "Coordinate.hpp"
-#include "Entity.hpp"
-#include "Item.hpp"
+class Coordinate;
+class Entity;
+typedef int ItemCategory;
 
 enum Order {
 	NOORDER,

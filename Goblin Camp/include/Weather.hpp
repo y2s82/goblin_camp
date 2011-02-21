@@ -24,6 +24,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Map;
 
+enum WeatherType {
+	NORMALWEATHER,
+	RAIN
+};
+
 class Weather {
 	friend class boost::serialization::access;
 private:
@@ -35,6 +40,7 @@ private:
 
 	Map* map;
 	Direction windDirection;
+	WeatherType currentWeather;
 
 public:
 	Weather(Map* map = 0);
@@ -42,6 +48,8 @@ public:
 	void RandomizeWind();
 	void ShiftWind();
 	std::string GetWindAbbreviation();
+	void Update();
+	void ChangeWeather(WeatherType);
 };
 
 BOOST_CLASS_VERSION(Weather, 0)
@@ -50,10 +58,12 @@ template<class Archive>
 void Weather::save(Archive & ar, const unsigned int version) const {
 	ar & map;
 	ar & windDirection;
+	ar & currentWeather;
 }
 
 template<class Archive>
 void Weather::load(Archive & ar, const unsigned int version) {
 	ar & map;
 	ar & windDirection;
+	ar & currentWeather;
 }

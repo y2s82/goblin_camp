@@ -15,17 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <list>
-
-#include <boost/shared_ptr.hpp>
-#include <libtcod.hpp>
-
 #include "JobManager.hpp"
-#include "Announce.hpp"
 #include "Game.hpp"
 #include "KuhnMunkres.hpp"
 #include "StockManager.hpp"
-#include "Game.hpp"
 
 JobManager::JobManager() {
 	for (std::vector<ItemCat>::iterator i = Item::Categories.begin(); i != Item::Categories.end(); ++i) {
@@ -56,9 +49,6 @@ void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
 
 void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {
 	if (boost::shared_ptr<Job> job = oldJob.lock()) {
-		/*        if (job->priority() > LOW)
-		Announce::Inst()->AddMsg(oldJob.lock()->name+std::string(" canceled: ")+msg, TCODColor::red);
-		*/
 		job->Assign(-1);
 		job->Paused(true);
 
