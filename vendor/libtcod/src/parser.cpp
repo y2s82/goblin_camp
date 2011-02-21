@@ -116,6 +116,11 @@ TCODParser::TCODParser() {
 	data = TCOD_parser_new();
 }
 
+TCODParser::~TCODParser() {
+	defs.clearAndDelete();
+	TCOD_parser_delete(data);
+}
+
 void TCODParser::run(const char *filename, ITCODParserListener *_listener) {
 	listener=_listener;
 	parser=this;
