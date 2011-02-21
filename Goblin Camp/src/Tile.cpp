@@ -126,8 +126,8 @@ void Tile::ResetType(TileType newType) {
 		case 4:
 		case 5:
 		case 6:
-		case 7:
-		case 8: graphic = ','; break;
+		case 7: graphic = ','; break;
+		case 8: graphic = ':'; break;
 		case 9: graphic = '\''; break;
 		}
 	} else { vis = false; walkable = false; buildable = false; }
