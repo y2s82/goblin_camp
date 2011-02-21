@@ -101,7 +101,7 @@ Game* Game::Inst() {
 bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType> tileReqs) {
 	for (int x = target.X(); x < target.X() + size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + size.Y(); ++y) {
-			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
+			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->GetType(x,y)) == tileReqs.end()) ) return false;
 		}
 	}
 	return true;
@@ -1232,11 +1232,11 @@ void Game::GenerateMap(uint32 seed) {
 		for (int y = 0; y < map->Height(); ++y) {
 			float height = map->heightMap->getValue(x,y);
 			if (height < map->GetWaterlevel()) {
-				if (random.GenerateBool()) map->Type(x,y,TILERIVERBED);
-				else map->Type(x,y,TILEDITCH);
+				if (random.GenerateBool()) map->ResetType(x,y,TILERIVERBED);
+				else map->ResetType(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
-				map->Type(x,y,TILEGRASS);
+				map->ResetType(x,y,TILEGRASS);
 				if (random.Generate(9) < 9) {
 					if (height < -0.01f) {
 						map->ForeColor(x,y, TCODColor(random.Generate(100,192),127,0));
@@ -1247,7 +1247,7 @@ void Game::GenerateMap(uint32 seed) {
 					}
 				}
 			} else {
-				map->Type(x,y,TILEROCK);
+				map->ResetType(x,y,TILEROCK);
 			}
 		}
 	}
@@ -1299,7 +1299,7 @@ void Game::GenerateMap(uint32 seed) {
 				lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
 				highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
-					map->Type(x+xOffset, y+yOffset, TILEBOG);
+					map->ResetType(x+xOffset, y+yOffset, TILEBOG);
 				}
 			}
 			break; //Only generate one bog
@@ -1394,7 +1394,7 @@ void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
 	for (int x = target.X(); x < target.X()+size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y()+size.Y(); ++y) {
-			if (Map::Inst()->Type(x,y) == type) return true;
+			if (Map::Inst()->GetType(x,y) == type) return true;
 		}
 	}
 	return false;
@@ -1403,7 +1403,7 @@ bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
 void Game::DesignateBog(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->Type(x,y) == TILEBOG) {
+			if (Map::Inst()->GetType(x,y) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), true);
 				Map::Inst()->Mark(x,y);
 			}
@@ -1423,7 +1423,7 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 					StockManager::Inst()->UpdateTreeDesignations(natObj, false);
 				}
 			}
-			if (Map::Inst()->Type(x,y) == TILEBOG) {
+			if (Map::Inst()->GetType(x,y) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
 			}
@@ -1871,7 +1871,7 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 }
 
 void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
+	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && Map::Inst()->GetType(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
 
@@ -1900,7 +1900,7 @@ void Game::CreateNatureObject(Coordinate location) {
 				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
+				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->GetType(ax,ay) == TILEGRASS &&
 					Map::Inst()->GetNatureObject(ax,ay) < 0 &&
 					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
@@ -2073,7 +2073,7 @@ boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 void Game::CreateDitch(Coordinate pos) {
 	RemoveNatureObject(pos, pos);
 	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
-	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
+	Map::Inst()->ChangeType(pos.X(), pos.Y(), TILEDITCH);
 }
 
 void Game::StartFire(Coordinate pos) {
@@ -2131,7 +2131,7 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
-				if (Map::Inst()->Type(x, y) == TILEDITCH) {
+				if (Map::Inst()->GetType(x, y) == TILEDITCH) {
 					boost::shared_ptr<Job> ditchFillJob(new Job("Fill ditch"));
 					ditchFillJob->DisregardTerritory();
 					ditchFillJob->Attempts(2);

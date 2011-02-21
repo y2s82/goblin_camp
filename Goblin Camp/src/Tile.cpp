@@ -57,12 +57,12 @@ Tile::Tile(TileType newType, int newCost) :
 	burnt(0),
 	flow(NODIRECTION)
 {
-	SetType(newType);
+	ResetType(newType);
 }
 
 TileType Tile::GetType() { return type; }
 
-void Tile::SetType(TileType newType) {
+void Tile::ResetType(TileType newType) {
 	type = newType;
 	if (type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true; low = false;
@@ -116,6 +116,16 @@ void Tile::SetType(TileType newType) {
 		moveCost = 5;
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
+}
+
+void Tile::ChangeType(TileType newType) {
+	bool oldBuildable = buildable;
+	bool oldVis = vis; 
+	bool oldWalkable = walkable; 
+	ResetType(newType);
+	buildable = oldBuildable;
+	vis = oldVis;
+	walkable = oldWalkable;
 }
 
 bool Tile::BlocksLight() const { return !vis; }
@@ -257,7 +267,7 @@ void Tile::WalkOver() {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (burnt > 0) Burn(0); //Just to re-do the color
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
-		if (walkedOver > 300 && Random::Generate(99) == 0) SetType(TILEMUD);
+		if (walkedOver > 300 && Random::Generate(99) == 0) ChangeType(TILEMUD);
 	}
 }
 

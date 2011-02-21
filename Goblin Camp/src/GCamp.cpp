@@ -227,10 +227,10 @@ void StartNewGame() {
 			TCODLine::init(lineX, lineY, candidate.second.X(), candidate.second.Y());
 			do {
 				if (lineX >= 0 && lineX < Map::Inst()->Width() && lineY >= 0 && lineY < Map::Inst()->Height()) {
-					if (Map::Inst()->Type(lineX, lineY) == TILEDITCH || Map::Inst()->Type(lineX, lineY) == TILERIVERBED) {
+					if (Map::Inst()->GetType(lineX, lineY) == TILEDITCH || Map::Inst()->GetType(lineX, lineY) == TILERIVERBED) {
 						if (distance < riverDistance) riverDistance = distance;
 						if (distance < 25) riverDistance = 2000;
-					} else if (Map::Inst()->Type(lineX, lineY) == TILEROCK) {
+					} else if (Map::Inst()->GetType(lineX, lineY) == TILEROCK) {
 						if (distance < hillDistance) hillDistance = distance;
 					}
 				}
@@ -239,7 +239,7 @@ void StartNewGame() {
 		}
 
 		candidate.first = -hillDistance - riverDistance;
-		if (Map::Inst()->Type(candidate.second.X(), candidate.second.Y()) != TILEGRASS) candidate.first -= 10000;
+		if (Map::Inst()->GetType(candidate.second.X(), candidate.second.Y()) != TILEGRASS) candidate.first -= 10000;
 		spawnCenterCandidates.push(candidate);
 	}
 
