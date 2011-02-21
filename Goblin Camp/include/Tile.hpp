@@ -35,6 +35,7 @@ enum TileType {
 	TILEBOG,
 	TILEROCK,
 	TILEMUD,
+	TILESNOW,
 	TILE_TYPE_COUNT
 };
 
@@ -74,7 +75,8 @@ private:
 public:
 	Tile(TileType = TILEGRASS, int = 1);
 	TileType GetType();
-	void SetType(TileType);
+	void ResetType(TileType);
+	void ChangeType(TileType);
 	bool BlocksLight() const;
 	void SetBlocksLight(bool);
 	bool IsWalkable() const;

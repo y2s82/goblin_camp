@@ -34,7 +34,7 @@ overlayFlags(0), markerids(0) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
-			tileMap[i][e].SetType(TILEGRASS);
+			tileMap[i][e].ResetType(TILEGRASS);
 		}
 	}
 	width = tileMap.size();
@@ -93,13 +93,18 @@ bool Map::IsBuildable(int x, int y) const {
 void Map::SetBuildable(int x, int y, bool value) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBuildable(value); 
 }
-TileType Map::Type(int x, int y) { 
+TileType Map::GetType(int x, int y) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
 	return TILENONE;
 }
-void Map::Type(int x, int y, TileType ntype) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetType(ntype); 
+void Map::ResetType(int x, int y, TileType ntype) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ResetType(ntype); 
 }
+
+void Map::ChangeType(int x, int y, TileType ntype) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ChangeType(ntype); 
+}
+
 void Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
 		tileMap[x][y].MoveTo(uid);
@@ -226,7 +231,7 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 }
 
 void Map::Reset(int x, int y) {
-	tileMap[x][y].SetType(TILEGRASS);
+	tileMap[x][y].ResetType(TILEGRASS);
 	tileMap[x][y].SetWalkable(true);
 	tileMap[x][y].SetBuildable(true);
 	tileMap[x][y].SetConstruction(-1);

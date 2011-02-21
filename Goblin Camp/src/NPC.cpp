@@ -1037,7 +1037,7 @@ CONTINUEEAT:
 				break;
 
 			case BOGIRON:
-				if (Map::Inst()->Type(x, y) == TILEBOG) {
+				if (Map::Inst()->GetType(x, y) == TILEBOG) {
 					AddEffect(WORKING);
 					if (Random::Generate(UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
@@ -1191,7 +1191,7 @@ CONTINUEEAT:
 					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
-						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						Map::Inst()->ChangeType(currentTarget().X(), currentTarget().Y(), TILEDITCH);
 						int amount = 0;
 						int chance = Random::Generate(9);
 						if (chance < 4) amount = 1;
@@ -1261,7 +1261,7 @@ CONTINUEEAT:
 
 			case FILLDITCH:
 				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("earth"))) {
-					if (Map::Inst()->Type(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
+					if (Map::Inst()->GetType(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
 						TaskFinished(TASKFAILFATAL, "(FILLDITCH)Target not a ditch");
 						break;
 					}
@@ -1277,7 +1277,7 @@ CONTINUEEAT:
 							Game::Inst()->RemoveItem(carried);
 							carried.reset();
 
-							Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEMUD);
+							Map::Inst()->ChangeType(currentTarget().X(), currentTarget().Y(), TILEMUD);
 
 							TaskFinished(TASKSUCCESS);
 							break;
