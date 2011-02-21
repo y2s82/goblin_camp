@@ -21,9 +21,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/split_member.hpp>
 
 #include "Entity.hpp"
-#include "Coordinate.hpp"
-#include "Item.hpp"
 
+class Coordinate;
+
+typedef int ItemType;
 typedef int NatureObjectType;
 
 class NatureObjectPreset {

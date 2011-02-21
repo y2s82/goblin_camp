@@ -21,9 +21,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/enable_shared_from_this.hpp>
 #include <boost/serialization/set.hpp>
 
-#include "Coordinate.hpp"
 #include "UI/UIComponents.hpp"
 #include "UI/Tooltip.hpp"
+
+#include "Coordinate.hpp"
 
 #define ENTITYHEIGHT 5
 

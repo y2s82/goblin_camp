@@ -25,11 +25,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 
 #include "Entity.hpp"
-#include "Coordinate.hpp"
 #include "Attack.hpp"
 
 typedef int ItemCategory;
 typedef int ItemType;
+
+class Coordinate;
 
 class ItemCat {
 public:

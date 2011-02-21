@@ -284,9 +284,11 @@ private:
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure\n") % str->getName()).str();
 #endif
-		if (boost::iequals(str->getName(), "category_type")) {
-			if (Item::itemCategoryNames.find(name) != Item::itemCategoryNames.end()) {
-				categoryIndex = Item::itemCategoryNames[name];
+		if (name && boost::iequals(str->getName(), "category_type")) {
+			std::string strName(name);
+			boost::to_upper(strName);
+			if (Item::itemCategoryNames.find(strName) != Item::itemCategoryNames.end()) {
+				categoryIndex = Item::itemCategoryNames[strName];
 				Item::Categories[categoryIndex] = ItemCat();
 				Item::Categories[categoryIndex].name = name;
 				presetCategoryParent[categoryIndex] = "";
@@ -295,12 +297,14 @@ private:
 				categoryIndex = Item::Categories.size() - 1;
 				++Game::ItemCatCount;
 				Item::Categories.back().name = name;
-				Item::itemCategoryNames.insert(std::make_pair(boost::to_upper_copy(Item::Categories.back().name), Game::ItemCatCount-1));
+				Item::itemCategoryNames.insert(std::make_pair(strName, Game::ItemCatCount-1));
 				presetCategoryParent.insert(std::make_pair(categoryIndex, ""));
 			}
-		} else if (boost::iequals(str->getName(), "item_type")) {
-			if (Item::itemTypeNames.find(name) != Item::itemTypeNames.end()) {
-				itemIndex = Item::itemTypeNames[name];
+		} else if (name && boost::iequals(str->getName(), "item_type")) {
+			std::string strName(name);
+			boost::to_upper(strName);
+			if (Item::itemTypeNames.find(strName) != Item::itemTypeNames.end()) {
+				itemIndex = Item::itemTypeNames[strName];
 				Item::Presets[itemIndex] = ItemPreset();
 				Item::Presets[itemIndex].name = name;
 				presetGrowth[itemIndex] = "";
@@ -315,7 +319,7 @@ private:
 				presetDecay.insert(std::make_pair(itemIndex, std::vector<std::string>()));
 				++Game::ItemTypeCount;
 				Item::Presets.back().name = name;
-				Item::itemTypeNames.insert(std::make_pair(boost::to_upper_copy(Item::Presets.back().name), Game::ItemTypeCount-1));
+				Item::itemTypeNames.insert(std::make_pair(strName, Game::ItemTypeCount-1));
 				presetProjectile.insert(std::make_pair(itemIndex, ""));
 			}
 		} else if (boost::iequals(str->getName(), "attack")) {

@@ -42,6 +42,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Item.hpp"
 #include "scripting/Event.hpp"
 #include "Faction.hpp"
+#include "Stockpile.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -103,6 +104,7 @@ Construction::~Construction() {
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
 			Map::Inst()->SetBlocksLight(ix,iy,false);
+			Map::Inst()->SetBlocksWater(ix,iy,false);
 		}
 	}
 	
@@ -394,11 +396,13 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
-		if (boost::iequals(str->getName(), "construction_type")) {
+		if (name && boost::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
-			if (Construction::constructionNames.find(name) != Construction::constructionNames.end()) {
-				constructionIndex = Construction::constructionNames[name];
+			std::string strName(name);
+			boost::to_upper(strName);
+			if (Construction::constructionNames.find(strName) != Construction::constructionNames.end()) {
+				constructionIndex = Construction::constructionNames[strName];
 				//A redefinition, so wipe out the earlier one
 				Construction::Presets[constructionIndex] = ConstructionPreset();
 				Construction::Presets[constructionIndex].name = name;
@@ -406,7 +410,7 @@ class ConstructionListener : public ITCODParserListener {
 			} else { //New construction
 				Construction::Presets.push_back(ConstructionPreset());
 				Construction::Presets.back().name = name;
-				Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
+				Construction::constructionNames.insert(std::make_pair(strName, Construction::Presets.size() - 1));
 				Construction::AllowedAmount.push_back(-1);
 				constructionIndex = Construction::Presets.size() - 1;
 			}
