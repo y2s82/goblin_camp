@@ -505,6 +505,10 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 				std::cout<<"("<<Construction::Presets[constructionIndex].name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
 #endif
+				//TILEGRASS changes to TILESNOW in winter
+				if (Tile::StringToTileType((char*)TCOD_list_get(value.list,i)) == TILEGRASS) {
+					Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
+				}
 			}
 		} else if (boost::iequals(name, "tier")) {
 			Construction::Presets[constructionIndex].tier = value.i;
@@ -580,6 +584,7 @@ class ConstructionListener : public ITCODParserListener {
 				Construction::Presets[constructionIndex].tileReqs.insert(TILEGRASS);
 				Construction::Presets[constructionIndex].tileReqs.insert(TILEMUD);
 				Construction::Presets[constructionIndex].tileReqs.insert(TILEROCK);
+				Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
 			}
 
 			//Add material information to the description
