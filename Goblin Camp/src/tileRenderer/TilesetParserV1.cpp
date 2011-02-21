@@ -150,7 +150,7 @@ boost::shared_ptr<TileSet> TileSetParserV1::Run(boost::filesystem::path dataFile
 	tileWidth = -1;
 	tileHeight = -1;
 	currentTexture = boost::shared_ptr<TileSetTexture>();
-	tileSetPath = dataFilePath.branch_path();
+	tileSetPath = dataFilePath.parent_path();
 	success = true;
 
 	parser.run(dataFilePath.string().c_str(), this);
@@ -532,7 +532,7 @@ TileSetMetadataParserV1::TileSetMetadataParserV1()
 }
 
 TileSetMetadata TileSetMetadataParserV1::Run(boost::filesystem::path dataFilePath) {
-	metadata = TileSetMetadata(dataFilePath.branch_path());
+	metadata = TileSetMetadata(dataFilePath.parent_path());
 	metadata.valid = true;
 
 	parser.run(dataFilePath.string().c_str(), this);

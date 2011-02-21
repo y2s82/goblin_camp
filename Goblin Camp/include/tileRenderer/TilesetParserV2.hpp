@@ -71,7 +71,10 @@ private:
 	int tileWidth;
 	int tileHeight;	
 
-	std::vector<int> fireSprites;
+	std::vector<int> markerFrames;
+	int markerFPS;
+
+	std::vector<int> fireFrames;
 	int fireFPS;
 
 	struct ConstructionSpriteFactory {
@@ -94,20 +97,19 @@ private:
 	};
 	ConstructionSpriteFactory constructionFactory;
 
-	struct SpellSpriteFactory {
+	struct AnimatedSpriteFactory {
 		std::vector<int> sprites;
 		int fps;
 
-		SpellSpriteFactory() : sprites(), fps(15) {}
+		AnimatedSpriteFactory() : sprites(), fps(15) {}
 
-		SpellSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
+		Sprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
-	SpellSpriteFactory spellFactory;
+	AnimatedSpriteFactory animSpriteFactory;
 
 	StatusEffectSpriteFactory statusEffectFactory;
 	NPCSpriteFactory npcSpriteFactory;
 		
-	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSprite itemSprite;
 	
 	static const char * uninitialisedTilesetError;

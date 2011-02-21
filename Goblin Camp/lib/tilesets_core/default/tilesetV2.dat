@@ -1,25 +1,25 @@
-tileset_data "Default Tileset" {
+tileset "Default Tileset" {
 	tileWidth=16
 	tileHeight=16
 	description="Test tileset with various tiles sourced from Goblin Camp Forum, as well as crawl-tiles"
 	author="onionknight, hutze, apostrophest, Crawl Stone Soup artists"
 
-	tile_texture_data "tileset.png"
+	texture "tileset.png"
 	{
 		// Terrain tiles
-		unknown_terrain=0
-		grass_terrain=[88,89,90,91,
-					   104,105,106,107,
-					   120,121,122,123,
-					   136,137,138,139]
-		ditch_terrain=[1]
-		riverbed_terrain=[2]
-		bog_terrain=[3]
-		rock_terrain=[92,93,94,95,
-					  108,109,110,111,
-					  124,125,126,127,
-					  140,141,142,143]
-		mud_terrain=[5]
+		unknownTerrain=0
+		grassTerrain=[88,89,90,91,
+				      104,105,106,107,
+					  120,121,122,123,
+					  136,137,138,139]
+		ditchTerrain=[1]
+		riverbedTerrain=[2]
+		bogTerrain=[3]
+		rockTerrain=[92,93,94,95,
+			         108,109,110,111,
+					 124,125,126,127,
+					 140,141,142,143]
+		mudTerrain=[5]
 
 		details=[192,193,194,195,208,209,210,211]
 		detailRange=128
@@ -37,13 +37,13 @@ tileset_data "Default Tileset" {
 			   153,154,
 			   169,170,
 			   185,186]
-		minor_filth=6
-		major_filth=[7,8,9,10,11]
-		marker=14
+		minorFilth=6
+		majorFilth=[7,8,9,10,11]
+		marker=[14]
 		blood=[16]
 
 		// Overlays
-		non_territory=13
+		nonTerritory=13
 		territory=12
 		marked=15
 		corruption=[128,129,130,131,
@@ -51,25 +51,46 @@ tileset_data "Default Tileset" {
 					160,161,162,163,
 					176,177,178,179]
 
-		// Cursors
-		default_cursor=[12,13]
-		construction_cursor=[12,13]
-		stockpile_cursor=[12,13]
-		treeFelling_cursor=[12,13]
-		harvest_cursor=[12,13]
-		order_cursor=[12,13]
-		tree_cursor=[12,13]
-		dismantle_cursor=[12,13]
-		undesignate_cursor=[12,13]
-		bog_cursor=[12,13]
-		dig_cursor=[12,13]
-		add_territory_cursor=[13]
-		remove_territory_cursor=[12]
-		gather_cursor=[12,13]
+		// Tile Highlights (when placing or selecting)
+		defaultTileHighlight=[12,13]
+		constructionTileHighlight=[12,13]
+		stockpileTileHighlight=[12,13]
+		treeFellingTileHighlight=[12,13]
+		harvestTileHighlight=[12,13]
+		orderTileHighlight=[12,13]
+		treeTileHighlight=[12,13]
+		dismantleTileHighlight=[12,13]
+		undesignateTileHighlight=[12,13]
+		bogTileHighlight=[12,13]
+		digTileHighlight=[12,13]
+		addTerritoryTileHighlight=[13]
+		removeTerritoryTileHighlight=[12]
+		gatherTileHighlight=[12,13]
 
-		default_underconstruction=18
+		defaultUnderconstruction=18
 		fire=[68,69]
 		fireFPS=10
+
+		creature_sprite {
+			sprites=[21]
+		}
+
+		plant_sprite {
+			sprites=[29]
+		}
+
+		item_sprite {
+			sprites=[20]
+		}
+		
+		spell_sprite {
+		    sprites=[71,73]
+			fps=30
+		}
+
+		construction_sprite {
+			sprites=[19]
+		}
 
 		status_effect_sprite "hunger" {
 			sprites=[46]
@@ -134,398 +155,377 @@ tileset_data "Default Tileset" {
 			flashRate=0
 			alwaysOn
 		}
-	
-		creature_sprite_data {
-			sprite=[21]
+
+		creature_sprite "goblin" {
+			sprites=[23]
 		}
 
-		plant_sprite_data {
-			sprite=29
-		}
-
-		item_sprite_data {
-			sprite=20
-		}
-		
-		spell_sprite_data {
-		    sprites=[71,73]
-			fps=30
-		}
-
-		construction_sprite_data {
-			sprites=[19]
-		}
-
-		creature_sprite_data "goblin" {
-			sprite=[23]
-		}
-
-		creature_sprite_data "orc" {
-			sprite=[24]
+		creature_sprite "orc" {
+			sprites=[24]
 		}		
 
-		creature_sprite_data "soldier ant" {
-			sprite=[59]
+		creature_sprite "soldier ant" {
+			sprites=[59]
 		}
 		
-		creature_sprite_data "starving wolf" {
-			sprite=[60]
+		creature_sprite "starving wolf" {
+			sprites=[60]
 		}
 		
-		creature_sprite_data "giant snail" {
-			sprite=[207]
+		creature_sprite "giant snail" {
+			sprites=[207]
 		}
 		
-		creature_sprite_data "rabid albino rat" {
-			sprite=[217]
+		creature_sprite "rabid albino rat" {
+			sprites=[217]
 		}
 		
-		creature_sprite_data "snake" {
-			sprite=[218]
+		creature_sprite "snake" {
+			sprites=[218]
 		}
 		
-		creature_sprite_data "killer bee" {
-			sprite=[220]
+		creature_sprite "killer bee" {
+			sprites=[220]
 		}
 		
-		creature_sprite_data "harpy" {
-			sprite=[221]
+		creature_sprite "harpy" {
+			sprites=[221]
 		}
 		
-		creature_sprite_data "kobold" {
-			sprite=[222]
+		creature_sprite "kobold" {
+			sprites=[222]
 		}
 		
-		creature_sprite_data "ogre" {
-			sprite=[223]
+		creature_sprite "ogre" {
+			sprites=[223]
 		}
 		
-		creature_sprite_data "troll" {
-			sprite=[233]
+		creature_sprite "troll" {
+			sprites=[233]
 		}
 		
-		creature_sprite_data "skeleton" {
-			sprite=[234]
+		creature_sprite "skeleton" {
+			sprites=[234]
 		}
 		
-		creature_sprite_data "minotaur" {
-			sprite=[235]
+		creature_sprite "minotaur" {
+			sprites=[235]
 		}
 		
-		creature_sprite_data "cyclops" {
-			sprite=[236]
+		creature_sprite "cyclops" {
+			sprites=[236]
 		}
 		
-		creature_sprite_data "giant" {
-			sprite=[237]
+		creature_sprite "giant" {
+			sprites=[237]
 		}
 		
-		creature_sprite_data "griffon" {
-			sprite=[238]
+		creature_sprite "griffon" {
+			sprites=[238]
 		}
 		
-		creature_sprite_data "will o wisp" {
-			sprite=[239]
+		creature_sprite "will o wisp" {
+			sprites=[239]
 		}
 		
-		creature_sprite_data "imp" {
-			sprite=[249]
+		creature_sprite "imp" {
+			sprites=[249]
 		}
 		
-		creature_sprite_data "salamander" {
-			sprite=[250]
+		creature_sprite "salamander" {
+			sprites=[250]
 		}
 		
-		creature_sprite_data "fire elemental" {
-			sprite=[251]
+		creature_sprite "fire elemental" {
+			sprites=[251]
 		}
 		
-		creature_sprite_data "treeman" {
-			sprite=[29]
+		creature_sprite "treeman" {
+			sprites=[29]
 		}
 		
-		plant_sprite_data "Pine"{
-			sprite=29
+		plant_sprite "Pine"{
+			sprites=[29]
 		}
 
-		plant_sprite_data "Wild Bloodberry bush" {
-			sprite=22
+		plant_sprite "Wild Bloodberry bush" {
+			sprites=[22]
 		}
 
-		plant_sprite_data "Wild Blueleaf" {
-			sprite=28
+		plant_sprite "Wild Blueleaf" {
+			sprites=[28]
 		}
 
-		plant_sprite_data "Dandelion" {
-			sprite=28
+		plant_sprite "Dandelion" {
+			sprites=[28]
 		}
 
-		plant_sprite_data "Red Poppy" {
-			sprite=28
+		plant_sprite "Red Poppy" {
+			sprites=[28]
 		}
 
-		plant_sprite_data "Alpine aster" {
-			sprite=30
+		plant_sprite "Alpine aster" {
+			sprites=[30]
 		}
 
-		plant_sprite_data "Blue Skullcap" {
-			sprite=28
+		plant_sprite "Blue Skullcap" {
+			sprites=[28]
 		}
 
-		plant_sprite_data "Willow" {
-			sprite=28
+		plant_sprite "Willow" {
+			sprites=[28]
 		}
 
-		plant_sprite_data "Birch" {
-			sprite=29
+		plant_sprite "Birch" {
+			sprites=[29]
 		}
 
-		plant_sprite_data "Spruce" {
-			sprite=29
+		plant_sprite "Spruce" {
+			sprites=[29]
 		}
 
-		plant_sprite_data "Silvervine" {
-			sprite=156
+		plant_sprite "Silvervine" {
+			sprites=[156]
 		}
 
-		plant_sprite_data "Thornbush" {
-			sprite=155
+		plant_sprite "Thornbush" {
+			sprites=[155]
 		}
 
-		plant_sprite_data "Withering tree" {
-			sprite=31
+		plant_sprite "Withering tree" {
+			sprites=[31]
 		}
 
-		plant_sprite_data "Redhollow" {
-			sprite=30
+		plant_sprite "Redhollow" {
+			sprites=[30]
 		}
 
-		plant_sprite_data "Darkroot" {
-			sprite=31
+		plant_sprite "Darkroot" {
+			sprites=[31]
 		}
 
-		item_sprite_data {
-			sprite=20
+		item_sprite {
+			sprites=[20]
 		}
 
-		item_sprite_data "Log" {
-			sprite=38 
+		item_sprite "Log" {
+			sprites=[38] 
 		}
 
-		item_sprite_data "Plank" {
-			sprite=37
+		item_sprite "Plank" {
+			sprites=[37]
 		}
 
-		item_sprite_data "Stone" {
-			sprite=32
+		item_sprite "Stone" {
+			sprites=[32]
 		}
 
-		item_sprite_data "Firewood" {
-			sprite=36
+		item_sprite "Firewood" {
+			sprites=[36]
 		}
 
-		item_sprite_data "Rough stone" {
-			sprite=32
+		item_sprite "Rough stone" {
+			sprites=[32]
 		}
 
-		item_sprite_data "Berry" {
-			sprite=35
+		item_sprite "Berry" {
+			sprites=[35]
 		}
 
-		item_sprite_data "Bread" {
-			sprite=189
+		item_sprite "Bread" {
+			sprites=[189]
 		}
 
-		item_sprite_data "Crate" {
-			sprite=40
+		item_sprite "Crate" {
+			sprites=[40]
 		}
 
-		item_sprite_data "Barrel" {
-			sprite=41
+		item_sprite "Barrel" {
+			sprites=[41]
 		}
 
-		item_sprite_data "Bucket" {
-			sprite=74
+		item_sprite "Bucket" {
+			sprites=[74]
 			drawWhenWielded
 		}
 
-		item_sprite_data "Sack" {
-			sprite=20
+		item_sprite "Sack" {
+			sprites=[20]
 		}
 
-		item_sprite_data "Door" {
-			sprite=39
+		item_sprite "Door" {
+			sprites=[39]
 		}
 
-		item_sprite_data "Bed" {
-			sprite=42
+		item_sprite "Bed" {
+			sprites=[42]
 		}
 
-		item_sprite_data "Clay" {
-			sprite=34
+		item_sprite "Clay" {
+			sprites=[34]
 		}
 
-		item_sprite_data "Seed" {
-			sprite=61
+		item_sprite "Seed" {
+			sprites=[61]
 		}
 		
-		item_sprite_data "Nightbloom" {
-			sprite=158
+		item_sprite "Nightbloom" {
+			sprites=[158]
 		}
 		
-		item_sprite_data "Dried fruit" {
-			sprite=159
+		item_sprite "Dried fruit" {
+			sprites=[159]
 		}
 		
-		item_sprite_data "Meat" {
-			sprite=174
+		item_sprite "Meat" {
+			sprites=[174]
 		}
 		
-		item_sprite_data "Berry wine" {
-			sprite=174
+		item_sprite "Berry wine" {
+			sprites=[174]
 		}
 		
-		item_sprite_data "Chillwine" {
-			sprite=175
+		item_sprite "Chillwine" {
+			sprites=[175]
 		}
 		
-		item_sprite_data "Healing tonic" {
-			sprite=187
+		item_sprite "Healing tonic" {
+			sprites=[187]
 		}
 		
-		item_sprite_data "Poison antidote" {
-			sprite=188
+		item_sprite "Poison antidote" {
+			sprites=[188]
 		}
 		
-		item_sprite_data "Wooden club" {
-			sprite=190
+		item_sprite "Wooden club" {
+			sprites=[190]
 		}
 		
-		item_sprite_data "Stone maul" {
-			sprite=191
+		item_sprite "Stone maul" {
+			sprites=[191]
 		}
 		
-		item_sprite_data "Stone axe" {
-			sprite=201
+		item_sprite "Stone axe" {
+			sprites=[201]
 		}
 		
-		item_sprite_data "Stone spear" {
-			sprite=202
+		item_sprite "Stone spear" {
+			sprites=[202]
 		}
 		
-		item_sprite_data "Bone dagger" {
-			sprite=203
+		item_sprite "Bone dagger" {
+			sprites=[203]
 		}
 		
-		item_sprite_data "Wooden arrow" {
-			sprite=204
+		item_sprite "Wooden arrow" {
+			sprites=[204]
 		}
 		
-		item_sprite_data "Stone-tipped arrow" {
-			sprite=205
+		item_sprite "Stone-tipped arrow" {
+			sprites=[205]
 		}
 		
-		item_sprite_data "Wooden bow" {
-			sprite=206
+		item_sprite "Wooden bow" {
+			sprites=[206]
 		}
 		
-		construction_sprite_data "Farm plot" {
+		construction_sprite "Farm plot" {
 			sprites=[43]
 		}
 
-		construction_sprite_data "Totem Pole" {
+		construction_sprite "Totem Pole" {
 			sprites=[43,43,43,
 					 43,44,43,
 					 43,43,43]
-			underconstruction_sprites=[18]
+			underconstructionSprites=[18]
 			width=3
 		}
 
-		construction_sprite_data "Door" {
+		construction_sprite "Door" {
 			sprites=[39]
 			openSprite=45
 		}
 
-		construction_sprite_data "Palisade" {
-			connection_map
+		construction_sprite "Palisade" {
+			connectionMap
 			sprites=[64,65,66,67,
 			         80,81,82,83,
 					 96,97,98,99,
 					 112,113,114,115]
 		}
 
-		construction_sprite_data "Stockpile" {
+		construction_sprite "Stockpile" {
 			sprites=[232]
 		}
 		
-		construction_sprite_data "Saw pit" {
+		construction_sprite "Saw pit" {
 			sprites=[242,242,242,
 					 242,242,242,
 					 242,242,242]
-			underconstruction_sprites=[18]
+			underconstructionSprites=[18]
 			width=3
 		}
 		
-		construction_sprite_data "Spawning pool" {
+		construction_sprite "Spawning pool" {
 			sprites=[227]
-			underconstruction_sprites=[226]
+			underconstructionSprites=[226]
 		}
 		
-		construction_sprite_data "Carpenter" {
+		construction_sprite "Carpenter" {
 			sprites=[230,229,231,
 					 228,243,245,
 					 246,244,247]
-			underconstruction_sprites=[18]
+			underconstructionSprites=[18]
 			width=3
 		}
-		construction_sprite_data "Weaver" {
+		construction_sprite "Weaver" {
 			sprites=[230,229,231,
 					 228,243,245,
 					 246,244,247]
-			underconstruction_sprites=[18]
+			underconstructionSprites=[18]
 			width=3
 		}
-		construction_sprite_data "Basket Weaver" {
+		construction_sprite "Basket Weaver" {
 			sprites=[230,229,231,
 					 228,243,245,
 					 246,244,247]
-			underconstruction_sprites=[18]
+			underconstructionSprites=[18]
 			width=3
 		}
-		construction_sprite_data "Kitchen" {
+		construction_sprite "Kitchen" {
 			sprites=[230,229,231,
 					 228,243,245,
 					 246,244,247]
-			underconstruction_sprites=[18]
+			underconstructionSprites=[18]
 			width=3
 		}
 		
-		construction_sprite_data "Bed" {
+		construction_sprite "Bed" {
 			sprites=[42]
 		}
 
-		construction_sprite_data "Spiked pit" {
+		construction_sprite "Spiked pit" {
 			sprites=[26]
-			unreadytrap_sprites=[25]
+			unreadyTrapSprites=[25]
 		}
 		
-		spell_sprite_data "smoke" {
+		spell_sprite "smoke" {
 			sprites=[63]
 		}
 
-		spell_sprite_data "spark" {
+		spell_sprite "spark" {
 		    sprites=[62]
 		}
 
-		spell_sprite_data "steam" {
+		spell_sprite "steam" {
 			sprites=[72]
 		}
 	}
 
-	tile_texture_data "orcTiles.png"
+	texture "orcTiles.png"
 	{
-		creature_sprite_data "orc" {
-			sprite=[0,1,2,3,4,
+		creature_sprite "orc" {
+			sprites=[0,1,2,3,4,
 			        5,6,7,8,9,
 					10,11,12,13,14,
 					15,16,17,18,19,
