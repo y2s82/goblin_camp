@@ -52,6 +52,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Item.hpp"
 #include "scripting/Engine.hpp"
 #include "scripting/Event.hpp"
+#include "Weather.hpp"
 
 #include "Version.hpp"
 
@@ -189,7 +190,9 @@ void StartNewGame() {
 	game->LoadingScreen();
 	
 	Script::Event::GameStart();
+
 	game->GenerateMap(time(0));
+	game->SetSeason(LateFall);
 
 	std::priority_queue<std::pair<int, Coordinate> > spawnCenterCandidates;
 
@@ -295,6 +298,8 @@ void StartNewGame() {
 	game->CenterOn(spawnCenterCandidates.top().second);
 
 	Map::Inst()->SetTerritoryRectangle(spawnTopCorner, spawnBottomCorner, true);
+
+	Map::Inst()->weather->ApplySeasonalEffects();
 
 	MainLoop();
 }
