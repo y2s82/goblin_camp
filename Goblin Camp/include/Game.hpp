@@ -206,6 +206,7 @@ public:
 	std::list<boost::weak_ptr<WaterNode> > waterList;
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
+	void CreateWaterFromNode(boost::shared_ptr<WaterNode>);
 	void RemoveWater(Coordinate);
 	Coordinate FindWater(Coordinate);
 	Coordinate FindFilth(Coordinate);
