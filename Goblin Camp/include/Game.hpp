@@ -228,6 +228,7 @@ public:
 
 	Season CurrentSeason();
 	std::string SeasonToString(Season);
+	void SetSeason(Season);
 	void SpawnTillageJobs();
 	void DeTillFarmPlots();
 	void DecayItems();
