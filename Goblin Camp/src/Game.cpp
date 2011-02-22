@@ -1254,7 +1254,7 @@ void Game::GenerateMap(uint32 seed) {
 				else map->ResetType(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
-				map->ResetType(x,y,TILESNOW);
+				map->ResetType(x,y,TILEGRASS);
 			} else {
 				map->ResetType(x,y,TILEROCK);
 			}
@@ -2165,4 +2165,8 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 			}
 		}
 	}
+}
+
+void Game::SetSeason(Season newSeason) {
+	season = newSeason;
 }
