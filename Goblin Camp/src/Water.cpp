@@ -91,6 +91,7 @@ void WaterNode::Update() {
 						if (!coastal) {
 							TileType tile = Map::Inst()->GetType(ix,iy);
 							if (tile != TILENONE && tile != TILEDITCH && tile != TILERIVERBED) coastal = true;
+							if (Map::Inst()->GetNatureObject(ix,iy) >= 0) coastal = true;
 						}
 						/*Choose the surrounding tiles that:
 						Are the same height or low
