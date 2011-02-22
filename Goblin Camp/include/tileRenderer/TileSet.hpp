@@ -33,7 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
 #include "tileRenderer/ItemSprite.hpp"
-#include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
 class TileSet : private boost::noncopyable
@@ -98,10 +98,10 @@ public:
 	void SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite);
 		
 	void AddNPCSprite(std::string name, const NPCSprite& sprite);
-	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
+	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& sprite);
 	void AddItemSprite(std::string name, const ItemSprite& sprite);
-	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
-	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
+	void AddConstructionSprite(std::string name, const ConstructionSprite& sprite);
+	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& sprite);
 	
 	void AddDetailSprite(const Sprite& sprite);
 	void SetDetailRange(int range);
@@ -109,10 +109,10 @@ public:
 	bool HasTerrainDetails() const;
 	
 	void SetDefaultNPCSprite(const NPCSprite& sprite);
-	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
+	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& sprite);
 	void SetDefaultItemSprite(const ItemSprite& sprite);
-	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
-	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
+	void SetDefaultConstructionSprite(const ConstructionSprite& sprite);
+	void SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite);
 	
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
@@ -159,8 +159,8 @@ private:
 	std::vector<ItemSprite> itemSprites;
 	LookupMap itemSpriteLookup;
 
-	ConstructionSpriteSet defaultConstructionSpriteSet;
-	std::vector<ConstructionSpriteSet> constructionSpriteSets;
+	ConstructionSprite defaultConstructionSprite;
+	std::vector<ConstructionSprite> constructionSprites;
 	LookupMap constructionSpriteLookup;
 
 	SpellSpriteSet defaultSpellSpriteSet;

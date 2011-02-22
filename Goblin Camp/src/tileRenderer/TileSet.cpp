@@ -49,9 +49,9 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	itemSprites(),
 	itemSpriteLookup(),
 	defaultItemSprite(),
-	constructionSpriteSets(),
+	constructionSprites(),
 	constructionSpriteLookup(),
-	defaultConstructionSpriteSet(),
+	defaultConstructionSprite(),
 	defaultSpellSpriteSet(),
 	spellSpriteLookup(),
 	spellSpriteSets(),
@@ -213,10 +213,10 @@ void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect 
 
 void TileSet::DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = door->GetGraphicsHint();
-	if (hint == -1 || hint >= constructionSpriteSets.size()) {
-		defaultConstructionSpriteSet.DrawOpen(worldPos - door->Position(), dst, dstRect);
+	if (hint == -1 || hint >= constructionSprites.size()) {
+		defaultConstructionSprite.DrawOpen(worldPos - door->Position(), dst, dstRect);
 	} else {
-		constructionSpriteSets[hint].DrawOpen(worldPos - door->Position(), dst, dstRect);
+		constructionSprites[hint].DrawOpen(worldPos - door->Position(), dst, dstRect);
 	}
 }
 
@@ -233,7 +233,7 @@ namespace {
 
 void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
-	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = construction->Type();
 		spriteSet.Draw(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
@@ -244,7 +244,7 @@ void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate
 
 void TileSet::DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = construction->GetGraphicsHint();
-	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.HasUnderConstructionSprites()) {
 		if (spriteSet.IsConnectionMap()) {
 			ConstructionType type = construction->Type();
@@ -259,7 +259,7 @@ void TileSet::DrawUnderConstruction(Construction * construction, const Coordinat
 
 void TileSet::DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	int hint = trap->GetGraphicsHint();
-	const ConstructionSpriteSet& spriteSet((hint == -1 || hint >= constructionSpriteSets.size()) ? defaultConstructionSpriteSet : constructionSpriteSets[hint]);
+	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = trap->Type();
 		spriteSet.DrawUnreadyTrap(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
@@ -508,54 +508,79 @@ void TileSet::SetFireSprite(const Sprite& sprite) {
 	fireTile = sprite;
 }
 
-void TileSet::AddNPCSprite(std::string name, const NPCSprite& set) {
-	int index = npcSprites.size();
-	npcSprites.push_back(set);
-	npcSpriteLookup[name] = index;
+void TileSet::AddNPCSprite(std::string name, const NPCSprite& sprite) {
+	LookupMap::const_iterator found(npcSpriteLookup.find(name));
+	if (found != npcSpriteLookup.end()) {
+		npcSprites[found->second] = sprite;
+	} else {
+		int index = npcSprites.size();
+		npcSprites.push_back(sprite);
+		npcSpriteLookup[name] = index;
+	}
 }
 
-void TileSet::SetDefaultNPCSprite(const NPCSprite& set) {
-	defaultNPCSprite = set;
+void TileSet::SetDefaultNPCSprite(const NPCSprite& sprite) {
+	defaultNPCSprite = sprite;
 }
 
-void TileSet::AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set) {
-	int index = natureObjectSpriteSets.size();
-	natureObjectSpriteSets.push_back(set);
-	natureObjectSpriteLookup[name] = index;
+void TileSet::AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& sprite) {
+	LookupMap::const_iterator found(natureObjectSpriteLookup.find(name));
+	if (found != natureObjectSpriteLookup.end()) {
+		natureObjectSpriteSets[found->second] = sprite;
+	} else {
+		int index = natureObjectSpriteSets.size();
+		natureObjectSpriteSets.push_back(sprite);
+		natureObjectSpriteLookup[name] = index;
+	}
 }
 
-void TileSet::SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set) {
-	defaultNatureObjectSpriteSet = set;
+void TileSet::SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& sprite) {
+	defaultNatureObjectSpriteSet = sprite;
 }
 
-void TileSet::AddItemSprite(std::string name, const ItemSprite& set) {
-	int index = itemSprites.size();
-	itemSprites.push_back(set);
-	itemSpriteLookup[name] = index;
+void TileSet::AddItemSprite(std::string name, const ItemSprite& sprite) {
+	LookupMap::const_iterator found(itemSpriteLookup.find(name));
+	if (found != itemSpriteLookup.end()) {
+		itemSprites[found->second] = sprite;
+	} else {
+		int index = itemSprites.size();
+		itemSprites.push_back(sprite);
+		itemSpriteLookup[name] = index;
+	}
 }
 
-void TileSet::SetDefaultItemSprite(const ItemSprite& set) {
-	defaultItemSprite = set;
+void TileSet::SetDefaultItemSprite(const ItemSprite& sprite) {
+	defaultItemSprite = sprite;
 }
 
-void TileSet::AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set) {
-	int index = constructionSpriteSets.size();
-	constructionSpriteSets.push_back(set);
-	constructionSpriteLookup[name] = index;
+void TileSet::AddConstructionSprite(std::string name, const ConstructionSprite& sprite) {
+	LookupMap::const_iterator found(constructionSpriteLookup.find(name));
+	if (found != constructionSpriteLookup.end()) {
+		constructionSprites[found->second] = sprite;
+	} else {
+		int index = constructionSprites.size();
+		constructionSprites.push_back(sprite);
+		constructionSpriteLookup[name] = index;
+	}
 }
 
-void TileSet::SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set) {
-	defaultConstructionSpriteSet = set;
+void TileSet::SetDefaultConstructionSprite(const ConstructionSprite& sprite) {
+	defaultConstructionSprite = sprite;
 }
 
-void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& set) {
-	int index = spellSpriteSets.size();
-	spellSpriteSets.push_back(set);
-	spellSpriteLookup[name] = index;
+void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& sprite) {
+	LookupMap::const_iterator found(spellSpriteLookup.find(name));
+	if (found != spellSpriteLookup.end()) {
+		spellSpriteSets[found->second] = sprite;
+	} else {
+		int index = spellSpriteSets.size();
+		spellSpriteSets.push_back(sprite);
+		spellSpriteLookup[name] = index;
+	}
 }
 
-void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& set) {
-	defaultSpellSpriteSet = set;
+void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite) {
+	defaultSpellSpriteSet = sprite;
 }
 
 void TileSet::AddDetailSprite(const Sprite& sprite) {
