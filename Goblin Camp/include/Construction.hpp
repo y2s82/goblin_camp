@@ -25,14 +25,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/split_member.hpp>
 
 #include "Entity.hpp"
-#include "Item.hpp"
-#include "Container.hpp"
 #include "UI/UIComponents.hpp"
 #include "Tile.hpp"
+#include "StatusEffect.hpp"
+#include "Attack.hpp"
 
 #include "ConstructionVisitor.hpp"
 
 class Job;
+typedef int ItemType;
+typedef int ItemCategory;
+class Container;
 
 enum BuildResult {
 	BUILD_NOMATERIAL = -99999
@@ -52,6 +55,7 @@ enum ConstructionTag {
 	SPAWNINGPOOL,
 	BRIDGE,
 	TRAP,
+	RANGEDADVANTAGE,
 	TAGCOUNT
 };
 
@@ -84,6 +88,7 @@ struct ConstructionPreset {
 	Attack trapAttack;
 	ItemCategory trapReloadItem;
 	int moveSpeedModifier;
+	std::vector<StatusEffectType> passiveStatusEffects;
 };
 
 class Construction : public Entity {
