@@ -65,6 +65,7 @@ protected:
 	bool marked;
 	int condition;
 	bool tree, harvestable;
+	bool ice;
 public:
 	~NatureObject();
 	static std::vector<NatureObjectPreset> Presets;
@@ -83,9 +84,10 @@ public:
 	int Harvest();
 	bool Tree();
 	bool Harvestable();
+	bool IsIce();
 };
 
-BOOST_CLASS_VERSION(NatureObject, 0)
+BOOST_CLASS_VERSION(NatureObject, 1)
 
 template<class Archive>
 void NatureObject::save(Archive & ar, const unsigned int version) const {
@@ -99,6 +101,7 @@ void NatureObject::save(Archive & ar, const unsigned int version) const {
 	ar & condition;
 	ar & tree;
 	ar & harvestable;
+	ar & ice;
 }
 
 template<class Archive>
@@ -124,6 +127,9 @@ void NatureObject::load(Archive & ar, const unsigned int version) {
 	ar & tree;
 	ar & harvestable;
 	if (failedToFindType) harvestable = true;
+	if (version >= 1) {
+		ar & ice;
+	}
 }
 
 class Ice : public NatureObject {
