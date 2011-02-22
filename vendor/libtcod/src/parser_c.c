@@ -350,6 +350,17 @@ TCOD_value_t TCOD_parse_value_list_value(TCOD_struct_int_t *def,int listnum) {
 	return ret;
 }
 
+void TCOD_clean_property_value(TCOD_value_t value, TCOD_value_type_t type) {
+	if (type & TCOD_TYPE_LIST) {
+		if ((type & ~TCOD_TYPE_LIST) == TCOD_TYPE_STRING) {
+			TCOD_list_clear_and_delete(value.list);
+		}
+		TCOD_list_delete(value.list);
+	} else {
+		if (type == TCOD_TYPE_STRING)
+			free(value.s);
+	}
+}
 
 TCOD_value_t TCOD_parse_property_value(TCOD_parser_int_t *parser, TCOD_parser_struct_t def, char *propname, bool list) {
 	TCOD_value_type_t type=TCOD_struct_get_type(def,propname);
@@ -370,6 +381,7 @@ TCOD_value_t TCOD_parse_property_value(TCOD_parser_int_t *parser, TCOD_parser_st
 			val=TCOD_parse_property_value(parser,def,propname,false);
 			if ( type == TCOD_TYPE_STRING || (type >= TCOD_TYPE_VALUELIST00 && type <= TCOD_TYPE_VALUELIST15 ) ) {
 				TCOD_list_push(ret.list,TCOD_strdup(val.s));
+				free(val.s);
 			} else {
 				TCOD_list_push(ret.list,val.custom);
 			}
@@ -445,6 +457,7 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 	}
 	if ( strcmp(lex->tok,"{") != 0 ) {
 		TCOD_parser_error("Parser::parseEntity : '{' expected");
+		free(name);
 		return false;
 	}
 	TCOD_lex_parse(lex);
@@ -465,6 +478,7 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 			else if ( strcmp(lex->tok,"struct_t") == 0 ) dynStruct=true;
 			else {
 				TCOD_parser_error("Parser::parseEntity : dynamic declaration of '%s' not supported",lex->tok);
+				if (name) free(name);
 				return false;
 			}
 			/* TODO : dynamically declared sub-structures */
@@ -472,11 +486,13 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 			if ( strcmp(lex->tok,"[") == 0 ) {
 				if ( dynType == TCOD_TYPE_NONE ) {
 					TCOD_parser_error("Parser::parseEntity : unexpected symbol '['");
+					if (name) free(name);
 					return false;
 				}
 				TCOD_lex_parse(lex);
 				if ( strcmp(lex->tok,"]") != 0 ) {
 					TCOD_parser_error("Parser::parseEntity : syntax error. ']' expected instead of '%s'",lex->tok);
+					if (name) free(name);
 					return false;
 				}
 				dynType |= TCOD_TYPE_LIST;
@@ -486,6 +502,7 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 		/* parse entity type content */
 		if ( lex->token_type != TCOD_LEX_IDEN ) {
 			TCOD_parser_error("Parser::parseEntity : identifier expected");
+			if (name) free(name);
 			return false;
 		}
 		/* is it a flag ? */
@@ -493,7 +510,10 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 			for (iflag=(char **)TCOD_list_begin(def->flags);iflag!=(char **)TCOD_list_end(def->flags); iflag++) {
 				if ( strcmp(*iflag,lex->tok) == 0 ) {
 					found=true;
-					if (!listener->new_flag(lex->tok)) return false;
+					if (!listener->new_flag(lex->tok)) {
+						if (name) free(name);
+						return false;
+					}
 					break;
 				}
 			}
@@ -511,16 +531,17 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 						TCOD_lex_parse(lex);
 						if ( strcmp(lex->tok,"=") != 0 ) {
 							TCOD_parser_error("Parser::parseEntity : '=' expected");
+							if (name) free(name);
 							return false;
 						}
 						TCOD_lex_parse(lex);
 						ret = TCOD_parse_property_value(parser, (TCOD_parser_struct_t *)def,propname,true);
 						result = listener->new_property(propname,TCOD_struct_get_type(def,propname),ret);
-						if (TCOD_struct_get_type(def, propname) == TCOD_TYPE_STRING) {
-							free(ret.s);
+						TCOD_clean_property_value(ret, TCOD_struct_get_type(def,propname));
+						if (!result || lex->token_type == TCOD_LEX_ERROR ) {
+							if (name) free(name);
+							return false;
 						}
-						if (!result) return false;
-						if ( lex->token_type == TCOD_LEX_ERROR ) return false;
 						found=true;
 						break;
 					}
@@ -554,8 +575,14 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 					for ( sub = (TCOD_struct_int_t **)TCOD_list_begin(def->structs);
 						sub != (TCOD_struct_int_t **)TCOD_list_end(def->structs); sub ++ ) {
 						if ( strcmp((*sub)->name,id) == 0 ) {
-							if (!listener->new_struct((TCOD_parser_struct_t *)(*sub),lex->tok)) return false;
-							if (!TCOD_parser_parse_entity(parser,*sub)) return false;
+							if (!listener->new_struct((TCOD_parser_struct_t *)(*sub),lex->tok)) {
+								if (subname) free(subname);
+								return false;
+							}
+							if (!TCOD_parser_parse_entity(parser,*sub)) {
+								if (subname) free(subname);
+								return false;
+							}
 							blockFound=true;
 							found=true;
 							break;
@@ -570,14 +597,21 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 					for ( sub = (TCOD_struct_int_t **)TCOD_list_begin(def->structs);
 						sub != (TCOD_struct_int_t **)TCOD_list_end(def->structs); sub ++ ) {
 						if ( strcmp((*sub)->name,type) == 0 ) {
-							if (!listener->new_struct((TCOD_parser_struct_t *)(*sub),subname)) return false;
-							if (!TCOD_parser_parse_entity(parser,*sub)) return false;
+							if (!listener->new_struct((TCOD_parser_struct_t *)(*sub),subname)) {
+								if (subname) free(subname);
+								return false;
+							}
+							if (!TCOD_parser_parse_entity(parser,*sub)) {
+								if (subname) free(subname);
+								return false;
+							}
 							blockFound=true;
 							found=true;
 							break;
 						}
 					}
 				}
+				if (subname) free(subname);
 				if (! blockFound && dynStruct ) {
 					/* unknown structure. auto-declaration */
 					TCOD_struct_int_t **idef;
@@ -607,12 +641,18 @@ static bool TCOD_parser_parse_entity(TCOD_parser_int_t *parser, TCOD_struct_int_
 			if (! blockFound ) {
 				TCOD_parser_error("Parser::parseEntity : entity type %s does not contain %s",
 					def->name,id);
+				if (name) free(name);
 				return false;
 			}
 		}
 		TCOD_lex_parse(lex);
 	}
-	if (!listener->end_struct((TCOD_parser_struct_t *)def,name)) return false;
+	if (!listener->end_struct((TCOD_parser_struct_t *)def,name)) 
+	{
+		if (name) free(name);
+		return false;
+	}
+	if (name) free(name);
 	return true;
 }
 

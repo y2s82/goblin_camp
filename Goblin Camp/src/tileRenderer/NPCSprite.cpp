@@ -136,7 +136,7 @@ NPCSprite NPCSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTextu
 			return NPCSprite();
 		}
 	} else {
-		return NPCSprite(Sprite(currentTexture, frames.begin(), frames.end(), frameRate));
+		return NPCSprite(Sprite(currentTexture, frames.begin(), frames.end(), false, frameRate));
 	}
 }
 

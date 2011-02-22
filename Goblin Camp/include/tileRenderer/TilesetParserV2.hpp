@@ -24,7 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/ItemSprite.hpp"
-#include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 #include "tileRenderer/StatusEffectSprite.hpp"
 
@@ -51,17 +51,17 @@ private:
 	bool readTexture;
 	bool extendingExisting;
 
-	enum SpriteSet
+	enum ParserState
 	{
-		SS_NONE,
-		SS_NPC,
-		SS_ITEM,
-		SS_NATURE,
-		SS_CONSTRUCTION,
-		SS_SPELL,
-		SS_STATUS_EFFECT
+		PS_NORMAL,
+		PS_NPC,
+		PS_ITEM,
+		PS_NATURE,
+		PS_CONSTRUCTION,
+		PS_SPELL,
+		PS_STATUS_EFFECT
 	};
-	TileSetParserV2::SpriteSet currentSpriteSet;
+	TileSetParserV2::ParserState currentParsingState;
 	
 	// Path where textures are found
 	boost::filesystem::path tileSetPath;
@@ -77,26 +77,6 @@ private:
 	std::vector<int> fireFrames;
 	int fireFPS;
 
-	struct ConstructionSpriteFactory {
-		std::vector<int> mainSprites;
-		std::vector<int> underConstructionSprites;
-		std::vector<int> unreadyTrapSprites;
-		bool connectionMapped;
-		int width;
-		Sprite openDoor;
-
-		ConstructionSpriteFactory() 
-		: mainSprites(), 
-		  underConstructionSprites(), 
-		  unreadyTrapSprites(),
-		  connectionMapped(false), 
-		  width(1), 
-		  openDoor() {}
-
-		ConstructionSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
-	};
-	ConstructionSpriteFactory constructionFactory;
-
 	struct AnimatedSpriteFactory {
 		std::vector<int> sprites;
 		int fps;
@@ -106,7 +86,7 @@ private:
 		Sprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
 	AnimatedSpriteFactory animSpriteFactory;
-
+	ConstructionSpriteFactory constructionFactory;
 	StatusEffectSpriteFactory statusEffectFactory;
 	NPCSpriteFactory npcSpriteFactory;
 		

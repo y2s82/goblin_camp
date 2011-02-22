@@ -467,7 +467,9 @@ tileset "Default Tileset" {
 		}
 		
 		construction_sprite "Spawning pool" {
-			sprites=[227]
+			sprites=[224,225,240,241,240,225]
+			frameCount=6
+			fps=12
 			underconstructionSprites=[226]
 		}
 		

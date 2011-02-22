@@ -63,7 +63,7 @@ void StatusEffectSpriteFactory::Reset() {
 }
 
 StatusEffectSprite StatusEffectSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	StatusEffectSprite result(Sprite(currentTexture,frames.begin(), frames.end(),fps), flashRate, alwaysOn);
+	StatusEffectSprite result(Sprite(currentTexture,frames.begin(), frames.end(), false, fps), flashRate, alwaysOn);
 	Reset();
 	return result;
 }

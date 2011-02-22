@@ -22,11 +22,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 
-class ConstructionSpriteSet
+class ConstructionSprite
 {
 public:
-	explicit ConstructionSpriteSet();
-	~ConstructionSpriteSet();
+	explicit ConstructionSprite();
+	~ConstructionSprite();
 
 	void AddSprite(const Sprite& sprite);
 	void AddUnderConstructionSprite(const Sprite& sprite);
@@ -56,3 +56,51 @@ private:
 	Sprite openSprite;
 	int width;
 };
+
+class ConstructionSpriteFactory
+{
+public:
+	explicit ConstructionSpriteFactory();
+	~ConstructionSpriteFactory();
+
+	void Reset();
+	ConstructionSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
+
+	template <typename IterT> void SetSpriteIndices(IterT start, IterT end);
+	template <typename IterT> void SetUnderConstructionSpriteIndices(IterT start, IterT end);
+	template <typename IterT> void SetUnreadyTrapSpriteIndices(IterT start, IterT end);
+
+	void SetOpenDoorSprite(const Sprite& sprite);
+	void SetWidth(int width);
+	void SetFPS(int fps);
+	void SetFrameCount(int frameCount);
+	void SetConnectionMap(bool isConnectionMap);
+
+private:
+	std::vector<int> spriteIndices;
+	std::vector<int> underConstructionSpriteIndices;
+	std::vector<int> unreadyTrapSpriteIndices;
+	Sprite openDoorSprite;
+	int width;
+	int frameRate;
+	int frameCount;
+	bool connectionMapped;
+};
+
+template <typename IterT> void ConstructionSpriteFactory::SetSpriteIndices(IterT iter, IterT end) {
+	for (; iter != end; ++iter) {
+		spriteIndices.push_back(*iter);
+	}
+}
+
+template <typename IterT> void ConstructionSpriteFactory::SetUnderConstructionSpriteIndices(IterT iter, IterT end) {
+	for (; iter != end; ++iter) {
+		underConstructionSpriteIndices.push_back(*iter);
+	}
+}
+
+template <typename IterT> void ConstructionSpriteFactory::SetUnreadyTrapSpriteIndices(IterT iter, IterT end) {
+	for (; iter != end; ++iter) {
+		unreadyTrapSpriteIndices.push_back(*iter);
+	}
+}

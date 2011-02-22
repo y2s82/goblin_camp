@@ -24,7 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/ItemSprite.hpp"
-#include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
 class TileSetParserV1 : public ITCODParserListener
@@ -76,7 +76,7 @@ private:
 
 		TempConstruction() : mainSprites(), underConstructionSprites(), connectionMapped(false), width(1), openDoor() {}
 
-		ConstructionSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
+		ConstructionSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
 	TempConstruction tempConstruction;
 

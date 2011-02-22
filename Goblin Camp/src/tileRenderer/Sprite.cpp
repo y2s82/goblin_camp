@@ -17,12 +17,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/Sprite.hpp"
 
-Sprite::Sprite() : tiles(), texture(), type(SPRITE_Single), frameTime(15) {}
+Sprite::Sprite() : tiles(), texture(), type(SPRITE_Single), frameTime(15), frameCount(1) {}
 Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
 	: tiles(),
 	  texture(tilesetTexture),
 	  type(SPRITE_Single),
-	  frameTime(15)
+	  frameTime(15),
+	  frameCount(1)
 {
 	tiles.push_back(tile);
 }
