@@ -61,6 +61,7 @@ enum StatusEffectType {
 	DRUNK,
 	HEALING,
 	HELPLESS,
+	HIGHGROUND,
 	STATUS_EFFECT_COUNT
 };
 
