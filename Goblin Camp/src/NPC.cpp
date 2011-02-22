@@ -1615,13 +1615,26 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		switch (squad->GetOrder(npc->orderIndex)) { //GetOrder handles incrementing orderIndex
 		case GUARD:
 			if (squad->TargetCoordinate(npc->orderIndex).X() >= 0) {
-				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
-				//WAIT waits Coordinate.x / 5 seconds
-				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
-				npc->jobs.push_back(newJob);
-				if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
-				else npc->run = true;
-				return true;
+				if (squad->Weapon() == Item::StringToItemCategory("Ranged weapon")) {
+					Coordinate position = Map::Inst()->FindRangedAdvantage(squad->TargetCoordinate(npc->orderIndex));
+					if (position.X() >= 0) {
+						newJob->tasks.push_back(Task(MOVE, position));
+						newJob->tasks.push_back(Task(WAIT, Coordinate(5*15)));
+					}
+				}
+
+				if (newJob->tasks.empty()) {
+					newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
+					//WAIT waits Coordinate.x / 5 seconds
+					newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
+				}
+
+				if (!newJob->tasks.empty()) {
+					npc->jobs.push_back(newJob);
+					if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
+					else npc->run = true;
+					return true;
+				}
 			}
 			break;
 
