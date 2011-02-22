@@ -191,7 +191,15 @@ bool NatureObject::Tree() { return tree; }
 bool NatureObject::Harvestable() { return harvestable; }
 
 Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	if (water) {
+		frozenWater = water;
+		Game::Inst()->RemoveWater(water->Position());
+	}
 }
 
 Ice::~Ice() {
+	if (frozenWater) {
+		Game::Inst()->CreateWaterFromNode(frozenWater);
+	}
 }
