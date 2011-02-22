@@ -1236,7 +1236,7 @@ void Game::GenerateMap(uint32 seed) {
 				else map->ResetType(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
-				map->ResetType(x,y,TILEGRASS);
+				map->ResetType(x,y,TILESNOW);
 			} else {
 				map->ResetType(x,y,TILEROCK);
 			}
@@ -1862,7 +1862,9 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 }
 
 void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && Map::Inst()->GetType(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
+	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && 
+		(Map::Inst()->GetType(location.X(),location.Y()) == TILEGRASS || Map::Inst()->GetType(location.X(),location.Y()) == TILESNOW)
+		&& Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
 
@@ -1891,7 +1893,8 @@ void Game::CreateNatureObject(Coordinate location) {
 				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->GetType(ax,ay) == TILEGRASS &&
+				if (Map::Inst()->IsWalkable(ax,ay) && (Map::Inst()->GetType(ax,ay) == TILEGRASS || 
+					Map::Inst()->GetType(ax,ay) == TILESNOW) &&
 					Map::Inst()->GetNatureObject(ax,ay) < 0 &&
 					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
