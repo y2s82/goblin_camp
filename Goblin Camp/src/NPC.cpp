@@ -1812,6 +1812,7 @@ bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
 		return true;
 	} else {
 		animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		animal->React = boost::bind(NPC::HostileAnimalReact, _1);
 	}
 	return false;
 }
