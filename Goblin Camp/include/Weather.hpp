@@ -15,12 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include "Coordinate.hpp"
+#include <vector>
 
 #include <boost/archive/binary_iarchive.hpp>
 #include <boost/archive/binary_oarchive.hpp>
 #include <boost/serialization/version.hpp>
 #include <boost/serialization/shared_ptr.hpp>
+
+#include "Coordinate.hpp"
 
 class Map;
 
@@ -41,6 +43,13 @@ private:
 	Map* map;
 	Direction windDirection;
 	WeatherType currentWeather;
+	bool tileChange;
+	bool changeAll;
+	int tileChangeRate;
+	int changePosition;
+	int currentTemperature;
+	int currentSeason;
+	void SeasonChange();
 
 public:
 	Weather(Map* map = 0);
@@ -59,6 +68,11 @@ void Weather::save(Archive & ar, const unsigned int version) const {
 	ar & map;
 	ar & windDirection;
 	ar & currentWeather;
+	ar & tileChange;
+	ar & changeAll;
+	ar & tileChangeRate;
+	ar & changePosition;
+	ar & currentTemperature;
 }
 
 template<class Archive>
@@ -66,4 +80,9 @@ void Weather::load(Archive & ar, const unsigned int version) {
 	ar & map;
 	ar & windDirection;
 	ar & currentWeather;
+	ar & tileChange;
+	ar & changeAll;
+	ar & tileChangeRate;
+	ar & changePosition;
+	ar & currentTemperature;
 }
