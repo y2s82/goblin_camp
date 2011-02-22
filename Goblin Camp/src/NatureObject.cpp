@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "NatureObject.hpp"
 #include "Map.hpp"
 #include "Item.hpp"
+#include "Game.hpp"
 
 NatureObjectPreset::NatureObjectPreset() :
 	name("NATUREOBJECT PRESET"),
@@ -188,3 +189,9 @@ int NatureObject::Harvest() { return --condition; }
 int NatureObject::Type() { return type; }
 bool NatureObject::Tree() { return tree; }
 bool NatureObject::Harvestable() { return harvestable; }
+
+Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
+}
+
+Ice::~Ice() {
+}
