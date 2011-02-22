@@ -710,3 +710,24 @@ void Map::Update() {
 	UpdateMarkers();
 	weather->Update();
 }
+
+//Finds a tile close to 'center' that will give an advantage to a creature with a ranged weapon
+Coordinate Map::FindRangedAdvantage(Coordinate center) {
+	std::vector<Coordinate> potentialPositions;
+	for (int x = center.X() - 5; x <= center.X() + 5; ++x) {
+		for (int y = center.Y() - 5; y <= center.Y() + 5; ++y) {
+			if (x >= 0 && x < width && y >= 0 && y < height) {
+
+				if (tileMap[x][y].construction >= 0 && 
+					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() &&
+					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(RANGEDADVANTAGE) &&
+					tileMap[x][y].npcList.empty()) {
+						potentialPositions.push_back(Coordinate(x,y));
+				}
+			}
+		}
+	}
+	if (!potentialPositions.empty())
+		return Random::ChooseElement(potentialPositions);
+	return Coordinate(-1,-1);
+}

@@ -133,6 +133,8 @@ public:
 	int GetTerrainMoveCost(int x, int y) const;
 	boost::shared_ptr<Weather> weather;
 	void Update();
+	
+	Coordinate FindRangedAdvantage(Coordinate);
 };
 
 BOOST_CLASS_VERSION(Map, 1)
