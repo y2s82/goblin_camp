@@ -59,6 +59,7 @@ public:
 	std::string GetWindAbbreviation();
 	void Update();
 	void ChangeWeather(WeatherType);
+	void ApplySeasonalEffects();
 };
 
 BOOST_CLASS_VERSION(Weather, 0)

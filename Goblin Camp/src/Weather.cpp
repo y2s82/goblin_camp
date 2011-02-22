@@ -70,7 +70,7 @@ void Weather::Update() {
 			currentWeather = NORMALWEATHER;
 		} else currentWeather = RAIN;
 	}
-	if (currentWeather == RAIN) Game::Inst()->CreateWater(Coordinate(Random::Generate(map->Width()-1),Random::Generate(map->Height()-1)),1);
+	if (currentTemperature >= 0 && currentWeather == RAIN) Game::Inst()->CreateWater(Coordinate(Random::Generate(map->Width()-1),Random::Generate(map->Height()-1)),1);
 
 	if (Game::Inst()->CurrentSeason() != static_cast<Season>(currentSeason)) {
 		currentSeason = static_cast<int>(Game::Inst()->CurrentSeason());
@@ -86,18 +86,43 @@ void Weather::Update() {
 				if (map->GetType(rx,ry) == TILEGRASS || map->GetType(rx,ry) == TILESNOW) {
 					map->ChangeType(rx, ry, static_cast<TileType>(tile), map->heightMap->getValue(rx,ry));
 				}
+				if (currentTemperature < 0) {
+					if (map->GetWater(rx, ry).lock() && map->GetWater(rx, ry).lock()->IsCoastal()) {
+						Game::Inst()->CreateNatureObject(Coordinate(rx, ry), "Ice");
+					}
+				} else if (currentTemperature > 0) {
+					if (map->GetNatureObject(rx, ry) >= 0) {
+						if (Game::Inst()->natureList[map->GetNatureObject(rx,ry)]->IsIce()) {
+							Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(rx,ry)]);
+						}
+					}
+				}
 			}
-			if (Random::Generate(99) == 0) ++tileChangeRate;
+			if (tileChangeRate < 300 && Random::Generate(200) == 0) ++tileChangeRate;
 		} else {
 			for (int i = 0; i < tileChangeRate; ++i) {
 				for (int x = 0; x < 500; ++x) {
 					if (map->GetType(x,changePosition) == TILEGRASS || map->GetType(x,changePosition) == TILESNOW) {
 						map->ChangeType(x, changePosition, static_cast<TileType>(tile), map->heightMap->getValue(x,changePosition));
 					}
+
+					if (currentTemperature < 0) {
+						if (map->GetWater(x,changePosition).lock() && map->GetWater(x,changePosition).lock()->IsCoastal()) {
+							Game::Inst()->CreateNatureObject(Coordinate(x,changePosition), "Ice");
+						}
+					} else if (currentTemperature > 0) {
+						if (map->GetNatureObject(x,changePosition) >= 0) {
+							if (Game::Inst()->natureList[map->GetNatureObject(x,changePosition)]->IsIce()) {
+								Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(x,changePosition)]);
+							}
+						}
+					}
+
 				}
 				++changePosition;
 				if (changePosition >= map->Height()) {
-					tileChange = false;
+					changeAll = false;
+					tileChangeRate = 1;
 					break;
 				}
 			}
@@ -119,7 +144,6 @@ void Weather::SeasonChange() {
 	case LateSummer:
 	case EarlyFall:
 	case Fall:
-		currentTemperature = 1;
 		break;
 
 	case LateWinter:
@@ -168,4 +192,8 @@ void Weather::SeasonChange() {
 		currentTemperature = 1;
 		break;
 	}
+}
+
+void Weather::ApplySeasonalEffects() {
+	SeasonChange();
 }
