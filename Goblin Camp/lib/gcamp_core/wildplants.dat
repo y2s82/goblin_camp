@@ -4,6 +4,7 @@ plant_type "Ice" {
 	condition=100
 	minheight=-100.0
 	maxheight=-100.0
+	walkable
 }
 
 plant_type "Pine" {
