@@ -317,7 +317,7 @@ void Map::Corrupt(int x, int y, int magnitude) {
 					!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
 						bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
 						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-						if (createTree && Random::Generate(3) < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+						if (createTree && Random::Generate(6) < 1) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 				}
 			}
 		}
