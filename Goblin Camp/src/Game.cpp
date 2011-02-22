@@ -1844,7 +1844,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
-				digJob->Attempts(1000);
+				digJob->Attempts(50);
 				digJob->DisregardTerritory();
 				digJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
 				digJob->tasks.push_back(Task(DIG, Coordinate(x,y)));
