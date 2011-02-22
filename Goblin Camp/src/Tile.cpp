@@ -148,7 +148,7 @@ void Tile::ChangeType(TileType newType,float height) {
 	bool oldVis = vis; 
 	bool oldWalkable = walkable; 
 	int oldGraphic = graphic;
-	bool keepGraphic = (type == TILEGRASS || type == TILESNOW) && (newType == TILEGRASS || type == TILESNOW);
+	bool keepGraphic = (type == TILEGRASS || type == TILESNOW) && (newType == TILEGRASS || newType == TILESNOW);
 	ResetType(newType,height);
 	buildable = oldBuildable;
 	vis = oldVis;
