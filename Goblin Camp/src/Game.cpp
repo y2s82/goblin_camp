@@ -685,6 +685,24 @@ void Game::CreateWater(Coordinate pos, int amount, int time) {
 	if (filth) RemoveFilth(pos);
 }
 
+void Game::CreateWaterFromNode(boost::shared_ptr<WaterNode> water) {
+	if (water) {
+		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(water->Position().X(), water->Position().Y()).lock();
+		boost::weak_ptr<WaterNode> existingWater(Map::Inst()->GetWater(water->Position().X(), water->Position().Y()));
+		if (!existingWater.lock()) {
+			waterList.push_back(water);
+			Map::Inst()->SetWater(water->Position().X(), water->Position().Y(), water);
+			if (filth) water->AddFilth(filth->Depth());
+		} else {
+			boost::shared_ptr<WaterNode> originalWater = existingWater.lock();
+			originalWater->Depth(water->Depth());
+			originalWater->AddFilth(water->GetFilth());
+			if (filth) originalWater->AddFilth(filth->Depth());
+		}
+		if (filth) RemoveFilth(filth->Position());
+	}
+}
+
 int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
@@ -1923,7 +1941,11 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
 			Map::Inst()->GetNatureObject(location.X(),location.Y()) < 0 &&
 			Map::Inst()->GetConstruction(location.X(), location.Y()) < 0) {
-				boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
+				boost::shared_ptr<NatureObject> natObj;
+				if (boost::iequals(NatureObject::Presets[natureObjectIndex].name, "Ice"))
+					natObj.reset(new Ice(Coordinate(location.X(),location.Y()), natureObjectIndex));
+				else
+					natObj.reset(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
