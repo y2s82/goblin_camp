@@ -257,7 +257,7 @@ public:
 	int GetAge();
 };
 
-BOOST_CLASS_VERSION(Game, 0)
+BOOST_CLASS_VERSION(Game, 1)
 
 template<class Archive>
 void Game::save(Archive & ar, const unsigned int version) const  {
@@ -269,6 +269,7 @@ void Game::save(Archive & ar, const unsigned int version) const  {
 	ar.template register_type<Door>();
 	ar.template register_type<SpawningPool>();
 	ar.template register_type<Trap>();
+	ar.template register_type<Ice>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -307,6 +308,7 @@ void Game::load(Archive & ar, const unsigned int version) {
 	ar.template register_type<Door>();
 	ar.template register_type<SpawningPool>();
 	ar.template register_type<Trap>();
+	if (version >= 1) ar.template register_type<Ice>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
