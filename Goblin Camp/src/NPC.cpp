@@ -389,6 +389,10 @@ void NPC::Update() {
 				RemoveEffect(BURNING);
 			} else { RemoveEffect(SWIM); }
 		} else { RemoveEffect(SWIM); }
+
+		if (Map::Inst()->GetNatureObject(x,y) >= 0 && 
+			Game::Inst()->natureList[Map::Inst()->GetNatureObject(x,y)]->IsIce() &&
+			Random::Generate(UPDATES_PER_SECOND*5) == 0) AddEffect(TRIPPED);
 	}
 
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
