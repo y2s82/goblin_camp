@@ -2467,7 +2467,7 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 					int ty = y;
 					TCODLine::init(tx, ty, endx, endy);
 					do {
-						if (Map::Inst()->BlocksLight(tx,ty)) break;
+						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
 								if (Game::Inst()->npcList[*npci]->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
@@ -2682,4 +2682,10 @@ void NPC::ValidateCurrentJob() {
 			}
 		}
 	}
+}
+
+int NPC::GetHeight() {
+	if (!flightPath.empty()) return flightPath.back().height;
+	if (HasEffect(FLYING) || HasEffect(HIGHGROUND)) return ENTITYHEIGHT+2;
+	return 0;
 }
