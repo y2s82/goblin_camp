@@ -1839,6 +1839,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 			allowedTypes.insert(TILEGRASS);
 			allowedTypes.insert(TILEMUD);
 			allowedTypes.insert(TILEBOG);
+			allowedTypes.insert(TILESNOW);
 			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
