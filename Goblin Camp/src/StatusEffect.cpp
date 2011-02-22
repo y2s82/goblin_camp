@@ -228,6 +228,15 @@ graphic(g),
 		statChanges[DODGE] = 0;
 		break;
 
+	case HIGHGROUND:
+		name = "Higher ground";
+		cooldown = UPDATES_PER_SECOND/2;
+		graphic = 23;
+		color = TCODColor(100,255,255);
+		visible = false;
+		negative = false;
+		break;
+
 	default: break;
 	}
 	cooldownDefault = cooldown;
@@ -262,6 +271,8 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return HEALING;
 	} else if (boost::iequals(str, "helpless")) {
 		return HELPLESS;
+	} else if (boost::iequals(str, "highground")) {
+		return HIGHGROUND;
 	}
 	return HUNGER;
 }
@@ -282,6 +293,7 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case DRUNK: return "drunk";
 	case HEALING: return "healing";
 	case HELPLESS: return "helpless";
+	case HIGHGROUND: return "highground";
 	default: return "";
 	}
 }
