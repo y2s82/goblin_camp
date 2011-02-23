@@ -149,6 +149,7 @@ private:
 	TCODColor _color, _bgcolor;
 	int _graphic;
 	bool taskBegun;
+	bool jobBegun;
 	bool expert;
 
 	boost::weak_ptr<Item> carried;
@@ -303,11 +304,13 @@ public:
 
 	void DumpContainer(Coordinate);
 	void ValidateCurrentJob();
+
+	virtual int GetHeight();
 };
 
 void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 
-BOOST_CLASS_VERSION(NPC, 0)
+BOOST_CLASS_VERSION(NPC, 1)
 
 template<class Archive>
 void NPC::save(Archive & ar, const unsigned int version) const {
@@ -370,6 +373,7 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar & traits;
 	ar & damageDealt;
 	ar & damageReceived;
+	ar & jobBegun;
 }
 
 template<class Archive>
@@ -443,6 +447,9 @@ void NPC::load(Archive & ar, const unsigned int version) {
 	ar & traits;
 	ar & damageDealt;
 	ar & damageReceived;
+	if (version >= 1) {
+		ar & jobBegun;
+	}
 
 	InitializeAIFunctions();
 }

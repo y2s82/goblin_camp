@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Water.hpp"
 #include "SpawningPool.hpp"
-
+#include "Stockpile.hpp"
 
 FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 	temperature(vtemp) {
@@ -79,7 +79,7 @@ void FireNode::Update() {
 			Map::Inst()->Burn(x, y);
 		}
 
-		if (Map::Inst()->Type(x, y) != TILEGRASS) --temperature;
+		if (Map::Inst()->GetType(x, y) != TILEGRASS) --temperature;
 		if (Map::Inst()->Burnt(x, y) >= 10) --temperature;
 
 		int inverseSparkChance = 150 - std::max(0, ((temperature - 50) / 8));

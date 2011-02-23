@@ -19,13 +19,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 #include "NatureObject.hpp"
+#include "Map.hpp"
+#include "Item.hpp"
 #include "Game.hpp"
-#include "Logger.hpp"
-#include "StockManager.hpp"
 
 NatureObjectPreset::NatureObjectPreset() :
 	name("NATUREOBJECT PRESET"),
@@ -49,7 +46,8 @@ std::vector<NatureObjectPreset> NatureObject::Presets = std::vector<NatureObject
 
 NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 	type(typeVal),
-	marked(false)
+	marked(false),
+	ice(false)
 {
 	Position(pos);
 
@@ -192,3 +190,22 @@ int NatureObject::Harvest() { return --condition; }
 int NatureObject::Type() { return type; }
 bool NatureObject::Tree() { return tree; }
 bool NatureObject::Harvestable() { return harvestable; }
+
+bool NatureObject::IsIce() { return ice; }
+
+Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
+	ice = true;
+	Map::Inst()->SetBlocksWater(x,y,true);
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	if (water) {
+		frozenWater = water;
+		Game::Inst()->RemoveWater(water->Position());
+	}
+}
+
+Ice::~Ice() {
+	Map::Inst()->SetBlocksWater(x,y,false);
+	if (frozenWater) {
+		Game::Inst()->CreateWaterFromNode(frozenWater);
+	}
+}

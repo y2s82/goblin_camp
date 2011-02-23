@@ -1,3 +1,12 @@
+plant_type "Ice" {
+	graphic=219
+	color="170,255,255"
+	condition=100
+	minheight=-100.0
+	maxheight=-100.0
+	walkable
+}
+
 plant_type "Pine" {
 	tree
 	graphic=6

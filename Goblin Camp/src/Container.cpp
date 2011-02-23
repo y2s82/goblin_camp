@@ -20,6 +20,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 #include "Construction.hpp"
 #include "Game.hpp"
+#include "Stockpile.hpp"
+
 
 Container::Container(
 	Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components,

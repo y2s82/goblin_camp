@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Random.hpp"
 #include "Filth.hpp"
 #include "Game.hpp"
+#include "Coordinate.hpp"
 
 FilthNode::FilthNode(int nx, int ny, int ndep) : x(nx), y(ny)
 {

@@ -27,13 +27,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "Faction.hpp"
 #include "Weather.hpp"
+#include "GCamp.hpp"
 
 Map::Map() :
 overlayFlags(0), markerids(0) {
 	tileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
-			tileMap[i][e].SetType(TILEGRASS);
+			tileMap[i][e].ResetType(TILEGRASS);
 		}
 	}
 	width = tileMap.size();
@@ -92,13 +93,18 @@ bool Map::IsBuildable(int x, int y) const {
 void Map::SetBuildable(int x, int y, bool value) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBuildable(value); 
 }
-TileType Map::Type(int x, int y) { 
+TileType Map::GetType(int x, int y) { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
 	return TILENONE;
 }
-void Map::Type(int x, int y, TileType ntype) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetType(ntype); 
+void Map::ResetType(int x, int y, TileType ntype, float tileHeight) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ResetType(ntype, tileHeight); 
 }
+
+void Map::ChangeType(int x, int y, TileType ntype, float tileHeight) { 
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ChangeType(ntype, tileHeight); 
+}
+
 void Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
 		tileMap[x][y].MoveTo(uid);
@@ -225,7 +231,7 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 }
 
 void Map::Reset(int x, int y) {
-	tileMap[x][y].SetType(TILEGRASS);
+	tileMap[x][y].ResetType(TILEGRASS);
 	tileMap[x][y].SetWalkable(true);
 	tileMap[x][y].SetBuildable(true);
 	tileMap[x][y].SetConstruction(-1);
@@ -311,7 +317,7 @@ void Map::Corrupt(int x, int y, int magnitude) {
 					!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree")) {
 						bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
 						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-						if (createTree && Random::Generate(3) < 3) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+						if (createTree && Random::Generate(6) < 1) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
 				}
 			}
 		}
@@ -697,4 +703,31 @@ int Map::GetTerrainMoveCost(int x, int y) const {
 	if (x >= 0 && x < width && y >= 0 && y < height)
 		return tileMap[x][y].GetTerrainMoveCost();
 	return 0;
+}
+
+void Map::Update() {
+	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0) Naturify(Random::Generate(Width() - 1), Random::Generate(Height() - 1));
+	UpdateMarkers();
+	weather->Update();
+}
+
+//Finds a tile close to 'center' that will give an advantage to a creature with a ranged weapon
+Coordinate Map::FindRangedAdvantage(Coordinate center) {
+	std::vector<Coordinate> potentialPositions;
+	for (int x = center.X() - 5; x <= center.X() + 5; ++x) {
+		for (int y = center.Y() - 5; y <= center.Y() + 5; ++y) {
+			if (x >= 0 && x < width && y >= 0 && y < height) {
+
+				if (tileMap[x][y].construction >= 0 && 
+					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() &&
+					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(RANGEDADVANTAGE) &&
+					tileMap[x][y].npcList.empty()) {
+						potentialPositions.push_back(Coordinate(x,y));
+				}
+			}
+		}
+	}
+	if (!potentialPositions.empty())
+		return Random::ChooseElement(potentialPositions);
+	return Coordinate(-1,-1);
 }

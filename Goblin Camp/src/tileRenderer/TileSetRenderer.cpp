@@ -311,7 +311,7 @@ namespace {
 		{
 			return true;
 		}
-		return map->Type(coord.X(), coord.Y()) == type;
+		return map->GetType(coord.X(), coord.Y()) == type;
 	}
 
 	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
@@ -351,7 +351,7 @@ namespace {
 }
 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	TileType type(map->Type(tileX, tileY));
+	TileType type(map->GetType(tileX, tileY));
 	Coordinate pos(tileX, tileY);
 
 	tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);

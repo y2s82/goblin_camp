@@ -17,10 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #ifdef DEBUG
 #include <iostream>
 #endif
-#include <boost/utility.hpp>
 
 #include "Entity.hpp"
-#include "Logger.hpp"
 #include "Map.hpp"
 
 FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
