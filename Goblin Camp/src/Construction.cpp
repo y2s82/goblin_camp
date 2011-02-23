@@ -42,6 +42,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Item.hpp"
 #include "scripting/Event.hpp"
 #include "Faction.hpp"
+#include "Stockpile.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -103,6 +104,7 @@ Construction::~Construction() {
 			Map::Inst()->SetWalkable(ix,iy,true);
 			Map::Inst()->SetConstruction(ix,iy,-1);
 			Map::Inst()->SetBlocksLight(ix,iy,false);
+			Map::Inst()->SetBlocksWater(ix,iy,false);
 		}
 	}
 	
@@ -394,11 +396,13 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
 #endif
-		if (boost::iequals(str->getName(), "construction_type")) {
+		if (name && boost::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
-			if (Construction::constructionNames.find(name) != Construction::constructionNames.end()) {
-				constructionIndex = Construction::constructionNames[name];
+			std::string strName(name);
+			boost::to_upper(strName);
+			if (Construction::constructionNames.find(strName) != Construction::constructionNames.end()) {
+				constructionIndex = Construction::constructionNames[strName];
 				//A redefinition, so wipe out the earlier one
 				Construction::Presets[constructionIndex] = ConstructionPreset();
 				Construction::Presets[constructionIndex].name = name;
@@ -406,7 +410,7 @@ class ConstructionListener : public ITCODParserListener {
 			} else { //New construction
 				Construction::Presets.push_back(ConstructionPreset());
 				Construction::Presets.back().name = name;
-				Construction::constructionNames.insert(std::make_pair(boost::to_upper_copy(Construction::Presets.back().name), Construction::Presets.size() - 1));
+				Construction::constructionNames.insert(std::make_pair(strName, Construction::Presets.size() - 1));
 				Construction::AllowedAmount.push_back(-1);
 				constructionIndex = Construction::Presets.size() - 1;
 			}
@@ -501,6 +505,10 @@ class ConstructionListener : public ITCODParserListener {
 #ifdef DEBUG
 				std::cout<<"("<<Construction::Presets[constructionIndex].name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
 #endif
+				//TILEGRASS changes to TILESNOW in winter
+				if (Tile::StringToTileType((char*)TCOD_list_get(value.list,i)) == TILEGRASS) {
+					Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
+				}
 			}
 		} else if (boost::iequals(name, "tier")) {
 			Construction::Presets[constructionIndex].tier = value.i;
@@ -559,6 +567,13 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets[constructionIndex].moveSpeedModifier = value.i;
 			Construction::Presets[constructionIndex].walkable = true;
 			Construction::Presets[constructionIndex].blocksLight = false;
+		} else if (boost::iequals(name,"passiveStatusEffects")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Construction::Presets[constructionIndex].passiveStatusEffects.push_back(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)));
+			}
+			Construction::Presets[constructionIndex].dynamic = true;
+			if (Construction::Presets[constructionIndex].passiveStatusEffects.back() == HIGHGROUND)
+				Construction::Presets[constructionIndex].tags[RANGEDADVANTAGE] = true;
 		}
 
 		return true;
@@ -576,6 +591,7 @@ class ConstructionListener : public ITCODParserListener {
 				Construction::Presets[constructionIndex].tileReqs.insert(TILEGRASS);
 				Construction::Presets[constructionIndex].tileReqs.insert(TILEMUD);
 				Construction::Presets[constructionIndex].tileReqs.insert(TILEROCK);
+				Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
 			}
 
 			//Add material information to the description
@@ -645,6 +661,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("chimneyx", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("chimneyy", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addProperty("slowMovement", TCOD_TYPE_INT, false);
+	constructionTypeStruct->addListProperty("passiveStatusEffects", TCOD_TYPE_STRING, false);
 
 	TCODParserStruct *attackTypeStruct = parser.newStructure("attack");
 	const char* damageTypes[] = { "slashing", "piercing", "blunt", "magic", "fire", "cold", "poison", NULL };
@@ -833,6 +850,15 @@ void Construction::Update() {
 			}
 			for (int i = 0; i < amount; ++i) {
 				Game::Inst()->CreateNPC(Position() + ProductionSpot(type), monsterType);
+			}
+		}
+	}
+
+	if (!Construction::Presets[type].passiveStatusEffects.empty() && !Map::Inst()->NPCList(x,y)->empty()) {
+		boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
+		if (!npc->HasEffect(FLYING)) {
+			for (int i = 0; i < Construction::Presets[type].passiveStatusEffects.size(); ++i) {
+				npc->AddEffect(Construction::Presets[type].passiveStatusEffects[i]);
 			}
 		}
 	}

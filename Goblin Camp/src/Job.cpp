@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Logger.hpp"
 #include "GCamp.hpp"
 #include "MapMarker.hpp"
+#include "Stockpile.hpp"
 
 Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
 	target(tar),

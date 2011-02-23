@@ -22,12 +22,16 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/serialization.hpp>
 #include <boost/tuple/tuple.hpp>
 
-#include "Item.hpp"
 #include "Construction.hpp"
-#include "Stockpile.hpp"
-#include "Coordinate.hpp"
 
+class Stockpile;
+class Coordinate;
 class MapMarker;
+class Entity;
+class Container;
+
+typedef int ItemCategory;
+typedef int ItemType;
 
 enum JobPriority {
 	HIGH,

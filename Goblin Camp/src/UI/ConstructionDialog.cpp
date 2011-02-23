@@ -15,13 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <string>
-
-#include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
-
 #include "UI/ConstructionDialog.hpp"
 #include "UI/Button.hpp"
 #include "UI/ScrollPanel.hpp"
@@ -33,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/Spinner.hpp"
 #include "UI.hpp"
 #include "Game.hpp"
+#include "Stockpile.hpp"
 
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
 boost::weak_ptr<Construction> ConstructionDialog::cachedConstruct = boost::weak_ptr<Construction>();

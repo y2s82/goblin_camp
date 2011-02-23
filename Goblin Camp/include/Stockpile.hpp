@@ -18,6 +18,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/serialization.hpp>
 
 #include "Construction.hpp"
+#include "Container.hpp"
+
+class Item;
 
 #define NOTFULL (1 << 0)
 #define BETTERTHAN (1 << 1)

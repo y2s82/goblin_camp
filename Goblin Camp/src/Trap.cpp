@@ -31,12 +31,13 @@ ready(true){
 void Trap::Update() {
 	if (built) {
 		if (ready && !Map::Inst()->NPCList(x, y)->empty()) {
-			ready = false;
-			graphic[1] = 62;
 			boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
-			npc->AddEffect(Construction::Presets[type].trapAttack.StatusEffects()->front().first);
-			npc->Damage(&Construction::Presets[type].trapAttack);
-			Faction::factions[npc->GetFaction()]->TrapDiscovered(Position());
+			if (!npc->HasEffect(FLYING)) {
+				ready = false;
+				graphic[1] = 62;
+				npc->Damage(&Construction::Presets[type].trapAttack);
+				Faction::factions[npc->GetFaction()]->TrapDiscovered(Position());
+			}
 		}
 	}
 }

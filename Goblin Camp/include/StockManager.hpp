@@ -16,14 +16,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <map>
+#include <set>
+#include <list>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/serialization/split_member.hpp>
 
-#include "Item.hpp"
-#include "Construction.hpp"
-#include "NatureObject.hpp"
-#include "Job.hpp"
+class Construction;
+typedef int ConstructionType;
+typedef int ItemType;
+typedef int ItemCategory;
+class NatureObject;
+class Job;
+class Coordinate;
 
 class StockManager
 {

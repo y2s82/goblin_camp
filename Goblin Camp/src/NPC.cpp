@@ -66,6 +66,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	lastMoveResult(TASKCONTINUE),
 	run(true),
 	taskBegun(false),
+	jobBegun(false),
 	expert(false),
 	carried(boost::weak_ptr<Item>()),
 	mainHand(boost::weak_ptr<Item>()),
@@ -177,6 +178,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 				taskIndex = 0;
 				foundItem = boost::weak_ptr<Item>();
 				addedTasksToCurrentJob = 0;
+				jobBegun = false;
 			}
 		} else {
 			//Remove any tasks this NPC added onto the front before sending it back to the JobManager
@@ -190,6 +192,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 			carried.reset();
 			foundItem = boost::weak_ptr<Item>();
 			addedTasksToCurrentJob = 0;
+			jobBegun = false;
 		}
 	}
 	taskBegun = false;
@@ -386,6 +389,10 @@ void NPC::Update() {
 				RemoveEffect(BURNING);
 			} else { RemoveEffect(SWIM); }
 		} else { RemoveEffect(SWIM); }
+
+		if (Map::Inst()->GetNatureObject(x,y) >= 0 && 
+			Game::Inst()->natureList[Map::Inst()->GetNatureObject(x,y)]->IsIce() &&
+			Random::Generate(UPDATES_PER_SECOND*5) == 0) AddEffect(TRIPPED);
 	}
 
 	for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
@@ -545,6 +552,11 @@ void NPC::Think() {
 		}
 
 		timeCount -= UPDATES_PER_SECOND;
+		if (!jobs.empty() && !jobBegun) {
+			jobBegun = true;
+			ValidateCurrentJob();
+		}
+
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 			case MOVE:
@@ -1029,7 +1041,7 @@ CONTINUEEAT:
 				break;
 
 			case BOGIRON:
-				if (Map::Inst()->Type(x, y) == TILEBOG) {
+				if (Map::Inst()->GetType(x, y) == TILEBOG) {
 					AddEffect(WORKING);
 					if (Random::Generate(UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
@@ -1183,7 +1195,7 @@ CONTINUEEAT:
 					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					if (++timer >= 50) {
 						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
-						Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						Map::Inst()->ChangeType(currentTarget().X(), currentTarget().Y(), TILEDITCH);
 						int amount = 0;
 						int chance = Random::Generate(9);
 						if (chance < 4) amount = 1;
@@ -1253,7 +1265,7 @@ CONTINUEEAT:
 
 			case FILLDITCH:
 				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("earth"))) {
-					if (Map::Inst()->Type(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
+					if (Map::Inst()->GetType(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
 						TaskFinished(TASKFAILFATAL, "(FILLDITCH)Target not a ditch");
 						break;
 					}
@@ -1269,7 +1281,7 @@ CONTINUEEAT:
 							Game::Inst()->RemoveItem(carried);
 							carried.reset();
 
-							Map::Inst()->Type(currentTarget().X(), currentTarget().Y(), TILEMUD);
+							Map::Inst()->ChangeType(currentTarget().X(), currentTarget().Y(), TILEMUD);
 
 							TaskFinished(TASKSUCCESS);
 							break;
@@ -1343,7 +1355,6 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 
 	jobs.push_back(job);
 	run = true;
-	ValidateCurrentJob();
 }
 
 TaskResult NPC::Move(TaskResult oldResult) {
@@ -1608,13 +1619,26 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 		switch (squad->GetOrder(npc->orderIndex)) { //GetOrder handles incrementing orderIndex
 		case GUARD:
 			if (squad->TargetCoordinate(npc->orderIndex).X() >= 0) {
-				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
-				//WAIT waits Coordinate.x / 5 seconds
-				newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
-				npc->jobs.push_back(newJob);
-				if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
-				else npc->run = true;
-				return true;
+				if (squad->Weapon() == Item::StringToItemCategory("Ranged weapon")) {
+					Coordinate position = Map::Inst()->FindRangedAdvantage(squad->TargetCoordinate(npc->orderIndex));
+					if (position.X() >= 0) {
+						newJob->tasks.push_back(Task(MOVE, position));
+						newJob->tasks.push_back(Task(WAIT, Coordinate(5*15)));
+					}
+				}
+
+				if (newJob->tasks.empty()) {
+					newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
+					//WAIT waits Coordinate.x / 5 seconds
+					newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
+				}
+
+				if (!newJob->tasks.empty()) {
+					npc->jobs.push_back(newJob);
+					if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
+					else npc->run = true;
+					return true;
+				}
 			}
 			break;
 
@@ -1792,6 +1816,7 @@ bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
 		return true;
 	} else {
 		animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		animal->React = boost::bind(NPC::HostileAnimalReact, _1);
 	}
 	return false;
 }
@@ -2460,7 +2485,7 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 					int ty = y;
 					TCODLine::init(tx, ty, endx, endy);
 					do {
-						if (Map::Inst()->BlocksLight(tx,ty)) break;
+						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
 								if (Game::Inst()->npcList[*npci]->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
@@ -2675,4 +2700,10 @@ void NPC::ValidateCurrentJob() {
 			}
 		}
 	}
+}
+
+int NPC::GetHeight() {
+	if (!flightPath.empty()) return flightPath.back().height;
+	if (HasEffect(FLYING) || HasEffect(HIGHGROUND)) return ENTITYHEIGHT+2;
+	return 0;
 }
