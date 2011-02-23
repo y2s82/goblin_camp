@@ -169,7 +169,7 @@ ConstructionSprite ConstructionSpriteFactory::Build(boost::shared_ptr<TileSetTex
 	ConstructionSprite spriteSet = ConstructionSprite();
 	if (connectionMapped) {
 		if (spriteIndices.size() > 0) {
-			spriteSet.AddSprite(Sprite(currentTexture, spriteIndices.begin(), spriteIndices.end(), true));
+			spriteSet.AddSprite(Sprite(currentTexture, spriteIndices.begin(), spriteIndices.end(), true, frameRate, frameCount));
 		}
 		if (underConstructionSpriteIndices.size() > 0) {
 			spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, underConstructionSpriteIndices.begin(), underConstructionSpriteIndices.end(), true));
