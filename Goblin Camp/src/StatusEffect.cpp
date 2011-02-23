@@ -267,6 +267,8 @@ bool StatusEffect::IsApplyableStatusEffect(StatusEffectType type) {
 	case DRUNK: 
 	case HEALING: 
 	case HELPLESS: 
+	case HIGHGROUND:
+	case TRIPPED:
 		return true;
 	default: 
 		return false;
