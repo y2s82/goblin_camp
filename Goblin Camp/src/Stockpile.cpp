@@ -277,7 +277,7 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
 				if (Map::Inst()->GetConstruction(ix,iy) == -1 && Map::Inst()->IsBuildable(ix,iy) &&
-					Construction::Presets[type].tileReqs.find(Map::Inst()->Type(ix,iy)) != Construction::Presets[type].tileReqs.end()) {
+					Construction::Presets[type].tileReqs.find(Map::Inst()->GetType(ix,iy)) != Construction::Presets[type].tileReqs.end()) {
 					if (Map::Inst()->GetConstruction(ix-1,iy) == uid ||
 						Map::Inst()->GetConstruction(ix+1,iy) == uid ||
 						Map::Inst()->GetConstruction(ix,iy-1) == uid ||

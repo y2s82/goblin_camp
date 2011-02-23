@@ -61,8 +61,9 @@ public:
 	int Height();
 	bool IsBuildable(int,int) const;
 	void SetBuildable(int,int,bool);
-	TileType Type(int,int);
-	void Type(int,int,TileType);
+	TileType GetType(int,int);
+	void ResetType(int,int,TileType,float tileHeight = 0.0);  //ResetType() resets all tile variables to defaults
+	void ChangeType(int,int,TileType,float tileHeight = 0.0); //ChangeType() preserves information such as buildability
 	void MoveTo(int,int,int);
 	void MoveFrom(int,int,int);
 	void SetConstruction(int,int,int);
@@ -132,6 +133,8 @@ public:
 	int GetTerrainMoveCost(int x, int y) const;
 	boost::shared_ptr<Weather> weather;
 	void Update();
+	
+	Coordinate FindRangedAdvantage(Coordinate);
 };
 
 BOOST_CLASS_VERSION(Map, 1)

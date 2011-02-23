@@ -35,7 +35,6 @@ void Trap::Update() {
 			if (!npc->HasEffect(FLYING)) {
 				ready = false;
 				graphic[1] = 62;
-				npc->AddEffect(Construction::Presets[type].trapAttack.StatusEffects()->front().first);
 				npc->Damage(&Construction::Presets[type].trapAttack);
 				Faction::factions[npc->GetFaction()]->TrapDiscovered(Position());
 			}

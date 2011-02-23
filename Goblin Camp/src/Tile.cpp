@@ -57,16 +57,25 @@ Tile::Tile(TileType newType, int newCost) :
 	burnt(0),
 	flow(NODIRECTION)
 {
-	SetType(newType);
+	ResetType(newType);
 }
 
 TileType Tile::GetType() { return type; }
 
-void Tile::SetType(TileType newType) {
+void Tile::ResetType(TileType newType, float height) {
 	type = newType;
 	if (type == TILEGRASS) {
 		vis = true; walkable = true; buildable = true; low = false;
 		originalForeColor = TCODColor(Random::Generate(49), 127, 0);
+		if (Random::Generate(9) < 9) {
+			if (height < -0.01f) {
+				originalForeColor = TCODColor(Random::Generate(100,192),127,0);
+			} else if (height < 0.0f) {
+				originalForeColor = TCODColor(Random::Generate(20,170),127,0);
+			} else if (height > 4.0f) {
+				originalForeColor = TCODColor(90, Random::Generate(120,150), 90);
+			}
+		}
 		backColor = TCODColor(0, 0, 0);
 		switch (Random::Generate(9)) {
 		case 0:
@@ -114,8 +123,40 @@ void Tile::SetType(TileType newType) {
 		originalForeColor = TCODColor(Random::Generate(120, 130), Random::Generate(80, 90), 0);
 		backColor = TCODColor(0, 0, 0);
 		moveCost = 5;
+	} else if (type == TILESNOW) {
+		vis = true; walkable = true; buildable = true; low = false;
+		originalForeColor = TCODColor(Random::Generate(225, 255), Random::Generate(225, 255), Random::Generate(225, 255));
+		backColor = TCODColor(0, 0, 0);
+		switch (Random::Generate(9)) {
+		case 0:
+		case 1:
+		case 2:
+		case 3: graphic = '.'; break;
+		case 4:
+		case 5:
+		case 6:
+		case 7: graphic = ','; break;
+		case 8: graphic = ':'; break;
+		case 9: graphic = '\''; break;
+		}
 	} else { vis = false; walkable = false; buildable = false; }
 	foreColor = originalForeColor;
+}
+
+void Tile::ChangeType(TileType newType,float height) {
+	bool oldBuildable = buildable;
+	bool oldVis = vis; 
+	bool oldWalkable = walkable; 
+	int oldGraphic = graphic;
+	bool keepGraphic = (type == TILEGRASS || type == TILESNOW) && (newType == TILEGRASS || newType == TILESNOW);
+	ResetType(newType,height);
+	buildable = oldBuildable;
+	vis = oldVis;
+	walkable = oldWalkable;
+	if (keepGraphic) {
+		graphic = oldGraphic;
+		Corrupt(0); //Recalculates color
+	}
 }
 
 bool Tile::BlocksLight() const { return !vis; }
@@ -257,7 +298,7 @@ void Tile::WalkOver() {
 		foreColor = originalForeColor + TCODColor(std::min(255, walkedOver), 0, 0) - TCODColor(0, std::min(255,corruption), 0);
 		if (burnt > 0) Burn(0); //Just to re-do the color
 		if (walkedOver > 100 && graphic != '.' && graphic != ',') graphic = Random::GenerateBool() ? '.' : ',';
-		if (walkedOver > 300 && Random::Generate(99) == 0) SetType(TILEMUD);
+		if (walkedOver > 300 && Random::Generate(99) == 0) ChangeType(TILEMUD);
 	}
 }
 

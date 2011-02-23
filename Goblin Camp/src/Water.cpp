@@ -51,7 +51,7 @@ void WaterNode::Update() {
 
 	if (!inert || inertCounter > (UPDATES_PER_SECOND*1)) {
 
-		if (Map::Inst()->Type(x,y) == TILERIVERBED) {
+		if (Map::Inst()->GetType(x,y) == TILERIVERBED) {
 			timeFromRiverBed = 1000;
 			if (depth < RIVERDEPTH) depth = RIVERDEPTH;
 		}
@@ -89,8 +89,9 @@ void WaterNode::Update() {
 				for (int iy = y-1; iy <= y+1; ++iy) {
 					if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
 						if (!coastal) {
-							TileType tile = Map::Inst()->Type(ix,iy);
+							TileType tile = Map::Inst()->GetType(ix,iy);
 							if (tile != TILENONE && tile != TILEDITCH && tile != TILERIVERBED) coastal = true;
+							if (Map::Inst()->GetNatureObject(ix,iy) >= 0) coastal = true;
 						}
 						/*Choose the surrounding tiles that:
 						Are the same height or low
@@ -199,7 +200,7 @@ void WaterNode::Update() {
 
 		} else {
 			int soakage = 500;
-			TileType type = Map::Inst()->Type(x,y);
+			TileType type = Map::Inst()->GetType(x,y);
 			if (type == TILEGRASS) soakage = 10;
 			else if (type == TILEBOG) soakage = 0;
 			if (Random::Generate(soakage) == 0) {
