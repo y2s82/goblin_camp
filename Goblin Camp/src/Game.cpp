@@ -100,7 +100,7 @@ Game* Game::Inst() {
 bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType> tileReqs) {
 	for (int x = target.X(); x < target.X() + size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + size.Y(); ++y) {
-			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->Type(x,y)) == tileReqs.end()) ) return false;
+			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->GetType(x,y)) == tileReqs.end()) ) return false;
 		}
 	}
 	return true;
@@ -667,6 +667,24 @@ void Game::CreateWater(Coordinate pos, int amount, int time) {
 	if (filth) RemoveFilth(pos);
 }
 
+void Game::CreateWaterFromNode(boost::shared_ptr<WaterNode> water) {
+	if (water) {
+		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(water->Position().X(), water->Position().Y()).lock();
+		boost::weak_ptr<WaterNode> existingWater(Map::Inst()->GetWater(water->Position().X(), water->Position().Y()));
+		if (!existingWater.lock()) {
+			waterList.push_back(water);
+			Map::Inst()->SetWater(water->Position().X(), water->Position().Y(), water);
+			if (filth) water->AddFilth(filth->Depth());
+		} else {
+			boost::shared_ptr<WaterNode> originalWater = existingWater.lock();
+			originalWater->Depth(water->Depth());
+			originalWater->AddFilth(water->GetFilth());
+			if (filth) originalWater->AddFilth(filth->Depth());
+		}
+		if (filth) RemoveFilth(filth->Position());
+	}
+}
+
 int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
@@ -1214,22 +1232,13 @@ void Game::GenerateMap(uint32 seed) {
 		for (int y = 0; y < map->Height(); ++y) {
 			float height = map->heightMap->getValue(x,y);
 			if (height < map->GetWaterlevel()) {
-				if (random.GenerateBool()) map->Type(x,y,TILERIVERBED);
-				else map->Type(x,y,TILEDITCH);
+				if (random.GenerateBool()) map->ResetType(x,y,TILERIVERBED);
+				else map->ResetType(x,y,TILEDITCH);
 				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
-				map->Type(x,y,TILEGRASS);
-				if (random.Generate(9) < 9) {
-					if (height < -0.01f) {
-						map->ForeColor(x,y, TCODColor(random.Generate(100,192),127,0));
-					} else if (height < 0.0f) {
-						map->ForeColor(x,y, TCODColor(random.Generate(20,170),127,0));
-					} else if (height > 4.0f) {
-						map->ForeColor(x,y, TCODColor(90, random.Generate(120,150), 90));
-					}
-				}
+				map->ResetType(x,y,TILEGRASS);
 			} else {
-				map->Type(x,y,TILEROCK);
+				map->ResetType(x,y,TILEROCK);
 			}
 		}
 	}
@@ -1281,7 +1290,7 @@ void Game::GenerateMap(uint32 seed) {
 				lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
 				highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
-					map->Type(x+xOffset, y+yOffset, TILEBOG);
+					map->ResetType(x+xOffset, y+yOffset, TILEBOG);
 				}
 			}
 			break; //Only generate one bog
@@ -1376,7 +1385,7 @@ void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
 	for (int x = target.X(); x < target.X()+size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y()+size.Y(); ++y) {
-			if (Map::Inst()->Type(x,y) == type) return true;
+			if (Map::Inst()->GetType(x,y) == type) return true;
 		}
 	}
 	return false;
@@ -1385,7 +1394,7 @@ bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
 void Game::DesignateBog(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->Type(x,y) == TILEBOG) {
+			if (Map::Inst()->GetType(x,y) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), true);
 				Map::Inst()->Mark(x,y);
 			}
@@ -1405,7 +1414,7 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 					StockManager::Inst()->UpdateTreeDesignations(natObj, false);
 				}
 			}
-			if (Map::Inst()->Type(x,y) == TILEBOG) {
+			if (Map::Inst()->GetType(x,y) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
 				Map::Inst()->Unmark(x,y);
 			}
@@ -1812,11 +1821,12 @@ void Game::Dig(Coordinate a, Coordinate b) {
 			allowedTypes.insert(TILEGRASS);
 			allowedTypes.insert(TILEMUD);
 			allowedTypes.insert(TILEBOG);
+			allowedTypes.insert(TILESNOW);
 			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
 				digJob->MarkGround(Coordinate(x,y));
-				digJob->Attempts(1000);
+				digJob->Attempts(50);
 				digJob->DisregardTerritory();
 				digJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
 				digJob->tasks.push_back(Task(DIG, Coordinate(x,y)));
@@ -1853,7 +1863,9 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 }
 
 void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && Map::Inst()->Type(location.X(),location.Y()) == TILEGRASS && Random::Generate(4) < 2) {
+	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && 
+		(Map::Inst()->GetType(location.X(),location.Y()) == TILEGRASS || Map::Inst()->GetType(location.X(),location.Y()) == TILESNOW)
+		&& Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
 
@@ -1882,7 +1894,8 @@ void Game::CreateNatureObject(Coordinate location) {
 				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
 				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
 				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->IsWalkable(ax,ay) && Map::Inst()->Type(ax,ay) == TILEGRASS &&
+				if (Map::Inst()->IsWalkable(ax,ay) && (Map::Inst()->GetType(ax,ay) == TILEGRASS || 
+					Map::Inst()->GetType(ax,ay) == TILESNOW) &&
 					Map::Inst()->GetNatureObject(ax,ay) < 0 &&
 					Map::Inst()->GetConstruction(ax, ay) < 0) {
 						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
@@ -1911,7 +1924,11 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
 			Map::Inst()->GetNatureObject(location.X(),location.Y()) < 0 &&
 			Map::Inst()->GetConstruction(location.X(), location.Y()) < 0) {
-				boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
+				boost::shared_ptr<NatureObject> natObj;
+				if (boost::iequals(NatureObject::Presets[natureObjectIndex].name, "Ice"))
+					natObj.reset(new Ice(Coordinate(location.X(),location.Y()), natureObjectIndex));
+				else
+					natObj.reset(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
 				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
 				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
 				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
@@ -2055,7 +2072,7 @@ boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 void Game::CreateDitch(Coordinate pos) {
 	RemoveNatureObject(pos, pos);
 	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
-	Map::Inst()->Type(pos.X(), pos.Y(), TILEDITCH);
+	Map::Inst()->ChangeType(pos.X(), pos.Y(), TILEDITCH);
 }
 
 void Game::StartFire(Coordinate pos) {
@@ -2113,7 +2130,7 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
-				if (Map::Inst()->Type(x, y) == TILEDITCH) {
+				if (Map::Inst()->GetType(x, y) == TILEDITCH) {
 					boost::shared_ptr<Job> ditchFillJob(new Job("Fill ditch"));
 					ditchFillJob->DisregardTerritory();
 					ditchFillJob->Attempts(2);
@@ -2131,4 +2148,8 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 			}
 		}
 	}
+}
+
+void Game::SetSeason(Season newSeason) {
+	season = newSeason;
 }

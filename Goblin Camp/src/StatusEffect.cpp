@@ -204,7 +204,7 @@ graphic(g),
 
 	case DRUNK:
 		name = "Drunk";
-		cooldown = MONTH_LENGTH * 2;
+		cooldown = MONTH_LENGTH;
 		graphic = 63;
 		color = TCODColor(218,255,127);
 		break;
@@ -226,6 +226,24 @@ graphic(g),
 		color = TCODColor(130,240,255);
 		statChanges[MOVESPEED] = 0;
 		statChanges[DODGE] = 0;
+		break;
+
+	case HIGHGROUND:
+		name = "Higher ground";
+		cooldown = UPDATES_PER_SECOND/2;
+		graphic = 23;
+		color = TCODColor(100,255,255);
+		visible = false;
+		negative = false;
+		break;
+
+	case TRIPPED:
+		name = "Tripped";
+		cooldown = UPDATES_PER_SECOND*2;
+		graphic = 31;
+		color = TCODColor::white;
+		statChanges[MOVESPEED] = 0.2;
+		statChanges[DODGE] = 0.2;
 		break;
 
 	default: break;
@@ -300,6 +318,10 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return HEALING;
 	} else if (boost::iequals(str, "helpless")) {
 		return HELPLESS;
+	} else if (boost::iequals(str, "highground")) {
+		return HIGHGROUND;
+	} else if (boost::iequals(str, "tripped")) {
+		return TRIPPED;
 	}
 	return HUNGER;
 }
@@ -328,6 +350,8 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case DRUNK: return "drunk";
 	case HEALING: return "healing";
 	case HELPLESS: return "helpless";
+	case HIGHGROUND: return "highground";
+	case TRIPPED: return "tripped";
 	default: return "";
 	}
 }

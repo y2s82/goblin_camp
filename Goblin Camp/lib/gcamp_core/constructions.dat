@@ -261,6 +261,18 @@ construction_type "Palisade" {
 	description="A palisade will stop most monsters from gaining free access to your camp"
 }
 
+construction_type "Battlement" {
+	tier=2
+	category="Basics"
+	graphicLength=1
+	graphic=[223]
+	walkable
+	maxCondition=30
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+	description="Creatures with ranged weapons can fire over walls from battlements"
+	passiveStatusEffects=["Highground"]
+}
+
 construction_type "Stone quarry" {
 	tier=2
 	category="Permanent"

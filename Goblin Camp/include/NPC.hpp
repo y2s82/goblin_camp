@@ -306,6 +306,8 @@ public:
 
 	void DumpContainer(Coordinate);
 	void ValidateCurrentJob();
+
+	virtual int GetHeight();
 };
 
 void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
