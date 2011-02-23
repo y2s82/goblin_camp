@@ -97,20 +97,27 @@ void Camp::UpdateTier() {
 	
 	int population = Game::Inst()->OrcCount() + Game::Inst()->GoblinCount();
 
-	int newTier = tier;
-	if (farmplots > 0 && workshops > 1 && production > 20 && population >= 20 && population < 30)
-		newTier = 1;
-	else if (workshops > 5 && production > 100 && population >= 30 && population < 40)
-		newTier = 2;
-	else if (workshops > 10 && production > 500 && population >= 40 && population < 60)
-		newTier = 3;
-	else if (production > 1000 && population >= 60 && population < 100)
-		newTier = 4;
-	else if (production > 3000 && population >= 100 && population < 200)
-		newTier = 5;
-	else if (production > 10000 && population >= 200)
-		newTier = 6;
-
+	// Immortius: There was previously an issue with new tier calculation - because
+	// the check for each tier had a population range, if you exceeded that population
+	// range before you achieved the other requirements you would not be able to reach that tier.
+	// The solution is to check eligability from highest tier downwards and avoid population ranges.
+	int newTier = 0;
+	if (farmplots > 0)
+	{
+		if      (workshops > 10 && production > 10000 && population >= 200)
+			newTier = 6;
+		else if (workshops > 10 && production > 3000  && population >= 100)
+			newTier = 5;
+		else if (workshops > 10 && production > 1000  && population >= 60)
+			newTier = 4;
+		else if (workshops > 10 && production > 500   && population >= 40)
+			newTier = 3;
+		else if (workshops > 5  && production > 100   && population >= 30)
+			newTier = 2;
+		else if (workshops > 1  && production > 20    && population >= 20)
+			newTier = 1;
+	}
+	
 	if (newTier < tier) ++newTier; //Only drop the camp tier down if newtier <= tier-2
 
 	if (newTier != tier) {
