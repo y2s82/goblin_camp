@@ -64,6 +64,7 @@ public:
 
 private:
 	void DrawSimpleConnected(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	inline int CurrentFrame() const { return (type & SPRITE_Animated) ? ((TCODSystem::getElapsedMilli() / frameTime) % frameCount) : 0; }
 };
 
 template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frames)
@@ -73,10 +74,23 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	  frameTime(1000 / frameRate),
 	  frameCount(frames > 0 ? frames : 1)
 {
+	std::vector<int> indices;
 	for(; start != end; ++start) {
-		tiles.push_back(*start);
+		indices.push_back(*start);
 	}
-	int numTiles = tiles.size() / frameCount;
+
+	// Assume all tiles are for animation if it isn't a connection map
+	if (!connectionMap) {
+		frameCount = indices.size();
+		tiles.assign(indices.begin(), indices.end());
+		type = (frameCount > 1) ? SPRITE_Animated : SPRITE_Single;
+		return;
+	}
+
+	if (frameCount > indices.size()) {
+		frameCount = indices.size();
+	}
+	int numTiles = indices.size() / frameCount;
 	if (numTiles == 0) { 
 		frameCount = 0;
 		return;
@@ -89,11 +103,20 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 			type = SPRITE_NormalConnectionMap; break;
 		case 5:
 			type = SPRITE_SimpleConnectionMap; break;
+		default:
+			type = SPRITE_Single;
+			numTiles = 1;
+			break;
 	}
-	if (type == SPRITE_Single && numTiles > 1) {
-		frameCount = numTiles;
-	}
+
 	if (frameCount > 1) {
 		type = static_cast<SpriteType>(type | SPRITE_Animated);
 	}
+
+	for (int tile = 0; tile < numTiles; ++tile) {
+		for (int frame = 0; frame < frameCount; ++frame) {
+			tiles.push_back(indices[tile + frame * numTiles]);
+		}
+	}
+
 }

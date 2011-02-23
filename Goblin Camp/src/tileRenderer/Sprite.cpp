@@ -154,12 +154,7 @@ namespace {
 
 void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (Exists()) {
-		if (IsAnimated()) {
-			int frame = (TCODSystem::getElapsedMilli() / frameTime) % tiles.size();
-			texture->DrawTile(tiles[frame], dst, dstRect);
-		} else {
-			texture->DrawTile(tiles[0], dst, dstRect);
-		}
+		texture->DrawTile(tiles[CurrentFrame()], dst, dstRect);
 	}
 }
 	
@@ -167,10 +162,10 @@ void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dst
 	if (IsConnectionMap()) {
 		if (type & SPRITE_ExtendedConnectionMap) {
 			int index = ExtConnectionIndex(connected);
-			texture->DrawTile(tiles.at(index), dst, dstRect);
+			texture->DrawTile(tiles.at(CurrentFrame() + frameCount * index), dst, dstRect);
 		} else if (type & SPRITE_NormalConnectionMap) {
 			int index = ConnectionIndex(connected(NORTH), connected(EAST), connected(SOUTH), connected(WEST));
-			texture->DrawTile(tiles.at(index), dst, dstRect);
+			texture->DrawTile(tiles.at(CurrentFrame() + frameCount * index), dst, dstRect);
 		} else {
 			DrawSimpleConnected(connected, dst, dstRect);
 		}
@@ -192,7 +187,7 @@ void Sprite::DrawSimpleConnected(ConnectedFunction connected, SDL_Surface * dst,
 			if (index == 3 && cornerConnected[corner]) {
 				index ++;
 			} 
-			texture->DrawTileCorner(tiles[index], corner, dst, dstRect);
+			texture->DrawTileCorner(tiles[CurrentFrame() + frameCount * index], corner, dst, dstRect);
 		}
 	}
 }
