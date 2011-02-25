@@ -236,6 +236,23 @@ bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
 	return success;
 }
 
+Sprite TileSetParserV1::ReadConnectionMap(TCOD_list_t tiles) {
+	int size = TCOD_list_size(tiles);
+	if (size == 47 || size == 16) {
+		std::vector<int> orderedTiles;
+		for (int i = 12; i < 16; ++i)
+			orderedTiles.push_back((intptr_t)TCOD_list_get(tiles, i));
+		for (int i = 0; i < 12; ++i)
+			orderedTiles.push_back((intptr_t)TCOD_list_get(tiles, i));
+		for (int i = 16; i < size; ++i)
+			orderedTiles.push_back((intptr_t)TCOD_list_get(tiles, i));
+		return Sprite(currentTexture, orderedTiles.begin(), orderedTiles.end(), true);
+	}
+	else {
+		return Sprite(currentTexture, (intptr_t*)TCOD_list_begin(tiles), (intptr_t*)TCOD_list_end(tiles), true);
+	}
+}
+
 bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 	// Tile Texture Properties
 	if (currentTexture) {
@@ -245,30 +262,30 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			if (boost::iequals(name, "unknown_terrain")) {
 				tileSet->SetTerrain(TILENONE, Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "grass_terrain")) {
-				tileSet->SetTerrain(TILEGRASS, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerrain(TILEGRASS, ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "ditch_terrain")) {
-				tileSet->SetTerrain(TILEDITCH, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerrain(TILEDITCH, ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "riverbed_terrain")) {
-				tileSet->SetTerrain(TILERIVERBED, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerrain(TILERIVERBED, ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "bog_terrain")) {
-				tileSet->SetTerrain(TILEBOG, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerrain(TILEBOG, ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "rock_terrain")) {
-				tileSet->SetTerrain(TILEROCK, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerrain(TILEROCK, ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "mud_terrain")) {
-				tileSet->SetTerrain(TILEMUD, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerrain(TILEMUD, ReadConnectionMap(value.list));
 			} 
 			
 			// Terrain Modifiers
 			else if (boost::iequals(name, "water")) {
-				tileSet->SetWaterAndIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetWaterAndIce(ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "minor_filth")) {
 				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "major_filth")) {
-				tileSet->SetFilthMajor(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetFilthMajor(ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "marker")) {
 				tileSet->SetMarker(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "blood")) {
-				tileSet->SetBlood(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetBlood(ReadConnectionMap(value.list));
 			} 
 			
 			// Overlays
@@ -279,7 +296,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} else if (boost::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "corruption")) {
-				tileSet->SetCorruption(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetCorruption(ReadConnectionMap(value.list));
 			}
 
 			// Cursors
@@ -500,10 +517,32 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 	ConstructionSprite spriteSet = ConstructionSprite();
 	if (connectionMapped) {
 		if (mainSprites.size() > 0) {
-			spriteSet.AddSprite(Sprite(currentTexture, mainSprites.begin(), mainSprites.end(), true));
+			if (mainSprites.size() == 16 || mainSprites.size() == 47) {
+				std::vector<int> orderedTiles;
+				for (int i = 12; i < 16; ++i)
+					orderedTiles.push_back(mainSprites.at(i));
+				for (int i = 0; i < 12; ++i)
+					orderedTiles.push_back(mainSprites.at(i));
+				for (int i = 16; i < mainSprites.size(); ++i)
+					orderedTiles.push_back(mainSprites.at(i));
+				spriteSet.AddSprite(Sprite(currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
+			} else {
+				spriteSet.AddSprite(Sprite(currentTexture, mainSprites.begin(), mainSprites.end(), true));
+			}
 		}
 		if (underConstructionSprites.size() > 0) {
-			spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, underConstructionSprites.begin(), underConstructionSprites.end(), true));
+			if (underConstructionSprites.size() == 16 || underConstructionSprites.size() == 47) {
+				std::vector<int> orderedTiles;
+				for (int i = 12; i < 16; ++i)
+					orderedTiles.push_back(underConstructionSprites.at(i));
+				for (int i = 0; i < 12; ++i)
+					orderedTiles.push_back(underConstructionSprites.at(i));
+				for (int i = 16; i < underConstructionSprites.size(); ++i)
+					orderedTiles.push_back(underConstructionSprites.at(i));
+				spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
+			} else {
+				spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, underConstructionSprites.begin(), underConstructionSprites.end(), true));
+			}
 		}
 	} else {
 		for (std::vector<int>::iterator iter = mainSprites.begin(); iter != mainSprites.end(); ++iter) {
