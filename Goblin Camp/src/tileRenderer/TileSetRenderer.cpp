@@ -328,6 +328,21 @@ namespace {
 		return map->GetType(coord.X(), coord.Y()) == type;
 	}
 
+	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
+			return true;
+		int natNum = -1;
+		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return Game::Inst()->natureList[natNum]->IsIce();
+		}
+		return false;
+	}
+
 	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
 		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
@@ -373,7 +388,11 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 	TileType type(map->GetType(tileX, tileY));
 	Coordinate pos(tileX, tileY);
 
-	tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
+	if (type == TILESNOW) {
+		tileSet->DrawTerrain(type, boost::bind(&SnowConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+	} else {
+		tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
+	}
 	
 	if (tileSet->HasTerrainDetails()) {
 		int detailIndex = permutationTable.Hash(permutationTable.Hash(tileX) + tileY) % tileSet->GetDetailRange(); 
