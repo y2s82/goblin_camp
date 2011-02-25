@@ -136,6 +136,10 @@ exe goblin-camp
       /python-modules
 ;
 
+###############################################################################
+##### install targets
+###############################################################################
+
 install dist-bin
     : goblin-camp
     : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE

@@ -13,13 +13,24 @@
 # if Mercurial is not available, or we're not building from Mercurial repository.
 import os, sys, subprocess
 
-assert len(sys.argv) == 5, 'Do not run directly, use build system instead.'
+assert len(sys.argv) >= 5, 'Do not run directly, use build system instead.'
 
-version, appendHg, input, output = sys.argv[1:]
+version, appendHg, input, output = sys.argv[1:5]
+
+rch = sys.argv[5] if len(sys.argv) > 5 else None
 
 variables = {
-    'GC_VERSION': version
+    'GC_VERSION': version,
 }
+
+if rch is not None:
+    if not os.path.exists(rch):
+        rch = os.path.join(os.path.dirname(input), rch)
+    with open(rch, 'r') as fp:
+        variables['GC_RCH_DEFINITIONS'] = '/* generate-version.py: inserting {0} */\n'.format(rch)
+        variables['GC_RCH_DEFINITIONS'] += fp.read()
+else:
+    variables['GC_RCH_DEFINITIONS'] = ''
 
 parts = (version + '.0.0').split('.')[:4]
 variables['GC_RC_VERSION']     = '.'.join(parts)
