@@ -31,6 +31,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	description(""),
 	version(""),
 	waterTile(),
+	iceTile(),
 	minorFilth(),
 	majorFilth(),
 	nonTerritoryOverlay(),
@@ -124,6 +125,14 @@ void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, S
 
 void TileSet::DrawWater(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	waterTile.Draw(connected, dst, dstRect);
+}
+
+void TileSet::DrawIce(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	if (iceTile.Exists()) {
+		iceTile.Draw(connected, dst, dstRect);
+	} else {
+		waterTile.Draw(connected, dst, dstRect);
+	}
 }
 
 void TileSet::DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const {
@@ -436,6 +445,10 @@ void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
 
 void TileSet::SetWater(const Sprite& sprite) {
 	waterTile = sprite;
+}
+
+void TileSet::SetIce(const Sprite& sprite) {
+	iceTile = sprite;
 }
 
 void TileSet::SetFilthMinor(const Sprite& sprite) {

@@ -8,10 +8,7 @@ tileset "Default Tileset" {
 	{
 		// Terrain tiles
 		unknownTerrain=0
-		grassTerrain=[88,89,90,91,
-				      104,105,106,107,
-					  120,121,122,123,
-					  136,137,138,139]
+		grassTerrain=[89]
 		ditchTerrain=[1]
 		riverbedTerrain=[2]
 		bogTerrain=[3]
@@ -20,23 +17,14 @@ tileset "Default Tileset" {
 					 124,125,126,127,
 					 140,141,142,143]
 		mudTerrain=[5]
+		snowTerrain=[90]
 
 		details=[192,193,194,195,208,209,210,211]
 		detailRange=128
 
 		// Terrain modifiers
-		water=[84,85,86,87,
-		       100,101,102,103,
-			   116,117,118,119,
-			   132,133,134,135,
-			   148,149,150,151,152,
-			   164,165,166,167,168,
-			   180,181,182,183,184,
-			   196,197,198,199,200,
-			   212,213,214,215,216,
-			   153,154,
-			   169,170,
-			   185,186]
+		water=[84,85,86,87,88]
+		ice=[100,101,102,103,104]
 		minorFilth=6
 		majorFilth=[7,8,9,10,11]
 		marker=[14]

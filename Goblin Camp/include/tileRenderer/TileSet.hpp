@@ -56,6 +56,7 @@ public:
 	void DrawCorruption(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawIce(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMajor(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -82,6 +83,7 @@ public:
 	void SetDescription(std::string desc);
 	void SetTerrain(TileType type, const Sprite& sprite);
 	void SetWater(const Sprite& sprite);
+	void SetIce(const Sprite& sprite);
 	void SetFilthMinor(const Sprite& sprite);
 	void SetFilthMajor(const Sprite& sprite);
 	void SetMarker(const Sprite& sprite);
@@ -130,6 +132,7 @@ private:
 	Sprite defaultTerrainTile;
 	TileTypeSpriteArray terrainTiles;
 	Sprite waterTile;
+	Sprite iceTile;
 	Sprite minorFilth;
 	Sprite majorFilth;
 	

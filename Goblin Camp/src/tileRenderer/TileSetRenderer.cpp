@@ -173,11 +173,12 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 				int natNum = map->GetNatureObject(tileX, tileY);
 				if (natNum >= 0) {
 					boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
-					if (natureObj->Marked())
-					{
+					if (natureObj->Marked()) {
 						tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
 					}
-					tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+					if (!natureObj->IsIce()) {
+						tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+					}
 				}
 
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
@@ -336,11 +337,15 @@ namespace {
 
 	bool WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		int natNum = -1;
 		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
 			return true;
 		}
 		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
 			return water->Depth() > 0;
+		}
+		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return Game::Inst()->natureList[natNum]->IsIce();
 		}
 		return false;
 	}
@@ -382,9 +387,14 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 	// Water
 	boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
 	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
-		if (water->Depth() > 0)
-		{
+		if (water->Depth() > 0) {
 			tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+		}
+	}
+	int natNum = -1;
+	if ((natNum = map->GetNatureObject(tileX, tileY)) >= 0) {
+		if (Game::Inst()->natureList[natNum]->IsIce()) {
+			tileSet->DrawIce(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 		}
 	}
 	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(tileX, tileY).lock()) {

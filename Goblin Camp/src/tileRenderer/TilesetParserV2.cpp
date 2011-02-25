@@ -69,12 +69,14 @@ namespace {
 		tileTextureStruct->addListProperty("bogTerrain", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("rockTerrain", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("mudTerrain", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("snowTerrain", TCOD_TYPE_INT, false);
 
 		tileTextureStruct->addListProperty("details", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("detailRange", TCOD_TYPE_INT, false);
 
 		// Terrain modifiers
 		tileTextureStruct->addListProperty("water", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("ice", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("minorFilth", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("majorFilth", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("marker", TCOD_TYPE_INT, false);
@@ -321,6 +323,8 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				tileSet->SetTerrain(TILEROCK, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "mudTerrain")) {
 				tileSet->SetTerrain(TILEMUD, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+			} else if (boost::iequals(name, "snowTerrain")) {
+				tileSet->SetTerrain(TILESNOW, Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} 
 
 			else if (boost::iequals(name, "details")) {
@@ -334,6 +338,8 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			// Terrain Modifiers
 			else if (boost::iequals(name, "water")) {
 				tileSet->SetWater(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+			} else if (boost::iequals(name, "ice")) {
+				tileSet->SetIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "minorFilth")) {
 				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "majorFilth")) {
