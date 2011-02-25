@@ -23,8 +23,9 @@ tileset "Default Tileset" {
 		detailRange=128
 
 		// Terrain modifiers
-		water=[84,85,86,87,88]
-		ice=[100,101,102,103,104]
+		waterAndIce=[84,85,86,87,88,
+		             100,101,102,103,104,105,106,
+					 116,117,118,119,120,121,122]
 		minorFilth=6
 		majorFilth=[7,8,9,10,11]
 		marker=[14]

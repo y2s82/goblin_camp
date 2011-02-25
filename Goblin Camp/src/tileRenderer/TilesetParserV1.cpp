@@ -260,7 +260,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			
 			// Terrain Modifiers
 			else if (boost::iequals(name, "water")) {
-				tileSet->SetWater(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetWaterAndIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "minor_filth")) {
 				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "major_filth")) {

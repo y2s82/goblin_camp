@@ -25,8 +25,10 @@ enum SpriteType
 	SPRITE_Single = 0x0,
 	SPRITE_Animated = 0x1,
 	SPRITE_SimpleConnectionMap = 0x2,
-	SPRITE_NormalConnectionMap = 0x4,
-	SPRITE_ExtendedConnectionMap = 0x8
+	SPRITE_TwoLayerConnectionMap = 0x6, // Two layered contains Simple
+	SPRITE_NormalConnectionMap = 0x8,
+	SPRITE_ExtendedConnectionMap = 0x18, // Extended constains Normal
+	SPRITE_ConnectionMap = 0x1E // Connection Map encompasses all variants
 };
 
 /****************
@@ -60,7 +62,10 @@ public:
 	
 	// Connection Map Drawing
 	typedef boost::function<bool (Direction)> ConnectedFunction;
+	typedef boost::function<int (Direction)> LayeredConnectedFunction;
+
 	void Draw(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void Draw(int layer, LayeredConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
 private:
 	void DrawSimpleConnected(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
@@ -99,6 +104,8 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	switch (numTiles) {
 		case 47:
 			type = SPRITE_ExtendedConnectionMap; break;
+		case 19:
+			type = SPRITE_TwoLayerConnectionMap; break;
 		case 16:
 			type = SPRITE_NormalConnectionMap; break;
 		case 5:

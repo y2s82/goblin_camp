@@ -123,15 +123,15 @@ void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, S
 	blood.Draw(connected, dst, dstRect);
 }
 
-void TileSet::DrawWater(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	waterTile.Draw(connected, dst, dstRect);
+void TileSet::DrawWater(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	waterTile.Draw(0, connected, dst, dstRect);
 }
 
-void TileSet::DrawIce(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+void TileSet::DrawIce(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	if (iceTile.Exists()) {
 		iceTile.Draw(connected, dst, dstRect);
 	} else {
-		waterTile.Draw(connected, dst, dstRect);
+		waterTile.Draw(1, connected, dst, dstRect);
 	}
 }
 
@@ -443,7 +443,7 @@ void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
 	}
 }
 
-void TileSet::SetWater(const Sprite& sprite) {
+void TileSet::SetWaterAndIce(const Sprite& sprite) {
 	waterTile = sprite;
 }
 
