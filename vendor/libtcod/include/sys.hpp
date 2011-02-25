@@ -271,7 +271,7 @@ public :
 			... draw something on sdl_surface using pygame
 		libtcod.sys_register_SDL_renderer(my_renderer)
 	*/
-	static void registerSDLRenderer(ITCODSDLRenderer *renderer);
+	static void registerSDLRenderer(ITCODSDLRenderer *renderer, bool provideSurfaceWithAlpha = false);
 
 	/**
 	@PageName system_sdlcbk

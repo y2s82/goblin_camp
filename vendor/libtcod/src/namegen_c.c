@@ -354,6 +354,7 @@ void namegen_parser_run (const char * filename) {
     TCOD_list_push(parsed_files,(const void *)TCOD_strdup(filename));
     /* run the parser */
     TCOD_parser_run(namegen_parser,filename,&namegen_listener);
+	TCOD_parser_delete(namegen_parser);
 }
 
 /* --------------- *

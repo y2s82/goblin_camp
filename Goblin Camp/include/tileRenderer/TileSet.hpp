@@ -29,10 +29,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Spell.hpp"
 #include "Fire.hpp"
 #include "tileRenderer/Sprite.hpp"
-#include "tileRenderer/NPCSpriteSet.hpp"
+#include "tileRenderer/StatusEffectSprite.hpp"
+#include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/NatureObjectSpriteSet.hpp"
-#include "tileRenderer/ItemSpriteSet.hpp"
-#include "tileRenderer/ConstructionSpriteSet.hpp"
+#include "tileRenderer/ItemSprite.hpp"
+#include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
 class TileSet : private boost::noncopyable
@@ -54,7 +55,8 @@ public:
 	void DrawTerrain(TileType type, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawCorruption(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawWater(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawWater(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawIce(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMajor(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -65,8 +67,10 @@ public:
 	void DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const;
 	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRecT) const;
 	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawDetail(int detailIndex, SDL_Surface *dst, SDL_Rect * dstRect) const;
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
@@ -78,7 +82,8 @@ public:
 	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
 	void SetTerrain(TileType type, const Sprite& sprite);
-	void SetWater(const Sprite& sprite);
+	void SetWaterAndIce(const Sprite& sprite);
+	void SetIce(const Sprite& sprite);
 	void SetFilthMinor(const Sprite& sprite);
 	void SetFilthMajor(const Sprite& sprite);
 	void SetMarker(const Sprite& sprite);
@@ -92,24 +97,29 @@ public:
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
 	void SetFireSprite(const Sprite& sprite);
 
-	void SetStatusSprite(StatusEffectType statusEffect, const Sprite& sprite);
+	void SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite);
 		
-	void AddNPCSpriteSet(std::string name, const NPCSpriteSet& set);
-	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& set);
-	void AddItemSpriteSet(std::string name, const ItemSpriteSet& set);
-	void AddConstructionSpriteSet(std::string name, const ConstructionSpriteSet& set);
-	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& set);
+	void AddNPCSprite(std::string name, const NPCSprite& sprite);
+	void AddNatureObjectSpriteSet(std::string name, const NatureObjectSpriteSet& sprite);
+	void AddItemSprite(std::string name, const ItemSprite& sprite);
+	void AddConstructionSprite(std::string name, const ConstructionSprite& sprite);
+	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& sprite);
 	
-	void SetDefaultNPCSpriteSet(const NPCSpriteSet& set);
-	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& set);
-	void SetDefaultItemSpriteSet(const ItemSpriteSet& set);
-	void SetDefaultConstructionSpriteSet(const ConstructionSpriteSet& set);
-	void SetDefaultSpellSpriteSet(const SpellSpriteSet& set);
+	void AddDetailSprite(const Sprite& sprite);
+	void SetDetailRange(int range);
+	int GetDetailRange() const;
+	bool HasTerrainDetails() const;
+	
+	void SetDefaultNPCSprite(const NPCSprite& sprite);
+	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& sprite);
+	void SetDefaultItemSprite(const ItemSprite& sprite);
+	void SetDefaultConstructionSprite(const ConstructionSprite& sprite);
+	void SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite);
 	
 private:
 	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
-	typedef boost::array<Sprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
+	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
 	
 	int tileWidth;
@@ -122,6 +132,7 @@ private:
 	Sprite defaultTerrainTile;
 	TileTypeSpriteArray terrainTiles;
 	Sprite waterTile;
+	Sprite iceTile;
 	Sprite minorFilth;
 	Sprite majorFilth;
 	
@@ -136,20 +147,23 @@ private:
 	Sprite defaultUnderConstructionSprite;
 	Sprite fireTile;
 
-	NPCSpriteSet defaultNPCSpriteSet;
-	std::vector<NPCSpriteSet> npcSpriteSets;
+	int detailRange;
+	std::vector<Sprite> detailSprites;
+
+	NPCSprite defaultNPCSprite;
+	std::vector<NPCSprite> npcSprites;
 	LookupMap npcSpriteLookup;
 
 	NatureObjectSpriteSet defaultNatureObjectSpriteSet;
 	std::vector<NatureObjectSpriteSet> natureObjectSpriteSets;
 	LookupMap natureObjectSpriteLookup;
 
-	ItemSpriteSet defaultItemSpriteSet;
-	std::vector<ItemSpriteSet> itemSpriteSets;
+	ItemSprite defaultItemSprite;
+	std::vector<ItemSprite> itemSprites;
 	LookupMap itemSpriteLookup;
 
-	ConstructionSpriteSet defaultConstructionSpriteSet;
-	std::vector<ConstructionSpriteSet> constructionSpriteSets;
+	ConstructionSprite defaultConstructionSprite;
+	std::vector<ConstructionSprite> constructionSprites;
 	LookupMap constructionSpriteLookup;
 
 	SpellSpriteSet defaultSpellSpriteSet;

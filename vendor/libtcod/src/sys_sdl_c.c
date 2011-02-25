@@ -143,13 +143,32 @@ static void check_ascii_to_tcod() {
 	}
 }
 
-void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
+void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer, bool provideSurfaceWithAlpha) {
 	TCOD_ctx.sdl_cbk=renderer;
 	if (renderer && !renderTarget) {
-		Uint8 rmask, gmask, bmask, amask;
-		SDL_Surface * temp = SDL_CreateRGBSurface(0, screen->w, screen->h, 32, screen->format->Rmask, screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
+		int w, h;
+		SDL_Surface * temp;
+		// Width and height to next power of two
+		w = screen->w;
+		w--;
+		w = (w >> 1) | w;
+		w = (w >> 2) | w;
+		w = (w >> 4) | w;
+		w = (w >> 8) | w;
+		w = (w >> 16) | w;
+		w++;
+		h  = screen->h;
+		h--;
+		h = (h >> 1) | h;
+		h = (h >> 2) | h;
+		h = (h >> 4) | h;
+		h = (h >> 8) | h;
+		h = (h >> 16) | h;
+		h++;
+
+		temp = SDL_CreateRGBSurface(0, w, h, 32, screen->format->Rmask, screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
 		SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
-		renderTarget = SDL_DisplayFormat(temp);
+		renderTarget = (provideSurfaceWithAlpha) ? SDL_DisplayFormatAlpha(temp) : SDL_DisplayFormat(temp);
 		SDL_FreeSurface(temp);
 	} else if (!renderer && renderTarget) {
 		SDL_FreeSurface(renderTarget);

@@ -167,14 +167,16 @@ template<class Archive>
 void Item::save(Archive & ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Entity>(*this);
 	ar & graphic;
-	ar & Item::ItemTypeToString(type);
+	std::string itemType(Item::ItemTypeToString(type));
+	ar & itemType;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
 	int categoryCount = (int)categories.size();
 	ar & categoryCount;
 	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
-		ar & Item::ItemCategoryToString(*cati);
+		std::string itemCat(Item::ItemCategoryToString(*cati));
+		ar & itemCat;
 	}
 	ar & flammable;
 	ar & attemptedStore;

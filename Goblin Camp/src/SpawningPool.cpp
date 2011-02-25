@@ -163,7 +163,7 @@ void SpawningPool::Update() {
 					}
 				}
 
-				if (Random::Generate(std::min(expansion, unsigned int(10))) == 0) Expand();
+				if (Random::Generate(std::min(expansion, 10U)) == 0) Expand();
 			}
 		}
 	}
