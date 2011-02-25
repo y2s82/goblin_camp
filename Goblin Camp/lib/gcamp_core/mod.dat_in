@@ -1,0 +1,6 @@
+mod {
+	name    = "Goblin Camp core data"
+	author  = "various"
+	version = "%GC_VERSION%"
+	// apiVersion deliberately omitted
+}
