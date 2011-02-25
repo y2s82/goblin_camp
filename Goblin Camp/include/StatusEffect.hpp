@@ -78,6 +78,7 @@ struct StatusEffect {
 
 	static StatusEffectType StringToStatusEffectType(std::string);
 	static std::string StatusEffectTypeToString(StatusEffectType);
+	static bool IsApplyableStatusEffect(StatusEffectType);
 
 	int graphic;
 	TCODColor color;

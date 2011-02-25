@@ -188,7 +188,8 @@ void Construction::save(Archive & ar, const unsigned int version) const {
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
-	ar & Construction::ConstructionTypeToString(type);
+	std::string constructionType(Construction::ConstructionTypeToString(type));
+	ar & constructionType;
 	ar & walkable;
 	ar & materials;
 	ar & producer;

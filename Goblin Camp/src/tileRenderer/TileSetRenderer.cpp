@@ -19,13 +19,33 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
-#include "data/Paths.hpp"
+#include "data/Config.hpp"
 #include "MathEx.hpp"
 
 #include "tileRenderer/DrawConstructionVisitor.hpp"
 
+namespace {
+
+	// TODO: Move this to MathEx
+	int NextPowerOfTwo(int val)
+	{
+		val--;
+		val = (val >> 1) | val;
+		val = (val >> 2) | val;
+		val = (val >> 4) | val;
+		val = (val >> 8) | val;
+		val = (val >> 16) | val;
+		val++;
+		return val;
+	}
+}
+
+
+ 
 TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
 : tcodConsole(mapConsole),
+  permutationTable(10, 473U),
+  translucentUI(Config::GetCVar<bool>("translucentUI")),
   screenWidth(resolutionX), 
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
@@ -49,18 +69,16 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
        bmask = 0x00ff0000;
        amask = 0xff000000;
    #endif
-   SDL_Surface * temp = SDL_CreateRGBSurface(0, screenWidth, screenHeight, 32, rmask, gmask, bmask, amask);
+   SDL_Surface * temp = SDL_CreateRGBSurface(0, NextPowerOfTwo(screenWidth), NextPowerOfTwo(screenHeight), 32, rmask, gmask, bmask, amask);
    SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
    mapSurface = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
    SDL_FreeSurface(temp);
 
-   // Make this a future option:
-   //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
    if (!mapSurface)
    {
 	   LOG(SDL_GetError());
    }
-   TCODSystem::registerSDLRenderer(this);
+   TCODSystem::registerSDLRenderer(this, translucentUI);
 }
 
 TileSetRenderer::~TileSetRenderer() {}
@@ -114,7 +132,6 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		for (int x = offsetX; x < offsetX + sizeX; x++) {
 			for (int y = offsetY; y < offsetY + sizeY; y++) {
 				tcodConsole->putCharEx(x, y, ' ', TCODColor::black, keyColor);
-				//tcodConsole->setDirty(x,y,1,1);
 			}
 		}
 	}
@@ -144,12 +161,26 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 			// Draw Terrain
 			SDL_Rect dstRect(CalcDest(tileX, tileY));
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
-				DrawTerrain(map, tileX, tileY, &dstRect);
-				if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(tileX,tileY))).lock()) {
-					DrawConstructionVisitor visitor(this, tileSet.get(), map, mapSurface.get(), &dstRect, Coordinate(tileX,tileY));
-					construction->AcceptVisitor(visitor);
-				} else  {
-					DrawFilth(map, tileX, tileY, &dstRect);
+				DrawTerrain(map, tileX, tileY, &dstRect);			
+				
+				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+					if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(tileX,tileY))).lock()) {
+						DrawConstructionVisitor visitor(this, tileSet.get(), map, mapSurface.get(), &dstRect, Coordinate(tileX,tileY));
+						construction->AcceptVisitor(visitor);
+					} else  {
+						DrawFilth(map, tileX, tileY, &dstRect);
+					}
+
+					int natNum = map->GetNatureObject(tileX, tileY);
+					if (natNum >= 0) {
+						boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
+						if (natureObj->Marked()) {
+							tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
+						}
+						if (!natureObj->IsIce()) {
+							tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+						}
+					}
 				}
 
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
@@ -165,8 +196,9 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 	DrawMarkers(map, startTileX, startTileY, tilesX, tilesY);
 
-	DrawNatureObjects(startTileX, startTileY, tilesX, tilesY);
-	DrawItems(startTileX, startTileY, tilesX, tilesY);
+	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+		DrawItems(startTileX, startTileY, tilesX, tilesY);
+	}
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
 	DrawFires(startTileX, startTileY, tilesX, tilesY);
 	DrawSpells(startTileX, startTileY, tilesX, tilesY);
@@ -237,22 +269,6 @@ void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) co
 	}
 }
 
-void TileSetRenderer::DrawNatureObjects(int startX, int startY, int sizeX, int sizeY) const {
-	for (std::map<int,boost::shared_ptr<NatureObject> >::iterator planti = Game::Inst()->natureList.begin(); planti != Game::Inst()->natureList.end(); ++planti) {
-		Coordinate plantPos = planti->second->Position();
-		if (plantPos.X() >= startX && plantPos.X() < startX + sizeX
-				&& plantPos.Y() >= startY && plantPos.Y() < startY + sizeY)
-		{
-			SDL_Rect dstRect(CalcDest(plantPos.X(), plantPos.Y()));
-			if (planti->second->Marked())
-			{
-				tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
-			}
-			tileSet->DrawNatureObject(planti->second, mapSurface.get(), &dstRect);
-		}
-	}
-}
-
 void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) const {
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
 		Coordinate npcPos = npci->second->Position();
@@ -314,6 +330,21 @@ namespace {
 		return map->GetType(coord.X(), coord.Y()) == type;
 	}
 
+	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
+			return true;
+		int natNum = -1;
+		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return Game::Inst()->natureList[natNum]->IsIce();
+		}
+		return false;
+	}
+
 	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
 		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
@@ -323,15 +354,19 @@ namespace {
 		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
 	}
 
-	bool WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
+	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		int natNum = -1;
 		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
-			return true;
+			return 2;
 		}
 		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
-			return water->Depth() > 0;
+			return (water->Depth() > 0) ? 1 : 0;
 		}
-		return false;
+		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
+		}
+		return 0;
 	}
 
 	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
@@ -347,6 +382,7 @@ namespace {
 		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
 			return blood->Depth() > 0;
 		}
+		return false;
 	}
 }
 
@@ -354,8 +390,17 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 	TileType type(map->GetType(tileX, tileY));
 	Coordinate pos(tileX, tileY);
 
-	tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
+	if (type == TILESNOW) {
+		tileSet->DrawTerrain(type, boost::bind(&SnowConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+	} else {
+		tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
+	}
 	
+	if (tileSet->HasTerrainDetails()) {
+		int detailIndex = permutationTable.Hash(permutationTable.Hash(tileX) + tileY) % tileSet->GetDetailRange(); 
+		tileSet->DrawDetail(detailIndex, mapSurface.get(), dstRect);
+	}
+
 	// Corruption
 	if (map->GetCorruption(tileX, tileY) >= 100) {
 		tileSet->DrawCorruption(boost::bind(&CorruptionConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
@@ -365,9 +410,14 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 	// Water
 	boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
 	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
-		if (water->Depth() > 0)
-		{
+		if (water->Depth() > 0) {
 			tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+		}
+	}
+	int natNum = -1;
+	if ((natNum = map->GetNatureObject(tileX, tileY)) >= 0) {
+		if (Game::Inst()->natureList[natNum]->IsIce()) {
+			tileSet->DrawIce(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 		}
 	}
 	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(tileX, tileY).lock()) {
@@ -395,16 +445,44 @@ void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_R
 	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
 }
 
-void TileSetRenderer::render(void * surf,void * sdl_screen) {
-	  SDL_Surface *tcod = (SDL_Surface *)surf;
-	  SDL_Surface *screen = (SDL_Surface *)sdl_screen;
+namespace {
+	inline void setPixelAlpha(SDL_Surface *surface, int x, int y, Uint32 keyColor)
+	{
+		SDL_PixelFormat *fmt = surface->format;
+		int bpp = fmt->BytesPerPixel;
+		if (bpp != 4) return;
 
-      SDL_Rect srcRect={0,0,screenWidth,screenHeight};
-      SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	  SDL_BlitSurface(mapSurface.get(), &srcRect, screen, &dstRect);
-	  SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
-	  // TODO: Make this an option
-	  //SDL_SetAlpha(tcod, SDL_SRCALPHA, 196);
-	  SDL_BlitSurface(tcod, &srcRect, screen, &dstRect);
+		Uint32 *p = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch) + x;
+		Uint32 c = (*p | fmt->Amask);
+		if (c == keyColor) {
+			*p = *p & ~fmt->Amask;
+		} else if (c == fmt->Amask) {
+			*p = (*p & ~fmt->Amask) | (128 << fmt->Ashift);
+		}
+	}
+
 }
 
+void TileSetRenderer::render(void * surf,void * sdl_screen) {
+	SDL_Surface *tcod = (SDL_Surface *)surf;
+	SDL_Surface *screen = (SDL_Surface *)sdl_screen;
+
+	SDL_Rect srcRect={0,0,screenWidth,screenHeight};
+	SDL_Rect dstRect={0,0,screenWidth,screenHeight};
+	SDL_LowerBlit(mapSurface.get(), &srcRect, screen, &dstRect);
+	
+	if (translucentUI) {
+		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);
+		SDL_LockSurface(tcod);
+		for (int x = 0; x < screenWidth; ++x) {
+			for (int y = 0; y < screenHeight; ++y) {
+				setPixelAlpha(tcod,x,y, keyColorVal);
+			}
+		}
+		SDL_UnlockSurface(tcod);
+	}
+	else {
+		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
+	}
+	SDL_LowerBlit(tcod, &srcRect, screen, &dstRect);
+}

@@ -213,6 +213,8 @@ private:
 
 	void UpdateHealth();
 public:
+	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
+
 	~NPC();
 	SkillSet Skills;
 	void Think();
@@ -319,7 +321,8 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & NPC::NPCTypeToString(type);
+	std::string npcType(NPC::NPCTypeToString(type));
+	ar & npcType;
 	ar & timeCount;
 	ar & jobs;
 	ar & taskIndex;

@@ -682,6 +682,7 @@ void TCOD_lex_savepoint(TCOD_lex_t *lex,TCOD_lex_t *_savept)
 void TCOD_lex_restore(TCOD_lex_t *lex,TCOD_lex_t *_savept)
 {
 	TCOD_lex_t *savept=(TCOD_lex_t *)_savept;
+	free(lex->tok);
 	*lex = *savept;
 	lex->savept=false;
 }
