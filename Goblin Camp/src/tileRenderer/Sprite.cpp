@@ -48,8 +48,8 @@ bool Sprite::IsAnimated() const {
 namespace {
 	inline int ConnectionIndex(bool connectNorth, bool connectEast, bool connectSouth, bool connectWest) {
 		int index = 0;
-		if (!connectSouth) index += 8;
-		if (connectSouth == connectNorth) index +=4;
+		if (connectNorth) index +=8;
+		if (connectNorth != connectSouth) index += 4;
 		if (connectWest) index += 2;
 		if (connectEast != connectWest) index += 1;
 		return index;
@@ -194,7 +194,7 @@ void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
 	
 void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (IsConnectionMap()) {
-		if (type & SPRITE_ExtendedConnectionMap) {
+		if ((type & SPRITE_ExtendedConnectionMap) == SPRITE_ExtendedConnectionMap) {
 			int index = ExtConnectionIndex(connected);
 			texture->DrawTile(tiles.at(CurrentFrame() + frameCount * index), dst, dstRect);
 		} else if (type & SPRITE_NormalConnectionMap) {
@@ -209,7 +209,7 @@ void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dst
 }
 
 void Sprite::Draw(int layer, LayeredConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
-	if (type & SPRITE_TwoLayerConnectionMap && layer > 0) {
+	if (((type & SPRITE_TwoLayerConnectionMap) == SPRITE_TwoLayerConnectionMap) && layer > 0) {
 		boost::array<int, 2> vertLayer = {connected(NORTH), connected(SOUTH)};
 		boost::array<int, 2> horizLayer = {connected(WEST), connected(EAST)};
 		boost::array<int, 4> cornerLayer = {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)};
