@@ -45,7 +45,7 @@ private:
 	int overlayFlags;
 	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
-
+	
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
 
