@@ -2,6 +2,13 @@
 
 LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
 
+/* This is needed because RC's preprocessor is not a full C preprocessor. */
+%GC_RCH_DEFINITIONS%
+
+#ifndef INTERNAL_FILENAME
+#	define INTERNAL_FILENAME ORIGINAL_FILENAME
+#endif
+
 VS_VERSION_INFO VERSIONINFO
 	FILEVERSION    %GC_RC_VERSION_INT%
 	PRODUCTVERSION %GC_RC_VERSION_INT%
@@ -19,11 +26,11 @@ BEGIN
 		BLOCK "040904b0"
 		BEGIN
 			VALUE "CompanyName",      "Ilkka Halila"
-			VALUE "FileDescription",  "The Goblin Camp executable"
+			VALUE "FileDescription",  FILE_DESCRIPTION
 			VALUE "FileVersion",      "%GC_RC_VERSION%"
-			VALUE "InternalName",     "goblin-camp.exe"
+			VALUE "InternalName",     INTERNAL_FILENAME
 			VALUE "LegalCopyright",   "Copyright (C) 2010-2011 Ilkka Halila"
-			VALUE "OriginalFilename", "goblin-camp.exe"
+			VALUE "OriginalFilename", ORIGINAL_FILENAME
 			VALUE "ProductName",      "Goblin Camp"
 			VALUE "ProductVersion",   "%GC_RC_VERSION%"
 		#if defined(DEBUG) || defined(WITH_REVID)
