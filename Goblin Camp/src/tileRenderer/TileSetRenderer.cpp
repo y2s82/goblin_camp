@@ -432,29 +432,12 @@ namespace {
 		if (bpp != 4) return;
 
 		Uint32 *p = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch) + x;
-		if ((*p | fmt->Amask) == keyColor) {
+		Uint32 c = (*p | fmt->Amask);
+		if (c == keyColor) {
 			*p = *p & ~fmt->Amask;
-			return;
+		} else if (c == fmt->Amask) {
+			*p = (*p & ~fmt->Amask) | (128 << fmt->Ashift);
 		}
-		
-		Uint8 red, green, blue;
-
-		Uint32 pixel = *p;
-		Uint32 temp = pixel & fmt->Rmask;  /* Isolate red component */
-		temp = temp >> fmt->Rshift; /* Shift it down to 8-bit */
-		red = (Uint8)temp;
-
-		temp = pixel & fmt->Gmask;  /* Isolate red component */
-		temp = temp >> fmt->Gshift; /* Shift it down to 8-bit */
-		green = (Uint8)temp;
-
-		temp = pixel & fmt->Bmask;  /* Isolate red component */
-		temp = temp >> fmt->Bshift; /* Shift it down to 8-bit */
-		blue = (Uint8)temp;
-
-		temp = 128 + ((red | green | blue) >> 1);
-		temp = temp << fmt->Ashift;
-		*p = (pixel & ~fmt->Amask) | temp;
 	}
 
 }
