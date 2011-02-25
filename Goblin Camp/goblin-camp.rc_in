@@ -22,7 +22,7 @@ BEGIN
 			VALUE "FileDescription",  "The Goblin Camp executable"
 			VALUE "FileVersion",      "%GC_RC_VERSION%"
 			VALUE "InternalName",     "goblin-camp.exe"
-			VALUE "LegalCopyright",   "Copyright (C) 2010 Ilkka Halila"
+			VALUE "LegalCopyright",   "Copyright (C) 2010-2011 Ilkka Halila"
 			VALUE "OriginalFilename", "goblin-camp.exe"
 			VALUE "ProductName",      "Goblin Camp"
 			VALUE "ProductVersion",   "%GC_RC_VERSION%"
