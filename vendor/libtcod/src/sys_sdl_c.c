@@ -143,7 +143,7 @@ static void check_ascii_to_tcod() {
 	}
 }
 
-void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
+void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer, bool provideSurfaceWithAlpha) {
 	TCOD_ctx.sdl_cbk=renderer;
 	if (renderer && !renderTarget) {
 		int w, h;
@@ -168,7 +168,7 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer) {
 
 		temp = SDL_CreateRGBSurface(0, w, h, 32, screen->format->Rmask, screen->format->Gmask, screen->format->Bmask, screen->format->Amask);
 		SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
-		renderTarget = SDL_DisplayFormat(temp);
+		renderTarget = (provideSurfaceWithAlpha) ? SDL_DisplayFormatAlpha(temp) : SDL_DisplayFormat(temp);
 		SDL_FreeSurface(temp);
 	} else if (!renderer && renderTarget) {
 		SDL_FreeSurface(renderTarget);

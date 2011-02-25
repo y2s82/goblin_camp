@@ -45,6 +45,7 @@ public:
 private:
 	TCODConsole * tcodConsole;
 	PermutationTable permutationTable;
+	bool translucentUI;
 
 	// the font characters size
 	int screenWidth, screenHeight;
@@ -55,6 +56,7 @@ private:
 	int startTileX, startTileY;
 	CursorType cursorMode;
 	int cursorHint;
+	
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;
 	void DrawFilth				(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;

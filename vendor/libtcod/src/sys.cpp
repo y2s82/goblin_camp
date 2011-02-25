@@ -89,11 +89,11 @@ static ITCODSDLRenderer *renderer=NULL;
 extern "C" void TCOD_CRenderer(void *sdl_surface, void *sdl_screen) {
 	if ( renderer ) renderer->render(sdl_surface, sdl_screen);
 }
-void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer) {
+void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer, bool provideSurfaceWithAlpha) {
 	::renderer = renderer;
 	if (renderer) {
-		TCOD_sys_register_SDL_renderer(TCOD_CRenderer);
+		TCOD_sys_register_SDL_renderer(TCOD_CRenderer, provideSurfaceWithAlpha);
 	} else {
-		TCOD_sys_register_SDL_renderer(0);
+		TCOD_sys_register_SDL_renderer(0, false);
 	}
 }

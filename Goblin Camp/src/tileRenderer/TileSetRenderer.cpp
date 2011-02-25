@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapMarker.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"
-#include "data/Paths.hpp"
+#include "data/Config.hpp"
 #include "MathEx.hpp"
 
 #include "tileRenderer/DrawConstructionVisitor.hpp"
@@ -43,6 +43,7 @@ namespace {
 TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
 : tcodConsole(mapConsole),
   permutationTable(10, 473U),
+  translucentUI(Config::GetCVar<bool>("translucentUI")),
   screenWidth(resolutionX), 
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
@@ -71,13 +72,11 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
    mapSurface = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
    SDL_FreeSurface(temp);
 
-   // Make this a future option:
-   //SDL_SetAlpha(tempBuffer.get(), SDL_SRCALPHA, 196);
    if (!mapSurface)
    {
 	   LOG(SDL_GetError());
    }
-   TCODSystem::registerSDLRenderer(this);
+   TCODSystem::registerSDLRenderer(this, translucentUI);
 }
 
 TileSetRenderer::~TileSetRenderer() {}
@@ -131,7 +130,6 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		for (int x = offsetX; x < offsetX + sizeX; x++) {
 			for (int y = offsetY; y < offsetY + sizeY; y++) {
 				tcodConsole->putCharEx(x, y, ' ', TCODColor::black, keyColor);
-				//tcodConsole->setDirty(x,y,1,1);
 			}
 		}
 	}
@@ -163,21 +161,23 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
 				DrawTerrain(map, tileX, tileY, &dstRect);			
 				
-				if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(tileX,tileY))).lock()) {
-					DrawConstructionVisitor visitor(this, tileSet.get(), map, mapSurface.get(), &dstRect, Coordinate(tileX,tileY));
-					construction->AcceptVisitor(visitor);
-				} else  {
-					DrawFilth(map, tileX, tileY, &dstRect);
-				}
-
-				int natNum = map->GetNatureObject(tileX, tileY);
-				if (natNum >= 0) {
-					boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
-					if (natureObj->Marked()) {
-						tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
+				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+					if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(tileX,tileY))).lock()) {
+						DrawConstructionVisitor visitor(this, tileSet.get(), map, mapSurface.get(), &dstRect, Coordinate(tileX,tileY));
+						construction->AcceptVisitor(visitor);
+					} else  {
+						DrawFilth(map, tileX, tileY, &dstRect);
 					}
-					if (!natureObj->IsIce()) {
-						tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+
+					int natNum = map->GetNatureObject(tileX, tileY);
+					if (natNum >= 0) {
+						boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
+						if (natureObj->Marked()) {
+							tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
+						}
+						if (!natureObj->IsIce()) {
+							tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+						}
 					}
 				}
 
@@ -194,7 +194,9 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 	DrawMarkers(map, startTileX, startTileY, tilesX, tilesY);
 
-	DrawItems(startTileX, startTileY, tilesX, tilesY);
+	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+		DrawItems(startTileX, startTileY, tilesX, tilesY);
+	}
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
 	DrawFires(startTileX, startTileY, tilesX, tilesY);
 	DrawSpells(startTileX, startTileY, tilesX, tilesY);
@@ -422,15 +424,61 @@ void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_R
 	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
 }
 
-void TileSetRenderer::render(void * surf,void * sdl_screen) {
-	  SDL_Surface *tcod = (SDL_Surface *)surf;
-	  SDL_Surface *screen = (SDL_Surface *)sdl_screen;
+namespace {
+	inline void setPixelAlpha(SDL_Surface *surface, int x, int y, Uint32 keyColor)
+	{
+		SDL_PixelFormat *fmt = surface->format;
+		int bpp = fmt->BytesPerPixel;
+		if (bpp != 4) return;
 
-      SDL_Rect srcRect={0,0,screenWidth,screenHeight};
-      SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	  SDL_BlitSurface(mapSurface.get(), &srcRect, screen, &dstRect);
-	  SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
-	  // TODO: Make this an option
-	  //SDL_SetAlpha(tcod, SDL_SRCALPHA, 196);
-	  SDL_BlitSurface(tcod, &srcRect, screen, &dstRect);
+		Uint32 *p = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch) + x;
+		if ((*p | fmt->Amask) == keyColor) {
+			*p = *p & ~fmt->Amask;
+			return;
+		}
+		
+		Uint8 red, green, blue;
+
+		Uint32 pixel = *p;
+		Uint32 temp = pixel & fmt->Rmask;  /* Isolate red component */
+		temp = temp >> fmt->Rshift; /* Shift it down to 8-bit */
+		red = (Uint8)temp;
+
+		temp = pixel & fmt->Gmask;  /* Isolate red component */
+		temp = temp >> fmt->Gshift; /* Shift it down to 8-bit */
+		green = (Uint8)temp;
+
+		temp = pixel & fmt->Bmask;  /* Isolate red component */
+		temp = temp >> fmt->Bshift; /* Shift it down to 8-bit */
+		blue = (Uint8)temp;
+
+		temp = 128 + ((red | green | blue) >> 1);
+		temp = temp << fmt->Ashift;
+		*p = (pixel & ~fmt->Amask) | temp;
+	}
+
+}
+
+void TileSetRenderer::render(void * surf,void * sdl_screen) {
+	SDL_Surface *tcod = (SDL_Surface *)surf;
+	SDL_Surface *screen = (SDL_Surface *)sdl_screen;
+
+	SDL_Rect srcRect={0,0,screenWidth,screenHeight};
+	SDL_Rect dstRect={0,0,screenWidth,screenHeight};
+	SDL_LowerBlit(mapSurface.get(), &srcRect, screen, &dstRect);
+	
+	if (translucentUI) {
+		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);
+		SDL_LockSurface(tcod);
+		for (int x = 0; x < screenWidth; ++x) {
+			for (int y = 0; y < screenHeight; ++y) {
+				setPixelAlpha(tcod,x,y, keyColorVal);
+			}
+		}
+		SDL_UnlockSurface(tcod);
+	}
+	else {
+		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
+	}
+	SDL_LowerBlit(tcod, &srcRect, screen, &dstRect);
 }
