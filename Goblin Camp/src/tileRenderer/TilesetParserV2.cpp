@@ -77,6 +77,7 @@ namespace {
 		// Terrain modifiers
 		tileTextureStruct->addListProperty("water", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("ice", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("waterAndIce", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("minorFilth", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("majorFilth", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("marker", TCOD_TYPE_INT, false);
@@ -337,9 +338,11 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			
 			// Terrain Modifiers
 			else if (boost::iequals(name, "water")) {
-				tileSet->SetWater(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetWaterAndIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "ice")) {
 				tileSet->SetIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+			} else if (boost::iequals(name, "waterAndIce")) {
+				tileSet->SetWaterAndIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "minorFilth")) {
 				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "majorFilth")) {

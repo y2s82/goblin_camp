@@ -25,6 +25,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/DrawConstructionVisitor.hpp"
 
 namespace {
+
+	// TODO: Move this to MathEx
 	int NextPowerOfTwo(int val)
 	{
 		val--;
@@ -352,19 +354,19 @@ namespace {
 		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
 	}
 
-	bool WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
+	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
 		int natNum = -1;
 		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
-			return true;
+			return 2;
 		}
 		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
-			return water->Depth() > 0;
+			return (water->Depth() > 0) ? 1 : 0;
 		}
 		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
-			return Game::Inst()->natureList[natNum]->IsIce();
+			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
 		}
-		return false;
+		return 0;
 	}
 
 	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {

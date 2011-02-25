@@ -38,7 +38,7 @@ bool Sprite::Exists() const
 }
 
 bool Sprite::IsConnectionMap() const {
-	return type & (SPRITE_SimpleConnectionMap | SPRITE_NormalConnectionMap | SPRITE_ExtendedConnectionMap);
+	return type & SPRITE_ConnectionMap;
 }
 
 bool Sprite::IsAnimated() const {
@@ -150,6 +150,40 @@ namespace {
 					(connected(NORTHWEST) << 7);
 		return lookupTable[index];
 	}
+
+	inline int SecondLayerConnectionIndex(int vert, int horiz, int corner) {
+		static boost::array<short, 27> lookupTable = {
+			    // Vert Layer, Horiz Layer, Corner Layer
+			5,  // 0         , 0          , 0
+			5,  // 0         , 0          , 1
+			5,  // 0         , 0          , 2
+			6,  // 1         , 0          , 0
+			6,  // 1         , 0          , 1
+			6,  // 1         , 0          , 2
+			7,  // 2         , 0          , 0
+			7,  // 2         , 0          , 1
+			7,  // 2         , 0          , 2
+			8,  // 0         , 1          , 0
+			8,  // 0         , 1          , 1
+			8,  // 0         , 1          , 2
+			10, // 1         , 1          , 0
+			11, // 1         , 1          , 1
+			11, // 1         , 1          , 2
+			12, // 2         , 1          , 0
+			13, // 2         , 1          , 1
+			13, // 2         , 1          , 2
+			9,  // 0         , 2          , 0
+			9,  // 0         , 2          , 1
+			9,  // 0         , 2          , 2
+			14, // 1         , 2          , 0
+			15, // 1         , 2          , 1
+			15, // 1         , 2          , 2
+			16, // 2         , 2          , 0
+			17, // 2         , 2          , 1
+			18, // 2         , 2          , 2
+		};
+		return lookupTable[corner + vert * 3 + horiz * 9];
+	}
 }
 
 void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
@@ -171,6 +205,24 @@ void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dst
 		}
 	} else {
 		Draw(dst, dstRect);
+	}
+}
+
+void Sprite::Draw(int layer, LayeredConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
+	if (type & SPRITE_TwoLayerConnectionMap && layer > 0) {
+		boost::array<int, 2> vertLayer = {connected(NORTH), connected(SOUTH)};
+		boost::array<int, 2> horizLayer = {connected(WEST), connected(EAST)};
+		boost::array<int, 4> cornerLayer = {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)};
+
+		for (int vertDirection = 0; vertDirection < 2; ++vertDirection) {
+			for (int horizDirection = 0; horizDirection < 2; ++horizDirection) {
+				TileSetTexture::Corner corner = static_cast<TileSetTexture::Corner>(horizDirection + 2 * vertDirection);
+				int index = SecondLayerConnectionIndex(vertLayer[vertDirection], horizLayer[horizDirection], cornerLayer[corner]);
+				texture->DrawTileCorner(tiles[CurrentFrame() + frameCount * index], corner, dst, dstRect);
+			}
+		}
+	} else {
+		Draw(connected, dst, dstRect);
 	}
 
 }
