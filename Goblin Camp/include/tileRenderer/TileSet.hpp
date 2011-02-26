@@ -49,6 +49,8 @@ public:
 	std::string GetVersion() const;
 	std::string GetDescription() const;
 
+	bool IsIceSupported() const;
+
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;

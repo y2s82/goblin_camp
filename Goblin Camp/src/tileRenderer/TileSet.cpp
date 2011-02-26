@@ -99,6 +99,10 @@ std::string TileSet::GetDescription() const {
 	return description;
 }
 
+bool TileSet::IsIceSupported() const {
+	return waterTile.IsTwoLayeredConnectionMap() || iceTile.Exists();
+}
+
 void TileSet::DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	markedOverlay.Draw(dst, dstRect);
 }
