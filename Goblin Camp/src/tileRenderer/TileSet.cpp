@@ -38,6 +38,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	territoryOverlay(),
 	markedOverlay(),
 	corruptionTile(),
+	corruptionOverlayTile(),
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
@@ -121,6 +122,10 @@ void TileSet::DrawTerrain(TileType type, Sprite::ConnectedFunction connected, SD
 
 void TileSet::DrawCorruption(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	corruptionTile.Draw(connected, dst, dstRect);
+}
+
+void TileSet::DrawCorruptionOverlay(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	corruptionOverlayTile.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
@@ -485,6 +490,10 @@ void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 
 void TileSet::SetCorruption(const Sprite& sprite) {
 	corruptionTile = sprite;
+}
+
+void TileSet::SetCorruptionOverlay(const Sprite& sprite) {
+	corruptionOverlayTile = sprite;
 }
 
 void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
