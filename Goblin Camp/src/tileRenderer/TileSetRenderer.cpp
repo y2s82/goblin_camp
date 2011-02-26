@@ -83,6 +83,85 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
 
 TileSetRenderer::~TileSetRenderer() {}
 
+
+namespace {
+	bool TerrainConnectionTest(Map* map, Coordinate origin, TileType type, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->GetType(coord.X(), coord.Y()) == type;
+	}
+
+	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
+			return true;
+		int natNum = -1;
+		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return Game::Inst()->natureList[natNum]->IsIce();
+		}
+		return false;
+	}
+
+	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
+	}
+
+	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		int natNum = -1;
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+			return 2;
+		}
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+			return (water->Depth() > 0) ? 1 : 0;
+		}
+		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
+		}
+		return 0;
+	}
+
+	bool WaterNoIceConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+			return true;
+		}
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+			return (water->Depth() > 0);
+		}
+		return false;
+	}
+
+	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
+			return filth->Depth() > 4;
+		}
+		return false;
+	}
+
+	bool BloodConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
+			return blood->Depth() > 0;
+		}
+		return false;
+	}
+}
+
+
 void TileSetRenderer::PreparePrefabs() 
 {
 	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci) {
@@ -204,6 +283,21 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
 	DrawFires(startTileX, startTileY, tilesX, tilesY);
 	DrawSpells(startTileX, startTileY, tilesX, tilesY);
+	
+	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+		for (int y = 0; y < tilesY; ++y) {
+			for (int x = 0; x <= tilesX; ++x) {
+				int tileX = x + startTileX;
+				int tileY = y + startTileY;
+
+				// Corruption
+				if (map->GetCorruption(tileX, tileY) >= 100) {
+					SDL_Rect dstRect(CalcDest(tileX, tileY));
+					tileSet->DrawCorruptionOverlay(boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), &dstRect);
+				}
+			}
+		}
+	}
 
 	SDL_SetClipRect(mapSurface.get(), NULL);
 }
@@ -322,83 +416,6 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 	}
 }
 
-namespace {
-	bool TerrainConnectionTest(Map* map, Coordinate origin, TileType type, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
-			return true;
-		}
-		return map->GetType(coord.X(), coord.Y()) == type;
-	}
-
-	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
-			return true;
-		}
-		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
-			return true;
-		int natNum = -1;
-		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
-			return Game::Inst()->natureList[natNum]->IsIce();
-		}
-		return false;
-	}
-
-	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
-			return true;
-		}
-		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
-	}
-
-	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		int natNum = -1;
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
-			return 2;
-		}
-		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
-			return (water->Depth() > 0) ? 1 : 0;
-		}
-		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
-			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
-		}
-		return 0;
-	}
-
-	bool WaterNoIceConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
-			return true;
-		}
-		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
-			return (water->Depth() > 0);
-		}
-		return false;
-	}
-
-	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
-			return filth->Depth() > 4;
-		}
-		return false;
-	}
-
-	bool BloodConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
-			return blood->Depth() > 0;
-		}
-		return false;
-	}
-}
-
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	TileType type(map->GetType(tileX, tileY));
 	Coordinate pos(tileX, tileY);
@@ -495,13 +512,19 @@ void TileSetRenderer::render(void * surf,void * sdl_screen) {
 	
 	if (translucentUI) {
 		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);
-		SDL_LockSurface(tcod);
+		if (SDL_MUSTLOCK(tcod))
+		{
+			SDL_LockSurface(tcod);
+		}
 		for (int x = 0; x < screenWidth; ++x) {
 			for (int y = 0; y < screenHeight; ++y) {
 				setPixelAlpha(tcod,x,y, keyColorVal);
 			}
 		}
-		SDL_UnlockSurface(tcod);
+		if (SDL_MUSTLOCK(tcod))
+		{
+			SDL_UnlockSurface(tcod);
+		}
 	}
 	else {
 		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));

@@ -39,6 +39,7 @@ tileset "Default Tileset" {
 					144,145,146,147,
 					160,161,162,163,
 					176,177,178,179]
+		corruptionOverlay=[132,133,134,135,136]
 
 		// Tile Highlights (when placing or selecting)
 		defaultTileHighlight=[12,13]

@@ -89,6 +89,7 @@ namespace {
 		tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("corruption", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("corruptionOverlay", TCOD_TYPE_INT, false);
 
 		tileTextureStruct->addProperty("defaultUnderconstruction", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("fire", TCOD_TYPE_INT, false);
@@ -366,6 +367,8 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				tileSet->SetMarkedOverlay(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "corruption")) {
 				tileSet->SetCorruption(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+			} else if (boost::iequals(name, "corruptionOverlay")) {
+				tileSet->SetCorruptionOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			}
 
 			// Cursors
