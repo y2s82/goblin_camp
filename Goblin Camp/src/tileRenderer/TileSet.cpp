@@ -144,12 +144,16 @@ void TileSet::DrawIce(Sprite::LayeredConnectedFunction connected, SDL_Surface *d
 	}
 }
 
-void TileSet::DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const {
-	minorFilth.Draw(dst, dstRect);
+void TileSet::DrawFilthMinor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	minorFilth.Draw(0, connected, dst, dstRect);
 }
 
-void TileSet::DrawFilthMajor(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	majorFilth.Draw(connected, dst, dstRect);
+void TileSet::DrawFilthMajor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (majorFilth.Exists()) {
+		majorFilth.Draw(connected, dst, dstRect);
+	} else {
+		minorFilth.Draw(1, connected, dst, dstRect);
+	}
 }
 
 void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const {
