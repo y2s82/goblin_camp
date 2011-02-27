@@ -115,7 +115,7 @@ always version ;
 ## should depend on it.
 ###############################################################################
 
-alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl ;
+alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl libuserialize ;
 
 ###############################################################################
 ##### stdafx.hpp

@@ -129,64 +129,7 @@ const boost::uint8_t fileFormatConst = 0x01;
 // Save/load entry points
 //
 
-// XXX: Relying on the little-endianess of the platform. Are we supporting anything other than x86/x64?
-// WARNING: Wild templates ahead.
 namespace {
-	// These exist to determine two smaller types that can compose a bigger type.
-	// N is type size in bytes.
-	template <size_t N> struct type { };
-	
-	#define DEFINE_TYPE(T) template <> struct type<sizeof(T)> { typedef T uint; }
-	DEFINE_TYPE(boost::uint8_t);
-	DEFINE_TYPE(boost::uint16_t);
-	DEFINE_TYPE(boost::uint32_t);
-	DEFINE_TYPE(boost::uint64_t);
-	#undef DEFINE_TYPE
-	
-	// ReadUInt<boost::uint64_t> calls ReadUInt<boost::uint32_t> and ReadUInt<boost::uint32_t>
-	// ReadUInt<boost::uint32_t> calls ReadUInt<boost::uint16_t> and ReadUInt<boost::uint16_t>
-	// ReadUInt<boost::uint16_t> calls ReadUInt<boost::uint8_t>  and ReadUInt<boost::uint8_t>
-	// ReadUInt<boost::uint8_t> reads single byte from the stream
-	//
-	// The result is then bitshifted and ORed to reconstruct the value.
-	
-	template <typename T>
-	T ReadUInt(std::ifstream& stream) {
-		typedef typename type<sizeof(T) / 2>::uint smaller;
-		
-		const boost::uint32_t smallerBits = sizeof(smaller) * 8;
-		
-		smaller a, b;
-		a = ReadUInt<smaller>(stream);
-		b = ReadUInt<smaller>(stream);
-		
-		return ((T)a << smallerBits) | (T)b;
-	}
-	
-	template <>
-	boost::uint8_t ReadUInt<boost::uint8_t>(std::ifstream& stream) {
-		return (boost::uint8_t)stream.get();
-	}
-	
-	// WriteUInt is a recursive call, just like ReadUInt.
-	
-	template <typename T>
-	void WriteUInt(std::ofstream& stream, typename type<sizeof(T)>::uint value) {
-		typedef typename type<sizeof(T) / 2>::uint smaller;
-		
-		const boost::uint32_t smallerBits = sizeof(smaller) * 8;
-		// All types here are unsigned.
-		const smaller maxValue = (smaller)-1;
-		
-		WriteUInt<smaller>(stream, (value >> smallerBits) & maxValue);
-		WriteUInt<smaller>(stream, value & maxValue);
-	}
-	
-	template <>
-	void WriteUInt<boost::uint8_t>(std::ofstream& stream, boost::uint8_t value) {
-		stream.put((char)value);
-	}
-	
 	template <typename T>
 	void WritePayload(T& ofs) {
 		boost::archive::binary_oarchive oarch(ofs);
@@ -209,6 +152,10 @@ namespace {
 		iarch >> *Map::Inst();
 	}
 }
+
+#include "uSerialize.hpp"
+using Serializer::WriteUInt;
+using Serializer::ReadUInt;
 
 bool Game::SaveGame(const std::string& filename) {
 	try {
