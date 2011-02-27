@@ -27,7 +27,7 @@ resources = []
 
 CPP_RE = re.compile('^.*?[.]c(?:c|pp|pp_in)?$', re.S | re.I)
 HPP_RE = re.compile('^.*?[.]h(?:h|pp)?$', re.S | re.I)
-DAT_RE = re.compile('^.*?[.](?:dat|py|txt|rc_in)?$', re.S | re.I)
+DAT_RE = re.compile('^.*?[.](?:dat|py|txt|rc_in|rch)?$', re.S | re.I)
 
 for root, dirs, files in os.walk(projDir):
     for fn in files:
