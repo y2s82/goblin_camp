@@ -18,6 +18,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <tut_macros.h>
 
 #include <sstream>
+#include <boost/assert.hpp>
+#include <boost/scoped_array.hpp>
+#include <cstring>
 
 #include "uSerialize.hpp"
 using namespace Serializer;
@@ -34,7 +37,7 @@ namespace tut {
 	typedef TestGroup::object Test;
 	
 	#define TEST(Id, Na, Co) template <> template <> void Test::test<Id>() { set_test_name(Na); do Co while(0); }
-	#define INT_EQUALS_TEST(Id, Ty, V) TEST(Id, #Ty, { WriteSInt<Ty>(ss, V); ensure_equals(ReadSInt<Ty>(ss), V); })
+	#define INT_EQUALS_TEST(Id, Ty, V) TEST(Id, #Ty, { WriteSInt<Ty>(ss, V); ensure_equals(ss.str().size(), sizeof(Ty)); ensure_equals(ReadSInt<Ty>(ss), V); })
 	
 	//
 	// Integer tests
@@ -47,6 +50,35 @@ namespace tut {
 	INT_EQUALS_TEST(6, boost::int16_t,  -23021)
 	INT_EQUALS_TEST(7, boost::int32_t,  -203203402)
 	INT_EQUALS_TEST(8, boost::int64_t,  -668920345920)
+	
+	//
+	// String tests
+	//
+	TEST(9, "std::string", {
+		std::string x = "foo bar baz";
+		WriteString<char>(ss, x);
+		ensure_equals(ss.str().size(), 16);
+		std::string y = ReadString<char>(ss);
+		ensure_equals(x, y);
+	})
+	
+	TEST(10, "std::wstring", {
+		std::wstring x = L"foo bar baz";
+		WriteString<wchar_t>(ss, x);
+		ensure_equals(ss.str().size(), 5 + (11 * sizeof(wchar_t)));
+		std::wstring y = ReadString<wchar_t>(ss);
+		ensure("equal", x == y);
+	})
+	
+	TEST(11, "std::string encoded, std::wstring decoded", {
+		WriteString<char>(ss, "foo bar baz");
+		ensure_THROW(ReadString<wchar_t>(ss), std::runtime_error);
+	})
+	
+	TEST(12, "std::wstring encoded, std::string decoded", {
+		WriteString<wchar_t>(ss, L"foo bar baz");
+		ensure_THROW(ReadString<char>(ss), std::runtime_error);
+	})
 }
 
 // Runner
