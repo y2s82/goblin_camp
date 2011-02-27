@@ -95,8 +95,13 @@ make mod.dat
     : $(version-reqs)
 ;
 
+make VERSION.txt
+    : $(HERE)/VERSION.txt_in
+    : @gc-version.generate
+;
+
 alias version
-    : $(version)
+    : $(version) mod.dat VERSION.txt
     :
     :
     : $(version-reqs)
@@ -152,6 +157,11 @@ install dist-data
       [ path.glob-tree $(HERE)/tiles : *.dat *.png ]
     : <conditional>@get-dist-data
       <install-source-root>$(HERE)
+;
+
+install dist-version
+    : VERSION.txt
+    : <conditional>@get-dist-data
 ;
 
 install dist-mod
