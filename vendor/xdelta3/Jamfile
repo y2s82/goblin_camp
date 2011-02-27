@@ -1,0 +1,28 @@
+###############################################################################
+##### xdelta3 project
+###############################################################################
+
+path-constant HERE : . ;
+
+common-reqs =
+    <include>$(HERE)/include
+;
+
+###############################################################################
+##### Project definition
+###############################################################################
+
+project xdelta3
+    : requirements
+      <link>static
+      <os>LINUX:<define>XD3_POSIX=1
+      <os>MACOSX:<define>XD3_POSIX=1
+      <define>XD3_USE_LARGEFILE64=1
+      <define>SECONDARY_DJW=1
+      <define>GENERIC_ENCODE_TABLES=1
+      <define>EXTERNAL_COMPRESSION=0
+    : usage-requirements
+      $(common-reqs)
+;
+
+lib xd3 : [ glob *.c ] ;
