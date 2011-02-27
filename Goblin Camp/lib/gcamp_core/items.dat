@@ -1803,3 +1803,11 @@ item_type "Earth" {
 	graphic = 177
 	color = "127,50,0"
 }
+
+item_type "Ice" {
+	category = [ "Misc." ]
+	graphic = 219
+	color="170,255,255"
+	bulk = 10
+	decaySpeed = 1
+}
