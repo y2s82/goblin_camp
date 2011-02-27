@@ -44,4 +44,6 @@ BEGIN
 	END
 END
 
-101 ICON "GoblinCamp.ico"
+#ifndef NO_GC_ICON
+	101 ICON "GoblinCamp.ico"
+#endif

@@ -56,3 +56,9 @@ install dist-prebuilt
       #dbghelp.dll
     : <conditional>@get-dist-bin
 ;
+
+install dist-patcher-base
+    : patcher-base
+    : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
+      <conditional>@get-dist-bin
+;
