@@ -21,6 +21,7 @@ project xdelta3
       <define>SECONDARY_DJW=1
       <define>GENERIC_ENCODE_TABLES=1
       <define>EXTERNAL_COMPRESSION=0
+      $(common-reqs)
     : usage-requirements
       $(common-reqs)
 ;
