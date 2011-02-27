@@ -81,8 +81,6 @@ screenWidth(0),
 	for(int i = 0; i < 12; i++) {
 		marks[i] = Coordinate(-1, -1);
 	}
-
-	Faction::StringToFactionType("Player");
 }
 
 Game::~Game() {
