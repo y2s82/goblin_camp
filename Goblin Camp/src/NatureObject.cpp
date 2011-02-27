@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "Item.hpp"
 #include "Game.hpp"
+#include "Random.hpp"
 
 NatureObjectPreset::NatureObjectPreset() :
 	name("NATUREOBJECT PRESET"),
@@ -207,5 +208,8 @@ Ice::~Ice() {
 	Map::Inst()->SetBlocksWater(x,y,false);
 	if (frozenWater) {
 		Game::Inst()->CreateWaterFromNode(frozenWater);
+		if (Random::Generate(4) == 0) {
+			Game::Inst()->CreateItem(Position(), Item::StringToItemType("ice"), false, -1);
+		}
 	}
 }
