@@ -108,6 +108,10 @@ void TileSet::DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	markedOverlay.Draw(dst, dstRect);
 }
 
+void TileSet::DrawMarkedOverlay(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	markedOverlay.Draw(connected, dst, dstRect);
+}
+
 void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	marker.Draw(dst, dstRect);
 }
@@ -156,11 +160,11 @@ void TileSet::DrawFilthMajor(Sprite::LayeredConnectedFunction connected, SDL_Sur
 	}
 }
 
-void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
 	if (owned) {
-		territoryOverlay.Draw(dst, dstRect);
+		territoryOverlay.Draw(connected, dst, dstRect);
 	} else {
-		nonTerritoryOverlay.Draw(dst, dstRect);
+		nonTerritoryOverlay.Draw(connected, dst, dstRect);
 	}
 }
 

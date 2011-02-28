@@ -53,6 +53,7 @@ public:
 
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawMarkedOverlay(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerrain(TileType type, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawCorruption(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
@@ -62,7 +63,7 @@ public:
 	void DrawIce(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMinor(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawFilthMajor(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;

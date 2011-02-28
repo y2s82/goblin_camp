@@ -167,6 +167,16 @@ namespace {
 		}
 		return false;
 	}
+	
+	bool TerritoryConnectionTest(Map* map, Coordinate origin, bool owned, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		return map->IsTerritory(coord.X(),coord.Y()) == owned;
+	}
+	
+	bool GroundMarkedConnectionTest(Map * map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		return map->GroundMarked(coord.X(), coord.Y());
+	}
 }
 
 
@@ -473,7 +483,7 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 		}
 	}
 	if (map->GroundMarked(tileX, tileY)) {
-		tileSet->DrawMarkedOverlay(mapSurface.get(), dstRect);
+		tileSet->DrawMarkedOverlay(boost::bind(&GroundMarkedConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 	}
 	
 }
@@ -489,7 +499,8 @@ void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRe
 }
 
 void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
+	bool isOwned(map->IsTerritory(tileX,tileY));
+	tileSet->DrawTerritoryOverlay(isOwned, boost::bind(&TerritoryConnectionTest, map, Coordinate(tileX, tileY), isOwned, _1), mapSurface.get(), dstRect);
 }
 
 namespace {
