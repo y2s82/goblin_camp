@@ -35,8 +35,6 @@ enum SpriteType
 /* Sprite
 /* Description of a single tile that can be drawn. 
 /* Supports animation and connection maps in addition to simple single titles.
-/*
-/* TODO: Animation supporting connection maps?
 /****************/
 class Sprite
 {
@@ -55,6 +53,7 @@ public:
 
 	bool Exists() const;
 	bool IsConnectionMap() const;
+	bool IsTwoLayeredConnectionMap() const;
 	bool IsAnimated() const;
 
 	// Standard Tile Drawing

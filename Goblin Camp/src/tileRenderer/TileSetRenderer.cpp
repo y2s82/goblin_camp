@@ -83,6 +83,103 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
 
 TileSetRenderer::~TileSetRenderer() {}
 
+
+namespace {
+	bool TerrainConnectionTest(Map* map, Coordinate origin, TileType type, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->GetType(coord.X(), coord.Y()) == type;
+	}
+
+	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
+			return true;
+		int natNum = -1;
+		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return Game::Inst()->natureList[natNum]->IsIce();
+		}
+		return false;
+	}
+
+	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
+	}
+
+	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		int natNum = -1;
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+			return 2;
+		}
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+			return (water->Depth() > 0) ? 1 : 0;
+		}
+		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
+		}
+		return 0;
+	}
+
+	bool WaterNoIceConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+			return true;
+		}
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+			return (water->Depth() > 0);
+		}
+		return false;
+	}
+
+	int FilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
+			return (filth->Depth() > 4) ? 2 : 1;
+		}
+		return 0;
+	}
+
+	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
+			return filth->Depth() > 4;
+		}
+		return false;
+	}
+
+	bool BloodConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
+			return blood->Depth() > 0;
+		}
+		return false;
+	}
+	
+	bool TerritoryConnectionTest(Map* map, Coordinate origin, bool owned, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		return map->IsTerritory(coord.X(),coord.Y()) == owned;
+	}
+	
+	bool GroundMarkedConnectionTest(Map * map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		return map->GroundMarked(coord.X(), coord.Y());
+	}
+}
+
+
 void TileSetRenderer::PreparePrefabs() 
 {
 	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci) {
@@ -145,12 +242,14 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	SDL_SetClipRect(mapSurface.get(), &viewportRect);
 	
 	// These are over-estimates, sometimes fewer tiles are needed.
-	startTileX = int((focusX * tileSet->TileWidth() - viewportRect.w / 2) / tileSet->TileWidth()) - 1;
-	startTileY = int((focusY * tileSet->TileHeight() - viewportRect.h / 2) / tileSet->TileHeight()) - 1;
-	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + viewportRect.w / 2) + viewportX;
-	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + viewportRect.h / 2) + viewportY;
-	int tilesX = CeilToInt::convert(boost::numeric_cast<float>(viewportRect.w) / tileSet->TileWidth()) + 2;
-	int tilesY = CeilToInt::convert(boost::numeric_cast<float>(viewportRect.h) / tileSet->TileHeight()) + 2;
+	int startPixelX = FloorToInt::convert(focusX * tileSet->TileWidth() - viewportRect.w / 2);
+	int startPixelY = FloorToInt::convert(focusY * tileSet->TileHeight() - viewportRect.h / 2);
+	startTileX = FloorToInt::convert(boost::numeric_cast<float>(startPixelX) / tileSet->TileWidth());
+	startTileY = FloorToInt::convert(boost::numeric_cast<float>(startPixelY) / tileSet->TileHeight());
+	mapOffsetX = startTileX * tileSet->TileWidth() - startPixelX + viewportX;
+	mapOffsetY = startTileY * tileSet->TileHeight() - startPixelY + viewportY;
+	int tilesX = CeilToInt::convert((focusX * tileSet->TileWidth() + viewportRect.w / 2) / tileSet->TileWidth()) - startTileX;
+	int tilesY = CeilToInt::convert((focusY * tileSet->TileHeight() + viewportRect.h / 2) / tileSet->TileHeight()) - startTileY;
 	
     // And then render to map
 	for (int y = 0; y < tilesY; ++y) {
@@ -202,6 +301,21 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
 	DrawFires(startTileX, startTileY, tilesX, tilesY);
 	DrawSpells(startTileX, startTileY, tilesX, tilesY);
+	
+	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
+		for (int y = 0; y < tilesY; ++y) {
+			for (int x = 0; x <= tilesX; ++x) {
+				int tileX = x + startTileX;
+				int tileY = y + startTileY;
+
+				// Corruption
+				if (map->GetCorruption(tileX, tileY) >= 100) {
+					SDL_Rect dstRect(CalcDest(tileX, tileY));
+					tileSet->DrawCorruptionOverlay(boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), &dstRect);
+				}
+			}
+		}
+	}
 
 	SDL_SetClipRect(mapSurface.get(), NULL);
 }
@@ -320,72 +434,6 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 	}
 }
 
-namespace {
-	bool TerrainConnectionTest(Map* map, Coordinate origin, TileType type, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
-			return true;
-		}
-		return map->GetType(coord.X(), coord.Y()) == type;
-	}
-
-	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
-			return true;
-		}
-		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
-			return true;
-		int natNum = -1;
-		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
-			return Game::Inst()->natureList[natNum]->IsIce();
-		}
-		return false;
-	}
-
-	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
-			return true;
-		}
-		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
-	}
-
-	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		int natNum = -1;
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
-			return 2;
-		}
-		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
-			return (water->Depth() > 0) ? 1 : 0;
-		}
-		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
-			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
-		}
-		return 0;
-	}
-
-	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
-			return filth->Depth() > 4;
-		}
-		return false;
-	}
-
-	bool BloodConnectionTest(Map* map, Coordinate origin, Direction dir) {
-		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
-			return blood->Depth() > 0;
-		}
-		return false;
-	}
-}
-
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	TileType type(map->GetType(tileX, tileY));
 	Coordinate pos(tileX, tileY);
@@ -408,16 +456,25 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 
 
 	// Water
-	boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
-	if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
-		if (water->Depth() > 0) {
-			tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+	if (tileSet->IsIceSupported()) {
+		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
+		if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
+			if (water->Depth() > 0) {
+				tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+			}
 		}
-	}
-	int natNum = -1;
-	if ((natNum = map->GetNatureObject(tileX, tileY)) >= 0) {
-		if (Game::Inst()->natureList[natNum]->IsIce()) {
-			tileSet->DrawIce(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+		int natNum = -1;
+		if ((natNum = map->GetNatureObject(tileX, tileY)) >= 0) {
+			if (Game::Inst()->natureList[natNum]->IsIce()) {
+				tileSet->DrawIce(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+			}
+		}
+	} else {
+		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
+		if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
+			if (water->Depth() > 0) {
+				tileSet->DrawWater(boost::bind(&WaterNoIceConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+			}
 		}
 	}
 	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(tileX, tileY).lock()) {
@@ -426,7 +483,7 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 		}
 	}
 	if (map->GroundMarked(tileX, tileY)) {
-		tileSet->DrawMarkedOverlay(mapSurface.get(), dstRect);
+		tileSet->DrawMarkedOverlay(boost::bind(&GroundMarkedConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
 	}
 	
 }
@@ -434,15 +491,16 @@ void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dst
 void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	if (boost::shared_ptr<FilthNode> filth = map->GetFilth(tileX, tileY).lock()) {
 		if (filth->Depth() > 4) {
-			tileSet->DrawFilthMajor(boost::bind(&MajorFilthConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), dstRect);
+			tileSet->DrawFilthMajor(boost::bind(&FilthConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), dstRect);
 		} else if (filth->Depth() > 0) {
-			tileSet->DrawFilthMinor(mapSurface.get(), dstRect);
+			tileSet->DrawFilthMinor(boost::bind(&FilthConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), dstRect);
 		}
 	}
 }
 
 void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	tileSet->DrawTerritoryOverlay(map->IsTerritory(tileX,tileY), mapSurface.get(), dstRect);
+	bool isOwned(map->IsTerritory(tileX,tileY));
+	tileSet->DrawTerritoryOverlay(isOwned, boost::bind(&TerritoryConnectionTest, map, Coordinate(tileX, tileY), isOwned, _1), mapSurface.get(), dstRect);
 }
 
 namespace {
@@ -473,13 +531,19 @@ void TileSetRenderer::render(void * surf,void * sdl_screen) {
 	
 	if (translucentUI) {
 		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);
-		SDL_LockSurface(tcod);
+		if (SDL_MUSTLOCK(tcod))
+		{
+			SDL_LockSurface(tcod);
+		}
 		for (int x = 0; x < screenWidth; ++x) {
 			for (int y = 0; y < screenHeight; ++y) {
 				setPixelAlpha(tcod,x,y, keyColorVal);
 			}
 		}
-		SDL_UnlockSurface(tcod);
+		if (SDL_MUSTLOCK(tcod))
+		{
+			SDL_UnlockSurface(tcod);
+		}
 	}
 	else {
 		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));

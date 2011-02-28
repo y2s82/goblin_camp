@@ -41,6 +41,10 @@ bool Sprite::IsConnectionMap() const {
 	return type & SPRITE_ConnectionMap;
 }
 
+bool Sprite::IsTwoLayeredConnectionMap() const {
+	return type & SPRITE_TwoLayerConnectionMap;
+}
+
 bool Sprite::IsAnimated() const {
 	return type & SPRITE_Animated;
 }

@@ -49,17 +49,21 @@ public:
 	std::string GetVersion() const;
 	std::string GetDescription() const;
 
+	bool IsIceSupported() const;
+
 	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawMarkedOverlay(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawTerrain(TileType type, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawCorruption(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
+	void DrawCorruptionOverlay(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawIce(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawFilthMajor(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawFilthMinor(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawFilthMajor(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -92,6 +96,7 @@ public:
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
 	void SetCorruption(const Sprite& sprite);
+	void SetCorruptionOverlay(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
@@ -140,6 +145,7 @@ private:
 	Sprite territoryOverlay;
 	Sprite markedOverlay;
 	Sprite corruptionTile;
+	Sprite corruptionOverlayTile;
 
 	Sprite marker;
 	Sprite blood;

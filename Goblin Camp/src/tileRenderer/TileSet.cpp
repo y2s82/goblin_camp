@@ -38,6 +38,7 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	territoryOverlay(),
 	markedOverlay(),
 	corruptionTile(),
+	corruptionOverlayTile(),
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
@@ -99,8 +100,16 @@ std::string TileSet::GetDescription() const {
 	return description;
 }
 
+bool TileSet::IsIceSupported() const {
+	return waterTile.IsTwoLayeredConnectionMap() || iceTile.Exists();
+}
+
 void TileSet::DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	markedOverlay.Draw(dst, dstRect);
+}
+
+void TileSet::DrawMarkedOverlay(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	markedOverlay.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
@@ -119,6 +128,10 @@ void TileSet::DrawCorruption(Sprite::ConnectedFunction connected, SDL_Surface *d
 	corruptionTile.Draw(connected, dst, dstRect);
 }
 
+void TileSet::DrawCorruptionOverlay(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	corruptionOverlayTile.Draw(connected, dst, dstRect);
+}
+
 void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
 	blood.Draw(connected, dst, dstRect);
 }
@@ -135,19 +148,23 @@ void TileSet::DrawIce(Sprite::LayeredConnectedFunction connected, SDL_Surface *d
 	}
 }
 
-void TileSet::DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const {
-	minorFilth.Draw(dst, dstRect);
+void TileSet::DrawFilthMinor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	minorFilth.Draw(0, connected, dst, dstRect);
 }
 
-void TileSet::DrawFilthMajor(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	majorFilth.Draw(connected, dst, dstRect);
-}
-
-void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	if (owned) {
-		territoryOverlay.Draw(dst, dstRect);
+void TileSet::DrawFilthMajor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (majorFilth.Exists()) {
+		majorFilth.Draw(connected, dst, dstRect);
 	} else {
-		nonTerritoryOverlay.Draw(dst, dstRect);
+		minorFilth.Draw(1, connected, dst, dstRect);
+	}
+}
+
+void TileSet::DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (owned) {
+		territoryOverlay.Draw(connected, dst, dstRect);
+	} else {
+		nonTerritoryOverlay.Draw(connected, dst, dstRect);
 	}
 }
 
@@ -481,6 +498,10 @@ void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 
 void TileSet::SetCorruption(const Sprite& sprite) {
 	corruptionTile = sprite;
+}
+
+void TileSet::SetCorruptionOverlay(const Sprite& sprite) {
+	corruptionOverlayTile = sprite;
 }
 
 void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {

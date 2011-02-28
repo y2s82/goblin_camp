@@ -79,16 +79,18 @@ namespace {
 		tileTextureStruct->addListProperty("ice", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("waterAndIce", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("minorFilth", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("filth", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("majorFilth", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("marker", TCOD_TYPE_INT, false);
 		tileTextureStruct->addProperty("markerFPS", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("blood", TCOD_TYPE_INT, false);
 
 		// Overlays
-		tileTextureStruct->addProperty("nonTerritory", TCOD_TYPE_INT, false);
-		tileTextureStruct->addProperty("territory", TCOD_TYPE_INT, false);
-		tileTextureStruct->addProperty("marked", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("nonTerritory", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("territory", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("marked", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("corruption", TCOD_TYPE_INT, false);
+		tileTextureStruct->addListProperty("corruptionOverlay", TCOD_TYPE_INT, false);
 
 		tileTextureStruct->addProperty("defaultUnderconstruction", TCOD_TYPE_INT, false);
 		tileTextureStruct->addListProperty("fire", TCOD_TYPE_INT, false);
@@ -347,6 +349,8 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "majorFilth")) {
 				tileSet->SetFilthMajor(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+			} else if (boost::iequals(name, "filth")) {
+				tileSet->SetFilthMinor(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "marker")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
 					markerFrames.push_back(*iter);
@@ -359,13 +363,15 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			
 			// Overlays
 			else if (boost::iequals(name, "nonTerritory")) {
-				tileSet->SetNonTerritoryOverlay(Sprite(currentTexture, value.i));
+				tileSet->SetNonTerritoryOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "territory")) {
-				tileSet->SetTerritoryOverlay(Sprite(currentTexture, value.i));
+				tileSet->SetTerritoryOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "marked")) {
-				tileSet->SetMarkedOverlay(Sprite(currentTexture, value.i));
+				tileSet->SetMarkedOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "corruption")) {
 				tileSet->SetCorruption(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+			} else if (boost::iequals(name, "corruptionOverlay")) {
+				tileSet->SetCorruptionOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			}
 
 			// Cursors
