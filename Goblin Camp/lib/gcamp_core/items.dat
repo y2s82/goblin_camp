@@ -492,10 +492,10 @@ item_type "Bloodberry" {
 	category = [ "Berry" ]
 	graphic = 248
 	color = "255,0,0"
-	nutrition = 6000
+	nutrition = 9900
 	fruits = [ "Bloodberry seed" ]
 	decay = [ "Bloodberry seed", "Filth" ]
-	decaySpeed = 6
+	decaySpeed = 5
 	fitsin = "Basket"
 }
 
@@ -557,7 +557,7 @@ item_type "Nightbloom" {
 	category = [ "Fruit" ]
 	graphic = 248
 	color = "190,255,200"
-	nutrition = 5000
+	nutrition = 9000
 	fruits = [ "Nightbloom seed" ]
 	decay = [ "Nightbloom seed", "Filth" ]
 	decaySpeed = 6
@@ -597,7 +597,7 @@ item_type "Dried fruit" {
 	color = "190,195,130"
 	components = ["Fruit","Fruit","Fruit"]
 	fitsin = "Basket"
-	nutrition = 4000
+	nutrition = 9000
 	decaySpeed = 15
 	decay = ["Filth"]
 	constructedin = "Kitchen"
@@ -1802,4 +1802,12 @@ item_type "Earth" {
 	category = [ "Earth" ]
 	graphic = 177
 	color = "127,50,0"
+}
+
+item_type "Ice" {
+	category = [ "Misc." ]
+	graphic = 219
+	color="170,255,255"
+	bulk = 10
+	decaySpeed = 1
 }

@@ -25,6 +25,7 @@ npc_type "orc" {
 		cooldown=25
 	}
 	death="Corpse"
+	faction="Player"
 }
 
 npc_type "goblin" {
@@ -52,6 +53,7 @@ npc_type "goblin" {
 		cooldown=25
 	}
 	death="Corpse"
+	faction="Player"
 }
 
 npc_type "giant snail" {

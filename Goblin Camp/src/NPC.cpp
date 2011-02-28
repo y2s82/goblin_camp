@@ -356,8 +356,8 @@ void NPC::Update() {
 	if (effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 
 	if (needsNutrition) {
-		thirst += 2; //These are +2 now that UPDATES_PER_SECOND was lowered from 50 to 25 
-		hunger += 2; //This way we don't need to change the original nutrition values
+		++thirst;
+		++hunger;
 
 		if (thirst >= THIRST_THRESHOLD) AddEffect(THIRST);
 		else RemoveEffect(THIRST);
