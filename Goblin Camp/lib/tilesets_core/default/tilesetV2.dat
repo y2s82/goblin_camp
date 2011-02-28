@@ -3,6 +3,7 @@ tileset "Default Tileset" {
 	tileHeight=16
 	description="Test tileset with various tiles sourced from Goblin Camp Forum, as well as crawl-tiles"
 	author="onionknight, hutze, apostrophest, Crawl Stone Soup artists"
+	version="0.15"
 
 	texture "tileset.png"
 	{
@@ -33,9 +34,9 @@ tileset "Default Tileset" {
 		blood=[16]
 
 		// Overlays
-		nonTerritory=13
-		territory=12
-		marked=15
+		nonTerritory=[13]
+		territory=[6,7,8,9,10]
+		marked=[75,91,107,123,139]
 		corruption=[128,129,130,131,
 					144,145,146,147,
 					160,161,162,163,
@@ -43,20 +44,20 @@ tileset "Default Tileset" {
 		corruptionOverlay=[132,133,134,135,136]
 
 		// Tile Highlights (when placing or selecting)
-		defaultTileHighlight=[12,13]
-		constructionTileHighlight=[12,13]
-		stockpileTileHighlight=[12,13]
-		treeFellingTileHighlight=[12,13]
-		harvestTileHighlight=[12,13]
-		orderTileHighlight=[12,13]
-		treeTileHighlight=[12,13]
-		dismantleTileHighlight=[12,13]
-		undesignateTileHighlight=[12,13]
-		bogTileHighlight=[12,13]
-		digTileHighlight=[12,13]
-		addTerritoryTileHighlight=[13]
-		removeTerritoryTileHighlight=[12]
-		gatherTileHighlight=[12,13]
+		defaultTileHighlight=[10,13]
+		constructionTileHighlight=[10,13]
+		stockpileTileHighlight=[10,13]
+		treeFellingTileHighlight=[10,13]
+		harvestTileHighlight=[10,13]
+		orderTileHighlight=[10,13]
+		treeTileHighlight=[10,13]
+		dismantleTileHighlight=[10,13]
+		undesignateTileHighlight=[10,13]
+		bogTileHighlight=[10,13]
+		digTileHighlight=[10,13]
+		addTerritoryTileHighlight=[10]
+		removeTerritoryTileHighlight=[13]
+		gatherTileHighlight=[10,13]
 
 		defaultUnderconstruction=18
 		fire=[68,69]
