@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 // std::basic_string serialising
-#include <stdexcept>
 
 namespace Serializer {
 	/**
