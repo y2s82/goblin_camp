@@ -79,6 +79,55 @@ namespace tut {
 		WriteString<wchar_t>(ss, L"foo bar baz");
 		ensure_THROW(ReadString<char>(ss), std::runtime_error);
 	})
+	
+	//
+	// Vector tests
+	//
+	TEST(13, "std::vector with integral type", {
+		std::vector<boost::uint16_t> v;
+		v.push_back(42); v.push_back(77); v.push_back(69);
+		
+		WriteVector<boost::uint16_t>(ss, v, &WriteVectorInt<boost::uint16_t>);
+		ensure_equals(ss.str().size(), sizeof(boost::uint16_t) * 3 + sizeof(boost::uint32_t));
+		
+		std::vector<boost::uint16_t> u = ReadVector<boost::uint16_t>(ss, &ReadVectorInt<boost::uint16_t>);
+		ensure("equal", v == u);
+	})
+	
+	TEST(14, "std::vector with string type", {
+		std::vector<std::string> v;
+		v.push_back("foo bar");
+		v.push_back("baz xxxxxx");
+		v.push_back("hello");
+		
+		WriteVector<std::string>(ss, v, &WriteVectorString<char>);
+		ensure_equals(ss.str().size(), sizeof(boost::uint32_t) + (1 + 4 + 7) + (1 + 4 + 10) + (1 + 4 + 5));
+		
+		std::vector<std::string> u = ReadVector<std::string>(ss, &ReadVectorString<char>);
+		ensure("equal", v == u);
+	})
+	
+	// yay
+	/*TEST(15, "std::vector with vector type with integral type", {
+		typedef std::vector<boost::uint8_t> VT;
+		
+		VT a; VT b; VT c;
+		a.push_back(1); a.push_back(2); a.push_back(3);
+		b.push_back(4); b.push_back(5); b.push_back(6);
+		c.push_back(7); c.push_back(8); c.push_back(9);
+		
+		std::vector<VT> v;
+		v.push_back(a); v.push_back(b); v.push_back(c);
+		
+		WriteVector<VT>(ss, v, &WriteVectorVector<VT>);
+		ensure_equals(
+			ss.str().size(),
+			sizeof(boost::uint32_t) + 3 * (sizeof(boost::uint32_t) + 3)
+		);
+		
+		std::vector<VT> u = ReadVector<VT>(ss, &ReadVectorVector<VT>);
+		ensure("equal", v == u);
+	})*/
 }
 
 // Runner

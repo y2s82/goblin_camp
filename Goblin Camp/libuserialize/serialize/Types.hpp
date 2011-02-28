@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/type_traits.hpp>
 #include <boost/cstdint.hpp>
 #include <string>
 #include <vector>

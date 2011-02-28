@@ -16,6 +16,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <iostream>
+#include <stdexcept>
+#include <boost/static_assert.hpp>
+#include <boost/assert.hpp>
+#include <boost/function.hpp>
 
 // WARNING: Wild templates ahead.
 #include "serialize/Types.hpp"
