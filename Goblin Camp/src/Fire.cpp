@@ -122,7 +122,7 @@ void FireNode::Update() {
 		if (temperature > 1 && Random::Generate(9) < 4) {
 			//Burn npcs on the ground
 			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
-				if (!Game::Inst()->npcList[*npci]->HasEffect(FLYING)) Game::Inst()->npcList[*npci]->AddEffect(BURNING);
+				if (!Game::Inst()->GetNPC(*npci)->HasEffect(FLYING)) Game::Inst()->GetNPC(*npci)->AddEffect(BURNING);
 			}
 
 			//Burn items

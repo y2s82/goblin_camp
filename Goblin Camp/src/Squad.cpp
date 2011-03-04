@@ -44,11 +44,15 @@ bool Squad::UpdateMembers() {
 	if ((signed int)members.size() < memberReq) {
 		int newMember = Game::Inst()->FindMilitaryRecruit();
 		if (newMember >= 0) { 
-			members.push_back(newMember);
-			Game::Inst()->npcList[newMember]->MemberOf(shared_from_this());
+			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(newMember);
+			if (npc) {
+				members.push_back(newMember);
+				npc->MemberOf(shared_from_this());
+			}
 		}
 	} else if ((signed int)members.size() > memberReq) {
-		Game::Inst()->npcList[members.back()]->MemberOf(boost::weak_ptr<Squad>());
+		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(members.back());
+		if (npc) npc->MemberOf(boost::weak_ptr<Squad>());
 		members.pop_back();
 	}
 
@@ -112,7 +116,8 @@ int Squad::Priority() { return priority; }
 
 void Squad::RemoveAllMembers() {
 	for (std::list<int>::iterator membi = members.begin(); membi != members.end(); ++membi) {
-		Game::Inst()->npcList[*membi]->MemberOf(boost::weak_ptr<Squad>());
+		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*membi);
+		if (npc) npc->MemberOf(boost::weak_ptr<Squad>());
 	}
 	members.clear();
 }
@@ -122,7 +127,8 @@ void Squad::Weapon(ItemCategory value) { weapon = value; }
 
 void Squad::Rearm() {
 	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
-		Game::Inst()->npcList[*memberi]->FindNewWeapon();
+		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*memberi);
+		if (npc) npc->FindNewWeapon();
 	}
 }
 
@@ -131,7 +137,8 @@ void Squad::Armor(ItemCategory value) { armor = value; }
 
 void Squad::Reequip() {
 	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
-		Game::Inst()->npcList[*memberi]->FindNewArmor();
+		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*memberi);
+		if (npc) npc->FindNewArmor();
 	}
 }
 

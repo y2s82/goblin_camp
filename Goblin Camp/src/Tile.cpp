@@ -241,8 +241,6 @@ void Tile::MoveFrom(int uid) {
 	if (npcList.find(uid) == npcList.end()) {
 #ifdef DEBUG
 		std::cout<<"\nNPC "<<uid<<" moved off of empty list";
-		std::cout<<"\nlist.size(): "<<npcList.size();
-		std::cout<<"\nNPC: "<<Game::Inst()->npcList[uid]->Position().X()<<","<<Game::Inst()->npcList[uid]->Position().Y()<<'\n';
 #endif
 		return;
 	}

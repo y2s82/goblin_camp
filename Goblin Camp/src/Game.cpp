@@ -2151,3 +2151,10 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 void Game::SetSeason(Season newSeason) {
 	season = newSeason;
 }
+
+boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
+	if (npcList.find(uid) != npcList.end()) {
+		return npcList.find(uid)->second;
+	}
+	return boost::shared_ptr<NPC>();
+}
