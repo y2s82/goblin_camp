@@ -723,7 +723,7 @@ void UI::ChooseDesignateBog() {
 boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
 		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
-		if (!npcList->empty()) return Game::Inst()->npcList[(*npcList->begin())];
+		if (!npcList->empty()) return Game::Inst()->GetNPC((*npcList->begin()));
 
 		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
 		if (!itemList->empty()) {
@@ -749,7 +749,7 @@ void UI::HandleUnderCursor(Coordinate pos, std::list<boost::weak_ptr<Entity> >* 
 		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
 		if (!npcList->empty()) {
 			for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
-				result->push_back(Game::Inst()->npcList[*npci]);
+				result->push_back(Game::Inst()->GetNPC(*npci));
 			}
 		}
 

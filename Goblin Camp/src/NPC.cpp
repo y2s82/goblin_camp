@@ -2492,8 +2492,8 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
-								if (Game::Inst()->npcList[*npci]->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
-								if (!onlyHostiles || (onlyHostiles && Game::Inst()->npcList[*npci]->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->npcList[*npci]);
+								if (Game::Inst()->GetNPC(*npci)->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
+								if (!onlyHostiles || (onlyHostiles && Game::Inst()->GetNPC(*npci)->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
 							}
 						}
 						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
