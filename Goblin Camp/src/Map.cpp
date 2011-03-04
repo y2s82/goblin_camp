@@ -57,11 +57,13 @@ Map* Map::Inst() {
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	return (float)tileMap[x1][y1].GetMoveCost(ptr);
 }
 
 //Simple version that doesn't take npc information into account
 bool Map::IsWalkable(int x, int y) const {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsWalkable();
 	return false;
 }
@@ -80,91 +82,113 @@ bool Map::IsWalkable(int x, int y, void* ptr) const {
 	return IsWalkable(x,y);
 }
 
-void Map::SetWalkable(int x,int y, bool value) { 
+void Map::SetWalkable(int x,int y, bool value) {
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWalkable(value); 
 }
 
 int Map::Width() { return width; }
 int Map::Height() { return height; }
 bool Map::IsBuildable(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsBuildable(); 
 	return false;
 }
 void Map::SetBuildable(int x, int y, bool value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBuildable(value); 
 }
 TileType Map::GetType(int x, int y) { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
 	return TILENONE;
 }
 void Map::ResetType(int x, int y, TileType ntype, float tileHeight) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ResetType(ntype, tileHeight); 
 }
 
 void Map::ChangeType(int x, int y, TileType ntype, float tileHeight) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ChangeType(ntype, tileHeight); 
 }
 
 void Map::MoveTo(int x, int y, int uid) {
 	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
+		boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 		tileMap[x][y].MoveTo(uid);
 	} 
 }
 void Map::MoveFrom(int x, int y, int uid) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].MoveFrom(uid); 
 }
 
 void Map::SetConstruction(int x, int y, int uid) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetConstruction(uid); 
 }
 int Map::GetConstruction(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetConstruction(); 
 	return -1;
 }
 
 boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetWater();
 	return boost::weak_ptr<WaterNode>();
 }
 void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWater(value); 
 }
 
 bool Map::IsLow(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsLow();
 	return false;
 }
 void Map::SetLow(int x, int y, bool value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetLow(value); 
 }
 
 bool Map::BlocksWater(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksWater(); 
 	return true;
 }
 void Map::SetBlocksWater(int x, int y, bool value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlocksWater(value); 
 }
 
 std::set<int>* Map::NPCList(int x, int y) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].npcList; 
 	return &tileMap[0][0].npcList;
 }
+
 std::set<int>* Map::ItemList(int x, int y) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].itemList;
 	return &tileMap[0][0].itemList;
 }
 
 int Map::GetGraphic(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetGraphic(); 
 	return '?';
 }
 TCODColor Map::GetForeColor(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor(); 
 	return TCODColor::pink;
 }
 
 void Map::ForeColor(int x, int y, TCODColor color) {
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		tileMap[x][y].originalForeColor = color;
 		tileMap[x][y].foreColor = color;
@@ -172,47 +196,61 @@ void Map::ForeColor(int x, int y, TCODColor color) {
 }
 
 TCODColor Map::GetBackColor(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetBackColor(); 
 	return TCODColor::yellow;
 }
 
 void Map::SetNatureObject(int x, int y, int val) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetNatureObject(val); 
 }
+
 int Map::GetNatureObject(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetNatureObject(); 
 	return -1;
 }
 
 boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetFilth(); 
 	return boost::weak_ptr<FilthNode>();
 }
 void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetFilth(value); 
 }
 
 boost::weak_ptr<BloodNode> Map::GetBlood(int x, int y) { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetBlood(); 
 	return boost::weak_ptr<BloodNode>();
 }
 void Map::SetBlood(int x, int y, boost::shared_ptr<BloodNode> value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlood(value); 
 }
 
 boost::weak_ptr<FireNode> Map::GetFire(int x, int y) { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetFire(); 
 	return boost::weak_ptr<FireNode>();
 }
+
 void Map::SetFire(int x, int y, boost::shared_ptr<FireNode> value) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetFire(value); 
 }
 
 bool Map::BlocksLight(int x, int y) const { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksLight(); 
 	return true;
 }
+
 void Map::SetBlocksLight(int x, int y, bool val) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlocksLight(val); 
 }
 
@@ -257,41 +295,56 @@ void Map::Reset(int x, int y) {
 	weather.reset(new Weather(this));
 }
 
-void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
-void Map::Unmark(int x, int y) { tileMap[x][y].Unmark(); }
+void Map::Mark(int x, int y) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Mark(); 
+}
+void Map::Unmark(int x, int y) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].Unmark(); 
+}
 
 int Map::GetMoveModifier(int x, int y) {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	int modifier = 0;
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		boost::shared_ptr<Construction> construction;
+		if (tileMap[x][y].construction >= 0) construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
+		bool bridge = false;
+		if (construction) bridge = (construction->Built() && construction->HasTag(BRIDGE));
 
-	boost::shared_ptr<Construction> construction;
-	if (tileMap[x][y].construction >= 0) construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
-	bool bridge = false;
-	if (construction) bridge = (construction->Built() && construction->HasTag(BRIDGE));
+		if (tileMap[x][y].GetType() == TILEBOG && !bridge) modifier += 10;
+		else if (tileMap[x][y].GetType() == TILEDITCH && !bridge) modifier += 4;
+		else if (tileMap[x][y].GetType() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
+			modifier += 6;
+		}
+		if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) { //Water adds 'depth' without a bridge
+			if (!bridge) modifier += water->Depth();
+		}
 
-	if (tileMap[x][y].GetType() == TILEBOG && !bridge) modifier += 10;
-	else if (tileMap[x][y].GetType() == TILEDITCH && !bridge) modifier += 4;
-	else if (tileMap[x][y].GetType() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
-		modifier += 6;
+		//Constructions (except bridges) slow down movement
+		if (construction && !bridge) modifier += construction->GetMoveSpeedModifier();
+
+		//Other critters slow down movement
+		if (tileMap[x][y].npcList.size() > 0) modifier += 2 + Random::Generate(tileMap[x][y].npcList.size() - 1);
 	}
-	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) { //Water adds 'depth' without a bridge
-		if (!bridge) modifier += water->Depth();
-	}
-
-	//Constructions (except bridges) slow down movement
-	if (construction && !bridge) modifier += construction->GetMoveSpeedModifier();
-
-	//Other critters slow down movement
-	if (tileMap[x][y].npcList.size() > 0) modifier += 2 + Random::Generate(tileMap[x][y].npcList.size() - 1);
-
 	return modifier;
 }
 
 float Map::GetWaterlevel() { return waterlevel; }
 
-bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
+bool Map::GroundMarked(int x, int y) { 
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
+	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].marked;
+	return false;
+}
 
-void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); }
+void Map::WalkOver(int x, int y) { 
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
+	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); 
+}
 void Map::Corrupt(int x, int y, int magnitude) {
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	int loops = 0;
 	while (magnitude > 0 && loops < 2000) {
 		++loops;
@@ -328,7 +381,9 @@ void Map::Corrupt(int x, int y, int magnitude) {
 }
 
 void Map::Naturify(int x, int y) {
+	bool createObject = false;
 	if (x >= 0 && x < width && y >= 0 && y < height) {
+		boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 		if (tileMap[x][y].walkedOver > 0) --tileMap[x][y].walkedOver;
 		if (tileMap[x][y].burnt > 0) tileMap[x][y].Burn(-1);
 		if (tileMap[x][y].walkedOver == 0 && tileMap[x][y].natureObject < 0 && tileMap[x][y].construction < 0) {
@@ -343,25 +398,29 @@ void Map::Naturify(int x, int y) {
 				}
 			}
 			if (natureObjects < (tileMap[x][y].corruption < 100 ? 5 : 1)) { //Corrupted areas have less flora
-				Game::Inst()->CreateNatureObject(Coordinate(x,y));
+				createObject = true;
 			}
-		} 
+		}
 	}
+	if (createObject) Game::Inst()->CreateNatureObject(Coordinate(x,y));
 }
 
 void Map::Corrupt(Coordinate location, int magnitude) { Corrupt(location.X(), location.Y(), magnitude); }
 
-int Map::GetCorruption(int x, int y) { 
+int Map::GetCorruption(int x, int y) {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].corruption;
 	return 0;
 }
 
 bool Map::IsTerritory(int x, int y) {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].territory;
 	return false;
 }
 
 void Map::SetTerritory(int x, int y, bool value) {
+	boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].territory = value;
 }
 
@@ -409,6 +468,7 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	Coordinate next(nextX, nextY);
 
 	//Find a suitable target
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	for (int x = left; x <= right; ++x) {
 		for (int y = up; y <= down; ++y) {
 			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
@@ -428,6 +488,7 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 
 bool Map::IsUnbridgedWater(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
+		boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 		if (boost::shared_ptr<WaterNode> water = tileMap[x][y].water) {
 			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
 			if (water->Depth() > 0 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
@@ -460,18 +521,21 @@ void Map::UpdateMarkers() {
 }
 
 TCODColor Map::GetColor(int x, int y) {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor();
 	return TCODColor::white;
 }
 
 void Map::Burn(int x, int y, int magnitude) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
+		boost::unique_lock<boost::shared_mutex> writeLock(tileMapMutex);
 		tileMap[x][y].Burn(magnitude);
 	}
 }
 
 int Map::Burnt(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
+		boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 		return tileMap[x][y].burnt;
 	}
 	return 0;
@@ -693,6 +757,7 @@ Direction Map::GetFlow(int x, int y) {
 
 bool Map::IsDangerous(int x, int y, int faction) const {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
+		boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 		if (tileMap[x][y].fire) return true;
 		return Faction::factions[faction]->IsTrapVisible(Coordinate(x,y));
 	}
@@ -700,6 +765,7 @@ bool Map::IsDangerous(int x, int y, int faction) const {
 }
 
 int Map::GetTerrainMoveCost(int x, int y) const {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);
 	if (x >= 0 && x < width && y >= 0 && y < height)
 		return tileMap[x][y].GetTerrainMoveCost();
 	return 0;
@@ -713,6 +779,7 @@ void Map::Update() {
 
 //Finds a tile close to 'center' that will give an advantage to a creature with a ranged weapon
 Coordinate Map::FindRangedAdvantage(Coordinate center) {
+	boost::shared_lock<boost::shared_mutex> readLock(tileMapMutex);	
 	std::vector<Coordinate> potentialPositions;
 	for (int x = center.X() - 5; x <= center.X() + 5; ++x) {
 		for (int y = center.Y() - 5; y <= center.Y() + 5; ++y) {
