@@ -74,7 +74,7 @@ public:
 	void DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 
 	const TerrainSprite& GetTerrainSprite(TileType type) const;
-	TerrainSprite GetTerrainSprite(TileType type);
+	TerrainSprite& GetTerrainSprite(TileType type);
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
