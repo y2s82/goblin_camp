@@ -35,6 +35,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ItemSprite.hpp"
 #include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
+#include "tileRenderer/TerrainSprite.hpp"
 
 class TileSet : private boost::noncopyable
 {
@@ -55,9 +56,6 @@ public:
 	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawMarkedOverlay(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawTerrain(TileType type, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawCorruption(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
-	void DrawCorruptionOverlay(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
 	void DrawBlood(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawWater(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawIce(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
@@ -74,7 +72,9 @@ public:
 	void DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRecT) const;
 	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
 	void DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawDetail(int detailIndex, SDL_Surface *dst, SDL_Rect * dstRect) const;
+
+	const TerrainSprite& GetTerrainSprite(TileType type) const;
+	TerrainSprite GetTerrainSprite(TileType type);
 
 	int GetGraphicsHintFor(const NPCPreset& npcPreset) const;
 	int GetGraphicsHintFor(const NatureObjectPreset& plantPreset) const;
@@ -85,7 +85,7 @@ public:
 	void SetAuthor(std::string auth);
 	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
-	void SetTerrain(TileType type, const Sprite& sprite);
+	void SetTerrain(TileType type, const TerrainSprite& sprite);
 	void SetWaterAndIce(const Sprite& sprite);
 	void SetIce(const Sprite& sprite);
 	void SetFilthMinor(const Sprite& sprite);
@@ -95,8 +95,6 @@ public:
 	void SetNonTerritoryOverlay(const Sprite& sprite);
 	void SetTerritoryOverlay(const Sprite& sprite);
 	void SetMarkedOverlay(const Sprite& sprite);
-	void SetCorruption(const Sprite& sprite);
-	void SetCorruptionOverlay(const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& sprite);
 	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
 	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
@@ -109,12 +107,7 @@ public:
 	void AddItemSprite(std::string name, const ItemSprite& sprite);
 	void AddConstructionSprite(std::string name, const ConstructionSprite& sprite);
 	void AddSpellSpriteSet(std::string name, const SpellSpriteSet& sprite);
-	
-	void AddDetailSprite(const Sprite& sprite);
-	void SetDetailRange(int range);
-	int GetDetailRange() const;
-	bool HasTerrainDetails() const;
-	
+		
 	void SetDefaultNPCSprite(const NPCSprite& sprite);
 	void SetDefaultNatureObjectSpriteSet(const NatureObjectSpriteSet& sprite);
 	void SetDefaultItemSprite(const ItemSprite& sprite);
@@ -122,7 +115,7 @@ public:
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite);
 	
 private:
-	typedef boost::array<Sprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef boost::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
 	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
@@ -134,7 +127,7 @@ private:
 	std::string version;
 	std::string description;
 
-	Sprite defaultTerrainTile;
+	TerrainSprite defaultTerrainTile;
 	TileTypeSpriteArray terrainTiles;
 	Sprite waterTile;
 	Sprite iceTile;
@@ -144,18 +137,13 @@ private:
 	Sprite nonTerritoryOverlay;
 	Sprite territoryOverlay;
 	Sprite markedOverlay;
-	Sprite corruptionTile;
-	Sprite corruptionOverlayTile;
 
 	Sprite marker;
 	Sprite blood;
 
 	Sprite defaultUnderConstructionSprite;
 	Sprite fireTile;
-
-	int detailRange;
-	std::vector<Sprite> detailSprites;
-
+	
 	NPCSprite defaultNPCSprite;
 	std::vector<NPCSprite> npcSprites;
 	LookupMap npcSpriteLookup;
