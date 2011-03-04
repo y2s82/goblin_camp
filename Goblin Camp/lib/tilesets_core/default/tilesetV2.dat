@@ -7,21 +7,41 @@ tileset "Default Tileset" {
 
 	texture "tileset.png"
 	{
-		// Terrain tiles
-		unknownTerrain=0
-		grassTerrain=[89]
-		ditchTerrain=[1]
-		riverbedTerrain=[2]
-		bogTerrain=[3]
-		rockTerrain=[92,93,94,95,
-			         108,109,110,111,
-					 124,125,126,127,
-					 140,141,142,143]
-		mudTerrain=[5]
-		snowTerrain=[148,149,150,151,152]
+		terrain_sprite {
+			sprites=[0]
+			
 
-		details=[192,193,194,195,208,209,210,211]
-		detailRange=128
+			//details=[192,193,194,195,208,209,210,211]
+			//detailsChance=0.0625
+		}
+
+		terrain_sprite "grass" {
+			sprites=[89]
+			snowSprites=[152]
+
+			details=[192,193,194,195,208,209,210,211]
+			detailsChance=0.0625
+		}
+
+		terrain_sprite "ditch" {
+			sprites=[1]
+		}
+
+		terrain_sprite "riverbed" {
+			sprites=[2]
+		}
+
+		terrain_sprite "bog" {
+			sprites=[3]
+		}
+
+		terrain_sprite "rock" {
+			sprites=[126]
+		}
+
+		terrain_sprite "mud" {
+			sprites=[5]
+		}
 
 		// Terrain modifiers
 		waterAndIce=[84,85,86,87,88,

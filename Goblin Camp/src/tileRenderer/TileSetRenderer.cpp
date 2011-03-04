@@ -94,6 +94,16 @@ namespace {
 		return map->GetType(coord.X(), coord.Y()) == type;
 	}
 
+	bool GrassConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		TileType type = map->GetType(coord.X(), coord.Y());
+		return type == TILEGRASS || type == TILESNOW;
+	}
+
 	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
 		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
@@ -116,6 +126,15 @@ namespace {
 			return true;
 		}
 		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
+	}
+
+	bool BurntConnectionTest(Map* map, Coordinate origin, Direction dir) {
+		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
+		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
+		{
+			return true;
+		}
+		return map->GetType(coord.X(), coord.Y()) == TILEGRASS && map->Burnt(coord.X(), coord.Y()) >= 10;
 	}
 
 	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
@@ -311,7 +330,9 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 				// Corruption
 				if (map->GetCorruption(tileX, tileY) >= 100) {
 					SDL_Rect dstRect(CalcDest(tileX, tileY));
-					tileSet->DrawCorruptionOverlay(boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), &dstRect);
+					TileType type = map->GetType(tileX, tileY);
+					const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
+					terrainSprite.DrawCorruptionOverlay(mapSurface.get(), &dstRect, boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1));
 				}
 			}
 		}
@@ -437,24 +458,31 @@ void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, 
 void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
 	TileType type(map->GetType(tileX, tileY));
 	Coordinate pos(tileX, tileY);
-
+	const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
+	bool corrupted = map->GetCorruption(tileX, tileY) >= 100;
 	if (type == TILESNOW) {
-		tileSet->DrawTerrain(type, boost::bind(&SnowConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+		if (corrupted) {
+			terrainSprite.DrawSnowedAndCorrupted(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+		} else {
+			terrainSprite.DrawSnowed(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1));
+		}
+	} else if (type == TILEGRASS) {
+		bool burnt = type == TILEGRASS && map->Burnt(tileX, tileY) >= 10;
+		if (corrupted) {
+			terrainSprite.DrawCorrupted(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+		} else if (burnt) {
+			terrainSprite.DrawBurnt(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&BurntConnectionTest, map, pos, _1));
+		} else {
+			terrainSprite.Draw(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1));
+		}
 	} else {
-		tileSet->DrawTerrain(type, boost::bind(&TerrainConnectionTest, map, pos, type, _1), mapSurface.get(), dstRect);
+		if (corrupted) {
+			terrainSprite.DrawCorrupted(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&TerrainConnectionTest, map, pos, type, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+		} else {
+			terrainSprite.Draw(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&TerrainConnectionTest, map, pos, type, _1));
+		}
 	}
 	
-	if (tileSet->HasTerrainDetails()) {
-		int detailIndex = permutationTable.Hash(permutationTable.Hash(tileX) + tileY) % tileSet->GetDetailRange(); 
-		tileSet->DrawDetail(detailIndex, mapSurface.get(), dstRect);
-	}
-
-	// Corruption
-	if (map->GetCorruption(tileX, tileY) >= 100) {
-		tileSet->DrawCorruption(boost::bind(&CorruptionConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
-	}
-
-
 	// Water
 	if (tileSet->IsIceSupported()) {
 		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);

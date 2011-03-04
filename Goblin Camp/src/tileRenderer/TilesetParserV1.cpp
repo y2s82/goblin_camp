@@ -136,7 +136,8 @@ TileSetParserV1::TileSetParserV1() :
 	tempConstruction(),
 	tempSpell(),
 	fireSprites(),
-	fireFPS(15)
+	fireFPS(15),
+	corruptionOverride()
 {
 	SetupTilesetParser(parser);
 }
@@ -260,19 +261,19 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 		case SS_NONE:
 			// Terrain
 			if (boost::iequals(name, "unknown_terrain")) {
-				tileSet->SetTerrain(TILENONE, Sprite(currentTexture, value.i));
+				tileSet->SetTerrain(TILENONE, TerrainSprite(Sprite(currentTexture, value.i)));
 			} else if (boost::iequals(name, "grass_terrain")) {
-				tileSet->SetTerrain(TILEGRASS, ReadConnectionMap(value.list));
+				tileSet->SetTerrain(TILEGRASS, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "ditch_terrain")) {
-				tileSet->SetTerrain(TILEDITCH, ReadConnectionMap(value.list));
+				tileSet->SetTerrain(TILEDITCH, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "riverbed_terrain")) {
-				tileSet->SetTerrain(TILERIVERBED, ReadConnectionMap(value.list));
+				tileSet->SetTerrain(TILERIVERBED, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "bog_terrain")) {
-				tileSet->SetTerrain(TILEBOG, ReadConnectionMap(value.list));
+				tileSet->SetTerrain(TILEBOG, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "rock_terrain")) {
-				tileSet->SetTerrain(TILEROCK, ReadConnectionMap(value.list));
+				tileSet->SetTerrain(TILEROCK, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "mud_terrain")) {
-				tileSet->SetTerrain(TILEMUD, ReadConnectionMap(value.list));
+				tileSet->SetTerrain(TILEMUD, TerrainSprite(ReadConnectionMap(value.list)));
 			} 
 			
 			// Terrain Modifiers
@@ -296,7 +297,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} else if (boost::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(Sprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "corruption")) {
-				tileSet->SetCorruption(ReadConnectionMap(value.list));
+				corruptionOverride = ReadConnectionMap(value.list);
 			}
 
 			// Cursors
@@ -453,7 +454,17 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 }
 
 bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
-	if (boost::iequals(str->getName(), "tile_texture_data")) {
+	if (boost::iequals(str->getName(), "tileset_data")) {
+		if (corruptionOverride.Exists()) {
+			for (TileType type = TILENONE; type < TILE_TYPE_COUNT; type = static_cast<TileType>(static_cast<unsigned int>(type) + 1)) {
+				TerrainSprite sprite = tileSet->GetTerrainSprite(type);
+				sprite.SetCorruption(corruptionOverride);
+				tileSet->SetTerrain(type, sprite);
+			}
+			corruptionOverride = Sprite();
+		}
+	}
+	else if (boost::iequals(str->getName(), "tile_texture_data")) {
 		if (fireSprites.size() > 0) {
 			tileSet->SetFireSprite(Sprite(currentTexture, fireSprites.begin(), fireSprites.end(), false, fireFPS));
 		}

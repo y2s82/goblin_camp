@@ -94,6 +94,7 @@ private:
 	NPCSprite npcSprite;
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSprite itemSprite;
+	Sprite corruptionOverride;
 	
 	static const char * uninitialisedTilesetError;
 	

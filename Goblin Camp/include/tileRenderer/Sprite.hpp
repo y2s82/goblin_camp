@@ -82,6 +82,9 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	for(; start != end; ++start) {
 		indices.push_back(*start);
 	}
+	if (indices.size() == 0) {
+		return;
+	}
 
 	// Assume all tiles are for animation if it isn't a connection map
 	if (!connectionMap) {
