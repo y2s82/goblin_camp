@@ -17,7 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/multi_array.hpp>
 #include <boost/serialization/split_member.hpp>
-#include <boost/thread/shared_mutex.hpp>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"
@@ -46,7 +45,6 @@ private:
 	int overlayFlags;
 	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
-	mutable boost::shared_mutex tileMapMutex;
 	
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
