@@ -326,7 +326,7 @@ const TerrainSprite& TileSet::GetTerrainSprite(TileType type) const {
 	}
 }
 
-TerrainSprite TileSet::GetTerrainSprite(TileType type) {
+TerrainSprite& TileSet::GetTerrainSprite(TileType type) {
 	if (type == TILENONE || !terrainTiles.at(type).Exists()) {
 		return defaultTerrainTile;
 	} else {
