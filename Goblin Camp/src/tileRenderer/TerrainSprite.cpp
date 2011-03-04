@@ -129,19 +129,21 @@ void TerrainSprite::DrawBurnt(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate c
 
 void TerrainSprite::DrawSnowed(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const {
 	if (Exists() && (snowSprites.size() > 0 || snowEdge.Exists())) {
-		if (!snowEdge.Exists() || (snowConnected(NORTH) && snowConnected(EAST) && snowConnected(SOUTH) && snowConnected(WEST) && snowConnected(NORTHEAST) && snowConnected(NORTHWEST) && snowConnected(SOUTHEAST) && snowConnected(SOUTHWEST))) {
+		// If we don't have a snow edge or entirely connected, just render the snow sprites.
+		if ((!snowEdge.Exists() && sprites.size() > 0) || (snowConnected(NORTH) && snowConnected(EAST) && snowConnected(SOUTH) && snowConnected(WEST) && snowConnected(NORTHEAST) && snowConnected(NORTHWEST) && snowConnected(SOUTHEAST) && snowConnected(SOUTHWEST))) {
 			if (snowSprites.size() > 1) {
 				snowSprites.at(permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % snowSprites.size()).Draw(dst, dstRect);			
 			} else if (snowSprites.size() == 1) {
 				snowSprites.at(0).Draw(dst, dstRect);
 			} else {
+				// snowEdge is being used to render everything
 				snowEdge.Draw(snowConnected, dst, dstRect);
 			}
 		} else {
 			DrawBaseLayer(dst, dstRect, sprites, heightSplits, numSprites, coords, permTable, height);
+			edge.Draw(terrainConnected, dst, dstRect);
 			snowEdge.Draw(snowConnected, dst, dstRect);
 		}
-		edge.Draw(terrainConnected, dst, dstRect);
 		if (!snowedDetails.empty()) {
 			DrawDetails(dst, dstRect, snowedDetails, coords, permTable);
 		} else {
@@ -154,19 +156,21 @@ void TerrainSprite::DrawSnowed(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate 
 
 void TerrainSprite::DrawSnowedAndCorrupted(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, Sprite::ConnectedFunction corruptConnected) const {
 	if (Exists() && snowSprites.size() > 0) {
-		if (snowConnected(NORTH) && snowConnected(EAST) && snowConnected(SOUTH) && snowConnected(WEST) && snowConnected(NORTHEAST) && snowConnected(NORTHWEST) && snowConnected(SOUTHEAST) && snowConnected(SOUTHWEST)) {
+		// If we don't have a snow edge or entirely connected, just render the snow sprites.
+		if ((!snowEdge.Exists() && sprites.size() > 0) || (snowConnected(NORTH) && snowConnected(EAST) && snowConnected(SOUTH) && snowConnected(WEST) && snowConnected(NORTHEAST) && snowConnected(NORTHWEST) && snowConnected(SOUTHEAST) && snowConnected(SOUTHWEST))) {
 			if (snowSprites.size() > 1) {
 				snowSprites.at(permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % snowSprites.size()).Draw(dst, dstRect);			
 			} else if (snowSprites.size() == 1) {
 				snowSprites.at(0).Draw(dst, dstRect);
 			} else {
+				// snowEdge is being used to render everything
 				snowEdge.Draw(snowConnected, dst, dstRect);
 			}
 		} else {
 			DrawBaseLayer(dst, dstRect, sprites, heightSplits, numSprites, coords, permTable, height);
+			edge.Draw(terrainConnected, dst, dstRect);
 			snowEdge.Draw(snowConnected, dst, dstRect);
 		}
-		edge.Draw(terrainConnected, dst, dstRect);
 		corruption.Draw(corruptConnected, dst, dstRect);
 		if (!corruptedDetails.empty()) {
 			DrawDetails(dst, dstRect, corruptedDetails, coords, permTable);
@@ -193,7 +197,7 @@ void TerrainSprite::DrawBaseLayer(SDL_Surface * dst, SDL_Rect *dstRect, const st
 			if (height >= heightSplits[i]) {
 				heightLayer++;
 			} else {
-				break;
+				break; 
 			}
 		}
 
@@ -243,7 +247,7 @@ TerrainSpriteFactory::TerrainSpriteFactory()
 }
 
 TerrainSpriteFactory::~TerrainSpriteFactory() {
-}
+} 
 
 TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
 	std::vector<Sprite> sprites;
@@ -256,19 +260,27 @@ TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TileSetTexture> curr
 		snowSprites.push_back(Sprite(currentTexture, *iter));
 	}
 
-	Sprite edgeSprite;
-	Sprite snowEdgeSprite;
-	if (sprites.size() > 0) {
-		// Set the skipped edge sprite to an existing one
-		if (edgeIndices.size() == 4) {
-			edgeIndices.push_back(currentTexture->Count());
-		} else if (edgeIndices.size() == 15 || edgeIndices.size() == 46) {
-			edgeIndices.insert(edgeIndices.begin() + 10, currentTexture->Count());
-		} else if (edgeIndices.size() == 18) {
-			edgeIndices.insert(edgeIndices.begin() + 4, currentTexture->Count());
-		}
-		edgeSprite = Sprite(currentTexture, edgeIndices.begin(), edgeIndices.end(), true);
+	// Set the skipped edge sprite to an existing one
+	if (edgeIndices.size() == 4) {
+		edgeIndices.push_back(currentTexture->Count());
+	} else if (edgeIndices.size() == 15 || edgeIndices.size() == 46) {
+		edgeIndices.insert(edgeIndices.begin() + 10, currentTexture->Count());
+	} else if (edgeIndices.size() == 18) {
+		edgeIndices.insert(edgeIndices.begin() + 4, currentTexture->Count());
 	}
+	Sprite edgeSprite = Sprite(currentTexture, edgeIndices.begin(), edgeIndices.end(), true);
+	
+	// Add extra sprite to snowSprite to complete connection map
+	if (snowSpriteIndices.size() > 0) {
+		if (snowEdgeIndices.size() == 4) {
+			snowEdgeIndices.push_back(snowSpriteIndices.at(0));
+		} else if (snowEdgeIndices.size() == 15 || snowEdgeIndices.size() == 46) {
+			snowEdgeIndices.insert(snowEdgeIndices.begin() + 10, currentTexture->Count());
+		} else if (snowEdgeIndices.size() == 18) {
+			snowEdgeIndices.insert(snowEdgeIndices.begin() + 4, snowSpriteIndices.at(0));
+		}
+	} 
+	Sprite snowEdgeSprite = Sprite(currentTexture, snowEdgeIndices.begin(), snowEdgeIndices.end(), true);
 	return TerrainSprite(sprites, snowSprites, heightSplits, edgeSprite, snowEdgeSprite, details, burntDetails, snowedDetails, corruptedDetails, detailsChance, corruption, corruptionOverlay, burntOverlay);
 }
 

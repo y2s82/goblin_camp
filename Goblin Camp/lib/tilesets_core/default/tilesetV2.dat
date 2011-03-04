@@ -5,22 +5,48 @@ tileset "Default Tileset" {
 	author="onionknight, hutze, apostrophest, Crawl Stone Soup artists"
 	version="0.15"
 
-	texture "tileset.png"
+	texture "terrain.png"
 	{
 		terrain_sprite {
 			sprites=[0]
-			
-
-			//details=[192,193,194,195,208,209,210,211]
-			//detailsChance=0.0625
 		}
 
 		terrain_sprite "grass" {
-			sprites=[89]
+			sprites=[
+			// Height < -1.0
+				20,
+			// Height < -0.5
+				21,
+			// Height < 0.0
+				22,
+			// Height < 0.25
+				23,
+			// Height < 0.5
+				24,
+			// Height < 1.0
+				25,
+			// Height < 2.0
+				26,
+			// Height < 4.0
+				27,
+			// Height >= 4.0
+				28
+			]
+			heightSplits=[1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0]
 			snowSprites=[152]
+			edgeSprites=[16,17,18,19]
+			snowEdgeSprites=[148,149,150,151]
 
 			details=[192,193,194,195,208,209,210,211]
+			snowedDetails=[196,197,198,199,212,213,214,215]
 			detailsChance=0.0625
+
+			burntOverlay=[32,33,34,35,36]
+			corruption=[128,129,130,131,
+						144,145,146,147,
+						160,161,162,163,
+						176,177,178,179]
+			corruptionOverlay=[132,133,134,135,136]
 		}
 
 		terrain_sprite "ditch" {
@@ -42,7 +68,10 @@ tileset "Default Tileset" {
 		terrain_sprite "mud" {
 			sprites=[5]
 		}
+	}
 
+	texture "tileset.png"
+	{
 		// Terrain modifiers
 		waterAndIce=[84,85,86,87,88,
 		             100,101,102,103,104,105,106,
@@ -57,11 +86,6 @@ tileset "Default Tileset" {
 		nonTerritory=[13]
 		territory=[6,7,8,9,10]
 		marked=[75,91,107,123,139]
-		corruption=[128,129,130,131,
-					144,145,146,147,
-					160,161,162,163,
-					176,177,178,179]
-		corruptionOverlay=[132,133,134,135,136]
 
 		// Tile Highlights (when placing or selecting)
 		defaultTileHighlight=[10,13]
