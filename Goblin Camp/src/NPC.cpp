@@ -123,6 +123,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 }
 
 NPC::~NPC() {
+	pathMutex.lock(); /* In case a pathing thread is active we need to wait until we can lock the pathMutex,
+					  because it signals that the thread has finished */
 	Map::Inst()->NPCList(x, y)->erase(uid);
 	if (squad.lock()) squad.lock()->Leave(uid);
 
