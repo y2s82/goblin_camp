@@ -50,7 +50,9 @@ void Faction::TrapDiscovered(Coordinate trapLocation) {
 
 bool Faction::IsTrapVisible(Coordinate trapLocation) {
 	boost::mutex::scoped_lock(trapVisibleMutex);
-	return trapVisible[trapLocation];
+	std::map<Coordinate, bool>::iterator trapi = trapVisible.find(trapLocation);
+	if (trapi == trapVisible.end()) return false;
+	return trapi->second;
 }
 
 void Faction::TrapSet(Coordinate trapLocation, bool visible) {
