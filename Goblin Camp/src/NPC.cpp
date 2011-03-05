@@ -1536,6 +1536,7 @@ boost::weak_ptr<Entity> NPC::currentEntity() {
 
 void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool threaded) {
 	boost::mutex::scoped_lock pathLock(npc->pathMutex);
+	boost::shared_lock<boost::shared_mutex> readCacheLock(Map::Inst()->cacheMutex);
 	npc->nopath = !path->compute(x0, y0, x1, y1);
 
 	for (int i = 0; i < path->size(); ++i) {

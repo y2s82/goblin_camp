@@ -32,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 Map::Map() :
 overlayFlags(0), markerids(0) {
 	tileMap.resize(boost::extents[500][500]);
+	cachedTileMap.resize(boost::extents[500][500]);
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
 			tileMap[i][e].ResetType(TILEGRASS);
@@ -57,7 +58,7 @@ Map* Map::Inst() {
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
-	return (float)tileMap[x1][y1].GetMoveCost(ptr);
+	return (float)cachedTileMap[x1][y1].GetMoveCost(ptr);
 }
 
 //Simple version that doesn't take npc information into account
@@ -80,8 +81,11 @@ bool Map::IsWalkable(int x, int y, void* ptr) const {
 	return IsWalkable(x,y);
 }
 
-void Map::SetWalkable(int x,int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWalkable(value); 
+void Map::SetWalkable(int x,int y, bool value) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetWalkable(value);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 
 int Map::Width() { return width; }
@@ -98,11 +102,17 @@ TileType Map::GetType(int x, int y) {
 	return TILENONE;
 }
 void Map::ResetType(int x, int y, TileType ntype, float tileHeight) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ResetType(ntype, tileHeight); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].ResetType(ntype, tileHeight);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 
 void Map::ChangeType(int x, int y, TileType ntype, float tileHeight) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].ChangeType(ntype, tileHeight); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].ChangeType(ntype, tileHeight);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 
 void Map::MoveTo(int x, int y, int uid) {
@@ -115,7 +125,10 @@ void Map::MoveFrom(int x, int y, int uid) {
 }
 
 void Map::SetConstruction(int x, int y, int uid) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetConstruction(uid); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetConstruction(uid);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 int Map::GetConstruction(int x, int y) const { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetConstruction(); 
@@ -127,7 +140,10 @@ boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) {
 	return boost::weak_ptr<WaterNode>();
 }
 void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetWater(value); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetWater(value);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 
 bool Map::IsLow(int x, int y) const { 
@@ -143,7 +159,9 @@ bool Map::BlocksWater(int x, int y) const {
 	return true;
 }
 void Map::SetBlocksWater(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlocksWater(value); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetBlocksWater(value);
+	}
 }
 
 std::set<int>* Map::NPCList(int x, int y) { 
@@ -177,7 +195,9 @@ TCODColor Map::GetBackColor(int x, int y) const {
 }
 
 void Map::SetNatureObject(int x, int y, int val) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetNatureObject(val); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetNatureObject(val);
+	}
 }
 int Map::GetNatureObject(int x, int y) const { 
 	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetNatureObject(); 
@@ -189,7 +209,10 @@ boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) {
 	return boost::weak_ptr<FilthNode>();
 }
 void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetFilth(value); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetFilth(value);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 
 boost::weak_ptr<BloodNode> Map::GetBlood(int x, int y) { 
@@ -205,7 +228,10 @@ boost::weak_ptr<FireNode> Map::GetFire(int x, int y) {
 	return boost::weak_ptr<FireNode>();
 }
 void Map::SetFire(int x, int y, boost::shared_ptr<FireNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetFire(value); 
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].SetFire(value);
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
 
 bool Map::BlocksLight(int x, int y) const { 
@@ -709,6 +735,7 @@ void Map::Update() {
 	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0) Naturify(Random::Generate(Width() - 1), Random::Generate(Height() - 1));
 	UpdateMarkers();
 	weather->Update();
+	UpdateCache();
 }
 
 //Finds a tile close to 'center' that will give an advantage to a creature with a ranged weapon
@@ -730,4 +757,12 @@ Coordinate Map::FindRangedAdvantage(Coordinate center) {
 	if (!potentialPositions.empty())
 		return Random::ChooseElement(potentialPositions);
 	return Coordinate(-1,-1);
+}
+
+void Map::UpdateCache() {
+	boost::unique_lock<boost::shared_mutex> writeLock(cacheMutex);
+	for (boost::unordered_set<Coordinate>::iterator tilei = changedTiles.begin(); tilei != changedTiles.end();) {
+			cachedTileMap[tilei->X()][tilei->Y()] = tileMap[tilei->X()][tilei->Y()];
+			tilei = changedTiles.erase(tilei);
+	}
 }
