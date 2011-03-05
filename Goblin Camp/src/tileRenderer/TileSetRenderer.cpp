@@ -23,24 +23,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MathEx.hpp"
 
 #include "tileRenderer/DrawConstructionVisitor.hpp"
-
-namespace {
-
-	// TODO: Move this to MathEx
-	int NextPowerOfTwo(int val)
-	{
-		val--;
-		val = (val >> 1) | val;
-		val = (val >> 2) | val;
-		val = (val >> 4) | val;
-		val = (val >> 8) | val;
-		val = (val >> 16) | val;
-		val++;
-		return val;
-	}
-}
-
-
  
 TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
 : tcodConsole(mapConsole),
@@ -69,7 +51,7 @@ TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared
        bmask = 0x00ff0000;
        amask = 0xff000000;
    #endif
-   SDL_Surface * temp = SDL_CreateRGBSurface(0, NextPowerOfTwo(screenWidth), NextPowerOfTwo(screenHeight), 32, rmask, gmask, bmask, amask);
+   SDL_Surface * temp = SDL_CreateRGBSurface(0, MathEx::NextPowerOfTwo(screenWidth), MathEx::NextPowerOfTwo(screenHeight), 32, rmask, gmask, bmask, amask);
    SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
    mapSurface = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
    SDL_FreeSurface(temp);

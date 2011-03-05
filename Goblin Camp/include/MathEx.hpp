@@ -23,3 +23,17 @@ typedef boost::numeric::converter<
 typedef boost::numeric::converter<
 	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Ceil<float>
 > CeilToInt;
+
+namespace MathEx {
+	inline int NextPowerOfTwo(int val)
+	{
+		val--;
+		val = (val >> 1) | val;
+		val = (val >> 2) | val;
+		val = (val >> 4) | val;
+		val = (val >> 8) | val;
+		val = (val >> 16) | val;
+		val++;
+		return val;
+	}
+}
