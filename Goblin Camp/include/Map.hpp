@@ -133,6 +133,7 @@ public:
 	Direction GetFlow(int x, int y);
 
 	bool IsDangerous(int x, int y, int faction) const;
+	bool IsDangerousCache(int x, int y, int faction) const;
 	int GetTerrainMoveCost(int x, int y) const;
 	boost::shared_ptr<Weather> weather;
 	void Update();

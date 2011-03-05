@@ -1542,7 +1542,7 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool th
 	for (int i = 0; i < path->size(); ++i) {
 		int pathX, pathY;
 		path->get(i, &pathX, &pathY);
-		if (Map::Inst()->IsDangerous(pathX, pathY, npc->faction)) {
+		if (Map::Inst()->IsDangerousCache(pathX, pathY, npc->faction)) {
 			npc->pathIsDangerous = true;
 			break;//One dangerous tile = whole path considered dangerous
 		}
