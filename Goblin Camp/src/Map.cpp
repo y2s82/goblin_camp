@@ -766,3 +766,11 @@ void Map::UpdateCache() {
 			tilei = changedTiles.erase(tilei);
 	}
 }
+
+bool Map::IsDangerousCache(int x, int y, int faction) const {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		if (cachedTileMap[x][y].fire) return true;
+		return Faction::factions[faction]->IsTrapVisible(Coordinate(x,y));
+	}
+	return false;
+}
