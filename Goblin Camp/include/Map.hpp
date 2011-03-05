@@ -41,7 +41,7 @@ private:
 	Map();
 	static Map* instance;
 	boost::multi_array<Tile, 2> tileMap;
-	boost::multi_array<Tile, 2> cachedTileMap;
+	boost::multi_array<CacheTile, 2> cachedTileMap;
 	int width, height;
 	float waterlevel;
 	int overlayFlags;
@@ -142,6 +142,7 @@ public:
 
 	mutable boost::shared_mutex cacheMutex;
 	void UpdateCache();
+	void TileChanged(int x, int y);
 };
 
 BOOST_CLASS_VERSION(Map, 1)

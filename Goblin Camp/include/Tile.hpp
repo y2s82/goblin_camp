@@ -42,6 +42,7 @@ enum TileType {
 class Tile {
 	friend class boost::serialization::access;
 	friend class Map;
+	friend class CacheTile;
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
@@ -83,8 +84,6 @@ public:
 	void SetWalkable(bool);
 	bool IsBuildable() const;
 	void SetBuildable(bool);
-	int GetMoveCost() const;
-	int GetMoveCost(void*) const;
 	void SetMoveCost(int);
 	void MoveFrom(int);
 	void MoveTo(int);
@@ -187,3 +186,24 @@ void Tile::load(Archive & ar, const unsigned int version) {
 	ar & fire;
 	ar & flow;
 }
+
+class CacheTile {
+public:
+	bool walkable;
+	int moveCost;
+	bool construction;
+	bool door;
+	bool trap;
+	bool bridge;
+	int moveSpeedModifier;
+	int waterDepth;
+	int npcCount;
+	bool fire;
+	int x;
+	int y;
+
+	CacheTile();
+	CacheTile& operator=(const Tile&);
+	int GetMoveCost() const;
+	int GetMoveCost(void*) const;
+};

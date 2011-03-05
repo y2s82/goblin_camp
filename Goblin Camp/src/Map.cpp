@@ -36,6 +36,8 @@ overlayFlags(0), markerids(0) {
 	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
 		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
 			tileMap[i][e].ResetType(TILEGRASS);
+			cachedTileMap[i][e].x = i;
+			cachedTileMap[i][e].y = e;
 		}
 	}
 	width = tileMap.size();
@@ -275,6 +277,7 @@ void Map::Reset(int x, int y) {
 	tileMap[x][y].corruption = 0;
 	tileMap[x][y].territory = false;
 	tileMap[x][y].burnt = 0;
+	changedTiles.insert(Coordinate(x,y));
 	heightMap->setValue(x,y,0.5f);
 	waterlevel = -0.8f;
 	overlayFlags = 0;
@@ -773,4 +776,10 @@ bool Map::IsDangerousCache(int x, int y, int faction) const {
 		return Faction::factions[faction]->IsTrapVisible(Coordinate(x,y));
 	}
 	return false;
+}
+
+void Map::TileChanged(int x, int y) {
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		changedTiles.insert(Coordinate(x,y));
+	}
 }
