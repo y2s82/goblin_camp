@@ -366,7 +366,6 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				tileSet->SetDefaultUnderConstructionSprite(Sprite(currentTexture, value.i));
 			}
 
-			// TODO: Capture fps/sprite set and build fire from this later
 			else if (boost::iequals(name, "fireFPS")) {
 				fireFPS = value.i;
 			}
@@ -392,7 +391,6 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			}
 			break;
 		case SS_CONSTRUCTION:
-			// TODO:
 			// Record sprites, under construction sprites for later assembly once width/connection map flag is known
 			if (boost::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
@@ -408,7 +406,6 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			}
 			break;
 		case SS_SPELL:
-			// TODO:
 			// Record sprites for later construction once both sprites and framerate is determined
 			if (boost::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)

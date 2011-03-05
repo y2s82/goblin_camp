@@ -24,8 +24,10 @@ namespace {
 	void SetupTilesetParser(TCODParser& parser) {
 		TCODParserStruct* creatureSpriteStruct = parser.newStructure("creature_sprite");
 		creatureSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
+		creatureSpriteStruct->addListProperty("weaponOverlays", TCOD_TYPE_INT, false);
 		creatureSpriteStruct->addProperty("fps", TCOD_TYPE_INT, false);
 		creatureSpriteStruct->addFlag("equipmentMap");
+		creatureSpriteStruct->addFlag("paperdoll");
 		creatureSpriteStruct->addListProperty("weaponTypes", TCOD_TYPE_STRING, false);
 		creatureSpriteStruct->addListProperty("armorTypes", TCOD_TYPE_STRING, false);
 		creatureSpriteStruct->addListProperty("armourTypes", TCOD_TYPE_STRING, false);
@@ -310,6 +312,8 @@ bool TileSetParserV2::parserFlag(TCODParser *parser,const char *name) {
 		case PS_NPC:
 			if (boost::iequals(name, "equipmentMap")) {
 				npcSpriteFactory.SetEquipmentMap(true);
+			} else if (boost::iequals(name, "paperdoll")) {
+				npcSpriteFactory.SetPaperdoll(true);
 			}
 			break;
 		}
@@ -463,6 +467,10 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			if (boost::iequals(name, "sprites")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
 					npcSpriteFactory.AddSpriteFrame(*iter);
+				}
+			} else if (boost::iequals(name, "weaponOverlays")) {
+				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
+					npcSpriteFactory.AddWeaponOverlay(*iter);
 				}
 			} else if (boost::iequals(name, "fps")) {
 				npcSpriteFactory.SetFPS(value.i);
