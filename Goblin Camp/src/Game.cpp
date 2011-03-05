@@ -2153,8 +2153,9 @@ void Game::SetSeason(Season newSeason) {
 }
 
 boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
-	if (npcList.find(uid) != npcList.end()) {
-		return npcList.find(uid)->second;
+	std::map<int, boost::shared_ptr<NPC> >::const_iterator npci = npcList.find(uid);
+	if (npci != npcList.end()) {
+		return npci->second;
 	}
 	return boost::shared_ptr<NPC>();
 }
