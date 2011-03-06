@@ -87,6 +87,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	needsSleep(false),
 	hasHands(false),
 	isTunneler(false),
+	isFlying(false),
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
@@ -1835,6 +1836,8 @@ void NPC::HungryAnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::AddEffect(StatusEffectType effect) {
+	if (effect == FLYING) isFlying = true;
+
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
 			statusEffectI->cooldown = statusEffectI->cooldownDefault;
@@ -1847,6 +1850,8 @@ void NPC::AddEffect(StatusEffectType effect) {
 }
 
 void NPC::AddEffect(StatusEffect effect) {
+	if (effect.type == FLYING) isFlying = true;
+
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect.type) {
 			statusEffectI->cooldown = statusEffectI->cooldownDefault;
@@ -1859,6 +1864,8 @@ void NPC::AddEffect(StatusEffect effect) {
 }
 
 void NPC::RemoveEffect(StatusEffectType effect) {
+	if (effect == FLYING) isFlying = false;
+
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
 			if (statusEffectIterator == statusEffectI) ++statusEffectIterator;
@@ -2713,3 +2720,5 @@ int NPC::GetHeight() {
 	if (HasEffect(FLYING) || HasEffect(HIGHGROUND)) return ENTITYHEIGHT+2;
 	return 0;
 }
+
+bool NPC::IsFlying() { return isFlying; }
