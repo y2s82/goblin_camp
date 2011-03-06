@@ -44,19 +44,19 @@ void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
 }
 
 void Faction::TrapDiscovered(Coordinate trapLocation) {
-	boost::mutex::scoped_lock(trapVisibleMutex);
+	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = true;
 }
 
 bool Faction::IsTrapVisible(Coordinate trapLocation) {
-	boost::mutex::scoped_lock(trapVisibleMutex);
+	boost::shared_lock<boost::shared_mutex> readLock(trapVisibleMutex);
 	std::map<Coordinate, bool>::iterator trapi = trapVisible.find(trapLocation);
 	if (trapi == trapVisible.end()) return false;
 	return trapi->second;
 }
 
 void Faction::TrapSet(Coordinate trapLocation, bool visible) {
-	boost::mutex::scoped_lock(trapVisibleMutex);
+	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = visible;
 }
 
@@ -76,7 +76,7 @@ std::string Faction::FactionTypeToString(FactionType faction) {
 }
 
 void Faction::Reset() {
-	boost::mutex::scoped_lock(trapVisibleMutex);
+	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	members.clear();
 	trapVisible.clear();
 }
