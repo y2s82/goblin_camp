@@ -336,16 +336,20 @@ int CacheTile::GetMoveCost(void* ptr) const {
 
 	if (cost < 100) { //If we're over 100 then it's clear enough that walking here is not a good choice
 
-		if (door && !static_cast<NPC*>(ptr)->HasHands()) {
-			cost += 50;
-		}
-		if (trap) { 
-			cost = Faction::factions[static_cast<NPC*>(ptr)->GetFaction()]->IsTrapVisible(Coordinate(x,y)) ? 
-				100 : 1;
-		}
+		NPC* npc = static_cast<NPC*>(ptr);
 
-		//cost == 0 normally means unwalkable, but tunnellers can, surprise surprise, tunnel through
-		if (cost == 0 && construction && static_cast<NPC*>(ptr)->IsTunneler()) cost = 50;
+		if (npc) {
+			if (door && npc->HasHands()) {
+				cost += 50;
+			}
+			if (trap) { 
+				cost = Faction::factions[npc->GetFaction()]->IsTrapVisible(Coordinate(x,y)) ? 
+					100 : 1;
+			}
+
+			//cost == 0 normally means unwalkable, but tunnellers can, surprise surprise, tunnel through
+			if (cost == 0 && construction && npc->IsTunneler()) cost = 50;
+		}
 	}
 	return cost;
 }
