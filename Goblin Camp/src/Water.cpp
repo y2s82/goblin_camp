@@ -267,6 +267,8 @@ void WaterNode::DeInert() {inert = false;}
 int WaterNode::Depth() {return depth;}
 
 void WaterNode::Depth(int newDepth) {
+	//20 because water can't add more cost to pathing calculations
+	if (depth <= 20 && newDepth <= 20 && depth != newDepth) Map::Inst()->TileChanged(x, y);
 	depth = newDepth;
 	UpdateGraphic();
 }
