@@ -72,7 +72,8 @@ private:
 	static const int detailPermOffset = 42;
 	int numSprites;
 
-	void DrawBaseLayer(SDL_Surface * dst, SDL_Rect *dstRect, const std::vector<Sprite>& sprites, const std::vector<float>& heightSplits, int numSprites, Coordinate coords, const PermutationTable& permTable, float height) const;
+	void DrawBaseLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height) const;
+	void DrawSnowLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const;
 	void DrawDetails(SDL_Surface * dst, SDL_Rect *dstRect, const std::vector<Sprite>& detailSprites, Coordinate coords, const PermutationTable& permTable) const;
 
 };
@@ -99,6 +100,8 @@ public:
 	void SetCorruptionSprite(const Sprite& sprite);
 	void SetCorruptionOverlaySprite(const Sprite& sprite);
 	void SetBurntSprite(const Sprite& sprite);
+	void SetWang(bool wang);
+	void SetSnowWang(bool wang);
 private:
 	std::vector<int> spriteIndices;
 	std::vector<int> snowSpriteIndices;
@@ -113,6 +116,8 @@ private:
 	Sprite corruption;
 	Sprite corruptionOverlay;
 	Sprite burntOverlay;
+	bool wang;
+	bool snowWang;
 
 };
 

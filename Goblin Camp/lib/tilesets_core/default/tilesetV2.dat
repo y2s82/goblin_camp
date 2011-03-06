@@ -12,6 +12,11 @@ tileset "Default Tileset" {
 		}
 
 		terrain_sprite "grass" {
+		/*sprites=[48,49,50,51,
+		         64,65,66,67,
+				 80,81,82,83,
+				 96,97,98,99]
+		wangTileset*/
 			sprites=[
 			// Height < -1.0
 				20,
