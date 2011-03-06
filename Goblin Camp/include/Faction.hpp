@@ -48,7 +48,7 @@ private:
 
 	static std::map<std::string, int> factionNames;
 
-	boost::mutex trapVisibleMutex;
+	boost::shared_mutex trapVisibleMutex;
 
 public:
 	Faction(std::string = "Noname faction");
