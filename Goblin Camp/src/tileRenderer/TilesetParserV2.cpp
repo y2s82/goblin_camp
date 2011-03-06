@@ -63,6 +63,8 @@ namespace {
 
 		TCODParserStruct* terrainSpriteStruct = parser.newStructure("terrain_sprite");
 		terrainSpriteStruct->addListProperty("sprites", TCOD_TYPE_INT, true);
+		terrainSpriteStruct->addFlag("wangTileset");
+		terrainSpriteStruct->addFlag("snowWangTileset");
 		terrainSpriteStruct->addListProperty("snowSprites", TCOD_TYPE_INT, false);
 		terrainSpriteStruct->addListProperty("heightSplits", TCOD_TYPE_FLOAT, false);
 		terrainSpriteStruct->addListProperty("edgeSprites", TCOD_TYPE_INT, false);
@@ -316,6 +318,12 @@ bool TileSetParserV2::parserFlag(TCODParser *parser,const char *name) {
 				npcSpriteFactory.SetPaperdoll(true);
 			}
 			break;
+		case PS_TERRAIN:
+			if (boost::iequals(name, "wangTileset")) {
+				terrainSpriteFactory.SetWang(true);
+			} else if (boost::iequals(name, "snowWangTileset")) {
+				terrainSpriteFactory.SetSnowWang(true);
+			}
 		}
 	}
 	return success;
