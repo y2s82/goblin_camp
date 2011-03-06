@@ -59,7 +59,7 @@ Map* Map::Inst() {
 }
 
 float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
-	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return 1.0f;
+	if (static_cast<NPC*>(ptr)->IsFlying()) return 1.0f;
 	return (float)cachedTileMap[x1][y1].GetMoveCost(ptr);
 }
 

@@ -175,6 +175,7 @@ private:
 	bool needsSleep;
 	bool hasHands;
 	bool isTunneler;
+	bool isFlying;
 
 	boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 	boost::function<void(boost::shared_ptr<NPC>)> React;
@@ -269,6 +270,7 @@ public:
 	boost::weak_ptr<Item> Carrying() const;
 	bool HasHands();
 	bool IsTunneler();
+	bool IsFlying(); //Special case for pathing's sake. Equivalent to HasEffect(FLYING) except it's threadsafe
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
 	void DecreaseItemCondition(boost::weak_ptr<Item>);
