@@ -537,7 +537,6 @@ void TileSetRenderer::render(void * surf,void * sdl_screen) {
 
 	SDL_Rect srcRect={0,0,screenWidth,screenHeight};
 	SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	SDL_LowerBlit(mapSurface.get(), &srcRect, screen, &dstRect);
 	
 	if (translucentUI) {
 		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);
@@ -558,5 +557,6 @@ void TileSetRenderer::render(void * surf,void * sdl_screen) {
 	else {
 		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
 	}
-	SDL_LowerBlit(tcod, &srcRect, screen, &dstRect);
+	SDL_LowerBlit(tcod, &srcRect, mapSurface.get(), &dstRect);
+	SDL_LowerBlit(mapSurface.get(), &srcRect, screen, &dstRect);
 }
