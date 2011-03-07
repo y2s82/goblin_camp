@@ -5,16 +5,25 @@ import generators ;
 import toolset ;
 import os ;
 import modules ;
+import feature ;
 
+type.register TXT_IN   : txt_in ;
+type.register TXT      : txt ;
 type.register RC_IN    : rc_in ;
 type.register CPP_IN   : cpp_in ;
-type.register PLIST_IN : plist_in ;
-type.register PLIST    : plist ;
+type.register DAT      : dat ;
+type.register DAT_IN   : dat_in ;
 
 if [ os.name ] = NT {
+    # RC "headers"
+    feature.feature rch : : free ;
+    toolset.flags gc-version.generate RCH <rch> ;
     generators.register-standard gc-version.generate : RC_IN : RC ;
 }
+
 generators.register-standard gc-version.generate : CPP_IN : CPP ;
+generators.register-standard gc-version.generate : TXT_IN : TXT ;
+generators.register-standard gc-version.generate : DAT_IN : DAT ;
 
 toolset.flags gc-version.generate APPEND_HG <variant>debug : yes ;
 
@@ -37,5 +46,5 @@ GC_VERSION = [ modules.peek : GC_VERSION ] ;
 PYTHON     = [ modules.peek : PYTHON ] ;
 
 actions generate {
-    $(PYTHON) "$(GC_ROOT)/tools/generate-version.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
+    $(PYTHON) "$(GC_ROOT)/tools/generate-version.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)" "$(RCH[0])"
 }
