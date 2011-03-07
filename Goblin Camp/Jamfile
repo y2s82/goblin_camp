@@ -122,10 +122,14 @@ alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl libuseria
 ## Precompiled header target.
 ###############################################################################
 
-cpp-pch stdafx.hpp
-    : $(HERE)/include/stdafx.hpp
-      common-deps
-;
+if --skip-pch in [ modules.peek : ARGV ] {
+    alias stdafx.hpp : common-deps : : <define>GC_SKIP_PCH ;
+} else {
+    cpp-pch stdafx.hpp
+        : $(HERE)/include/stdafx.hpp
+          common-deps
+    ;
+}
 
 ###############################################################################
 ##### goblin-camp
