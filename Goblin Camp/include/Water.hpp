@@ -60,6 +60,7 @@ public:
 	bool IsCoastal();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(WaterNode, 0)
 
 template<class Archive>

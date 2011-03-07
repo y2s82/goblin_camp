@@ -74,6 +74,7 @@ public:
 	static void LoadPresets(std::string);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Spell, 0)
 
 template<class Archive>

@@ -46,6 +46,7 @@ public:
 	bool IsReady() const;
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Trap, 0)
 
 template<class Archive>

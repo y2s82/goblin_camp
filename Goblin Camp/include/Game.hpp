@@ -262,6 +262,7 @@ public:
 	int GetAge();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Game, 1)
 
 template<class Archive>

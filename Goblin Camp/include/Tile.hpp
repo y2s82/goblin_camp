@@ -115,6 +115,7 @@ public:
 	int GetTerrainMoveCost() const;
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Tile, 0)
 
 template<class Archive>

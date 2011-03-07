@@ -73,6 +73,7 @@ public:
 	void UpdateWaterJobs();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Camp, 0)
 
 template<class Archive>

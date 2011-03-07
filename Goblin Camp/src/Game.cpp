@@ -19,6 +19,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/algorithm/string.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+namespace py = boost::python;
+
 #include "Random.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"

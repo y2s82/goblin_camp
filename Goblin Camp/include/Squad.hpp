@@ -17,9 +17,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 #include <list>
+#include <vector>
 
 #include <boost/weak_ptr.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 class Coordinate;
 class Entity;
@@ -83,6 +85,7 @@ public:
 	void SetGeneralOrder(Order);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Squad, 0)
 
 template<class Archive>

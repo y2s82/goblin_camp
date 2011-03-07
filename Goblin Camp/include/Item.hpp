@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <list>
 #include <map>
-
+#include <boost/unordered_map.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
 #include <libtcod.hpp>
@@ -161,6 +161,7 @@ public:
 	int DecreaseCondition(); //Only decreases condition, does NOT handle item removal or debris creation!
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Item, 0)
 
 template<class Archive>
@@ -247,6 +248,7 @@ public:
 	void Growth(ItemType);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(OrganicItem, 0)
 
 template<class Archive>

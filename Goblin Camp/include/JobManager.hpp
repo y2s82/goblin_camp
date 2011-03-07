@@ -51,6 +51,7 @@ public:
 	void AssignJobs();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(JobManager, 0)
 
 template<class Archive>

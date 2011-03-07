@@ -75,6 +75,7 @@ public:
 	void UpdateBogDesignations(Coordinate, bool add);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(StockManager, 0)
 
 template<class Archive>

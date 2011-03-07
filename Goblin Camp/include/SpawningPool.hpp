@@ -51,6 +51,7 @@ public:
 	void Burn();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(SpawningPool, 0)
 
 template<class Archive>

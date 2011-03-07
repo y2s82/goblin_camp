@@ -46,6 +46,7 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(FarmPlot, 0)
 
 template<class Archive>

@@ -22,6 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/algorithm/string.hpp>
+
 #include "Random.hpp"
 #include "Tile.hpp"
 #include "Announce.hpp"

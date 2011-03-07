@@ -88,6 +88,7 @@ public:
 	void RemoveBulk(int);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Entity, 0)
 
 template<class Archive>

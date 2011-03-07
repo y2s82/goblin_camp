@@ -110,6 +110,7 @@ public:
 	int flags;
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Task, 0)
 
 template<class Archive>
@@ -211,6 +212,7 @@ public:
 	void AddMapMarker(MapMarker);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Job, 0)
 
 template<class Archive>

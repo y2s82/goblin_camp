@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/serialization/split_member.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
 
@@ -45,6 +46,7 @@ public:
 	TCODColor GetColor();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(FilthNode, 0)
 
 template<class Archive>

@@ -62,6 +62,7 @@ public:
 	void ApplySeasonalEffects();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Weather, 0)
 
 template<class Archive>
