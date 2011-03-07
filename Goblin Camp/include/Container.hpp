@@ -77,6 +77,7 @@ public:
 	int GetReservedSpace();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(::Container, 0)
 
 template<class Archive>

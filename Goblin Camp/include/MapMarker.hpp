@@ -49,6 +49,7 @@ public:
 	TCODColor Color() const;
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(MapMarker, 0)
 
 template<class Archive>

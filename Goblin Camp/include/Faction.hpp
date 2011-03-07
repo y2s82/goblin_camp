@@ -20,9 +20,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 
-#include <boost/serialization/serialization.hpp>
+#include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/thread/mutex.hpp>
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/weak_ptr.hpp>
 
 class NPC;
 class Coordinate;
@@ -41,7 +42,7 @@ private:
 	void load(Archive & ar, const unsigned int version);
 	BOOST_SERIALIZATION_SPLIT_MEMBER()
 
-	std::list<boost::weak_ptr<NPC> > members;
+	std::list< boost::weak_ptr<NPC> > members;
 	std::map<Coordinate, bool> trapVisible;
 
 	std::string name;
@@ -65,6 +66,7 @@ public:
 	void Reset();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Faction, 0)
 
 template<class Archive>

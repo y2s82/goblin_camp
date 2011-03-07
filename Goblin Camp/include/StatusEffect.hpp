@@ -94,6 +94,7 @@ struct StatusEffect {
 	bool negative; //Is this a negative effect? ie. one the creature wants to get rid of
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(StatusEffect, 0)
 
 template<class Archive>

@@ -23,6 +23,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/foreach.hpp>
 #include <algorithm>
 
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+namespace py = boost::python;
+
 #include "scripting/Engine.hpp"
 #include "Logger.hpp"
 #include "Game.hpp"

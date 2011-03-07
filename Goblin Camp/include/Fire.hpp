@@ -47,6 +47,7 @@ public:
 	void SetHeat(int);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(FireNode, 0)
 
 template<class Archive>

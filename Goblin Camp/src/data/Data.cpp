@@ -26,7 +26,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/filesystem.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/bind.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
 
+namespace py = boost::python;
 namespace fs = boost::filesystem;
 
 #include "data/Config.hpp"

@@ -118,6 +118,7 @@ inline int Distance(const Coordinate& a, const Coordinate& b) {
 	return Distance(a.x, a.y, b.x, b.y);
 }
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Coordinate, 0)
 
 template<class Archive>

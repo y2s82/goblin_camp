@@ -76,6 +76,7 @@ public:
 	void operator()(Skill, int);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(SkillSet, 0)
 
 template<class Archive>
@@ -314,6 +315,7 @@ public:
 
 void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(NPC, 1)
 
 template<class Archive>

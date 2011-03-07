@@ -33,6 +33,7 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Door, 0)
 
 template<class Archive>

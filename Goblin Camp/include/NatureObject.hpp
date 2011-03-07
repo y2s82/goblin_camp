@@ -87,6 +87,7 @@ public:
 	bool IsIce();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(NatureObject, 1)
 
 template<class Archive>
@@ -147,6 +148,7 @@ public:
 	~Ice();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Ice, 0)
 
 template<class Archive>

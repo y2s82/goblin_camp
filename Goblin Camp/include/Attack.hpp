@@ -77,6 +77,7 @@ public:
 	void SetMagicProjectile();
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Attack, 0)
 
 template<class Archive>

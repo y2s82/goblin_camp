@@ -79,6 +79,7 @@ public:
 	virtual void Dismantle(Coordinate pos=Coordinate(-1,-1));
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Stockpile, 0)
 
 template<class Archive>

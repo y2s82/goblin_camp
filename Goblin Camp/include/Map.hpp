@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <utility>
+#include <list>
+
+#include <boost/thread/shared_mutex.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/serialization/split_member.hpp>
 #include <boost/unordered_set.hpp>
@@ -45,7 +49,7 @@ private:
 	int width, height;
 	float waterlevel;
 	int overlayFlags;
-	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
+	std::list< std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
 	boost::unordered_set<Coordinate> changedTiles;
 	
@@ -145,6 +149,7 @@ public:
 	void TileChanged(int x, int y);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Map, 1)
 
 template<class Archive>

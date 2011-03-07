@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/serialization/split_member.hpp>
 
 #include "Entity.hpp"
@@ -177,6 +178,7 @@ public:
 	static std::string ConstructionTypeToString(ConstructionType);
 };
 
+#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Construction, 0)
 
 template<class Archive>

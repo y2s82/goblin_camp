@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/assert.hpp>
 #include <libtcod.hpp>
 #include <boost/filesystem.hpp>
+#include <boost/algorithm/string.hpp>
 
 namespace fs = boost::filesystem;
 
