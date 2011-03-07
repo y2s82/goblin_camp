@@ -116,7 +116,7 @@ void Spell::UpdateVelocity() {
 						if (Map::Inst()->NPCList(tx,ty)->size() > 0) { //Hit a creature
 							if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
-								boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
+								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(tx,ty)->begin());
 								for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 									npc->Damage(&*attacki);
 								}
@@ -195,7 +195,9 @@ class SpellListener : public ITCODParserListener {
 			Spell::Presets[spellIndex].attacks.back().CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Spell::Presets[spellIndex].attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Spell::Presets[spellIndex].attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {

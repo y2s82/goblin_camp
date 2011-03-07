@@ -112,6 +112,10 @@ void WaterNode::Update() {
 			if (timeFromRiverBed > 0) --timeFromRiverBed;
 			divided = ((double)depthSum/waterList.size());
 
+			boost::shared_ptr<Item> item;
+			if (!Map::Inst()->ItemList(x,y)->empty())
+				item = Game::Inst()->GetItem(*Map::Inst()->ItemList(x,y)->begin()).lock();
+
 			//Loop through neighbouring waternodes
 			for (unsigned int i = 0; i < waterList.size(); ++i) {
 				if (boost::shared_ptr<WaterNode> water = waterList[i].lock()) {
@@ -121,75 +125,122 @@ void WaterNode::Update() {
 
 					//So much filth it'll go anywhere
 					if (filth > 10 && Random::Generate(3) == 0) { filth -= 5; water->filth += 5; }
-					//Filth goes with the flow
-					if (filth > 0) {
-						switch (Map::Inst()->GetFlow(x, y)) {
-						case NORTH:
-							if (coordList[i].Y() < y) {
+					//Filth and items go with the flow
+					switch (Map::Inst()->GetFlow(x, y)) {
+					case NORTH:
+						if (coordList[i].Y() < y) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case NORTHEAST:
-							if (coordList[i].Y() < y && coordList[i].X() > x) {
+					case NORTHEAST:
+						if (coordList[i].Y() < y && coordList[i].X() > x) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case EAST:
-							if (coordList[i].X() > x) {
+					case EAST:
+						if (coordList[i].X() > x) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case SOUTHEAST:
-							if (coordList[i].Y() > y && coordList[i].X() > x) {
+					case SOUTHEAST:
+						if (coordList[i].Y() > y && coordList[i].X() > x) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case SOUTH:
-							if (coordList[i].Y() > y) {
+					case SOUTH:
+						if (coordList[i].Y() > y) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case SOUTHWEST:
-							if (coordList[i].Y() > y && coordList[i].X() < x) {
+					case SOUTHWEST:
+						if (coordList[i].Y() > y && coordList[i].X() < x) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case WEST:
-							if (coordList[i].X() < x) {
+					case WEST:
+						if (coordList[i].X() < x) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						case NORTHWEST:
-							if (coordList[i].Y() < y && coordList[i].X() < x) {
+					case NORTHWEST:
+						if (coordList[i].Y() < y && coordList[i].X() < x) {
+							if (filth > 0) {
 								--filth;
 								++water->filth;
 							}
-							break;
+							if (item && Random::Generate(item->GetBulk()) == 0) {
+								item->Position(water->Position());
+								item.reset();
+							}
+						}
+						break;
 
-						default:
+					default:
+						if (filth > 0) {
 							if (water->filth < filth && Random::GenerateBool()) {
 								--filth;
 								++water->filth;
 							}
-							break;
 						}
+						break;
 					}
-				}
-				else {
+				} else {
 					Game::Inst()->CreateWater(coordList[i], (int)divided, timeFromRiverBed);
 				}
 			}
@@ -216,6 +267,8 @@ void WaterNode::DeInert() {inert = false;}
 int WaterNode::Depth() {return depth;}
 
 void WaterNode::Depth(int newDepth) {
+	//20 because water can't add more cost to pathing calculations
+	if (depth <= 20 && newDepth <= 20 && depth != newDepth) Map::Inst()->TileChanged(x, y);
 	depth = newDepth;
 	UpdateGraphic();
 }

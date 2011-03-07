@@ -38,7 +38,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define BFS_MAX_DISTANCE 20
 
-#define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 2)
+#define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 3)
 
 class Faction;
 
@@ -61,6 +61,9 @@ class Game {
 	friend class boost::serialization::access;
 	friend class ConfigListener;
 	friend void SettingsMenu();
+	friend class TCODMapRenderer;
+	friend class TileSetRenderer;
+	friend class NPCDialog;
 private:
 	template<class Archive>
 	void save(Archive & ar, const unsigned int version) const;
@@ -91,6 +94,10 @@ private:
 	boost::shared_ptr<MapRenderer> renderer;
 	bool gameOver;
 
+	std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
+	std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
+	std::map<int, boost::shared_ptr<NPC> > npcList;
+
 public:
 	static Game* Inst();
 	~Game();
@@ -111,7 +118,7 @@ public:
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
 	void Init();
-	void TilesetChanged();
+	void ResetRenderer();
 	void LoadingScreen();
 	void ErrorScreen();
 	void GenerateMap(uint32 seed = 0);
@@ -142,7 +149,6 @@ public:
 	void EnableDevMode();
 
 	/*      NPCS        NPCS        NPCS        */
-	std::map<int,boost::shared_ptr<NPC> > npcList;
 	int CreateNPC(Coordinate, NPCType);
 	void BumpEntity(int);
 	int DistanceNPCToCoordinate(int, Coordinate);
@@ -163,6 +169,7 @@ public:
 	void Thirstify(Coordinate);
 	void Tire(Coordinate);
 	void Badsleepify(Coordinate);
+	boost::shared_ptr<NPC> GetNPC(int) const;
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());
@@ -171,8 +178,6 @@ public:
 	void RemoveConstruction(boost::weak_ptr<Construction>);
 	static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
 	void RefreshStockpiles() { refreshStockpiles = true; }
-	std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
-	std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
 	Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>, int faction = -1);
 	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 	boost::weak_ptr<Construction> GetConstruction(int);

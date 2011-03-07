@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "Door.hpp"
 #include "SpawningPool.hpp"
+#include "Trap.hpp"
 
 class DrawConstructionVisitor : public ConstructionVisitor  {
 private:
@@ -41,5 +42,6 @@ public:
 	void Visit(Construction * construction);
 	void Visit(SpawningPool * spawningPool);
 	void Visit(Door * door);
+	void Visit(Trap * trap);
 	
 };

@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "MapRenderer.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/TileSet.hpp"
+#include "tileRenderer/PermutationTable.hpp"
 #include <SDL.h>
 
 class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer, private boost::noncopyable
@@ -43,6 +44,8 @@ public:
 	void render(void *sdlSurface, void*sdlScreen);
 private:
 	TCODConsole * tcodConsole;
+	PermutationTable permutationTable;
+	bool translucentUI;
 
 	// the font characters size
 	int screenWidth, screenHeight;
@@ -53,6 +56,7 @@ private:
 	int startTileX, startTileY;
 	CursorType cursorMode;
 	int cursorHint;
+	
 
 	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;
 	void DrawFilth				(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;
@@ -60,7 +64,6 @@ private:
 	
 	void DrawMarkers(Map * map, int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawItems(int startTileX, int startTileY, int sizeX, int sizeY) const;
-	void DrawNatureObjects(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawNPCs(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawSpells(int startTileX, int startTileY, int sizeX, int sizeY) const;
 	void DrawFires(int startTile, int startTileY, int sizeX, int sizeY) const;

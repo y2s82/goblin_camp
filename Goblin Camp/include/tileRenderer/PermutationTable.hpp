@@ -16,13 +16,24 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
-#include "tileRenderer/Sprite.hpp"
+#include <libtcod.hpp>
+#include <vector>
 
-class NPCSpriteSet
-{
+class PermutationTable {
 public:
-	explicit NPCSpriteSet();
-	~NPCSpriteSet();
+	explicit PermutationTable(int power);
+	explicit PermutationTable(int power, uint32 seed);
+	~PermutationTable();
 
-	Sprite tile;
+	inline int Hash(int val) const {
+		return table[bitMask & val];
+	}
+
+	inline int ExtHash(int val) const {
+		return table[(table[bitMask & val] + val >> power) & bitMask];
+	}
+private:
+	std::vector<int> table;
+	int power;
+	int bitMask;
 };

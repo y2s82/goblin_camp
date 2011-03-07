@@ -25,8 +25,10 @@ enum SpriteType
 	SPRITE_Single = 0x0,
 	SPRITE_Animated = 0x1,
 	SPRITE_SimpleConnectionMap = 0x2,
-	SPRITE_NormalConnectionMap = 0x4,
-	SPRITE_ExtendedConnectionMap = 0x8
+	SPRITE_TwoLayerConnectionMap = 0x6, // Two layered contains Simple
+	SPRITE_NormalConnectionMap = 0x8,
+	SPRITE_ExtendedConnectionMap = 0x18, // Extended constains Normal
+	SPRITE_ConnectionMap = 0x1E // Connection Map encompasses all variants
 };
 
 /****************
@@ -43,13 +45,12 @@ private:
 	boost::shared_ptr<TileSetTexture> texture;
 	SpriteType type;
 	int frameTime;
-	int width;
+	int frameCount;
 
 public:
 	explicit Sprite();
 	explicit Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
-	template <typename IterT> explicit Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, SpriteType type = SPRITE_ExtendedConnectionMap);
-	template <typename IterT> explicit Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, int frameRate, SpriteType type = SPRITE_Animated);
+	template <typename IterT> explicit Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	~Sprite();
 
 	bool Exists() const;
@@ -61,50 +62,68 @@ public:
 	
 	// Connection Map Drawing
 	typedef boost::function<bool (Direction)> ConnectedFunction;
+	typedef boost::function<int (Direction)> LayeredConnectedFunction;
+
 	void Draw(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void Draw(int layer, LayeredConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
 private:
 	void DrawSimpleConnected(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	inline int CurrentFrame() const { return (type & SPRITE_Animated) ? ((TCODSystem::getElapsedMilli() / frameTime) % frameCount) : 0; }
 };
 
-template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, SpriteType spriteType)
+template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frames)
 	: tiles(),
 	  texture(tilesetTexture),
-	  type(spriteType),
-	  frameTime(15)
+	  type(SPRITE_Single),
+	  frameTime(1000 / frameRate),
+	  frameCount(frames > 0 ? frames : 1)
 {
+	std::vector<int> indices;
 	for(; start != end; ++start) {
-		tiles.push_back(*start);
+		indices.push_back(*start);
 	}
-	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 47) {
-		// Down grade to connection map
-		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_NormalConnectionMap);
-	}
-	if ((type & SPRITE_NormalConnectionMap) && tiles.size() < 16) {
-		type = static_cast<SpriteType>((type & ~SPRITE_NormalConnectionMap) | SPRITE_SimpleConnectionMap);
-	}
-	if ((type & SPRITE_SimpleConnectionMap) && tiles.size() < 5) {
-		type = static_cast<SpriteType>(type & ~SPRITE_SimpleConnectionMap);
-	}
-}
 
-template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, int frameRate, SpriteType spriteType)
-	: tiles(),
-	  texture(tilesetTexture),
-	  type(spriteType),
-	  frameTime(1000 / frameRate)
-{
-	for(; start != end; ++start) {
-		tiles.push_back(*start);
+	// Assume all tiles are for animation if it isn't a connection map
+	if (!connectionMap) {
+		frameCount = indices.size();
+		tiles.assign(indices.begin(), indices.end());
+		type = (frameCount > 1) ? SPRITE_Animated : SPRITE_Single;
+		return;
 	}
-	if ((type & SPRITE_ExtendedConnectionMap) && tiles.size() < 47) {
-		// Down grade to connection map
-		type = static_cast<SpriteType>((type & ~SPRITE_ExtendedConnectionMap) | SPRITE_NormalConnectionMap);
+
+	if (frameCount > indices.size()) {
+		frameCount = indices.size();
 	}
-	if ((type & SPRITE_NormalConnectionMap) && tiles.size() < 16) {
-		type = static_cast<SpriteType>((type & ~SPRITE_NormalConnectionMap) | SPRITE_SimpleConnectionMap);
+	int numTiles = indices.size() / frameCount;
+	if (numTiles == 0) { 
+		frameCount = 0;
+		return;
 	}
-	if ((type & SPRITE_SimpleConnectionMap) && tiles.size() < 5) {
-		type = static_cast<SpriteType>(type & ~SPRITE_SimpleConnectionMap);
+	
+	switch (numTiles) {
+		case 47:
+			type = SPRITE_ExtendedConnectionMap; break;
+		case 19:
+			type = SPRITE_TwoLayerConnectionMap; break;
+		case 16:
+			type = SPRITE_NormalConnectionMap; break;
+		case 5:
+			type = SPRITE_SimpleConnectionMap; break;
+		default:
+			type = SPRITE_Single;
+			numTiles = 1;
+			break;
 	}
+
+	if (frameCount > 1) {
+		type = static_cast<SpriteType>(type | SPRITE_Animated);
+	}
+
+	for (int tile = 0; tile < numTiles; ++tile) {
+		for (int frame = 0; frame < frameCount; ++frame) {
+			tiles.push_back(indices[tile + frame * numTiles]);
+		}
+	}
+
 }

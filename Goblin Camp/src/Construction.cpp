@@ -555,7 +555,9 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets[constructionIndex].trapAttack.Amount(value.dice);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Construction::Presets[constructionIndex].trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Construction::Presets[constructionIndex].trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -855,7 +857,7 @@ void Construction::Update() {
 	}
 
 	if (!Construction::Presets[type].passiveStatusEffects.empty() && !Map::Inst()->NPCList(x,y)->empty()) {
-		boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
+		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(x, y)->begin());
 		if (!npc->HasEffect(FLYING)) {
 			for (int i = 0; i < Construction::Presets[type].passiveStatusEffects.size(); ++i) {
 				npc->AddEffect(Construction::Presets[type].passiveStatusEffects[i]);

@@ -395,7 +395,9 @@ private:
 			Item::Presets[itemIndex].attack.CooldownMax(value.i);
 		} else if (boost::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -421,7 +423,9 @@ private:
 			Item::Presets[itemIndex].condition = value.i;
 		} else if (boost::iequals(name,"addStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"addEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -429,7 +433,9 @@ private:
 			}
 		} else if (boost::iequals(name,"removeStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)), 100));
+				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
+				if (StatusEffect::IsApplyableStatusEffect(type))
+					Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
 		} else if (boost::iequals(name,"removeEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -593,7 +599,7 @@ void Item::UpdateVelocity() {
 						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
 							Attack attack = GetAttack();
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(tx,ty)->begin());
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);

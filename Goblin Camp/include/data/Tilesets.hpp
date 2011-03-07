@@ -17,16 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <list>
 #include <boost/filesystem.hpp>
+#include "tileRenderer/TileSetLoader.hpp"
 
 namespace Tilesets {
-	struct Metadata {
-		boost::filesystem::path basePath;
-		std::string name, author, version, description;
-		int width, height;
-		bool valid;
-		bool defaultTileset;
-		Metadata(const boost::filesystem::path& path);
-	};
-	
-	std::vector<Metadata> LoadTilesetMetadata();
+	std::vector<TileSetMetadata> LoadTilesetMetadata();
 }

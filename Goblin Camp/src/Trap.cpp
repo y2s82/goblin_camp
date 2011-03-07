@@ -31,8 +31,8 @@ ready(true){
 void Trap::Update() {
 	if (built) {
 		if (ready && !Map::Inst()->NPCList(x, y)->empty()) {
-			boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(x, y)->begin()];
-			if (!npc->HasEffect(FLYING)) {
+			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(x, y)->begin());
+			if (npc && !npc->HasEffect(FLYING)) {
 				ready = false;
 				graphic[1] = 62;
 				npc->Damage(&Construction::Presets[type].trapAttack);
@@ -73,4 +73,12 @@ void Trap::SpawnRepairJob() {
 		JobManager::Inst()->AddJob(reload);
 		reloadJob = reload;
 	}
+}
+
+void Trap::AcceptVisitor(ConstructionVisitor& visitor) {
+	visitor.Visit(this);
+}
+
+bool Trap::IsReady() const {
+	return ready;
 }

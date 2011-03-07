@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/serialization/serialization.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 class NPC;
 class Coordinate;
@@ -46,6 +47,8 @@ private:
 	std::string name;
 
 	static std::map<std::string, int> factionNames;
+
+	boost::shared_mutex trapVisibleMutex;
 
 public:
 	Faction(std::string = "Noname faction");

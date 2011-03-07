@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 namespace Paths {
 	enum Path {
 		Executable, GlobalData, Personal, Mods, Saves,
-		Screenshots, Font, Config, ExecutableDir, Tilesets
+		Screenshots, Font, Config, ExecutableDir, CoreTilesets, Tilesets
 	};
 	
 	void Init();

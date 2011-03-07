@@ -126,6 +126,11 @@ const boost::uint32_t saveMagicConst = 0x47434d50;
 const boost::uint8_t fileFormatConst = 0x01;
 
 //
+
+
+
+
+
 // Save/load entry points
 //
 

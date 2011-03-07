@@ -39,7 +39,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define MAXIMUM_JOB_ATTEMPTS 5
 
 #define THIRST_THRESHOLD (UPDATES_PER_SECOND * 60 * 10)
-#define HUNGER_THRESHOLD 18000
+#define HUNGER_THRESHOLD (MONTH_LENGTH * 6)
 #define WEARY_THRESHOLD (UPDATES_PER_SECOND * 60 * 12)
 #define DRINKABLE_WATER_DEPTH 2
 #define WALKABLE_WATER_DEPTH 1
@@ -175,6 +175,7 @@ private:
 	bool needsSleep;
 	bool hasHands;
 	bool isTunneler;
+	bool isFlying;
 
 	boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
 	boost::function<void(boost::shared_ptr<NPC>)> React;
@@ -213,6 +214,8 @@ private:
 
 	void UpdateHealth();
 public:
+	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
+
 	~NPC();
 	SkillSet Skills;
 	void Think();
@@ -267,6 +270,7 @@ public:
 	boost::weak_ptr<Item> Carrying() const;
 	bool HasHands();
 	bool IsTunneler();
+	bool IsFlying(); //Special case for pathing's sake. Equivalent to HasEffect(FLYING) except it's threadsafe
 	void FindNewArmor();
 	boost::weak_ptr<Item> Wearing();
 	void DecreaseItemCondition(boost::weak_ptr<Item>);
@@ -319,7 +323,8 @@ void NPC::save(Archive & ar, const unsigned int version) const {
 	ar.template register_type<Entity>();
 	ar.template register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
-	ar & NPC::NPCTypeToString(type);
+	std::string npcType(NPC::NPCTypeToString(type));
+	ar & npcType;
 	ar & timeCount;
 	ar & jobs;
 	ar & taskIndex;
