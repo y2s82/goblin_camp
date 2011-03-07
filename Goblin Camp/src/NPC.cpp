@@ -87,6 +87,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	needsSleep(false),
 	hasHands(false),
 	isTunneler(false),
+	isFlying(false),
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
@@ -123,6 +124,8 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 }
 
 NPC::~NPC() {
+	pathMutex.lock(); /* In case a pathing thread is active we need to wait until we can lock the pathMutex,
+					  because it signals that the thread has finished */
 	Map::Inst()->NPCList(x, y)->erase(uid);
 	if (squad.lock()) squad.lock()->Leave(uid);
 
@@ -1534,12 +1537,13 @@ boost::weak_ptr<Entity> NPC::currentEntity() {
 
 void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool threaded) {
 	boost::mutex::scoped_lock pathLock(npc->pathMutex);
+	boost::shared_lock<boost::shared_mutex> readCacheLock(Map::Inst()->cacheMutex);
 	npc->nopath = !path->compute(x0, y0, x1, y1);
 
 	for (int i = 0; i < path->size(); ++i) {
 		int pathX, pathY;
 		path->get(i, &pathX, &pathY);
-		if (Map::Inst()->IsDangerous(pathX, pathY, npc->faction)) {
+		if (Map::Inst()->IsDangerousCache(pathX, pathY, npc->faction)) {
 			npc->pathIsDangerous = true;
 			break;//One dangerous tile = whole path considered dangerous
 		}
@@ -1832,6 +1836,8 @@ void NPC::HungryAnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::AddEffect(StatusEffectType effect) {
+	if (effect == FLYING) isFlying = true;
+
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
 			statusEffectI->cooldown = statusEffectI->cooldownDefault;
@@ -1843,7 +1849,23 @@ void NPC::AddEffect(StatusEffectType effect) {
 	statusEffectsChanged = true;
 }
 
+void NPC::AddEffect(StatusEffect effect) {
+	if (effect.type == FLYING) isFlying = true;
+
+	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+		if (statusEffectI->type == effect.type) {
+			statusEffectI->cooldown = statusEffectI->cooldownDefault;
+			return;
+		}
+	}
+
+	statusEffects.push_back(effect);
+	statusEffectsChanged = true;
+}
+
 void NPC::RemoveEffect(StatusEffectType effect) {
+	if (effect == FLYING) isFlying = false;
+
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
 			if (statusEffectIterator == statusEffectI) ++statusEffectIterator;
@@ -2462,17 +2484,6 @@ void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 	}
 }
 
-void NPC::AddEffect(StatusEffect effect) {
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
-		if (statusEffectI->type == effect.type) {
-			statusEffectI->cooldown = statusEffectI->cooldownDefault;
-			return;
-		}
-	}
-
-	statusEffects.push_back(effect);
-}
-
 bool NPC::IsTunneler() { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
@@ -2490,8 +2501,8 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
-								if (Game::Inst()->npcList[*npci]->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
-								if (!onlyHostiles || (onlyHostiles && Game::Inst()->npcList[*npci]->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->npcList[*npci]);
+								if (Game::Inst()->GetNPC(*npci)->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
+								if (!onlyHostiles || (onlyHostiles && Game::Inst()->GetNPC(*npci)->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
 							}
 						}
 						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
@@ -2709,3 +2720,5 @@ int NPC::GetHeight() {
 	if (HasEffect(FLYING) || HasEffect(HIGHGROUND)) return ENTITYHEIGHT+2;
 	return 0;
 }
+
+bool NPC::IsFlying() { return isFlying; }

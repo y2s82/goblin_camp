@@ -80,7 +80,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConsole* console) {
 	int skip = 0;
 	int y = pos.Y();
-	std::map<int,boost::shared_ptr<NPC> >::iterator npc;
+	boost::shared_ptr<NPC> npc;
 	TCODColor color_mappings[] = { TCODColor::green, TCODColor::yellow, TCODColor::red, TCODColor::grey };
 
 	for (int i=0; i<=PRIORITY_COUNT; i++) {
@@ -89,16 +89,16 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 			jobi != (i < PRIORITY_COUNT ? availableList[i].end() : waitingList.end()); ++jobi) {
 			if (skip < from) ++skip;
 			else {
-				npc = Game::Inst()->npcList.find((*jobi)->Assigned());
-				if (npc != Game::Inst()->npcList.end()) { 
-					console->print(pos.X(), y, "%c", npc->second->GetNPCSymbol());
+				npc = Game::Inst()->GetNPC((*jobi)->Assigned());
+				if (npc) { 
+					console->print(pos.X(), y, "%c", npc->GetNPCSymbol());
 				}
 				console->print(pos.X() + 2, y, "%s", (*jobi)->name.c_str());
 
 #if DEBUG
-				if (npc != Game::Inst()->npcList.end()) {
-					if (npc->second->currentTask() != 0) {
-						console->print(pos.X() + 45, y, "%s", (*jobi)->ActionToString(npc->second->currentTask()->action).c_str());
+				if (npc) {
+					if (npc->currentTask() != 0) {
+						console->print(pos.X() + 45, y, "%s", (*jobi)->ActionToString(npc->currentTask()->action).c_str());
 					}
 				}
 				console->print(pos.X() + width - 11, y, "A-> %d", (*jobi)->Assigned());
@@ -119,7 +119,8 @@ boost::weak_ptr<Job> JobManager::GetJob(int uid) {
 	for (int i = 0; i < PRIORITY_COUNT; ++i) {
 		for (std::list<boost::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
 			jobi != availableList[i].end(); ++jobi) {
-				if ((*jobi)->Menial() != Game::Inst()->npcList[uid]->Expert()) {
+				boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(uid);
+				if (npc && (*jobi)->Menial() != npc->Expert()) {
 					if ((*jobi)->Assigned() == -1 && !(*jobi)->Removable()) {
 						job = (*jobi);
 						goto FoundJob;
@@ -249,36 +250,42 @@ void JobManager::Reset() {
 }
 
 void JobManager::NPCWaiting(int uid) {
-	if (Game::Inst()->npcList[uid]->Expert()) {
-		for(std::vector<int>::iterator it = expertNPCsWaiting.begin(); it != expertNPCsWaiting.end(); it++) {
-			if(*it == uid) {
-				return;
+	boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(uid);
+	if (npc) {
+		if (npc->Expert()) {
+			for(std::vector<int>::iterator it = expertNPCsWaiting.begin(); it != expertNPCsWaiting.end(); it++) {
+				if(*it == uid) {
+					return;
+				}
 			}
-		}
-		expertNPCsWaiting.push_back(uid);
-	} else {
-		for(std::vector<int>::iterator it = menialNPCsWaiting.begin(); it != menialNPCsWaiting.end(); it++) {
-			if(*it == uid) {
-				return;
+			expertNPCsWaiting.push_back(uid);
+		} else {
+			for(std::vector<int>::iterator it = menialNPCsWaiting.begin(); it != menialNPCsWaiting.end(); it++) {
+				if(*it == uid) {
+					return;
+				}
 			}
+			menialNPCsWaiting.push_back(uid);
 		}
-		menialNPCsWaiting.push_back(uid);
 	}
 }
 
 void JobManager::NPCNotWaiting(int uid) {
-	if (Game::Inst()->npcList[uid]->Expert()) {
-		for(std::vector<int>::iterator it = expertNPCsWaiting.begin(); it != expertNPCsWaiting.end(); it++) {
-			if(*it == uid) {
-				expertNPCsWaiting.erase(it);
-				return;
+	boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(uid);
+	if (npc) {
+		if (npc->Expert()) {
+			for(std::vector<int>::iterator it = expertNPCsWaiting.begin(); it != expertNPCsWaiting.end(); it++) {
+				if(*it == uid) {
+					expertNPCsWaiting.erase(it);
+					return;
+				}
 			}
-		}
-	} else {
-		for(std::vector<int>::iterator it = menialNPCsWaiting.begin(); it != menialNPCsWaiting.end(); it++) {
-			if(*it == uid) {
-				menialNPCsWaiting.erase(it);
-				return;
+		} else {
+			for(std::vector<int>::iterator it = menialNPCsWaiting.begin(); it != menialNPCsWaiting.end(); it++) {
+				if(*it == uid) {
+					menialNPCsWaiting.erase(it);
+					return;
+				}
 			}
 		}
 	}
@@ -327,10 +334,7 @@ void JobManager::AssignJobs() {
 							menialMatrix(x, y) = 1;
 						} else {
 							boost::shared_ptr<Job> job = menialJobsToAssign[y];
-							boost::shared_ptr<NPC> npc;
-							if (Game::Inst()->npcList.find(menialNPCsWaiting[x]) != Game::Inst()->npcList.end()) {
-								npc = Game::Inst()->npcList[menialNPCsWaiting[x]];
-							}
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(menialNPCsWaiting[x]);
 							if(!npc || job->tasks.empty() ||
 								(job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
 								menialMatrix(x, y) = 1;
@@ -352,10 +356,7 @@ void JobManager::AssignJobs() {
 							expertMatrix(x, y) = 1;
 						} else {
 							boost::shared_ptr<Job> job = expertJobsToAssign[y];
-							boost::shared_ptr<NPC> npc;
-							if (Game::Inst()->npcList.find(expertNPCsWaiting[x]) != Game::Inst()->npcList.end()) {
-								npc = Game::Inst()->npcList[expertNPCsWaiting[x]];
-							}
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(expertNPCsWaiting[x]);
 							if(!npc || job->tasks.empty() ||
 							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
 								expertMatrix(x, y) = 1;
@@ -378,18 +379,14 @@ void JobManager::AssignJobs() {
 					if(jobNum < menialJobsToAssign.size()) {
 						int npcNum = menialNPCsWaiting[n];
 						boost::shared_ptr<Job> job = menialJobsToAssign[jobNum];
-						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
-							boost::shared_ptr<NPC> npc;
-							if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) 
-								npc = Game::Inst()->npcList[npcNum];
-							if (job && npc) {
-								job->Assign(npcNum);
-								menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
-								n--;
-								if (job->RequiresTool())
-									toolJobs[job->GetRequiredTool()].push_back(job);
-								npc->StartJob(job);
-							}
+						boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(npcNum);
+						if (job && npc) {
+							job->Assign(npcNum);
+							menialNPCsWaiting.erase(menialNPCsWaiting.begin() + n);
+							n--;
+							if (job->RequiresTool())
+								toolJobs[job->GetRequiredTool()].push_back(job);
+							npc->StartJob(job);
 						}
 					}
 				}
@@ -399,18 +396,14 @@ void JobManager::AssignJobs() {
 					if(jobNum < expertJobsToAssign.size()) {
 						int npcNum = expertNPCsWaiting[n];
 						boost::shared_ptr<Job> job = expertJobsToAssign[jobNum];
-						if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) {
-							boost::shared_ptr<NPC> npc;
-							if (Game::Inst()->npcList.find(npcNum) != Game::Inst()->npcList.end()) 
-								npc = Game::Inst()->npcList[npcNum];
-							if (job && npc) {
-								job->Assign(npcNum);
-								expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
-								n--;
-								if (job->RequiresTool())
-									toolJobs[job->GetRequiredTool()].push_back(job);
-								npc->StartJob(job);
-							}
+						boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(npcNum);
+						if (job && npc) {
+							job->Assign(npcNum);
+							expertNPCsWaiting.erase(expertNPCsWaiting.begin() + n);
+							n--;
+							if (job->RequiresTool())
+								toolJobs[job->GetRequiredTool()].push_back(job);
+							npc->StartJob(job);
 						}
 					}
 				}
@@ -434,10 +427,10 @@ void JobManager::RemoveJob(Action action, Coordinate location) {
 				if (remove) {
 					(*jobi)->Attempts(0);
 					if ((*jobi)->Assigned() >= 0) {
-						std::map<int,boost::shared_ptr<NPC> >::iterator npc = Game::Inst()->npcList.find((*jobi)->Assigned());
+						boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC((*jobi)->Assigned());
 						boost::weak_ptr<Job> jobToRemove = *jobi;
 						++jobi; //AbortJob will cancel the job and the invalidate the old iterator
-						if (npc != Game::Inst()->npcList.end()) npc->second->AbortJob(jobToRemove);
+						if (npc) npc->AbortJob(jobToRemove);
 					} else {
 						jobi = (i < PRIORITY_COUNT ? availableList[i].erase(jobi) : waitingList.erase(jobi));
 					}

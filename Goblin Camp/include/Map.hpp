@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/multi_array.hpp>
 #include <boost/serialization/split_member.hpp>
+#include <boost/unordered_set.hpp>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"
@@ -40,11 +41,13 @@ private:
 	Map();
 	static Map* instance;
 	boost::multi_array<Tile, 2> tileMap;
+	boost::multi_array<CacheTile, 2> cachedTileMap;
 	int width, height;
 	float waterlevel;
 	int overlayFlags;
 	std::list<std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
+	boost::unordered_set<Coordinate> changedTiles;
 	
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
@@ -130,11 +133,16 @@ public:
 	Direction GetFlow(int x, int y);
 
 	bool IsDangerous(int x, int y, int faction) const;
+	bool IsDangerousCache(int x, int y, int faction) const;
 	int GetTerrainMoveCost(int x, int y) const;
 	boost::shared_ptr<Weather> weather;
 	void Update();
 	
 	Coordinate FindRangedAdvantage(Coordinate);
+
+	mutable boost::shared_mutex cacheMutex;
+	void UpdateCache();
+	void TileChanged(int x, int y);
 };
 
 BOOST_CLASS_VERSION(Map, 1)

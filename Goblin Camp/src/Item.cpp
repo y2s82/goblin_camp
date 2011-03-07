@@ -599,7 +599,7 @@ void Item::UpdateVelocity() {
 						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
 
 							Attack attack = GetAttack();
-							boost::shared_ptr<NPC> npc = Game::Inst()->npcList[*Map::Inst()->NPCList(tx,ty)->begin()];
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(tx,ty)->begin());
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);

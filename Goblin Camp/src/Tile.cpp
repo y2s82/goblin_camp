@@ -184,48 +184,6 @@ void Tile::SetWalkable(bool value) {
 bool Tile::BlocksWater() const { return blocksWater; }
 void Tile::SetBlocksWater(bool value) { blocksWater = value; }
 
-int Tile::GetMoveCost(void* ptr) const {
-	if (construction >= 0) {
-		if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(construction).lock()) {
-			if (!static_cast<NPC*>(ptr)->HasHands()) {
-				if (cons->HasTag(DOOR)) return GetMoveCost()+50;
-			}
-			if (cons->HasTag(TRAP)) { 
-				return GetMoveCost()+boost::static_pointer_cast<Trap>(cons)->GetMoveCostModifier(
-					Faction::factions[static_cast<NPC*>(ptr)->GetFaction()]->IsTrapVisible(cons->Position()));
-			}
-		}
-	}
-
-	int cost = GetMoveCost();
-	//cost == 0 normally means unwalkable, but tunnellers can, surprise surprise, tunnel through
-	if (cost == 0 && construction >= 0 && static_cast<NPC*>(ptr)->IsTunneler()) return 50;
-	return cost;
-}
-
-int Tile::GetMoveCost() const {
-	if (!IsWalkable()) return 0;
-	int cost = moveCost;
-
-	if (fire) cost += 200; //Walking through fire... not such a good idea.
-
-	//If a construction exists here take it into consideration
-	bool bridge = false;
-	if (construction > 0) {
-		if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(construction).lock()) {
-			if (construct->HasTag(BRIDGE) && construct->Built()) {
-				cost = 1;
-				bridge = true;
-			} else cost += construct->GetMoveSpeedModifier();
-		}
-	}
-	if (!bridge && water) { //If no built bridge here take water depth into account
-		cost += std::min(20, water->Depth());
-	}
-
-	return cost;
-}
-
 int Tile::GetTerrainMoveCost() const {
 	int cost = moveCost;
 	if (construction >= 0) cost += 2;
@@ -241,8 +199,6 @@ void Tile::MoveFrom(int uid) {
 	if (npcList.find(uid) == npcList.end()) {
 #ifdef DEBUG
 		std::cout<<"\nNPC "<<uid<<" moved off of empty list";
-		std::cout<<"\nlist.size(): "<<npcList.size();
-		std::cout<<"\nNPC: "<<Game::Inst()->npcList[uid]->Position().X()<<","<<Game::Inst()->npcList[uid]->Position().Y()<<'\n';
 #endif
 		return;
 	}
@@ -351,3 +307,69 @@ void Tile::Burn(int magnitude) {
 		}
 	}
 }
+
+CacheTile::CacheTile() : walkable(true), moveCost(1), construction(false),
+	door(false), trap(false), bridge(false), moveSpeedModifier(0),
+	waterDepth(0), npcCount(0), fire(false), x(0), y(0) {}
+
+CacheTile& CacheTile::operator=(const Tile& tile) {
+	walkable = tile.walkable;
+	moveCost = tile.moveCost;
+	boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(tile.construction).lock();
+	if (construct) {
+		construction = true;
+		door = construct->HasTag(DOOR);
+		trap = construct->HasTag(TRAP);
+		bridge = construct->HasTag(BRIDGE);
+		moveSpeedModifier = construct->GetMoveSpeedModifier();
+	}
+
+	if (tile.water) waterDepth = tile.water->Depth();
+	npcCount = tile.npcList.size();
+	fire = bool(tile.fire);
+
+	return *this;
+}
+
+int CacheTile::GetMoveCost(void* ptr) const {
+	int cost = GetMoveCost();
+
+	if (cost < 100) { //If we're over 100 then it's clear enough that walking here is not a good choice
+
+		NPC* npc = static_cast<NPC*>(ptr);
+
+		if (npc) {
+			if (door && npc->HasHands()) {
+				cost += 50;
+			}
+			if (trap) { 
+				cost = Faction::factions[npc->GetFaction()]->IsTrapVisible(Coordinate(x,y)) ? 
+					100 : 1;
+			}
+
+			//cost == 0 normally means unwalkable, but tunnellers can, surprise surprise, tunnel through
+			if (cost == 0 && construction && npc->IsTunneler()) cost = 50;
+		}
+	}
+	return cost;
+}
+
+int CacheTile::GetMoveCost() const {
+	if (!walkable) return 0;
+	int cost = moveCost;
+
+	if (fire) cost += 200; //Walking through fire... not such a good idea.
+
+	//If a construction exists here take it into consideration
+	if (bridge) {
+		cost -= (moveCost-1); //Disregard terrain in case of a bridge
+	}
+	cost += moveSpeedModifier;
+	
+	if (!bridge) { //If no built bridge here take water depth into account
+		cost += std::min(20, waterDepth);
+	}
+
+	return cost;
+}
+
