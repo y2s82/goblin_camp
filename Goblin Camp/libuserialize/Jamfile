@@ -22,3 +22,6 @@ project libuserialize
 if --with-tests in [ modules.peek : ARGV ] {
     exe userialize-test : $(HERE)/uSerializeTest.cpp /boost ;
 }
+
+# This does what it says: if there are no targets in the project, it gets ignored.
+alias propagate-includes ;
