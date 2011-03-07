@@ -30,4 +30,5 @@ exe _p_tcher
     : [ glob-tree *.cpp ]
       _patcher.rc
       /winsdk /xdelta3
+      "/Goblin Camp//libuserialize"
 ;
