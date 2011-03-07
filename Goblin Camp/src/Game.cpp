@@ -1295,6 +1295,7 @@ void Game::GenerateMap(uint32 seed) {
 	map->RandomizeWind();
 	
 	map->CalculateFlow(px, py);
+	map->UpdateCache();
 }
 
 //This is intentional, otherwise designating where to cut down trees would always show red unless you were over a tree
@@ -2140,4 +2141,12 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 
 void Game::SetSeason(Season newSeason) {
 	season = newSeason;
+}
+
+boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
+	std::map<int, boost::shared_ptr<NPC> >::const_iterator npci = npcList.find(uid);
+	if (npci != npcList.end()) {
+		return npci->second;
+	}
+	return boost::shared_ptr<NPC>();
 }
