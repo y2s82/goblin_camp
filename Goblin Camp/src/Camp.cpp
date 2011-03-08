@@ -289,7 +289,7 @@ void Camp::UpdateWaterJobs() {
 }
 
 void Camp::save(OutputArchive& ar, const unsigned int version) const {
-	ar.template register_type<Coordinate>();
+	ar.register_type<Coordinate>();
 	ar & centerX;
 	ar & centerY;
 	ar & buildingCount;
@@ -310,7 +310,7 @@ void Camp::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void Camp::load(InputArchive& ar, const unsigned int version) {
-	ar.template register_type<Coordinate>();
+	ar.register_type<Coordinate>();
 	ar & centerX;
 	ar & centerY;
 	ar & buildingCount;

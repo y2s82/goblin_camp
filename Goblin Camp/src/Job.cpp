@@ -269,13 +269,13 @@ void Job::AddMapMarker(MapMarker marker) {
 }
 
 void Job::save(OutputArchive& ar, const unsigned int version) const {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<NatureObject>();
-	ar.template register_type<Construction>();
-	ar.template register_type<Door>();
-	ar.template register_type<FarmPlot>();
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<NatureObject>();
+	ar.register_type<Construction>();
+	ar.register_type<Door>();
+	ar.register_type<FarmPlot>();
 	ar & _priority;
 	ar & completion;
 	ar & preReqs;
@@ -303,13 +303,13 @@ void Job::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void Job::load(InputArchive& ar, const unsigned int version) {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<NatureObject>();
-	ar.template register_type<Construction>();
-	ar.template register_type<Door>();
-	ar.template register_type<FarmPlot>();
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<NatureObject>();
+	ar.register_type<Construction>();
+	ar.register_type<Door>();
+	ar.register_type<FarmPlot>();
 	ar & _priority;
 	ar & completion;
 	ar & preReqs;
