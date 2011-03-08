@@ -34,7 +34,7 @@ enum SpriteType
 /****************
 /* Sprite
 /* Description of a single tile that can be drawn. 
-/* Supports animation and connection maps in addition to simple single titles.
+/* Supports animation and connection maps in addition to just single tiles.
 /****************/
 class Sprite
 {
