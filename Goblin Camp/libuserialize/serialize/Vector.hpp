@@ -61,7 +61,7 @@ namespace Serializer {
 	template <typename T>
 	void WriteVector(std::ostream& stream, const std::vector<T>& vec, boost::function<void(std::ostream&, const T&)> functor) {
 		WriteUInt<boost::uint32_t>(stream, vec.size());
-		for (std::vector<T>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
+		for (typename std::vector<T>::const_iterator it = vec.begin(); it != vec.end(); ++it) {
 			functor(stream, *it);
 		}
 	}
