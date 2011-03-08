@@ -25,21 +25,6 @@ and I couldn't come up with a coherent answer just by googling. */
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/map.hpp>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/set.hpp>
-#include <boost/serialization/weak_ptr.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/export.hpp>
-#include <boost/serialization/array.hpp>
-#include <boost/serialization/vector.hpp>
-#include <boost/multi_array.hpp>
-#include <map>
 #include <fstream>
 #include <boost/cstdint.hpp>
 
@@ -50,26 +35,14 @@ namespace io = boost::iostreams;
 
 #include "Logger.hpp"
 #include "data/Config.hpp"
-#include "Game.hpp"
-#include "Tile.hpp"
-#include "Coordinate.hpp"
-#include "JobManager.hpp"
-#include "MapMarker.hpp"
-#include "Map.hpp"
-#include "StockManager.hpp"
-#include "StatusEffect.hpp"
-#include "Stockpile.hpp"
-#include "Farmplot.hpp"
-#include "Door.hpp"
-#include "Camp.hpp"
-#include "Container.hpp"
-#include "Blood.hpp"
+#include "data/Serialization.hpp"
+
 #include "Entity.hpp"
-#include "Attack.hpp"
-#include "SpawningPool.hpp"
-#include "Faction.hpp"
-#include "Trap.hpp"
-#include "Weather.hpp"
+#include "Game.hpp"
+#include "JobManager.hpp"
+#include "Camp.hpp"
+#include "StockManager.hpp"
+#include "Map.hpp"
 
 // IMPORTANT
 // Implementing class versioning properly is an effort towards backward compatibility for saves,
@@ -126,11 +99,6 @@ const boost::uint32_t saveMagicConst = 0x47434d50;
 const boost::uint8_t fileFormatConst = 0x01;
 
 //
-
-
-
-
-
 // Save/load entry points
 //
 

@@ -20,10 +20,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 
-#include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/weak_ptr.hpp>
+
+#include "data/Serialization.hpp"
 
 class NPC;
 class Coordinate;
@@ -33,24 +34,15 @@ class Coordinate;
 typedef int FactionType;
 
 class Faction {
-	friend class boost::serialization::access;
-
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
+	static std::map<std::string, int> factionNames;
+	
 	std::list< boost::weak_ptr<NPC> > members;
 	std::map<Coordinate, bool> trapVisible;
-
 	std::string name;
-
-	static std::map<std::string, int> factionNames;
-
+	
 	boost::shared_mutex trapVisibleMutex;
-
 public:
 	Faction(std::string = "Noname faction");
 	void AddMember(boost::weak_ptr<NPC>);
@@ -66,19 +58,4 @@ public:
 	void Reset();
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Faction, 0)
-
-template<class Archive>
-void Faction::save(Archive & ar, const unsigned int version) const {
-	ar & members;
-	ar & trapVisible;
-	ar & name;
-}
-
-template<class Archive>
-void Faction::load(Archive & ar, const unsigned int version) {
-	ar & members;
-	ar & trapVisible;
-	ar & name;
-}

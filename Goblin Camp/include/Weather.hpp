@@ -17,12 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <vector>
 
-#include <boost/archive/binary_iarchive.hpp>
-#include <boost/archive/binary_oarchive.hpp>
-#include <boost/serialization/version.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-
 #include "Coordinate.hpp"
+#include "data/Serialization.hpp"
 
 class Map;
 
@@ -32,14 +28,8 @@ enum WeatherType {
 };
 
 class Weather {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	Map* map;
 	Direction windDirection;
 	WeatherType currentWeather;
@@ -62,29 +52,4 @@ public:
 	void ApplySeasonalEffects();
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Weather, 0)
-
-template<class Archive>
-void Weather::save(Archive & ar, const unsigned int version) const {
-	ar & map;
-	ar & windDirection;
-	ar & currentWeather;
-	ar & tileChange;
-	ar & changeAll;
-	ar & tileChangeRate;
-	ar & changePosition;
-	ar & currentTemperature;
-}
-
-template<class Archive>
-void Weather::load(Archive & ar, const unsigned int version) {
-	ar & map;
-	ar & windDirection;
-	ar & currentWeather;
-	ar & tileChange;
-	ar & changeAll;
-	ar & tileChangeRate;
-	ar & changePosition;
-	ar & currentTemperature;
-}

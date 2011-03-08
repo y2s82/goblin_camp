@@ -15,21 +15,16 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/split_member.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
+
+#include "data/Serialization.hpp"
 
 class Coordinate;
 
 class FilthNode : public boost::enable_shared_from_this<FilthNode> {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	int x, y;
 	int depth;
 	int graphic;
@@ -46,27 +41,4 @@ public:
 	TCODColor GetColor();
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(FilthNode, 0)
-
-template<class Archive>
-void FilthNode::save(Archive & ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
-	ar & depth;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-}
-
-template<class Archive>
-void FilthNode::load(Archive & ar, const unsigned int version) {
-	ar & x;
-	ar & y;
-	ar & depth;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-}

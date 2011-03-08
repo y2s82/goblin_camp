@@ -18,7 +18,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <list>
 
-#include <boost/serialization/split_member.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
@@ -35,6 +34,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Spell.hpp"
 
 #include "MapRenderer.hpp"
+#include "data/Serialization.hpp"
 
 #define BFS_MAX_DISTANCE 20
 
@@ -58,19 +58,14 @@ enum Season {
 };
 
 class Game {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend class ConfigListener;
 	friend void SettingsMenu();
 	friend class TCODMapRenderer;
 	friend class TileSetRenderer;
 	friend class NPCDialog;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	
 	Game();
 	static Game* instance;
 	int screenWidth, screenHeight;
@@ -262,83 +257,4 @@ public:
 	int GetAge();
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Game, 1)
-
-template<class Archive>
-void Game::save(Archive & ar, const unsigned int version) const  {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<OrganicItem>();
-	ar.template register_type<FarmPlot>();
-	ar.template register_type<Door>();
-	ar.template register_type<SpawningPool>();
-	ar.template register_type<Trap>();
-	ar.template register_type<Ice>();
-	ar & season;
-	ar & time;
-	ar & orcCount;
-	ar & goblinCount;
-	ar & peacefulFaunaCount;
-	ar & safeMonths;
-	ar & marks;
-	ar & camX;
-	ar & camY;
-	ar & Faction::factions;
-	ar & npcList;
-	ar & squadList;
-	ar & hostileSquadList;
-	ar & staticConstructionList;
-	ar & dynamicConstructionList;
-	ar & itemList;
-	ar & freeItems;
-	ar & flyingItems;
-	ar & stoppedItems;
-	ar & natureList;
-	ar & waterList;
-	ar & filthList;
-	ar & bloodList;
-	ar & fireList;
-	ar & spellList;
-	ar & age;
-}
-
-template<class Archive>
-void Game::load(Archive & ar, const unsigned int version) {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<OrganicItem>();
-	ar.template register_type<FarmPlot>();
-	ar.template register_type<Door>();
-	ar.template register_type<SpawningPool>();
-	ar.template register_type<Trap>();
-	if (version >= 1) ar.template register_type<Ice>();
-	ar & season;
-	ar & time;
-	ar & orcCount;
-	ar & goblinCount;
-	ar & peacefulFaunaCount;
-	ar & safeMonths;
-	ar & marks;
-	ar & camX;
-	ar & camY;
-	ar & Faction::factions;
-	ar & npcList;
-	ar & squadList;
-	ar & hostileSquadList;
-	ar & staticConstructionList;
-	ar & dynamicConstructionList;
-	ar & itemList;
-	ar & freeItems;
-	ar & flyingItems;
-	ar & stoppedItems;
-	ar & natureList;
-	ar & waterList;
-	ar & filthList;
-	ar & bloodList;
-	ar & fireList;
-	ar & spellList;
-	ar & age;
-}

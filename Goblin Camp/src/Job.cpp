@@ -18,6 +18,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <libtcod.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "Job.hpp"
 #include "Announce.hpp"
@@ -26,6 +29,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "MapMarker.hpp"
 #include "Stockpile.hpp"
+#include "Door.hpp"
+#include "Farmplot.hpp"
 
 Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
 	target(tar),
@@ -34,6 +39,22 @@ Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory
 	item(itt),
 	flags(fla)
 {
+}
+
+void Task::save(OutputArchive& ar, const unsigned int version) const {
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
+}
+
+void Task::load(InputArchive& ar, const unsigned int version) {
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
 }
 
 Job::Job(std::string value, JobPriority pri, int z, bool m) :
@@ -114,7 +135,6 @@ bool Job::ParentCompleted() {
 	if (!parent.lock()) return true;
 	return parent.lock()->Completed();
 }
-
 
 boost::shared_ptr<Job> Job::MoveJob(Coordinate tar) {
 	boost::shared_ptr<Job> moveJob(new Job("Move"));
@@ -246,4 +266,76 @@ bool Job::OutsideTerritory() {
 
 void Job::AddMapMarker(MapMarker marker) {
 	mapMarkers.push_back(Map::Inst()->AddMarker(marker));
+}
+
+void Job::save(OutputArchive& ar, const unsigned int version) const {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	ar & reservedSpot.get<0>();
+	ar & reservedSpot.get<1>();
+	ar & reservedSpot.get<2>();
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
+}
+
+void Job::load(InputArchive& ar, const unsigned int version) {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<NatureObject>();
+	ar.template register_type<Construction>();
+	ar.template register_type<Door>();
+	ar.template register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	boost::weak_ptr<Stockpile> sp;
+	ar & sp;
+	Coordinate location;
+	ar & location;
+	ItemType type;
+	ar & type;
+	reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
 }

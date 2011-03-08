@@ -16,6 +16,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include "Random.hpp"
 #include "StockManager.hpp"
@@ -341,4 +346,34 @@ void StockManager::Reset() {
 	treeFellingJobs.clear();
 	designatedBog.clear();
 	Init();
+}
+
+void StockManager::save(OutputArchive& ar, const unsigned int version) const {
+	ar & categoryQuantities;
+	ar & typeQuantities;
+	ar & minimums;
+	ar & producables;
+	ar & producers;
+	ar & workshops;
+	ar & fromTrees;
+	ar & fromEarth;
+	ar & designatedTrees;
+	ar & treeFellingJobs;
+	ar & designatedBog;
+	ar & bogIronJobs;
+}
+
+void StockManager::load(InputArchive& ar, const unsigned int version) {
+	ar & categoryQuantities;
+	ar & typeQuantities;
+	ar & minimums;
+	ar & producables;
+	ar & producers;
+	ar & workshops;
+	ar & fromTrees;
+	ar & fromEarth;
+	ar & designatedTrees;
+	ar & treeFellingJobs;
+	ar & designatedBog;
+	ar & bogIronJobs;
 }

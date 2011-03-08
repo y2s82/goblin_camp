@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/serialization/map.hpp>
+
 #include "Random.hpp"
 #include "Farmplot.hpp"
 #include "Game.hpp"
@@ -161,4 +163,18 @@ bool FarmPlot::SeedAllowed(ItemType type) { return allowedSeeds[type]; }
 
 void FarmPlot::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
+}
+
+void FarmPlot::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeds;
+	ar & growth;
+}
+
+void FarmPlot::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Stockpile>(*this);
+	ar & tilled;
+	ar & allowedSeeds;
+	ar & growth;
 }

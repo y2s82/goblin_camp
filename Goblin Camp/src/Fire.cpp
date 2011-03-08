@@ -191,3 +191,21 @@ void FireNode::Update() {
 		}
 	}
 }
+
+void FireNode::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}
+
+void FireNode::load(InputArchive& ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}

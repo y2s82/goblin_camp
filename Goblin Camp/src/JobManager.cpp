@@ -15,6 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+
 #include "JobManager.hpp"
 #include "Game.hpp"
 #include "KuhnMunkres.hpp"
@@ -439,4 +444,22 @@ void JobManager::RemoveJob(Action action, Coordinate location) {
 				}
 		}
 	}
+}
+
+void JobManager::save(OutputArchive& ar, const unsigned int version) const {
+	ar & availableList;
+	ar & waitingList;
+	ar & menialNPCsWaiting;
+	ar & expertNPCsWaiting;
+	ar & toolJobs;
+	ar & failList;
+}
+
+void JobManager::load(InputArchive& ar, const unsigned int version) {
+	ar & availableList;
+	ar & waitingList;
+	ar & menialNPCsWaiting;
+	ar & expertNPCsWaiting;
+	ar & toolJobs;
+	ar & failList;
 }

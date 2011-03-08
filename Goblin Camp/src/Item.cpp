@@ -23,6 +23,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #endif
 
+#include <boost/serialization/weak_ptr.hpp>
+
 #include "Random.hpp"
 #include "Item.hpp"
 #include "Game.hpp"
@@ -664,6 +666,65 @@ int Item::DecreaseCondition() {
 	return condition;
 }
 
+void Item::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & graphic;
+	std::string itemType(Item::ItemTypeToString(type));
+	ar & itemType;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	int categoryCount = (int)categories.size();
+	ar & categoryCount;
+	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
+		std::string itemCat(Item::ItemCategoryToString(*cati));
+		ar & itemCat;
+	}
+	ar & flammable;
+	ar & attemptedStore;
+	ar & decayCounter;
+	ar & attack;
+	ar & resistances;
+	ar & condition;
+	ar & container;
+	ar & internal;
+}
+
+void Item::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & graphic;
+	bool failedToFindType = false;
+	std::string typeName;
+	ar & typeName;
+	type = Item::StringToItemType(typeName);
+	if (type == -1) {
+		type = Item::StringToItemType("debris");
+		failedToFindType = true;
+	}
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	int categoryCount = 0;
+	ar & categoryCount;
+	categories.clear();
+	for (int i = 0; i < categoryCount; ++i) {
+		std::string categoryName;
+		ar & categoryName;
+		int categoryType = Item::StringToItemCategory(categoryName);
+		if (categoryType >= 0 && categoryType < Item::Categories.size()) categories.insert(categoryType);
+	}
+	if (categories.empty()) categories.insert(Item::StringToItemCategory("garbage"));
+	ar & flammable;
+	if (failedToFindType) flammable = true; //Just so you can get rid of it
+	ar & attemptedStore;
+	ar & decayCounter;
+	ar & attack;
+	ar & resistances;
+	ar & condition;
+	ar & container;
+	ar & internal;
+}
+
 ItemCat::ItemCat() : flammable(false),
 	name("Category schmategory"),
 	parent(-1)
@@ -709,3 +770,15 @@ void OrganicItem::Nutrition(int val) { nutrition = val; }
 
 ItemType OrganicItem::Growth() { return growth; }
 void OrganicItem::Growth(ItemType val) { growth = val; }
+
+void OrganicItem::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & nutrition;
+	ar & growth;
+}
+
+void OrganicItem::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & nutrition;
+	ar & growth;
+}

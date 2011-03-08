@@ -27,6 +27,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/serialization/deque.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/set.hpp>
+
 #include "Random.hpp"
 #include "NPC.hpp"
 #include "Coordinate.hpp"
@@ -47,6 +53,14 @@ SkillSet::SkillSet() {
 
 int SkillSet::operator()(Skill skill) {return skills[skill];}
 void SkillSet::operator()(Skill skill, int value) {skills[skill] = value;}
+
+void SkillSet::save(OutputArchive& ar, const unsigned int version) const {
+	ar & skills;
+}
+
+void SkillSet::load(InputArchive& ar, const unsigned int version) {
+	ar & skills;
+}
 
 std::map<std::string, NPCType> NPC::NPCTypeNames = std::map<std::string, NPCType>();
 std::vector<NPCPreset> NPC::Presets = std::vector<NPCPreset>();
@@ -2722,3 +2736,144 @@ int NPC::GetHeight() {
 }
 
 bool NPC::IsFlying() { return isFlying; }
+
+void NPC::save(OutputArchive& ar, const unsigned int version) const {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<SkillSet>();
+	ar & boost::serialization::base_object<Entity>(*this);
+	std::string npcType(NPC::NPCTypeToString(type));
+	ar & npcType;
+	ar & timeCount;
+	ar & jobs;
+	ar & taskIndex;
+	ar & orderIndex;
+	ar & nopath;
+	ar & findPathWorking;
+	ar & timer;
+	ar & nextMove;
+	ar & run;
+	ar & _color.r;
+	ar & _color.g;
+	ar & _color.b;
+	ar & _bgcolor.r;
+	ar & _bgcolor.g;
+	ar & _bgcolor.b;
+	ar & _graphic;
+	ar & taskBegun;
+	ar & expert;
+	ar & carried;
+	ar & mainHand;
+	ar & offHand;
+	ar & armor;
+	ar & quiver;
+	ar & thirst;
+	ar & hunger;
+	ar & weariness;
+	ar & thinkSpeed;
+	ar & statusEffects;
+	ar & health;
+	ar & maxHealth;
+	ar & foundItem;
+	ar & inventory;
+	ar & needsNutrition;
+	ar & needsSleep;
+	ar & hasHands;
+	ar & isTunneler;
+	ar & baseStats;
+	ar & effectiveStats;
+	ar & baseResistances;
+	ar & effectiveResistances;
+	ar & aggressive;
+	ar & coward;
+	ar & aggressor;
+	ar & dead;
+	ar & squad;
+	ar & attacks;
+	ar & escaped;
+	ar & addedTasksToCurrentJob;
+	ar & Skills;
+	ar & hasMagicRangedAttacks;
+	ar & traits;
+	ar & damageDealt;
+	ar & damageReceived;
+	ar & jobBegun;
+}
+
+void NPC::load(InputArchive& ar, const unsigned int version) {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<SkillSet>();
+	ar & boost::serialization::base_object<Entity>(*this);
+	std::string typeName;
+	ar & typeName;
+	type = -1;
+	bool failedToFindType = false;
+	type = NPC::StringToNPCType(typeName);
+	if (type == -1) { //Apparently a creature type that doesn't exist
+		type = 2; //Whatever the first monster happens to be
+		failedToFindType = true; //We'll allow loading, this creature will just immediately die
+	}
+
+	ar & timeCount;
+	ar & jobs;
+	ar & taskIndex;
+	ar & orderIndex;
+	ar & nopath;
+	ar & findPathWorking;
+	ar & timer;
+	ar & nextMove;
+	ar & run;
+	ar & _color.r;
+	ar & _color.g;
+	ar & _color.b;
+	ar & _bgcolor.r;
+	ar & _bgcolor.g;
+	ar & _bgcolor.b;
+	ar & _graphic;
+	ar & taskBegun;
+	ar & expert;
+	ar & carried;
+	ar & mainHand;
+	ar & offHand;
+	ar & armor;
+	ar & quiver;
+	ar & thirst;
+	ar & hunger;
+	ar & weariness;
+	ar & thinkSpeed;
+	ar & statusEffects;
+	ar & health;
+	if (failedToFindType) health = 0;
+	ar & maxHealth;
+	ar & foundItem;
+	ar & inventory;
+	ar & needsNutrition;
+	ar & needsSleep;
+	ar & hasHands;
+	ar & isTunneler;
+	ar & baseStats;
+	ar & effectiveStats;
+	ar & baseResistances;
+	ar & effectiveResistances;
+	ar & aggressive;
+	ar & coward;
+	ar & aggressor;
+	ar & dead;
+	ar & squad;
+	ar & attacks;
+	ar & escaped;
+	ar & addedTasksToCurrentJob;
+	ar & Skills;
+	ar & hasMagicRangedAttacks;
+	ar & traits;
+	ar & damageDealt;
+	ar & damageReceived;
+	if (version >= 1) {
+		ar & jobBegun;
+	}
+
+	InitializeAIFunctions();
+}

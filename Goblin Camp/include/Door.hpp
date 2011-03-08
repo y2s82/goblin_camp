@@ -16,15 +16,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include "Construction.hpp"
+#include "data/Serialization.hpp"
 
 class Door : public Construction {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
+	GC_SERIALIZABLE_CLASS
+	
 	int closedGraphic;
 public:
 	Door(ConstructionType = 0, Coordinate = Coordinate(0,0));
@@ -33,17 +29,4 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Door, 0)
-
-template<class Archive>
-void Door::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object <Construction>(*this);
-	ar & closedGraphic;
-}
-
-template<class Archive>
-void Door::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & closedGraphic;
-}

@@ -13,8 +13,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-
 #include "stdafx.hpp"
+
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/weak_ptr.hpp>
 
 #include "Faction.hpp"
 #include "NPC.hpp"
@@ -79,4 +82,16 @@ void Faction::Reset() {
 	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	members.clear();
 	trapVisible.clear();
+}
+
+void Faction::save(OutputArchive& ar, const unsigned int version) const {
+	ar & members;
+	ar & trapVisible;
+	ar & name;
+}
+
+void Faction::load(InputArchive& ar, const unsigned int version) {
+	ar & members;
+	ar & trapVisible;
+	ar & name;
 }
