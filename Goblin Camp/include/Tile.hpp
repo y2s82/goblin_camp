@@ -19,13 +19,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 
-#include <boost/serialization/split_member.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "Water.hpp"
 #include "Filth.hpp"
 #include "Blood.hpp"
 #include "Fire.hpp"
+
+#include "data/Serialization.hpp"
 
 enum TileType {
 	TILENONE,
@@ -40,16 +41,11 @@ enum TileType {
 };
 
 class Tile {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend class Map;
 	friend class CacheTile;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	
 	TileType type;
 	bool vis; //Does light pass through this tile? Tile type, but also constructions/objects affect this
 	bool walkable;
@@ -115,78 +111,7 @@ public:
 	int GetTerrainMoveCost() const;
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Tile, 0)
-
-template<class Archive>
-void Tile::save(Archive & ar, const unsigned int version) const {
-	ar & type;
-	ar & vis;
-	ar & walkable;
-	ar & buildable;
-	ar & moveCost;
-	ar & construction;
-	ar & low;
-	ar & blocksWater;
-	ar & water;
-	ar & graphic;
-	ar & foreColor.r;
-	ar & foreColor.g;
-	ar & foreColor.b;
-	ar & originalForeColor.r;
-	ar & originalForeColor.g;
-	ar & originalForeColor.b;
-	ar & backColor.r;
-	ar & backColor.g;
-	ar & backColor.b;
-	ar & natureObject;
-	ar & npcList;
-	ar & itemList;
-	ar & filth;
-	ar & blood;
-	ar & marked;
-	ar & walkedOver;
-	ar & corruption;
-	ar & territory;
-	ar & burnt;
-	ar & fire;
-	ar & flow;
-}
-
-template<class Archive>
-void Tile::load(Archive & ar, const unsigned int version) {
-	ar & type;
-	ar & vis;
-	ar & walkable;
-	ar & buildable;
-	ar & moveCost;
-	ar & construction;
-	ar & low;
-	ar & blocksWater;
-	ar & water;
-	ar & graphic;
-	ar & foreColor.r;
-	ar & foreColor.g;
-	ar & foreColor.b;
-	ar & originalForeColor.r;
-	ar & originalForeColor.g;
-	ar & originalForeColor.b;
-	ar & backColor.r;
-	ar & backColor.g;
-	ar & backColor.b;
-	ar & natureObject;
-	ar & npcList;
-	ar & itemList;
-	ar & filth;
-	ar & blood;
-	ar & marked;
-	ar & walkedOver;
-	ar & corruption;
-	ar & territory;
-	ar & burnt;
-	ar & fire;
-	ar & flow;
-}
 
 class CacheTile {
 public:

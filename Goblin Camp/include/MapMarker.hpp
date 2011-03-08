@@ -15,24 +15,18 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/serialization.hpp>
 #include <libtcod.hpp>
 
 #include "Coordinate.hpp"
+#include "data/Serialization.hpp"
 
 enum MarkerType {
 	FLASHINGMARKER
 };
 
 class MapMarker {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	MarkerType type;
 	TCODColor origColor, color;
 	int duration;
@@ -49,37 +43,4 @@ public:
 	TCODColor Color() const;
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(MapMarker, 0)
-
-template<class Archive>
-void MapMarker::save(Archive & ar, const unsigned int version) const {
-	ar & type;
-	ar & origColor.r;
-	ar & origColor.g;
-	ar & origColor.b;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & duration;
-	ar & graphic;
-	ar & x;
-	ar & y;
-	ar & counter;
-}
-
-template<class Archive>
-void MapMarker::load(Archive & ar, const unsigned int version) {
-	ar & type;
-	ar & origColor.r;
-	ar & origColor.g;
-	ar & origColor.b;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & duration;
-	ar & graphic;
-	ar & x;
-	ar & y;
-	ar & counter;
-}

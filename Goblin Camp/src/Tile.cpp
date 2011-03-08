@@ -23,6 +23,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/set.hpp>
 
 #include "Random.hpp"
 #include "Tile.hpp"
@@ -310,6 +312,74 @@ void Tile::Burn(int magnitude) {
 	}
 }
 
+void Tile::save(OutputArchive& ar, const unsigned int version) const {
+	ar & type;
+	ar & vis;
+	ar & walkable;
+	ar & buildable;
+	ar & moveCost;
+	ar & construction;
+	ar & low;
+	ar & blocksWater;
+	ar & water;
+	ar & graphic;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & originalForeColor.r;
+	ar & originalForeColor.g;
+	ar & originalForeColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
+	ar & natureObject;
+	ar & npcList;
+	ar & itemList;
+	ar & filth;
+	ar & blood;
+	ar & marked;
+	ar & walkedOver;
+	ar & corruption;
+	ar & territory;
+	ar & burnt;
+	ar & fire;
+	ar & flow;
+}
+
+void Tile::load(InputArchive& ar, const unsigned int version) {
+	ar & type;
+	ar & vis;
+	ar & walkable;
+	ar & buildable;
+	ar & moveCost;
+	ar & construction;
+	ar & low;
+	ar & blocksWater;
+	ar & water;
+	ar & graphic;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & originalForeColor.r;
+	ar & originalForeColor.g;
+	ar & originalForeColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
+	ar & natureObject;
+	ar & npcList;
+	ar & itemList;
+	ar & filth;
+	ar & blood;
+	ar & marked;
+	ar & walkedOver;
+	ar & corruption;
+	ar & territory;
+	ar & burnt;
+	ar & fire;
+	ar & flow;
+}
+
 CacheTile::CacheTile() : walkable(true), moveCost(1), construction(false),
 	door(false), trap(false), bridge(false), moveSpeedModifier(0),
 	waterDepth(0), npcCount(0), fire(false), x(0), y(0) {}
@@ -374,4 +444,3 @@ int CacheTile::GetMoveCost() const {
 
 	return cost;
 }
-

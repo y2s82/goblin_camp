@@ -33,3 +33,23 @@ void BloodNode::Draw(Coordinate upleft, TCODConsole* console) {
 int BloodNode::Depth() {return depth;}
 void BloodNode::Depth(int val) {depth=val;}
 Coordinate BloodNode::Position() {return Coordinate(x,y);}
+
+void BloodNode::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}
+
+void BloodNode::load(InputArchive& ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}

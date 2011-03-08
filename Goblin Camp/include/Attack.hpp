@@ -17,12 +17,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <vector>
 #include <string>
-
-#include <boost/serialization/split_member.hpp>
-
 #include <libtcod.hpp>
 
 #include "StatusEffect.hpp"
+#include "data/Serialization.hpp"
 
 enum DamageType {
 	DAMAGE_SLASH,
@@ -38,14 +36,8 @@ enum DamageType {
 };
 
 class Attack {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	DamageType damageType;
 	TCOD_dice_t damageAmount;
 	int cooldown;
@@ -77,33 +69,4 @@ public:
 	void SetMagicProjectile();
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Attack, 0)
-
-template<class Archive>
-void Attack::save(Archive & ar, const unsigned int version) const {
-	ar & damageType;
-	ar & damageAmount.addsub;
-	ar & damageAmount.multiplier;
-	ar & damageAmount.nb_dices;
-	ar & damageAmount.nb_faces;
-	ar & cooldown;
-	ar & cooldownMax;
-	ar & statusEffects;
-	ar & projectile;
-	ar & magicProjectile;
-}
-
-template<class Archive>
-void Attack::load(Archive & ar, const unsigned int version) {
-	ar & damageType;
-	ar & damageAmount.addsub;
-	ar & damageAmount.multiplier;
-	ar & damageAmount.nb_dices;
-	ar & damageAmount.nb_faces;
-	ar & cooldown;
-	ar & cooldownMax;
-	ar & statusEffects;
-	ar & projectile;
-	ar & magicProjectile;
-}

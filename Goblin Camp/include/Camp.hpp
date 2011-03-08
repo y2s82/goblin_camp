@@ -19,22 +19,16 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 #include <list>
 
-#include <boost/serialization/serialization.hpp>
 #include <boost/weak_ptr.hpp>
 
 #include "Coordinate.hpp"
+#include "data/Serialization.hpp"
 
 class Job;
 
 class Camp {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	Camp();
 	static Camp* instance;
 	double centerX, centerY;
@@ -73,49 +67,4 @@ public:
 	void UpdateWaterJobs();
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Camp, 0)
-
-template<class Archive>
-void Camp::save(Archive & ar, const unsigned int version) const {
-	ar.template register_type<Coordinate>();
-	ar & centerX;
-	ar & centerY;
-	ar & buildingCount;
-	ar & locked;
-	ar & lockedCenter;
-	ar & tier;
-	ar & name;
-	ar & workshops;
-	ar & farmplots;
-	ar & production;
-	ar & upperCorner;
-	ar & lowerCorner;
-	ar & autoTerritory;
-	ar & article;
-	ar & waterZones;
-	ar & menialWaterJobs;
-	ar & expertWaterJobs;
-}
-
-template<class Archive>
-void Camp::load(Archive & ar, const unsigned int version) {
-	ar.template register_type<Coordinate>();
-	ar & centerX;
-	ar & centerY;
-	ar & buildingCount;
-	ar & locked;
-	ar & lockedCenter;
-	ar & tier;
-	ar & name;
-	ar & workshops;
-	ar & farmplots;
-	ar & production;
-	ar & upperCorner;
-	ar & lowerCorner;
-	ar & autoTerritory;
-	ar & article;
-	ar & waterZones;
-	ar & menialWaterJobs;
-	ar & expertWaterJobs;
-}

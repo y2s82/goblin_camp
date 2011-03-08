@@ -19,12 +19,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <list>
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/serialization/set.hpp>
 
 #include "UI/UIComponents.hpp"
 #include "UI/Tooltip.hpp"
 
 #include "Coordinate.hpp"
+#include "data/Serialization.hpp"
 
 #define ENTITYHEIGHT 5
 
@@ -35,12 +35,8 @@ struct FlightPath {
 };
 
 class Entity: public boost::enable_shared_from_this<Entity> {
-	friend class boost::serialization::access;
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
+	GC_SERIALIZABLE_CLASS
+	
 protected:
 	unsigned int x, y;
 	int uid;
@@ -88,37 +84,4 @@ public:
 	void RemoveBulk(int);
 };
 
-#include <boost/serialization/version.hpp>
 BOOST_CLASS_VERSION(Entity, 0)
-
-template<class Archive>
-void Entity::save(Archive & ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
-	ar & uid;
-	ar & zone;
-	ar & reserved;
-	ar & name;
-	ar & Faction::FactionTypeToString(faction);
-	ar & velocity;
-	ar & nextVelocityMove;
-	ar & velocityTarget;
-	ar & bulk;
-}
-
-template<class Archive>
-void Entity::load(Archive & ar, const unsigned int version) {
-	ar & x;
-	ar & y;
-	ar & uid;
-	ar & zone;
-	ar & reserved;
-	ar & name;
-	std::string factionName;
-	ar & factionName;
-	faction = Faction::StringToFactionType(factionName);
-	ar & velocity;
-	ar & nextVelocityMove;
-	ar & velocityTarget;
-	ar & bulk;
-}

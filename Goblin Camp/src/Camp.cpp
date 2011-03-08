@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+
 #include "Camp.hpp"
 #include "Coordinate.hpp"
 #include "Game.hpp"
@@ -282,4 +286,46 @@ void Camp::UpdateWaterJobs() {
 			}
 		}
 	}
+}
+
+void Camp::save(OutputArchive& ar, const unsigned int version) const {
+	ar.template register_type<Coordinate>();
+	ar & centerX;
+	ar & centerY;
+	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
+	ar & tier;
+	ar & name;
+	ar & workshops;
+	ar & farmplots;
+	ar & production;
+	ar & upperCorner;
+	ar & lowerCorner;
+	ar & autoTerritory;
+	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
+}
+
+void Camp::load(InputArchive& ar, const unsigned int version) {
+	ar.template register_type<Coordinate>();
+	ar & centerX;
+	ar & centerY;
+	ar & buildingCount;
+	ar & locked;
+	ar & lockedCenter;
+	ar & tier;
+	ar & name;
+	ar & workshops;
+	ar & farmplots;
+	ar & production;
+	ar & upperCorner;
+	ar & lowerCorner;
+	ar & autoTerritory;
+	ar & article;
+	ar & waterZones;
+	ar & menialWaterJobs;
+	ar & expertWaterJobs;
 }

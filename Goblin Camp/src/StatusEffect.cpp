@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include "StatusEffect.hpp"
 #include "GCamp.hpp"
@@ -356,4 +357,38 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case TRIPPED: return "tripped";
 	default: return "";
 	}
+}
+
+void StatusEffect::save(OutputArchive& ar, const unsigned int version) const {
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & name;
+	ar & type;
+	ar & cooldown;
+	ar & cooldownDefault;
+	ar & statChanges;
+	ar & resistanceChanges;
+	ar & damage;
+	ar & damageType;
+	ar & visible;
+	ar & negative;
+}
+
+void StatusEffect::load(InputArchive& ar, const unsigned int version) {
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & name;
+	ar & type;
+	ar & cooldown;
+	ar & cooldownDefault;
+	ar & statChanges;
+	ar & resistanceChanges;
+	ar & damage;
+	ar & damageType;
+	ar & visible;
+	ar & negative;
 }

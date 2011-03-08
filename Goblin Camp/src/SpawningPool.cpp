@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/serialization/shared_ptr.hpp>
+
 #include "Random.hpp"
 #include "SpawningPool.hpp"
 #include "UI/Button.hpp"
@@ -298,4 +300,34 @@ void SpawningPool::Burn() {
 	if (burn > 30000) {
 		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
+}
+
+void SpawningPool::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & dumpFilth;
+	ar & dumpCorpses;
+	ar & a;
+	ar & b;
+	ar & expansion;
+	ar & filth;
+	ar & corpses;
+	ar & spawns;
+	ar & corpseContainer;
+	ar & jobCount;
+	ar & burn;
+}
+
+void SpawningPool::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & dumpFilth;
+	ar & dumpCorpses;
+	ar & a;
+	ar & b;
+	ar & expansion;
+	ar & filth;
+	ar & corpses;
+	ar & spawns;
+	ar & corpseContainer;
+	ar & jobCount;
+	ar & burn;
 }

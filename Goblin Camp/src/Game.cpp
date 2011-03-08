@@ -19,6 +19,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+
 #include <boost/algorithm/string.hpp>
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
@@ -2164,4 +2171,80 @@ boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
 		return npci->second;
 	}
 	return boost::shared_ptr<NPC>();
+}
+
+void Game::save(OutputArchive& ar, const unsigned int version) const  {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
+	ar.template register_type<Trap>();
+	ar.template register_type<Ice>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
+	ar & marks;
+	ar & camX;
+	ar & camY;
+	ar & Faction::factions;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
+	ar & age;
+}
+
+void Game::load(InputArchive& ar, const unsigned int version) {
+	ar.template register_type<Container>();
+	ar.template register_type<Item>();
+	ar.template register_type<Entity>();
+	ar.template register_type<OrganicItem>();
+	ar.template register_type<FarmPlot>();
+	ar.template register_type<Door>();
+	ar.template register_type<SpawningPool>();
+	ar.template register_type<Trap>();
+	if (version >= 1) ar.template register_type<Ice>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
+	ar & marks;
+	ar & camX;
+	ar & camY;
+	ar & Faction::factions;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
+	ar & age;
 }

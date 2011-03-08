@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/shared_ptr.hpp>
 
 #include "NatureObject.hpp"
 #include "Map.hpp"
@@ -196,6 +197,47 @@ bool NatureObject::Harvestable() { return harvestable; }
 
 bool NatureObject::IsIce() { return ice; }
 
+void NatureObject::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & NatureObject::Presets[type].name;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & marked;
+	ar & condition;
+	ar & tree;
+	ar & harvestable;
+	ar & ice;
+}
+
+void NatureObject::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	std::string typeName;
+	ar & typeName;
+	bool failedToFindType = true;
+	type = 0; //Default to whatever is the first wildplant
+	for (int i = 0; i < NatureObject::Presets.size(); ++i) {
+		if (boost::iequals(NatureObject::Presets[i].name, typeName)) {
+			type = i;
+			failedToFindType = false;
+			break;
+		}
+	}
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & marked;
+	ar & condition;
+	ar & tree;
+	ar & harvestable;
+	if (failedToFindType) harvestable = true;
+	if (version >= 1) {
+		ar & ice;
+	}
+}
+
 Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
 	ice = true;
 	Map::Inst()->SetBlocksWater(x,y,true);
@@ -214,4 +256,14 @@ Ice::~Ice() {
 			Game::Inst()->CreateItem(Position(), Item::StringToItemType("ice"), false, -1);
 		}
 	}
+}
+
+void Ice::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<NatureObject>(*this);
+	ar & frozenWater;
+}
+
+void Ice::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<NatureObject>(*this);
+	ar & frozenWater;
 }
