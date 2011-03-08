@@ -42,7 +42,6 @@ public:
 
 	bool Exists() const;
 
-	// Connection map draw
 	void Draw(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected) const;
 	void DrawCorrupted(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction corruptConnected) const;
 	void DrawBurnt(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction burntConnected) const;
