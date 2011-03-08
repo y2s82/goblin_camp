@@ -23,6 +23,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/tuple/tuple.hpp>
 
 #include "Construction.hpp"
+#include "NatureObject.hpp"
+#include "Item.hpp"
 
 class Stockpile;
 class Coordinate;
