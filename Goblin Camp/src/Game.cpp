@@ -2174,15 +2174,15 @@ boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
 }
 
 void Game::save(OutputArchive& ar, const unsigned int version) const  {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<OrganicItem>();
-	ar.template register_type<FarmPlot>();
-	ar.template register_type<Door>();
-	ar.template register_type<SpawningPool>();
-	ar.template register_type<Trap>();
-	ar.template register_type<Ice>();
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<OrganicItem>();
+	ar.register_type<FarmPlot>();
+	ar.register_type<Door>();
+	ar.register_type<SpawningPool>();
+	ar.register_type<Trap>();
+	ar.register_type<Ice>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -2212,15 +2212,15 @@ void Game::save(OutputArchive& ar, const unsigned int version) const  {
 }
 
 void Game::load(InputArchive& ar, const unsigned int version) {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<OrganicItem>();
-	ar.template register_type<FarmPlot>();
-	ar.template register_type<Door>();
-	ar.template register_type<SpawningPool>();
-	ar.template register_type<Trap>();
-	if (version >= 1) ar.template register_type<Ice>();
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<OrganicItem>();
+	ar.register_type<FarmPlot>();
+	ar.register_type<Door>();
+	ar.register_type<SpawningPool>();
+	ar.register_type<Trap>();
+	if (version >= 1) ar.register_type<Ice>();
 	ar & season;
 	ar & time;
 	ar & orcCount;

@@ -2738,10 +2738,10 @@ int NPC::GetHeight() {
 bool NPC::IsFlying() { return isFlying; }
 
 void NPC::save(OutputArchive& ar, const unsigned int version) const {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<SkillSet>();
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	std::string npcType(NPC::NPCTypeToString(type));
 	ar & npcType;
@@ -2802,10 +2802,10 @@ void NPC::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void NPC::load(InputArchive& ar, const unsigned int version) {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<SkillSet>();
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<SkillSet>();
 	ar & boost::serialization::base_object<Entity>(*this);
 	std::string typeName;
 	ar & typeName;

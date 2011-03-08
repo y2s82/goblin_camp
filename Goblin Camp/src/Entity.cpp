@@ -120,7 +120,8 @@ void Entity::save(OutputArchive& ar, const unsigned int version) const {
 	ar & zone;
 	ar & reserved;
 	ar & name;
-	ar & Faction::FactionTypeToString(faction);
+	std::string factionName = Faction::FactionTypeToString(faction);
+	ar & factionName;
 	ar & velocity;
 	ar & nextVelocityMove;
 	ar & velocityTarget;
