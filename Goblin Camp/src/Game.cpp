@@ -749,8 +749,27 @@ void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordina
 
 Coordinate Game::FindFilth(Coordinate pos) {
 	if (filthList.size() == 0) return Coordinate(-1,-1);
-	//Choose random filth
 	std::priority_queue<std::pair<int, int> > potentialFilth;
+
+	//First check the vicinity of the given position
+	if (pos.X() >= 0) {
+		for (int i = 0; i < 10; ++i) {
+			boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X() + Random::Generate(-5, 5),
+				pos.Y() + Random::Generate(-5, 5)).lock();
+			if (filth && filth->Depth() > 0 && 
+				Map::Inst()->IsWalkable(filth->Position().X(), filth->Position().Y())) return filth->Position();
+		}
+	}
+	
+	//Then around the camp center (a pretty good place to find filth most of the time)
+	for (int i = 0; i < 10; ++i) {
+		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(Camp::Inst()->Center().X() + Random::Generate(-5, 5),
+			Camp::Inst()->Center().Y() + Random::Generate(-5, 5)).lock();
+		if (filth && filth->Depth() > 0 && 
+			Map::Inst()->IsWalkable(filth->Position().X(), filth->Position().Y())) return filth->Position();
+	}
+
+	//If we still haven't found filth just choose the closest filth out of 30
 	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
 		unsigned filth = Random::ChooseIndex(filthList);
 		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
