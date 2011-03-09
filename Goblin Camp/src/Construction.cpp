@@ -456,6 +456,7 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets[constructionIndex].dynamic = true;
 		} else if (boost::iequals(name, "bridge")) {
 			Construction::Presets[constructionIndex].tags[BRIDGE] = true;
+			Construction::Presets[constructionIndex].moveSpeedModifier = 0;
 		}
 		return true;
 	}
