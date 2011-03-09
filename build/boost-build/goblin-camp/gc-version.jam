@@ -1,0 +1,41 @@
+# Generators for _version.cpp and _version.rc
+
+import type ;
+import generators ;
+import toolset ;
+import os ;
+import modules ;
+
+type.register RC_IN    : rc_in ;
+type.register CPP_IN   : cpp_in ;
+type.register PLIST_IN : plist_in ;
+type.register PLIST    : plist ;
+
+if [ os.name ] = NT {
+    generators.register-standard gc-version.generate : RC_IN : RC ;
+}
+generators.register-standard gc-version.generate : CPP_IN : CPP ;
+
+toolset.flags gc-version.generate APPEND_HG <variant>debug : yes ;
+
+local rule set-appendhg-flag ( what ) {
+    local variants = release profile ;
+    
+    for local variant in $(variants) {
+        toolset.flags gc-version.generate APPEND_HG <variant>$(variant) : $(what) ;
+    }
+}
+
+if --with-revid in [ modules.peek : ARGV ] {
+    set-appendhg-flag yes ;
+} else {
+    set-appendhg-flag no  ;
+}
+
+GC_ROOT    = [ modules.peek : GC_ROOT ] ;
+GC_VERSION = [ modules.peek : GC_VERSION ] ;
+PYTHON     = [ modules.peek : PYTHON ] ;
+
+actions generate {
+    $(PYTHON) "$(GC_ROOT)/tools/generate-version.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)"
+}
