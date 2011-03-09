@@ -748,7 +748,8 @@ Coordinate Map::FindRangedAdvantage(Coordinate center) {
 		for (int y = center.Y() - 5; y <= center.Y() + 5; ++y) {
 			if (x >= 0 && x < width && y >= 0 && y < height) {
 
-				if (tileMap[x][y].construction >= 0 && 
+				if (tileMap[x][y].construction >= 0 &&
+					!tileMap[x][y].fire &&
 					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() &&
 					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(RANGEDADVANTAGE) &&
 					tileMap[x][y].npcList.empty()) {
