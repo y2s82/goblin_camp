@@ -102,8 +102,10 @@ namespace {
 			return (permTable->Hash((pos.X() + 1) + permTable->Hash(2 * pos.Y())) & 0x1);
 		case SOUTH:
 			return (permTable->Hash(permTable->Hash(pos.X()) + pos.Y() + 1) & 0x1);
-		default:
+		case WEST:
 			return (permTable->Hash(pos.X() + permTable->Hash(2 * pos.Y())) & 0x1);
+		default:
+			return false;
 		}
 	}
 }
