@@ -394,9 +394,17 @@ CacheTile& CacheTile::operator=(const Tile& tile) {
 		trap = construct->HasTag(TRAP);
 		bridge = construct->HasTag(BRIDGE);
 		moveSpeedModifier = construct->GetMoveSpeedModifier();
+	} else {
+		construction = false;
+		door = false;
+		trap = false;
+		bridge = false;
+		moveSpeedModifier = 0;
 	}
 
 	if (tile.water) waterDepth = tile.water->Depth();
+	else waterDepth = 0;
+
 	npcCount = tile.npcList.size();
 	fire = bool(tile.fire);
 
