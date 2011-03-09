@@ -325,6 +325,8 @@ CacheTile& CacheTile::operator=(const Tile& tile) {
 	}
 
 	if (tile.water) waterDepth = tile.water->Depth();
+	else waterDepth = 0;
+
 	npcCount = tile.npcList.size();
 	fire = bool(tile.fire);
 
