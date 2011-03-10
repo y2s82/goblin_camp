@@ -125,7 +125,9 @@ void Tile::ResetType(TileType newType, float height) {
 		moveCost = 5;
 	} else if (type == TILESNOW) {
 		vis = true; walkable = true; buildable = true; low = false;
-		originalForeColor = TCODColor(Random::Generate(225, 255), Random::Generate(225, 255), Random::Generate(225, 255));
+		int colorNum = Random::Generate(195,250);
+		originalForeColor = TCODColor(colorNum + Random::Generate(-5, 5), colorNum + Random::Generate(-5, 5), 
+			colorNum + Random::Generate(-5, 5));
 		backColor = TCODColor(0, 0, 0);
 		switch (Random::Generate(9)) {
 		case 0:
