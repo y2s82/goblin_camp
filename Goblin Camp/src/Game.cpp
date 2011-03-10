@@ -536,21 +536,13 @@ void Game::ResetRenderer() {
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 	if (boost::shared_ptr<Construction> construct = cons.lock()) {
-		Coordinate blueprint = Construction::Blueprint(construct->Type());
-		for (int x = construct->X(); x < construct->X() + blueprint.X(); ++x) {
-			for (int y = construct->Y(); y < construct->Y() + blueprint.Y(); ++y) {
-				Map::Inst()->SetBuildable(x,y,true);
-				Map::Inst()->SetConstruction(x,y,-1);
-			}
-		}
-
-		Script::Event::BuildingDestroyed(cons, construct->X(), construct->Y());
-
 		if (Construction::Presets[construct->type].dynamic) {
 			Game::Inst()->dynamicConstructionList.erase(construct->Uid());
 		} else {
 			Game::Inst()->staticConstructionList.erase(construct->Uid());
 		}
+
+		Script::Event::BuildingDestroyed(cons, construct->X(), construct->Y());
 	}
 }
 
