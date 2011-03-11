@@ -3,58 +3,110 @@ tileset "Default Tileset" {
 	tileHeight=16
 	description="Test tileset with various tiles sourced from Goblin Camp Forum, as well as crawl-tiles"
 	author="onionknight, hutze, apostrophest, Crawl Stone Soup artists"
+	version="0.15"
+
+	texture "terrain.png"
+	{
+		terrain_sprite {
+			sprites=[0]
+		}
+
+		terrain_sprite "grass" {
+		/*sprites=[48,49,50,51,
+		         64,65,66,67,
+				 80,81,82,83,
+				 96,97,98,99]
+		wangTileset*/
+			sprites=[
+			// Height < -1.0
+				20,
+			// Height < -0.5
+				21,
+			// Height < 0.0
+				22,
+			// Height < 0.25
+				23,
+			// Height < 0.5
+				24,
+			// Height < 1.0
+				25,
+			// Height < 2.0
+				26,
+			// Height < 4.0
+				27,
+			// Height >= 4.0
+				28
+			]
+			heightSplits=[-1.0, -0.5, 0.0, 0.25, 0.5, 1.0, 2.0, 4.0]
+			snowSprites=[152]
+			edgeSprites=[16,17,18,19]
+			snowEdgeSprites=[148,149,150,151]
+
+			details=[192,193,194,195,208,209,210,211]
+			snowedDetails=[196,197,198,199,212,213,214,215]
+			detailsChance=0.0625
+
+			burntOverlay=[32,33,34,35,36]
+			corruption=[128,129,130,131,
+						144,145,146,147,
+						160,161,162,163,
+						176,177,178,179]
+			corruptionOverlay=[132,133,134,135,136]
+		}
+
+		terrain_sprite "ditch" {
+			sprites=[1]
+		}
+
+		terrain_sprite "riverbed" {
+			sprites=[2]
+		}
+
+		terrain_sprite "bog" {
+			sprites=[3]
+		}
+
+		terrain_sprite "rock" {
+			sprites=[126]
+		}
+
+		terrain_sprite "mud" {
+			sprites=[5]
+		}
+	}
 
 	texture "tileset.png"
 	{
-		// Terrain tiles
-		unknownTerrain=0
-		grassTerrain=[89]
-		ditchTerrain=[1]
-		riverbedTerrain=[2]
-		bogTerrain=[3]
-		rockTerrain=[92,93,94,95,
-			         108,109,110,111,
-					 124,125,126,127,
-					 140,141,142,143]
-		mudTerrain=[5]
-		snowTerrain=[148,149,150,151,152]
-
-		details=[192,193,194,195,208,209,210,211]
-		detailRange=128
-
 		// Terrain modifiers
 		waterAndIce=[84,85,86,87,88,
 		             100,101,102,103,104,105,106,
 					 116,117,118,119,120,121,122]
-		minorFilth=6
-		majorFilth=[7,8,9,10,11]
+		filth=[164,165,166,167,168,
+		       180,181,182,183,184,185,186,
+			   196,197,198,199,200,169,170]
 		marker=[14]
 		blood=[16]
 
 		// Overlays
-		nonTerritory=13
-		territory=12
-		marked=15
-		corruption=[128,129,130,131,
-					144,145,146,147,
-					160,161,162,163,
-					176,177,178,179]
+		nonTerritory=[13]
+		territory=[6,7,8,9,10]
+		marked=[75,91,107,123,139]
 
 		// Tile Highlights (when placing or selecting)
-		defaultTileHighlight=[12,13]
-		constructionTileHighlight=[12,13]
-		stockpileTileHighlight=[12,13]
-		treeFellingTileHighlight=[12,13]
-		harvestTileHighlight=[12,13]
-		orderTileHighlight=[12,13]
-		treeTileHighlight=[12,13]
-		dismantleTileHighlight=[12,13]
-		undesignateTileHighlight=[12,13]
-		bogTileHighlight=[12,13]
-		digTileHighlight=[12,13]
-		addTerritoryTileHighlight=[13]
-		removeTerritoryTileHighlight=[12]
-		gatherTileHighlight=[12,13]
+		defaultTileHighlight=[10,13]
+		constructionTileHighlight=[10,13]
+		stockpileTileHighlight=[10,13]
+		treeFellingTileHighlight=[10,13]
+		harvestTileHighlight=[10,13]
+		orderTileHighlight=[10,13]
+		treeTileHighlight=[10,13]
+		dismantleTileHighlight=[10,13]
+		undesignateTileHighlight=[10,13]
+		bogTileHighlight=[10,13]
+		digTileHighlight=[10,13]
+		addTerritoryTileHighlight=[10]
+		removeTerritoryTileHighlight=[13]
+		gatherTileHighlight=[10,13]
 
 		defaultUnderconstruction=18
 		fire=[68,69]
@@ -516,12 +568,9 @@ tileset "Default Tileset" {
 	texture "orcTiles.png"
 	{
 		creature_sprite "orc" {
-			sprites=[0,1,2,3,4,
-			        5,6,7,8,9,
-					10,11,12,13,14,
-					15,16,17,18,19,
-					20,21,22,23,24]
-			equipmentMap
+			sprites=[5,6,7,8,9]
+			weaponOverlays=[1,2,3,4]
+			paperdoll
 			weaponTypes=["Blunt weapon", "Slashing weapon", "Piercing weapon", "Ranged weapon"]
 			armorTypes=["Padded clothing", "Light armor", "Medium armor", "Heavy armor"]
 		}	

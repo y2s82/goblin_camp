@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TilesetParserV2.hpp"
 #include "Logger.hpp"
 #include "data/Mods.hpp"
+#include "data/Paths.hpp"
 
 TileSetMetadata::TileSetMetadata()
 	: path(),
@@ -50,6 +51,15 @@ TilesetModMetadata::TilesetModMetadata(boost::filesystem::path loc)
 	  width(0),
 	  height(0)
 {
+}
+
+boost::shared_ptr<TileSet> TileSetLoader::LoadTileSet(std::string tilesetName) {
+	// Resolve path
+	boost::filesystem::path tilesetPath(Paths::Get(Paths::CoreTilesets) / tilesetName);
+	if (!boost::filesystem::is_directory(tilesetPath)) {
+		tilesetPath = Paths::Get(Paths::Tilesets) / tilesetName;
+	}
+	return LoadTileSet(tilesetPath);
 }
 
 boost::shared_ptr<TileSet> TileSetLoader::LoadTileSet(boost::filesystem::path path) {
