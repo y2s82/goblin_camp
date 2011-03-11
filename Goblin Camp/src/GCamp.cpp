@@ -15,14 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
-	#include "Stockmanager.hpp"
-	#include "JobManager.hpp"
-#endif
-
 #include <libtcod.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
@@ -53,6 +45,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Engine.hpp"
 #include "scripting/Event.hpp"
 #include "Weather.hpp"
+#include "StockManager.hpp"
+#include "JobManager.hpp"
 
 #include "Version.hpp"
 
@@ -72,12 +66,7 @@ extern "C" void TCOD_sys_startup(void);
 
 int GCMain(std::vector<std::string>& args) {
 	int exitcode = 0;
-
-	#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
-		_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-		//_CrtSetBreakAlloc(32921);
-	#endif
-
+	
 	//
 	// Bootstrap phase.
 	//
@@ -97,7 +86,7 @@ int GCMain(std::vector<std::string>& args) {
 	#ifdef MACOSX
 	Data::LoadFont();
 	#endif
-		
+	
 	//
 	// Parse command line.
 	//
@@ -126,18 +115,19 @@ int GCMain(std::vector<std::string>& args) {
 	// Shutdown.
 	//
 	Script::Shutdown();
-
-	#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
+	
+	#ifdef CHK_MEMORY_LEAKS
 		// Pull down the singletons. Unnecessary but eases memory leak detection
 		delete Game::Inst();
 		delete Tooltip::Inst();
 		delete UI::Inst();
-	    delete Camp::Inst();
+		delete Camp::Inst();
 		delete Announce::Inst();
 		delete StockManager::Inst();
-		delete JobManager::Inst();	
+		delete JobManager::Inst();
 		delete Map::Inst();
 	#endif
+	
 	return exitcode;
 }
 

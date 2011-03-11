@@ -19,6 +19,19 @@ make goblin-camp.rc
 
 version += goblin-camp.rc ;
 
+if --redirect-streams in [ modules.peek : ARGV ] {
+    additional-reqs += <user-interface>gui <define>GC_REDIRECT_STREAMS ;
+} else {
+    additional-reqs += <variant>release:<user-interface>gui ;
+}
+
+if --memory-debug in [ modules.peek : ARGV ] {
+    additional-reqs +=
+        <variant>debug:<define>CHK_MEMORY_LEAKS
+        <variant>debug:<define>_CRTDBG_MAP_ALLOC
+    ;
+}
+
 alias platform-deps
     : [ path.glob-tree $(HERE)/src/platform/windows : *.cpp ]
       /winsdk
