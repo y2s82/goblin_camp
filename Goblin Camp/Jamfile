@@ -47,7 +47,6 @@ project "Goblin Camp"
     : requirements
       <include>$(HERE)
       <include>$(HERE)/include
-      <os>NT,<variant>release:<user-interface>gui
 ;
 
 ###############################################################################
@@ -143,6 +142,7 @@ exe goblin-camp
       platform-deps
       version
       /python-modules
+    : $(additional-reqs:E=)
 ;
 
 ###############################################################################
