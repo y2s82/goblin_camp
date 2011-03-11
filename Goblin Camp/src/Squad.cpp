@@ -19,6 +19,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+
 #include "Squad.hpp"
 #include "Game.hpp"
 
@@ -147,3 +151,29 @@ Order Squad::GetGeneralOrder() {
 }
 
 void Squad::SetGeneralOrder(Order order) { generalOrder = order; }
+
+void Squad::save(OutputArchive& ar, const unsigned int version) const {
+	ar & name;
+	ar & memberReq;
+	ar & members;
+	ar & generalOrder;
+	ar & orders;
+	ar & targetCoordinates;
+	ar & targetEntities;
+	ar & priority;
+	ar & weapon;
+	ar & armor;
+}
+
+void Squad::load(InputArchive& ar, const unsigned int version) {
+	ar & name;
+	ar & memberReq;
+	ar & members;
+	ar & generalOrder;
+	ar & orders;
+	ar & targetCoordinates;
+	ar & targetEntities;
+	ar & priority;
+	ar & weapon;
+	ar & armor;
+}

@@ -15,26 +15,17 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/serialization.hpp>
-
 #include "Construction.hpp"
+#include "data/Serialization.hpp"
 
 class Job;
 
 class Trap : public Construction {
-	friend class boost::serialization::access;
-
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	bool ready;
 	boost::weak_ptr<Job> reloadJob;
 	int readyGraphic;
-
 public:
 	Trap(ConstructionType = 0, Coordinate = Coordinate(0,0));
 	virtual void Update();
@@ -47,19 +38,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(Trap, 0)
-
-template<class Archive>
-void Trap::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & ready;
-	ar & reloadJob;
-	ar & readyGraphic;
-}
-
-template<class Archive>
-void Trap::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & ready;
-	ar & reloadJob;
-	ar & readyGraphic;
-}

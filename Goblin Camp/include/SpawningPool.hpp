@@ -19,15 +19,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI/Dialog.hpp"
 #include "UI/UIComponents.hpp"
 
-class SpawningPool : public Construction {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
+#include "data/Serialization.hpp"
 
+class SpawningPool : public Construction {
+	GC_SERIALIZABLE_CLASS
+	
 	Dialog* dialog;
 	UIContainer* container;
 	bool dumpFilth, dumpCorpses;
@@ -52,35 +48,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(SpawningPool, 0)
-
-template<class Archive>
-void SpawningPool::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & dumpFilth;
-	ar & dumpCorpses;
-	ar & a;
-	ar & b;
-	ar & expansion;
-	ar & filth;
-	ar & corpses;
-	ar & spawns;
-	ar & corpseContainer;
-	ar & jobCount;
-	ar & burn;
-}
-
-template<class Archive>
-void SpawningPool::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & dumpFilth;
-	ar & dumpCorpses;
-	ar & a;
-	ar & b;
-	ar & expansion;
-	ar & filth;
-	ar & corpses;
-	ar & spawns;
-	ar & corpseContainer;
-	ar & jobCount;
-	ar & burn;
-}

@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+
 #include "Random.hpp"
 #include "Stockpile.hpp"
 #include "Game.hpp"
@@ -585,4 +589,49 @@ void Stockpile::Dismantle(Coordinate location) {
 		}
 		if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
+}
+
+void Stockpile::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & symbol;
+	ar & a;
+	ar & b;
+	ar & capacity;
+	ar & amount;
+	ar & allowed;
+	ar & reserved;
+	ar & containers;
+	int colorCount = colors.size();
+	ar & colorCount;
+	for (std::map<Coordinate, TCODColor>::const_iterator it = colors.begin(); it != colors.end(); ++it) {
+		ar & it->first;
+		ar & it->second.r;
+		ar & it->second.g;
+		ar & it->second.b;
+	}
+	ar & limits;
+}
+
+void Stockpile::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & symbol;
+	ar & a;
+	ar & b;
+	ar & capacity;
+	ar & amount;
+	ar & allowed;
+	ar & reserved;
+	ar & containers;
+	int colorCount;
+	ar & colorCount;
+	for (int i = 0; i < colorCount; ++i) {
+		Coordinate location;
+		ar & location;
+		uint8 r, g, b;
+		ar & r;
+		ar & g;
+		ar & b;
+		colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
+	}
+	ar & limits;
 }

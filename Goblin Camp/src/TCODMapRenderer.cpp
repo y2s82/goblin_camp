@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <iostream>
+
 #include "TCODMapRenderer.hpp"
 #include <libtcod.hpp>
 #include "MapMarker.hpp"

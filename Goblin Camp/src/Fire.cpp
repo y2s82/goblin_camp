@@ -13,8 +13,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-
 #include "stdafx.hpp"
+
+#include <boost/algorithm/string.hpp>
 
 #include "Fire.hpp"
 #include "Random.hpp"
@@ -189,4 +190,22 @@ void FireNode::Update() {
 
 		}
 	}
+}
+
+void FireNode::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
+}
+
+void FireNode::load(InputArchive& ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & temperature;
 }

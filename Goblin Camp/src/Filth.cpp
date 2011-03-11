@@ -49,3 +49,23 @@ void FilthNode::Depth(int val) {
 	color.g = 150 - std::min(Map::Inst()->GetCorruption(x, y), 80) + add;
 }
 Coordinate FilthNode::Position() {return Coordinate(x,y);}
+
+void FilthNode::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}
+
+void FilthNode::load(InputArchive& ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+}

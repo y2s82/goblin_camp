@@ -18,9 +18,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <vector>
 
-#include <boost/serialization/split_member.hpp>
-
 #include "Entity.hpp"
+#include "data/Serialization.hpp"
 
 class Coordinate;
 class WaterNode;
@@ -45,18 +44,11 @@ public:
 	int graphicsHint;
 };
 
-class NatureObject : public Entity
-{
-	friend class boost::serialization::access;
+class NatureObject : public Entity {
+	GC_SERIALIZABLE_CLASS
+	
 	friend class Game;
 	friend class Ice;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
 protected:
 	NatureObject(Coordinate = Coordinate(0,0), NatureObjectType = 0);
 	NatureObjectType type;
@@ -89,58 +81,9 @@ public:
 
 BOOST_CLASS_VERSION(NatureObject, 1)
 
-template<class Archive>
-void NatureObject::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Entity>(*this);
-	ar & NatureObject::Presets[type].name;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & marked;
-	ar & condition;
-	ar & tree;
-	ar & harvestable;
-	ar & ice;
-}
-
-template<class Archive>
-void NatureObject::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Entity>(*this);
-	std::string typeName;
-	ar & typeName;
-	bool failedToFindType = true;
-	type = 0; //Default to whatever is the first wildplant
-	for (int i = 0; i < NatureObject::Presets.size(); ++i) {
-		if (boost::iequals(NatureObject::Presets[i].name, typeName)) {
-			type = i;
-			failedToFindType = false;
-			break;
-		}
-	}
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & marked;
-	ar & condition;
-	ar & tree;
-	ar & harvestable;
-	if (failedToFindType) harvestable = true;
-	if (version >= 1) {
-		ar & ice;
-	}
-}
-
 class Ice : public NatureObject {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	boost::shared_ptr<WaterNode> frozenWater;
 public:
 	Ice(Coordinate = Coordinate(0,0), NatureObjectType = 0);
@@ -148,15 +91,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(Ice, 0)
-
-template<class Archive>
-void Ice::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<NatureObject>(*this);
-	ar & frozenWater;
-}
-
-template<class Archive>
-void Ice::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<NatureObject>(*this);
-	ar & frozenWater;
-}

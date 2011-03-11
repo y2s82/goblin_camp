@@ -17,9 +17,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 #include <list>
+#include <vector>
 
 #include <boost/weak_ptr.hpp>
-#include <boost/serialization/split_member.hpp>
+#include <boost/enable_shared_from_this.hpp>
+
+#include "data/Serialization.hpp"
 
 class Coordinate;
 class Entity;
@@ -33,14 +36,8 @@ enum Order {
 };
 
 class Squad : public boost::enable_shared_from_this<Squad> {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	std::string name;
 	int memberReq;
 	//List of NPC uid's
@@ -84,31 +81,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(Squad, 0)
-
-template<class Archive>
-void Squad::save(Archive & ar, const unsigned int version) const {
-	ar & name;
-	ar & memberReq;
-	ar & members;
-	ar & generalOrder;
-	ar & orders;
-	ar & targetCoordinates;
-	ar & targetEntities;
-	ar & priority;
-	ar & weapon;
-	ar & armor;
-}
-
-template<class Archive>
-void Squad::load(Archive & ar, const unsigned int version) {
-	ar & name;
-	ar & memberReq;
-	ar & members;
-	ar & generalOrder;
-	ar & orders;
-	ar & targetCoordinates;
-	ar & targetEntities;
-	ar & priority;
-	ar & weapon;
-	ar & armor;
-}

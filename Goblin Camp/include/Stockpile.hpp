@@ -15,10 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/serialization.hpp>
-
 #include "Construction.hpp"
 #include "Container.hpp"
+#include "data/Serialization.hpp"
 
 class Item;
 
@@ -30,14 +29,9 @@ class Item;
 #define AVOIDGARBAGE (1 << 5)
 
 class Stockpile : public Construction, public ContainerListener {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend class Game;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
 protected:
 	Stockpile(ConstructionType=0, int symbol=0, Coordinate=Coordinate(0,0));
 
@@ -80,50 +74,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(Stockpile, 0)
-
-template<class Archive>
-void Stockpile::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & symbol;
-	ar & a;
-	ar & b;
-	ar & capacity;
-	ar & amount;
-	ar & allowed;
-	ar & reserved;
-	ar & containers;
-	int colorCount = colors.size();
-	ar & colorCount;
-	for (std::map<Coordinate, TCODColor>::const_iterator it = colors.begin(); it != colors.end(); ++it) {
-		ar & it->first;
-		ar & it->second.r;
-		ar & it->second.g;
-		ar & it->second.b;
-	}
-	ar & limits;
-}
-
-template<class Archive>
-void Stockpile::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Construction>(*this);
-	ar & symbol;
-	ar & a;
-	ar & b;
-	ar & capacity;
-	ar & amount;
-	ar & allowed;
-	ar & reserved;
-	ar & containers;
-	int colorCount;
-	ar & colorCount;
-	for (int i = 0; i < colorCount; ++i) {
-		Coordinate location;
-		ar & location;
-		uint8 r, g, b;
-		ar & r;
-		ar & g;
-		ar & b;
-		colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
-	}
-	ar & limits;
-}

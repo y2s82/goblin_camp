@@ -15,9 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/serialization/split_member.hpp>
 #include <boost/array.hpp>
 #include <cstdlib> // int abs(int)
+
+#include "data/Serialization.hpp"
 
 enum Direction {
 	NORTH,
@@ -32,15 +33,10 @@ enum Direction {
 };
 
 class Coordinate {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend int Distance(const Coordinate&, const Coordinate&);
 	friend std::size_t hash_value(const Coordinate&);
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
 	
 	int x, y;
 public:
@@ -119,17 +115,3 @@ inline int Distance(const Coordinate& a, const Coordinate& b) {
 }
 
 BOOST_CLASS_VERSION(Coordinate, 0)
-
-template<class Archive>
-void Coordinate::save(Archive & ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
-}
-
-template<class Archive>
-void Coordinate::load(Archive & ar, const unsigned int version) {
-	if (version == 0) {
-		ar & x;
-		ar & y;
-	}
-}

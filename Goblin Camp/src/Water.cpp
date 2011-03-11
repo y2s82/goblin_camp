@@ -314,3 +314,31 @@ TCODColor WaterNode::GetColor()
 }
 
 bool WaterNode::IsCoastal() { return coastal; }
+
+void WaterNode::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & inertCounter;
+	ar & inert;
+	ar & timeFromRiverBed;
+	ar & filth;
+}
+
+void WaterNode::load(InputArchive& ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & depth;
+	ar & graphic;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & inertCounter;
+	ar & inert;
+	ar & timeFromRiverBed;
+	ar & filth;
+}

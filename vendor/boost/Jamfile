@@ -49,4 +49,6 @@ for local L in date_time filesystem random serialization system {
     lib $(L) : [ glob $(HERE)/libs/$(L)/*.cpp ] ;
 }
 
+lib iostreams : [ glob $(HERE)/libs/iostreams/*.cpp ] : <use>/zlib ;
+
 lib thread : $(thread-sources) ;

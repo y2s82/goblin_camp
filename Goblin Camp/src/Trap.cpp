@@ -13,8 +13,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-
 #include "stdafx.hpp"
+
+#include <boost/serialization/weak_ptr.hpp>
 
 #include "Trap.hpp"
 #include "Game.hpp"
@@ -81,4 +82,18 @@ void Trap::AcceptVisitor(ConstructionVisitor& visitor) {
 
 bool Trap::IsReady() const {
 	return ready;
+}
+
+void Trap::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & ready;
+	ar & reloadJob;
+	ar & readyGraphic;
+}
+
+void Trap::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & ready;
+	ar & reloadJob;
+	ar & readyGraphic;
 }

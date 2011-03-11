@@ -44,3 +44,13 @@ bool Door::Open() {
 void Door::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
 }
+
+void Door::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object <Construction>(*this);
+	ar & closedGraphic;
+}
+
+void Door::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Construction>(*this);
+	ar & closedGraphic;
+}

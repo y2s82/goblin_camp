@@ -15,13 +15,16 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+
 #include "Entity.hpp"
 #include "Container.hpp"
 #include "Logger.hpp"
 #include "Construction.hpp"
 #include "Game.hpp"
 #include "Stockpile.hpp"
-
 
 Container::Container(
 	Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components,
@@ -163,3 +166,23 @@ void Container::Draw(Coordinate upleft, TCODConsole* console) {
 }
 
 int Container::GetReservedSpace() { return reservedSpace; }
+
+void Container::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & items;
+	ar & capacity;
+	ar & reservedSpace;
+	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
+}
+
+void Container::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Item>(*this);
+	ar & items;
+	ar & capacity;
+	ar & reservedSpace;
+	ar & listenersAsUids;
+	ar & water;
+	ar & filth;
+}
