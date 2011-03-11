@@ -17,7 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 // Data refactoring: mods.
 #include <list>
-#include "tileRenderer\TileSetLoader.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
 
 namespace Mods {
 	struct Metadata {

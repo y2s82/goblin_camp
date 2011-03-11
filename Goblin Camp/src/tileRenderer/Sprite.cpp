@@ -28,8 +28,6 @@ Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
 	tiles.push_back(tile);
 }
 
-
-
 Sprite::~Sprite() {}
 
 bool Sprite::Exists() const
@@ -39,6 +37,10 @@ bool Sprite::Exists() const
 
 bool Sprite::IsConnectionMap() const {
 	return type & SPRITE_ConnectionMap;
+}
+
+bool Sprite::IsTwoLayeredConnectionMap() const {
+	return (type & SPRITE_TwoLayerConnectionMap) == SPRITE_TwoLayerConnectionMap;
 }
 
 bool Sprite::IsAnimated() const {

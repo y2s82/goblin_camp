@@ -54,6 +54,7 @@ private:
 	enum ParserState
 	{
 		PS_NORMAL,
+		PS_TERRAIN,
 		PS_NPC,
 		PS_ITEM,
 		PS_NATURE,
@@ -89,12 +90,17 @@ private:
 	ConstructionSpriteFactory constructionFactory;
 	StatusEffectSpriteFactory statusEffectFactory;
 	NPCSpriteFactory npcSpriteFactory;
+	TerrainSpriteFactory terrainSpriteFactory;
 		
 	ItemSprite itemSprite;
+	Sprite corruptionOverride;
+	Sprite corruptionOverlayOverride;
 	
 	static const char * uninitialisedTilesetError;
 	
 	void SetCursorSprites(CursorType type, TCOD_list_t cursors);
+	TileType StringToTileType(std::string typeString) const;
+	void ApplyCorruptionOverrides();
 };
 
 class TileSetMetadataParserV2 : public ITCODParserListener {
