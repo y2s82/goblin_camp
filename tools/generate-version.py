@@ -43,8 +43,9 @@ if appendHg == 'yes':
     # try to run hg
     try:
         out = subprocess.Popen('hg id -r tip -ni', shell = True, stdout = subprocess.PIPE).communicate()[0]
-        rev, num = out.split()
-        revID = 'r{0}:{1}'.format(num, rev)
+        if out:
+            rev, num = out.split()
+            revID = 'r{0}:{1}'.format(num, rev)
     except OSError:
         pass
 
