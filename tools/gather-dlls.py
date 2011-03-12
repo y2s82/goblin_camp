@@ -36,8 +36,8 @@ class FindMeDLLs(object):
         
         if 'SystemRoot' in os.environ:
             # system32/SysWOW64 are searched implicitly
-            self.searchPath.insert(0, os.path.join(os.environ['SystemRoot'], 'SysWOW64'))
-            self.searchPath.insert(0, os.path.join(os.environ['SystemRoot'], 'system32'))
+            self.searchPath.append(os.path.join(os.environ['SystemRoot'], 'SysWOW64'))
+            self.searchPath.append(os.path.join(os.environ['SystemRoot'], 'system32'))
         
         self.dlls = set()
         self.gather(exe, self.pe)
