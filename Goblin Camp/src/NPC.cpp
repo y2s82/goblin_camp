@@ -252,7 +252,6 @@ void NPC::HandleThirst() {
 				newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 				newJob->tasks.push_back(Task(DRINK));
 				jobs.push_back(newJob);
-				run = true;
 			} else {
 				for (int ix = tmpCoord.X()-1; ix <= tmpCoord.X()+1; ++ix) {
 					for (int iy = tmpCoord.Y()-1; iy <= tmpCoord.Y()+1; ++iy) {
@@ -265,7 +264,6 @@ void NPC::HandleThirst() {
 CONTINUEDRINKBLOCK:
 				newJob->tasks.push_back(Task(DRINK, tmpCoord));
 				jobs.push_back(newJob);
-				run = true;
 			}
 		}
 	}
@@ -303,7 +301,6 @@ void NPC::HandleHunger() {
 					newJob->tasks.push_back(Task(EAT));
 					newJob->tasks.push_back(Task(CALMDOWN));
 					jobs.push_back(newJob);
-					run = true;
 				}				
 			}
 		} else { //Something to eat!
@@ -315,7 +312,6 @@ void NPC::HandleHunger() {
 			newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 			newJob->tasks.push_back(Task(EAT));
 			jobs.push_back(newJob);
-			run = true;
 		}
 	}
 }
@@ -337,7 +333,6 @@ void NPC::HandleWeariness() {
 		}
 		if (boost::shared_ptr<Construction> bed = wbed.lock()) {
 			if (bed->Built()) {
-				run = true;
 				sleepJob->ReserveEntity(bed);
 				sleepJob->tasks.push_back(Task(MOVE, bed->Position()));
 				sleepJob->tasks.push_back(Task(SLEEP, bed->Position(), bed));
@@ -1326,7 +1321,6 @@ CONTINUEEAT:
 				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
-					run = true;
 					int dx = x - threatLocation.X();
 					int dy = y - threatLocation.Y();
 					if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
@@ -1348,7 +1342,6 @@ CONTINUEEAT:
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(9), 0)));
 				jobs.push_back(idleJob);
 				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
-				else run = true;
 			}
 		}
 	}
@@ -1371,7 +1364,6 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 	}
 
 	jobs.push_back(job);
-	run = true;
 }
 
 TaskResult NPC::Move(TaskResult oldResult) {
@@ -1593,7 +1585,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 								newJob->tasks.push_back(Task(TAKE));
 								newJob->tasks.push_back(Task(WIELD));
 								npc->jobs.push_back(newJob);
-								npc->run = true;
 								return true;
 						}
 						break;
@@ -1610,7 +1601,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 						newJob->tasks.push_back(Task(TAKE));
 						newJob->tasks.push_back(Task(WEAR));
 						npc->jobs.push_back(newJob);
-						npc->run = true;
 						return true;
 				}
 			} else if (npc->quiver.lock()->empty()) {
@@ -1624,7 +1614,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 							newJob->tasks.push_back(Task(QUIVER));
 						}
 						npc->jobs.push_back(newJob);
-						npc->run = true;
 						return true;
 				}
 			}
@@ -1654,7 +1643,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 				if (!newJob->tasks.empty()) {
 					npc->jobs.push_back(newJob);
 					if (Distance(npc->Position(), squad->TargetCoordinate(npc->orderIndex)) < 10) npc->run = false;
-					else npc->run = true;
 					return true;
 				}
 			}
@@ -1664,7 +1652,6 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			if (squad->TargetEntity(npc->orderIndex).lock()) {
 				newJob->tasks.push_back(Task(MOVENEAR, squad->TargetEntity(npc->orderIndex).lock()->Position(), squad->TargetEntity(npc->orderIndex)));
 				npc->jobs.push_back(newJob);
-				npc->run = true;
 				return true;
 			}
 			break;
@@ -1707,7 +1694,6 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, npc->Position() + Coordinate(Random::Generate(-2, 2), Random::Generate(-2, 2))));
 			runAroundLikeAHeadlessChickenJob->internal = true;
 			npc->jobs.push_back(runAroundLikeAHeadlessChickenJob);
-			npc->run = true;
 			npc->AddEffect(PANIC);
 			return;
 		}
@@ -1734,7 +1720,6 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 						killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
 						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
 						npc->jobs.push_back(killJob);
-						npc->run = true;
 						return;
 					}
 				}
@@ -1793,7 +1778,6 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 			killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
 			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
 			animal->jobs.push_back(killJob);
-			animal->run = true;
 			return;
 		}
 	}
@@ -2339,7 +2323,6 @@ void NPC::FindNewWeapon() {
 		weaponJob->tasks.push_back(Task(TAKE, weapon->Position(), weapon));
 		weaponJob->tasks.push_back(Task(WIELD));
 		jobs.push_back(weaponJob);
-		run = true;
 	}
 }
 
@@ -2358,7 +2341,6 @@ void NPC::FindNewArmor() {
 		armorJob->tasks.push_back(Task(TAKE, arm->Position(), arm));
 		armorJob->tasks.push_back(Task(WEAR));
 		jobs.push_back(armorJob);
-		run = true;
 	}
 }
 
@@ -2582,7 +2564,6 @@ void NPC::GoBerserk() {
 		berserkJob->internal = true;
 		berserkJob->tasks.push_back(Task(KILL, creature->Position(), creature));
 		jobs.push_back(berserkJob);
-		run = true;
 	}
 
 	AddEffect(RAGE);
