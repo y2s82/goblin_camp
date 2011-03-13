@@ -250,4 +250,20 @@ void Job::AddMapMarker(MapMarker marker) {
 }
 
 void Job::AllowFire() { fireAllowed = true; }
-bool Job::FireAllowed() { return fireAllowed; }
+bool Job::InvalidFireAllowance() {
+	if (!fireAllowed) {
+		for (std::vector<Task>::iterator task = tasks.begin(); task != tasks.end(); ++task) {
+			Coordinate coord = task->target;
+			if (coord.X() < 0 || coord.X() >= Map::Inst()->Width() || coord.Y() < 0 || coord.Y() >= Map::Inst()->Height()) {
+				if (task->entity.lock()) {
+					coord = task->entity.lock()->Position();
+				}
+			}
+
+			if (coord.X() >= 0 && coord.X() < Map::Inst()->Width() && coord.Y() >= 0 && coord.Y() < Map::Inst()->Height()) {
+				if (Map::Inst()->GetFire(coord.X(), coord.Y()).lock()) return true;
+			}
+		}
+	}
+	return false;
+}

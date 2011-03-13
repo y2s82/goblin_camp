@@ -212,7 +212,7 @@ public:
 	void AddMapMarker(MapMarker);
 
 	void AllowFire();
-	bool FireAllowed();
+	bool InvalidFireAllowance();
 };
 
 BOOST_CLASS_VERSION(Job, 0)
