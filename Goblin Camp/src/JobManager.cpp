@@ -33,7 +33,7 @@ JobManager *JobManager::Inst() {
 }
 
 void JobManager::AddJob(boost::shared_ptr<Job> newJob) {
-	if (!newJob->Attempt() || newJob->OutsideTerritory()) {
+	if (!newJob->Attempt() || newJob->OutsideTerritory() || newJob->InvalidFireAllowance()) {
 		failList.push_back(newJob);
 		return;
 	}
