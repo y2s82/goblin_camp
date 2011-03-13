@@ -1959,7 +1959,7 @@ void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
 						quiver.lock()->RemoveItem(projectile);
 						projectile->PutInContainer();
 						projectile->Position(Position());
-						projectile->CalculateFlightPath(targetEntity->Position(), 50, GetHeight());
+						projectile->CalculateFlightPath(targetEntity->Position(), 100, GetHeight());
 					}
 				}
 				break;
