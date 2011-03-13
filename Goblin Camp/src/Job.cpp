@@ -55,6 +55,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	tool(-1),
 	markedGround(Coordinate(-1,-1)),
 	obeyTerritory(true),
+	fireAllowed(false),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
@@ -247,3 +248,6 @@ bool Job::OutsideTerritory() {
 void Job::AddMapMarker(MapMarker marker) {
 	mapMarkers.push_back(Map::Inst()->AddMarker(marker));
 }
+
+void Job::AllowFire() { fireAllowed = true; }
+bool Job::FireAllowed() { return fireAllowed; }
