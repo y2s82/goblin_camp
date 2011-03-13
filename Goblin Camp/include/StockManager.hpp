@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 
 #include <boost/weak_ptr.hpp>
-#include <boost/serialization/split_member.hpp>
+#include "data/Serialization.hpp"
 
 class Construction;
 typedef int ConstructionType;
@@ -30,19 +30,12 @@ class NatureObject;
 class Job;
 class Coordinate;
 
-class StockManager
-{
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+class StockManager {
+	GC_SERIALIZABLE_CLASS
+	
 	StockManager(void);
 	static StockManager* instance;
-
+	
 	std::map<ItemCategory,int> categoryQuantities;
 	std::map<ItemType,int> typeQuantities;
 	std::map<ItemType,int> minimums; //If minimum is -1, the product isn't available yet
@@ -76,35 +69,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(StockManager, 0)
-
-template<class Archive>
-void StockManager::save(Archive & ar, const unsigned int version) const {
-	ar & categoryQuantities;
-	ar & typeQuantities;
-	ar & minimums;
-	ar & producables;
-	ar & producers;
-	ar & workshops;
-	ar & fromTrees;
-	ar & fromEarth;
-	ar & designatedTrees;
-	ar & treeFellingJobs;
-	ar & designatedBog;
-	ar & bogIronJobs;
-}
-
-template<class Archive>
-void StockManager::load(Archive & ar, const unsigned int version) {
-	ar & categoryQuantities;
-	ar & typeQuantities;
-	ar & minimums;
-	ar & producables;
-	ar & producers;
-	ar & workshops;
-	ar & fromTrees;
-	ar & fromEarth;
-	ar & designatedTrees;
-	ar & treeFellingJobs;
-	ar & designatedBog;
-	ar & bogIronJobs;
-}

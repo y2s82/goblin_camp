@@ -19,13 +19,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <list>
 #include <map>
-
-#include <boost/serialization/split_member.hpp>
+#include <boost/unordered_map.hpp>
 #include <boost/shared_ptr.hpp>
 #include <libtcod.hpp>
 
 #include "Entity.hpp"
 #include "Attack.hpp"
+
+#include "data/Serialization.hpp"
 
 typedef int ItemCategory;
 typedef int ItemType;
@@ -82,17 +83,11 @@ struct ItemPreset {
 };
 
 class Item : public Entity {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend class Game;
 	friend class ItemListener;
-
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	
 	ItemType type;
 	std::set<ItemCategory> categories;
 	bool flammable;
@@ -163,82 +158,13 @@ public:
 
 BOOST_CLASS_VERSION(Item, 0)
 
-template<class Archive>
-void Item::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Entity>(*this);
-	ar & graphic;
-	std::string itemType(Item::ItemTypeToString(type));
-	ar & itemType;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	int categoryCount = (int)categories.size();
-	ar & categoryCount;
-	for (std::set<ItemCategory>::iterator cati = categories.begin(); cati != categories.end(); ++cati) {
-		std::string itemCat(Item::ItemCategoryToString(*cati));
-		ar & itemCat;
-	}
-	ar & flammable;
-	ar & attemptedStore;
-	ar & decayCounter;
-	ar & attack;
-	ar & resistances;
-	ar & condition;
-	ar & container;
-	ar & internal;
-}
-
-template<class Archive>
-void Item::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Entity>(*this);
-	ar & graphic;
-	bool failedToFindType = false;
-	std::string typeName;
-	ar & typeName;
-	type = Item::StringToItemType(typeName);
-	if (type == -1) {
-		type = Item::StringToItemType("debris");
-		failedToFindType = true;
-	}
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	int categoryCount = 0;
-	ar & categoryCount;
-	categories.clear();
-	for (int i = 0; i < categoryCount; ++i) {
-		std::string categoryName;
-		ar & categoryName;
-		int categoryType = Item::StringToItemCategory(categoryName);
-		if (categoryType >= 0 && categoryType < Item::Categories.size()) categories.insert(categoryType);
-	}
-	if (categories.empty()) categories.insert(Item::StringToItemCategory("garbage"));
-	ar & flammable;
-	if (failedToFindType) flammable = true; //Just so you can get rid of it
-	ar & attemptedStore;
-	ar & decayCounter;
-	ar & attack;
-	ar & resistances;
-	ar & condition;
-	ar & container;
-	ar & internal;
-}
-
-
 class OrganicItem : public Item {
-	friend class boost::serialization::access;
-	friend class game;
-
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
+	friend class Game;
+	
 	int nutrition;
 	ItemType growth;
-
 public:
 	OrganicItem(Coordinate=Coordinate(0,0), ItemType=0);
 	int Nutrition();
@@ -248,16 +174,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(OrganicItem, 0)
-
-template<class Archive>
-void OrganicItem::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Item>(*this);
-	ar & nutrition;
-	ar & growth;
-}
-template<class Archive>
-void OrganicItem::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Item>(*this);
-	ar & nutrition;
-	ar & growth;
-}

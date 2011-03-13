@@ -19,9 +19,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/weak_ptr.hpp>
 #include <boost/shared_ptr.hpp>
-#include <boost/serialization/split_member.hpp>
 
 #include "Item.hpp"
+#include "data/Serialization.hpp"
 
 class ContainerListener {
 public:
@@ -30,14 +30,8 @@ public:
 };
 
 class Container : public Item {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	std::set<boost::weak_ptr<Item> > items;
 	int capacity;
 	int reservedSpace;
@@ -78,25 +72,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(::Container, 0)
-
-template<class Archive>
-void Container::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Item>(*this);
-	ar & items;
-	ar & capacity;
-	ar & reservedSpace;
-	ar & listenersAsUids;
-	ar & water;
-	ar & filth;
-}
-
-template<class Archive>
-void Container::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Item>(*this);
-	ar & items;
-	ar & capacity;
-	ar & reservedSpace;
-	ar & listenersAsUids;
-	ar & water;
-	ar & filth;
-}

@@ -16,6 +16,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/utility.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "Attack.hpp"
 #include "GCamp.hpp"
@@ -111,3 +113,29 @@ void Attack::AddDamage(TCOD_dice_t value) {
 
 void Attack::SetMagicProjectile() { magicProjectile = true; }
 bool Attack::IsProjectileMagic() { return magicProjectile; }
+
+void Attack::save(OutputArchive& ar, const unsigned int version) const {
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & projectile;
+	ar & magicProjectile;
+}
+
+void Attack::load(InputArchive& ar, const unsigned int version) {
+	ar & damageType;
+	ar & damageAmount.addsub;
+	ar & damageAmount.multiplier;
+	ar & damageAmount.nb_dices;
+	ar & damageAmount.nb_faces;
+	ar & cooldown;
+	ar & cooldownMax;
+	ar & statusEffects;
+	ar & projectile;
+	ar & magicProjectile;
+}

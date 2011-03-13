@@ -197,3 +197,25 @@ void Weather::SeasonChange() {
 void Weather::ApplySeasonalEffects() {
 	SeasonChange();
 }
+
+void Weather::save(OutputArchive& ar, const unsigned int version) const {
+	ar & map;
+	ar & windDirection;
+	ar & currentWeather;
+	ar & tileChange;
+	ar & changeAll;
+	ar & tileChangeRate;
+	ar & changePosition;
+	ar & currentTemperature;
+}
+
+void Weather::load(InputArchive& ar, const unsigned int version) {
+	ar & map;
+	ar & windDirection;
+	ar & currentWeather;
+	ar & tileChange;
+	ar & changeAll;
+	ar & tileChangeRate;
+	ar & changePosition;
+	ar & currentTemperature;
+}

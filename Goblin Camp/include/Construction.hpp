@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
-#include <boost/serialization/split_member.hpp>
+#include <boost/unordered_map.hpp>
 
 #include "Entity.hpp"
 #include "UI/UIComponents.hpp"
@@ -31,6 +31,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Attack.hpp"
 
 #include "ConstructionVisitor.hpp"
+
+#include "data/Serialization.hpp"
 
 class Job;
 typedef int ItemType;
@@ -92,16 +94,10 @@ struct ConstructionPreset {
 };
 
 class Construction : public Entity {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend class Game;
 	friend class ConstructionListener;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
 protected:
 	Construction(ConstructionType = 0, Coordinate = Coordinate(0,0));
 
@@ -178,68 +174,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(Construction, 0)
-
-template<class Archive>
-void Construction::save(Archive & ar, const unsigned int version) const {
-	ar & boost::serialization::base_object<Entity>(*this);
-	ar & condition;
-	ar & maxCondition;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	std::string constructionType(Construction::ConstructionTypeToString(type));
-	ar & constructionType;
-	ar & walkable;
-	ar & materials;
-	ar & producer;
-	ar & products;
-	ar & jobList;
-	ar & progress;
-	ar & container;
-	ar & materialsUsed;
-	ar & stockpile;
-	ar & farmplot;
-	ar & dismantle;
-	ar & time;
-	ar & AllowedAmount;
-	ar & built;
-	ar & flammable;
-	ar & repairJob;
-}
-
-template<class Archive>
-void Construction::load(Archive & ar, const unsigned int version) {
-	ar & boost::serialization::base_object<Entity>(*this);
-	ar & condition;
-	ar & maxCondition;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	bool failedToFindType = false;
-	std::string typeName;
-	ar & typeName;
-	type = Construction::StringToConstructionType(typeName);
-	if (type == -1) {
-		type = Construction::StringToConstructionType("Saw pit");
-		failedToFindType = true;
-	}
-	ar & walkable;
-	ar & materials;
-	ar & producer;
-	ar & products;
-	ar & jobList;
-	ar & progress;
-	ar & container;
-	ar & materialsUsed;
-	ar & stockpile;
-	ar & farmplot;
-	ar & dismantle;
-	ar & time;
-	ar & AllowedAmount;
-	ar & built;
-	ar & flammable;
-	if (failedToFindType) flammable = true; //So you can burn these constructions
-	ar & repairJob;
-}

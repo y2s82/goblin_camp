@@ -15,8 +15,12 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <SDL.h>
+#include <vector>
 #include <boost/shared_ptr.hpp>
+#include <boost/function.hpp>
+#include <libtcod.hpp>
+#include <SDL.h>
+
 #include "Coordinate.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
 

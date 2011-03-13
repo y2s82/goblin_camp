@@ -18,8 +18,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <queue>
 #include <list>
 
-#include <boost/serialization/split_member.hpp>
-
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/function.hpp>
@@ -34,6 +32,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StatusEffect.hpp"
 #include "Squad.hpp"
 #include "Attack.hpp"
+
+#include "data/Serialization.hpp"
 
 #define LOS_DISTANCE 12
 #define MAXIMUM_JOB_ATTEMPTS 5
@@ -61,14 +61,8 @@ enum Skill {
 };
 
 class SkillSet {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	int skills[SKILLAMOUNT];
 public:
 	SkillSet();
@@ -77,16 +71,6 @@ public:
 };
 
 BOOST_CLASS_VERSION(SkillSet, 0)
-
-template<class Archive>
-void SkillSet::save(Archive & ar, const unsigned int version) const {
-	ar & skills;
-}
-
-template<class Archive>
-void SkillSet::load(Archive & ar, const unsigned int version) {
-	ar & skills;
-}
 
 struct NPCPreset {
 	NPCPreset(std::string);
@@ -116,18 +100,12 @@ struct NPCPreset {
 };
 
 class NPC : public Entity {
-	friend class boost::serialization::access;
+	GC_SERIALIZABLE_CLASS
+	
 	friend class Game;
 	friend class NPCListener;
 	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
-
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	
 	NPC(Coordinate = Coordinate(0,0),
 		boost::function<bool(boost::shared_ptr<NPC>)> findJob = boost::function<bool(boost::shared_ptr<NPC>)>(),
 		boost::function<void(boost::shared_ptr<NPC>)> react = boost::function<void(boost::shared_ptr<NPC>)>());
@@ -312,149 +290,6 @@ public:
 	virtual int GetHeight();
 };
 
-void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
-
 BOOST_CLASS_VERSION(NPC, 1)
 
-template<class Archive>
-void NPC::save(Archive & ar, const unsigned int version) const {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<SkillSet>();
-	ar & boost::serialization::base_object<Entity>(*this);
-	std::string npcType(NPC::NPCTypeToString(type));
-	ar & npcType;
-	ar & timeCount;
-	ar & jobs;
-	ar & taskIndex;
-	ar & orderIndex;
-	ar & nopath;
-	ar & findPathWorking;
-	ar & timer;
-	ar & nextMove;
-	ar & run;
-	ar & _color.r;
-	ar & _color.g;
-	ar & _color.b;
-	ar & _bgcolor.r;
-	ar & _bgcolor.g;
-	ar & _bgcolor.b;
-	ar & _graphic;
-	ar & taskBegun;
-	ar & expert;
-	ar & carried;
-	ar & mainHand;
-	ar & offHand;
-	ar & armor;
-	ar & quiver;
-	ar & thirst;
-	ar & hunger;
-	ar & weariness;
-	ar & thinkSpeed;
-	ar & statusEffects;
-	ar & health;
-	ar & maxHealth;
-	ar & foundItem;
-	ar & inventory;
-	ar & needsNutrition;
-	ar & needsSleep;
-	ar & hasHands;
-	ar & isTunneler;
-	ar & baseStats;
-	ar & effectiveStats;
-	ar & baseResistances;
-	ar & effectiveResistances;
-	ar & aggressive;
-	ar & coward;
-	ar & aggressor;
-	ar & dead;
-	ar & squad;
-	ar & attacks;
-	ar & escaped;
-	ar & addedTasksToCurrentJob;
-	ar & Skills;
-	ar & hasMagicRangedAttacks;
-	ar & traits;
-	ar & damageDealt;
-	ar & damageReceived;
-	ar & jobBegun;
-}
-
-template<class Archive>
-void NPC::load(Archive & ar, const unsigned int version) {
-	ar.template register_type<Container>();
-	ar.template register_type<Item>();
-	ar.template register_type<Entity>();
-	ar.template register_type<SkillSet>();
-	ar & boost::serialization::base_object<Entity>(*this);
-	std::string typeName;
-	ar & typeName;
-	type = -1;
-	bool failedToFindType = false;
-	type = NPC::StringToNPCType(typeName);
-	if (type == -1) { //Apparently a creature type that doesn't exist
-		type = 2; //Whatever the first monster happens to be
-		failedToFindType = true; //We'll allow loading, this creature will just immediately die
-	}
-
-	ar & timeCount;
-	ar & jobs;
-	ar & taskIndex;
-	ar & orderIndex;
-	ar & nopath;
-	ar & findPathWorking;
-	ar & timer;
-	ar & nextMove;
-	ar & run;
-	ar & _color.r;
-	ar & _color.g;
-	ar & _color.b;
-	ar & _bgcolor.r;
-	ar & _bgcolor.g;
-	ar & _bgcolor.b;
-	ar & _graphic;
-	ar & taskBegun;
-	ar & expert;
-	ar & carried;
-	ar & mainHand;
-	ar & offHand;
-	ar & armor;
-	ar & quiver;
-	ar & thirst;
-	ar & hunger;
-	ar & weariness;
-	ar & thinkSpeed;
-	ar & statusEffects;
-	ar & health;
-	if (failedToFindType) health = 0;
-	ar & maxHealth;
-	ar & foundItem;
-	ar & inventory;
-	ar & needsNutrition;
-	ar & needsSleep;
-	ar & hasHands;
-	ar & isTunneler;
-	ar & baseStats;
-	ar & effectiveStats;
-	ar & baseResistances;
-	ar & effectiveResistances;
-	ar & aggressive;
-	ar & coward;
-	ar & aggressor;
-	ar & dead;
-	ar & squad;
-	ar & attacks;
-	ar & escaped;
-	ar & addedTasksToCurrentJob;
-	ar & Skills;
-	ar & hasMagicRangedAttacks;
-	ar & traits;
-	ar & damageDealt;
-	ar & damageReceived;
-	if (version >= 1) {
-		ar & jobBegun;
-	}
-
-	InitializeAIFunctions();
-}
+void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);

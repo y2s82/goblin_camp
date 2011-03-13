@@ -17,9 +17,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 
-#include <boost/serialization/split_member.hpp>
 #include <boost/format.hpp>
 #include <libtcod.hpp>
+
+#include "data/Serialization.hpp"
 
 enum NPCStat {
 	MOVESPEED,
@@ -67,15 +68,11 @@ enum StatusEffectType {
 };
 
 struct StatusEffect {
-	friend class boost::serialization::access;
+private:
+	GC_SERIALIZABLE_CLASS
+public:
 	StatusEffect(StatusEffectType=HUNGER, int graphic = 'Y', TCODColor=TCODColor::pink);
-
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	
 	static StatusEffectType StringToStatusEffectType(std::string);
 	static std::string StatusEffectTypeToString(StatusEffectType);
 	static bool IsApplyableStatusEffect(StatusEffectType);
@@ -95,39 +92,3 @@ struct StatusEffect {
 };
 
 BOOST_CLASS_VERSION(StatusEffect, 0)
-
-template<class Archive>
-void StatusEffect::save(Archive & ar, const unsigned int version) const {
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & name;
-	ar & type;
-	ar & cooldown;
-	ar & cooldownDefault;
-	ar & statChanges;
-	ar & resistanceChanges;
-	ar & damage;
-	ar & damageType;
-	ar & visible;
-	ar & negative;
-}
-
-template<class Archive>
-void StatusEffect::load(Archive & ar, const unsigned int version) {
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & name;
-	ar & type;
-	ar & cooldown;
-	ar & cooldownDefault;
-	ar & statChanges;
-	ar & resistanceChanges;
-	ar & damage;
-	ar & damageType;
-	ar & visible;
-	ar & negative;
-}

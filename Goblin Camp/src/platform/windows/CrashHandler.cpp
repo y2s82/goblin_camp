@@ -51,7 +51,7 @@ namespace {
 			SHGFP_TYPE_CURRENT, "My Games\\Goblin Camp\\crashes", dumpPath
 		);
 		
-		strftime(date, 20, "%d-%m-%Y_%H-%M-%S", timeStruct);
+		strftime(date, 20, "%Y-%m-%d_%H-%M-%S", timeStruct);
 		_snprintf(dumpFilename, MAX_PATH, "dump_%s.dmp", date);
 		_snprintf(dumpPath, MAX_PATH, "%s\\%s", dumpPath, dumpFilename);
 		
@@ -70,7 +70,7 @@ namespace {
 		);
 		
 		if (dump == INVALID_HANDLE_VALUE) {
-			OutputDebugString(TEXT("[Goblin Camp] Could not create crash.dmp."));
+			OutputDebugString(TEXT("[Goblin Camp] Could not create crash dump."));
 			return false;
 		}
 		
@@ -87,15 +87,16 @@ namespace {
 		dumpCallback.CallbackParam    = NULL; 
 		
 		MINIDUMP_TYPE type = static_cast<MINIDUMP_TYPE>(
-			MiniDumpWithPrivateReadWriteMemory | MiniDumpWithDataSegs |
-			MiniDumpWithHandleData | MiniDumpWithFullMemoryInfo |
-			MiniDumpWithThreadInfo | MiniDumpWithUnloadedModules
+			MiniDumpWithDataSegs | MiniDumpWithHandleData |
+			MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo |
+			MiniDumpWithUnloadedModules | MiniDumpIgnoreInaccessibleMemory |
+			MiniDumpWithPrivateReadWriteMemory | MiniDumpWithProcessThreadData
 		);
 		
-		bool result = MiniDumpWriteDump(
+		bool result = !!MiniDumpWriteDump(
 			GetCurrentProcess(), GetCurrentProcessId(),
-			dump, type, (exception != NULL) ? &dumpExcInfo : NULL, NULL, &dumpCallback
-		) ? TRUE : FALSE;
+			dump, type, ((exception != NULL) ? &dumpExcInfo : NULL), NULL, &dumpCallback
+		);
 		
 		if (!result) {
 			char buffer[256];
@@ -119,11 +120,12 @@ namespace {
 			case IncludeModuleCallback: return TRUE;
 			case CancelCallback:        return FALSE;
 			case ModuleCallback:
-				if (output->ModuleWriteFlags & ModuleWriteDataSeg) {
+				{
 					wchar_t filename[_MAX_FNAME];
 					_wsplitpath_s(input->Module.FullPath, NULL, 0, NULL, 0, filename, _MAX_FNAME, NULL, 0);
+					
 					if (wcsicmp(filename, L"goblin-camp") != 0 && wcsicmp(filename, L"ntdll") != 0) {
-						output->ModuleWriteFlags &= ~ModuleWriteDataSeg;
+						output->ModuleWriteFlags = ModuleWriteModule;
 					}
 				}
 				return TRUE;

@@ -89,6 +89,7 @@ project
       <os>NT,<toolset>msvc:<define>_HAS_ITERATOR_DEBUGGING=0
       <os>NT,<toolset>msvc:<define>_SECURE_SCL=0
       <os>NT,<toolset>msvc:"<linkflags>/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCMTD"
+      <os>NT,<toolset>msvc:"<cflags>/bigobj"
       #####
       ## Linux specific defines
       #####

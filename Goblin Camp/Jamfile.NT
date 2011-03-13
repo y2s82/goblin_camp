@@ -5,12 +5,32 @@
 ###############################################################################
 ##### Platform dependencies
 ## On Windows, Goblin Camp requires Windows SDK libraries. We also add
-## goblin-camp.rc_in to build — it embeds version info in the executable
+## common.rc_in to build — it embeds version info in the executable
 ## (viewable from Windows Explorer's Properties, or TC's FileInfo) as well
 ## as misc. resources (like icon).
 ###############################################################################
 
-version += $(HERE)/goblin-camp.rc_in ;
+import gc-version ;
+make goblin-camp.rc
+    : $(HERE)/common.rc_in
+    : @gc-version.generate
+    : <rch>goblin-camp.rch <implicit-dependency>goblin-camp.rch
+;
+
+version += goblin-camp.rc ;
+
+if --redirect-streams in [ modules.peek : ARGV ] {
+    additional-reqs += <user-interface>gui <define>GC_REDIRECT_STREAMS ;
+} else {
+    additional-reqs += <variant>release:<user-interface>gui ;
+}
+
+if --memory-debug in [ modules.peek : ARGV ] {
+    additional-reqs +=
+        <variant>debug:<define>CHK_MEMORY_LEAKS
+        <variant>debug:<define>_CRTDBG_MAP_ALLOC
+    ;
+}
 
 alias platform-deps
     : [ path.glob-tree $(HERE)/src/platform/windows : *.cpp ]
@@ -49,3 +69,10 @@ install dist-prebuilt
       #dbghelp.dll
     : <conditional>@get-dist-bin
 ;
+
+# Disabled for now, unfinished.
+#install dist-patcher-base
+#    : patcher-base
+#    : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
+#      <conditional>@get-dist-bin
+#;

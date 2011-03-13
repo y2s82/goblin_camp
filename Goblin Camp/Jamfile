@@ -47,7 +47,6 @@ project "Goblin Camp"
     : requirements
       <include>$(HERE)
       <include>$(HERE)/include
-      <os>NT,<variant>release:<user-interface>gui
 ;
 
 ###############################################################################
@@ -95,8 +94,13 @@ make mod.dat
     : $(version-reqs)
 ;
 
+make VERSION.txt
+    : $(HERE)/VERSION.txt_in
+    : @gc-version.generate
+;
+
 alias version
-    : $(version)
+    : $(version) mod.dat VERSION.txt
     :
     :
     : $(version-reqs)
@@ -110,17 +114,21 @@ always version ;
 ## should depend on it.
 ###############################################################################
 
-alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl ;
+alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl libuserialize ;
 
 ###############################################################################
 ##### stdafx.hpp
 ## Precompiled header target.
 ###############################################################################
 
-cpp-pch stdafx.hpp
-    : $(HERE)/include/stdafx.hpp
-      common-deps
-;
+if --skip-pch in [ modules.peek : ARGV ] {
+    alias stdafx.hpp : common-deps : : <define>GC_SKIP_PCH ;
+} else {
+    cpp-pch stdafx.hpp
+        : $(HERE)/include/stdafx.hpp
+          common-deps
+    ;
+}
 
 ###############################################################################
 ##### goblin-camp
@@ -134,7 +142,12 @@ exe goblin-camp
       platform-deps
       version
       /python-modules
+    : $(additional-reqs:E=)
 ;
+
+###############################################################################
+##### install targets
+###############################################################################
 
 install dist-bin
     : goblin-camp
@@ -147,6 +160,11 @@ install dist-data
       [ path.glob-tree $(HERE)/lib : *.py *.zip *.dat *.png ]
     : <conditional>@get-dist-data
       <install-source-root>$(HERE)
+;
+
+install dist-version
+    : VERSION.txt
+    : <conditional>@get-dist-data
 ;
 
 install dist-mod

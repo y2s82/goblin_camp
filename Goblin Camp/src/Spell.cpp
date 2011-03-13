@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <boost/algorithm/string.hpp>
+#include <boost/serialization/list.hpp>
+
 #include "Spell.hpp"
 #include "Game.hpp"
 #include "Random.hpp"
@@ -238,4 +241,32 @@ void Spell::LoadPresets(std::string filename) {
 
 	SpellListener listener = SpellListener();
 	parser.run(filename.c_str(), &listener);
+}
+
+void Spell::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & graphic;
+	std::string spellType(Spell::SpellTypeToString(type));
+	ar & spellType;
+	ar & dead;
+	ar & attacks;
+	ar & immaterial;
+}
+
+void Spell::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<Entity>(*this);
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & graphic;
+	std::string typeName;
+	ar & typeName;
+	type = Spell::StringToSpellType(typeName);
+	if (type == -1) type = 0;
+	ar & dead;
+	ar & attacks;
+	ar & immaterial;
 }

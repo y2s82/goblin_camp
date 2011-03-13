@@ -18,6 +18,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <libtcod.hpp>
 #include <boost/algorithm/string.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "Job.hpp"
 #include "Announce.hpp"
@@ -26,6 +29,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "MapMarker.hpp"
 #include "Stockpile.hpp"
+#include "Door.hpp"
+#include "Farmplot.hpp"
 
 Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
 	target(tar),
@@ -34,6 +39,22 @@ Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory
 	item(itt),
 	flags(fla)
 {
+}
+
+void Task::save(OutputArchive& ar, const unsigned int version) const {
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
+}
+
+void Task::load(InputArchive& ar, const unsigned int version) {
+	ar & target;
+	ar & entity;
+	ar & action;
+	ar & item;
+	ar & flags;
 }
 
 Job::Job(std::string value, JobPriority pri, int z, bool m) :
@@ -55,6 +76,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	tool(-1),
 	markedGround(Coordinate(-1,-1)),
 	obeyTerritory(true),
+	fireAllowed(false),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
@@ -114,7 +136,6 @@ bool Job::ParentCompleted() {
 	if (!parent.lock()) return true;
 	return parent.lock()->Completed();
 }
-
 
 boost::shared_ptr<Job> Job::MoveJob(Coordinate tar) {
 	boost::shared_ptr<Job> moveJob(new Job("Move"));
@@ -247,3 +268,95 @@ bool Job::OutsideTerritory() {
 void Job::AddMapMarker(MapMarker marker) {
 	mapMarkers.push_back(Map::Inst()->AddMarker(marker));
 }
+
+void Job::AllowFire() { fireAllowed = true; }
+bool Job::InvalidFireAllowance() {
+	if (!fireAllowed) {
+		for (std::vector<Task>::iterator task = tasks.begin(); task != tasks.end(); ++task) {
+			Coordinate coord = task->target;
+			if (coord.X() < 0 || coord.X() >= Map::Inst()->Width() || coord.Y() < 0 || coord.Y() >= Map::Inst()->Height()) {
+				if (task->entity.lock()) {
+					coord = task->entity.lock()->Position();
+				}
+			}
+
+			if (coord.X() >= 0 && coord.X() < Map::Inst()->Width() && coord.Y() >= 0 && coord.Y() < Map::Inst()->Height()) {
+				if (Map::Inst()->GetFire(coord.X(), coord.Y()).lock()) return true;
+			}
+		}
+	}
+	return false;
+}
+
+void Job::save(OutputArchive& ar, const unsigned int version) const {
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<NatureObject>();
+	ar.register_type<Construction>();
+	ar.register_type<Door>();
+	ar.register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	ar & reservedSpot.get<0>();
+	ar & reservedSpot.get<1>();
+	ar & reservedSpot.get<2>();
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
+}
+
+void Job::load(InputArchive& ar, const unsigned int version) {
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<NatureObject>();
+	ar.register_type<Construction>();
+	ar.register_type<Door>();
+	ar.register_type<FarmPlot>();
+	ar & _priority;
+	ar & completion;
+	ar & preReqs;
+	ar & parent;
+	ar & npcUid;
+	ar & _zone;
+	ar & menial;
+	ar & paused;
+	ar & waitingForRemoval;
+	ar & reservedEntities;
+	boost::weak_ptr<Stockpile> sp;
+	ar & sp;
+	Coordinate location;
+	ar & location;
+	ItemType type;
+	ar & type;
+	reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
+	ar & attempts;
+	ar & attemptMax;
+	ar & connectedEntity;
+	ar & reservedContainer;
+	ar & reservedSpace;
+	ar & tool;
+	ar & name;
+	ar & tasks;
+	ar & internal;
+	ar & markedGround;
+	ar & obeyTerritory;
+}
+

@@ -13,9 +13,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
-
 #include "stdafx.hpp"
+
+#include <boost/math/constants/constants.hpp>
 
 #include "MapMarker.hpp"
 #include "Random.hpp"
@@ -48,4 +48,34 @@ int MapMarker::Graphic() const {
 
 TCODColor MapMarker::Color() const {
 	return color;
+}
+
+void MapMarker::save(OutputArchive& ar, const unsigned int version) const {
+	ar & type;
+	ar & origColor.r;
+	ar & origColor.g;
+	ar & origColor.b;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & duration;
+	ar & graphic;
+	ar & x;
+	ar & y;
+	ar & counter;
+}
+
+void MapMarker::load(InputArchive& ar, const unsigned int version) {
+	ar & type;
+	ar & origColor.r;
+	ar & origColor.g;
+	ar & origColor.b;
+	ar & color.r;
+	ar & color.g;
+	ar & color.b;
+	ar & duration;
+	ar & graphic;
+	ar & x;
+	ar & y;
+	ar & counter;
 }

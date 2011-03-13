@@ -19,6 +19,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/serialization/map.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/vector.hpp>
+
+#include <boost/algorithm/string.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+namespace py = boost::python;
+
 #include "Random.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
@@ -526,21 +538,13 @@ void Game::ResetRenderer() {
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 	if (boost::shared_ptr<Construction> construct = cons.lock()) {
-		Coordinate blueprint = Construction::Blueprint(construct->Type());
-		for (int x = construct->X(); x < construct->X() + blueprint.X(); ++x) {
-			for (int y = construct->Y(); y < construct->Y() + blueprint.Y(); ++y) {
-				Map::Inst()->SetBuildable(x,y,true);
-				Map::Inst()->SetConstruction(x,y,-1);
-			}
-		}
-
-		Script::Event::BuildingDestroyed(cons, construct->X(), construct->Y());
-
 		if (Construction::Presets[construct->type].dynamic) {
 			Game::Inst()->dynamicConstructionList.erase(construct->Uid());
 		} else {
 			Game::Inst()->staticConstructionList.erase(construct->Uid());
 		}
+
+		Script::Event::BuildingDestroyed(cons, construct->X(), construct->Y());
 	}
 }
 
@@ -987,10 +991,21 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
+			ItemType itemType = item->Type();
+
+			/* If this is a container and it contains items, then stockpile it based on the items inside
+			instead of the container's type */
+			boost::shared_ptr<Container> containerItem = boost::dynamic_pointer_cast<Container>(item);
+			if (containerItem && !containerItem->empty()) {
+				if (boost::shared_ptr<Item> innerItem = containerItem->GetFirstItem().lock()) {
+					itemType = innerItem->Type();
+				}
+			}
+
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 				if (stocki->second->stockpile) {
 					boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
-					if (sp->Allowed(Item::Presets[item->Type()].specificCategories) && !sp->Full(item->Type())) {
+					if (sp->Allowed(Item::Presets[itemType].specificCategories) && !sp->Full(itemType)) {
 
 						//Found a stockpile that both allows the item, and has space
 						int distance = Distance(sp->Center(), item->Position());
@@ -1006,7 +1021,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 				JobPriority priority;
 				if (item->IsCategory(Item::StringToItemCategory("Food"))) priority = HIGH;
 				else {
-					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(item->Type()) / (float)StockManager::Inst()->Minimum(item->Type());
+					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(itemType) / (float)StockManager::Inst()->Minimum(itemType);
 					if (stockDeficit >= 1.0) priority = LOW;
 					else if (stockDeficit > 0.25) priority = MED;
 					else priority = HIGH;
@@ -2168,4 +2183,80 @@ boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
 		return npci->second;
 	}
 	return boost::shared_ptr<NPC>();
+}
+
+void Game::save(OutputArchive& ar, const unsigned int version) const  {
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<OrganicItem>();
+	ar.register_type<FarmPlot>();
+	ar.register_type<Door>();
+	ar.register_type<SpawningPool>();
+	ar.register_type<Trap>();
+	ar.register_type<Ice>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
+	ar & marks;
+	ar & camX;
+	ar & camY;
+	ar & Faction::factions;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
+	ar & age;
+}
+
+void Game::load(InputArchive& ar, const unsigned int version) {
+	ar.register_type<Container>();
+	ar.register_type<Item>();
+	ar.register_type<Entity>();
+	ar.register_type<OrganicItem>();
+	ar.register_type<FarmPlot>();
+	ar.register_type<Door>();
+	ar.register_type<SpawningPool>();
+	ar.register_type<Trap>();
+	if (version >= 1) ar.register_type<Ice>();
+	ar & season;
+	ar & time;
+	ar & orcCount;
+	ar & goblinCount;
+	ar & peacefulFaunaCount;
+	ar & safeMonths;
+	ar & marks;
+	ar & camX;
+	ar & camY;
+	ar & Faction::factions;
+	ar & npcList;
+	ar & squadList;
+	ar & hostileSquadList;
+	ar & staticConstructionList;
+	ar & dynamicConstructionList;
+	ar & itemList;
+	ar & freeItems;
+	ar & flyingItems;
+	ar & stoppedItems;
+	ar & natureList;
+	ar & waterList;
+	ar & filthList;
+	ar & bloodList;
+	ar & fireList;
+	ar & spellList;
+	ar & age;
 }

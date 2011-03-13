@@ -22,6 +22,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/algorithm/string.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/set.hpp>
+
 #include "Random.hpp"
 #include "Tile.hpp"
 #include "Announce.hpp"
@@ -125,7 +129,9 @@ void Tile::ResetType(TileType newType, float height) {
 		moveCost = 5;
 	} else if (type == TILESNOW) {
 		vis = true; walkable = true; buildable = true; low = false;
-		originalForeColor = TCODColor(Random::Generate(225, 255), Random::Generate(225, 255), Random::Generate(225, 255));
+		int colorNum = Random::Generate(195,250);
+		originalForeColor = TCODColor(colorNum + Random::Generate(-5, 5), colorNum + Random::Generate(-5, 5), 
+			colorNum + Random::Generate(-5, 5));
 		backColor = TCODColor(0, 0, 0);
 		switch (Random::Generate(9)) {
 		case 0:
@@ -308,6 +314,74 @@ void Tile::Burn(int magnitude) {
 	}
 }
 
+void Tile::save(OutputArchive& ar, const unsigned int version) const {
+	ar & type;
+	ar & vis;
+	ar & walkable;
+	ar & buildable;
+	ar & moveCost;
+	ar & construction;
+	ar & low;
+	ar & blocksWater;
+	ar & water;
+	ar & graphic;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & originalForeColor.r;
+	ar & originalForeColor.g;
+	ar & originalForeColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
+	ar & natureObject;
+	ar & npcList;
+	ar & itemList;
+	ar & filth;
+	ar & blood;
+	ar & marked;
+	ar & walkedOver;
+	ar & corruption;
+	ar & territory;
+	ar & burnt;
+	ar & fire;
+	ar & flow;
+}
+
+void Tile::load(InputArchive& ar, const unsigned int version) {
+	ar & type;
+	ar & vis;
+	ar & walkable;
+	ar & buildable;
+	ar & moveCost;
+	ar & construction;
+	ar & low;
+	ar & blocksWater;
+	ar & water;
+	ar & graphic;
+	ar & foreColor.r;
+	ar & foreColor.g;
+	ar & foreColor.b;
+	ar & originalForeColor.r;
+	ar & originalForeColor.g;
+	ar & originalForeColor.b;
+	ar & backColor.r;
+	ar & backColor.g;
+	ar & backColor.b;
+	ar & natureObject;
+	ar & npcList;
+	ar & itemList;
+	ar & filth;
+	ar & blood;
+	ar & marked;
+	ar & walkedOver;
+	ar & corruption;
+	ar & territory;
+	ar & burnt;
+	ar & fire;
+	ar & flow;
+}
+
 CacheTile::CacheTile() : walkable(true), moveCost(1), construction(false),
 	door(false), trap(false), bridge(false), moveSpeedModifier(0),
 	waterDepth(0), npcCount(0), fire(false), x(0), y(0) {}
@@ -380,4 +454,3 @@ int CacheTile::GetMoveCost() const {
 
 	return cost;
 }
-

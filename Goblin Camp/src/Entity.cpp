@@ -18,8 +18,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
+#include <boost/serialization/set.hpp>
+
 #include "Entity.hpp"
 #include "Map.hpp"
+#include "Faction.hpp"
 
 FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
 
@@ -109,3 +112,34 @@ void Entity::SetBulk(int amount) { bulk = amount; }
 int Entity::GetBulk() { return bulk; }
 void Entity::AddBulk(int amount) { bulk += amount; }
 void Entity::RemoveBulk(int amount) { bulk -= amount; }
+
+void Entity::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+	ar & uid;
+	ar & zone;
+	ar & reserved;
+	ar & name;
+	std::string factionName = Faction::FactionTypeToString(faction);
+	ar & factionName;
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
+	ar & bulk;
+}
+
+void Entity::load(InputArchive& ar, const unsigned int version) {
+	ar & x;
+	ar & y;
+	ar & uid;
+	ar & zone;
+	ar & reserved;
+	ar & name;
+	std::string factionName;
+	ar & factionName;
+	faction = Faction::StringToFactionType(factionName);
+	ar & velocity;
+	ar & nextVelocityMove;
+	ar & velocityTarget;
+	ar & bulk;
+}

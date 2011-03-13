@@ -16,15 +16,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include "Job.hpp"
+#include "data/Serialization.hpp"
 
 class JobManager {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
+	GC_SERIALIZABLE_CLASS
+	
 	JobManager();
 	static JobManager *instance;
 	std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
@@ -52,23 +48,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(JobManager, 0)
-
-template<class Archive>
-void JobManager::save(Archive & ar, const unsigned int version) const {
-	ar & availableList;
-	ar & waitingList;
-	ar & menialNPCsWaiting;
-	ar & expertNPCsWaiting;
-	ar & toolJobs;
-	ar & failList;
-}
-
-template<class Archive>
-void JobManager::load(Archive & ar, const unsigned int version) {
-	ar & availableList;
-	ar & waitingList;
-	ar & menialNPCsWaiting;
-	ar & expertNPCsWaiting;
-	ar & toolJobs;
-	ar & failList;
-}

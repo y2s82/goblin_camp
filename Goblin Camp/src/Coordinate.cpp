@@ -25,3 +25,15 @@ std::size_t hash_value(const Coordinate& coord) {
 	boost::hash_combine(seed, coord.y);
 	return seed;
 }
+
+void Coordinate::save(OutputArchive& ar, const unsigned int version) const {
+	ar & x;
+	ar & y;
+}
+
+void Coordinate::load(InputArchive& ar, const unsigned int version) {
+	if (version == 0) {
+		ar & x;
+		ar & y;
+	}
+}

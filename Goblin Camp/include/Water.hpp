@@ -16,23 +16,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <boost/enable_shared_from_this.hpp>
-#include <boost/serialization/split_member.hpp>
-
 #include <libtcod.hpp>
+
+#include "data/Serialization.hpp"
 
 class Coordinate;
 
 #define RIVERDEPTH 5000
 
 class WaterNode : public boost::enable_shared_from_this<WaterNode> {
-	friend class boost::serialization::access;
-private:
-	template<class Archive>
-	void save(Archive & ar, const unsigned int version) const;
-	template<class Archive>
-	void load(Archive & ar, const unsigned int version);
-	BOOST_SERIALIZATION_SPLIT_MEMBER()
-
+	GC_SERIALIZABLE_CLASS
+	
 	int x, y;
 	int depth;
 	int graphic;
@@ -61,33 +55,3 @@ public:
 };
 
 BOOST_CLASS_VERSION(WaterNode, 0)
-
-template<class Archive>
-void WaterNode::save(Archive & ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
-	ar & depth;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & inertCounter;
-	ar & inert;
-	ar & timeFromRiverBed;
-	ar & filth;
-}
-
-template<class Archive>
-void WaterNode::load(Archive & ar, const unsigned int version) {
-	ar & x;
-	ar & y;
-	ar & depth;
-	ar & graphic;
-	ar & color.r;
-	ar & color.g;
-	ar & color.b;
-	ar & inertCounter;
-	ar & inert;
-	ar & timeFromRiverBed;
-	ar & filth;
-}

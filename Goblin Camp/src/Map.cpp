@@ -16,6 +16,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <boost/unordered_set.hpp>
+#include <boost/algorithm/string.hpp>
+#include <boost/serialization/list.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include "Random.hpp"
 #include "Map.hpp"
@@ -782,5 +786,37 @@ bool Map::IsDangerousCache(int x, int y, int faction) const {
 void Map::TileChanged(int x, int y) {
 	if (x >= 0 && x < width && y >= 0 && y < height) {
 		changedTiles.insert(Coordinate(x,y));
+	}
+}
+
+void Map::save(OutputArchive& ar, const unsigned int version) const {
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
+		}
+	}
+	ar & width;
+	ar & height;
+	ar & mapMarkers;
+	ar & markerids;
+	ar & weather;
+}
+
+void Map::load(InputArchive& ar, const unsigned int version) {
+	for (int x = 0; x < tileMap.size(); ++x) {
+		for (int y = 0; y < tileMap[x].size(); ++y) {
+			ar & tileMap[x][y];
+		}
+	}
+	ar & width;
+	ar & height;
+	ar & mapMarkers;
+	ar & markerids;
+	if (version == 0) {
+		Direction unused;
+		ar & unused;
+	}
+	if (version >= 1) {
+		ar & weather;
 	}
 }
