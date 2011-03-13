@@ -440,7 +440,7 @@ int CacheTile::GetMoveCost() const {
 	if (!walkable) return 0;
 	int cost = moveCost;
 
-	if (fire) cost += 200; //Walking through fire... not such a good idea.
+	if (fire) cost += 500; //Walking through fire... not such a good idea.
 
 	//If a construction exists here take it into consideration
 	if (bridge) {
