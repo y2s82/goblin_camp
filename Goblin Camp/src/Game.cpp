@@ -989,10 +989,21 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
+			ItemType itemType = item->Type();
+
+			/* If this is a container and it contains items, then stockpile it based on the items inside
+			instead of the container's type */
+			boost::shared_ptr<Container> containerItem = boost::dynamic_pointer_cast<Container>(item);
+			if (containerItem && !containerItem->empty()) {
+				if (boost::shared_ptr<Item> innerItem = containerItem->GetFirstItem().lock()) {
+					itemType = innerItem->Type();
+				}
+			}
+
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 				if (stocki->second->stockpile) {
 					boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
-					if (sp->Allowed(Item::Presets[item->Type()].specificCategories) && !sp->Full(item->Type())) {
+					if (sp->Allowed(Item::Presets[itemType].specificCategories) && !sp->Full(itemType)) {
 
 						//Found a stockpile that both allows the item, and has space
 						int distance = Distance(sp->Center(), item->Position());
@@ -1008,7 +1019,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 				JobPriority priority;
 				if (item->IsCategory(Item::StringToItemCategory("Food"))) priority = HIGH;
 				else {
-					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(item->Type()) / (float)StockManager::Inst()->Minimum(item->Type());
+					float stockDeficit = (float)StockManager::Inst()->TypeQuantity(itemType) / (float)StockManager::Inst()->Minimum(itemType);
 					if (stockDeficit >= 1.0) priority = LOW;
 					else if (stockDeficit > 0.25) priority = MED;
 					else priority = HIGH;
