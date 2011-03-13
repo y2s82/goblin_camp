@@ -76,6 +76,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	tool(-1),
 	markedGround(Coordinate(-1,-1)),
 	obeyTerritory(true),
+	fireAllowed(false),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
@@ -268,6 +269,25 @@ void Job::AddMapMarker(MapMarker marker) {
 	mapMarkers.push_back(Map::Inst()->AddMarker(marker));
 }
 
+void Job::AllowFire() { fireAllowed = true; }
+bool Job::InvalidFireAllowance() {
+	if (!fireAllowed) {
+		for (std::vector<Task>::iterator task = tasks.begin(); task != tasks.end(); ++task) {
+			Coordinate coord = task->target;
+			if (coord.X() < 0 || coord.X() >= Map::Inst()->Width() || coord.Y() < 0 || coord.Y() >= Map::Inst()->Height()) {
+				if (task->entity.lock()) {
+					coord = task->entity.lock()->Position();
+				}
+			}
+
+			if (coord.X() >= 0 && coord.X() < Map::Inst()->Width() && coord.Y() >= 0 && coord.Y() < Map::Inst()->Height()) {
+				if (Map::Inst()->GetFire(coord.X(), coord.Y()).lock()) return true;
+			}
+		}
+	}
+	return false;
+}
+
 void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
@@ -339,3 +359,4 @@ void Job::load(InputArchive& ar, const unsigned int version) {
 	ar & markedGround;
 	ar & obeyTerritory;
 }
+
