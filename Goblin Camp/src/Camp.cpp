@@ -230,6 +230,7 @@ inline void CreateWaterJob(boost::shared_ptr<Job> waterJob, Coordinate location)
 		waterJob->tasks.push_back(Task(MOVEADJACENT, location));
 		waterJob->tasks.push_back(Task(POUR, location));
 		waterJob->DisregardTerritory();
+		waterJob->AllowFire();
 	} else {
 		waterJob.reset();
 	}
