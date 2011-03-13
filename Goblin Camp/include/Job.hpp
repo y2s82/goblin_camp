@@ -128,6 +128,7 @@ class Job {
 	Coordinate markedGround;
 	bool obeyTerritory;
 	std::list<int> mapMarkers;
+	bool fireAllowed;
 public:
 	static boost::shared_ptr<Job> MoveJob(Coordinate);
 	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
@@ -180,6 +181,9 @@ public:
 	bool OutsideTerritory();
 
 	void AddMapMarker(MapMarker);
+
+	void AllowFire();
+	bool InvalidFireAllowance();
 };
 
 BOOST_CLASS_VERSION(Job, 0)
