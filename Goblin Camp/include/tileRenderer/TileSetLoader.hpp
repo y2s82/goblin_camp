@@ -41,6 +41,7 @@ struct TilesetModMetadata {
 
 namespace TileSetLoader
 {
+	boost::shared_ptr<TileSet> LoadTileSet(std::string name);
 	boost::shared_ptr<TileSet> LoadTileSet(boost::filesystem::path path);
 	TileSetMetadata LoadTileSetMetadata(boost::filesystem::path path);
 	std::list<TilesetModMetadata> LoadTilesetModMetadata(boost::filesystem::path path);

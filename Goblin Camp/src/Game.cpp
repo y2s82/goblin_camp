@@ -61,10 +61,6 @@ namespace py = boost::python;
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "MathEx.hpp"
 
-// TODO: Temporary
-#include "data/Paths.hpp"
-
-
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
 
@@ -519,15 +515,9 @@ void Game::ResetRenderer() {
 	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
-		
-		// Resolve path
-		boost::filesystem::path tilesetPath(Paths::Get(Paths::CoreTilesets) / tilesetName);
-		if (!boost::filesystem::is_directory(tilesetPath)) {
-			tilesetPath = Paths::Get(Paths::Tilesets) / tilesetName;
-		}
-		
+				
 		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
-		boost::shared_ptr<TileSet> tileSet = TileSetLoader::LoadTileSet(tilesetPath);
+		boost::shared_ptr<TileSet> tileSet = TileSetLoader::LoadTileSet(tilesetName);
 		if (tileSet)
 		{
 			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, tileSet, buffer));

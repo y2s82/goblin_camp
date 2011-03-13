@@ -38,9 +38,7 @@ enum SpriteType
 /****************
 /* Sprite
 /* Description of a single tile that can be drawn. 
-/* Supports animation and connection maps in addition to simple single titles.
-/*
-/* TODO: Animation supporting connection maps?
+/* Supports animation and connection maps in addition to just single tiles.
 /****************/
 class Sprite
 {
@@ -59,6 +57,7 @@ public:
 
 	bool Exists() const;
 	bool IsConnectionMap() const;
+	bool IsTwoLayeredConnectionMap() const;
 	bool IsAnimated() const;
 
 	// Standard Tile Drawing
@@ -86,6 +85,9 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	std::vector<int> indices;
 	for(; start != end; ++start) {
 		indices.push_back(*start);
+	}
+	if (indices.size() == 0) {
+		return;
 	}
 
 	// Assume all tiles are for animation if it isn't a connection map

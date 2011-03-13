@@ -25,6 +25,7 @@ public:
 	explicit NPCSprite();
 	explicit NPCSprite(const Sprite& sprite);
 	explicit NPCSprite(const std::vector<Sprite>& sprites, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes);
+	explicit NPCSprite(const std::vector<Sprite>& sprites, const std::vector<Sprite>& weaponOverlays, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes);
 	~NPCSprite();
 
 	bool IsEquipmentAware() const;
@@ -35,7 +36,9 @@ public:
 
 private:
 	std::vector<Sprite> sprites;
+	std::vector<Sprite> weaponOverlays;
 	bool equipmentAware;
+	bool paperdoll;
 	std::vector<std::string> weaponTypeNames;
 	std::vector<std::string> armourTypeNames;
 };
@@ -52,13 +55,17 @@ public:
 	void AddSpriteFrame(int frame);
 	void SetFPS(int fps);
 	void SetEquipmentMap(bool equipmentMap);
+	void SetPaperdoll(bool paperDoll);
+	void AddWeaponOverlay(int index);
 	void AddArmourType(std::string armourType);
 	void AddWeaponType(std::string weaponType);
 	
 private:
 	std::vector<int> frames;
+	std::vector<int> weaponOverlayIndices;
 	std::vector<std::string> armourTypes;
 	std::vector<std::string> weaponTypes;
 	int frameRate;
 	bool equipmentMap;
+	bool paperdoll;
 };

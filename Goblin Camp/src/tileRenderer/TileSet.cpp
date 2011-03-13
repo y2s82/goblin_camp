@@ -37,7 +37,6 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	nonTerritoryOverlay(),
 	territoryOverlay(),
 	markedOverlay(),
-	corruptionTile(),
 	marker(),
 	blood(),
 	defaultUnderConstructionSprite(),
@@ -57,12 +56,10 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 	spellSpriteLookup(),
 	spellSpriteSets(),
 	fireTile(),
-	defaultTerrainTile(),
-	detailRange(0),
-	detailSprites()
+	defaultTerrainTile()
 	{
 		for (int i = 0; i < terrainTiles.size(); ++i) {
-			terrainTiles[i] = Sprite();
+			terrainTiles[i] = TerrainSprite();
 		}
 		for (int i = 0; i < placeableCursors.size(); ++i) {
 			placeableCursors[i] = Sprite();
@@ -99,24 +96,20 @@ std::string TileSet::GetDescription() const {
 	return description;
 }
 
+bool TileSet::IsIceSupported() const {
+	return waterTile.IsTwoLayeredConnectionMap() || iceTile.Exists();
+}
+
 void TileSet::DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	markedOverlay.Draw(dst, dstRect);
 }
 
+void TileSet::DrawMarkedOverlay(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+	markedOverlay.Draw(connected, dst, dstRect);
+}
+
 void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
 	marker.Draw(dst, dstRect);
-}
-
-void TileSet::DrawTerrain(TileType type, Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	if (type == TILENONE || !terrainTiles.at(type).Exists()) { 
-		defaultTerrainTile.Draw(dst, dstRect);
-	} else {
-		terrainTiles.at(type).Draw(connected, dst, dstRect);
-	}
-}
-
-void TileSet::DrawCorruption(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	corruptionTile.Draw(connected, dst, dstRect);
 }
 
 void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
@@ -135,19 +128,23 @@ void TileSet::DrawIce(Sprite::LayeredConnectedFunction connected, SDL_Surface *d
 	}
 }
 
-void TileSet::DrawFilthMinor(SDL_Surface *dst, SDL_Rect * dstRect) const {
-	minorFilth.Draw(dst, dstRect);
+void TileSet::DrawFilthMinor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	minorFilth.Draw(0, connected, dst, dstRect);
 }
 
-void TileSet::DrawFilthMajor(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	majorFilth.Draw(connected, dst, dstRect);
-}
-
-void TileSet::DrawTerritoryOverlay(bool owned, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	if (owned) {
-		territoryOverlay.Draw(dst, dstRect);
+void TileSet::DrawFilthMajor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (majorFilth.Exists()) {
+		majorFilth.Draw(connected, dst, dstRect);
 	} else {
-		nonTerritoryOverlay.Draw(dst, dstRect);
+		minorFilth.Draw(1, connected, dst, dstRect);
+	}
+}
+
+void TileSet::DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+	if (owned) {
+		territoryOverlay.Draw(connected, dst, dstRect);
+	} else {
+		nonTerritoryOverlay.Draw(connected, dst, dstRect);
 	}
 }
 
@@ -321,9 +318,19 @@ void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_
 	fireTile.Draw(dst, dstRect);
 }
 
-void TileSet::DrawDetail(int detailIndex, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	if (detailIndex < detailSprites.size()) {
-		detailSprites[detailIndex].Draw(dst, dstRect);
+const TerrainSprite& TileSet::GetTerrainSprite(TileType type) const {
+	if (type == TILENONE || !terrainTiles.at(type).Exists()) {
+		return defaultTerrainTile;
+	} else {
+		return terrainTiles.at(type);
+	}
+}
+
+TerrainSprite& TileSet::GetTerrainSprite(TileType type) {
+	if (type == TILENONE || !terrainTiles.at(type).Exists()) {
+		return defaultTerrainTile;
+	} else {
+		return terrainTiles.at(type);
 	}
 }
 
@@ -432,7 +439,7 @@ void TileSet::SetVersion(std::string ver) {
 	version = ver;
 }
 
-void TileSet::SetTerrain(TileType type, const Sprite& sprite) {
+void TileSet::SetTerrain(TileType type, const TerrainSprite& sprite) {
 	if (type < 0 || type >= TILE_TYPE_COUNT) 
 		return;
 
@@ -477,10 +484,6 @@ void TileSet::SetTerritoryOverlay(const Sprite& sprite) {
 
 void TileSet::SetMarkedOverlay(const Sprite& sprite) {
 	markedOverlay = sprite;
-}
-
-void TileSet::SetCorruption(const Sprite& sprite) {
-	corruptionTile = sprite;
 }
 
 void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
@@ -594,20 +597,4 @@ void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& sprite) 
 
 void TileSet::SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite) {
 	defaultSpellSpriteSet = sprite;
-}
-
-void TileSet::AddDetailSprite(const Sprite& sprite) {
-	detailSprites.push_back(sprite);
-}
-
-void TileSet::SetDetailRange(int range) {
-	detailRange = range;
-}
-
-int TileSet::GetDetailRange() const {
-	return detailRange;
-}
-
-bool TileSet::HasTerrainDetails() const {
-	return detailRange > 0 && detailSprites.size() > 0;
 }
