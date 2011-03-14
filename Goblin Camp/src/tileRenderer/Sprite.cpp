@@ -17,10 +17,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/Sprite.hpp"
 
-Sprite::Sprite() : tiles(), texture(), type(SPRITE_Single), frameTime(15), frameCount(1) {}
-Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
+Sprite::Sprite() : tiles(), type(SPRITE_Single), frameTime(15), frameCount(1) {}
+Sprite::Sprite(int tile)
 	: tiles(),
-	  texture(tilesetTexture),
 	  type(SPRITE_Single),
 	  frameTime(15),
 	  frameCount(1)
@@ -30,9 +29,8 @@ Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
 
 Sprite::~Sprite() {}
 
-bool Sprite::Exists() const
-{
-	return tiles.size() > 0;
+bool Sprite::Exists() const {
+	return !tiles.empty();
 }
 
 bool Sprite::IsConnectionMap() const {
@@ -188,64 +186,61 @@ namespace {
 	}
 }
 
-void Sprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
-	if (Exists()) {
-		texture->DrawTile(tiles[CurrentFrame()], dst, dstRect);
-	}
+void Sprite::Draw(int screenX, int screenY) const {
+	DrawInternal(screenX, screenY, tiles[CurrentFrame()]);
 }
 	
-void Sprite::Draw(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
+void Sprite::Draw(int screenX, int screenY, ConnectedFunction connected) const {
 	if (IsConnectionMap()) {
 		if ((type & SPRITE_ExtendedConnectionMap) == SPRITE_ExtendedConnectionMap) {
 			int index = ExtConnectionIndex(connected);
-			texture->DrawTile(tiles.at(CurrentFrame() + frameCount * index), dst, dstRect);
+			DrawInternal(screenX, screenY, tiles.at(CurrentFrame() + frameCount * index));
 		} else if (type & SPRITE_NormalConnectionMap) {
 			int index = ConnectionIndex(connected(NORTH), connected(EAST), connected(SOUTH), connected(WEST));
-			texture->DrawTile(tiles.at(CurrentFrame() + frameCount * index), dst, dstRect);
+			DrawInternal(screenX, screenY, tiles.at(CurrentFrame() + frameCount * index));
 		} else {
-			DrawSimpleConnected(connected, dst, dstRect);
+			DrawSimpleConnected(screenX, screenY, connected);
 		}
 	} else {
-		Draw(dst, dstRect);
+		Draw(screenX, screenY);
 	}
 }
 
-void Sprite::Draw(int layer, LayeredConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
-	if (((type & SPRITE_TwoLayerConnectionMap) == SPRITE_TwoLayerConnectionMap) && layer > 0) {
+void Sprite::Draw(int screenX, int screenY, int connectionLayer, LayeredConnectedFunction connected) const {
+	if (((type & SPRITE_TwoLayerConnectionMap) == SPRITE_TwoLayerConnectionMap) && connectionLayer > 0) {
 		boost::array<int, 2> vertLayer = {connected(NORTH), connected(SOUTH)};
 		boost::array<int, 2> horizLayer = {connected(WEST), connected(EAST)};
 		boost::array<int, 4> cornerLayer = {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)};
 
 		for (int vertDirection = 0; vertDirection < 2; ++vertDirection) {
 			for (int horizDirection = 0; horizDirection < 2; ++horizDirection) {
-				TileSetTexture::Corner corner = static_cast<TileSetTexture::Corner>(horizDirection + 2 * vertDirection);
+				Corner corner = static_cast<Corner>(horizDirection + 2 * vertDirection);
 				int index = SecondLayerConnectionIndex(vertLayer[vertDirection], horizLayer[horizDirection], cornerLayer[corner]);
-				texture->DrawTileCorner(tiles[CurrentFrame() + frameCount * index], corner, dst, dstRect);
+				DrawInternal(screenX, screenY, tiles[CurrentFrame() + frameCount * index], corner);
 			}
 		}
 	} else {
-		Draw(connected, dst, dstRect);
+		Draw(screenX, screenY, connected);
 	}
 
 }
 
-void Sprite::DrawSimpleConnected(ConnectedFunction connected, SDL_Surface * dst, SDL_Rect * dstRect) const {
+void Sprite::DrawSimpleConnected(int screenX, int screenY, ConnectedFunction connected) const {
 	boost::array<bool, 2> vertConnected = {connected(NORTH), connected(SOUTH)};
 	boost::array<bool, 2> horizConnected = {connected(WEST), connected(EAST)};
 	boost::array<bool, 4> cornerConnected = {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)};
 	
 	for (int vertDirection = 0; vertDirection < 2; ++vertDirection) {
 		for (int horizDirection = 0; horizDirection < 2; ++horizDirection) {
-			TileSetTexture::Corner corner = static_cast<TileSetTexture::Corner>(horizDirection + 2 * vertDirection);
+			Corner corner = static_cast<Corner>(horizDirection + 2 * vertDirection);
 			int index = (vertConnected[vertDirection] ? 1 : 0) + (horizConnected[horizDirection] ? 2 : 0);
 			if (index == 3 && cornerConnected[corner]) {
 				index ++;
 			} 
-			texture->DrawTileCorner(tiles[CurrentFrame() + frameCount * index], corner, dst, dstRect);
+			DrawInternal(screenX, screenY, tiles[CurrentFrame() + frameCount * index], corner);
 		}
 	}
 }
 
-
-
-
+void Sprite::DrawInternal(int screenX, int screenY, int tile) const {}
+void Sprite::DrawInternal(int screenX, int screenY, int tile, Corner corner) const {}

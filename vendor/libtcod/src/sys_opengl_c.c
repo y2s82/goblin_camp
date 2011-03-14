@@ -283,6 +283,10 @@ bool TCOD_opengl_init_state(int conw, int conh, void *font) {
 	return true;
 }
 
+void TCOD_sys_register_OGL_renderer(OGL_renderer_t renderer) {
+	TCOD_ctx.ogl_cbk = renderer;
+}
+
 static GLuint loadShader(const char *txt, GLuint type) {
 	int success;
 	int infologLength = 0;
@@ -454,6 +458,7 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, char_t *console_buffe
 	char_t *c=console_buffer;
 	char_t *oc=prev_console_buffer;
 	int ascii;
+
 	/* update opengl data */
 	/* TODO use function pointers so that libtcod's putchar directly updates opengl data */
 	for (y=0;y<conheight;y++) {
@@ -587,6 +592,7 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, char_t *console_buffe
 			glVertex3f(-1.0f,1.0f,0.0f);
 		glEnd());
 	
+		glActiveTexture(GL_TEXTURE0);
 	    DBGCHECKGL(glBindTexture(GL_TEXTURE_2D, 0));
 	
 	    DBGCHECKGL(glUseProgramObjectARB(0));
@@ -606,6 +612,7 @@ bool TCOD_opengl_render( int oldFade, bool *ascii_updated, char_t *console_buffe
 		glVertex2i( x+conwidth, y);
 		glEnd();
 	}
+
 	return true;
 }
 

@@ -97,3 +97,17 @@ void TCODSystem::registerSDLRenderer(ITCODSDLRenderer *renderer, bool provideSur
 		TCOD_sys_register_SDL_renderer(0, false);
 	}
 }
+
+// custom post-renderer
+static ITCODOGLRenderer *oglRenderer=NULL;
+extern "C" void TCOD_COGLRenderer() {
+	if ( oglRenderer ) oglRenderer->render();
+}
+void TCODSystem::registerOGLRenderer(ITCODOGLRenderer *renderer) {
+	::oglRenderer = renderer;
+	if (renderer) {
+		TCOD_sys_register_OGL_renderer(TCOD_COGLRenderer);
+	} else {
+		TCOD_sys_register_OGL_renderer(0);
+	}
+}

@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <libtcod.hpp>
 #include "NPC.hpp"
 #include "Item.hpp"
@@ -42,7 +43,7 @@ enum CursorType
 	Cursor_Item_Mode
 };
 
-class MapRenderer
+class MapRenderer : private boost::noncopyable
 {
 public:
 	virtual ~MapRenderer() = 0;
@@ -76,6 +77,6 @@ public:
 	virtual void SetCursorMode(const ItemPreset& preset) = 0;
 	virtual void SetCursorMode(int other) = 0;
 	
-	virtual void DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) = 0;
-	virtual void DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) = 0;
+	virtual void DrawCursor(const Coordinate& pos, bool placeable) = 0;
+	virtual void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable) = 0;
 };
