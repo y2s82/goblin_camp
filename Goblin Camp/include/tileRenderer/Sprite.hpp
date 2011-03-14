@@ -142,7 +142,7 @@ public:
 	}
 
 	void Draw(int screenX, int screenY, int connectionLayer, Sprite::LayeredConnectedFunction connectedFunction) const {
-		if (ptr) ptr->Draw(screenX, screenY, connectedFunction);
+		if (ptr) ptr->Draw(screenX, screenY, connectionLayer, connectedFunction);
 	}
 
 	bool IsConnectionMap() const { return ptr && ptr->IsConnectionMap(); }
