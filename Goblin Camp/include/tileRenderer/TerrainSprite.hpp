@@ -73,7 +73,7 @@ private:
 	int numSprites;
 
 	void DrawBaseLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height) const;
-	void DrawSnowLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const;
+	void DrawSnowLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, bool corrupt = false, Sprite::ConnectedFunction corruptConnect = 0) const;
 	void DrawDetails(int screenX, int screenY, const std::vector<Sprite_ptr>& detailSprites, Coordinate coords, const PermutationTable& permTable) const;
 
 };
