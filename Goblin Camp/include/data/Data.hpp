@@ -44,7 +44,7 @@ namespace Data {
 	void GetSavedGames(std::vector<Save>&);
 	unsigned CountSavedGames();
 	bool LoadGame(const std::string&);
-	bool SaveGame(const std::string&);
+	bool SaveGame(const std::string&, bool=true);
 	
 	// font, config
 	void LoadConfig();

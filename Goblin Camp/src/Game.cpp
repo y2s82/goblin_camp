@@ -55,6 +55,7 @@ namespace py = boost::python;
 #include "UI/MessageBox.hpp"
 #include "Trap.hpp"
 #include "Faction.hpp"
+#include "data/Data.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -815,6 +816,12 @@ void Game::Update() {
 		case EarlySpring:
 			Announce::Inst()->AddMsg("Spring has begun");
 			++age;
+			if (Config::GetCVar<bool>("autosave")) {
+				if (Data::SaveGame("autosave", false))
+					Announce::Inst()->AddMsg("Autosaved");
+				else
+					Announce::Inst()->AddMsg("Failed to autosave! Refer to the logfile", TCODColor::red);
+			}
 		case Spring:
 		case LateSpring:
 			SpawnTillageJobs();
