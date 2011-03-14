@@ -119,9 +119,14 @@ void TerrainSprite::Draw(int screenX, int screenY, Coordinate coords, const Perm
 
 void TerrainSprite::DrawCorrupted(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction corruptConnected) const {
 	if (Exists()) {
-		DrawBaseLayer(screenX, screenY, coords, permTable, height);
-		corruption.Draw(screenX, screenY, corruptConnected);
-		edge.Draw(screenX, screenY, terrainConnected);
+		if (sprites.empty()) {
+			edge.Draw(screenX, screenY, terrainConnected);
+			corruption.Draw(screenX, screenY, corruptConnected);
+		} else {
+			DrawBaseLayer(screenX, screenY, coords, permTable, height);
+			corruption.Draw(screenX, screenY, corruptConnected);
+			edge.Draw(screenX, screenY, terrainConnected);
+		}
 		if (!corruptedDetails.empty()) {
 			DrawDetails(screenX, screenY, corruptedDetails, coords, permTable);
 		} else {
@@ -158,8 +163,7 @@ void TerrainSprite::DrawSnowed(int screenX, int screenY, Coordinate coords, cons
 
 void TerrainSprite::DrawSnowedAndCorrupted(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, Sprite::ConnectedFunction corruptConnected) const {
 	if (Exists() && snowSprites.size() > 0) {
-		DrawSnowLayer(screenX, screenY, coords, permTable, height, terrainConnected, snowConnected);
-		corruption.Draw(screenX, screenY, corruptConnected);
+		DrawSnowLayer(screenX, screenY, coords, permTable, height, terrainConnected, snowConnected, true, corruptConnected);
 		if (!corruptedDetails.empty()) {
 			DrawDetails(screenX, screenY, corruptedDetails, coords, permTable);
 		} else if (!snowedDetails.empty()) {
@@ -201,7 +205,7 @@ void TerrainSprite::DrawBaseLayer(int screenX, int screenY, Coordinate coords, c
 	}
 }
 
-void TerrainSprite::DrawSnowLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const {
+void TerrainSprite::DrawSnowLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, bool corrupt, Sprite::ConnectedFunction corruptConnected) const {
 	// If we don't have a snow edge or entirely connected, just render the snow sprites.
 	if ((!snowEdge.Exists() && sprites.size() > 0) || (snowConnected(NORTH) && snowConnected(EAST) && snowConnected(SOUTH) && snowConnected(WEST) && snowConnected(NORTHEAST) && snowConnected(NORTHWEST) && snowConnected(SOUTHEAST) && snowConnected(SOUTHWEST))) {
 		if (snowSprites.size() > 1) {
@@ -216,10 +220,27 @@ void TerrainSprite::DrawSnowLayer(int screenX, int screenY, Coordinate coords, c
 			// snowEdge is being used to render everything
 			snowEdge.Draw(screenX, screenY, snowConnected);
 		}
+		if (corrupt) {
+			corruption.Draw(screenX, screenY, corruptConnected);
+		}
 	} else {
 		DrawBaseLayer(screenX, screenY, coords, permTable, height);
 		edge.Draw(screenX, screenY, terrainConnected);
 		snowEdge.Draw(screenX, screenY, snowConnected);
+		if (sprites.empty()) {
+			snowEdge.Draw(screenX, screenY, snowConnected);
+			if (corrupt) {
+				corruption.Draw(screenX, screenY, corruptConnected);
+			}
+			edge.Draw(screenX, screenY, terrainConnected);
+		} else {
+			DrawBaseLayer(screenX, screenY, coords, permTable, height);
+			snowEdge.Draw(screenX, screenY, snowConnected);
+			if (corrupt) {
+				corruption.Draw(screenX, screenY, corruptConnected);
+			}
+			edge.Draw(screenX, screenY, terrainConnected);
+		}
 	}
 }
 

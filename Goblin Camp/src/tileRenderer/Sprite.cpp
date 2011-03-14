@@ -29,10 +29,6 @@ Sprite::Sprite(int tile)
 
 Sprite::~Sprite() {}
 
-bool Sprite::Exists() const {
-	return !tiles.empty();
-}
-
 bool Sprite::IsConnectionMap() const {
 	return type & SPRITE_ConnectionMap;
 }

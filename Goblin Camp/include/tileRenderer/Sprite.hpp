@@ -37,7 +37,6 @@ class Sprite : private boost::noncopyable
 public:
 	virtual ~Sprite() = 0;
 
-	bool Exists() const;
 	bool IsConnectionMap() const;
 	bool IsTwoLayeredConnectionMap() const;
 	bool IsAnimated() const;
@@ -134,7 +133,7 @@ public:
 	explicit SpritePtr(Sprite * sprite) : ptr(sprite) {}
 
 	Sprite * get() { return ptr.get(); }
-	bool Exists() const { return ptr && ptr->Exists(); }
+	bool Exists() const { return ptr; }
 
 	void Draw(int screenX, int screenY) const {	if (ptr) ptr->Draw(screenX, screenY); }; 
 
