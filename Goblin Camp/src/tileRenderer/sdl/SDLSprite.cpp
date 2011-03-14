@@ -13,17 +13,29 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-
 #include "stdafx.hpp"
-#include "tileRenderer/SpellSpriteSet.hpp"
 
-SpellSpriteSet::SpellSpriteSet() : tile() {}
+#include "tileRenderer/sdl/SDLSprite.hpp"
 
-SpellSpriteSet::SpellSpriteSet(Sprite_ptr sprite)
-	: tile(sprite) {}
+SDLSprite::SDLSprite() 
+: Sprite(),
+  renderer(0),
+  texture()
+{}
 
-SpellSpriteSet::~SpellSpriteSet() {}
+SDLSprite::SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
+	: Sprite(tile),
+	  renderer(renderer),
+	  texture(tilesetTexture)
+{
+}
 
-void SpellSpriteSet::Draw(int screenX, int screenY) const {
-	tile.Draw(screenX, screenY);
+SDLSprite::~SDLSprite() {}
+
+void SDLSprite::DrawInternal(int screenX, int screenY, int tile) const {
+	renderer->DrawSprite(screenX, screenY, texture, tile);
+}
+
+void SDLSprite::DrawInternal(int screenX, int screenY, int tile, Corner corner) const {
+	renderer->DrawSpriteCorner(screenX, screenY, texture, tile, corner);
 }

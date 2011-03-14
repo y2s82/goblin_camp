@@ -62,7 +62,7 @@ class Game {
 	friend class ConfigListener;
 	friend void SettingsMenu();
 	friend class TCODMapRenderer;
-	friend class TileSetRenderer;
+	friend class TilesetRenderer;
 	friend class NPCDialog;
 private:
 	template<class Archive>

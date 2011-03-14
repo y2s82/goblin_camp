@@ -56,6 +56,7 @@ TCOD_internal_context_t TCOD_ctx={
 	/* default renderer to use */
 	TCOD_RENDERER_GLSL,
 	NULL,
+	NULL,
 	/* fading data */
 	{0,0,0},255,
 };

@@ -23,7 +23,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 TCODMapRenderer::TCODMapRenderer(TCODConsole * mapConsole) :
 	console(mapConsole),
-	cursorChar('X')
+	cursorChar('X'),
+	upleft(0,0)
 {
 }
 
@@ -70,7 +71,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	viewportX /= charX;
 	viewportY /= charY;
 
-	Coordinate upleft(FloorToInt::convert(focusX) - (viewportW / 2), FloorToInt::convert(focusY) - (viewportH / 2));
+	upleft = Coordinate(FloorToInt::convert(focusX) - (viewportW / 2), FloorToInt::convert(focusY) - (viewportH / 2));
 
 	int screenDeltaX = upleft.X();
 	int screenDeltaY = upleft.Y();
@@ -205,9 +206,7 @@ void TCODMapRenderer::SetCursorMode(int other) {
 	cursorChar = other;
 }
 
-void TCODMapRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {
-	Coordinate upleft(FloorToInt::convert(focusX) - (console->getWidth() / 2), FloorToInt::convert(focusY) - (console->getHeight() / 2));
-
+void TCODMapRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable) {
 	for (int x = std::max(0, start.X() - upleft.X()); x <= std::min(console->getWidth() - 1, end.X() - upleft.X()); ++x)
 	{
 		for (int y = std::max(0, start.Y() - upleft.Y()); y <= std::min(console->getHeight() - 1, end.Y() - upleft.Y()); ++y)
@@ -218,9 +217,7 @@ void TCODMapRenderer::DrawCursor(const Coordinate& start, const Coordinate& end,
 	}
 }
 
-void TCODMapRenderer::DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) {
-	Coordinate upleft(FloorToInt::convert(focusX) - (console->getWidth() / 2), FloorToInt::convert(focusY) - (console->getHeight() / 2));
-
+void TCODMapRenderer::DrawCursor(const Coordinate& pos, bool placeable) {
 	if (pos.X() - upleft.X() >= 0 && pos.X() - upleft.X() < console->getWidth()
 		&& pos.Y() - upleft.Y() >= 0 && pos.Y() - upleft.Y() < console->getHeight())
 	{

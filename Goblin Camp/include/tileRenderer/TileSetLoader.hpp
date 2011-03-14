@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <libtcod.hpp>
+#include "tileRenderer/TilesetRenderer.hpp"
 #include "tileRenderer/TileSet.hpp"
 
 struct TileSetMetadata
@@ -41,8 +42,8 @@ struct TilesetModMetadata {
 
 namespace TileSetLoader
 {
-	boost::shared_ptr<TileSet> LoadTileSet(std::string name);
-	boost::shared_ptr<TileSet> LoadTileSet(boost::filesystem::path path);
+	boost::shared_ptr<TileSet> LoadTileSet(boost::shared_ptr<TilesetRenderer> spriteFactory, std::string name);
+	boost::shared_ptr<TileSet> LoadTileSet(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::filesystem::path path);
 	TileSetMetadata LoadTileSetMetadata(boost::filesystem::path path);
 	std::list<TilesetModMetadata> LoadTilesetModMetadata(boost::filesystem::path path);
 };

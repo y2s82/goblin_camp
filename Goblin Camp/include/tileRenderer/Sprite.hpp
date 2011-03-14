@@ -15,10 +15,11 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <SDL.h>
-#include <boost/shared_ptr.hpp>
+#include <boost/noncopyable.hpp>
+#include <boost/function.hpp>
 #include "Coordinate.hpp"
-#include "tileRenderer/TileSetTexture.hpp"
+#include <libtcod.hpp>
+#include "tileRenderer/Corner.hpp"
 
 enum SpriteType
 {
@@ -31,49 +32,46 @@ enum SpriteType
 	SPRITE_ConnectionMap = 0x1E // Connection Map encompasses all variants
 };
 
-/****************
-/* Sprite
-/* Description of a single tile that can be drawn. 
-/* Supports animation and connection maps in addition to just single tiles.
-/****************/
-class Sprite
+class Sprite : private boost::noncopyable
 {
-private:
-	std::vector<int> tiles;
-	boost::shared_ptr<TileSetTexture> texture;
-	SpriteType type;
-	int frameTime;
-	int frameCount;
-
 public:
-	explicit Sprite();
-	explicit Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
-	template <typename IterT> explicit Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
-	~Sprite();
+	virtual ~Sprite() = 0;
 
 	bool Exists() const;
 	bool IsConnectionMap() const;
 	bool IsTwoLayeredConnectionMap() const;
 	bool IsAnimated() const;
 
-	// Standard Tile Drawing
-	void Draw(SDL_Surface * dst, SDL_Rect * dstRect) const; 
-	
 	// Connection Map Drawing
 	typedef boost::function<bool (Direction)> ConnectedFunction;
 	typedef boost::function<int (Direction)> LayeredConnectedFunction;
 
-	void Draw(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
-	void Draw(int layer, LayeredConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	// Standard Tile Drawing
+	void Draw(int screenX, int screenY) const; 
+	void Draw(int screenX, int screenY, ConnectedFunction) const;
+	void Draw(int screenX, int screenY, int connectionLayer, LayeredConnectedFunction) const;
+
+protected:
+	explicit Sprite();
+	explicit Sprite(int tile);
+	template <typename IterT> explicit Sprite(IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
+
+	std::vector<int> tiles;
+	SpriteType type;
+	int frameTime;
+	int frameCount;
+
+	virtual void DrawInternal(int screenX, int screenY, int tile) const = 0;
+	virtual void DrawInternal(int screenX, int screenY, int tile, Corner corner) const = 0;
 
 private:
-	void DrawSimpleConnected(ConnectedFunction, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void DrawSimpleConnected(int screenX, int screenY, Sprite::ConnectedFunction) const;
 	inline int CurrentFrame() const { return (type & SPRITE_Animated) ? ((TCODSystem::getElapsedMilli() / frameTime) % frameCount) : 0; }
+
 };
 
-template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frames)
+template <typename IterT> Sprite::Sprite(IterT start, IterT end, bool connectionMap, int frameRate, int frames)
 	: tiles(),
-	  texture(tilesetTexture),
 	  type(SPRITE_Single),
 	  frameTime(1000 / frameRate),
 	  frameCount(frames > 0 ? frames : 1)
@@ -129,3 +127,31 @@ template <typename IterT> Sprite::Sprite(boost::shared_ptr<TileSetTexture> tiles
 	}
 
 }
+
+class SpritePtr {
+public:
+	explicit SpritePtr() : ptr() {}
+	explicit SpritePtr(Sprite * sprite) : ptr(sprite) {}
+
+	Sprite * get() { return ptr.get(); }
+	bool Exists() const { return ptr && ptr->Exists(); }
+
+	void Draw(int screenX, int screenY) const {	if (ptr) ptr->Draw(screenX, screenY); }; 
+
+	void Draw(int screenX, int screenY, Sprite::ConnectedFunction connectedFunction) const { 
+		if (ptr) ptr->Draw(screenX, screenY, connectedFunction); 
+	}
+
+	void Draw(int screenX, int screenY, int connectionLayer, Sprite::LayeredConnectedFunction connectedFunction) const {
+		if (ptr) ptr->Draw(screenX, screenY, connectedFunction);
+	}
+
+	bool IsConnectionMap() const { return ptr && ptr->IsConnectionMap(); }
+	bool IsTwoLayeredConnectionMap() const { return ptr && ptr->IsTwoLayeredConnectionMap(); }
+	bool IsAnimated() const { return ptr && ptr->IsAnimated(); }
+
+private:
+	boost::shared_ptr<Sprite> ptr;
+};
+
+typedef SpritePtr Sprite_ptr;

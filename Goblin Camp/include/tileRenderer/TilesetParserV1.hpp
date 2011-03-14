@@ -16,9 +16,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <libtcod.hpp>
+#include "tileRenderer/TilesetRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
@@ -27,10 +29,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 
-class TileSetParserV1 : public ITCODParserListener
+class TileSetParserV1 : public ITCODParserListener, private boost::noncopyable
 {
 public:
-	explicit TileSetParserV1();
+	explicit TileSetParserV1(boost::shared_ptr<TilesetRenderer> spriteFactory);
 	~TileSetParserV1();
 
 	boost::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
@@ -43,6 +45,7 @@ public:
 
 private:
 	TCODParser parser;
+	boost::shared_ptr<TilesetRenderer> spriteFactory;
 
 	enum SpriteSet
 	{
@@ -68,23 +71,25 @@ private:
 	int fireFPS;
 
 	struct TempConstruction {
+		boost::shared_ptr<TilesetRenderer> spriteFactory;
 		std::vector<int> mainSprites;
 		std::vector<int> underConstructionSprites;
 		bool connectionMapped;
 		int width;
-		Sprite openDoor;
+		Sprite_ptr openDoor;
 
-		TempConstruction() : mainSprites(), underConstructionSprites(), connectionMapped(false), width(1), openDoor() {}
+		TempConstruction(boost::shared_ptr<TilesetRenderer> spriteFactory) : spriteFactory(spriteFactory), mainSprites(), underConstructionSprites(), connectionMapped(false), width(1), openDoor() {}
 
 		ConstructionSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
 	TempConstruction tempConstruction;
 
 	struct TempSpell {
+		boost::shared_ptr<TilesetRenderer> spriteFactory;
 		std::vector<int> sprites;
 		int fps;
 
-		TempSpell() : sprites(), fps(15) {}
+		TempSpell(boost::shared_ptr<TilesetRenderer> spriteFactory) : spriteFactory(spriteFactory), sprites(), fps(15) {}
 
 		SpellSpriteSet Build(boost::shared_ptr<TileSetTexture> currentTexture);
 	};
@@ -94,12 +99,12 @@ private:
 	NPCSprite npcSprite;
 	NatureObjectSpriteSet natureObjectSpriteSet;
 	ItemSprite itemSprite;
-	Sprite corruptionOverride;
+	Sprite_ptr corruptionOverride;
 	
 	static const char * uninitialisedTilesetError;
 	
 	void SetCursorSprites(CursorType type, TCOD_list_t cursors);
-	Sprite ReadConnectionMap(TCOD_list_t indices);
+	Sprite_ptr ReadConnectionMap(SpriteLayerType layer, TCOD_list_t indices);
 };
 
 class TileSetMetadataParserV1 : public ITCODParserListener {

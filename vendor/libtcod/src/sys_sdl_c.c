@@ -358,6 +358,9 @@ static void TCOD_sys_render(void *vbitmap, int console_width, int console_height
 #ifndef NO_OPENGL
 	else {
 		TCOD_opengl_render(oldFade, ascii_updated, console_buffer, prev_console_buffer);
+		if (TCOD_ctx.ogl_cbk) {
+			TCOD_ctx.ogl_cbk();	
+		}
 		TCOD_opengl_swap();
 	}  
 #endif

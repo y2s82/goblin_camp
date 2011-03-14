@@ -27,14 +27,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class DrawConstructionVisitor : public ConstructionVisitor  {
 private:
-	const TileSetRenderer * tileSetRenderer;
+	const TilesetRenderer * tileSetRenderer;
 	const TileSet * tileSet;
-	Map * map;
-	SDL_Surface * dst;
-	SDL_Rect * dstRect;
+	int screenX, screenY;
 	const Coordinate& coordinate;
 public:
-	explicit DrawConstructionVisitor(const TileSetRenderer * tileSetRenderer, const TileSet * tileSet, Map * map, SDL_Surface * destination, SDL_Rect *destinationRect, const Coordinate& pos);
+	explicit DrawConstructionVisitor(const TilesetRenderer * tileSetRenderer, const TileSet * tileSet, int screenX, int screenY, const Coordinate& pos);
 	~DrawConstructionVisitor();
 
 	void Visit(FarmPlot * farmPlot);
