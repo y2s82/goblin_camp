@@ -23,7 +23,7 @@ StatusEffectSprite::StatusEffectSprite()
 	  flashRate(0)
 {}
 
-StatusEffectSprite::StatusEffectSprite(Sprite sprite, int flashRate, bool alwaysOn)
+StatusEffectSprite::StatusEffectSprite(Sprite_ptr sprite, int flashRate, bool alwaysOn)
 	: sprite(sprite),
 	  flashRate(flashRate == 0 ? 0 : 1000/(flashRate + 1)),
 	  alwaysOn(alwaysOn)
@@ -31,10 +31,10 @@ StatusEffectSprite::StatusEffectSprite(Sprite sprite, int flashRate, bool always
 	
 StatusEffectSprite::~StatusEffectSprite() {}
 
-void StatusEffectSprite::Draw(bool forceOn, SDL_Surface * dst, SDL_Rect * dstRect) const {
+void StatusEffectSprite::Draw(int screenX, int screenY, bool forceOn) const {
 	if (forceOn || flashRate == 0 || (TCODSystem::getElapsedMilli() / flashRate) % 2 == 0)
 	{
-		sprite.Draw(dst, dstRect);
+		sprite.Draw(screenX, screenY);
 	}
 }
 
@@ -44,42 +44,4 @@ bool StatusEffectSprite::IsAlwaysVisible() const {
 
 bool StatusEffectSprite::Exists() const {
 	return sprite.Exists();
-}
-
-StatusEffectSpriteFactory::StatusEffectSpriteFactory() 
-: frames(),
-  fps(10),
-  alwaysOn(false),
-  flashRate(1)
-{}
-
-StatusEffectSpriteFactory::~StatusEffectSpriteFactory() {}
-
-void StatusEffectSpriteFactory::Reset() {
-	frames.clear();
-	fps = 10;
-	alwaysOn = false;
-	flashRate = 1;
-}
-
-StatusEffectSprite StatusEffectSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	StatusEffectSprite result(Sprite(currentTexture,frames.begin(), frames.end(), false, fps), flashRate, alwaysOn);
-	Reset();
-	return result;
-}
-
-void StatusEffectSpriteFactory::AddSpriteFrame(int frame) {
-	frames.push_back(frame);
-}
-
-void StatusEffectSpriteFactory::SetFPS(int framesPerSecond) {
-	fps = framesPerSecond;
-}
-
-void StatusEffectSpriteFactory::SetAlwaysOn(bool on) {
-	alwaysOn = on;
-}
-
-void StatusEffectSpriteFactory::SetFlashRate(int rate) {
-	flashRate = rate;
 }
