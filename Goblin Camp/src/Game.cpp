@@ -47,6 +47,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/sdl/SDLTilesetRenderer.hpp"
+#include "tileRenderer/ogl/OGLTilesetRenderer.hpp"
 #include "MathEx.hpp"
 
 int Game::ItemTypeCount = 0;
@@ -500,7 +501,24 @@ void Game::ResetRenderer() {
 	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
 
 	TCODSystem::registerSDLRenderer(0);
-	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
+	TCODSystem::registerOGLRenderer(0);
+	if (renderer_type == TCOD_RENDERER_GLSL && useTileset) {
+		std::string tilesetName = Config::GetStringCVar("tileset");
+		if (tilesetName.size() == 0) tilesetName = "default";
+				
+		boost::shared_ptr<OGLTilesetRenderer> tilesetRenderer(new OGLTilesetRenderer(width, height, buffer));
+
+		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
+		boost::shared_ptr<TileSet> tileSet = TileSetLoader::LoadTileSet(tilesetRenderer, tilesetName);
+		if (tileSet) {
+			tilesetRenderer->SetTileset(tileSet);
+			tilesetRenderer->AssembleTextures();
+			renderer = tilesetRenderer;
+		} else {
+			TCODSystem::registerOGLRenderer(0);
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+		}
+	} else if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
 				

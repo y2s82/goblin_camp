@@ -30,7 +30,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class SDLSprite : public Sprite
 {
 public:
-	explicit SDLSprite();
 	explicit SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
 	template <typename IterT> explicit SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	~SDLSprite();

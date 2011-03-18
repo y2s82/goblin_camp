@@ -53,7 +53,6 @@ public:
 	explicit TilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole = 0);
 	virtual ~TilesetRenderer() = 0;
 
-	virtual Sprite_ptr CreateSprite() = 0;
 	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) = 0;
 	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1) = 0;
 	template <typename IterT> static Sprite_ptr CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
@@ -81,6 +80,8 @@ protected:
 	virtual void PreDrawMap() = 0;
 	virtual void PostDrawMap() = 0;
 	virtual void DrawNullTile(int screenX, int screenY) = 0;
+
+	virtual void TilesetChanged();
 
 	TCODConsole * tcodConsole;
 	PermutationTable permutationTable;

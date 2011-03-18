@@ -280,6 +280,8 @@ public :
 	static void registerSDLRenderer(ITCODSDLRenderer *renderer, bool provideSurfaceWithAlpha = false);
 	static void registerOGLRenderer(ITCODOGLRenderer *renderer);
 
+	static char asciiToTCOD(char c);
+
 	/**
 	@PageName system_sdlcbk
 	@FuncTitle Managing screen redraw

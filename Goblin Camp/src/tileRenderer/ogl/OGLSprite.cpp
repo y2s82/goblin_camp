@@ -15,21 +15,20 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include "tileRenderer/sdl/SDLSprite.hpp"
+#include "tileRenderer/ogl/OGLSprite.hpp"
 
-SDLSprite::SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile)
+OGLSprite::OGLSprite(OGLTilesetRenderer * const renderer, int tile)
 	: Sprite(tile),
-	  renderer(renderer),
-	  texture(tilesetTexture)
+	  renderer(renderer)
 {
 }
 
-SDLSprite::~SDLSprite() {}
+OGLSprite::~OGLSprite() {}
 
-void SDLSprite::DrawInternal(int screenX, int screenY, int tile) const {
-	renderer->DrawSprite(screenX, screenY, texture, tile);
+void OGLSprite::DrawInternal(int screenX, int screenY, int tile) const {
+	renderer->DrawSprite(screenX, screenY, tile);
 }
 
-void SDLSprite::DrawInternal(int screenX, int screenY, int tile, Corner corner) const {
-	renderer->DrawSpriteCorner(screenX, screenY, texture, tile, corner);
+void OGLSprite::DrawInternal(int screenX, int screenY, int tile, Corner corner) const {
+	renderer->DrawSpriteCorner(screenX, screenY, tile, corner);
 }

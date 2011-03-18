@@ -194,6 +194,10 @@ int TCODConsole::getChar(int x, int y) const {
 	return TCOD_console_get_char(data,x,y);
 }
 
+int TCODConsole::getCharCode(int x, int y) const {
+	return TCOD_console_get_char_code(data,x,y);
+}
+
 void TCODConsole::setCharBackground(int x, int y, const TCODColor &col, TCOD_bkgnd_flag_t flag) {
 	TCOD_color_t c={col.r,col.g,col.b};
 	TCOD_console_set_char_background(data,x,y,c,flag);
