@@ -111,3 +111,7 @@ void TCODSystem::registerOGLRenderer(ITCODOGLRenderer *renderer) {
 		TCOD_sys_register_OGL_renderer(0);
 	}
 }
+
+char TCODSystem::asciiToTCOD(char c) {
+	return TCOD_sys_ascii_to_tcod(c);
+}

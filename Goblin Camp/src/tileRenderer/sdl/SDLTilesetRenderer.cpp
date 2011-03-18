@@ -55,10 +55,6 @@ SDLTilesetRenderer::SDLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 SDLTilesetRenderer::~SDLTilesetRenderer() {
 }
 
-Sprite_ptr SDLTilesetRenderer::CreateSprite() {
-	return Sprite_ptr(new SDLSprite());
-}
-
 Sprite_ptr SDLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	return Sprite_ptr(new SDLSprite(this, tilesetTexture, tile));
 }

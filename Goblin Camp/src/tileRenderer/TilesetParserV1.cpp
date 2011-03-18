@@ -458,7 +458,7 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 				sprite.SetCorruption(corruptionOverride);
 				tileSet->SetTerrain(type, sprite);
 			}
-			corruptionOverride = spriteFactory->CreateSprite();
+			corruptionOverride = Sprite_ptr();
 		}
 	}
 	else if (boost::iequals(str->getName(), "tile_texture_data")) {

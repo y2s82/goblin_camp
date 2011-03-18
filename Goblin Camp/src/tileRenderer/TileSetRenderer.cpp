@@ -473,6 +473,7 @@ void TilesetRenderer::DrawTerritoryOverlay(int screenX, int screenY, Coordinate 
 
 void TilesetRenderer::SetTileset(boost::shared_ptr<TileSet> newTileset) {
 	tileSet = newTileset;
+	TilesetChanged();
 }
 
 int TilesetRenderer::GetScreenWidth() const {
@@ -485,4 +486,7 @@ int TilesetRenderer::GetScreenHeight() const {
 
 TCODColor TilesetRenderer::GetKeyColor() const {
 	return keyColor;
+}
+
+void TilesetRenderer::TilesetChanged() {
 }

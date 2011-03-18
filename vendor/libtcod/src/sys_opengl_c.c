@@ -287,6 +287,10 @@ void TCOD_sys_register_OGL_renderer(OGL_renderer_t renderer) {
 	TCOD_ctx.ogl_cbk = renderer;
 }
 
+char TCOD_sys_ascii_to_tcod(char c) {
+	return TCOD_ctx.ascii_to_tcod[c];
+}
+
 static GLuint loadShader(const char *txt, GLuint type) {
 	int success;
 	int infologLength = 0;

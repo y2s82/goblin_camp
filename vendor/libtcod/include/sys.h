@@ -86,4 +86,5 @@ typedef void (*SDL_renderer_t) (void*sdl_surface, void *sdl_screen);
 typedef void (*OGL_renderer_t) ();
 TCODLIB_API void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer, bool provideSurfaceWithAlpha);
 TCODLIB_API void TCOD_sys_register_OGL_renderer(OGL_renderer_t renderer);
+TCODLIB_API char TCOD_sys_ascii_to_tcod(char c);
 #endif
