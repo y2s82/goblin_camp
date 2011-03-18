@@ -61,9 +61,10 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = TerrainSprite();
 		}
+		// TODO: Is this ok?
 		for (int i = 0; i < placeableCursors.size(); ++i) {
-			placeableCursors[i] = Sprite();
-			nonplaceableCursors[i] = Sprite();
+			placeableCursors[i] = Sprite_ptr();
+			nonplaceableCursors[i] = Sprite_ptr();
 		}
 		for (int i = 0; i < defaultStatusEffects.size(); ++i) {
 			defaultStatusEffects[i] = StatusEffectSprite();
@@ -100,66 +101,66 @@ bool TileSet::IsIceSupported() const {
 	return waterTile.IsTwoLayeredConnectionMap() || iceTile.Exists();
 }
 
-void TileSet::DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect* dstRect) const {
-	markedOverlay.Draw(dst, dstRect);
+void TileSet::DrawMarkedOverlay(int screenX, int screenY) const {
+	markedOverlay.Draw(screenX, screenY);
 }
 
-void TileSet::DrawMarkedOverlay(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	markedOverlay.Draw(connected, dst, dstRect);
+void TileSet::DrawMarkedOverlay(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
+	markedOverlay.Draw(screenX, screenY, connected);
 }
 
-void TileSet::DrawMarker(SDL_Surface *dst, SDL_Rect* dstRect) const {
-	marker.Draw(dst, dstRect);
+void TileSet::DrawMarker(int screenX, int screenY) const {
+	marker.Draw(screenX, screenY);
 }
 
-void TileSet::DrawBlood(Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	blood.Draw(connected, dst, dstRect);
+void TileSet::DrawBlood(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
+	blood.Draw(screenX, screenY, connected);
 }
 
-void TileSet::DrawWater(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
-	waterTile.Draw(0, connected, dst, dstRect);
+void TileSet::DrawWater(int screenX, int screenY, Sprite::LayeredConnectedFunction connected) const {
+	waterTile.Draw(screenX, screenY, 0, connected);
 }
 
-void TileSet::DrawIce(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect* dstRect) const {
+void TileSet::DrawIce(int screenX, int screenY, Sprite::LayeredConnectedFunction connected) const {
 	if (iceTile.Exists()) {
-		iceTile.Draw(connected, dst, dstRect);
+		iceTile.Draw(screenX, screenY, connected);
 	} else {
-		waterTile.Draw(1, connected, dst, dstRect);
+		waterTile.Draw(screenX, screenY, 1, connected);
 	}
 }
 
-void TileSet::DrawFilthMinor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
-	minorFilth.Draw(0, connected, dst, dstRect);
+void TileSet::DrawFilthMinor(int screenX, int screenY, Sprite::LayeredConnectedFunction connected) const {
+	minorFilth.Draw(screenX, screenY, 0, connected);
 }
 
-void TileSet::DrawFilthMajor(Sprite::LayeredConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawFilthMajor(int screenX, int screenY, Sprite::LayeredConnectedFunction connected) const {
 	if (majorFilth.Exists()) {
-		majorFilth.Draw(connected, dst, dstRect);
+		majorFilth.Draw(screenX, screenY, connected);
 	} else {
-		minorFilth.Draw(1, connected, dst, dstRect);
+		minorFilth.Draw(screenX, screenY, 1, connected);
 	}
 }
 
-void TileSet::DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction connected, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawTerritoryOverlay(int screenX, int screenY, bool owned, Sprite::ConnectedFunction connected) const {
 	if (owned) {
-		territoryOverlay.Draw(connected, dst, dstRect);
+		territoryOverlay.Draw(screenX, screenY, connected);
 	} else {
-		nonTerritoryOverlay.Draw(connected, dst, dstRect);
+		nonTerritoryOverlay.Draw(screenX, screenY, connected);
 	}
 }
 
-void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) const {
 	int hint = npc->GetGraphicsHint();
 	if (hint == -1 || hint >= npcSprites.size()) {
-		defaultNPCSprite.Draw(npc, dst, dstRect);
+		defaultNPCSprite.Draw(screenX, screenY, npc);
 	} else {
-		npcSprites[hint].Draw(npc, dst, dstRect);
+		npcSprites[hint].Draw(screenX, screenY, npc);
 	}
 
 	if ((TCODSystem::getElapsedMilli() % 1000 < 700)) {
 		if (npc->HasEffect(CARRYING)) {
 			if (boost::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
-				DrawItem(carriedItem, dst, dstRect);
+				DrawItem(screenX, screenY, carriedItem);
 			}
 		}
 		else if (boost::shared_ptr<Item> wielded = npc->Wielding().lock())
@@ -167,7 +168,7 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 			int itemHint = wielded->GetGraphicsHint();
 			if (itemHint != -1 && itemSprites[itemHint].renderWhenWielded)
 			{
-				DrawItem(wielded, dst, dstRect);
+				DrawItem(screenX, screenY, wielded);
 			}
 		}
 	}
@@ -175,7 +176,7 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 	int numActiveEffects = 0;
 	for (NPC::StatusEffectIterator iter = npc->StatusEffects()->begin(); iter != npc->StatusEffects()->end(); ++iter) {
 		if (defaultStatusEffects.at(iter->type).IsAlwaysVisible()) {
-			defaultStatusEffects.at(iter->type).Draw(false, dst, dstRect);
+			defaultStatusEffects.at(iter->type).Draw(screenX, screenY, false);
 		} else if (defaultStatusEffects.at(iter->type).Exists()) {
 			numActiveEffects++;
 		}
@@ -190,7 +191,7 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 			{
 				if (count == activeEffect)
 				{
-					sprite.Draw(numActiveEffects > 1, dst, dstRect);
+					sprite.Draw(screenX, screenY, numActiveEffects > 1);
 					break;
 				}
 				++count;
@@ -199,30 +200,30 @@ void TileSet::DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * d
 	} 
 }
 
-void TileSet::DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawNatureObject(int screenX, int screenY, boost::shared_ptr<NatureObject> plant) const {
 	int hint = plant->GetGraphicsHint();
 	if (hint == -1 || hint >= natureObjectSpriteSets.size()) {
-		defaultNatureObjectSpriteSet.tile.Draw(dst, dstRect);
+		defaultNatureObjectSpriteSet.tile.Draw(screenX, screenY);
 	} else {
-		natureObjectSpriteSets[hint].tile.Draw(dst, dstRect);
+		natureObjectSpriteSets[hint].tile.Draw(screenX, screenY);
 	}
 }
 
-void TileSet::DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) const {
 	int hint = item->GetGraphicsHint();
 	if (hint == -1 || hint >= itemSprites.size()) {
-		defaultItemSprite.tile.Draw(dst, dstRect);
+		defaultItemSprite.tile.Draw(screenX, screenY);
 	} else {
-		itemSprites[hint].tile.Draw(dst, dstRect);
+		itemSprites[hint].tile.Draw(screenX, screenY);
 	}
 }
 
-void TileSet::DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawOpenDoor(int screenX, int screenY, Door * door, const Coordinate& worldPos) const {
 	int hint = door->GetGraphicsHint();
 	if (hint == -1 || hint >= constructionSprites.size()) {
-		defaultConstructionSprite.DrawOpen(worldPos - door->Position(), dst, dstRect);
+		defaultConstructionSprite.DrawOpen(screenX, screenY, worldPos - door->Position());
 	} else {
-		constructionSprites[hint].DrawOpen(worldPos - door->Position(), dst, dstRect);
+		constructionSprites[hint].DrawOpen(screenX, screenY, worldPos - door->Position());
 	}
 }
 
@@ -237,85 +238,85 @@ namespace {
 	}
 }
 
-void TileSet::DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawBaseConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const {
 	int hint = construction->GetGraphicsHint();
 	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = construction->Type();
-		spriteSet.Draw(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
+		spriteSet.Draw(screenX, screenY, boost::bind(&ConstructionConnectTo, type, worldPos, _1));
 	} else {
-		spriteSet.Draw(worldPos - construction->Position(), dst, dstRect);
+		spriteSet.Draw(screenX, screenY, worldPos - construction->Position());
 	}
 }
 
-void TileSet::DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawUnderConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const {
 	int hint = construction->GetGraphicsHint();
 	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.HasUnderConstructionSprites()) {
 		if (spriteSet.IsConnectionMap()) {
 			ConstructionType type = construction->Type();
-			spriteSet.DrawUnderConstruction(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
+			spriteSet.DrawUnderConstruction(screenX, screenY, boost::bind(&ConstructionConnectTo, type, worldPos, _1));
 		} else {
-			spriteSet.DrawUnderConstruction(worldPos - construction->Position(), dst, dstRect);
+			spriteSet.DrawUnderConstruction(screenX, screenY, worldPos - construction->Position());
 		}
 	} else {
-		defaultUnderConstructionSprite.Draw(dst, dstRect);
+		defaultUnderConstructionSprite.Draw(screenX, screenY);
 	}
 }
 
-void TileSet::DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawUnreadyTrap(int screenX, int screenY, Construction * trap, const Coordinate& worldPos) const {
 	int hint = trap->GetGraphicsHint();
 	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = trap->Type();
-		spriteSet.DrawUnreadyTrap(boost::bind(&ConstructionConnectTo, type, worldPos, _1), dst, dstRect);
+		spriteSet.DrawUnreadyTrap(screenX, screenY, boost::bind(&ConstructionConnectTo, type, worldPos, _1));
 	} else {
-		spriteSet.DrawUnreadyTrap(worldPos - trap->Position(), dst, dstRect);
+		spriteSet.DrawUnreadyTrap(screenX, screenY, worldPos - trap->Position());
 	}
 }
 
-void TileSet::DrawStockpileContents(Stockpile * stockpile, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawStockpileContents(int screenX, int screenY, Stockpile * stockpile, const Coordinate& worldPos) const {
 	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
 	if (storage && !storage->empty()) {
 		if (boost::shared_ptr<Item> item = storage->GetFirstItem().lock()) {
-			DrawItem(item, dst, dstRect);
+			DrawItem(screenX, screenY, item);
 		}
 	}
 }
 
-void TileSet::DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const {
+void TileSet::DrawCursor(int screenX, int screenY, CursorType type, int cursorHint, bool placeable) const {
 	if (type == Cursor_Item_Mode)
 	{
 		if (cursorHint == -1 || cursorHint >= itemSprites.size()) {
-			defaultItemSprite.tile.Draw(dst, dstRect);
+			defaultItemSprite.tile.Draw(screenX, screenY);
 		} else {
-			itemSprites[cursorHint].tile.Draw(dst, dstRect);
+			itemSprites[cursorHint].tile.Draw(screenX, screenY);
 		}
 	} else if (type == Cursor_NPC_Mode) {
 		if (cursorHint == -1 || cursorHint >= npcSprites.size()) {
-			defaultNPCSprite.Draw(dst, dstRect);
+			defaultNPCSprite.Draw(screenX, screenY);
 		} else {
-			npcSprites[cursorHint].Draw(dst, dstRect);
+			npcSprites[cursorHint].Draw(screenX, screenY);
 		}
 	} else {
 		if (placeable) {
-			placeableCursors.at(type).Draw(dst, dstRect);
+			placeableCursors.at(type).Draw(screenX, screenY);
 		} else {
-			nonplaceableCursors.at(type).Draw(dst, dstRect);
+			nonplaceableCursors.at(type).Draw(screenX, screenY);
 		}
 	}
 }
 
-void TileSet::DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const {
+void TileSet::DrawSpell(int screenX, int screenY, boost::shared_ptr<Spell> spell) const {
 	if (spell->GetGraphicsHint() == -1) {
-		defaultSpellSpriteSet.Draw(dst, dstRect);
+		defaultSpellSpriteSet.Draw(screenX, screenY);
 	} else {
-		spellSpriteSets[spell->GetGraphicsHint()].Draw(dst, dstRect);
+		spellSpriteSets[spell->GetGraphicsHint()].Draw(screenX, screenY);
 	}
 }
 
-void TileSet::DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const {
-	fireTile.Draw(dst, dstRect);
+void TileSet::DrawFire(int screenX, int screenY, boost::shared_ptr<FireNode> fire) const {
+	fireTile.Draw(screenX, screenY);
 }
 
 const TerrainSprite& TileSet::GetTerrainSprite(TileType type) const {
@@ -450,43 +451,43 @@ void TileSet::SetTerrain(TileType type, const TerrainSprite& sprite) {
 	}
 }
 
-void TileSet::SetWaterAndIce(const Sprite& sprite) {
+void TileSet::SetWaterAndIce(Sprite_ptr sprite) {
 	waterTile = sprite;
 }
 
-void TileSet::SetIce(const Sprite& sprite) {
+void TileSet::SetIce(Sprite_ptr sprite) {
 	iceTile = sprite;
 }
 
-void TileSet::SetFilthMinor(const Sprite& sprite) {
+void TileSet::SetFilthMinor(Sprite_ptr sprite) {
 	minorFilth = sprite;
 }
 
-void TileSet::SetFilthMajor(const Sprite& sprite) {
+void TileSet::SetFilthMajor(Sprite_ptr sprite) {
 	majorFilth = sprite;
 }
 
-void TileSet::SetMarker(const Sprite& sprite) {
+void TileSet::SetMarker(Sprite_ptr sprite) {
 	marker = sprite;
 }
 
-void TileSet::SetBlood(const Sprite& sprite) {
+void TileSet::SetBlood(Sprite_ptr sprite) {
 	blood = sprite;
 }
 
-void TileSet::SetNonTerritoryOverlay(const Sprite& sprite) {
+void TileSet::SetNonTerritoryOverlay(Sprite_ptr sprite) {
 	nonTerritoryOverlay = sprite;
 }
 
-void TileSet::SetTerritoryOverlay(const Sprite& sprite) {
+void TileSet::SetTerritoryOverlay(Sprite_ptr sprite) {
 	territoryOverlay = sprite;
 }
 
-void TileSet::SetMarkedOverlay(const Sprite& sprite) {
+void TileSet::SetMarkedOverlay(Sprite_ptr sprite) {
 	markedOverlay = sprite;
 }
 
-void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
+void TileSet::SetCursorSprites(CursorType type, Sprite_ptr sprite) {
 	placeableCursors[type] = sprite;
 	nonplaceableCursors[type] = sprite;
 	if (type == Cursor_None) {
@@ -499,7 +500,7 @@ void TileSet::SetCursorSprites(CursorType type, const Sprite& sprite) {
 	}
 }
 
-void TileSet::SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite) {
+void TileSet::SetCursorSprites(CursorType type, Sprite_ptr placeableSprite, Sprite_ptr nonplaceableSprite) {
 	placeableCursors[type] = placeableSprite;
 	nonplaceableCursors[type] = nonplaceableSprite;
 	if (type == Cursor_None) {
@@ -516,11 +517,11 @@ void TileSet::SetStatusSprite(StatusEffectType statusEffect, const StatusEffectS
 	defaultStatusEffects[statusEffect] = sprite;
 }
 
-void TileSet::SetDefaultUnderConstructionSprite(const Sprite& sprite) {
+void TileSet::SetDefaultUnderConstructionSprite(Sprite_ptr sprite) {
 	defaultUnderConstructionSprite = sprite;
 }
 
-void TileSet::SetFireSprite(const Sprite& sprite) {
+void TileSet::SetFireSprite(Sprite_ptr sprite) {
 	fireTile = sprite;
 }
 

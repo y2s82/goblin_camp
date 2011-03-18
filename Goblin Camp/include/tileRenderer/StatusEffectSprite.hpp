@@ -22,37 +22,15 @@ class StatusEffectSprite
 {
 public:
 	explicit StatusEffectSprite();
-	explicit StatusEffectSprite(Sprite sprite, int flashRate, bool alwaysOn);
+	explicit StatusEffectSprite(Sprite_ptr sprite, int flashRate, bool alwaysOn);
 	~StatusEffectSprite();
 
-	void Draw(bool forceOn, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void Draw(int screenX, int screenY, bool forceOn) const;
 	bool IsAlwaysVisible() const;
 	bool Exists() const;
 	
 private:
-	Sprite sprite;
+	Sprite_ptr sprite;
 	bool alwaysOn;
 	int flashRate;
 };
-
-class StatusEffectSpriteFactory
-{
-public:
-	explicit StatusEffectSpriteFactory();
-	~StatusEffectSpriteFactory();
-
-	void Reset();
-	StatusEffectSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
-
-	void AddSpriteFrame(int frame);
-	void SetFPS(int fps);
-	void SetAlwaysOn(bool alwaysOn);
-	void SetFlashRate(int flashRate);
-	
-private:
-	std::vector<int> frames;
-	int fps;
-	bool alwaysOn;
-	int flashRate;
-};
-

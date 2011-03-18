@@ -41,6 +41,12 @@ public :
 	virtual void render(void *sdlSurface, void*sdlScreen) = 0;
 };
 
+class TCODLIB_API ITCODOGLRenderer {
+public :
+	virtual ~ITCODOGLRenderer() {}
+	virtual void render() = 0;
+};
+
 class TCODLIB_API TCODSystem {
 public :
 	/**
@@ -272,6 +278,9 @@ public :
 		libtcod.sys_register_SDL_renderer(my_renderer)
 	*/
 	static void registerSDLRenderer(ITCODSDLRenderer *renderer, bool provideSurfaceWithAlpha = false);
+	static void registerOGLRenderer(ITCODOGLRenderer *renderer);
+
+	static char asciiToTCOD(char c);
 
 	/**
 	@PageName system_sdlcbk

@@ -144,8 +144,9 @@ namespace {
 	}
 }
 
-TileSetParserV2::TileSetParserV2() :
+TileSetParserV2::TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactory) :
 	parser(),
+	spriteFactory(spriteFactory),
 	readTexture(false),
 	extendingExisting(false),
 	tileSet(),
@@ -214,9 +215,9 @@ void TileSetParserV2::Modify(boost::shared_ptr<TileSet> target, boost::filesyste
 void TileSetParserV2::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
 	int size = TCOD_list_size(cursors);
 	if (size == 1) {
-		tileSet->SetCursorSprites(type, Sprite(currentTexture, (intptr_t)TCOD_list_get(cursors, 0)));
+		tileSet->SetCursorSprites(type, spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, (intptr_t)TCOD_list_get(cursors, 0)));
 	} else if (size > 1) {
-		tileSet->SetCursorSprites(type, Sprite(currentTexture, (intptr_t)TCOD_list_get(cursors, 0)), Sprite(currentTexture, (intptr_t)TCOD_list_get(cursors, 1)));
+		tileSet->SetCursorSprites(type, spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, (intptr_t)TCOD_list_get(cursors, 0)), spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, (intptr_t)TCOD_list_get(cursors, 1)));
 	}
 }
 
@@ -240,8 +241,8 @@ bool TileSetParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 	// Root element for tileset extension data files
 	if (boost::iequals(str->getName(), "tileset_extension"))
 	{
-		corruptionOverride = Sprite();
-		corruptionOverlayOverride = Sprite();
+		corruptionOverride = Sprite_ptr();
+		corruptionOverlayOverride = Sprite_ptr();
 		readTexture = true;
 		return success;
 	}
@@ -357,17 +358,17 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			
 			// Terrain Modifiers
 			if (boost::iequals(name, "water")) {
-				tileSet->SetWaterAndIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetWaterAndIce(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Water, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "ice")) {
-				tileSet->SetIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetIce(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Ice, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "waterAndIce")) {
-				tileSet->SetWaterAndIce(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetWaterAndIce(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Water, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "minorFilth")) {
-				tileSet->SetFilthMinor(Sprite(currentTexture, value.i));
+				tileSet->SetFilthMinor(spriteFactory->CreateSprite(SPRITELAYER_Filth, currentTexture, value.i));
 			} else if (boost::iequals(name, "majorFilth")) {
-				tileSet->SetFilthMajor(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetFilthMajor(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Filth, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "filth")) {
-				tileSet->SetFilthMinor(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetFilthMinor(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Filth, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "marker")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
 					markerFrames.push_back(*iter);
@@ -375,20 +376,20 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} else if (boost::iequals(name, "markerFPS")) {
 				markerFPS = value.i;
 			} else if (boost::iequals(name, "blood")) {
-				tileSet->SetBlood(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetBlood(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Blood, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} 
 			
 			// Overlays
 			else if (boost::iequals(name, "nonTerritory")) {
-				tileSet->SetNonTerritoryOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetNonTerritoryOverlay(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Territory, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "territory")) {
-				tileSet->SetTerritoryOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetTerritoryOverlay(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Territory, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "marked")) {
-				tileSet->SetMarkedOverlay(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				tileSet->SetMarkedOverlay(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Marked, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "corruption")) {
-				corruptionOverride = Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true);
+				corruptionOverride = TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_TerrainOverlay, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true);
 			} else if (boost::iequals(name, "corruptionOverlay")) {
-				corruptionOverlayOverride = Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true);
+				corruptionOverlayOverride = TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_CorruptionOverlay, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true);
 			}
 
 			// Cursors
@@ -423,7 +424,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} 
 						
 			else if (boost::iequals(name, "defaultUnderconstruction")) {
-				tileSet->SetDefaultUnderConstructionSprite(Sprite(currentTexture, value.i));
+				tileSet->SetDefaultUnderConstructionSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, value.i));
 			}
 
 			// Capture fps/sprite set and build fire from this later
@@ -449,28 +450,28 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				terrainSpriteFactory.SetSnowEdgeSpriteIndices((intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list));
 			} else if (boost::iequals(name, "details")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
-					terrainSpriteFactory.AddDetailSprite(Sprite(currentTexture, *iter));
+					terrainSpriteFactory.AddDetailSprite(spriteFactory->CreateSprite(SPRITELAYER_TerrainDetail, currentTexture, *iter));
 				}
 			} else if (boost::iequals(name, "burntDetails")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
-					terrainSpriteFactory.AddBurntDetailSprite(Sprite(currentTexture, *iter));
+					terrainSpriteFactory.AddBurntDetailSprite(spriteFactory->CreateSprite(SPRITELAYER_TerrainDetail, currentTexture, *iter));
 				}
 			} else if (boost::iequals(name, "snowedDetails")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
-					terrainSpriteFactory.AddSnowedDetailSprite(Sprite(currentTexture, *iter));
+					terrainSpriteFactory.AddSnowedDetailSprite(spriteFactory->CreateSprite(SPRITELAYER_TerrainDetail, currentTexture, *iter));
 				}
 			} else if (boost::iequals(name, "corruptDetails")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
-					terrainSpriteFactory.AddCorruptedDetailSprite(Sprite(currentTexture, *iter));
+					terrainSpriteFactory.AddCorruptedDetailSprite(spriteFactory->CreateSprite(SPRITELAYER_TerrainDetail, currentTexture, *iter));
 				}
 			} else if (boost::iequals(name, "detailsChance")) {
 				terrainSpriteFactory.SetDetailsChance(value.f);
 			} else if (boost::iequals(name, "corruption")) {
-				terrainSpriteFactory.SetCorruptionSprite(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				terrainSpriteFactory.SetCorruptionSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_TerrainOverlay, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "corruptionOverlay")) {
-				terrainSpriteFactory.SetCorruptionOverlaySprite(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				terrainSpriteFactory.SetCorruptionOverlaySprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_CorruptionOverlay, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} else if (boost::iequals(name, "burntOverlay")) {
-				terrainSpriteFactory.SetBurntSprite(Sprite(currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
+				terrainSpriteFactory.SetBurntSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_TerrainOverlay, currentTexture, (intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list), true));
 			} 
 			break;
 		case PS_NPC: 
@@ -513,7 +514,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} else if (boost::iequals(name, "unreadyTrapSprites")) {
 				constructionFactory.SetUnreadyTrapSpriteIndices((intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list));
 			} else if (boost::iequals(name, "openSprite")) {
-				constructionFactory.SetOpenDoorSprite(Sprite(currentTexture, value.i));
+				constructionFactory.SetOpenDoorSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, value.i));
 			} else if (boost::iequals(name, "width")) {
 				constructionFactory.SetWidth(value.i);
 			} else if (boost::iequals(name, "fps")) {
@@ -610,10 +611,10 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		ApplyCorruptionOverrides();
 	} else if (boost::iequals(str->getName(), "texture")) {
 		if (fireFrames.size() > 0) {
-			tileSet->SetFireSprite(Sprite(currentTexture, fireFrames.begin(), fireFrames.end(), false, fireFPS));
+			tileSet->SetFireSprite(spriteFactory->CreateSprite(SPRITELAYER_Fire, currentTexture, fireFrames, false, fireFPS));
 		}
 		if (markerFrames.size() > 0) {
-			tileSet->SetMarker(Sprite(currentTexture, markerFrames.begin(), markerFrames.end(), false, markerFPS));
+			tileSet->SetMarker(spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, markerFrames, false, markerFPS));
 		}
 		currentTexture = boost::shared_ptr<TileSetTexture>();
 		return success;
@@ -624,14 +625,14 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 	
 	if (boost::iequals(str->getName(), "creature_sprite")) {
 		if (name == 0) {
-			tileSet->SetDefaultNPCSprite(npcSpriteFactory.Build(currentTexture));
+			tileSet->SetDefaultNPCSprite(npcSpriteFactory.Build(spriteFactory, currentTexture));
 		} else {
-			tileSet->AddNPCSprite(std::string(name), npcSpriteFactory.Build(currentTexture));
+			tileSet->AddNPCSprite(std::string(name), npcSpriteFactory.Build(spriteFactory, currentTexture));
 		}
 		currentParsingState = PS_NORMAL;
 	} else if (boost::iequals(str->getName(), "plant_sprite")) {
 		NatureObjectSpriteSet plantSprite;
-		plantSprite.tile = animSpriteFactory.Build(currentTexture);
+		plantSprite.tile = animSpriteFactory.Build(SPRITELAYER_Nature, spriteFactory, currentTexture);
 		if (name == 0) {
 			tileSet->SetDefaultNatureObjectSpriteSet(plantSprite);
 		} else {
@@ -639,7 +640,7 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		}
 		currentParsingState = PS_NORMAL;
 	} else if (boost::iequals(str->getName(), "item_sprite")) {
-		itemSprite.tile = animSpriteFactory.Build(currentTexture);
+		itemSprite.tile = animSpriteFactory.Build(SPRITELAYER_Item, spriteFactory, currentTexture);
 		if (name == 0) {
 			tileSet->SetDefaultItemSprite(itemSprite);
 		} else {
@@ -647,7 +648,7 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		}
 		currentParsingState = PS_NORMAL;
 	} else if (boost::iequals(str->getName(), "construction_sprite")) {
-		ConstructionSprite constructionSprite = constructionFactory.Build(currentTexture);
+		ConstructionSprite constructionSprite = constructionFactory.Build(spriteFactory, currentTexture);
 		if (constructionSprite.IsValid()) {
 			if (name == 0) {
 				tileSet->SetDefaultConstructionSprite(constructionSprite);
@@ -664,9 +665,9 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		currentParsingState = PS_NORMAL;
 	} else if (boost::iequals(str->getName(), "spell_sprite")) {
 		if (name == 0) {
-			tileSet->SetDefaultSpellSpriteSet(SpellSpriteSet(animSpriteFactory.Build(currentTexture)));
+			tileSet->SetDefaultSpellSpriteSet(SpellSpriteSet(animSpriteFactory.Build(SPRITELAYER_Spell, spriteFactory, currentTexture)));
 		} else {
-			tileSet->AddSpellSpriteSet(std::string(name), SpellSpriteSet(animSpriteFactory.Build(currentTexture)));
+			tileSet->AddSpellSpriteSet(std::string(name), SpellSpriteSet(animSpriteFactory.Build(SPRITELAYER_Spell, spriteFactory, currentTexture)));
 		}
 		currentParsingState = PS_NORMAL;
 	} else if (boost::iequals(str->getName(), "status_effect_sprite")) {
@@ -675,19 +676,19 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 			if (type == HUNGER && !boost::iequals(name, "hunger")) {
 				LOG("Unknown Status Effect: " << std::string(name));
 			} else {
-				tileSet->SetStatusSprite(type, statusEffectFactory.Build(currentTexture));
+				tileSet->SetStatusSprite(type, statusEffectFactory.Build(spriteFactory, currentTexture));
 			}
 		}
 		currentParsingState = PS_NORMAL;
 	} else if (boost::iequals(str->getName(), "terrain_sprite")) {
 		if (name == 0) {
-			tileSet->SetTerrain(TILENONE, terrainSpriteFactory.Build(currentTexture));
+			tileSet->SetTerrain(TILENONE, terrainSpriteFactory.Build(spriteFactory, currentTexture));
 		} else {
 			TileType type = StringToTileType(std::string(name));
 			if (type == TILENONE) {
 				LOG("Unknown Terrain Type: " << std::string(name));
 			} else {
-				tileSet->SetTerrain(type, terrainSpriteFactory.Build(currentTexture));
+				tileSet->SetTerrain(type, terrainSpriteFactory.Build(spriteFactory, currentTexture));
 			}
 		}
 		currentParsingState = PS_NORMAL;
@@ -701,8 +702,8 @@ void TileSetParserV2::error(const char *msg) {
 	success = false;
 }
 
-Sprite TileSetParserV2::AnimatedSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	return Sprite(currentTexture, sprites.begin(), sprites.end(), false, fps);
+Sprite_ptr TileSetParserV2::AnimatedSpriteFactory::Build(SpriteLayerType layer, boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
+	return spriteFactory->CreateSprite(layer, currentTexture, sprites, false, fps);
 }
 
 
