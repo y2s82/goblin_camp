@@ -2718,6 +2718,14 @@ int NPC::GetHeight() {
 
 bool NPC::IsFlying() { return isFlying; }
 
+void NPC::SetFaction(int newFaction) {
+	if (newFaction >= 0 && newFaction < Faction::factions.size()) {
+		faction = newFaction;
+		factionPtr = Faction::factions[newFaction];
+		factionPtr->AddMember(boost::static_pointer_cast<NPC>(shared_from_this()));
+	}
+}
+
 void NPC::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
@@ -2857,4 +2865,5 @@ void NPC::load(InputArchive& ar, const unsigned int version) {
 	}
 
 	InitializeAIFunctions();
+	SetFaction(faction); //Required to initialize factionPtr
 }
