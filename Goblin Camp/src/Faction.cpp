@@ -110,6 +110,23 @@ bool Faction::IsFriendsWith(FactionType otherFaction) {
 	return friends.find(otherFaction) != friends.end();
 }
 
+void Faction::Init() {
+	factionNames.clear();
+	for (int i = 0; i < factions.size(); ++i) {
+		factionNames.insert(std::make_pair(factions[i]->name, i));
+	}
+	for (int i = 0; i < factions.size(); ++i) {
+		factions[i]->MakeFriendsWith(i);
+		factions[i]->TranslateFriends();
+	}
+}
+
+void Faction::TranslateFriends() {
+	for (std::list<std::string>::iterator namei = friendNames.begin(); namei != friendNames.end(); ++namei) {
+		friends.insert(Faction::StringToFactionType(*namei));
+	}
+}
+
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & members;
 	ar & trapVisible;
@@ -142,7 +159,7 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 		for (int i = 0; i < friendCount; ++i) {
 			std::string factionName;
 			ar & factionName;
-			friends.insert(Faction::StringToFactionType(factionName));
+			friendNames.push_back(factionName);
 		}
 	}
 }
