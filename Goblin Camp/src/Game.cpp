@@ -300,7 +300,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
-	npc->faction = NPC::Presets[type].faction;
+	npc->SetFaction(NPC::Presets[type].faction);
 	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
@@ -1642,6 +1642,9 @@ int Game::CharWidth() const { return charWidth; }
 void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
 	if (boost::shared_ptr<NPC> npc = wnpc.lock()) {
 		npcList.erase(npc->uid);
+		int faction = npc->GetFaction();
+		if (faction >= 0 && faction < Faction::factions.size())
+			Faction::factions[faction]->RemoveMember(npc);
 	}
 }
 

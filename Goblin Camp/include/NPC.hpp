@@ -46,6 +46,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 typedef int NPCType;
 
+class Faction;
+
 enum Trait {
 	FRESH,
 	CHICKENHEART,
@@ -191,6 +193,7 @@ class NPC : public Entity {
 	bool statusEffectsChanged;
 
 	void UpdateHealth();
+	boost::shared_ptr<Faction> factionPtr;
 public:
 	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
 
@@ -288,6 +291,7 @@ public:
 	void ValidateCurrentJob();
 
 	virtual int GetHeight();
+	virtual void SetFaction(int);
 };
 
 BOOST_CLASS_VERSION(NPC, 1)
