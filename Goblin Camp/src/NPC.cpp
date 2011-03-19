@@ -814,7 +814,7 @@ CONTINUEEAT:
 					TaskFinished(TASKFAILFATAL, "(FIND)Failed"); 
 					break;
 				} else {
-					if (faction == PLAYERFACTION) currentJob().lock()->ReserveEntity(foundItem);
+					if (factionPtr->IsFriendsWith(PLAYERFACTION)) currentJob().lock()->ReserveEntity(foundItem);
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
@@ -1699,7 +1699,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 		}
 
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if ((npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) || 
+			if ((!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction()) && npci->lock()->aggressive) || 
 				npci->lock() == npc->aggressor.lock() || 
 				(npc->seenFire && (npc->jobs.empty() || !boost::iequals(npc->jobs.front()->name,"Pour water")))) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
@@ -1713,7 +1713,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 				if (!surroundingsScanned) npc->ScanSurroundings(true);
 				surroundingsScanned = true;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-					if (npci->lock()->faction != npc->faction) {
+					if (!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 						JobManager::Inst()->NPCNotWaiting(npc->uid);
 						boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 						killJob->internal = true;
@@ -1746,7 +1746,7 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 	}
 
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-		if (npci->lock()->faction != animal->faction) {
+		if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 			animal->AddEffect(PANIC);
 		}
 	}
@@ -1772,7 +1772,7 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 	animal->aggressive = true;
 	animal->ScanSurroundings();
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-		if (npci->lock()->faction != animal->faction) {
+		if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 			boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 			killJob->internal = true;
 			killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
@@ -2497,8 +2497,10 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
-								if (Game::Inst()->GetNPC(*npci)->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
-								if (!onlyHostiles || (onlyHostiles && Game::Inst()->GetNPC(*npci)->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
+								if (!factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction())) threatLocation = Coordinate(tx,ty);
+								if (!onlyHostiles || 
+									(onlyHostiles && !factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction()))) 
+									nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
 							}
 						}
 						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
