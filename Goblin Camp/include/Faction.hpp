@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/weak_ptr.hpp>
 
 #include "data/Serialization.hpp"
+#include "Job.hpp"
 
 class NPC;
 class Coordinate;
@@ -32,6 +33,13 @@ class Coordinate;
 #define PLAYERFACTION 0
 
 typedef int FactionType;
+
+enum FactionGoal {
+	FACTIONDESTROY, //Destroy buildings
+	FACTIONKILL,    //Kill hostiles
+	FACTIONSTEAL,   //Steal items valuable to the faction
+	FACTIONPATROL   //Patrol area
+};
 
 class Faction {
 	GC_SERIALIZABLE_CLASS
@@ -43,6 +51,13 @@ class Faction {
 	std::string name;
 	
 	boost::shared_mutex trapVisibleMutex;
+
+	std::vector<boost::weak_ptr<Job> > jobs;
+	std::vector<FactionGoal> goals;
+
+	int activeTime;
+	int maxActiveTime;
+	bool active;
 public:
 	Faction(std::string = "Noname faction");
 	void AddMember(boost::weak_ptr<NPC>);
@@ -56,6 +71,9 @@ public:
 	static std::vector<boost::shared_ptr<Faction> > factions;
 
 	void Reset();
+	void Update();
+	bool FindJob(boost::shared_ptr<NPC>);
+	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
 };
 
-BOOST_CLASS_VERSION(Faction, 0)
+BOOST_CLASS_VERSION(Faction, 1)

@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Faction.hpp"
 #include "NPC.hpp"
+#include "Game.hpp"
 
 std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::shared_ptr<Faction> >();
@@ -28,7 +29,11 @@ std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::
 Faction::Faction(std::string vname) : 
 members(std::list<boost::weak_ptr<NPC> >()), 
 	trapVisible(std::map<Coordinate,bool>()),
-	name(vname) { }
+	name(vname),
+	activeTime(0),
+	maxActiveTime(MONTH_LENGTH),
+	active(false)
+{ }
 
 void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
 	members.push_back(newMember);
@@ -78,20 +83,44 @@ std::string Faction::FactionTypeToString(FactionType faction) {
 	return "Faction name not found";
 }
 
+//Reset() does not erase names or goals because these are defined at startup and
+//remain constant
 void Faction::Reset() {
 	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	members.clear();
 	trapVisible.clear();
+	jobs.clear();
+	activeTime = 0;
+	maxActiveTime = MONTH_LENGTH;
+	active = false;
 }
+
+void Faction::Update() {};
+
+bool Faction::FindJob(boost::shared_ptr<NPC> npc) {return false;}
+
+void Faction::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {}
 
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & members;
 	ar & trapVisible;
 	ar & name;
+	ar & jobs;
+	ar & goals;
+	ar & activeTime;
+	ar & maxActiveTime;
+	ar & active;
 }
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
 	ar & members;
 	ar & trapVisible;
 	ar & name;
+	if (version >= 1) {
+		ar & jobs;
+		ar & goals;
+		ar & activeTime;
+		ar & maxActiveTime;
+		ar & active;
+	}
 }
