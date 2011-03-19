@@ -32,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Job.hpp"
 #include "Fire.hpp"
 #include "Spell.hpp"
+#include "GCamp.hpp"
 
 #include "MapRenderer.hpp"
 #include "data/Serialization.hpp"
