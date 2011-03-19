@@ -101,6 +101,14 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {return false;}
 
 void Faction::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {}
 
+void Faction::MakeFriendsWith(FactionType otherFaction) {
+	friends.insert(otherFaction);
+}
+
+bool Faction::IsFriendsWith(FactionType otherFaction) {
+	return friends.find(otherFaction) != friends.end();
+}
+
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & members;
 	ar & trapVisible;
@@ -110,6 +118,12 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & activeTime;
 	ar & maxActiveTime;
 	ar & active;
+	std::size_t friendCount = friends.size();
+	ar & friendCount;
+	for (std::set<FactionType>::iterator factionIter = friends.begin(); factionIter != friends.end(); ++factionIter) {
+		std::string factionName = Faction::FactionTypeToString(*factionIter);
+		ar & factionName;
+	}
 }
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
@@ -122,5 +136,12 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 		ar & activeTime;
 		ar & maxActiveTime;
 		ar & active;
+		std::size_t friendCount;
+		ar & friendCount;
+		for (int i = 0; i < friendCount; ++i) {
+			std::string factionName;
+			ar & factionName;
+			friends.insert(Faction::StringToFactionType(factionName));
+		}
 	}
 }
