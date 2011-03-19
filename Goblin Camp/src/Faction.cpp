@@ -72,6 +72,7 @@ FactionType Faction::StringToFactionType(std::string name) {
 	if (factionNames.find(name) == factionNames.end()) {
 		factions.push_back(boost::shared_ptr<Faction>(new Faction(name)));
 		factionNames[name] = factions.size() - 1;
+		factions.back()->MakeFriendsWith(factions.size()-1); //A faction is always friendly with itself
 	}
 	return factionNames[name];
 }
