@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/ogl/OGLTilesetRenderer.hpp"
 #include "tileRenderer/ogl/OGLSprite.hpp"
+#include "tileRenderer/ogl/OGLTexture.hpp"
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_opengl.h>
@@ -109,13 +110,17 @@ namespace {
 OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole)
 : TilesetRenderer(screenWidth, screenHeight, mapConsole),
   rawTiles(),
-  texture(0),
-  viewportW(0), viewportH(0),
+  texture(),
   textureTilesW(0), textureTilesH(0),
+  fontTexture(),
   fontCharW(0), fontCharH(0),
   fontTexW(0), fontTexH(0),
+  consoleProgram(0), consoleVertShader(0), consoleFragShader(0),
+  consoleTextures(),
   consoleTexW(0), consoleTexH(0),
-  viewportDrawStack()
+  consoleData(),
+  viewportDrawStack(),
+  viewportW(0), viewportH(0)
 {
 	TCODSystem::registerOGLRenderer(this);
 	viewportDrawStack.resize(boost::extents[0][0]);	
@@ -163,9 +168,10 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 	boost::shared_ptr<SDL_Surface> temp(SDL_CreateRGBSurface(SDL_SWSURFACE, fontTexW, fontTexH, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	SDL_BlitSurface(tempAlpha.get(), NULL, temp.get(), NULL);
 
-	glGenTextures(1, &fontTexture);
-	glBindTexture(GL_TEXTURE_2D, fontTexture);
+	fontTexture = CreateOGLTexture();
+	glBindTexture(GL_TEXTURE_2D, *fontTexture);
 	SDL_LockSurface(temp.get());
+	
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
@@ -230,6 +236,7 @@ void OGLTilesetRenderer::TilesetChanged() {
 }
 
 void OGLTilesetRenderer::AssembleTextures() {
+	boost::shared_ptr<const unsigned int> tempTex(CreateOGLTexture());
 	GLint texSize; 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
 	
@@ -283,9 +290,8 @@ void OGLTilesetRenderer::AssembleTextures() {
 	}
 	rawTiles.clear();
 
-	glGenTextures(1, &texture);
-	CheckGL_Error("glGenTextures", __FILE__, __LINE__);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	texture = CreateOGLTexture();
+	glBindTexture(GL_TEXTURE_2D, *texture);
 	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -329,17 +335,17 @@ void OGLTilesetRenderer::render() {
 		}
 	}
 
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[Character]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RED, GL_UNSIGNED_BYTE, consoleData[Character].begin()._Ptr);
 
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[ForeCol]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, consoleData[ForeCol].begin()._Ptr);
 
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[BackCol]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, consoleData[BackCol].begin()._Ptr);
 	
 	glUseProgramObjectARB(0);
-	glBindTexture(GL_TEXTURE_2D, texture);
+	glBindTexture(GL_TEXTURE_2D, *texture);
 	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -392,19 +398,19 @@ void OGLTilesetRenderer::render() {
 
 	
 	glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, fontTexture);
+    glBindTexture(GL_TEXTURE_2D, *fontTexture);
 	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"font"),0);
 	
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[Character]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
 	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"term"),1);
 	
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[ForeCol]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
 	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"termfcol"),2);
 	
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[BackCol]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
 	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"termbcol"),3);
 	
 	glBegin(GL_QUADS);
@@ -514,23 +520,21 @@ bool OGLTilesetRenderer::InitaliseShaders() {
 	if (!LoadProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader, &consoleVertShader, &consoleFragShader, &consoleProgram)) return false;
 	
     /* Generate Textures */
-	GLuint tempTex[ConsoleTextureTypesCount];
-	glGenTextures(ConsoleTextureTypesCount, tempTex);
 	for (int i = 0; i < ConsoleTextureTypesCount; ++i) {
-		consoleTextures[i] = tempTex[i];
+		consoleTextures[i] = CreateOGLTexture();
 		consoleData[i] = std::vector<unsigned char>(consoleDataAlignment[i] * tcodConsole->getWidth() * tcodConsole->getHeight());
 		consoleDirty[i] = true;
 	}
 
 	/* Character Texture */
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[Character]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
 
     /* ForeCol Texture */
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[ForeCol]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
@@ -538,7 +542,7 @@ bool OGLTilesetRenderer::InitaliseShaders() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
 
     /* BackCol Texture */
-	glBindTexture(GL_TEXTURE_2D, consoleTextures[BackCol]);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );

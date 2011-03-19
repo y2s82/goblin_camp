@@ -51,11 +51,11 @@ private:
 	typedef std::vector<RawTileData>::iterator rawTileIterator;
 
 	// TODO: Make this OGL GLuint (need to prevent SDL\SDLOpenGL.h leaking out)
-	unsigned int texture; 
+	boost::shared_ptr<const unsigned int> texture; 
 	unsigned int textureTilesW;
 	unsigned int textureTilesH;
 
-	unsigned int fontTexture;
+	boost::shared_ptr<const unsigned int> fontTexture;
 	unsigned int fontCharW, fontCharH;
 	unsigned int fontTexW, fontTexH;
 	unsigned int consoleProgram, consoleVertShader, consoleFragShader;
@@ -66,7 +66,7 @@ private:
 		BackCol,
 		ConsoleTextureTypesCount
 	};
-	boost::array<unsigned int, ConsoleTextureTypesCount> consoleTextures;
+	boost::array<boost::shared_ptr<const unsigned int>, ConsoleTextureTypesCount> consoleTextures;
 	unsigned int consoleTexW, consoleTexH;
 	boost::array<std::vector<unsigned char>, ConsoleTextureTypesCount> consoleData;
 	static boost::array<unsigned char, ConsoleTextureTypesCount> consoleDataAlignment;
