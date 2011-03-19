@@ -49,6 +49,7 @@ class Faction {
 	std::list< boost::weak_ptr<NPC> > members;
 	std::map<Coordinate, bool> trapVisible;
 	std::set<FactionType> friends;
+	std::list<std::string> friendNames;
 	std::string name;
 	
 	boost::shared_mutex trapVisibleMutex;
@@ -78,6 +79,9 @@ public:
 
 	void MakeFriendsWith(FactionType);
 	bool IsFriendsWith(FactionType);
+	
+	static void Init();
+	void TranslateFriends();
 };
 
 BOOST_CLASS_VERSION(Faction, 1)

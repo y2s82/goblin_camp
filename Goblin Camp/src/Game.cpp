@@ -300,8 +300,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
-	npc->SetFaction(NPC::Presets[type].faction);
 	npc->InitializeAIFunctions();
+	npc->SetFaction(NPC::Presets[type].faction);
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
 	npc->graphic(NPC::Presets[type].graphic);
@@ -385,6 +385,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	}
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+	npc->factionPtr->AddMember(npc);
 
 	return npc->Uid();
 }
@@ -2253,6 +2254,7 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & camX;
 	ar & camY;
 	ar & Faction::factions;
+	Faction::Init();
 	ar & npcList;
 	ar & squadList;
 	ar & hostileSquadList;

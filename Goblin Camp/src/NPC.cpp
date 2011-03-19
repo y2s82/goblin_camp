@@ -2724,7 +2724,8 @@ void NPC::SetFaction(int newFaction) {
 	if (newFaction >= 0 && newFaction < Faction::factions.size()) {
 		faction = newFaction;
 		factionPtr = Faction::factions[newFaction];
-		factionPtr->AddMember(boost::static_pointer_cast<NPC>(shared_from_this()));
+	} else if (!Faction::factions.empty()) {
+		factionPtr = Faction::factions[0];
 	}
 }
 
