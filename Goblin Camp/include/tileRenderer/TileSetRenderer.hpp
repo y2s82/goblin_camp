@@ -20,53 +20,100 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/PermutationTable.hpp"
-#include <SDL.h>
 
-class TileSetRenderer : public MapRenderer, public ITCODSDLRenderer, private boost::noncopyable
+enum SpriteLayerType
+{
+	SPRITELAYER_TerrainBase,
+	SPRITELAYER_TerrainEdge,
+	SPRITELAYER_TerrainSnow,
+	SPRITELAYER_TerrainOverlay,
+	SPRITELAYER_TerrainDetail,
+	SPRITELAYER_Water,
+	SPRITELAYER_Ice,
+	SPRITELAYER_Filth,
+	SPRITELAYER_Blood,
+	SPRITELAYER_Construction, 
+	SPRITELAYER_Marked,
+	SPRITELAYER_Nature,
+	SPRITELAYER_NPC,
+	SPRITELAYER_Item,
+	SPRITELAYER_Fire,
+	SPRITELAYER_Spell,
+	SPRITELAYER_CorruptionOverlay,
+	SPRITELAYER_Territory,
+	SPRITELAYER_StatusEffect,
+	SPRITELAYER_TileHighlight,
+	NUM_SPRITELAYERS
+};
+
+class TilesetRenderer : public MapRenderer
 {
 	friend class DrawConstructionVisitor;
 public:
-	explicit TileSetRenderer(int screenWidth, int screenHeight, boost::shared_ptr<TileSet> tileSet, TCODConsole * mapConsole = 0);
-	~TileSetRenderer();
+	explicit TilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole = 0);
+	virtual ~TilesetRenderer() = 0;
+
+	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) = 0;
+	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1) = 0;
+	template <typename IterT> static Sprite_ptr CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
+
+	void SetTileset(boost::shared_ptr<TileSet> tileSet);
 
 	Coordinate TileAt(int screenX, int screenY, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const;
+
 	void DrawMap(Map* map, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) ;
 	void PreparePrefabs();
 	float ScrollRate() const;
+
+	int GetScreenWidth() const;
+	int GetScreenHeight() const;
+	TCODColor GetKeyColor() const;
 
 	void SetCursorMode(CursorType mode);
 	void SetCursorMode(const NPCPreset& preset);
 	void SetCursorMode(const ItemPreset& preset);
 	void SetCursorMode(int other);
-	void DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable);
-	void DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable);
+	void DrawCursor(const Coordinate& pos, bool placeable);
+	void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable);
 
-	void render(void *sdlSurface, void*sdlScreen);
-private:
+protected:
+	virtual void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) = 0;
+	virtual void PostDrawMap() = 0;
+	virtual void DrawNullTile(int screenX, int screenY) = 0;
+
+	virtual void TilesetChanged();
+
 	TCODConsole * tcodConsole;
 	PermutationTable permutationTable;
-	bool translucentUI;
-
-	// the font characters size
-	int screenWidth, screenHeight;
-	boost::shared_ptr<SDL_Surface> mapSurface;
 	boost::shared_ptr<TileSet> tileSet;
-	TCODColor keyColor;
+
+	// Current render state
+	Map * map;
+	int startPixelX, startPixelY;
+	int pixelW, pixelH;
 	int mapOffsetX, mapOffsetY; // This is the pixel offset when drawing to the viewport
-	int startTileX, startTileY;
+	int startTileX, startTileY; // Top-left tile
+	int tilesX, tilesY; // Num tiles to render in this window
 	CursorType cursorMode;
 	int cursorHint;
 	
-
-	void DrawTerrain			(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;
-	void DrawFilth				(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;
-	void DrawTerritoryOverlay	(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const;
+	void DrawTerrain			(int screenX, int screenY, Coordinate pos) const;
+	void DrawFilth				(int screenX, int screenY, Coordinate pos) const;
+	void DrawTerritoryOverlay	(int screenX, int screenY, Coordinate pos) const;
 	
-	void DrawMarkers(Map * map, int startTileX, int startTileY, int sizeX, int sizeY) const;
-	void DrawItems(int startTileX, int startTileY, int sizeX, int sizeY) const;
-	void DrawNPCs(int startTileX, int startTileY, int sizeX, int sizeY) const;
-	void DrawSpells(int startTileX, int startTileY, int sizeX, int sizeY) const;
-	void DrawFires(int startTile, int startTileY, int sizeX, int sizeY) const;
+	void DrawMarkers() const;
+	void DrawItems() const;
+	void DrawNPCs() const;
+	void DrawSpells() const;
+	void DrawFires() const;
 
-	SDL_Rect CalcDest(int mapPosX, int mapPosY) const { SDL_Rect dstRect = {tileSet->TileWidth() * (mapPosX - startTileX) + mapOffsetX, tileSet->TileHeight() * (mapPosY - startTileY) + mapOffsetY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
+private:
+	// the font characters size
+	int screenWidth, screenHeight;
+	TCODColor keyColor;
 };
+
+template <typename IterT> Sprite_ptr TilesetRenderer::CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frameCount) {
+	std::vector<int> tiles(start, end);
+	return spriteFactory->CreateSprite(spriteLayer, tilesetTexture, tiles, connectionMap, frameRate, frameCount);
+}

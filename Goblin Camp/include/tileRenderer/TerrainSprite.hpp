@@ -19,133 +19,61 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/PermutationTable.hpp"
 #include <boost/shared_ptr.hpp>
+#include "tileRenderer/TilesetTexture.hpp"
 
 class TerrainSprite
 {
 public:
 	explicit TerrainSprite();
-	explicit TerrainSprite(const Sprite& sprite);
-	explicit TerrainSprite(std::vector<Sprite> sprites,
-						   std::vector<Sprite> snowSprites,
+	explicit TerrainSprite(Sprite_ptr sprite);
+	explicit TerrainSprite(std::vector<Sprite_ptr > sprites,
+						   std::vector<Sprite_ptr > snowSprites,
 						   std::vector<float> heightSplits,
-						   Sprite edge,
-						   Sprite snowEdge,
-						   std::vector<Sprite> details,
-						   std::vector<Sprite> burntDetails,
-						   std::vector<Sprite> snowedDetails,
-						   std::vector<Sprite> corruptedDetails,
+						   Sprite_ptr edge,
+						   Sprite_ptr snowEdge,
+						   std::vector<Sprite_ptr > details,
+						   std::vector<Sprite_ptr > burntDetails,
+						   std::vector<Sprite_ptr > snowedDetails,
+						   std::vector<Sprite_ptr > corruptedDetails,
 						   int detailsChance,
-						   Sprite corruption,
-						   Sprite corruptionOverlay,
-						   Sprite burntOverlay);
+						   Sprite_ptr corruption,
+						   Sprite_ptr corruptionOverlay,
+						   Sprite_ptr burntOverlay);
 	~TerrainSprite();
 
 	bool Exists() const;
 
-	void Draw(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected) const;
-	void DrawCorrupted(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction corruptConnected) const;
-	void DrawBurnt(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction burntConnected) const;
-	void DrawSnowed(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const;
-	void DrawSnowedAndCorrupted(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, Sprite::ConnectedFunction corruptConnected) const;
-	void DrawCorruptionOverlay(SDL_Surface * dst, SDL_Rect *dstRect, Sprite::ConnectedFunction) const;
+	void Draw(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected) const;
+	void DrawCorrupted(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction corruptConnected) const;
+	void DrawBurnt(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction burntConnected) const;
+	void DrawSnowed(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const;
+	void DrawSnowedAndCorrupted(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, Sprite::ConnectedFunction corruptConnected) const;
+	void DrawCorruptionOverlay(int screenX, int screenY, Sprite::ConnectedFunction) const;
 	
-	void SetCorruption(Sprite sprite);
-	void SetCorruptionOverlay(Sprite sprite);
+	void SetCorruption(Sprite_ptr sprite);
+	void SetCorruptionOverlay(Sprite_ptr sprite);
 
 private:	
-	std::vector<Sprite> sprites;
-	std::vector<Sprite> snowSprites;
+	std::vector<Sprite_ptr> sprites;
+	std::vector<Sprite_ptr> snowSprites;
 	std::vector<float> heightSplits;
-	Sprite edge;
-	Sprite snowEdge;
-	std::vector<Sprite> details;
-	std::vector<Sprite> burntDetails;
-	std::vector<Sprite> snowedDetails;
-	std::vector<Sprite> corruptedDetails;
+	Sprite_ptr edge;
+	Sprite_ptr snowEdge;
+	std::vector<Sprite_ptr> details;
+	std::vector<Sprite_ptr> burntDetails;
+	std::vector<Sprite_ptr> snowedDetails;
+	std::vector<Sprite_ptr> corruptedDetails;
 	int detailsChance;
-	Sprite corruption;
-	Sprite corruptionOverlay;
-	Sprite burntOverlay;
+	Sprite_ptr corruption;
+	Sprite_ptr corruptionOverlay;
+	Sprite_ptr burntOverlay;
 	
 	// Just a little spice to separate details from normal sprites
 	static const int detailPermOffset = 42;
 	int numSprites;
 
-	void DrawBaseLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height) const;
-	void DrawSnowLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const;
-	void DrawDetails(SDL_Surface * dst, SDL_Rect *dstRect, const std::vector<Sprite>& detailSprites, Coordinate coords, const PermutationTable& permTable) const;
+	void DrawBaseLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height) const;
+	void DrawSnowLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, bool corrupt = false, Sprite::ConnectedFunction corruptConnect = 0) const;
+	void DrawDetails(int screenX, int screenY, const std::vector<Sprite_ptr>& detailSprites, Coordinate coords, const PermutationTable& permTable) const;
 
 };
-
-class TerrainSpriteFactory
-{
-public:
-	explicit TerrainSpriteFactory();
-	~TerrainSpriteFactory();
-	
-	void Reset();
-	TerrainSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
-
-	template <typename IterT> void SetSpriteIndices(IterT start, IterT end);
-	template <typename IterT> void SetSnowSpriteIndices(IterT start, IterT end);
-	template <typename IterT> void SetHeightSplits(IterT start, IterT end);
-	template <typename IterT> void SetEdgeSpriteIndices(IterT start, IterT end);
-	template <typename IterT> void SetSnowEdgeSpriteIndices(IterT start, IterT end);
-	void AddDetailSprite(const Sprite& sprite);
-	void AddBurntDetailSprite(const Sprite& sprite);
-	void AddSnowedDetailSprite(const Sprite& sprite);
-	void AddCorruptedDetailSprite(const Sprite& sprite);
-	void SetDetailsChance(float chance);
-	void SetCorruptionSprite(const Sprite& sprite);
-	void SetCorruptionOverlaySprite(const Sprite& sprite);
-	void SetBurntSprite(const Sprite& sprite);
-	void SetWang(bool wang);
-	void SetSnowWang(bool wang);
-private:
-	std::vector<int> spriteIndices;
-	std::vector<int> snowSpriteIndices;
-	std::vector<float> heightSplits;
-	std::vector<int> edgeIndices;
-	std::vector<int> snowEdgeIndices;
-	std::vector<Sprite> details;
-	std::vector<Sprite> burntDetails;
-	std::vector<Sprite> snowedDetails;
-	std::vector<Sprite> corruptedDetails;
-	int detailsChance;
-	Sprite corruption;
-	Sprite corruptionOverlay;
-	Sprite burntOverlay;
-	bool wang;
-	bool snowWang;
-
-};
-
-template <typename IterT> void TerrainSpriteFactory::SetSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		spriteIndices.push_back(*iter);
-	}
-}
-
-template <typename IterT> void TerrainSpriteFactory::SetSnowSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		snowSpriteIndices.push_back(*iter);
-	}
-}
-
-template <typename IterT> void TerrainSpriteFactory::SetHeightSplits(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		heightSplits.push_back(*iter);
-	}
-}
-
-template <typename IterT> void TerrainSpriteFactory::SetEdgeSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		edgeIndices.push_back(*iter);
-	}
-}
-
-template <typename IterT> void TerrainSpriteFactory::SetSnowEdgeSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		snowEdgeIndices.push_back(*iter);
-	}
-}

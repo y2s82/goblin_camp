@@ -13,17 +13,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#pragma once
 
-#include "stdafx.hpp"
-#include "tileRenderer/SpellSpriteSet.hpp"
+#include <boost/shared_ptr.hpp>
 
-SpellSpriteSet::SpellSpriteSet() : tile() {}
-
-SpellSpriteSet::SpellSpriteSet(Sprite_ptr sprite)
-	: tile(sprite) {}
-
-SpellSpriteSet::~SpellSpriteSet() {}
-
-void SpellSpriteSet::Draw(int screenX, int screenY) const {
-	tile.Draw(screenX, screenY);
-}
+boost::shared_ptr<const unsigned int> CreateOGLTexture();

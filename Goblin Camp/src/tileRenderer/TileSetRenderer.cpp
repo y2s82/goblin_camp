@@ -17,53 +17,34 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "MapMarker.hpp"
-#include "Logger.hpp"
 #include "Game.hpp"
-#include "data/Config.hpp"
 #include "MathEx.hpp"
 
 #include "tileRenderer/DrawConstructionVisitor.hpp"
  
-TileSetRenderer::TileSetRenderer(int resolutionX, int resolutionY, boost::shared_ptr<TileSet> ts, TCODConsole * mapConsole) 
+TilesetRenderer::TilesetRenderer(int resolutionX, int resolutionY, TCODConsole * mapConsole) 
 : tcodConsole(mapConsole),
   permutationTable(10, 473U),
-  translucentUI(Config::GetCVar<bool>("translucentUI")),
   screenWidth(resolutionX), 
   screenHeight(resolutionY),
   keyColor(TCODColor::magenta),
-  mapSurface(),
-  tileSet(ts),
+  tileSet(),
+  startPixelX(0),
+  startPixelY(0),
+  pixelW(0),
+  pixelH(0),
   mapOffsetX(0),
   mapOffsetY(0),
   startTileX(0),
   startTileY(0),
+  tilesX(0),
+  tilesY(0),
   cursorMode(Cursor_None),
   cursorHint(-1) {
-   Uint32 rmask, gmask, bmask, amask;
-   #if SDL_BYTEORDER == SDL_BIG_ENDIAN
-       rmask = 0xff000000;
-       gmask = 0x00ff0000;
-       bmask = 0x0000ff00;
-       amask = 0x000000ff;
-   #else
-       rmask = 0x000000ff;
-       gmask = 0x0000ff00;
-       bmask = 0x00ff0000;
-       amask = 0xff000000;
-   #endif
-   SDL_Surface * temp = SDL_CreateRGBSurface(0, MathEx::NextPowerOfTwo(screenWidth), MathEx::NextPowerOfTwo(screenHeight), 32, rmask, gmask, bmask, amask);
-   SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
-   mapSurface = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
-   SDL_FreeSurface(temp);
-
-   if (!mapSurface)
-   {
-	   LOG(SDL_GetError());
-   }
-   TCODSystem::registerSDLRenderer(this, translucentUI);
+   
 }
 
-TileSetRenderer::~TileSetRenderer() {}
+TilesetRenderer::~TilesetRenderer() {}
 
 
 namespace {
@@ -181,7 +162,7 @@ namespace {
 }
 
 
-void TileSetRenderer::PreparePrefabs() 
+void TilesetRenderer::PreparePrefabs() 
 {
 	for (std::vector<NPCPreset>::iterator npci = NPC::Presets.begin(); npci != NPC::Presets.end(); ++npci) {
 		npci->graphicsHint = tileSet->GetGraphicsHintFor(*npci);
@@ -200,7 +181,7 @@ void TileSetRenderer::PreparePrefabs()
 	}
 }
 
-Coordinate TileSetRenderer::TileAt(int x, int y, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const {
+Coordinate TilesetRenderer::TileAt(int x, int y, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const {
 	if (viewportW == -1) viewportW = screenWidth;
 	if (viewportH == -1) viewportH = screenHeight;
 
@@ -210,11 +191,11 @@ Coordinate TileSetRenderer::TileAt(int x, int y, float focusX, float focusY, int
 	return Coordinate(FloorToInt::convert((left + x) / tileSet->TileWidth()), FloorToInt::convert((up + y) / tileSet->TileHeight()));
 }
 
-void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) {
+void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) {
 	if (viewportW == -1) viewportW = screenWidth;
 	if (viewportH == -1) viewportH = screenHeight;
 
-	// Merge viewport to console
+	// Merge viewport to console (because the console is composed of discrete tiles, expand to fill the space used to render the world).
 	if (tcodConsole != 0) {
 		int charX, charY;
 		TCODSystem::getCharSize(&charX, &charY);
@@ -234,74 +215,71 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		}
 	}
 
-	SDL_Rect viewportRect;
-	viewportRect.x = viewportX;
-	viewportRect.y = viewportY;
-	viewportRect.w = viewportW;
-	viewportRect.h = viewportH;
+	PreDrawMap(viewportX, viewportY, viewportW, viewportH);
 	
-	SDL_SetClipRect(mapSurface.get(), &viewportRect);
-	
-	// These are over-estimates, sometimes fewer tiles are needed.
-	int startPixelX = FloorToInt::convert(focusX * tileSet->TileWidth() - viewportRect.w / 2);
-	int startPixelY = FloorToInt::convert(focusY * tileSet->TileHeight() - viewportRect.h / 2);
-	startTileX = FloorToInt::convert(boost::numeric_cast<float>(startPixelX) / tileSet->TileWidth());
-	startTileY = FloorToInt::convert(boost::numeric_cast<float>(startPixelY) / tileSet->TileHeight());
-	mapOffsetX = startTileX * tileSet->TileWidth() - startPixelX + viewportX;
-	mapOffsetY = startTileY * tileSet->TileHeight() - startPixelY + viewportY;
-	int tilesX = CeilToInt::convert((focusX * tileSet->TileWidth() + viewportRect.w / 2) / tileSet->TileWidth()) - startTileX;
-	int tilesY = CeilToInt::convert((focusY * tileSet->TileHeight() + viewportRect.h / 2) / tileSet->TileHeight()) - startTileY;
-	
+	// Setup rendering state
+	map = mapToDraw;
+	startPixelX = viewportX;
+	startPixelY = viewportY;
+	int absStartPixelX = FloorToInt::convert(focusX * tileSet->TileWidth() - viewportW / 2);
+	int absStartPixelY = FloorToInt::convert(focusY * tileSet->TileHeight() - viewportH / 2);
+	pixelW = viewportW;
+	pixelH = viewportH;
+	startTileX = FloorToInt::convert(boost::numeric_cast<float>(absStartPixelX) / tileSet->TileWidth());
+	startTileY = FloorToInt::convert(boost::numeric_cast<float>(absStartPixelY) / tileSet->TileHeight());
+	mapOffsetX = startTileX * tileSet->TileWidth() - absStartPixelX;
+	mapOffsetY = startTileY * tileSet->TileHeight() - absStartPixelY;
+	tilesX = CeilToInt::convert((focusX * tileSet->TileWidth() + viewportW / 2) / tileSet->TileWidth()) - startTileX;
+	tilesY = CeilToInt::convert((focusY * tileSet->TileHeight() + viewportH / 2) / tileSet->TileHeight()) - startTileY;
+
     // And then render to map
 	for (int y = 0; y < tilesY; ++y) {
 		for (int x = 0; x <= tilesX; ++x) {
-			int tileX = x + startTileX;
-			int tileY = y + startTileY;
+			Coordinate pos(x + startTileX, y + startTileY);
 			
 			// Draw Terrain
-			SDL_Rect dstRect(CalcDest(tileX, tileY));
-			if (tileX >= 0 && tileX < map->Width() && tileY >= 0 && tileY < map->Height()) {
-				DrawTerrain(map, tileX, tileY, &dstRect);			
+			if (pos.X() >= 0 && pos.X() < map->Width() && pos.Y() >= 0 && pos.Y() < map->Height()) {
+				DrawTerrain(x, y, pos);			
 				
 				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
-					if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(tileX,tileY))).lock()) {
-						DrawConstructionVisitor visitor(this, tileSet.get(), map, mapSurface.get(), &dstRect, Coordinate(tileX,tileY));
+					if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(pos.X(),pos.Y()))).lock()) {
+						DrawConstructionVisitor visitor(this, tileSet.get(), x, y, pos);
 						construction->AcceptVisitor(visitor);
 					} else  {
-						DrawFilth(map, tileX, tileY, &dstRect);
+						DrawFilth(x, y, pos);
 					}
 
-					int natNum = map->GetNatureObject(tileX, tileY);
+					int natNum = map->GetNatureObject(pos.X(), pos.Y());
 					if (natNum >= 0) {
 						boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
 						if (natureObj->Marked()) {
-							tileSet->DrawMarkedOverlay(mapSurface.get(), &dstRect);
+							tileSet->DrawMarkedOverlay(x, y);
 						}
 						if (!natureObj->IsIce()) {
-							tileSet->DrawNatureObject(natureObj, mapSurface.get(), &dstRect);
+							tileSet->DrawNatureObject(x, y, natureObj);
 						}
 					}
 				}
 
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
-					DrawTerritoryOverlay(map, tileX, tileY, &dstRect);
+					DrawTerritoryOverlay(x, y, pos);
 				}
 			}
 			else {
 				// Out of world
-				SDL_FillRect(mapSurface.get(), &dstRect, 0);
+				DrawNullTile(x, y);
 			}
 		}
 	}
 
-	DrawMarkers(map, startTileX, startTileY, tilesX, tilesY);
+	DrawMarkers();
 
 	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
-		DrawItems(startTileX, startTileY, tilesX, tilesY);
+		DrawItems();
 	}
-	DrawNPCs(startTileX, startTileY, tilesX, tilesY);
-	DrawFires(startTileX, startTileY, tilesX, tilesY);
-	DrawSpells(startTileX, startTileY, tilesX, tilesY);
+	DrawNPCs();
+	DrawFires();
+	DrawSpells();
 	
 	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
 		for (int y = 0; y < tilesY; ++y) {
@@ -311,252 +289,204 @@ void TileSetRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 				// Corruption
 				if (map->GetCorruption(tileX, tileY) >= 100) {
-					SDL_Rect dstRect(CalcDest(tileX, tileY));
 					TileType type = map->GetType(tileX, tileY);
 					const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
-					terrainSprite.DrawCorruptionOverlay(mapSurface.get(), &dstRect, boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1));
+					terrainSprite.DrawCorruptionOverlay(x, y, boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1));
 				}
 			}
 		}
 	}
 
-	SDL_SetClipRect(mapSurface.get(), NULL);
+	PostDrawMap();
 }
 
-float TileSetRenderer::ScrollRate() const {
+float TilesetRenderer::ScrollRate() const {
 	return 16.0f / (tileSet->TileWidth() + tileSet->TileHeight());
 }
 
-void TileSetRenderer::SetCursorMode(CursorType mode) {
+void TilesetRenderer::SetCursorMode(CursorType mode) {
 	cursorMode = mode;
 	cursorHint = -1;
 }
 
-void TileSetRenderer::SetCursorMode(const NPCPreset& preset) {
+void TilesetRenderer::SetCursorMode(const NPCPreset& preset) {
 	cursorMode = Cursor_NPC_Mode;
 	cursorHint = preset.graphicsHint;
 }
 
-void TileSetRenderer::SetCursorMode(const ItemPreset& preset) {
+void TilesetRenderer::SetCursorMode(const ItemPreset& preset) {
 	cursorMode = Cursor_Item_Mode;
 	cursorHint = preset.graphicsHint;
 }
 
-void TileSetRenderer::SetCursorMode(int other) {
+void TilesetRenderer::SetCursorMode(int other) {
 	cursorMode = Cursor_None;
 	cursorHint = -1;
 }
 	
-void TileSetRenderer::DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable) {
-	startTileX = int((focusX * tileSet->TileWidth() - screenWidth / 2) / tileSet->TileWidth()) - 1;
-	startTileY = int((focusY * tileSet->TileHeight() - screenHeight / 2) / tileSet->TileHeight()) - 1;
-	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + screenWidth / 2);
-	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + screenHeight / 2);
-
-	SDL_Rect dstRect(CalcDest(pos.X(), pos.Y()));
-	tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface.get(), &dstRect);
+void TilesetRenderer::DrawCursor(const Coordinate& pos, bool placeable) {
+	tileSet->DrawCursor(pos.X() - startTileX, pos.Y() - startTileY, cursorMode, cursorHint, placeable);
 }
 
-void TileSetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable) {
-	startTileX = int((focusX * tileSet->TileWidth() - screenWidth / 2) / tileSet->TileWidth()) - 1;
-	startTileY = int((focusY * tileSet->TileHeight() - screenHeight / 2) / tileSet->TileHeight()) - 1;
-	mapOffsetX = int(startTileX * tileSet->TileWidth() - focusX * tileSet->TileWidth() + screenWidth / 2);
-	mapOffsetY = int(startTileY * tileSet->TileHeight() - focusY * tileSet->TileHeight() + screenHeight / 2);
-
+void TilesetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable) {
 	for (int x = start.X(); x <= end.X(); ++x) {
 		for (int y = start.Y(); y <= end.Y(); ++y) {
-			SDL_Rect dstRect(CalcDest(x, y));
-			tileSet->DrawCursor(cursorMode, cursorHint, placeable, mapSurface.get(), &dstRect);
+			tileSet->DrawCursor(x - startTileX, y - startTileY, cursorMode, cursorHint, placeable);
 		}
 	}
-	
 }
 
-void TileSetRenderer::DrawItems(int startX, int startY, int sizeX, int sizeY) const {
+void TilesetRenderer::DrawItems() const {
 	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
 		if (!itemi->second->ContainedIn().lock()) {
 			Coordinate itemPos = itemi->second->Position();
-			if (itemPos.X() >= startX && itemPos.X() < startX + sizeX
-				&& itemPos.Y() >= startY && itemPos.Y() < startY + sizeY)
+			if (itemPos.X() >= startTileX && itemPos.X() < startTileX + tilesX
+				&& itemPos.Y() >= startTileY && itemPos.Y() < startTileY + tilesY)
 			{
-				SDL_Rect dstRect(CalcDest(itemPos.X(), itemPos.Y()));
-				tileSet->DrawItem(itemi->second, mapSurface.get(), &dstRect);
+				tileSet->DrawItem(itemPos.X() - startTileX, itemPos.Y() - startTileY, itemi->second);
 			}
 		}
 	}
 }
 
-void TileSetRenderer::DrawNPCs(int startX, int startY, int sizeX, int sizeY) const {
+void TilesetRenderer::DrawNPCs() const {
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
 		Coordinate npcPos = npci->second->Position();
-		if (npcPos.X() >= startX && npcPos.X() < startX + sizeX
-				&& npcPos.Y() >= startY && npcPos.Y() < startY + sizeY)
+		if (npcPos.X() >= startTileX && npcPos.X() < startTileX + tilesX
+				&& npcPos.Y() >= startTileY && npcPos.Y() < startTileY + tilesY)
 		{
-			SDL_Rect dstRect(CalcDest(npcPos.X(), npcPos.Y()));
-			tileSet->DrawNPC(npci->second, mapSurface.get(), &dstRect);
+			tileSet->DrawNPC(npcPos.X() - startTileX, npcPos.Y() - startTileY, npci->second);
 		}
 	}
 }
 
-void TileSetRenderer::DrawSpells(int startX, int startY, int sizeX, int sizeY) const {
+void TilesetRenderer::DrawSpells() const {
 	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
 		Coordinate spellPos = (*spelli)->Position();
-		if (spellPos.X() >= startX && spellPos.X() < startX + sizeX
-				&& spellPos.Y() >= startY && spellPos.Y() < startY + sizeY)
+		if (spellPos.X() >= startTileX && spellPos.X() < startTileX + tilesX
+				&& spellPos.Y() >= startTileY && spellPos.Y() < startTileY + tilesY)
 		{
-			SDL_Rect dstRect(CalcDest(spellPos.X(), spellPos.Y()));
-			tileSet->DrawSpell(*spelli, mapSurface.get(), &dstRect);
+			tileSet->DrawSpell(spellPos.X() - startTileX, spellPos.Y() - startTileY, *spelli);
 		}
 	}
 }
 
-void TileSetRenderer::DrawFires(int startX, int startY, int sizeX, int sizeY) const {
+void TilesetRenderer::DrawFires() const {
 	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (boost::shared_ptr<FireNode> fire = firei->lock())
 		{
 			Coordinate firePos = fire->GetPosition();
-			if (firePos.X() >= startX && firePos.X() < startX + sizeX
-					&& firePos.Y() >= startY && firePos.Y() < startY + sizeY)
+			if (firePos.X() >= startTileX && firePos.X() < startTileX + tilesX
+					&& firePos.Y() >= startTileY && firePos.Y() < startTileY + tilesY)
 			{
-				SDL_Rect dstRect(CalcDest(firePos.X(), firePos.Y()));
-				tileSet->DrawFire(fire, mapSurface.get(), &dstRect);
+				tileSet->DrawFire(firePos.X() - startTileX, firePos.Y() - startTileY, fire);
 			}
 		}
 	}
 }
 
-void TileSetRenderer::DrawMarkers(Map * map, int startX, int startY, int sizeX, int sizeY) const {
+void TilesetRenderer::DrawMarkers() const {
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
 		int markerX = markeri->second.X();
 		int markerY = markeri->second.Y();
-		if (markerX >= startX && markerX < startX + sizeX
-			&& markerY >= startY && markerY < startY + sizeY) {
-				SDL_Rect dstRect( CalcDest(markerX, markerY));
-				tileSet->DrawMarker(mapSurface.get(), &dstRect);
+		if (markerX >= startTileX && markerX < startTileX + tilesX
+			&& markerY >= startTileY && markerY < startTileY + tilesY) {
+				tileSet->DrawMarker(markerX - startTileX, markerY - startTileY);
 		}
 	}
 }
 
-void TileSetRenderer::DrawTerrain(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	TileType type(map->GetType(tileX, tileY));
-	Coordinate pos(tileX, tileY);
+void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) const {
+	TileType type(map->GetType(pos.X(), pos.Y()));
 	const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
-	bool corrupted = map->GetCorruption(tileX, tileY) >= 100;
+	bool corrupted = map->GetCorruption(pos.X(), pos.Y()) >= 100;
 	if (type == TILESNOW) {
 		if (corrupted) {
-			terrainSprite.DrawSnowedAndCorrupted(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+			terrainSprite.DrawSnowedAndCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else {
-			terrainSprite.DrawSnowed(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1));
+			terrainSprite.DrawSnowed(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1));
 		}
 	} else if (type == TILEGRASS) {
-		bool burnt = type == TILEGRASS && map->Burnt(tileX, tileY) >= 10;
+		bool burnt = type == TILEGRASS && map->Burnt(pos.X(), pos.Y()) >= 10;
 		if (corrupted) {
-			terrainSprite.DrawCorrupted(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else if (burnt) {
-			terrainSprite.DrawBurnt(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&BurntConnectionTest, map, pos, _1));
+			terrainSprite.DrawBurnt(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&BurntConnectionTest, map, pos, _1));
 		} else {
-			terrainSprite.Draw(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&GrassConnectionTest, map, pos, _1));
+			terrainSprite.Draw(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1));
 		}
 	} else {
 		if (corrupted) {
-			terrainSprite.DrawCorrupted(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&TerrainConnectionTest, map, pos, type, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&TerrainConnectionTest, map, pos, type, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else {
-			terrainSprite.Draw(mapSurface.get(), dstRect, pos, permutationTable, map->heightMap->getValue(tileX, tileY), boost::bind(&TerrainConnectionTest, map, pos, type, _1));
+			terrainSprite.Draw(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&TerrainConnectionTest, map, pos, type, _1));
 		}
 	}
 	
 	// Water
 	if (tileSet->IsIceSupported()) {
-		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
+		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos.X(),pos.Y());
 		if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
-				tileSet->DrawWater(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
 			}
 		}
 		int natNum = -1;
-		if ((natNum = map->GetNatureObject(tileX, tileY)) >= 0) {
+		if ((natNum = map->GetNatureObject(pos.X(), pos.Y())) >= 0) {
 			if (Game::Inst()->natureList[natNum]->IsIce()) {
-				tileSet->DrawIce(boost::bind(&WaterConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+				tileSet->DrawIce(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
 			}
 		}
 	} else {
-		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(tileX,tileY);
+		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos.X(),pos.Y());
 		if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
-				tileSet->DrawWater(boost::bind(&WaterNoIceConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterNoIceConnectionTest, map, pos, _1));
 			}
 		}
 	}
-	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(tileX, tileY).lock()) {
+	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(pos.X(), pos.Y()).lock()) {
 		if (blood->Depth() > 0) {
-			tileSet->DrawBlood(boost::bind(&BloodConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+			tileSet->DrawBlood(screenX, screenY, boost::bind(&BloodConnectionTest, map, pos, _1));
 		}
 	}
-	if (map->GroundMarked(tileX, tileY)) {
-		tileSet->DrawMarkedOverlay(boost::bind(&GroundMarkedConnectionTest, map, pos, _1), mapSurface.get(), dstRect);
+	if (map->GroundMarked(pos.X(), pos.Y())) {
+		tileSet->DrawMarkedOverlay(screenX, screenY, boost::bind(&GroundMarkedConnectionTest, map, pos, _1));
 	}
 	
 }
 
-void TileSetRenderer::DrawFilth(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	if (boost::shared_ptr<FilthNode> filth = map->GetFilth(tileX, tileY).lock()) {
+void TilesetRenderer::DrawFilth(int screenX, int screenY, Coordinate pos) const {
+	if (boost::shared_ptr<FilthNode> filth = map->GetFilth(pos.X(), pos.Y()).lock()) {
 		if (filth->Depth() > 4) {
-			tileSet->DrawFilthMajor(boost::bind(&FilthConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), dstRect);
+			tileSet->DrawFilthMajor(screenX, screenY, boost::bind(&FilthConnectionTest, map, pos, _1));
 		} else if (filth->Depth() > 0) {
-			tileSet->DrawFilthMinor(boost::bind(&FilthConnectionTest, map, Coordinate(tileX, tileY), _1), mapSurface.get(), dstRect);
+			tileSet->DrawFilthMinor(screenX, screenY, boost::bind(&FilthConnectionTest, map, pos, _1));
 		}
 	}
 }
 
-void TileSetRenderer::DrawTerritoryOverlay(Map* map, int tileX, int tileY, SDL_Rect * dstRect) const {
-	bool isOwned(map->IsTerritory(tileX,tileY));
-	tileSet->DrawTerritoryOverlay(isOwned, boost::bind(&TerritoryConnectionTest, map, Coordinate(tileX, tileY), isOwned, _1), mapSurface.get(), dstRect);
+void TilesetRenderer::DrawTerritoryOverlay(int screenX, int screenY, Coordinate pos) const {
+	bool isOwned(map->IsTerritory(pos.X(),pos.Y()));
+	tileSet->DrawTerritoryOverlay(screenX, screenY, isOwned, boost::bind(&TerritoryConnectionTest, map, pos, isOwned, _1));
 }
 
-namespace {
-	inline void setPixelAlpha(SDL_Surface *surface, int x, int y, Uint32 keyColor)
-	{
-		SDL_PixelFormat *fmt = surface->format;
-		int bpp = fmt->BytesPerPixel;
-		if (bpp != 4) return;
-
-		Uint32 *p = (Uint32 *)((Uint8 *)surface->pixels + y * surface->pitch) + x;
-		Uint32 c = (*p | fmt->Amask);
-		if (c == keyColor) {
-			*p = *p & ~fmt->Amask;
-		} else if (c == fmt->Amask) {
-			*p = (*p & ~fmt->Amask) | (128 << fmt->Ashift);
-		}
-	}
-
+void TilesetRenderer::SetTileset(boost::shared_ptr<TileSet> newTileset) {
+	tileSet = newTileset;
+	TilesetChanged();
 }
 
-void TileSetRenderer::render(void * surf,void * sdl_screen) {
-	SDL_Surface *tcod = (SDL_Surface *)surf;
-	SDL_Surface *screen = (SDL_Surface *)sdl_screen;
+int TilesetRenderer::GetScreenWidth() const {
+	return screenWidth;
+}
 
-	SDL_Rect srcRect={0,0,screenWidth,screenHeight};
-	SDL_Rect dstRect={0,0,screenWidth,screenHeight};
-	
-	if (translucentUI) {
-		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);
-		if (SDL_MUSTLOCK(tcod))
-		{
-			SDL_LockSurface(tcod);
-		}
-		for (int x = 0; x < screenWidth; ++x) {
-			for (int y = 0; y < screenHeight; ++y) {
-				setPixelAlpha(tcod,x,y, keyColorVal);
-			}
-		}
-		if (SDL_MUSTLOCK(tcod))
-		{
-			SDL_UnlockSurface(tcod);
-		}
-	}
-	else {
-		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
-	}
-	SDL_LowerBlit(tcod, &srcRect, mapSurface.get(), &dstRect);
-	SDL_LowerBlit(mapSurface.get(), &srcRect, screen, &dstRect);
+int TilesetRenderer::GetScreenHeight() const {
+	return screenHeight;
+}
+
+TCODColor TilesetRenderer::GetKeyColor() const {
+	return keyColor;
+}
+
+void TilesetRenderer::TilesetChanged() {
 }

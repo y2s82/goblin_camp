@@ -27,79 +27,31 @@ public:
 	explicit ConstructionSprite();
 	~ConstructionSprite();
 
-	void AddSprite(const Sprite& sprite);
-	void AddUnderConstructionSprite(const Sprite& sprite);
-	void AddUnreadyTrapSprite(const Sprite& sprite);
+	void AddSprite(Sprite_ptr sprite);
+	void AddUnderConstructionSprite(Sprite_ptr sprite);
+	void AddUnreadyTrapSprite(Sprite_ptr sprite);
 	void SetWidth(int width);
-	void SetOpenSprite(const Sprite& sprite);
+	void SetOpenSprite(Sprite_ptr sprite);
 
 	bool IsValid() const;
 	bool HasUnderConstructionSprites() const;
 	bool IsConnectionMap() const;
 		
 	// Normal draw
-	void Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawUnreadyTrap(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void Draw(int screenX, int screenY, const Coordinate& internalPos) const;
+	void DrawUnderConstruction(int screenX, int screenY, const Coordinate& internalPos) const;
+	void DrawUnreadyTrap(int screenX, int screenY, const Coordinate& internalPos) const;
+	void DrawOpen(int screenX, int screenY, const Coordinate& internalPos) const;
 
 	// Connection map draw
-	void Draw(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawUnderConstruction(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawUnreadyTrap(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
-	void DrawOpen(Sprite::ConnectedFunction, SDL_Surface * dst, SDL_Rect *dstRect) const;
+	void Draw(int screenX, int screenY, Sprite::ConnectedFunction) const;
+	void DrawUnderConstruction(int screenX, int screenY, Sprite::ConnectedFunction) const;
+	void DrawUnreadyTrap(int screenX, int screenY, Sprite::ConnectedFunction) const;
+	void DrawOpen(int screenX, int screenY, Sprite::ConnectedFunction) const;
 private:	
-	std::vector<Sprite> sprites;
-	std::vector<Sprite> underconstructionSprites;
-	std::vector<Sprite> unreadyTrapSprites;
-	Sprite openSprite;
+	std::vector<Sprite_ptr> sprites;
+	std::vector<Sprite_ptr> underconstructionSprites;
+	std::vector<Sprite_ptr> unreadyTrapSprites;
+	Sprite_ptr openSprite;
 	int width;
 };
-
-class ConstructionSpriteFactory
-{
-public:
-	explicit ConstructionSpriteFactory();
-	~ConstructionSpriteFactory();
-
-	void Reset();
-	ConstructionSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
-
-	template <typename IterT> void SetSpriteIndices(IterT start, IterT end);
-	template <typename IterT> void SetUnderConstructionSpriteIndices(IterT start, IterT end);
-	template <typename IterT> void SetUnreadyTrapSpriteIndices(IterT start, IterT end);
-
-	void SetOpenDoorSprite(const Sprite& sprite);
-	void SetWidth(int width);
-	void SetFPS(int fps);
-	void SetFrameCount(int frameCount);
-	void SetConnectionMap(bool isConnectionMap);
-
-private:
-	std::vector<int> spriteIndices;
-	std::vector<int> underConstructionSpriteIndices;
-	std::vector<int> unreadyTrapSpriteIndices;
-	Sprite openDoorSprite;
-	int width;
-	int frameRate;
-	int frameCount;
-	bool connectionMapped;
-};
-
-template <typename IterT> void ConstructionSpriteFactory::SetSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		spriteIndices.push_back(*iter);
-	}
-}
-
-template <typename IterT> void ConstructionSpriteFactory::SetUnderConstructionSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		underConstructionSpriteIndices.push_back(*iter);
-	}
-}
-
-template <typename IterT> void ConstructionSpriteFactory::SetUnreadyTrapSpriteIndices(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		unreadyTrapSpriteIndices.push_back(*iter);
-	}
-}
