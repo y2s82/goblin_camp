@@ -33,7 +33,12 @@ public:
 	Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
 	Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	
-	void DrawSprite(int screenX, int screenY, int tile);
+	inline void DrawSprite(int screenX, int screenY, int tile) {
+		DrawSpriteCorner(screenX, screenY, tile, TopLeft);
+		DrawSpriteCorner(screenX, screenY, tile, TopRight);
+		DrawSpriteCorner(screenX, screenY, tile, BottomLeft);
+		DrawSpriteCorner(screenX, screenY, tile, BottomRight);
+	};
 	void DrawSpriteCorner(int screenX, int screenY, int tile, Corner corner);
 
 	void AssembleTextures();
@@ -50,14 +55,17 @@ private:
 	std::vector<RawTileData> rawTiles;
 	typedef std::vector<RawTileData>::iterator rawTileIterator;
 
-	// TODO: Make this OGL GLuint (need to prevent SDL\SDLOpenGL.h leaking out)
-	boost::shared_ptr<const unsigned int> texture; 
-	unsigned int textureTilesW;
-	unsigned int textureTilesH;
+	// Tiles texture
+	boost::shared_ptr<const unsigned int> tilesTexture; 
+	unsigned int tilesTextureW;
+	unsigned int tilesTextureH;
 
+	// UI Font
 	boost::shared_ptr<const unsigned int> fontTexture;
 	unsigned int fontCharW, fontCharH;
 	unsigned int fontTexW, fontTexH;
+
+	// Console Rendering
 	unsigned int consoleProgram, consoleVertShader, consoleFragShader;
 
 	enum ConsoleTexureTypes {
@@ -72,15 +80,42 @@ private:
 	static boost::array<unsigned char, ConsoleTextureTypesCount> consoleDataAlignment;
 	boost::array<bool, ConsoleTextureTypesCount> consoleDirty;
 	
-	
-	boost::multi_array<std::vector<unsigned int>, 2> viewportDrawStack;
-	typedef boost::multi_array<std::vector<unsigned int>, 2>::iterator viewportColumnIterator;
-	typedef boost::multi_array<std::vector<unsigned int>, 2>::subarray<1>::type::iterator viewportRowIterator;
-	int viewportW, viewportH;
+	// Viewports
+	class ViewportLayer {
+	public:
+		explicit ViewportLayer();
+		explicit ViewportLayer(int width, int height);
+		void Reset();
+		void SetTile(int x, int y, unsigned int tile);
+		int GetTile(int x, int y) const;
+		bool IsTileSet(int x, int y) const;
+		unsigned char* operator*();
+	private:
+		std::vector<unsigned char> data;
+		int width;
+		int height;
+	};
+	boost::array<ViewportLayer, 5> viewportLayers;
+	boost::array<boost::shared_ptr<const unsigned int>, 5> viewportTextures;
+	struct RenderTile {
+		int x;
+		int y;
+		unsigned int tile;
 
+		explicit RenderTile(int x, int y, unsigned int tile) : x(x), y(y), tile(tile) {}
+	};
+	std::vector<RenderTile> renderQueue;
+	int viewportW, viewportH;
+	int viewportTexW, viewportTexH;
+	// TODO: Resource manage these
+	unsigned int viewportProgram, viewportVertShader, viewportFragShader;
+	
+	
 	unsigned int LoadShader(std::string shader, unsigned int type);
 	bool LoadProgram(std::string vertShaderCode, std::string fragShaderCode, unsigned int *vertShader, unsigned int *fragShader, unsigned int *program);
 	bool InitaliseShaders();
+
+	inline int ViewportIndex(int x, int y) { return 4 * (x + y * 2 * viewportW); }
 };
 
 const bool operator==(const RawTileData& lhs, const RawTileData& rhs);

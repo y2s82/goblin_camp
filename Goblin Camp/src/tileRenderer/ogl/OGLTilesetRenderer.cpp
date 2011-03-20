@@ -87,6 +87,51 @@ namespace {
 	"} "
 	;
 
+	static std::string tiles_vertex_shader =
+#ifndef NDEBUG
+	"#version 110\n"
+#endif
+	"uniform vec2 termsize; "
+
+	"void main(void) "
+	"{ "
+
+	"   gl_Position = gl_Vertex; "
+
+	"   gl_TexCoord[0] = gl_MultiTexCoord0; "
+	"   gl_TexCoord[0].x = gl_TexCoord[0].x*termsize.x; "
+	"   gl_TexCoord[0].y = gl_TexCoord[0].y*termsize.y; "
+	"} "
+	;
+
+	static std::string tiles_pixel_shader =
+#ifndef NDEBUG
+	"#version 110\n"
+#endif
+	"uniform sampler2D tilesheet; \n"
+	"uniform sampler2D tiles; \n"
+
+	"uniform float tilew; \n"
+	"uniform vec2 tilecoef; \n"
+	"uniform vec2 termsize; \n"
+	"uniform vec2 termcoef; \n"
+
+	"void main(void) "
+	"{ "
+	"   vec2 rawCoord = gl_TexCoord[0].xy; \n"                           /* varying from [0, termsize) in x and y */
+	"   vec2 conPos = floor(rawCoord); \n"                               /* console integer position */
+	"   vec2 pixPos = fract(rawCoord); \n"                               /* pixel offset within console position */
+	"   pixPos = vec2(pixPos.x*tilecoef.x,pixPos.y*tilecoef.y); \n"      /* Correct pixel offset for font tex location */
+
+	"   vec2 address = vec2(rawCoord.x*termcoef.x,rawCoord.y*termcoef.y); \n"
+	"   vec4 tileInfo = texture2D(tiles, address); \n"
+	"   float inchar = tileInfo.r*256.0 + tileInfo.g * 256.0 *256.0 + tileInfo.b * 256.0 * 256.0 * 256.0; \n"
+	"   vec2 tchar = vec2(mod(floor(inchar),floor(tilew)),floor(inchar/tilew)); \n"  /* 1D index to 2D index map for character */
+
+	"   gl_FragColor = texture2D(tilesheet, vec2((tchar.x*tilecoef.x),(tchar.y*tilecoef.y))+pixPos.xy); \n"   /* magic func: finds pixel value in font file */
+	"   gl_FragColor *= tileInfo.a; \n"
+	"} "
+	;
 
 	static PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB=0;
 	static PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB=0;
@@ -110,8 +155,8 @@ namespace {
 OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole)
 : TilesetRenderer(screenWidth, screenHeight, mapConsole),
   rawTiles(),
-  texture(),
-  textureTilesW(0), textureTilesH(0),
+  tilesTexture(),
+  tilesTextureW(0), tilesTextureH(0),
   fontTexture(),
   fontCharW(0), fontCharH(0),
   fontTexW(0), fontTexH(0),
@@ -119,11 +164,11 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
   consoleTextures(),
   consoleTexW(0), consoleTexH(0),
   consoleData(),
-  viewportDrawStack(),
+  viewportLayers(),
+  renderQueue(),
   viewportW(0), viewportH(0)
 {
 	TCODSystem::registerOGLRenderer(this);
-	viewportDrawStack.resize(boost::extents[0][0]);	
 
 	glCreateShaderObjectARB=(PFNGLCREATESHADEROBJECTARBPROC)SDL_GL_GetProcAddress("glCreateShaderObjectARB");
 	glGetObjectParameterivARB=(PFNGLGETOBJECTPARAMETERIVARBPROC)SDL_GL_GetProcAddress("glGetObjectParameterivARB");
@@ -172,7 +217,6 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 	glBindTexture(GL_TEXTURE_2D, *fontTexture);
 	SDL_LockSurface(temp.get());
 	
-
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 
@@ -186,6 +230,9 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 OGLTilesetRenderer::~OGLTilesetRenderer() {}
 
 Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
+	if (tilesetTexture->Count() <= tile) {
+		return Sprite_ptr();
+	}
 	RawTileData rawTile = {tile, tilesetTexture};
 	rawTileIterator existing = std::find(rawTiles.begin(), rawTiles.end(), rawTile);
 	if (existing != rawTiles.end()) {
@@ -203,27 +250,32 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::
 
 	std::vector<int> tileIds;
 	for (std::vector<int>::const_iterator tileIter = tiles.begin(); tileIter != tiles.end(); ++tileIter) {
-		RawTileData rawTile = {*tileIter, tilesetTexture};
-		rawTileIterator existing = std::find(rawTiles.begin(), rawTiles.end(), rawTile);
-		if (existing != rawTiles.end()) {
-			tileIds.push_back(existing - rawTiles.begin());
+		if (*tileIter < tilesetTexture->Count()) {
+			RawTileData rawTile = {*tileIter, tilesetTexture};
+			rawTileIterator existing = std::find(rawTiles.begin(), rawTiles.end(), rawTile);
+			if (existing != rawTiles.end()) {
+				tileIds.push_back(existing - rawTiles.begin());
+			} else {
+				tileIds.push_back(rawTiles.size());
+				rawTiles.push_back(rawTile);
+			}
 		} else {
-			tileIds.push_back(rawTiles.size());
-			rawTiles.push_back(rawTile);
+			tileIds.push_back(-1);
 		}
 	}
 	return Sprite_ptr(new OGLSprite(this, tileIds.begin(), tileIds.end(), connectionMap, frameRate, frameCount));
 }
-	
-void OGLTilesetRenderer::DrawSprite(int screenX, int screenY, int tile)  {
-	viewportDrawStack[2 * screenX][2 * screenY].push_back(tile);
-	viewportDrawStack[2 * screenX + 1][2 * screenY].push_back(tile);
-	viewportDrawStack[2 * screenX][2 * screenY + 1].push_back(tile);
-	viewportDrawStack[2 * screenX + 1][2 * screenY + 1].push_back(tile);
-}
 
 void OGLTilesetRenderer::DrawSpriteCorner(int screenX, int screenY, int tile, Corner corner) {
-	viewportDrawStack[2 * screenX + (corner & 0x1)][2 * screenY + ((corner & 0x2) >> 1)].push_back(tile);
+	int x = 2 * screenX + (corner & 0x1);
+	int y = 2 * screenY + ((corner & 0x2) >> 1);
+	for (int i = 0; i < viewportLayers.size(); ++i) {
+		if (!viewportLayers[i].IsTileSet(x,y)) {
+			viewportLayers[i].SetTile(x,y,tile);
+			return;
+		}
+	}
+	renderQueue.push_back(RenderTile(x, y, tile));
 }
 
 void OGLTilesetRenderer::TilesetChanged() {
@@ -231,8 +283,26 @@ void OGLTilesetRenderer::TilesetChanged() {
 	viewportH = CeilToInt::convert(boost::numeric_cast<float>(GetScreenHeight()) / tileSet->TileHeight()) + 2;
 
 	// Twice the viewport size, so we can have different corners
-	viewportDrawStack.resize(boost::extents[2 * viewportW][2 * viewportH]);
+	for (int i = 0; i < viewportLayers.size(); ++i) {
+		viewportLayers[i] = ViewportLayer(2 * viewportW, 2 * viewportH);
+	}
+
+	// TODO: Only needed if using shaders
+	viewportTexW = MathEx::NextPowerOfTwo(2 * viewportW);
+	viewportTexH = MathEx::NextPowerOfTwo(2 * viewportH);
+	for (int i = 0; i < viewportTextures.size(); ++i) {
+		viewportTextures[i] = CreateOGLTexture();
+		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexW, viewportTexH, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+		CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
+	}
 	InitaliseShaders();
+	if (!LoadProgram(tiles_vertex_shader, tiles_pixel_shader, &viewportVertShader, &viewportFragShader, &viewportProgram)) {
+		LOG("Failed to load tiles shader");
+	}
 }
 
 void OGLTilesetRenderer::AssembleTextures() {
@@ -251,17 +321,17 @@ void OGLTilesetRenderer::AssembleTextures() {
 		return; // TODO: Error out
 
 	// Get initial horizontal tiles (based on tex size)
-	textureTilesW = std::min(texSize / tileSet->TileWidth(), boost::numeric_cast<GLint>(rawTiles.size()));
-	GLint widthPixels = std::min(texSize, MathEx::NextPowerOfTwo(tileSet->TileWidth() * textureTilesW));
+	tilesTextureW = std::min(texSize / tileSet->TileWidth(), boost::numeric_cast<GLint>(rawTiles.size()));
+	GLint widthPixels = std::min(texSize, MathEx::NextPowerOfTwo(tileSet->TileWidth() * tilesTextureW));
 	// Final horizontal tiles
-	textureTilesW = widthPixels / tileSet->TileWidth();
+	tilesTextureW = widthPixels / tileSet->TileWidth();
 
 	// Vertical size calculated based on size needed based on width.
-	GLint heightPixels = std::min(texSize, MathEx::NextPowerOfTwo(CeilToInt::convert((float)rawTiles.size() / textureTilesW) * tileSet->TileHeight()));
-	textureTilesH = heightPixels / tileSet->TileHeight();
+	GLint heightPixels = std::min(texSize, MathEx::NextPowerOfTwo(CeilToInt::convert((float)rawTiles.size() / tilesTextureW) * tileSet->TileHeight()));
+	tilesTextureH = heightPixels / tileSet->TileHeight();
 
 	// TODO: Error out
-	if (textureTilesH * textureTilesW < rawTiles.size())
+	if (tilesTextureH * tilesTextureW < rawTiles.size())
 		return;
 
 	// Build texture
@@ -280,8 +350,8 @@ void OGLTilesetRenderer::AssembleTextures() {
 	boost::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, widthPixels, heightPixels, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	SDL_FillRect(tempSurface.get(), 0, SDL_MapRGBA(tempSurface->format, 0,0,0,0));
 	int tile = 0;
-	for (int y = 0; y < textureTilesH && tile < rawTiles.size(); ++y) {
-		for (int x = 0; x < textureTilesW && tile < rawTiles.size(); ++x) {
+	for (int y = 0; y < tilesTextureH && tile < rawTiles.size(); ++y) {
+		for (int x = 0; x < tilesTextureW && tile < rawTiles.size(); ++x) {
 			SDL_Rect target = {x * tileSet->TileWidth(), y * tileSet->TileHeight(), tileSet->TileWidth(), tileSet->TileHeight()};
 			SDL_SetAlpha(rawTiles[tile].texture->GetInternalSurface().get(), 0, SDL_ALPHA_OPAQUE);
 			rawTiles[tile].texture->DrawTile(rawTiles[tile].tile, tempSurface.get(), &target);
@@ -290,8 +360,8 @@ void OGLTilesetRenderer::AssembleTextures() {
 	}
 	rawTiles.clear();
 
-	texture = CreateOGLTexture();
-	glBindTexture(GL_TEXTURE_2D, *texture);
+	tilesTexture = CreateOGLTexture();
+	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
 	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -336,49 +406,121 @@ void OGLTilesetRenderer::render() {
 	}
 
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RED, GL_UNSIGNED_BYTE, consoleData[Character].begin()._Ptr);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RED, GL_UNSIGNED_BYTE, &consoleData[Character][0]);
 
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, consoleData[ForeCol].begin()._Ptr);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, &consoleData[ForeCol][0]);
 
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, consoleData[BackCol].begin()._Ptr);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &consoleData[BackCol][0]);
 	
-	glUseProgramObjectARB(0);
-	glBindTexture(GL_TEXTURE_2D, *texture);
-	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+	for (int i = 0; i < viewportLayers.size(); ++i) {
+		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2 * viewportW, 2 * viewportH, GL_RGBA, GL_UNSIGNED_BYTE, *viewportLayers[i]);
+	}
 
+
+	glUseProgramObjectARB(0);
+	
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+	float texCoordTileW = 0.5f / tilesTextureW;
+	float texCoordTileH = 0.5f / tilesTextureH;
+
+	float offsetX = 2.0f * mapOffsetX / tileSet->TileWidth();
+	float offsetY = 2.0f * mapOffsetY / tileSet->TileHeight();
+
+	/* rendering console */
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
+		glUseProgramObjectARB(viewportProgram);
+	
+		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"termsize"), (float) viewportW, (float) viewportH);
+		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"termcoef"), 2.0f/viewportTexW, 2.0f/viewportTexH);
+		glUniform1fARB(glGetUniformLocationARB(viewportProgram,"tilew"), tilesTextureW);
+		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
+
+		for (int i = 0; i < viewportTextures.size(); ++i) {
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+			glUniform1iARB(glGetUniformLocationARB(viewportProgram,"tilesheet"),0);
+	
+			glActiveTexture(GL_TEXTURE1);
+			glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
+			glUniform1iARB(glGetUniformLocationARB(viewportProgram,"tiles"),1);
+	
+			float sizeX = 2.0f * viewportW * tileSet->TileWidth() / GetScreenWidth();
+			float sizeY = 2.0f * viewportH * tileSet->TileHeight() / GetScreenHeight();
+
+			float vertOffsetX = 2.0f * mapOffsetX / GetScreenWidth();
+			float vertOffsetY = -2.0f * (mapOffsetY + 2 * tileSet->TileHeight()) / GetScreenHeight();
+
+			glBegin(GL_QUADS);
+				glTexCoord2f(0.0f, 1.0f);
+				glVertex3f(vertOffsetX - 1.0f, vertOffsetY - 1.0f,0.0f);
+				glTexCoord2f(1.0f, 1.0f);
+				glVertex3f(vertOffsetX + sizeX - 1.0f, vertOffsetY - 1.0f,0.0f);
+				glTexCoord2f(1.0f, 0.0f);
+				glVertex3f(vertOffsetX + sizeX - 1.0f, vertOffsetY + sizeY - 1.0f, 0.0f);
+				glTexCoord2f(0.0f, 0.0f);
+				glVertex3f(vertOffsetX - 1.0f, vertOffsetY + sizeY - 1.0f,0.0f);
+			glEnd();
+		}
+	
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, 0);
+		glUseProgramObjectARB(0);
+
+		CheckGL_Error("Shader Render Viewport Layers", __FILE__, __LINE__);
+	} else {
+		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+		CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+		glBegin(GL_QUADS);
+		for (int x = 0; x < 2 * viewportW; ++x) {
+			for (int y = 0; y < 2 * viewportH; ++y) {
+				for (int i = 0; i < viewportLayers.size(); ++i) {
+					if (viewportLayers[i].IsTileSet(x, y) ) {
+						unsigned int srcX = 2 * (viewportLayers[i].GetTile(x,y) % tilesTextureW);
+						unsigned int srcY = 2 * (viewportLayers[i].GetTile(x,y) / tilesTextureH);
+						srcX += (x & 0x1);
+						srcY += (y & 0x1);
+						glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
+						glVertex2f( offsetX + x, -offsetY + viewportH * 2 - y - 4);
+						glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
+						glVertex2f( offsetX + x, -offsetY + viewportH * 2 - y - 5);
+						glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
+						glVertex2f( offsetX + x+1, -offsetY + viewportH * 2 - y - 5);
+						glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
+						glVertex2f( offsetX + x+1, -offsetY + viewportH * 2 - y - 4);
+					}
+				}
+			}
+		}
+		glEnd();
+		CheckGL_Error("Render Viewport Layers", __FILE__, __LINE__);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+
 	glBegin(GL_QUADS);
 	glColor4f(1.0,1.0,1.0,1.0);
 
-	float texCoordTileW = 0.5f / textureTilesW;
-	float texCoordTileH = 0.5f / textureTilesH;
-
-	float offsetX = (float) mapOffsetX / tileSet->TileWidth();
-	float offsetY = (float) mapOffsetY / tileSet->TileHeight();
-
-	for (int x = 0; x < 2 * viewportW; ++x) {
-		for (int y = 0; y < 2 * viewportH; ++y) {
-			for (std::vector<unsigned int>::iterator tile = viewportDrawStack[x][y].begin(); tile != viewportDrawStack[x][y].end(); ++tile) {
-				unsigned int srcX = 2 * (*tile % textureTilesW);
-				unsigned int srcY = 2 * (*tile / textureTilesW);
-				srcX += (x & 0x1);
-				srcY += (y & 0x1);
-				glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
-				glVertex2f( offsetX + x, -offsetY + viewportH * 2 - y - 4);
-				glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
-				glVertex2f( offsetX + x, -offsetY + viewportH * 2 - y - 5);
-				glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
-				glVertex2f( offsetX + x+1, -offsetY + viewportH * 2 - y - 5);
-				glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
-				glVertex2f( offsetX + x+1, -offsetY + viewportH * 2 - y - 4);
-			}
-		}
+	for (std::vector<RenderTile>::iterator queuedTile = renderQueue.begin(); queuedTile != renderQueue.end(); ++queuedTile) {
+		unsigned int srcX = 2 * (queuedTile->tile % tilesTextureW);
+		unsigned int srcY = 2 * (queuedTile->tile / tilesTextureH);
+		srcX += (queuedTile->x & 0x1);
+		srcY += (queuedTile->y & 0x1);
+		glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
+		glVertex2f( offsetX + queuedTile->x, -offsetY + viewportH * 2 - queuedTile->y - 4);
+		glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
+		glVertex2f( offsetX + queuedTile->x, -offsetY + viewportH * 2 - queuedTile->y - 5);
+		glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
+		glVertex2f( offsetX + queuedTile->x+1, -offsetY + viewportH * 2 - queuedTile->y - 5);
+		glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
+		glVertex2f( offsetX + queuedTile->x+1, -offsetY + viewportH * 2 - queuedTile->y - 4);
 	}
 	glEnd();
 	CheckGL_Error("render", __FILE__, __LINE__);
@@ -431,11 +573,11 @@ void OGLTilesetRenderer::render() {
 }
 
 void OGLTilesetRenderer::PreDrawMap() {
-	for (viewportColumnIterator col = viewportDrawStack.begin(); col != viewportDrawStack.end(); ++col) {
-		for (viewportRowIterator row = (*col).begin(); row != (*col).end(); ++row) {
-			(*row).clear();
-		}
+	for (int i = 0; i < viewportLayers.size(); ++i) {
+		viewportLayers[i].Reset();
 	}
+
+	renderQueue.clear();
 }
 
 void OGLTilesetRenderer::PostDrawMap() {
@@ -552,4 +694,44 @@ bool OGLTilesetRenderer::InitaliseShaders() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	
 	return true;
+}
+
+OGLTilesetRenderer::ViewportLayer::ViewportLayer()
+: width(0), height(0), data()
+{}
+
+OGLTilesetRenderer::ViewportLayer::ViewportLayer(int width, int height)
+	: width(width),
+	  height(height),
+	  data(width * height * 4, 0)
+{}
+
+void OGLTilesetRenderer::ViewportLayer::Reset() {
+	for (int i = 3; i < 4 * width * height; i += 4) {
+		data[i] = 0;
+	}
+	//for (std::vector<unsigned char>::iterator iter = data.begin(); iter != data.end(); iter += 4) {
+	//	*(iter + 3) = 0;
+	//}
+}
+
+void OGLTilesetRenderer::ViewportLayer::SetTile(int x, int y, unsigned int tile) {
+	int index = 4 * (x + y * width);
+	data[index] = tile & 0xff;
+	data[index + 1] = (tile >> 8) & 0xff;
+	data[index + 2] = (tile >> 16) & 0xff;
+	data[index + 3] = 0xff;
+}
+
+unsigned char * OGLTilesetRenderer::ViewportLayer::operator*() {
+	return &data[0];
+}
+
+bool OGLTilesetRenderer::ViewportLayer::IsTileSet(int x, int y) const {
+	return data[4 * (x + y * width) + 3] != 0;
+}
+
+int OGLTilesetRenderer::ViewportLayer::GetTile(int x, int y) const {
+	int index = 4 * (x + y * width);
+	return data[index] | (data[index + 1] << 8) | (data[index + 2] << 16);
 }

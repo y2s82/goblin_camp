@@ -26,9 +26,13 @@ OGLSprite::OGLSprite(OGLTilesetRenderer * const renderer, int tile)
 OGLSprite::~OGLSprite() {}
 
 void OGLSprite::DrawInternal(int screenX, int screenY, int tile) const {
-	renderer->DrawSprite(screenX, screenY, tile);
+	if (tile != -1) {
+		renderer->DrawSprite(screenX, screenY, tile);
+	}
 }
 
 void OGLSprite::DrawInternal(int screenX, int screenY, int tile, Corner corner) const {
-	renderer->DrawSpriteCorner(screenX, screenY, tile, corner);
+	if (tile != -1) {
+		renderer->DrawSpriteCorner(screenX, screenY, tile, corner);
+	}
 }
