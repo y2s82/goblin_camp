@@ -30,10 +30,23 @@ Faction::Faction(std::string vname) :
 members(std::list<boost::weak_ptr<NPC> >()), 
 	trapVisible(std::map<Coordinate,bool>()),
 	name(vname),
+	currentGoal(0),
 	activeTime(0),
 	maxActiveTime(MONTH_LENGTH),
 	active(false)
-{ }
+{
+	//Hardcoding these for now, they will be moved to a data file eventually
+	if (boost::iequals(name, "Wolves")) {
+		goals.push_back(FACTIONSTEAL);
+	} else if (boost::iequals(name, "Giants")) {
+		goals.push_back(FACTIONDESTROY);
+	} else if (boost::iequals(name, "Bees")) {
+		goals.push_back(FACTIONKILL);
+	} else if (boost::iequals(name, "Trolls")) {
+		goals.push_back(FACTIONPATROL);
+		friends.insert(PLAYERFACTION);
+	}
+}
 
 void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
 	members.push_back(newMember);
@@ -91,6 +104,7 @@ void Faction::Reset() {
 	members.clear();
 	trapVisible.clear();
 	jobs.clear();
+	currentGoal = 0;
 	activeTime = 0;
 	maxActiveTime = MONTH_LENGTH;
 	active = false;
@@ -98,7 +112,9 @@ void Faction::Reset() {
 
 void Faction::Update() {};
 
-bool Faction::FindJob(boost::shared_ptr<NPC> npc) {return false;}
+bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
+	return false;
+}
 
 void Faction::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {}
 
@@ -133,6 +149,7 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & name;
 	ar & jobs;
 	ar & goals;
+	ar & currentGoal;
 	ar & activeTime;
 	ar & maxActiveTime;
 	ar & active;
@@ -151,6 +168,7 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 	if (version >= 1) {
 		ar & jobs;
 		ar & goals;
+		ar & currentGoal;
 		ar & activeTime;
 		ar & maxActiveTime;
 		ar & active;
