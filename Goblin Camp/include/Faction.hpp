@@ -56,7 +56,7 @@ class Faction {
 
 	std::vector<boost::weak_ptr<Job> > jobs;
 	std::vector<FactionGoal> goals;
-
+	int currentGoal;
 	int activeTime;
 	int maxActiveTime;
 	bool active;
