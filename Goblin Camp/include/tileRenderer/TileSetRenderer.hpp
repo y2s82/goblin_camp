@@ -77,7 +77,7 @@ public:
 	void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable);
 
 protected:
-	virtual void PreDrawMap() = 0;
+	virtual void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) = 0;
 	virtual void PostDrawMap() = 0;
 	virtual void DrawNullTile(int screenX, int screenY) = 0;
 

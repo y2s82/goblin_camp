@@ -214,6 +214,8 @@ void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int vi
 			}
 		}
 	}
+
+	PreDrawMap(viewportX, viewportY, viewportW, viewportH);
 	
 	// Setup rendering state
 	map = mapToDraw;
@@ -229,8 +231,6 @@ void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int vi
 	mapOffsetY = startTileY * tileSet->TileHeight() - absStartPixelY;
 	tilesX = CeilToInt::convert((focusX * tileSet->TileWidth() + viewportW / 2) / tileSet->TileWidth()) - startTileX;
 	tilesY = CeilToInt::convert((focusY * tileSet->TileHeight() + viewportH / 2) / tileSet->TileHeight()) - startTileY;
-
-	PreDrawMap();
 
     // And then render to map
 	for (int y = 0; y < tilesY; ++y) {

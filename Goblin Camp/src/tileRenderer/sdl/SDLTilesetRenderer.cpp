@@ -63,12 +63,12 @@ Sprite_ptr SDLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::
 	return Sprite_ptr(new SDLSprite(this, tilesetTexture, tiles.begin(), tiles.end(), connectionMap, frameRate, frameCount));
 }
 
-void SDLTilesetRenderer::PreDrawMap() {
+void SDLTilesetRenderer::PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) {
 	SDL_Rect viewportRect;
-	viewportRect.x = startPixelX;
-	viewportRect.y = startPixelY;
-	viewportRect.w = pixelW;
-	viewportRect.h = pixelH;
+	viewportRect.x = viewportX;
+	viewportRect.y = viewportY;
+	viewportRect.w = viewportW;
+	viewportRect.h = viewportH;
 	SDL_SetClipRect(mapSurface.get(), &viewportRect);
 }
 

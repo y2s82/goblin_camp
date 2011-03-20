@@ -164,6 +164,7 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
   consoleTextures(),
   consoleTexW(0), consoleTexH(0),
   consoleData(),
+  renderInProgress(false),
   viewportLayers(),
   renderQueue(),
   viewportW(0), viewportH(0)
@@ -287,21 +288,23 @@ void OGLTilesetRenderer::TilesetChanged() {
 		viewportLayers[i] = ViewportLayer(2 * viewportW, 2 * viewportH);
 	}
 
-	// TODO: Only needed if using shaders
-	viewportTexW = MathEx::NextPowerOfTwo(2 * viewportW);
-	viewportTexH = MathEx::NextPowerOfTwo(2 * viewportH);
-	for (int i = 0; i < viewportTextures.size(); ++i) {
-		viewportTextures[i] = CreateOGLTexture();
-		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
+		viewportTexW = MathEx::NextPowerOfTwo(2 * viewportW);
+		viewportTexH = MathEx::NextPowerOfTwo(2 * viewportH);
+		for (int i = 0; i < viewportTextures.size(); ++i) {
+			viewportTextures[i] = CreateOGLTexture();
+			glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
 
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexW, viewportTexH, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
-		CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
-	}
-	InitaliseShaders();
-	if (!LoadProgram(tiles_vertex_shader, tiles_pixel_shader, &viewportVertShader, &viewportFragShader, &viewportProgram)) {
-		LOG("Failed to load tiles shader");
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, viewportTexW, viewportTexH, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
+			CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
+		}
+	
+		InitaliseShaders();
+		if (!LoadProgram(tiles_vertex_shader, tiles_pixel_shader, &viewportVertShader, &viewportFragShader, &viewportProgram)) {
+			LOG("Failed to load tiles shader");
+		}
 	}
 }
 
@@ -377,52 +380,46 @@ void OGLTilesetRenderer::AssembleTextures() {
 	CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
 }
 
-void OGLTilesetRenderer::render() {
-	glClearColor(0,0,0,255);
-	glClear(GL_COLOR_BUFFER_BIT);
-	int consoleW = TCODConsole::root->getWidth();
-	int consoleH = TCODConsole::root->getHeight();
-	for (int x = 0; x < TCODConsole::root->getWidth(); ++x) {
-		for (int y = 0; y < TCODConsole::root->getHeight(); ++y) {
-			TCODColor backCol = TCODConsole::root->getCharBackground(x,y);
-			unsigned char alpha = (backCol == GetKeyColor()) ? 0 : ((backCol == TCODColor::black) ? 128 : 255);
-			consoleData[BackCol][4 * (x + y * consoleW)] = backCol.r;
-			consoleData[BackCol][4 * (x + y * consoleW) + 1] = backCol.g;
-			consoleData[BackCol][4 * (x + y * consoleW) + 2] = backCol.b;
-			consoleData[BackCol][4 * (x + y * consoleW) + 3] = alpha;
-
-			unsigned char c = TCODConsole::root->getCharCode(x,y);
-			if (c == -1) c = TCODSystem::asciiToTCOD(TCODConsole::root->getChar(x,y));
-			consoleData[Character][x + y * consoleW] = c;
-			if (c != 0) {
-				TCODColor foreCol = TCODConsole::root->getCharForeground(x,y); 
-				consoleData[ForeCol][3 * (x + y * consoleW)] = foreCol.r;
-				consoleData[ForeCol][3 * (x + y * consoleW) + 1] = foreCol.g;
-				consoleData[ForeCol][3 * (x + y * consoleW) + 2] = foreCol.b;
-			} else {
-				consoleData[Character][x + y * consoleW] = 0;
-			}
-		}
+void OGLTilesetRenderer::PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) {
+	if (renderInProgress) {
+		RenderViewport();
+	} else {
+		glClearColor(0,0,0,255);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+	for (int i = 0; i < viewportLayers.size(); ++i) {
+		viewportLayers[i].Reset();
 	}
 
-	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RED, GL_UNSIGNED_BYTE, &consoleData[Character][0]);
+	renderQueue.clear();
+	renderInProgress = true;
+}
 
-	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, &consoleData[ForeCol][0]);
+void OGLTilesetRenderer::PostDrawMap() {
+}
 
-	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
-	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &consoleData[BackCol][0]);
-	
+void OGLTilesetRenderer::render() 
+{
+	if (renderInProgress) {
+		RenderViewport();
+		renderInProgress = false;
+	} else {
+		glClearColor(0,0,0,255);
+		glClear(GL_COLOR_BUFFER_BIT);
+	}
+	RenderConsole();
+}
+
+void OGLTilesetRenderer::RenderViewport() {
+	glUseProgramObjectARB(0);
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+
 	for (int i = 0; i < viewportLayers.size(); ++i) {
 		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2 * viewportW, 2 * viewportH, GL_RGBA, GL_UNSIGNED_BYTE, *viewportLayers[i]);
 	}
-
-	glUseProgramObjectARB(0);
-	
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_CLIP_PLANE0);
@@ -564,7 +561,47 @@ void OGLTilesetRenderer::render() {
 	glDisable(GL_CLIP_PLANE1);
 	glDisable(GL_CLIP_PLANE2);
 	glDisable(GL_CLIP_PLANE3);
+	glDisable(GL_BLEND);
 	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void OGLTilesetRenderer::RenderConsole() {
+	int consoleW = TCODConsole::root->getWidth();
+	int consoleH = TCODConsole::root->getHeight();
+	for (int x = 0; x < TCODConsole::root->getWidth(); ++x) {
+		for (int y = 0; y < TCODConsole::root->getHeight(); ++y) {
+			TCODColor backCol = TCODConsole::root->getCharBackground(x,y);
+			unsigned char alpha = (backCol == GetKeyColor()) ? 0 : ((backCol == TCODColor::black) ? 128 : 255);
+			consoleData[BackCol][4 * (x + y * consoleW)] = backCol.r;
+			consoleData[BackCol][4 * (x + y * consoleW) + 1] = backCol.g;
+			consoleData[BackCol][4 * (x + y * consoleW) + 2] = backCol.b;
+			consoleData[BackCol][4 * (x + y * consoleW) + 3] = alpha;
+
+			unsigned char c = TCODConsole::root->getCharCode(x,y);
+			if (c == -1) c = TCODSystem::asciiToTCOD(TCODConsole::root->getChar(x,y));
+			consoleData[Character][x + y * consoleW] = c;
+			if (c != 0) {
+				TCODColor foreCol = TCODConsole::root->getCharForeground(x,y); 
+				consoleData[ForeCol][3 * (x + y * consoleW)] = foreCol.r;
+				consoleData[ForeCol][3 * (x + y * consoleW) + 1] = foreCol.g;
+				consoleData[ForeCol][3 * (x + y * consoleW) + 2] = foreCol.b;
+			} else {
+				consoleData[Character][x + y * consoleW] = 0;
+			}
+		}
+	}
+
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RED, GL_UNSIGNED_BYTE, &consoleData[Character][0]);
+
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGB, GL_UNSIGNED_BYTE, &consoleData[ForeCol][0]);
+
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &consoleData[BackCol][0]);
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	/* rendering console */
 	glUseProgramObjectARB(consoleProgram);
@@ -609,17 +646,6 @@ void OGLTilesetRenderer::render() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_BLEND);
 	glUseProgramObjectARB(0);
-}
-
-void OGLTilesetRenderer::PreDrawMap() {
-	for (int i = 0; i < viewportLayers.size(); ++i) {
-		viewportLayers[i].Reset();
-	}
-
-	renderQueue.clear();
-}
-
-void OGLTilesetRenderer::PostDrawMap() {
 }
 
 void OGLTilesetRenderer::DrawNullTile(int screenX, int screenY) {

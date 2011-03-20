@@ -618,7 +618,7 @@ void SettingsMenu() {
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
 	SettingRenderer renderers[] = {
-		{ "OGL Tileset",	TCOD_RENDERER_GLSL   , true},
+		{ "GLSL Tileset",	TCOD_RENDERER_GLSL   , true},
 		{ "Tileset",		TCOD_RENDERER_SDL    , true},
 		{ "GLSL",			TCOD_RENDERER_GLSL   , false},
 		{ "OpenGL",			TCOD_RENDERER_OPENGL , false},
