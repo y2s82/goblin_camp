@@ -22,6 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Faction.hpp"
 #include "NPC.hpp"
 #include "Game.hpp"
+#include "Camp.hpp"
+#include "Random.hpp"
 
 std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::shared_ptr<Faction> >();
@@ -45,6 +47,8 @@ members(std::list<boost::weak_ptr<NPC> >()),
 	} else if (boost::iequals(name, "Trolls")) {
 		goals.push_back(FACTIONPATROL);
 		friends.insert(PLAYERFACTION);
+	} else {
+		goals.push_back(FACTIONKILL);
 	}
 }
 
@@ -112,7 +116,102 @@ void Faction::Reset() {
 
 void Faction::Update() {};
 
+namespace {
+	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job) {
+		boost::shared_ptr<Construction> construction = Game::Inst()->GetRandomConstruction().lock();
+		if (construction) {
+			job->tasks.push_back(Task(MOVEADJACENT, construction->Position(), construction));
+			job->tasks.push_back(Task(KILL, construction->Position(), construction));
+			job->internal = true;
+			return true;
+		}
+		return false;
+	}
+
+	inline bool GenerateKillJob(boost::shared_ptr<Job> job) {
+		job->internal = true;
+		job->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
+		return true;
+	}
+
+	inline bool GenerateStealJob(boost::shared_ptr<Job> job, boost::shared_ptr<Item> item) {
+		job->internal = true;
+		if (item) {
+			job->tasks.push_back(Task(MOVE, item->Position()));
+			job->tasks.push_back(Task(TAKE, item->Position(), item));
+		}
+		job->tasks.push_back(Task(FLEEMAP));
+		return true;
+	}
+}
+
 bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
+	if (!goals.empty()) {
+		if (currentGoal < 0 || currentGoal >= goals.size()) currentGoal = 0;
+		switch (goals[currentGoal]) {
+		case FACTIONDESTROY: 
+			{
+				boost::shared_ptr<Job> destroyJob(new Job("Destroy building"));
+				if (GenerateDestroyJob(destroyJob) || GenerateKillJob(destroyJob)) {
+					npc->StartJob(destroyJob);
+					return true;
+				}
+			}
+			break;
+
+		case FACTIONKILL:
+			{
+				boost::shared_ptr<Job> attackJob(new Job("Attack settlement"));
+				if (GenerateKillJob(attackJob)) {
+					npc->StartJob(attackJob);
+					return true;
+				}
+			}
+			break;
+
+		case FACTIONSTEAL:
+			{
+				boost::shared_ptr<Job> stealJob(new Job("Steal food"));
+				boost::weak_ptr<Item> food = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), npc->Position());
+				if (GenerateStealJob(stealJob, food.lock())) {
+					npc->StartJob(stealJob);
+					return true;
+				}
+			}
+			break;
+
+		case FACTIONPATROL:
+			{
+				boost::shared_ptr<Job> patrolJob(new Job("Patrol"));
+				patrolJob->internal = true;
+				int limit = 0;
+				Coordinate location(-1,-1);
+				if (IsFriendsWith(PLAYERFACTION)) {
+					while (location.X() < 0 && limit < 100) {
+						int x = Random::Generate(Camp::Inst()->GetUprTerritoryCorner().X(),
+							Camp::Inst()->GetLowTerritoryCorner().X());
+						int y = Random::Generate(Camp::Inst()->GetUprTerritoryCorner().Y(),
+							Camp::Inst()->GetLowTerritoryCorner().Y());
+						if (Map::Inst()->IsTerritory(x,y)) location = Coordinate(x,y);
+						++limit;
+					}
+				} else {
+					while (location.X() < 0 && limit < 100) {
+						int x = Random::Generate(Map::Inst()->Width());
+						int y = Random::Generate(Map::Inst()->Height());
+						if (!Map::Inst()->IsTerritory(x,y)) location = Coordinate(x,y);
+						++limit;
+					}
+				}
+				patrolJob->tasks.push_back(Task(MOVENEAR, location));
+				npc->StartJob(patrolJob);
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
 	return false;
 }
 
