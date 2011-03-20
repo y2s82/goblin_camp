@@ -289,7 +289,7 @@ void Camp::UpdateWaterJobs() {
 	}
 }
 
-Coordinate Camp::GetUpTerritoryCorner() const { return upperCorner; }
+Coordinate Camp::GetUprTerritoryCorner() const { return upperCorner; }
 Coordinate Camp::GetLowTerritoryCorner() const { return lowerCorner; }
 
 void Camp::save(OutputArchive& ar, const unsigned int version) const {
