@@ -426,20 +426,43 @@ void OGLTilesetRenderer::render() {
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_CLIP_PLANE0);
+	glEnable(GL_CLIP_PLANE1);
+	glEnable(GL_CLIP_PLANE2);
+	glEnable(GL_CLIP_PLANE3);
 
+	GLdouble eqn0[4] = { -1.0, 0.0, 0.0, ((double)(startPixelX + pixelW) / fontCharW) };
+	GLdouble eqn1[4] = { 1.0, 0.0, 0.0, -((double)startPixelX / fontCharW) };
+	GLdouble eqn2[4] = { 0.0,-1.0, 0.0, ((double)(GetScreenHeight() - startPixelY) / fontCharH) };
+	GLdouble eqn3[4] = { 0.0, 1.0, 0.0, -((double)(GetScreenHeight() - startPixelY - pixelH) / fontCharH) };
+
+	glClipPlane(GL_CLIP_PLANE0, eqn0);
+	glClipPlane(GL_CLIP_PLANE1, eqn1);
+	glClipPlane(GL_CLIP_PLANE2, eqn2);
+	glClipPlane(GL_CLIP_PLANE3, eqn3);
+	
 	float texCoordTileW = 0.5f / tilesTextureW;
 	float texCoordTileH = 0.5f / tilesTextureH;
 
-	float offsetX = 2.0f * mapOffsetX / tileSet->TileWidth();
-	float offsetY = 2.0f * mapOffsetY / tileSet->TileHeight();
+	float offsetX = 2.0f * (mapOffsetX + startPixelX) / tileSet->TileWidth();
+	float offsetY = 2.0f * (mapOffsetY + startPixelY) / tileSet->TileHeight();
 
 	/* rendering console */
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
+		float sizeX = 2.0f * viewportW * tileSet->TileWidth() / GetScreenWidth();
+		float sizeY = 2.0f * viewportH * tileSet->TileHeight() / GetScreenHeight();
+
+		float startX = 2.0f * startPixelX / GetScreenWidth();
+		float startY = 2.0f * startPixelY /  GetScreenHeight();
+
+		float vertOffsetX = 2.0f * mapOffsetX / GetScreenWidth();
+		float vertOffsetY = 2.0f * mapOffsetY / GetScreenHeight();
+		
 		glUseProgramObjectARB(viewportProgram);
 	
 		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"termsize"), (float) viewportW, (float) viewportH);
 		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"termcoef"), 2.0f/viewportTexW, 2.0f/viewportTexH);
-		glUniform1fARB(glGetUniformLocationARB(viewportProgram,"tilew"), tilesTextureW);
+		glUniform1fARB(glGetUniformLocationARB(viewportProgram,"tilew"), (GLfloat)tilesTextureW);
 		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
 
 		for (int i = 0; i < viewportTextures.size(); ++i) {
@@ -451,21 +474,15 @@ void OGLTilesetRenderer::render() {
 			glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
 			glUniform1iARB(glGetUniformLocationARB(viewportProgram,"tiles"),1);
 	
-			float sizeX = 2.0f * viewportW * tileSet->TileWidth() / GetScreenWidth();
-			float sizeY = 2.0f * viewportH * tileSet->TileHeight() / GetScreenHeight();
-
-			float vertOffsetX = 2.0f * mapOffsetX / GetScreenWidth();
-			float vertOffsetY = -2.0f * (mapOffsetY + 2 * tileSet->TileHeight()) / GetScreenHeight();
-
 			glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, 1.0f);
-				glVertex3f(vertOffsetX - 1.0f, vertOffsetY - 1.0f,0.0f);
+				glVertex3f(vertOffsetX + startX - 1.0f, 1.0f - vertOffsetY - startY - sizeY,0.0f);
 				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(vertOffsetX + sizeX - 1.0f, vertOffsetY - 1.0f,0.0f);
+				glVertex3f(vertOffsetX + startX + sizeX - 1.0f, 1.0f - vertOffsetY - startY - sizeY,0.0f);
 				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(vertOffsetX + sizeX - 1.0f, vertOffsetY + sizeY - 1.0f, 0.0f);
+				glVertex3f(vertOffsetX + startX + sizeX - 1.0f, 1.0f - vertOffsetY - startY, 0.0f);
 				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(vertOffsetX - 1.0f, vertOffsetY + sizeY - 1.0f,0.0f);
+				glVertex3f(vertOffsetX + startX - 1.0f, 1.0f -vertOffsetY - startY,0.0f);
 			glEnd();
 		}
 	
@@ -524,7 +541,11 @@ void OGLTilesetRenderer::render() {
 	}
 	glEnd();
 	CheckGL_Error("render", __FILE__, __LINE__);
-	
+
+	glDisable(GL_CLIP_PLANE0);
+	glDisable(GL_CLIP_PLANE1);
+	glDisable(GL_CLIP_PLANE2);
+	glDisable(GL_CLIP_PLANE3);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	/* rendering console */
@@ -696,42 +717,3 @@ bool OGLTilesetRenderer::InitaliseShaders() {
 	return true;
 }
 
-OGLTilesetRenderer::ViewportLayer::ViewportLayer()
-: width(0), height(0), data()
-{}
-
-OGLTilesetRenderer::ViewportLayer::ViewportLayer(int width, int height)
-	: width(width),
-	  height(height),
-	  data(width * height * 4, 0)
-{}
-
-void OGLTilesetRenderer::ViewportLayer::Reset() {
-	for (int i = 3; i < 4 * width * height; i += 4) {
-		data[i] = 0;
-	}
-	//for (std::vector<unsigned char>::iterator iter = data.begin(); iter != data.end(); iter += 4) {
-	//	*(iter + 3) = 0;
-	//}
-}
-
-void OGLTilesetRenderer::ViewportLayer::SetTile(int x, int y, unsigned int tile) {
-	int index = 4 * (x + y * width);
-	data[index] = tile & 0xff;
-	data[index + 1] = (tile >> 8) & 0xff;
-	data[index + 2] = (tile >> 16) & 0xff;
-	data[index + 3] = 0xff;
-}
-
-unsigned char * OGLTilesetRenderer::ViewportLayer::operator*() {
-	return &data[0];
-}
-
-bool OGLTilesetRenderer::ViewportLayer::IsTileSet(int x, int y) const {
-	return data[4 * (x + y * width) + 3] != 0;
-}
-
-int OGLTilesetRenderer::ViewportLayer::GetTile(int x, int y) const {
-	int index = 4 * (x + y * width);
-	return data[index] | (data[index + 1] << 8) | (data[index + 2] << 16);
-}
