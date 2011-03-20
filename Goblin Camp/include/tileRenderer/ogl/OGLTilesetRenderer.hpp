@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/TilesetRenderer.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
+#include "tileRenderer/ogl/OGLViewportLayer.hpp"
 #include <boost/multi_array.hpp>
 
 struct RawTileData {
@@ -81,22 +82,9 @@ private:
 	boost::array<bool, ConsoleTextureTypesCount> consoleDirty;
 	
 	// Viewports
-	class ViewportLayer {
-	public:
-		explicit ViewportLayer();
-		explicit ViewportLayer(int width, int height);
-		void Reset();
-		void SetTile(int x, int y, unsigned int tile);
-		int GetTile(int x, int y) const;
-		bool IsTileSet(int x, int y) const;
-		unsigned char* operator*();
-	private:
-		std::vector<unsigned char> data;
-		int width;
-		int height;
-	};
-	boost::array<ViewportLayer, 5> viewportLayers;
-	boost::array<boost::shared_ptr<const unsigned int>, 5> viewportTextures;
+	static const int VIEWPORT_LAYERS = 5;
+	boost::array<ViewportLayer, VIEWPORT_LAYERS> viewportLayers;
+	boost::array<boost::shared_ptr<const unsigned int>, VIEWPORT_LAYERS> viewportTextures;
 	struct RenderTile {
 		int x;
 		int y;

@@ -39,5 +39,5 @@ private:
 	bool translucentUI;
 	boost::shared_ptr<SDL_Surface> mapSurface;
 
-	SDL_Rect CalcDest(int screenX, int screenY) const { SDL_Rect dstRect = {tileSet->TileWidth() * (screenX) + mapOffsetX, tileSet->TileHeight() * (screenY) + mapOffsetY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
+	SDL_Rect CalcDest(int screenX, int screenY) const { SDL_Rect dstRect = {tileSet->TileWidth() * (screenX) + mapOffsetX + startPixelX, tileSet->TileHeight() * (screenY) + mapOffsetY + startPixelY, tileSet->TileWidth(), tileSet->TileHeight()}; return dstRect; }
 };
