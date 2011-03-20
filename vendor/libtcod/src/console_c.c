@@ -56,6 +56,7 @@ TCOD_internal_context_t TCOD_ctx={
 	/* default renderer to use */
 	TCOD_RENDERER_GLSL,
 	NULL,
+	NULL,
 	/* fading data */
 	{0,0,0},255,
 };
@@ -332,6 +333,14 @@ TCOD_color_t TCOD_console_get_char_foreground(TCOD_console_t con,int x, int y) {
 		&& (unsigned)(x) < (unsigned)dat->w && (unsigned)(y) < (unsigned)dat->h )
 		return TCOD_white;
 	return dat->buf[ y * dat->w + x ].fore;
+}
+
+int TCOD_console_get_char_code(TCOD_console_t con,int x, int y) {
+	TCOD_console_data_t *dat=con ? (TCOD_console_data_t *)con : TCOD_ctx.root;
+	TCOD_IFNOT ( dat != NULL
+		&& (unsigned)(x) < (unsigned)dat->w && (unsigned)(y) < (unsigned)dat->h )
+		return 0;
+	return dat->buf[ y * dat->w + x ].cf;
 }
 
 int TCOD_console_get_char(TCOD_console_t con,int x, int y) {

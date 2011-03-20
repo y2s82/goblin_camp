@@ -13,17 +13,20 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#pragma once
+#include <vector>
 
-#include "stdafx.hpp"
-#include "tileRenderer/SpellSpriteSet.hpp"
-
-SpellSpriteSet::SpellSpriteSet() : tile() {}
-
-SpellSpriteSet::SpellSpriteSet(Sprite_ptr sprite)
-	: tile(sprite) {}
-
-SpellSpriteSet::~SpellSpriteSet() {}
-
-void SpellSpriteSet::Draw(int screenX, int screenY) const {
-	tile.Draw(screenX, screenY);
-}
+class ViewportLayer {
+public:
+	explicit ViewportLayer();
+	explicit ViewportLayer(int width, int height);
+	void Reset();
+	void SetTile(int x, int y, unsigned int tile);
+	int GetTile(int x, int y) const;
+	bool IsTileSet(int x, int y) const;
+	unsigned char* operator*();
+private:
+	std::vector<unsigned char> data;
+	int width;
+	int height;
+};

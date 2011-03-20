@@ -55,10 +55,10 @@ MenuResult SideBar::Update(int x, int y, bool clicked) {
 
 void SideBar::Draw(TCODConsole* console) {
 	if (entity.lock()) {
+		console->setDefaultForeground(TCODColor::white);
 		int edgeX = console->getWidth();
 		leftX = edgeX - width;
 		topY = std::max(0,(console->getHeight() - height) / 2);
-		
 		console->rect(edgeX - (width-1), topY+1, width-2, height-2, true);
 		
 		if(contents) {

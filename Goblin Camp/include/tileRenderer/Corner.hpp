@@ -13,17 +13,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#pragma once
 
-#include "stdafx.hpp"
-#include "tileRenderer/SpellSpriteSet.hpp"
-
-SpellSpriteSet::SpellSpriteSet() : tile() {}
-
-SpellSpriteSet::SpellSpriteSet(Sprite_ptr sprite)
-	: tile(sprite) {}
-
-SpellSpriteSet::~SpellSpriteSet() {}
-
-void SpellSpriteSet::Draw(int screenX, int screenY) const {
-	tile.Draw(screenX, screenY);
-}
+enum Corner {
+	TopLeft = 0x0,
+	TopRight = 0x1,
+	BottomLeft = 0x2,
+	BottomRight = 0x3
+};
