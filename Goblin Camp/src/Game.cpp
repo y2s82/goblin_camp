@@ -2196,6 +2196,24 @@ boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
 	return boost::shared_ptr<NPC>();
 }
 
+boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
+	if (dynamicConstructionList.empty() || 
+		(Random::GenerateBool && !staticConstructionList.empty())) {
+		int index = Random::Generate(staticConstructionList.size()-1);
+		for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consi = staticConstructionList.begin();
+			consi != staticConstructionList.end(); ++consi) {
+				if (index-- == 0) return consi->second;
+		}
+	} else if (!dynamicConstructionList.empty()) {
+		int index = Random::Generate(dynamicConstructionList.size()-1);
+		for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consi = dynamicConstructionList.begin();
+			consi != dynamicConstructionList.end(); ++consi) {
+				if (index-- == 0) return consi->second;
+		}
+	}
+	return boost::weak_ptr<Construction>();
+}
+
 void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
