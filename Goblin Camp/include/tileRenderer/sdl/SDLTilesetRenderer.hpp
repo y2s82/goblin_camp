@@ -32,7 +32,7 @@ public:
 
 	void render(void *sdlSurface, void*sdlScreen);
 protected:
-	void PreDrawMap();
+	void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH);
 	void PostDrawMap();
 	void DrawNullTile(int screenX, int screenY);
 private:

@@ -47,7 +47,7 @@ public:
 	void render();
 
 protected:
-	void PreDrawMap();
+	void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH);
 	void PostDrawMap();
 	void DrawNullTile(int screenX, int screenY);
 	void TilesetChanged();
@@ -82,6 +82,7 @@ private:
 	boost::array<bool, ConsoleTextureTypesCount> consoleDirty;
 	
 	// Viewports
+	bool renderInProgress;
 	static const int VIEWPORT_LAYERS = 5;
 	boost::array<ViewportLayer, VIEWPORT_LAYERS> viewportLayers;
 	boost::array<boost::shared_ptr<const unsigned int>, VIEWPORT_LAYERS> viewportTextures;
@@ -103,7 +104,8 @@ private:
 	bool LoadProgram(std::string vertShaderCode, std::string fragShaderCode, unsigned int *vertShader, unsigned int *fragShader, unsigned int *program);
 	bool InitaliseShaders();
 
-	inline int ViewportIndex(int x, int y) { return 4 * (x + y * 2 * viewportW); }
+	void RenderViewport();
+	void RenderConsole();
 };
 
 const bool operator==(const RawTileData& lhs, const RawTileData& rhs);
