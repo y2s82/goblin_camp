@@ -419,7 +419,6 @@ void OGLTilesetRenderer::render() {
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2 * viewportW, 2 * viewportH, GL_RGBA, GL_UNSIGNED_BYTE, *viewportLayers[i]);
 	}
 
-
 	glUseProgramObjectARB(0);
 	
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -444,8 +443,8 @@ void OGLTilesetRenderer::render() {
 	float texCoordTileW = 0.5f / tilesTextureW;
 	float texCoordTileH = 0.5f / tilesTextureH;
 
-	float offsetX = 2.0f * (mapOffsetX + startPixelX) / tileSet->TileWidth();
-	float offsetY = 2.0f * (mapOffsetY + startPixelY) / tileSet->TileHeight();
+	float offsetX = (float)mapOffsetX + startPixelX;
+	float offsetY = (float)mapOffsetY + startPixelY;
 
 	/* rendering console */
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
@@ -492,6 +491,15 @@ void OGLTilesetRenderer::render() {
 
 		CheckGL_Error("Shader Render Viewport Layers", __FILE__, __LINE__);
 	} else {
+		float sizeX = 0.5f * tileSet->TileWidth();
+		float sizeY = 0.5f * tileSet->TileHeight();
+
+		float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
+		float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+
+		float factorX = 1.0f / fontCharW;
+		float factorY = 1.0f / fontCharH;
+
 		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
 		CheckGL_Error("glBindTexture", __FILE__, __LINE__);
 		glBegin(GL_QUADS);
@@ -504,13 +512,13 @@ void OGLTilesetRenderer::render() {
 						srcX += (x & 0x1);
 						srcY += (y & 0x1);
 						glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
-						glVertex2f( offsetX + x, -offsetY + viewportH * 2 - y - 4);
+						glVertex2f(factorX * (offsetX + x * sizeX), factorY * (GetScreenHeight() - y * sizeY - offsetY));
 						glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
-						glVertex2f( offsetX + x, -offsetY + viewportH * 2 - y - 5);
+						glVertex2f(factorX * (offsetX + x * sizeX), factorY * (GetScreenHeight() - (y + 1) * sizeY - offsetY));
 						glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
-						glVertex2f( offsetX + x+1, -offsetY + viewportH * 2 - y - 5);
+						glVertex2f(factorX * (offsetX + (x + 1) * sizeX),factorY * (GetScreenHeight() - (y + 1) * sizeY - offsetY));
 						glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
-						glVertex2f( offsetX + x+1, -offsetY + viewportH * 2 - y - 4);
+						glVertex2f(factorX * (offsetX + (x + 1) * sizeX), factorY * (GetScreenHeight() - y * sizeY - offsetY));
 					}
 				}
 			}
@@ -519,28 +527,38 @@ void OGLTilesetRenderer::render() {
 		CheckGL_Error("Render Viewport Layers", __FILE__, __LINE__);
 	}
 
-	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
-	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+	{
+		float sizeX = 0.5f * tileSet->TileWidth();
+		float sizeY = 0.5f * tileSet->TileHeight();
 
-	glBegin(GL_QUADS);
-	glColor4f(1.0,1.0,1.0,1.0);
+		float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
+		float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
 
-	for (std::vector<RenderTile>::iterator queuedTile = renderQueue.begin(); queuedTile != renderQueue.end(); ++queuedTile) {
-		unsigned int srcX = 2 * (queuedTile->tile % tilesTextureW);
-		unsigned int srcY = 2 * (queuedTile->tile / tilesTextureH);
-		srcX += (queuedTile->x & 0x1);
-		srcY += (queuedTile->y & 0x1);
-		glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
-		glVertex2f( offsetX + queuedTile->x, -offsetY + viewportH * 2 - queuedTile->y - 4);
-		glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
-		glVertex2f( offsetX + queuedTile->x, -offsetY + viewportH * 2 - queuedTile->y - 5);
-		glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
-		glVertex2f( offsetX + queuedTile->x+1, -offsetY + viewportH * 2 - queuedTile->y - 5);
-		glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
-		glVertex2f( offsetX + queuedTile->x+1, -offsetY + viewportH * 2 - queuedTile->y - 4);
+		float factorX = 1.0f / fontCharW;
+		float factorY = 1.0f / fontCharH;
+
+		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+		CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+
+		glBegin(GL_QUADS);
+		glColor4f(1.0,1.0,1.0,1.0);
+		for (std::vector<RenderTile>::iterator queuedTile = renderQueue.begin(); queuedTile != renderQueue.end(); ++queuedTile) {
+			unsigned int srcX = 2 * (queuedTile->tile % tilesTextureW);
+			unsigned int srcY = 2 * (queuedTile->tile / tilesTextureH);
+			srcX += (queuedTile->x & 0x1);
+			srcY += (queuedTile->y & 0x1);
+			glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
+			glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (GetScreenHeight() - queuedTile->y * sizeY - offsetY));
+			glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
+			glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (GetScreenHeight() - (queuedTile->y + 1) * sizeY - offsetY));
+			glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
+			glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX),factorY * (GetScreenHeight() - (queuedTile->y + 1) * sizeY - offsetY));
+			glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
+			glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX), factorY * (GetScreenHeight() - queuedTile->y * sizeY - offsetY));
+		}
+		glEnd();
+		CheckGL_Error("render", __FILE__, __LINE__);
 	}
-	glEnd();
-	CheckGL_Error("render", __FILE__, __LINE__);
 
 	glDisable(GL_CLIP_PLANE0);
 	glDisable(GL_CLIP_PLANE1);
