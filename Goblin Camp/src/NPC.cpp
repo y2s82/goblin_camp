@@ -2282,14 +2282,14 @@ void NPC::InitializeAIFunctions() {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
-		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 		React = boost::bind(NPC::HungryAnimalReact, _1);
-		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
-		React = boost::bind(NPC::HostileAnimalReact, _1);
 		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
+		React = boost::bind(NPC::HostileAnimalReact, _1);
 	}
 }
 
