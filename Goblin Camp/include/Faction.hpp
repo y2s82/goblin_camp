@@ -38,7 +38,8 @@ enum FactionGoal {
 	FACTIONDESTROY, //Destroy buildings
 	FACTIONKILL,    //Kill hostiles
 	FACTIONSTEAL,   //Steal items valuable to the faction
-	FACTIONPATROL   //Patrol area
+	FACTIONPATROL,  //Patrol area
+	FACTIONIDLE     //Idle
 };
 
 class Faction {
