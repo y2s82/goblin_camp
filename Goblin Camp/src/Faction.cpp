@@ -47,6 +47,8 @@ members(std::list<boost::weak_ptr<NPC> >()),
 	} else if (boost::iequals(name, "Trolls")) {
 		goals.push_back(FACTIONPATROL);
 		friends.insert(PLAYERFACTION);
+	} else if (boost::iequals(name, "Peaceful animal")) {
+		goals.push_back(FACTIONIDLE);
 	} else {
 		goals.push_back(FACTIONKILL);
 	}
@@ -205,6 +207,11 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 				}
 				patrolJob->tasks.push_back(Task(MOVENEAR, location));
 				npc->StartJob(patrolJob);
+			}
+			break;
+
+		case FACTIONIDLE:
+			{
 			}
 			break;
 
