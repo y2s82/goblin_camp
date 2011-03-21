@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "stdafx.hpp"
 #include "tileRenderer/TerrainSprite.hpp"
+#include <boost/bind.hpp>
 
 TerrainSprite::TerrainSprite()
 	: sprites(),
@@ -184,7 +185,7 @@ void TerrainSprite::DrawBaseLayer(int screenX, int screenY, Coordinate coords, c
 	if (sprites.size() > 0) {
 		// Calculate height layer
 		int heightLayer = 0;
-		for (int i = 0; i < heightSplits.size(); ++i) {
+		for (unsigned int i = 0; i < heightSplits.size(); ++i) {
 			if (height >= heightSplits[i]) {
 				heightLayer++;
 			} else {
