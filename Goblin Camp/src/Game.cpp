@@ -300,8 +300,8 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
-	npc->InitializeAIFunctions();
 	npc->SetFaction(NPC::Presets[type].faction);
+	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
 	npc->graphic(NPC::Presets[type].graphic);
@@ -2198,7 +2198,7 @@ boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
 
 boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
 	if (dynamicConstructionList.empty() || 
-		(Random::GenerateBool && !staticConstructionList.empty())) {
+		(Random::GenerateBool() && !staticConstructionList.empty())) {
 		int index = Random::Generate(staticConstructionList.size()-1);
 		for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consi = staticConstructionList.begin();
 			consi != staticConstructionList.end(); ++consi) {
