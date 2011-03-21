@@ -47,7 +47,8 @@ class Faction {
 	
 	static std::map<std::string, int> factionNames;
 	
-	std::list< boost::weak_ptr<NPC> > members;
+	std::list<boost::weak_ptr<NPC> > members;
+	std::list<int> membersAsUids;
 	std::map<Coordinate, bool> trapVisible;
 	std::set<FactionType> friends;
 	std::list<std::string> friendNames;
@@ -61,6 +62,8 @@ class Faction {
 	int activeTime;
 	int maxActiveTime;
 	bool active;
+	void TranslateFriends();
+
 public:
 	Faction(std::string = "Noname faction");
 	void AddMember(boost::weak_ptr<NPC>);
@@ -81,8 +84,8 @@ public:
 	void MakeFriendsWith(FactionType);
 	bool IsFriendsWith(FactionType);
 	
-	static void Init();
-	void TranslateFriends();
+	static void Init(); //Initialize faction names, required before loading npcs from a save file
+	static void TranslateMembers(); //Translate member uids into pointers _after_ loading npcs from a save
 };
 
 BOOST_CLASS_VERSION(Faction, 1)
