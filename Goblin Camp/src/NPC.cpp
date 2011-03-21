@@ -2191,6 +2191,17 @@ class NPCListener : public ITCODParserListener {
 		std::cout<<boost::format("end of %s\n") % str->getName();
 #endif
 		if (NPC::Presets[npcIndex].plural == "") NPC::Presets[npcIndex].plural = NPC::Presets[npcIndex].name + "s";
+		if (NPC::Presets[npcIndex].faction == -1) {
+			if (NPC::Presets[npcIndex].ai == "PlayerNPC") {
+				NPC::Presets[npcIndex].faction = PLAYERFACTION;
+			} else if (NPC::Presets[npcIndex].ai == "PeacefulAnimal") {
+				NPC::Presets[npcIndex].faction = Faction::StringToFactionType("Peaceful animal");
+			} else if (NPC::Presets[npcIndex].ai == "HungryAnimal") {
+				NPC::Presets[npcIndex].faction = Faction::StringToFactionType("Hostile monster");
+			} else if (NPC::Presets[npcIndex].ai == "HostileAnimal") {
+				NPC::Presets[npcIndex].faction = Faction::StringToFactionType("Hostile monster");
+			}
+		}
 		return true;
 	}
 	void error(const char *msg) {
@@ -2270,19 +2281,15 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-		if (faction == -1) faction = PLAYERFACTION;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
 		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		if (faction == -1) faction = Faction::StringToFactionType("Peaceful animal");
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
-		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
 		React = boost::bind(NPC::HungryAnimalReact, _1);
-		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
-		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 	}
 }
 
