@@ -288,7 +288,6 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 }
 
 int Game::CreateNPC(Coordinate target, NPCType type) {
-
 	int tries = 0;
 	int radius = 1;
 	Coordinate originalTarget = target;
