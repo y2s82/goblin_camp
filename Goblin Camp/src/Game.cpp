@@ -2271,8 +2271,9 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & camX;
 	ar & camY;
 	ar & Faction::factions;
-	Faction::Init();
+	Faction::Init(); //Initialize names and default friends, do before loading npcs
 	ar & npcList;
+	Faction::TranslateMembers(); //Translate uid's into pointers, only do after loading npcs
 	ar & squadList;
 	ar & hostileSquadList;
 	ar & staticConstructionList;
