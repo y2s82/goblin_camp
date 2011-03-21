@@ -111,6 +111,7 @@ std::string Faction::FactionTypeToString(FactionType faction) {
 void Faction::Reset() {
 	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	members.clear();
+	membersAsUids.clear();
 	trapVisible.clear();
 	jobs.clear();
 	currentGoal = 0;
@@ -263,8 +264,19 @@ void Faction::TranslateFriends() {
 	}
 }
 
+void Faction::TranslateMembers() {
+	for (int i = 0; i < factions.size(); ++i) {
+		for (std::list<int>::iterator uidi = factions[i]->membersAsUids.begin(); 
+			uidi != factions[i]->membersAsUids.end(); ++uidi) {
+				boost::weak_ptr<NPC> npc = Game::Inst()->GetNPC(*uidi);
+				if (npc.lock()) factions[i]->AddMember(npc);
+		}
+	}
+}
+
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
-	ar & members;
+	std::list< boost::weak_ptr<NPC> > unusedList;
+	ar & unusedList;
 	ar & trapVisible;
 	ar & name;
 	ar & jobs;
@@ -273,16 +285,28 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & activeTime;
 	ar & maxActiveTime;
 	ar & active;
+	
 	std::size_t friendCount = friends.size();
 	ar & friendCount;
 	for (std::set<FactionType>::iterator factionIter = friends.begin(); factionIter != friends.end(); ++factionIter) {
 		std::string factionName = Faction::FactionTypeToString(*factionIter);
 		ar & factionName;
 	}
+
+	std::size_t memberCount = members.size();
+	ar & memberCount;
+	for (std::list<boost::weak_ptr<NPC> >::const_iterator membi = members.begin(); membi != members.end(); ++membi) {
+		int uid = -1;
+		if (membi->lock()) {
+			uid = membi->lock()->Uid();
+		}
+		ar & uid;
+	}
 }
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
-	ar & members;
+	std::list< boost::weak_ptr<NPC> > unusedList;
+	ar & unusedList;
 	ar & trapVisible;
 	ar & name;
 	if (version >= 1) {
@@ -294,10 +318,18 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 		ar & active;
 		std::size_t friendCount;
 		ar & friendCount;
-		for (int i = 0; i < friendCount; ++i) {
+		for (std::size_t i = 0; i < friendCount; ++i) {
 			std::string factionName;
 			ar & factionName;
 			friendNames.push_back(factionName);
+		}
+
+		std::size_t memberCount;
+		ar & memberCount;
+		for (std::size_t i = 0; i < memberCount; ++i) {
+			int uid;
+			ar & uid;
+			membersAsUids.push_back(uid);
 		}
 	}
 }
