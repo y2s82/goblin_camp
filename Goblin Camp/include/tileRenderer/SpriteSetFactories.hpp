@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
-#include "tileRenderer/TilesetRenderer.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
 #include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/NPCSprite.hpp"
 

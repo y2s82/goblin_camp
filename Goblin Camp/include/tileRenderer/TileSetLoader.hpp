@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <libtcod.hpp>
-#include "tileRenderer/TilesetRenderer.hpp"
+#include "tileRenderer/TileSetRenderer.hpp"
 #include "tileRenderer/TileSet.hpp"
 
 struct TileSetMetadata
