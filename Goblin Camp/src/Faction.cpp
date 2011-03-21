@@ -49,7 +49,7 @@ members(std::list<boost::weak_ptr<NPC> >()),
 		friends.insert(PLAYERFACTION);
 	} else if (boost::iequals(name, "Peaceful animal")) {
 		goals.push_back(FACTIONIDLE);
-	} else {
+	} else if (boost::iequals(name, "Hostile monster")) {
 		goals.push_back(FACTIONKILL);
 	}
 }
@@ -88,12 +88,15 @@ void Faction::TrapSet(Coordinate trapLocation, bool visible) {
 }
 
 FactionType Faction::StringToFactionType(std::string name) {
-	if (factionNames.find(name) == factionNames.end()) {
-		factions.push_back(boost::shared_ptr<Faction>(new Faction(name)));
-		factionNames[name] = factions.size() - 1;
-		factions.back()->MakeFriendsWith(factions.size()-1); //A faction is always friendly with itself
+	if (!boost::iequals(name, "Faction name not found")) {
+		if (factionNames.find(name) == factionNames.end()) {
+			factions.push_back(boost::shared_ptr<Faction>(new Faction(name)));
+			factionNames[name] = factions.size() - 1;
+			factions.back()->MakeFriendsWith(factions.size()-1); //A faction is always friendly with itself
+		}
+		return factionNames[name];
 	}
-	return factionNames[name];
+	return -1;
 }
 
 std::string Faction::FactionTypeToString(FactionType faction) {
@@ -119,8 +122,19 @@ void Faction::Reset() {
 void Faction::Update() {};
 
 namespace {
-	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job) {
-		boost::shared_ptr<Construction> construction = Game::Inst()->GetRandomConstruction().lock();
+	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job, boost::shared_ptr<NPC> npc) {
+		boost::shared_ptr<Construction> construction;
+		TCODLine::init(npc->Position().X(), npc->Position().Y(), Camp::Inst()->Center().X(), Camp::Inst()->Center().Y());
+		int x = npc->Position().X();
+		int y = npc->Position().Y();
+		do {
+			int constructionID = Map::Inst()->GetConstruction(x,y);
+			if (constructionID >= 0) {
+				construction = Game::Inst()->GetConstruction(constructionID).lock();
+				if (construction && !construction->HasTag(WORKSHOP) && !construction->HasTag(WALL))
+					construction.reset();
+			}
+		} while (!TCODLine::step(&x, &y) && !construction);
 		if (construction) {
 			job->tasks.push_back(Task(MOVEADJACENT, construction->Position(), construction));
 			job->tasks.push_back(Task(KILL, construction->Position(), construction));
@@ -154,7 +168,7 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 		case FACTIONDESTROY: 
 			{
 				boost::shared_ptr<Job> destroyJob(new Job("Destroy building"));
-				if (GenerateDestroyJob(destroyJob) || GenerateKillJob(destroyJob)) {
+				if (GenerateDestroyJob(destroyJob, npc) || GenerateKillJob(destroyJob)) {
 					npc->StartJob(destroyJob);
 					return true;
 				}
