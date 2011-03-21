@@ -2874,6 +2874,6 @@ void NPC::load(InputArchive& ar, const unsigned int version) {
 		ar & jobBegun;
 	}
 
-	InitializeAIFunctions();
 	SetFaction(faction); //Required to initialize factionPtr
+	InitializeAIFunctions();
 }
