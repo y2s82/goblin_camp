@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Camp.hpp"
 #include "Random.hpp"
+#include "Announce.hpp"
 
 std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::shared_ptr<Faction> >();
@@ -204,24 +205,27 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 				int limit = 0;
 				Coordinate location(-1,-1);
 				if (IsFriendsWith(PLAYERFACTION)) {
-					while (location.X() < 0 && limit < 100) {
+					do {
 						int x = Random::Generate(Camp::Inst()->GetUprTerritoryCorner().X(),
 							Camp::Inst()->GetLowTerritoryCorner().X());
 						int y = Random::Generate(Camp::Inst()->GetUprTerritoryCorner().Y(),
 							Camp::Inst()->GetLowTerritoryCorner().Y());
 						if (Map::Inst()->IsTerritory(x,y)) location = Coordinate(x,y);
 						++limit;
-					}
+					} while (location.X() < 0 && limit < 100);
 				} else {
-					while (location.X() < 0 && limit < 100) {
+					do {
 						int x = Random::Generate(Map::Inst()->Width());
 						int y = Random::Generate(Map::Inst()->Height());
 						if (!Map::Inst()->IsTerritory(x,y)) location = Coordinate(x,y);
 						++limit;
-					}
+					} while (location.X() < 0 && limit < 100);
 				}
-				patrolJob->tasks.push_back(Task(MOVENEAR, location));
-				npc->StartJob(patrolJob);
+				if (location.X() >= 0 && location.Y() >= 0) {
+					patrolJob->tasks.push_back(Task(MOVENEAR, location));
+					npc->StartJob(patrolJob);
+					return true;
+				}
 			}
 			break;
 
