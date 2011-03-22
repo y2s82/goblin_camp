@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/PermutationTable.hpp"
 #include <boost/shared_ptr.hpp>
-#include "tileRenderer/TilesetTexture.hpp"
+#include "tileRenderer/TileSetTexture.hpp"
 
 class TerrainSprite
 {
