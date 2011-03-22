@@ -354,6 +354,7 @@ npc_type "troll" {
 		effectChances=[    33    ]
 	}
 	death="Corpse"
+	faction="Trolls"
 }
 
 npc_type "skeleton" { 
