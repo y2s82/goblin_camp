@@ -59,6 +59,10 @@ members(std::list<boost::weak_ptr<NPC> >()),
 
 void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
 	members.push_back(newMember);
+	if (!active) {
+		active = true;
+		activeTime = 0;
+	}
 }
 
 void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
@@ -71,6 +75,7 @@ void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
 			++membi;
 		} else membi = members.erase(membi);
 	}
+	if (active && members.empty()) active = false;
 }
 
 void Faction::TrapDiscovered(Coordinate trapLocation, bool propagate) {
@@ -130,7 +135,11 @@ void Faction::Reset() {
 	active = false;
 }
 
-void Faction::Update() {};
+void Faction::Update() {
+	if (active) {
+		++activeTime;
+	}
+};
 
 namespace {
 	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job, boost::shared_ptr<NPC> npc) {
