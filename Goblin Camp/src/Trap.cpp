@@ -53,9 +53,9 @@ int Trap::Use() {
 			ready = true;
 			graphic[1] = readyGraphic;
 			progress = 0;
-			//Hide the trap from everyone but the player faction
+			//Hide the trap from everyone unfriendly to the player faction
 			for (int i = 0; i < Faction::factions.size(); ++i) {
-				Faction::factions[i]->TrapSet(Position(), i == PLAYERFACTION);
+				Faction::factions[i]->TrapSet(Position(), Faction::factions[i]->IsFriendsWith(PLAYERFACTION));
 			}
 			return 100;
 		}
