@@ -251,7 +251,7 @@ bool Faction::IsFriendsWith(FactionType otherFaction) {
 	return friends.find(otherFaction) != friends.end();
 }
 
-void Faction::Init() {
+void Faction::InitAfterLoad() {
 	factionNames.clear();
 	for (int i = 0; i < factions.size(); ++i) {
 		factionNames.insert(std::make_pair(factions[i]->name, i));

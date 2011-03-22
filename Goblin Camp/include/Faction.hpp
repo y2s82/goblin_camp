@@ -84,7 +84,7 @@ public:
 	void MakeFriendsWith(FactionType);
 	bool IsFriendsWith(FactionType);
 	
-	static void Init(); //Initialize faction names, required before loading npcs from a save file
+	static void InitAfterLoad(); //Initialize faction names, required before loading npcs from a save file
 	static void TranslateMembers(); //Translate member uids into pointers _after_ loading npcs from a save
 	void TransferTrapInfo(boost::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
 };
