@@ -2270,10 +2270,21 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & marks;
 	ar & camX;
 	ar & camY;
-	ar & Faction::factions;
-	Faction::Init(); //Initialize names and default friends, do before loading npcs
+
+	if (version < 1) { /* Earlier versions didn't use factions for more than storing trap data, 
+	                   so transfer that and use the new defualts otherwise */
+		std::vector<boost::shared_ptr<Faction> > oldFactionData;
+		ar & oldFactionData;
+		oldFactionData[0]->TransferTrapInfo(Faction::factions[PLAYERFACTION]);
+	} else {
+		ar & Faction::factions;
+		Faction::InitAfterLoad(); //Initialize names and default friends, before loading npcs
+	}
+	
 	ar & npcList;
-	Faction::TranslateMembers(); //Translate uid's into pointers, only do after loading npcs
+	
+	Faction::TranslateMembers(); //Translate uid's into pointers, do this after loading npcs
+	
 	ar & squadList;
 	ar & hostileSquadList;
 	ar & staticConstructionList;
