@@ -991,6 +991,10 @@ void Game::Update() {
 			++spellit;
 		}
 	}
+
+	for (std::size_t i = 0; i < Faction::factions.size(); ++i) {
+		Faction::factions[i]->Update();
+	}
 }
 
 boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
