@@ -278,6 +278,10 @@ void Faction::TranslateMembers() {
 	}
 }
 
+void Faction::TransferTrapInfo(boost::shared_ptr<Faction> otherFaction) {
+	otherFaction->trapVisible = this->trapVisible;
+}
+
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	std::list< boost::weak_ptr<NPC> > unusedList;
 	ar & unusedList;
