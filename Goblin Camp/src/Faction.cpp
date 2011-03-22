@@ -29,10 +29,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::shared_ptr<Faction> >();
 
-Faction::Faction(std::string vname) : 
+Faction::Faction(std::string vname, int vindex) : 
 members(std::list<boost::weak_ptr<NPC> >()), 
 	trapVisible(std::map<Coordinate,bool>()),
 	name(vname),
+	index(vindex),
 	currentGoal(0),
 	activeTime(0),
 	maxActiveTime(MONTH_LENGTH),
@@ -48,6 +49,7 @@ members(std::list<boost::weak_ptr<NPC> >()),
 	} else if (boost::iequals(name, "Trolls")) {
 		goals.push_back(FACTIONPATROL);
 		friends.insert(PLAYERFACTION);
+		factions[0]->friends.insert(index);
 	} else if (boost::iequals(name, "Peaceful animal")) {
 		goals.push_back(FACTIONIDLE);
 	} else if (boost::iequals(name, "Hostile monster")) {
@@ -71,9 +73,15 @@ void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
 	}
 }
 
-void Faction::TrapDiscovered(Coordinate trapLocation) {
+void Faction::TrapDiscovered(Coordinate trapLocation, bool propagate) {
 	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = true;
+	//Inform friends
+	if (propagate) {
+		for (std::set<FactionType>::iterator friendi = friends.begin(); friendi != friends.end(); ++friendi) {
+			if (*friendi != index) Faction::factions[*friendi]->TrapDiscovered(trapLocation, false);
+		}
+	}
 }
 
 bool Faction::IsTrapVisible(Coordinate trapLocation) {
@@ -91,7 +99,8 @@ void Faction::TrapSet(Coordinate trapLocation, bool visible) {
 FactionType Faction::StringToFactionType(std::string name) {
 	if (!boost::iequals(name, "Faction name not found")) {
 		if (factionNames.find(name) == factionNames.end()) {
-			factions.push_back(boost::shared_ptr<Faction>(new Faction(name)));
+			int index = factions.size();
+			factions.push_back(boost::shared_ptr<Faction>(new Faction(name, index)));
 			factionNames[name] = factions.size() - 1;
 			factions.back()->MakeFriendsWith(factions.size()-1); //A faction is always friendly with itself
 		}

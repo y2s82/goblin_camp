@@ -53,7 +53,8 @@ class Faction {
 	std::set<FactionType> friends;
 	std::list<std::string> friendNames;
 	std::string name;
-	
+	int index;
+
 	boost::shared_mutex trapVisibleMutex;
 
 	std::vector<boost::weak_ptr<Job> > jobs;
@@ -65,10 +66,10 @@ class Faction {
 	void TranslateFriends();
 
 public:
-	Faction(std::string = "Noname faction");
+	Faction(std::string = "Noname faction", int = -1);
 	void AddMember(boost::weak_ptr<NPC>);
 	void RemoveMember(boost::weak_ptr<NPC>);
-	void TrapDiscovered(Coordinate);
+	void TrapDiscovered(Coordinate, bool propagate=true);
 	bool IsTrapVisible(Coordinate);
 	void TrapSet(Coordinate, bool visible);
 
