@@ -150,7 +150,8 @@ class NPC : public Entity {
 	boost::weak_ptr<Item> foundItem;
 	boost::shared_ptr<Container> inventory;
 
-	std::list<boost::weak_ptr<NPC> >nearNpcs;
+	std::list<boost::weak_ptr<NPC> > nearNpcs;
+	std::list<boost::weak_ptr<Construction> > nearConstructions;
 	bool needsNutrition;
 	bool needsSleep;
 	bool hasHands;
