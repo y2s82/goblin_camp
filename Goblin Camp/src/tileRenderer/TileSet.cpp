@@ -61,7 +61,6 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 		for (int i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = TerrainSprite();
 		}
-		// TODO: Is this ok?
 		for (int i = 0; i < placeableCursors.size(); ++i) {
 			placeableCursors[i] = Sprite_ptr();
 			nonplaceableCursors[i] = Sprite_ptr();

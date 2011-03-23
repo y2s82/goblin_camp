@@ -557,6 +557,7 @@ void Game::ResetRenderer() {
 	if (running) {
 		renderer->PreparePrefabs();
 	}
+	renderer->SetTranslucentUI(Config::GetCVar<bool>("translucentUI"));
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {

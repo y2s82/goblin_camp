@@ -67,7 +67,7 @@ private:
 	unsigned int fontTexW, fontTexH;
 
 	// Console Rendering
-	unsigned int consoleProgram, consoleVertShader, consoleFragShader;
+	boost::shared_ptr<const unsigned int> consoleProgram;
 
 	enum ConsoleTexureTypes {
 		Character,
@@ -96,12 +96,8 @@ private:
 	std::vector<RenderTile> renderQueue;
 	int viewportW, viewportH;
 	int viewportTexW, viewportTexH;
-	// TODO: Resource manage these
-	unsigned int viewportProgram, viewportVertShader, viewportFragShader;
+	boost::shared_ptr<const unsigned int> viewportProgram;
 	
-	
-	unsigned int LoadShader(std::string shader, unsigned int type);
-	bool LoadProgram(std::string vertShaderCode, std::string fragShaderCode, unsigned int *vertShader, unsigned int *fragShader, unsigned int *program);
 	bool InitaliseShaders();
 
 	void RenderViewport();

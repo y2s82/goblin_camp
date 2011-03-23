@@ -76,6 +76,8 @@ public:
 	void DrawCursor(const Coordinate& pos, bool placeable);
 	void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable);
 
+	void SetTranslucentUI(bool translucent);
+
 protected:
 	virtual void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) = 0;
 	virtual void PostDrawMap() = 0;
@@ -86,6 +88,7 @@ protected:
 	TCODConsole * tcodConsole;
 	PermutationTable permutationTable;
 	boost::shared_ptr<TileSet> tileSet;
+	bool translucentUI;
 
 	// Current render state
 	Map * map;
@@ -95,7 +98,7 @@ protected:
 	int startTileX, startTileY; // Top-left tile
 	int tilesX, tilesY; // Num tiles to render in this window
 	CursorType cursorMode;
-	int cursorHint;
+	int cursorHint;	
 	
 	void DrawTerrain			(int screenX, int screenY, Coordinate pos) const;
 	void DrawFilth				(int screenX, int screenY, Coordinate pos) const;

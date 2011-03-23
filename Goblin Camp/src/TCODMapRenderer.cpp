@@ -227,3 +227,5 @@ void TCODMapRenderer::DrawCursor(const Coordinate& pos, bool placeable) {
 		else console->putCharEx(pos.X() - upleft.X(), pos.Y() - upleft.Y(), cursorChar, TCODColor::green, TCODColor::black);
 	}
 }
+
+void TCODMapRenderer::SetTranslucentUI(bool) {}
