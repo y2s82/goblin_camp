@@ -143,6 +143,11 @@ void Faction::Update() {
 	}
 };
 
+FactionGoal Faction::GetCurrentGoal() const {
+	if (currentGoal < goals.size()) return goals[currentGoal];
+	return FACTIONIDLE;
+}
+
 namespace {
 	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job, boost::shared_ptr<NPC> npc) {
 		boost::shared_ptr<Construction> construction;
