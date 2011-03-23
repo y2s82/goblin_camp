@@ -1776,14 +1776,31 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 	animal->ScanSurroundings();
 	if (animal->aggressive) {
-		for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-			if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
-				boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
-				killJob->internal = true;
-				killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-				while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
-				animal->jobs.push_back(killJob);
-				return;
+		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
+			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
+				if (boost::shared_ptr<Construction> construct = consi->lock()) {
+					if (construct->HasTag(WORKSHOP) || construct->HasTag(WALL)) {
+						boost::shared_ptr<Job> destroyJob(new Job("Destroy "+construct->Name()));
+						destroyJob->internal = true;
+						destroyJob->tasks.push_back(Task(MOVEADJACENT, construct->Position(), construct));
+						destroyJob->tasks.push_back(Task(KILL, construct->Position(), construct));
+						while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
+						animal->jobs.push_back(destroyJob);
+						return;
+					}
+				}
+			}
+		} else {
+			for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+				boost::shared_ptr<NPC> otherNPC = npci->lock();
+				if (otherNPC && !animal->factionPtr->IsFriendsWith(otherNPC->GetFaction())) {
+					boost::shared_ptr<Job> killJob(new Job("Kill "+otherNPC->name));
+					killJob->internal = true;
+					killJob->tasks.push_back(Task(KILL, otherNPC->Position(), *npci));
+					while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
+					animal->jobs.push_back(killJob);
+					return;
+				}
 			}
 		}
 	}
