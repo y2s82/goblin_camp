@@ -609,11 +609,12 @@ void SettingsMenu() {
 	bool useTileset          = Config::GetCVar<bool>("useTileset");
 	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
 	bool tutorial            = Config::GetCVar<bool>("tutorial");
+	bool translucentUI       = Config::GetCVar<bool>("translucentUI");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	const int w = 40;
-	const int h = 20;
+	const int h = 22;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
@@ -687,6 +688,10 @@ void SettingsMenu() {
 		TCODConsole::root->print(x + 1, currentY, "Tutorial");
 
 		currentY += 2;
+		TCODConsole::root->setDefaultForeground((translucentUI ? TCODColor::green : TCODColor::grey));
+		TCODConsole::root->print(x + 1, currentY, "Translucent UI");
+
+		currentY += 2;
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->print(x + 1, currentY, "Renderer");
 
@@ -710,8 +715,9 @@ void SettingsMenu() {
 			clicked = false;
 			int whereY      = mouse.cy - y - 1;
 			int rendererY   = currentY - y - 1;
-			int fullscreenY = rendererY - 4;
-			int tutorialY = rendererY - 2;
+			int fullscreenY = rendererY - 6;
+			int tutorialY = rendererY - 4;
+			int translucentUIY = rendererY - 2;
 
 			if (whereY > 1 && whereY < fullscreenY) {
 				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
@@ -722,6 +728,8 @@ void SettingsMenu() {
 				fullscreen = !fullscreen;
 			} else if (whereY == tutorialY) {
 				tutorial = !tutorial;
+			} else if (whereY == translucentUIY) {
+				translucentUI = !translucentUI;
 			} else if (whereY > rendererY) {
 				int whereRenderer = whereY - rendererY - 1;
 				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
@@ -738,11 +746,15 @@ void SettingsMenu() {
 	Config::SetCVar("useTileset", useTileset);
 	Config::SetCVar("fullscreen", fullscreen);
 	Config::SetCVar("tutorial", tutorial);
-	
+	Config::SetCVar("translucentUI", translucentUI);
+
 	try {
 		Config::Save();
 	} catch (const std::exception& e) {
 		LOG("Could not save configuration! " << e.what());
+	}
+	if (Game::Inst()->Renderer()) {
+		Game::Inst()->Renderer()->SetTranslucentUI(translucentUI);
 	}
 }
 

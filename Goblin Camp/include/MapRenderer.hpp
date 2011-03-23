@@ -79,4 +79,6 @@ public:
 	
 	virtual void DrawCursor(const Coordinate& pos, bool placeable) = 0;
 	virtual void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable) = 0;
+
+	virtual void SetTranslucentUI(bool translucent) = 0;
 };

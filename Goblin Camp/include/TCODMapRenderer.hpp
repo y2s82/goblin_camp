@@ -36,6 +36,8 @@ public:
 	void DrawCursor(const Coordinate& pos, bool placeable);
 	void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable);
 
+	void SetTranslucentUI(bool);
+
 private:
 	TCODConsole * console;
 	int cursorChar;

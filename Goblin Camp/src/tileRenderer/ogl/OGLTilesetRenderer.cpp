@@ -17,15 +17,19 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/ogl/OGLTilesetRenderer.hpp"
 #include "tileRenderer/ogl/OGLSprite.hpp"
-#include "tileRenderer/ogl/OGLTexture.hpp"
+#include "tileRenderer/ogl/OGLResources.hpp"
+#include "tileRenderer/ogl/OGLFunctionExt.hpp"
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
 #include <SDL/SDL_opengl.h>
 #include "MathEx.hpp"
 #include "Logger.hpp"
+#include <boost/scoped_array.hpp>
 
-#include "data/paths.hpp"
+#include "data/Paths.hpp"
+
+using namespace OGLFunctionExtension;
 
 namespace {
 
@@ -105,7 +109,7 @@ namespace {
 	"} "
 	;
 
-	static std::string tiles_pixel_shader =
+	static std::string tiles_frag_shader =
 #ifndef NDEBUG
 	"#version 110\n"
 #endif
@@ -133,23 +137,6 @@ namespace {
 	"   gl_FragColor *= tileInfo.a; \n"
 	"} "
 	;
-
-	static PFNGLCREATESHADEROBJECTARBPROC glCreateShaderObjectARB=0;
-	static PFNGLGETOBJECTPARAMETERIVARBPROC glGetObjectParameterivARB=0;
-	static PFNGLSHADERSOURCEARBPROC glShaderSourceARB=0;
-	static PFNGLCOMPILESHADERARBPROC glCompileShaderARB=0;
-	static PFNGLGETINFOLOGARBPROC glGetInfoLogARB=0;
-	static PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB=0;
-	static PFNGLATTACHOBJECTARBPROC glAttachObjectARB=0;
-	static PFNGLLINKPROGRAMARBPROC glLinkProgramARB=0;
-	static PFNGLUSEPROGRAMOBJECTARBPROC glUseProgramObjectARB=0;
-	static PFNGLUNIFORM2FARBPROC glUniform2fARB=0;
-	static PFNGLGETUNIFORMLOCATIONARBPROC glGetUniformLocationARB=0;
-	static PFNGLUNIFORM1FARBPROC glUniform1fARB=0;
-	static PFNGLUNIFORM1IARBPROC glUniform1iARB=0;
-	#ifdef TCOD_WINDOWS
-	static PFNGLACTIVETEXTUREPROC glActiveTexture=0;
-	#endif
 }
 
 
@@ -161,7 +148,8 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
   fontTexture(),
   fontCharW(0), fontCharH(0),
   fontTexW(0), fontTexH(0),
-  consoleProgram(0), consoleVertShader(0), consoleFragShader(0),
+  consoleProgram(),
+  viewportProgram(),
   consoleTextures(),
   consoleTexW(0), consoleTexH(0),
   consoleData(),
@@ -171,23 +159,6 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
   viewportW(0), viewportH(0)
 {
 	TCODSystem::registerOGLRenderer(this);
-
-	glCreateShaderObjectARB=(PFNGLCREATESHADEROBJECTARBPROC)SDL_GL_GetProcAddress("glCreateShaderObjectARB");
-	glGetObjectParameterivARB=(PFNGLGETOBJECTPARAMETERIVARBPROC)SDL_GL_GetProcAddress("glGetObjectParameterivARB");
-	glShaderSourceARB=(PFNGLSHADERSOURCEARBPROC)SDL_GL_GetProcAddress("glShaderSourceARB");
-	glCompileShaderARB=(PFNGLCOMPILESHADERARBPROC)SDL_GL_GetProcAddress("glCompileShaderARB");
-	glGetInfoLogARB=(PFNGLGETINFOLOGARBPROC)SDL_GL_GetProcAddress("glGetInfoLogARB");
-	glCreateProgramObjectARB=(PFNGLCREATEPROGRAMOBJECTARBPROC)SDL_GL_GetProcAddress("glCreateProgramObjectARB");
-	glAttachObjectARB=(PFNGLATTACHOBJECTARBPROC)SDL_GL_GetProcAddress("glAttachObjectARB");
-	glLinkProgramARB=(PFNGLLINKPROGRAMARBPROC)SDL_GL_GetProcAddress("glLinkProgramARB");
-	glUseProgramObjectARB=(PFNGLUSEPROGRAMOBJECTARBPROC)SDL_GL_GetProcAddress("glUseProgramObjectARB");
-	glUniform2fARB=(PFNGLUNIFORM2FARBPROC)SDL_GL_GetProcAddress("glUniform2fARB");
-	glGetUniformLocationARB=(PFNGLGETUNIFORMLOCATIONARBPROC)SDL_GL_GetProcAddress("glGetUniformLocationARB");
-	glUniform1fARB=(PFNGLUNIFORM1FARBPROC)SDL_GL_GetProcAddress("glUniform1fARB");
-	glUniform1iARB=(PFNGLUNIFORM1IARBPROC)SDL_GL_GetProcAddress("glUniform1iARB");
-#ifdef TCOD_WINDOWS	
-	glActiveTexture=(PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture");
-#endif
 
 	Uint32 rmask, gmask, bmask, amask;
 	if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
@@ -303,7 +274,8 @@ void OGLTilesetRenderer::TilesetChanged() {
 		}
 	
 		InitaliseShaders();
-		if (!LoadProgram(tiles_vertex_shader, tiles_pixel_shader, &viewportVertShader, &viewportFragShader, &viewportProgram)) {
+		viewportProgram = CreateOGLShaderProgram(tiles_vertex_shader, tiles_frag_shader);
+		if (!viewportProgram) {
 			LOG("Failed to load tiles shader");
 		}
 	}
@@ -351,34 +323,42 @@ void OGLTilesetRenderer::AssembleTextures() {
 		bmask = 0x00ff0000;
 		amask = 0xff000000;
 	}
-	boost::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, widthPixels, heightPixels, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
-	SDL_FillRect(tempSurface.get(), 0, SDL_MapRGBA(tempSurface->format, 0,0,0,0));
-	int tile = 0;
-	for (int y = 0; y < tilesTextureH && tile < rawTiles.size(); ++y) {
-		for (int x = 0; x < tilesTextureW && tile < rawTiles.size(); ++x) {
-			SDL_Rect target = {x * tileSet->TileWidth(), y * tileSet->TileHeight(), tileSet->TileWidth(), tileSet->TileHeight()};
-			SDL_SetAlpha(rawTiles[tile].texture->GetInternalSurface().get(), 0, SDL_ALPHA_OPAQUE);
-			rawTiles[tile].texture->DrawTile(rawTiles[tile].tile, tempSurface.get(), &target);
-			tile++;
-		}
-	}
-	rawTiles.clear();
-
+	boost::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, tileSet->TileWidth(), tileSet->TileHeight(), 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
+	if(tempSurface.get() == NULL) {
+        LOG("CreateRGBSurface failed: " << SDL_GetError());
+    }
+		
 	tilesTexture = CreateOGLTexture();
+	boost::scoped_array<unsigned char> rawData(new unsigned char[4 * widthPixels * heightPixels]);
+
 	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPixels, heightPixels, 0, GL_BGRA, GL_UNSIGNED_BYTE, rawData.get());
 	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
 
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 
-	if (SDL_MUSTLOCK(tempSurface.get())) {
-		SDL_LockSurface(tempSurface.get());
+	int tile = 0;
+	for (int y = 0; y < tilesTextureH && tile < rawTiles.size(); ++y) {
+		for (int x = 0; x < tilesTextureW && tile < rawTiles.size(); ++x) {
+			SDL_Rect srcRect = {0,0, tileSet->TileWidth(), tileSet->TileHeight()};
+			SDL_SetAlpha(rawTiles[tile].texture->GetInternalSurface().get(), 0, SDL_ALPHA_OPAQUE);
+			rawTiles[tile].texture->DrawTile(rawTiles[tile].tile, tempSurface.get(), &srcRect);
+
+			if (SDL_MUSTLOCK(tempSurface.get())) {
+				SDL_LockSurface(tempSurface.get());
+			}
+			glTexSubImage2D(GL_TEXTURE_2D, 0, x * tileSet->TileWidth(), y * tileSet->TileHeight(), tileSet->TileWidth(), tileSet->TileHeight(), GL_BGRA, GL_UNSIGNED_BYTE, tempSurface->pixels);
+			if (SDL_MUSTLOCK(tempSurface.get())) {
+				SDL_UnlockSurface(tempSurface.get());
+			}
+
+			tile++;
+		}
 	}
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPixels, heightPixels, 0, GL_BGRA, GL_UNSIGNED_BYTE, tempSurface->pixels);
-	if (SDL_MUSTLOCK(tempSurface.get())) {
-		SDL_UnlockSurface(tempSurface.get());
-	}
+	
 	CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
+	rawTiles.clear();
 }
 
 void OGLTilesetRenderer::PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) {
@@ -455,21 +435,21 @@ void OGLTilesetRenderer::RenderViewport() {
 		float vertOffsetX = 2.0f * mapOffsetX / GetScreenWidth();
 		float vertOffsetY = 2.0f * mapOffsetY / GetScreenHeight();
 		
-		glUseProgramObjectARB(viewportProgram);
+		glUseProgramObjectARB(*viewportProgram);
 	
-		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"termsize"), (float) viewportW, (float) viewportH);
-		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"termcoef"), 2.0f/viewportTexW, 2.0f/viewportTexH);
-		glUniform1fARB(glGetUniformLocationARB(viewportProgram,"tilew"), (GLfloat)tilesTextureW);
-		glUniform2fARB(glGetUniformLocationARB(viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
+		glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"termsize"), (float) viewportW, (float) viewportH);
+		glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"termcoef"), 2.0f/viewportTexW, 2.0f/viewportTexH);
+		glUniform1fARB(glGetUniformLocationARB(*viewportProgram,"tilew"), (GLfloat)tilesTextureW);
+		glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
 
 		for (int i = 0; i < viewportTextures.size(); ++i) {
 			glActiveTexture(GL_TEXTURE0);
 			glBindTexture(GL_TEXTURE_2D, *tilesTexture);
-			glUniform1iARB(glGetUniformLocationARB(viewportProgram,"tilesheet"),0);
+			glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tilesheet"),0);
 	
 			glActiveTexture(GL_TEXTURE1);
 			glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
-			glUniform1iARB(glGetUniformLocationARB(viewportProgram,"tiles"),1);
+			glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tiles"),1);
 	
 			glBegin(GL_QUADS);
 				glTexCoord2f(0.0f, 1.0f);
@@ -572,7 +552,7 @@ void OGLTilesetRenderer::RenderConsole() {
 	for (int x = 0; x < TCODConsole::root->getWidth(); ++x) {
 		for (int y = 0; y < TCODConsole::root->getHeight(); ++y) {
 			TCODColor backCol = TCODConsole::root->getCharBackground(x,y);
-			unsigned char alpha = (backCol == GetKeyColor()) ? 0 : ((backCol == TCODColor::black) ? 128 : 255);
+			unsigned char alpha = (backCol == GetKeyColor()) ? 0 : ((translucentUI && backCol == TCODColor::black) ? 128 : 255);
 			consoleData[BackCol][4 * (x + y * consoleW)] = backCol.r;
 			consoleData[BackCol][4 * (x + y * consoleW) + 1] = backCol.g;
 			consoleData[BackCol][4 * (x + y * consoleW) + 2] = backCol.b;
@@ -605,32 +585,32 @@ void OGLTilesetRenderer::RenderConsole() {
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 	/* rendering console */
-	glUseProgramObjectARB(consoleProgram);
+	glUseProgramObjectARB(*consoleProgram);
 	
 	/* Technically all these glUniform calls can be moved to SFConsole() when the shader is loaded */
 	/* None of these change */
 	/* The Textures still need to bind to the same # Activetexture throughout though */
-	glUniform2fARB(glGetUniformLocationARB(consoleProgram,"termsize"), (float) tcodConsole->getWidth(), (float) tcodConsole->getHeight());
-	glUniform2fARB(glGetUniformLocationARB(consoleProgram,"termcoef"), 1.0f/consoleTexW, 1.0f/consoleTexH);
-	glUniform1fARB(glGetUniformLocationARB(consoleProgram,"fontw"), (float)16);
-	glUniform2fARB(glGetUniformLocationARB(consoleProgram,"fontcoef"), (float)(fontCharW)/(fontTexW), (float)(fontCharH)/(fontTexH));
+	glUniform2fARB(glGetUniformLocationARB(*consoleProgram,"termsize"), (float) tcodConsole->getWidth(), (float) tcodConsole->getHeight());
+	glUniform2fARB(glGetUniformLocationARB(*consoleProgram,"termcoef"), 1.0f/consoleTexW, 1.0f/consoleTexH);
+	glUniform1fARB(glGetUniformLocationARB(*consoleProgram,"fontw"), (float)16);
+	glUniform2fARB(glGetUniformLocationARB(*consoleProgram,"fontcoef"), (float)(fontCharW)/(fontTexW), (float)(fontCharH)/(fontTexH));
 
 	
 	glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, *fontTexture);
-	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"font"),0);
+	glUniform1iARB(glGetUniformLocationARB(*consoleProgram,"font"),0);
 	
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
-	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"term"),1);
+	glUniform1iARB(glGetUniformLocationARB(*consoleProgram,"term"),1);
 	
 	glActiveTexture(GL_TEXTURE2);
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
-	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"termfcol"),2);
+	glUniform1iARB(glGetUniformLocationARB(*consoleProgram,"termfcol"),2);
 	
 	glActiveTexture(GL_TEXTURE3);
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
-	glUniform1iARB(glGetUniformLocationARB(consoleProgram,"termbcol"),3);
+	glUniform1iARB(glGetUniformLocationARB(*consoleProgram,"termbcol"),3);
 	
 	glBegin(GL_QUADS);
 	    glTexCoord2f(0.0f, 1.0f);
@@ -656,76 +636,11 @@ const bool operator==(const RawTileData& lhs, const RawTileData& rhs) {
 	return lhs.tile == rhs.tile && lhs.texture == rhs.texture;
 }
 
-GLuint OGLTilesetRenderer::LoadShader(std::string shader, GLuint type) {
-	int success;
-	int infologLength = 0;
-	int charsWritten = 0;
-    char *infoLog;
-	GLuint v = glCreateShaderObjectARB(type);
-	const char * shaderTxt = shader.c_str();
-	glShaderSourceARB(v, 1, &shaderTxt, 0);
-	glCompileShaderARB(v);
-
-	glGetObjectParameterivARB(v, GL_COMPILE_STATUS, &success);
-	if(success!=GL_TRUE)
-	{
-	    /* something went wrong */
-		glGetObjectParameterivARB(v, GL_INFO_LOG_LENGTH,&infologLength);
-		if(infologLength>0)
-		{
-			infoLog = (char *)malloc(infologLength);
-			glGetInfoLogARB(v, infologLength, &charsWritten, infoLog);
-			LOG("GLSL ERROR : " << infoLog);
-			free(infoLog);
-		}
-		return 0;
-	}
-
-	return v;
-}
-
-bool OGLTilesetRenderer::LoadProgram(std::string vertShaderCode, std::string fragShaderCode, GLuint *vertShader, GLuint *fragShader, GLuint *program) {
-	/* Create and load Program and Shaders */
-	int success;
-	*program = glCreateProgramObjectARB();
-
-	*vertShader = LoadShader(vertShaderCode, GL_VERTEX_SHADER);
-	if ( *vertShader == 0 ) return false;
-	glAttachObjectARB(*program, *vertShader);
-
-	*fragShader = LoadShader(fragShaderCode, GL_FRAGMENT_SHADER);
-	if ( *fragShader == 0 ) return false;
-	glAttachObjectARB(*program, *fragShader);
-
-	glLinkProgramARB(*program);
-
-	glGetObjectParameterivARB(*program, GL_LINK_STATUS, &success);
-	if(success!=GL_TRUE)
-	{
-		/* something went wrong */
-		int infologLength = 0;
-		int charsWritten = 0;
-		char *infoLog;
-		glGetObjectParameterivARB(*program, GL_INFO_LOG_LENGTH,&infologLength);
-		if (infologLength > 0)
-	    {
-	        infoLog = (char *)malloc(infologLength);
-	        glGetInfoLogARB(*program, infologLength, &charsWritten, infoLog);
-			printf("OPENGL ERROR: Program link Error");
-			printf("%s\n",infoLog);
-	        free(infoLog);
-	    }
-		return false;
-	}
-	return true;
-}
-
 boost::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = {1, 3, 4};
 
 bool OGLTilesetRenderer::InitaliseShaders() {
-	int i;
-	TCOD_color_t *fCol;
-	if (!LoadProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader, &consoleVertShader, &consoleFragShader, &consoleProgram)) return false;
+	consoleProgram = CreateOGLShaderProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader);
+	if (!*consoleProgram) return false;
 	
     /* Generate Textures */
 	for (int i = 0; i < ConsoleTextureTypesCount; ++i) {

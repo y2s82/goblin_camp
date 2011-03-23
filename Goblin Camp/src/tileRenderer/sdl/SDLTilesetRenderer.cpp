@@ -25,7 +25,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 SDLTilesetRenderer::SDLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole)
 : TilesetRenderer(screenWidth, screenHeight, mapConsole),
-  translucentUI(Config::GetCVar<bool>("translucentUI")),
   mapSurface()
 {
 	TCODSystem::registerSDLRenderer(this, translucentUI);
