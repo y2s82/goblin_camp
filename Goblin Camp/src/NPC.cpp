@@ -1769,16 +1769,17 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
-	animal->aggressive = true;
 	animal->ScanSurroundings();
-	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-		if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
-			boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
-			killJob->internal = true;
-			killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
-			animal->jobs.push_back(killJob);
-			return;
+	if (animal->aggressive) {
+		for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+			if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
+				boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
+				killJob->internal = true;
+				killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
+				while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
+				animal->jobs.push_back(killJob);
+				return;
+			}
 		}
 	}
 
