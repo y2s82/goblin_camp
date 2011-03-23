@@ -88,6 +88,8 @@ public:
 	static void InitAfterLoad(); //Initialize faction names, required before loading npcs from a save file
 	static void TranslateMembers(); //Translate member uids into pointers _after_ loading npcs from a save
 	void TransferTrapInfo(boost::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
+
+	FactionGoal GetCurrentGoal() const;
 };
 
 BOOST_CLASS_VERSION(Faction, 1)
