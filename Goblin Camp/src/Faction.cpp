@@ -54,6 +54,7 @@ members(std::list<boost::weak_ptr<NPC> >()),
 		goals.push_back(FACTIONIDLE);
 	} else if (boost::iequals(name, "Hostile monster")) {
 		goals.push_back(FACTIONKILL);
+		maxActiveTime = UPDATES_PER_SECOND*5;
 	}
 }
 
@@ -66,11 +67,13 @@ void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
 }
 
 void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
-	for (std::list<boost::weak_ptr<NPC> >::iterator membi = members.begin(); membi != members.end();) {
+	bool memberFound = false;
+	for (std::list<boost::weak_ptr<NPC> >::iterator membi = members.begin(); membi != members.end()
+		&& !memberFound;) {
 		if (membi->lock()) {
 			if (member.lock() && member.lock() == membi->lock()) {
 				members.erase(membi);
-				return;
+				memberFound = true;
 			}
 			++membi;
 		} else membi = members.erase(membi);
@@ -131,7 +134,6 @@ void Faction::Reset() {
 	jobs.clear();
 	currentGoal = 0;
 	activeTime = 0;
-	maxActiveTime = MONTH_LENGTH;
 	active = false;
 }
 
@@ -166,6 +168,7 @@ namespace {
 
 	inline bool GenerateKillJob(boost::shared_ptr<Job> job) {
 		job->internal = true;
+		job->tasks.push_back(Task(GETANGRY));
 		job->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
 		return true;
 	}
@@ -182,6 +185,16 @@ namespace {
 }
 
 bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
+	
+	if (activeTime >= maxActiveTime) {
+		boost::shared_ptr<Job> fleeJob(new Job("Leave"));
+		fleeJob->internal = true;
+		fleeJob->tasks.push_back(Task(CALMDOWN));
+		fleeJob->tasks.push_back(Task(FLEEMAP));
+		npc->StartJob(fleeJob);
+		return true;
+	}
+
 	if (!goals.empty()) {
 		if (currentGoal < 0 || currentGoal >= goals.size()) currentGoal = 0;
 		switch (goals[currentGoal]) {
