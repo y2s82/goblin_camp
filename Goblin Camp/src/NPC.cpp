@@ -2497,6 +2497,7 @@ bool NPC::IsTunneler() { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
 	nearNpcs.clear();
+	nearConstructions.clear();
 	threatLocation = Coordinate(-1,-1);
 	seenFire = false;
 	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
@@ -2507,7 +2508,17 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 					int ty = y;
 					TCODLine::init(tx, ty, endx, endy);
 					do {
+						/*Check constructions before checking for lightblockage because we can see a wall
+						even though we can't see through it*/
+						int constructUid = Map::Inst()->GetConstruction(tx,ty);
+						if (constructUid >= 0) {
+							nearConstructions.push_back(Game::Inst()->GetConstruction(constructUid));
+						}
+
+						//Stop moving along this line if our view is blocked
 						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
+
+						//Add all the npcs on this tile, or only hostiles if that boolean is set
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
 								if (!factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction())) threatLocation = Coordinate(tx,ty);
@@ -2516,6 +2527,8 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 									nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
 							}
 						}
+
+						//Only care about fire if we're not flying and not effectively immune
 						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
 							if (effectiveResistances[FIRE_RES] < 90) {
 								threatLocation = Coordinate(tx,ty);
@@ -2523,6 +2536,8 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 							}
 						}
 
+						/*Stop if we already see many npcs, otherwise this can start to bog down in
+						high traffic places*/
 						if (nearNpcs.size() > 10) break;
 
 					} while(!TCODLine::step(&tx, &ty));
