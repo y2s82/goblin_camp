@@ -992,7 +992,7 @@ void Game::Update() {
 		}
 	}
 
-	for (std::size_t i = 0; i < Faction::factions.size(); ++i) {
+	for (std::size_t i = 1; i < Faction::factions.size(); ++i) {
 		Faction::factions[i]->Update();
 	}
 }
