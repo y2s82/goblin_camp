@@ -966,14 +966,19 @@ CONTINUEEAT:
 				//Find the closest edge and change into a MOVE task and a new FLEEMAP task
 				//Unfortunately this assumes that FLEEMAP is the last task in a job,
 				//which might not be.
-				tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
-				if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
-					currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(x, 
-						(y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
-				} else {
-					currentJob().lock()->tasks[taskIndex] = Task(MOVE, 
-						Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
-						y));
+				{
+					Coordinate target;
+					tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
+					if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
+						target = Coordinate(x, (y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1);
+					} else {
+						target = Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
+							y);
+					}
+					if (Map::Inst()->IsWalkable(target.X(), target.Y(), static_cast<void*>(this)))
+						currentJob().lock()->tasks[taskIndex] = Task(MOVE, target);
+					else
+						currentJob().lock()->tasks[taskIndex] = Task(MOVENEAR, target);
 				}
 				currentJob().lock()->tasks.push_back(Task(FLEEMAP));
 				break;
