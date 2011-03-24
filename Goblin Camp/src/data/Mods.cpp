@@ -32,6 +32,7 @@ namespace fs = boost::filesystem;
 #include "NatureObject.hpp"
 #include "NPC.hpp"
 #include "scripting/Engine.hpp"
+#include "Faction.hpp"
 
 namespace Globals {
 	/**
@@ -149,6 +150,7 @@ namespace {
 			LoadFile("wildplants",    dir, NatureObject::LoadPresets, required);
 			LoadFile("names",         dir, LoadNames, required);
 			LoadFile("creatures",     dir, NPC::LoadPresets, required);
+			LoadFile("factions",      dir, Faction::LoadPresets, required);
 		} catch (const std::runtime_error& e) {
 			LOG_FUNC("Failed to load mod due to std::runtime_error: " << e.what(), "LoadMod");
 			if (required) Game::Inst()->ErrorScreen();
