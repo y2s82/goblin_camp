@@ -52,26 +52,26 @@ public:
 
 	bool IsIceSupported() const;
 
-	void DrawCursor(CursorType type, int cursorHint, bool placeable, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawMarkedOverlay(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawMarkedOverlay(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect* dstRect) const;
-	void DrawMarker(SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawBlood(Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawWater(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawIce(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawFilthMinor(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawFilthMajor(Sprite::LayeredConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawTerritoryOverlay(bool owned, Sprite::ConnectedFunction, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawNPC(boost::shared_ptr<NPC> npc, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawNatureObject(boost::shared_ptr<NatureObject> plant, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawItem(boost::shared_ptr<Item> item, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawSpell(boost::shared_ptr<Spell> spell, SDL_Surface * dst, SDL_Rect * dstRect) const;
-	void DrawFire(boost::shared_ptr<FireNode> fire, SDL_Surface * dst, SDL_Rect * dstRect) const;
-	void DrawBaseConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawUnderConstruction(Construction * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawUnreadyTrap(Construction * trap, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRecT) const;
-	void DrawStockpileContents(Stockpile * construction, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
-	void DrawOpenDoor(Door * door, const Coordinate& worldPos, SDL_Surface *dst, SDL_Rect * dstRect) const;
+	void DrawCursor(int screenX, int screenY, CursorType type, int cursorHint, bool placeable) const;
+	void DrawMarkedOverlay(int screenX, int screenY) const;
+	void DrawMarkedOverlay(int screenX, int screenY, Sprite::ConnectedFunction) const;
+	void DrawMarker(int screenX, int screenY) const;
+	void DrawBlood(int screenX, int screenY, Sprite::ConnectedFunction) const;
+	void DrawWater(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
+	void DrawIce(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
+	void DrawFilthMinor(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
+	void DrawFilthMajor(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
+	void DrawTerritoryOverlay(int screenX, int screenY, bool owned, Sprite::ConnectedFunction) const;
+	void DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) const;
+	void DrawNatureObject(int screenX, int screenY, boost::shared_ptr<NatureObject> plant) const;
+	void DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) const;
+	void DrawSpell(int screenX, int screenY, boost::shared_ptr<Spell> spell) const;
+	void DrawFire(int screenX, int screenY, boost::shared_ptr<FireNode> fire) const;
+	void DrawBaseConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const;
+	void DrawUnderConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const;
+	void DrawUnreadyTrap(int screenX, int screenY, Construction * trap, const Coordinate& worldPos) const;
+	void DrawStockpileContents(int screenX, int screenY, Stockpile * construction, const Coordinate& worldPos) const;
+	void DrawOpenDoor(int screenX, int screenY, Door * door, const Coordinate& worldPos) const;
 
 	const TerrainSprite& GetTerrainSprite(TileType type) const;
 	TerrainSprite& GetTerrainSprite(TileType type);
@@ -86,19 +86,19 @@ public:
 	void SetVersion(std::string ver);
 	void SetDescription(std::string desc);
 	void SetTerrain(TileType type, const TerrainSprite& sprite);
-	void SetWaterAndIce(const Sprite& sprite);
-	void SetIce(const Sprite& sprite);
-	void SetFilthMinor(const Sprite& sprite);
-	void SetFilthMajor(const Sprite& sprite);
-	void SetMarker(const Sprite& sprite);
-	void SetBlood(const Sprite& sprite);
-	void SetNonTerritoryOverlay(const Sprite& sprite);
-	void SetTerritoryOverlay(const Sprite& sprite);
-	void SetMarkedOverlay(const Sprite& sprite);
-	void SetCursorSprites(CursorType type, const Sprite& sprite);
-	void SetCursorSprites(CursorType type, const Sprite& placeableSprite, const Sprite& nonplaceableSprite);
-	void SetDefaultUnderConstructionSprite(const Sprite& sprite);
-	void SetFireSprite(const Sprite& sprite);
+	void SetWaterAndIce(Sprite_ptr sprite);
+	void SetIce(Sprite_ptr sprite);
+	void SetFilthMinor(Sprite_ptr sprite);
+	void SetFilthMajor(Sprite_ptr sprite);
+	void SetMarker(Sprite_ptr sprite);
+	void SetBlood(Sprite_ptr sprite);
+	void SetNonTerritoryOverlay(Sprite_ptr sprite);
+	void SetTerritoryOverlay(Sprite_ptr sprite);
+	void SetMarkedOverlay(Sprite_ptr sprite);
+	void SetCursorSprites(CursorType type, Sprite_ptr sprite);
+	void SetCursorSprites(CursorType type, Sprite_ptr placeableSprite, Sprite_ptr nonplaceableSprite);
+	void SetDefaultUnderConstructionSprite(Sprite_ptr sprite);
+	void SetFireSprite(Sprite_ptr sprite);
 
 	void SetStatusSprite(StatusEffectType statusEffect, const StatusEffectSprite& sprite);
 		
@@ -116,7 +116,7 @@ public:
 	
 private:
 	typedef boost::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
-	typedef boost::array<Sprite, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
+	typedef boost::array<Sprite_ptr, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
 	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
 	
@@ -129,20 +129,20 @@ private:
 
 	TerrainSprite defaultTerrainTile;
 	TileTypeSpriteArray terrainTiles;
-	Sprite waterTile;
-	Sprite iceTile;
-	Sprite minorFilth;
-	Sprite majorFilth;
+	Sprite_ptr waterTile;
+	Sprite_ptr iceTile;
+	Sprite_ptr minorFilth;
+	Sprite_ptr majorFilth;
 	
-	Sprite nonTerritoryOverlay;
-	Sprite territoryOverlay;
-	Sprite markedOverlay;
+	Sprite_ptr nonTerritoryOverlay;
+	Sprite_ptr territoryOverlay;
+	Sprite_ptr markedOverlay;
 
-	Sprite marker;
-	Sprite blood;
+	Sprite_ptr marker;
+	Sprite_ptr blood;
 
-	Sprite defaultUnderConstructionSprite;
-	Sprite fireTile;
+	Sprite_ptr defaultUnderConstructionSprite;
+	Sprite_ptr fireTile;
 	
 	NPCSprite defaultNPCSprite;
 	std::vector<NPCSprite> npcSprites;

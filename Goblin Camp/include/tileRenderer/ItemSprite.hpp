@@ -24,6 +24,6 @@ public:
 	explicit ItemSprite();
 	~ItemSprite();
 
-	Sprite tile;
+	Sprite_ptr tile;
 	bool renderWhenWielded;
 };

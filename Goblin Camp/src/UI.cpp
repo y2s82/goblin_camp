@@ -441,37 +441,16 @@ void UI::Draw(TCODConsole* console) {
 	bool xswap = false, yswap = false;
 
 	DrawTopBar(console);
-	sideBar.Draw(console);
 
 	if (menuOpen) {
 		currentMenu->Draw(menuX, menuY, console);
 	}
-
-	Tooltip *tooltip = Tooltip::Inst();
-	tooltip->Clear();
-	if (menuOpen) {
-		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
-	}
-	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
-	if (_state == UINORMAL && (!menuOpen || (currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) & NOMENUHIT)) 
-		&& (sideBar.Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
-		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
-		&& !underCursor.empty() && underCursor.begin()->lock()) {
-			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-				if (ucit->lock()) {
-					Coordinate mouseLoc = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
-					ucit->lock()->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
-				}
-			}
-	}
-	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
-
+	
 	Coordinate mouseTile(Game::Inst()->TileAt(mouseInput.x, mouseInput.y));
 	boost::shared_ptr<MapRenderer> renderer = Game::Inst()->Renderer();
 
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.X() == 0)) {
-	
-		renderer->DrawCursor(mouseTile, Coordinate(mouseTile.X() + _blueprint.X() - 1, mouseTile.Y() + _blueprint.Y() - 1), Game::Inst()->camX, Game::Inst()->camY, placeable);
+		renderer->DrawCursor(mouseTile, Coordinate(mouseTile.X() + _blueprint.X() - 1, mouseTile.Y() + _blueprint.Y() - 1), placeable);
 	}
 	else if (_state == UIABPLACEMENT && a.X() > 0) {
 		if (a.X() > b.X()) {
@@ -488,18 +467,18 @@ void UI::Draw(TCODConsole* console) {
 		}
 		for (int ix = a.X(); ix <= b.X(); ++ix) {
 			if (!yswap) {
-				renderer->DrawCursor(Coordinate(ix, a.Y()), Game::Inst()->camX, Game::Inst()->camY, placeable);
+				renderer->DrawCursor(Coordinate(ix, a.Y()), placeable);
 			}
 			else {
-				renderer->DrawCursor(Coordinate(ix, b.Y()), Game::Inst()->camX, Game::Inst()->camY, placeable);
+				renderer->DrawCursor(Coordinate(ix, b.Y()), placeable);
 			}
 		}
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			if (!xswap) {
-				renderer->DrawCursor(Coordinate(b.X(), iy), Game::Inst()->camX, Game::Inst()->camY, placeable);
+				renderer->DrawCursor(Coordinate(b.X(), iy), placeable);
 			}
 			else {
-				renderer->DrawCursor(Coordinate(a.X(), iy), Game::Inst()->camX, Game::Inst()->camY, placeable);
+				renderer->DrawCursor(Coordinate(a.X(), iy), placeable);
 			}
 		}
 		if (xswap) {
@@ -525,7 +504,7 @@ void UI::Draw(TCODConsole* console) {
 			b.Y(tmp);
 			yswap = true;
 		}
-		renderer->DrawCursor(a, b, Game::Inst()->camX, Game::Inst()->camY, placeable);
+		renderer->DrawCursor(a, b, placeable);
 		if (xswap) {
 			tmp = a.X();
 			a.X(b.X());
@@ -538,9 +517,29 @@ void UI::Draw(TCODConsole* console) {
 		}
 	}
 
-	if (drawCursor) renderer->DrawCursor(mouseTile, Game::Inst()->camX, Game::Inst()->camY, true);
+	if (drawCursor) renderer->DrawCursor(mouseTile, true);
 	
 	Announce::Inst()->Draw(console);
+	sideBar.Draw(console);
+
+	Tooltip *tooltip = Tooltip::Inst();
+	tooltip->Clear();
+	if (menuOpen) {
+		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
+	}
+	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
+	if (_state == UINORMAL && (!menuOpen || (currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) & NOMENUHIT)) 
+		&& (sideBar.Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
+		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
+		&& !underCursor.empty() && underCursor.begin()->lock()) {
+			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
+				if (ucit->lock()) {
+					Coordinate mouseLoc = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
+					ucit->lock()->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
+				}
+			}
+	}
+	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
 }
 
 int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut) {

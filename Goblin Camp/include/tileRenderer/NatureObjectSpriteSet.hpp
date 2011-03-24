@@ -24,5 +24,5 @@ public:
 	explicit NatureObjectSpriteSet();
 	~NatureObjectSpriteSet();
 
-	Sprite tile;
+	Sprite_ptr tile;
 };

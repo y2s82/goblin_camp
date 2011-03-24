@@ -33,10 +33,13 @@ public:
 	void SetCursorMode(const NPCPreset& preset);
 	void SetCursorMode(const ItemPreset& preset);
 	void SetCursorMode(int other);
-	void DrawCursor(const Coordinate& pos, float focusX, float focusY, bool placeable);
-	void DrawCursor(const Coordinate& start, const Coordinate& end, float focusX, float focusY, bool placeable);
+	void DrawCursor(const Coordinate& pos, bool placeable);
+	void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable);
+
+	void SetTranslucentUI(bool);
 
 private:
 	TCODConsole * console;
 	int cursorChar;
+	Coordinate upleft;
 };

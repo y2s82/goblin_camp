@@ -23,49 +23,23 @@ class NPCSprite
 {
 public:
 	explicit NPCSprite();
-	explicit NPCSprite(const Sprite& sprite);
-	explicit NPCSprite(const std::vector<Sprite>& sprites, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes);
-	explicit NPCSprite(const std::vector<Sprite>& sprites, const std::vector<Sprite>& weaponOverlays, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes);
+	explicit NPCSprite(Sprite_ptr sprite);
+	explicit NPCSprite(const std::vector<Sprite_ptr>& sprites, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes);
+	explicit NPCSprite(const std::vector<Sprite_ptr>& sprites, const std::vector<Sprite_ptr>& weaponOverlays, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes);
 	~NPCSprite();
 
 	bool IsEquipmentAware() const;
 	bool Exists() const;
 
-	void Draw(SDL_Surface * dst, SDL_Rect * dstRect) const;
-	void Draw(boost::shared_ptr<NPC> npc, SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void Draw(int screenX, int screenY) const;
+	void Draw(int screenX, int screenY, boost::shared_ptr<NPC> npc) const;
 
 private:
-	std::vector<Sprite> sprites;
-	std::vector<Sprite> weaponOverlays;
+	std::vector<Sprite_ptr> sprites;
+	std::vector<Sprite_ptr> weaponOverlays;
 	bool equipmentAware;
 	bool paperdoll;
 	std::vector<std::string> weaponTypeNames;
 	std::vector<std::string> armourTypeNames;
 };
 
-class NPCSpriteFactory
-{
-public:
-	explicit NPCSpriteFactory();
-	~NPCSpriteFactory();
-
-	void Reset();
-	NPCSprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
-
-	void AddSpriteFrame(int frame);
-	void SetFPS(int fps);
-	void SetEquipmentMap(bool equipmentMap);
-	void SetPaperdoll(bool paperDoll);
-	void AddWeaponOverlay(int index);
-	void AddArmourType(std::string armourType);
-	void AddWeaponType(std::string weaponType);
-	
-private:
-	std::vector<int> frames;
-	std::vector<int> weaponOverlayIndices;
-	std::vector<std::string> armourTypes;
-	std::vector<std::string> weaponTypes;
-	int frameRate;
-	bool equipmentMap;
-	bool paperdoll;
-};

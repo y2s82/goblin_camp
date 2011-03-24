@@ -25,10 +25,10 @@ NPCSprite::NPCSprite()
   weaponTypeNames(),
   armourTypeNames()
 {
-	sprites.push_back(Sprite());
+	sprites.push_back(Sprite_ptr());
 }
 
-NPCSprite::NPCSprite(const Sprite& sprite)
+NPCSprite::NPCSprite(Sprite_ptr sprite)
 : sprites(),
   weaponOverlays(),
   equipmentAware(false),
@@ -39,7 +39,7 @@ NPCSprite::NPCSprite(const Sprite& sprite)
 	sprites.push_back(sprite);
 }
 
-NPCSprite::NPCSprite(const std::vector<Sprite>& s, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes)
+NPCSprite::NPCSprite(const std::vector<Sprite_ptr>& s, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes)
 : sprites(s),
   weaponOverlays(),
   equipmentAware(true),
@@ -48,14 +48,14 @@ NPCSprite::NPCSprite(const std::vector<Sprite>& s, const std::vector<std::string
   armourTypeNames(armourTypes)
 {
 	if (sprites.empty()) {
-		sprites.push_back(Sprite());
+		sprites.push_back(Sprite_ptr());
 	}
 	if ((weaponTypeNames.size() + 1) * (armourTypeNames.size() + 1) != sprites.size()) {
 		equipmentAware = false;
 	}
 }
 
-NPCSprite::NPCSprite(const std::vector<Sprite>& s, const std::vector<Sprite>& weaps, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes)
+NPCSprite::NPCSprite(const std::vector<Sprite_ptr>& s, const std::vector<Sprite_ptr>& weaps, const std::vector<std::string>& weaponTypes, const std::vector<std::string>& armourTypes)
 : sprites(s),
   weaponOverlays(weaps),
   equipmentAware(false),
@@ -64,7 +64,7 @@ NPCSprite::NPCSprite(const std::vector<Sprite>& s, const std::vector<Sprite>& we
   armourTypeNames(armourTypes)
 {
 	if (sprites.empty()) {
-		sprites.push_back(Sprite());
+		sprites.push_back(Sprite_ptr());
 	}
 	if (sprites.size() != armourTypeNames.size() + 1 || weaponOverlays.size() != weaponTypeNames.size()) {
 		paperdoll = false;
@@ -81,8 +81,8 @@ bool NPCSprite::Exists() const {
 	return sprites.at(0).Exists();
 }
 
-void NPCSprite::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
-	sprites.at(0).Draw(dst, dstRect);
+void NPCSprite::Draw(int screenX, int screenY) const {
+	sprites.at(0).Draw(screenX, screenY);
 }
 
 namespace {
@@ -107,7 +107,7 @@ namespace {
 	}
 }
 
-void NPCSprite::Draw(boost::shared_ptr<NPC> npc, SDL_Surface * dst, SDL_Rect * dstRect) const {
+void NPCSprite::Draw(int screenX, int screenY, boost::shared_ptr<NPC> npc) const {
 	if (equipmentAware || paperdoll) {
 		int weaponIndex = -1;
 		int armourIndex = -1;
@@ -120,99 +120,14 @@ void NPCSprite::Draw(boost::shared_ptr<NPC> npc, SDL_Surface * dst, SDL_Rect * d
 			armourIndex = findIndex(itemPreset, armourTypeNames);
 		}
 		if (equipmentAware) {
-			sprites.at((weaponIndex + 1) + ((armourIndex + 1) * (weaponTypeNames.size() + 1))).Draw(dst, dstRect);
+			sprites.at((weaponIndex + 1) + ((armourIndex + 1) * (weaponTypeNames.size() + 1))).Draw(screenX, screenY);
 		} else {
-			sprites.at(armourIndex + 1).Draw(dst, dstRect);
+			sprites.at(armourIndex + 1).Draw(screenX, screenY);
 			if (weaponIndex != -1) {
-				weaponOverlays.at(weaponIndex).Draw(dst, dstRect);
+				weaponOverlays.at(weaponIndex).Draw(screenX, screenY);
 			}
 		}
 	} else {
-		sprites.at(0).Draw(dst, dstRect);
+		sprites.at(0).Draw(screenX, screenY);
 	}
-}
-
-NPCSpriteFactory::NPCSpriteFactory()
-: frames(),
-  weaponOverlayIndices(),
-  armourTypes(),
-  weaponTypes(),
-  frameRate(15),
-  equipmentMap(false),
-  paperdoll(false)
-{
-}
-
-NPCSpriteFactory::~NPCSpriteFactory() {}
-
-void NPCSpriteFactory::Reset() {
-	frames.clear();
-	weaponOverlayIndices.clear();
-	armourTypes.clear();
-	weaponTypes.clear();
-	frameRate = 15;
-	equipmentMap = false;
-	paperdoll = false;
-}
-
-NPCSprite NPCSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	if (equipmentMap) {
-		if (frames.size() == (weaponTypes.size() + 1) * (armourTypes.size() + 1)) {
-			std::vector<Sprite> sprites;
-			for (std::vector<int>::iterator iter = frames.begin(); iter != frames.end(); ++iter)
-				sprites.push_back(Sprite(currentTexture, *iter));
-
-			return NPCSprite(sprites, weaponTypes, armourTypes);
-		} else if (frames.size() > 0) {
-			return NPCSprite(Sprite(currentTexture, frames[0]));
-		} else {
-			return NPCSprite();
-		}
-	} else if (paperdoll) {
-		if (frames.size() == armourTypes.size() + 1 && weaponOverlayIndices.size() == weaponTypes.size()) {
-			std::vector<Sprite> sprites;
-			for (std::vector<int>::iterator iter = frames.begin(); iter != frames.end(); ++iter)
-				sprites.push_back(Sprite(currentTexture, *iter));
-
-			std::vector<Sprite> weaponOverlays;
-			for (std::vector<int>::iterator iter = weaponOverlayIndices.begin(); iter != weaponOverlayIndices.end(); ++iter)
-				weaponOverlays.push_back(Sprite(currentTexture, *iter));
-
-			return NPCSprite(sprites, weaponOverlays, weaponTypes, armourTypes);
-		} else if (frames.size() > 0) {
-			return NPCSprite(Sprite(currentTexture, frames[0]));
-		} else {
-			return NPCSprite();
-		}
-	} else {
-		return NPCSprite(Sprite(currentTexture, frames.begin(), frames.end(), false, frameRate));
-	}
-}
-
-void NPCSpriteFactory::AddSpriteFrame(int frame) {
-	frames.push_back(frame);
-}
-
-void NPCSpriteFactory::SetFPS(int fps) {
-	frameRate = fps;
-}
-
-void NPCSpriteFactory::SetEquipmentMap(bool equipMap) {
-	equipmentMap = equipMap;
-}
-
-void NPCSpriteFactory::AddArmourType(std::string armourType) {
-	armourTypes.push_back(armourType);
-}
-
-void NPCSpriteFactory::AddWeaponType(std::string weaponType) {
-	weaponTypes.push_back(weaponType);
-}
-
-void NPCSpriteFactory::SetPaperdoll(bool value) {
-	paperdoll = value;
-}
-
-void NPCSpriteFactory::AddWeaponOverlay(int index) {
-	weaponOverlayIndices.push_back(index);
 }
