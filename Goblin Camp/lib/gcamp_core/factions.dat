@@ -1,0 +1,30 @@
+faction_type "Player" {
+	friends=["Trolls"]
+}
+
+faction_type "Peaceful animal" {
+	goals = ["idle"]
+}
+
+faction_type "Hostile monster" {
+	goals = ["kill"]
+}
+
+faction_type "Giants" {
+	goals = ["destroy"]
+	activeTime = 10
+}
+
+faction_type "Wolves" {
+	goals =        ["steal"]
+	goalSpecifiers=["food"]
+}
+
+faction_type "Trolls" {
+	goals = ["patrol"]
+	friends=["Player"]
+}
+
+faction_type "Bees" {
+	goals = ["kill"]
+}
