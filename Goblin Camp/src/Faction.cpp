@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/weak_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "Faction.hpp"
 #include "NPC.hpp"
@@ -323,7 +324,10 @@ class FactionListener : public ITCODParserListener {
 			}
 		} else if (boost::iequals(name,"goalSpecifiers")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
-				Faction::factions[factionIndex]->goalSpecifiers.push_back((int)TCOD_list_get(value.list,i));
+				std::string specString((char*)TCOD_list_get(value.list,i));
+				int value = Item::StringToItemCategory(specString);
+				if (value < 0) value = boost::lexical_cast<int>(specString);
+				Faction::factions[factionIndex]->goalSpecifiers.push_back(value);
 			}
 		} else if (boost::iequals(name,"activeTime")) {
 			Faction::factions[factionIndex]->maxActiveTime = value.i;
