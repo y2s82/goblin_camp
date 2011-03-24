@@ -45,6 +45,8 @@ enum FactionGoal {
 class Faction {
 	GC_SERIALIZABLE_CLASS
 	
+	friend class FactionListener;
+
 	static std::map<std::string, int> factionNames;
 	
 	std::list<boost::weak_ptr<NPC> > members;
@@ -59,6 +61,7 @@ class Faction {
 
 	std::vector<boost::weak_ptr<Job> > jobs;
 	std::vector<FactionGoal> goals;
+	std::vector<int> goalSpecifiers;
 	int currentGoal;
 	int activeTime;
 	int maxActiveTime;
@@ -77,6 +80,9 @@ public:
 	static std::string FactionTypeToString(FactionType);
 	static std::vector<boost::shared_ptr<Faction> > factions;
 
+	static FactionGoal StringToFactionGoal(std::string);
+	static std::string FactionGoalToString(FactionGoal);
+
 	void Reset();
 	void Update();
 	bool FindJob(boost::shared_ptr<NPC>);
@@ -90,6 +96,7 @@ public:
 	void TransferTrapInfo(boost::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
 
 	FactionGoal GetCurrentGoal() const;
+	static void LoadPresets(std::string);
 };
 
 BOOST_CLASS_VERSION(Faction, 1)
