@@ -32,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Job.hpp"
 #include "Fire.hpp"
 #include "Spell.hpp"
+#include "GCamp.hpp"
 
 #include "MapRenderer.hpp"
 #include "data/Serialization.hpp"
@@ -177,6 +178,7 @@ public:
 	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 	boost::weak_ptr<Construction> GetConstruction(int);
 	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag, Coordinate closeTo=Coordinate(-1,-1));
+	boost::weak_ptr<Construction> GetRandomConstruction() const;
 	void Damage(Coordinate);
 	void UpdateFarmPlotSeedAllowances(ItemType);
 

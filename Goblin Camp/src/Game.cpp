@@ -289,7 +289,6 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 }
 
 int Game::CreateNPC(Coordinate target, NPCType type) {
-
 	int tries = 0;
 	int radius = 1;
 	Coordinate originalTarget = target;
@@ -301,7 +300,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
 	npc->type = type;
-	npc->faction = NPC::Presets[type].faction;
+	npc->SetFaction(NPC::Presets[type].faction);
 	npc->InitializeAIFunctions();
 	npc->expert = NPC::Presets[type].expert;
 	npc->color(NPC::Presets[type].color);
@@ -386,6 +385,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	}
 
 	npcList.insert(std::pair<int,boost::shared_ptr<NPC> >(npc->Uid(),npc));
+	npc->factionPtr->AddMember(npc);
 
 	return npc->Uid();
 }
@@ -1013,6 +1013,10 @@ void Game::Update() {
 			(*spellit)->UpdateVelocity();
 			++spellit;
 		}
+	}
+
+	for (std::size_t i = 1; i < Faction::factions.size(); ++i) {
+		Faction::factions[i]->Update();
 	}
 }
 
@@ -1664,6 +1668,9 @@ int Game::CharWidth() const { return charWidth; }
 void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
 	if (boost::shared_ptr<NPC> npc = wnpc.lock()) {
 		npcList.erase(npc->uid);
+		int faction = npc->GetFaction();
+		if (faction >= 0 && faction < Faction::factions.size())
+			Faction::factions[faction]->RemoveMember(npc);
 	}
 }
 
@@ -2214,6 +2221,24 @@ boost::shared_ptr<NPC> Game::GetNPC(int uid) const {
 	return boost::shared_ptr<NPC>();
 }
 
+boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
+	if (dynamicConstructionList.empty() || 
+		(Random::GenerateBool() && !staticConstructionList.empty())) {
+		int index = Random::Generate(staticConstructionList.size()-1);
+		for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consi = staticConstructionList.begin();
+			consi != staticConstructionList.end(); ++consi) {
+				if (index-- == 0) return consi->second;
+		}
+	} else if (!dynamicConstructionList.empty()) {
+		int index = Random::Generate(dynamicConstructionList.size()-1);
+		for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consi = dynamicConstructionList.begin();
+			consi != dynamicConstructionList.end(); ++consi) {
+				if (index-- == 0) return consi->second;
+		}
+	}
+	return boost::weak_ptr<Construction>();
+}
+
 void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
@@ -2271,8 +2296,21 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & marks;
 	ar & camX;
 	ar & camY;
-	ar & Faction::factions;
+
+	if (version < 1) { /* Earlier versions didn't use factions for more than storing trap data, 
+	                   so transfer that and use the new defualts otherwise */
+		std::vector<boost::shared_ptr<Faction> > oldFactionData;
+		ar & oldFactionData;
+		oldFactionData[0]->TransferTrapInfo(Faction::factions[PLAYERFACTION]);
+	} else {
+		ar & Faction::factions;
+		Faction::InitAfterLoad(); //Initialize names and default friends, before loading npcs
+	}
+	
 	ar & npcList;
+	
+	Faction::TranslateMembers(); //Translate uid's into pointers, do this after loading npcs
+	
 	ar & squadList;
 	ar & hostileSquadList;
 	ar & staticConstructionList;

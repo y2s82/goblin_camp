@@ -814,7 +814,7 @@ CONTINUEEAT:
 					TaskFinished(TASKFAILFATAL, "(FIND)Failed"); 
 					break;
 				} else {
-					if (faction == PLAYERFACTION) currentJob().lock()->ReserveEntity(foundItem);
+					if (factionPtr->IsFriendsWith(PLAYERFACTION)) currentJob().lock()->ReserveEntity(foundItem);
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
@@ -966,14 +966,19 @@ CONTINUEEAT:
 				//Find the closest edge and change into a MOVE task and a new FLEEMAP task
 				//Unfortunately this assumes that FLEEMAP is the last task in a job,
 				//which might not be.
-				tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
-				if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
-					currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(x, 
-						(y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1));
-				} else {
-					currentJob().lock()->tasks[taskIndex] = Task(MOVE, 
-						Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
-						y));
+				{
+					Coordinate target;
+					tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
+					if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
+						target = Coordinate(x, (y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1);
+					} else {
+						target = Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
+							y);
+					}
+					if (Map::Inst()->IsWalkable(target.X(), target.Y(), static_cast<void*>(this)))
+						currentJob().lock()->tasks[taskIndex] = Task(MOVE, target);
+					else
+						currentJob().lock()->tasks[taskIndex] = Task(MOVENEAR, target);
 				}
 				currentJob().lock()->tasks.push_back(Task(FLEEMAP));
 				break;
@@ -1699,7 +1704,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 		}
 
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if ((npci->lock()->GetFaction() != npc->faction && npci->lock()->aggressive) || 
+			if ((!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction()) && npci->lock()->aggressive) || 
 				npci->lock() == npc->aggressor.lock() || 
 				(npc->seenFire && (npc->jobs.empty() || !boost::iequals(npc->jobs.front()->name,"Pour water")))) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
@@ -1713,7 +1718,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 				if (!surroundingsScanned) npc->ScanSurroundings(true);
 				surroundingsScanned = true;
 				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-					if (npci->lock()->faction != npc->faction) {
+					if (!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 						JobManager::Inst()->NPCNotWaiting(npc->uid);
 						boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 						killJob->internal = true;
@@ -1746,7 +1751,7 @@ void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
 	}
 
 	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-		if (npci->lock()->faction != animal->faction) {
+		if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 			animal->AddEffect(PANIC);
 		}
 	}
@@ -1769,16 +1774,34 @@ bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
-	animal->aggressive = true;
 	animal->ScanSurroundings();
-	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-		if (npci->lock()->faction != animal->faction) {
-			boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
-			killJob->internal = true;
-			killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-			while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
-			animal->jobs.push_back(killJob);
-			return;
+	if (animal->aggressive) {
+		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
+			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
+				if (boost::shared_ptr<Construction> construct = consi->lock()) {
+					if (construct->HasTag(WORKSHOP) || construct->HasTag(WALL)) {
+						boost::shared_ptr<Job> destroyJob(new Job("Destroy "+construct->Name()));
+						destroyJob->internal = true;
+						destroyJob->tasks.push_back(Task(MOVEADJACENT, construct->Position(), construct));
+						destroyJob->tasks.push_back(Task(KILL, construct->Position(), construct));
+						while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
+						animal->jobs.push_back(destroyJob);
+						return;
+					}
+				}
+			}
+		} else {
+			for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+				boost::shared_ptr<NPC> otherNPC = npci->lock();
+				if (otherNPC && !animal->factionPtr->IsFriendsWith(otherNPC->GetFaction())) {
+					boost::shared_ptr<Job> killJob(new Job("Kill "+otherNPC->name));
+					killJob->internal = true;
+					killJob->tasks.push_back(Task(KILL, otherNPC->Position(), *npci));
+					while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILNONFATAL);
+					animal->jobs.push_back(killJob);
+					return;
+				}
+			}
 		}
 	}
 
@@ -2191,6 +2214,17 @@ class NPCListener : public ITCODParserListener {
 		std::cout<<boost::format("end of %s\n") % str->getName();
 #endif
 		if (NPC::Presets[npcIndex].plural == "") NPC::Presets[npcIndex].plural = NPC::Presets[npcIndex].name + "s";
+		if (NPC::Presets[npcIndex].faction == -1) {
+			if (NPC::Presets[npcIndex].ai == "PlayerNPC") {
+				NPC::Presets[npcIndex].faction = PLAYERFACTION;
+			} else if (NPC::Presets[npcIndex].ai == "PeacefulAnimal") {
+				NPC::Presets[npcIndex].faction = Faction::StringToFactionType("Peaceful animal");
+			} else if (NPC::Presets[npcIndex].ai == "HungryAnimal") {
+				NPC::Presets[npcIndex].faction = Faction::StringToFactionType("Hostile monster");
+			} else if (NPC::Presets[npcIndex].ai == "HostileAnimal") {
+				NPC::Presets[npcIndex].faction = Faction::StringToFactionType("Hostile monster");
+			}
+		}
 		return true;
 	}
 	void error(const char *msg) {
@@ -2270,19 +2304,15 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-		if (faction == -1) faction = PLAYERFACTION;
 	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
-		FindJob = boost::bind(NPC::PeacefulAnimalFindJob, _1);
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-		if (faction == -1) faction = Faction::StringToFactionType("Peaceful animal");
 	} else if (NPC::Presets[type].ai == "HungryAnimal") {
-		FindJob = boost::bind(NPC::HungryAnimalFindJob, _1);
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 		React = boost::bind(NPC::HungryAnimalReact, _1);
-		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	} else if (NPC::Presets[type].ai == "HostileAnimal") {
-		FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
+		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
 		React = boost::bind(NPC::HostileAnimalReact, _1);
-		if (faction == -1) faction = Faction::StringToFactionType("Hostile monster");
 	}
 }
 
@@ -2484,6 +2514,7 @@ bool NPC::IsTunneler() { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
 	nearNpcs.clear();
+	nearConstructions.clear();
 	threatLocation = Coordinate(-1,-1);
 	seenFire = false;
 	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
@@ -2494,13 +2525,27 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 					int ty = y;
 					TCODLine::init(tx, ty, endx, endy);
 					do {
+						/*Check constructions before checking for lightblockage because we can see a wall
+						even though we can't see through it*/
+						int constructUid = Map::Inst()->GetConstruction(tx,ty);
+						if (constructUid >= 0) {
+							nearConstructions.push_back(Game::Inst()->GetConstruction(constructUid));
+						}
+
+						//Stop moving along this line if our view is blocked
 						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
+
+						//Add all the npcs on this tile, or only hostiles if that boolean is set
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
-								if (Game::Inst()->GetNPC(*npci)->GetFaction() != faction) threatLocation = Coordinate(tx,ty);
-								if (!onlyHostiles || (onlyHostiles && Game::Inst()->GetNPC(*npci)->GetFaction() != faction)) nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
+								if (!factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction())) threatLocation = Coordinate(tx,ty);
+								if (!onlyHostiles || 
+									(onlyHostiles && !factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction()))) 
+									nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
 							}
 						}
+
+						//Only care about fire if we're not flying and not effectively immune
 						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
 							if (effectiveResistances[FIRE_RES] < 90) {
 								threatLocation = Coordinate(tx,ty);
@@ -2508,6 +2553,8 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 							}
 						}
 
+						/*Stop if we already see many npcs, otherwise this can start to bog down in
+						high traffic places*/
 						if (nearNpcs.size() > 10) break;
 
 					} while(!TCODLine::step(&tx, &ty));
@@ -2718,6 +2765,15 @@ int NPC::GetHeight() {
 
 bool NPC::IsFlying() { return isFlying; }
 
+void NPC::SetFaction(int newFaction) {
+	if (newFaction >= 0 && newFaction < Faction::factions.size()) {
+		faction = newFaction;
+		factionPtr = Faction::factions[newFaction];
+	} else if (!Faction::factions.empty()) {
+		factionPtr = Faction::factions[0];
+	}
+}
+
 void NPC::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
@@ -2856,5 +2912,6 @@ void NPC::load(InputArchive& ar, const unsigned int version) {
 		ar & jobBegun;
 	}
 
+	SetFaction(faction); //Required to initialize factionPtr
 	InitializeAIFunctions();
 }

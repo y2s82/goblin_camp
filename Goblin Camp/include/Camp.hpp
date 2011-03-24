@@ -65,6 +65,8 @@ public:
 	void AddWaterZone(Coordinate from, Coordinate to);
 	void RemoveWaterZone(Coordinate from, Coordinate to);
 	void UpdateWaterJobs();
+	Coordinate GetUprTerritoryCorner() const;
+	Coordinate GetLowTerritoryCorner() const;
 };
 
 BOOST_CLASS_VERSION(Camp, 0)
