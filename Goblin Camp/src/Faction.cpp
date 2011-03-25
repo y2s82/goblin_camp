@@ -37,8 +37,10 @@ members(std::list<boost::weak_ptr<NPC> >()),
 	index(vindex),
 	currentGoal(0),
 	activeTime(0),
-	maxActiveTime(MONTH_LENGTH),
-	active(false)
+	maxActiveTime(MONTH_LENGTH/2),
+	active(false),
+	aggressive(false),
+	coward(false)
 {
 }
 
@@ -313,6 +315,11 @@ class FactionListener : public ITCODParserListener {
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
+		if (boost::iequals(name,"aggressive")) {
+			Faction::factions[factionIndex]->aggressive = true;
+		} else if (boost::iequals(name,"coward")) {
+			Faction::factions[factionIndex]->coward = true;
+		}
 		return true;
 	}
 
@@ -355,6 +362,8 @@ void Faction::LoadPresets(std::string filename) {
 	factionTypeStruct->addListProperty("goalSpecifiers", TCOD_TYPE_STRING, false);
 	factionTypeStruct->addProperty("activeTime", TCOD_TYPE_INT, false);
 	factionTypeStruct->addListProperty("friends", TCOD_TYPE_STRING, false);
+	factionTypeStruct->addFlag("aggressive");
+	factionTypeStruct->addFlag("coward");
 
 	FactionListener listener = FactionListener();
 	parser.run(filename.c_str(), &listener);
@@ -389,6 +398,10 @@ std::string Faction::FactionGoalToString(FactionGoal goal) {
 	}
 	return "idle";
 }
+
+bool Faction::IsCoward() { return coward; }
+
+bool Faction::IsAggressive() { return aggressive; }
 
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	std::list< boost::weak_ptr<NPC> > unusedList;
