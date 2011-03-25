@@ -79,7 +79,6 @@ private:
 	unsigned int consoleTexW, consoleTexH;
 	boost::array<std::vector<unsigned char>, ConsoleTextureTypesCount> consoleData;
 	static boost::array<unsigned char, ConsoleTextureTypesCount> consoleDataAlignment;
-	boost::array<bool, ConsoleTextureTypesCount> consoleDirty;
 	
 	// Viewports
 	bool renderInProgress;
@@ -98,10 +97,18 @@ private:
 	int viewportTexW, viewportTexH;
 	boost::shared_ptr<const unsigned int> viewportProgram;
 	
-	bool InitaliseShaders();
-
+	bool InitialiseConsoleTextures();
+	bool InitialiseConsoleShaders();
+	
 	void RenderViewport();
+	void RenderOGLViewport();
+	void RenderGLSLViewport();
+	void RenderGLSLTile(int tile, int x, int y);
+	void RenderOGLTile(int tile, int x, int y);
+
 	void RenderConsole();
+	void RenderOGLConsole();
+	void RenderGLSLConsole();
 };
 
 const bool operator==(const RawTileData& lhs, const RawTileData& rhs);

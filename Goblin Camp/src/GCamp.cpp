@@ -614,12 +614,13 @@ void SettingsMenu() {
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	const int w = 40;
-	const int h = 22;
+	const int h = 23;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
 	SettingRenderer renderers[] = {
 		{ "GLSL Tileset",	TCOD_RENDERER_GLSL   , true},
+		{ "OpenGL Tileset",	TCOD_RENDERER_OPENGL , true},
 		{ "Tileset",		TCOD_RENDERER_SDL    , true},
 		{ "GLSL",			TCOD_RENDERER_GLSL   , false},
 		{ "OpenGL",			TCOD_RENDERER_OPENGL , false},
