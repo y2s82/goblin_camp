@@ -2252,15 +2252,6 @@ void NPC::InitializeAIFunctions() {
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
-		aggressive = false;
-		coward = true;
-	} else if (NPC::Presets[type].ai == "HungryAnimal") {
-		aggressive = false;
-		coward = false;
-	} else if (NPC::Presets[type].ai == "HostileAnimal") {
-		aggressive = true;
-		coward = false;
 	}
 }
 
