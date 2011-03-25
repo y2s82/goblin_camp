@@ -4,15 +4,17 @@ faction_type "Player" {
 
 faction_type "Peaceful animal" {
 	goals = ["idle"]
+	coward
 }
 
 faction_type "Hostile monster" {
 	goals = ["kill"]
+	aggressive
 }
 
 faction_type "Giants" {
 	goals = ["destroy"]
-	activeTime = 10
+	aggressive
 }
 
 faction_type "Wolves" {
@@ -23,8 +25,41 @@ faction_type "Wolves" {
 faction_type "Trolls" {
 	goals = ["patrol"]
 	friends=["Player"]
+	aggressive
 }
 
 faction_type "Bees" {
 	goals = ["kill"]
+	aggressive
 }
+
+faction_type "Ants" {
+	goals = ["kill"]
+	aggressive
+}
+
+faction_type "Kobolds" {
+	goals =        ["steal",  "steal", "steal"]
+	goalSpecifiers=["weapon", "metal", "food"]
+}
+
+faction_type "Undead" {
+	goals = ["kill"]
+	aggressive
+}
+
+faction_type "Minotaurs" {
+	goals = ["destroy"]
+	aggressive
+}
+
+faction_type "Golems" {
+	goals = ["destroy"]
+	aggressive
+}
+
+faction_type "Elementals" {
+	goals = ["destroy"]
+	aggressive
+}
+
