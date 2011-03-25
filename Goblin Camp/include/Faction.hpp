@@ -66,8 +66,10 @@ class Faction {
 	int activeTime;
 	int maxActiveTime;
 	bool active;
-	void TranslateFriends();
 
+	bool aggressive, coward;
+
+	void TranslateFriends();
 public:
 	Faction(std::string = "Noname faction", int = -1);
 	void AddMember(boost::weak_ptr<NPC>);
@@ -97,6 +99,9 @@ public:
 
 	FactionGoal GetCurrentGoal() const;
 	static void LoadPresets(std::string);
+
+	bool IsCoward();
+	bool IsAggressive();
 };
 
 BOOST_CLASS_VERSION(Faction, 1)
