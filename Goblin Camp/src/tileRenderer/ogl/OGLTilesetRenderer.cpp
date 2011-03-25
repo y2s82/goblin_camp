@@ -31,6 +31,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 using namespace OGLFunctionExtension;
 
+// Note: Libtcod swaps the vertical axis depending on whether the renderer is GLSL or OpenGL.
+
 namespace {
 
 	void CheckGL_Error(const char* GLcall, const char* file, const int line) {
@@ -260,6 +262,8 @@ void OGLTilesetRenderer::TilesetChanged() {
 		viewportLayers[i] = ViewportLayer(2 * viewportW, 2 * viewportH);
 	}
 
+	InitialiseConsoleTextures();
+
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
 		viewportTexW = MathEx::NextPowerOfTwo(2 * viewportW);
 		viewportTexH = MathEx::NextPowerOfTwo(2 * viewportH);
@@ -273,7 +277,8 @@ void OGLTilesetRenderer::TilesetChanged() {
 			CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
 		}
 	
-		InitaliseShaders();
+		InitialiseConsoleShaders();
+
 		viewportProgram = CreateOGLShaderProgram(tiles_vertex_shader, tiles_frag_shader);
 		if (!viewportProgram) {
 			LOG("Failed to load tiles shader");
@@ -395,12 +400,7 @@ void OGLTilesetRenderer::RenderViewport() {
 	glUseProgramObjectARB(0);
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 	glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-
-	for (int i = 0; i < viewportLayers.size(); ++i) {
-		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
-		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2 * viewportW, 2 * viewportH, GL_RGBA, GL_UNSIGNED_BYTE, *viewportLayers[i]);
-	}
-		
+			
 	glEnable(GL_BLEND);
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_CLIP_PLANE0);
@@ -424,118 +424,10 @@ void OGLTilesetRenderer::RenderViewport() {
 	float offsetX = (float)mapOffsetX + startPixelX;
 	float offsetY = (float)mapOffsetY + startPixelY;
 
-	/* rendering console */
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
-		float sizeX = 2.0f * viewportW * tileSet->TileWidth() / GetScreenWidth();
-		float sizeY = 2.0f * viewportH * tileSet->TileHeight() / GetScreenHeight();
-
-		float startX = 2.0f * startPixelX / GetScreenWidth();
-		float startY = 2.0f * startPixelY /  GetScreenHeight();
-
-		float vertOffsetX = 2.0f * mapOffsetX / GetScreenWidth();
-		float vertOffsetY = 2.0f * mapOffsetY / GetScreenHeight();
-		
-		glUseProgramObjectARB(*viewportProgram);
-	
-		glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"termsize"), (float) viewportW, (float) viewportH);
-		glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"termcoef"), 2.0f/viewportTexW, 2.0f/viewportTexH);
-		glUniform1fARB(glGetUniformLocationARB(*viewportProgram,"tilew"), (GLfloat)tilesTextureW);
-		glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
-
-		for (int i = 0; i < viewportTextures.size(); ++i) {
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_2D, *tilesTexture);
-			glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tilesheet"),0);
-	
-			glActiveTexture(GL_TEXTURE1);
-			glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
-			glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tiles"),1);
-	
-			glBegin(GL_QUADS);
-				glTexCoord2f(0.0f, 1.0f);
-				glVertex3f(vertOffsetX + startX - 1.0f, 1.0f - vertOffsetY - startY - sizeY,0.0f);
-				glTexCoord2f(1.0f, 1.0f);
-				glVertex3f(vertOffsetX + startX + sizeX - 1.0f, 1.0f - vertOffsetY - startY - sizeY,0.0f);
-				glTexCoord2f(1.0f, 0.0f);
-				glVertex3f(vertOffsetX + startX + sizeX - 1.0f, 1.0f - vertOffsetY - startY, 0.0f);
-				glTexCoord2f(0.0f, 0.0f);
-				glVertex3f(vertOffsetX + startX - 1.0f, 1.0f -vertOffsetY - startY,0.0f);
-			glEnd();
-		}
-	
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glUseProgramObjectARB(0);
-
-		CheckGL_Error("Shader Render Viewport Layers", __FILE__, __LINE__);
+		RenderGLSLViewport();
 	} else {
-		float sizeX = 0.5f * tileSet->TileWidth();
-		float sizeY = 0.5f * tileSet->TileHeight();
-
-		float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
-		float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
-
-		float factorX = 1.0f / fontCharW;
-		float factorY = 1.0f / fontCharH;
-
-		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
-		CheckGL_Error("glBindTexture", __FILE__, __LINE__);
-		glBegin(GL_QUADS);
-		for (int x = 0; x < 2 * viewportW; ++x) {
-			for (int y = 0; y < 2 * viewportH; ++y) {
-				for (int i = 0; i < viewportLayers.size(); ++i) {
-					if (viewportLayers[i].IsTileSet(x, y) ) {
-						unsigned int srcX = 2 * (viewportLayers[i].GetTile(x,y) % tilesTextureW);
-						unsigned int srcY = 2 * (viewportLayers[i].GetTile(x,y) / tilesTextureH);
-						srcX += (x & 0x1);
-						srcY += (y & 0x1);
-						glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
-						glVertex2f(factorX * (offsetX + x * sizeX), factorY * (GetScreenHeight() - y * sizeY - offsetY));
-						glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
-						glVertex2f(factorX * (offsetX + x * sizeX), factorY * (GetScreenHeight() - (y + 1) * sizeY - offsetY));
-						glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
-						glVertex2f(factorX * (offsetX + (x + 1) * sizeX),factorY * (GetScreenHeight() - (y + 1) * sizeY - offsetY));
-						glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
-						glVertex2f(factorX * (offsetX + (x + 1) * sizeX), factorY * (GetScreenHeight() - y * sizeY - offsetY));
-					}
-				}
-			}
-		}
-		glEnd();
-		CheckGL_Error("Render Viewport Layers", __FILE__, __LINE__);
-	}
-
-	{
-		float sizeX = 0.5f * tileSet->TileWidth();
-		float sizeY = 0.5f * tileSet->TileHeight();
-
-		float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
-		float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
-
-		float factorX = 1.0f / fontCharW;
-		float factorY = 1.0f / fontCharH;
-
-		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
-		CheckGL_Error("glBindTexture", __FILE__, __LINE__);
-
-		glBegin(GL_QUADS);
-		glColor4f(1.0,1.0,1.0,1.0);
-		for (std::vector<RenderTile>::iterator queuedTile = renderQueue.begin(); queuedTile != renderQueue.end(); ++queuedTile) {
-			unsigned int srcX = 2 * (queuedTile->tile % tilesTextureW);
-			unsigned int srcY = 2 * (queuedTile->tile / tilesTextureH);
-			srcX += (queuedTile->x & 0x1);
-			srcY += (queuedTile->y & 0x1);
-			glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
-			glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (GetScreenHeight() - queuedTile->y * sizeY - offsetY));
-			glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
-			glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (GetScreenHeight() - (queuedTile->y + 1) * sizeY - offsetY));
-			glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
-			glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX),factorY * (GetScreenHeight() - (queuedTile->y + 1) * sizeY - offsetY));
-			glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
-			glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX), factorY * (GetScreenHeight() - queuedTile->y * sizeY - offsetY));
-		}
-		glEnd();
-		CheckGL_Error("render", __FILE__, __LINE__);
+		RenderOGLViewport();
 	}
 
 	glDisable(GL_CLIP_PLANE0);
@@ -546,9 +438,158 @@ void OGLTilesetRenderer::RenderViewport() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void OGLTilesetRenderer::RenderGLSLViewport() {
+	for (int i = 0; i < viewportLayers.size(); ++i) {
+		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
+		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2 * viewportW, 2 * viewportH, GL_RGBA, GL_UNSIGNED_BYTE, *viewportLayers[i]);
+	}
+
+	float sizeX = 2.0f * viewportW * tileSet->TileWidth() / GetScreenWidth();
+	float sizeY = 2.0f * viewportH * tileSet->TileHeight() / GetScreenHeight();
+
+	float startX = 2.0f * startPixelX / GetScreenWidth();
+	float startY = 2.0f * startPixelY /  GetScreenHeight();
+
+	float vertOffsetX = 2.0f * mapOffsetX / GetScreenWidth();
+	float vertOffsetY = 2.0f * mapOffsetY / GetScreenHeight();
+		
+	glUseProgramObjectARB(*viewportProgram);
+	
+	glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"termsize"), (float) viewportW, (float) viewportH);
+	glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"termcoef"), 2.0f/viewportTexW, 2.0f/viewportTexH);
+	glUniform1fARB(glGetUniformLocationARB(*viewportProgram,"tilew"), (GLfloat)tilesTextureW);
+	glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
+
+	for (int i = 0; i < viewportTextures.size(); ++i) {
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+		glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tilesheet"),0);
+	
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
+		glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tiles"),1);
+	
+		glBegin(GL_QUADS);
+			glTexCoord2f(0.0f, 1.0f);
+			glVertex3f(vertOffsetX + startX - 1.0f, 1.0f - vertOffsetY - startY - sizeY,0.0f);
+			glTexCoord2f(1.0f, 1.0f);
+			glVertex3f(vertOffsetX + startX + sizeX - 1.0f, 1.0f - vertOffsetY - startY - sizeY,0.0f);
+			glTexCoord2f(1.0f, 0.0f);
+			glVertex3f(vertOffsetX + startX + sizeX - 1.0f, 1.0f - vertOffsetY - startY, 0.0f);
+			glTexCoord2f(0.0f, 0.0f);
+			glVertex3f(vertOffsetX + startX - 1.0f, 1.0f -vertOffsetY - startY,0.0f);
+		glEnd();
+	}
+	
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glUseProgramObjectARB(0);
+
+	CheckGL_Error("Shader Render Viewport Layers", __FILE__, __LINE__);
+
+	float texCoordTileW = 0.5f / tilesTextureW;
+	float texCoordTileH = 0.5f / tilesTextureH;
+
+	sizeX = 0.5f * tileSet->TileWidth();
+	sizeY = 0.5f * tileSet->TileHeight();
+
+	float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
+	float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+
+	float factorX = 1.0f / fontCharW;
+	float factorY = 1.0f / fontCharH;
+
+	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+
+	glBegin(GL_QUADS);
+	glColor4f(1.0,1.0,1.0,1.0);
+	for (std::vector<RenderTile>::iterator queuedTile = renderQueue.begin(); queuedTile != renderQueue.end(); ++queuedTile) {
+		unsigned int srcX = 2 * (queuedTile->tile % tilesTextureW);
+		unsigned int srcY = 2 * (queuedTile->tile / tilesTextureH);
+		srcX += (queuedTile->x & 0x1);
+		srcY += (queuedTile->y & 0x1);
+		glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
+		glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (GetScreenHeight() - queuedTile->y * sizeY - offsetY));
+		glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
+		glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (GetScreenHeight() - (queuedTile->y + 1) * sizeY - offsetY));
+		glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
+		glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX),factorY * (GetScreenHeight() - (queuedTile->y + 1) * sizeY - offsetY));
+		glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
+		glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX), factorY * (GetScreenHeight() - queuedTile->y * sizeY - offsetY));
+	}
+	glEnd();
+	CheckGL_Error("render", __FILE__, __LINE__);
+}
+
+void OGLTilesetRenderer::RenderOGLViewport() {
+	float texCoordTileW = 0.5f / tilesTextureW;
+	float texCoordTileH = 0.5f / tilesTextureH;
+
+	float sizeX = 0.5f * tileSet->TileWidth();
+	float sizeY = 0.5f * tileSet->TileHeight();
+
+	float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
+	float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+
+	float factorX = 1.0f / fontCharW;
+	float factorY = 1.0f / fontCharH;
+
+	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+	glBegin(GL_QUADS);
+	glColor4f(1.0,1.0,1.0,1.0);
+	for (int x = 0; x < 2 * viewportW; ++x) {
+		for (int y = 0; y < 2 * viewportH; ++y) {
+			for (int i = 0; i < viewportLayers.size(); ++i) {
+				if (viewportLayers[i].IsTileSet(x, y) ) {
+					unsigned int srcX = 2 * (viewportLayers[i].GetTile(x,y) % tilesTextureW);
+					unsigned int srcY = 2 * (viewportLayers[i].GetTile(x,y) / tilesTextureH);
+					srcX += (x & 0x1);
+					srcY += (y & 0x1);
+					glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
+					glVertex2f(factorX * (offsetX + x * sizeX), factorY * (y * sizeY + offsetY));
+					glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
+					glVertex2f(factorX * (offsetX + x * sizeX), factorY * ((y + 1) * sizeY + offsetY));
+					glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
+					glVertex2f(factorX * (offsetX + (x + 1) * sizeX),factorY * ((y + 1) * sizeY + offsetY));
+					glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
+					glVertex2f(factorX * (offsetX + (x + 1) * sizeX), factorY * (y * sizeY + offsetY));
+				}
+			}
+		}
+	}
+	glEnd();
+	CheckGL_Error("Render Viewport Layers", __FILE__, __LINE__);
+	
+	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
+	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+
+	glBegin(GL_QUADS);
+	glColor4f(1.0,1.0,1.0,1.0);
+	for (std::vector<RenderTile>::iterator queuedTile = renderQueue.begin(); queuedTile != renderQueue.end(); ++queuedTile) {
+		unsigned int srcX = 2 * (queuedTile->tile % tilesTextureW);
+		unsigned int srcY = 2 * (queuedTile->tile / tilesTextureH);
+		srcX += (queuedTile->x & 0x1);
+		srcY += (queuedTile->y & 0x1);
+		glTexCoord2f(srcX * texCoordTileW, srcY * texCoordTileH );
+		glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * (queuedTile->y * sizeY + offsetY));
+		glTexCoord2f(srcX * texCoordTileW, (srcY+1)*texCoordTileH );
+		glVertex2f(factorX * (offsetX + queuedTile->x * sizeX), factorY * ((queuedTile->y + 1) * sizeY + offsetY));
+		glTexCoord2f((srcX+1)*texCoordTileW, (srcY+1)*texCoordTileH );
+		glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX),factorY * ((queuedTile->y + 1) * sizeY + offsetY));
+		glTexCoord2f((srcX+1)*texCoordTileW, srcY*texCoordTileH );
+		glVertex2f(factorX * (offsetX + (queuedTile->x + 1) * sizeX), factorY * (queuedTile->y * sizeY + offsetY));
+	}
+	glEnd();
+	CheckGL_Error("render", __FILE__, __LINE__);
+}
+
+
 void OGLTilesetRenderer::RenderConsole() {
 	int consoleW = TCODConsole::root->getWidth();
 	int consoleH = TCODConsole::root->getHeight();
+	// Update console data
 	for (int x = 0; x < TCODConsole::root->getWidth(); ++x) {
 		for (int y = 0; y < TCODConsole::root->getHeight(); ++y) {
 			TCODColor backCol = TCODConsole::root->getCharBackground(x,y);
@@ -571,7 +612,13 @@ void OGLTilesetRenderer::RenderConsole() {
 			}
 		}
 	}
-
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
+		RenderGLSLConsole();
+	} else {
+		RenderOGLConsole();
+	}
+}
+void OGLTilesetRenderer::RenderGLSLConsole() {
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
 	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RED, GL_UNSIGNED_BYTE, &consoleData[Character][0]);
 
@@ -595,9 +642,8 @@ void OGLTilesetRenderer::RenderConsole() {
 	glUniform1fARB(glGetUniformLocationARB(*consoleProgram,"fontw"), (float)16);
 	glUniform2fARB(glGetUniformLocationARB(*consoleProgram,"fontcoef"), (float)(fontCharW)/(fontTexW), (float)(fontCharH)/(fontTexH));
 
-	
 	glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, *fontTexture);
+	glBindTexture(GL_TEXTURE_2D, *fontTexture);
 	glUniform1iARB(glGetUniformLocationARB(*consoleProgram,"font"),0);
 	
 	glActiveTexture(GL_TEXTURE1);
@@ -613,13 +659,13 @@ void OGLTilesetRenderer::RenderConsole() {
 	glUniform1iARB(glGetUniformLocationARB(*consoleProgram,"termbcol"),3);
 	
 	glBegin(GL_QUADS);
-	    glTexCoord2f(0.0f, 1.0f);
+		glTexCoord2f(0.0f, 1.0f);
 		glVertex3f(-1.0f,-1.0f,0.0f);
-	    glTexCoord2f(1.0f, 1.0f);
+		glTexCoord2f(1.0f, 1.0f);
 		glVertex3f(1.0f,-1.0f,0.0f);
-	    glTexCoord2f(1.0f, 0.0f);
+		glTexCoord2f(1.0f, 0.0f);
 		glVertex3f(1.0f,1.0f, 0.0f);
-	    glTexCoord2f(0.0f, 0.0f);
+		glTexCoord2f(0.0f, 0.0f);
 		glVertex3f(-1.0f,1.0f,0.0f);
 	glEnd();
 	
@@ -627,6 +673,81 @@ void OGLTilesetRenderer::RenderConsole() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_BLEND);
 	glUseProgramObjectARB(0);
+}
+
+void OGLTilesetRenderer::RenderOGLConsole() {
+	int consoleW = TCODConsole::root->getWidth();
+	int consoleH = TCODConsole::root->getHeight();
+
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
+	glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tcodConsole->getWidth(), tcodConsole->getHeight(), GL_RGBA, GL_UNSIGNED_BYTE, &consoleData[BackCol][0]);
+
+	/* fixed pipeline for video cards without pixel shader support */
+	/* draw the background as a single quad */
+	float texw=(float)consoleW/consoleTexW;
+	float texh=(float)consoleH/consoleTexH;
+	float fonw=(float)fontCharW/(fontTexW);
+	float fonh=(float)fontCharH/(fontTexH);
+	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
+	CheckGL_Error("glBindTexture", __FILE__, __LINE__);
+	glBegin(GL_QUADS);
+		glColor3f(1.0,1.0,1.0);
+		glTexCoord2f( 0.0, 0.0 );
+		glVertex2i( 0, 0);
+		glTexCoord2f( 0.0, texh);
+		glVertex2i( 0, consoleH );
+		glTexCoord2f( texw, texh );
+		glVertex2i( consoleW, consoleH);
+		glTexCoord2f( texw, 0.0 );
+		glVertex2i( consoleW, 0 );
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	CheckGL_Error("Render Console Background", __FILE__, __LINE__);
+	/* draw the characters (one quad per cell) */
+	glBindTexture(GL_TEXTURE_2D, *fontTexture);
+	    
+		
+	std::vector<unsigned char>::iterator fColorIter (consoleData[ForeCol].begin());
+	std::vector<unsigned char>::iterator characterIter (consoleData[Character].begin());
+	glBegin( GL_QUADS );
+	for (int y = 0; y < consoleH; y++) {
+		for (int x = 0; x < consoleW; x++) {
+			if ( *characterIter != 0 && *characterIter != ' ' ) {
+				unsigned char foreR = (*fColorIter++);
+				unsigned char foreG = (*fColorIter++);
+				unsigned char foreB = (*fColorIter++);	
+
+				int srcx,srcy,destx,desty;
+				destx=x;
+				desty=y;
+				if ( TCODConsole::root->isFullscreen() ) {
+					int offX, offY;
+					TCODSystem::getFullscreenOffsets(&offX, &offY);
+					destx+=offX/fontCharW;
+					desty+=offY/fontCharH;
+				}
+				// draw foreground 
+				unsigned char character = *characterIter++;
+				srcx = (character%16);
+				srcy = (character/16);
+
+				glColor3f((GLfloat)(foreR/255.0), (GLfloat)(foreG/255.0), (GLfloat)(foreB/255.0));
+				glTexCoord2f( srcx*fonw, srcy*fonh );
+				glVertex2i( destx, desty);
+				glTexCoord2f( srcx*fonw, (srcy+1)*fonh );
+				glVertex2i( destx, desty+1 );
+				glTexCoord2f( (srcx+1)*fonw, (srcy+1)*fonh );
+				glVertex2i( destx+1, desty+1 );
+				glTexCoord2f( (srcx+1)*fonw, srcy*fonh );
+				glVertex2i( destx+1, desty );
+			}
+		}
+	}
+	glEnd();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_BLEND);
 }
 
 void OGLTilesetRenderer::DrawNullTile(int screenX, int screenY) {
@@ -638,33 +759,23 @@ const bool operator==(const RawTileData& lhs, const RawTileData& rhs) {
 
 boost::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = {1, 3, 4};
 
-bool OGLTilesetRenderer::InitaliseShaders() {
+bool OGLTilesetRenderer::InitialiseConsoleShaders() {
 	consoleProgram = CreateOGLShaderProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader);
 	if (!*consoleProgram) return false;
 	
-    /* Generate Textures */
+	return true;
+}
+
+bool OGLTilesetRenderer::InitialiseConsoleTextures() {
+	/* Generate Textures */
 	for (int i = 0; i < ConsoleTextureTypesCount; ++i) {
-		consoleTextures[i] = CreateOGLTexture();
+		if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL || i == BackCol) {
+			consoleTextures[i] = CreateOGLTexture();
+		}
 		consoleData[i] = std::vector<unsigned char>(consoleDataAlignment[i] * tcodConsole->getWidth() * tcodConsole->getHeight());
-		consoleDirty[i] = true;
 	}
 
-	/* Character Texture */
-	glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
-
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
-
-    /* ForeCol Texture */
-	glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
-
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
-
-    /* BackCol Texture */
+	/* BackCol Texture */
 	glBindTexture(GL_TEXTURE_2D, *consoleTextures[BackCol]);
 
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
@@ -673,7 +784,23 @@ bool OGLTilesetRenderer::InitaliseShaders() {
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_RGBA, GL_UNSIGNED_BYTE, 0);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-	
+
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
+		/* Character Texture */
+		glBindTexture(GL_TEXTURE_2D, *consoleTextures[Character]);
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, 0);
+
+		/* ForeCol Texture */
+		glBindTexture(GL_TEXTURE_2D, *consoleTextures[ForeCol]);
+
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, consoleTexW, consoleTexH, 0, GL_RGB, GL_UNSIGNED_BYTE, 0);
+	}
 	return true;
 }
 

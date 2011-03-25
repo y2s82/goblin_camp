@@ -515,7 +515,7 @@ void Game::ResetRenderer() {
 
 	TCODSystem::registerSDLRenderer(0);
 	TCODSystem::registerOGLRenderer(0);
-	if (renderer_type == TCOD_RENDERER_GLSL && useTileset) {
+	if ((renderer_type == TCOD_RENDERER_GLSL || renderer_type == TCOD_RENDERER_OPENGL) && useTileset) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
 				
