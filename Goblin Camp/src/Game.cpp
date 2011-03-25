@@ -342,9 +342,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->AddEffect(FLYING);
 	}
 
-	if (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end()) {
-		npc->coward = true;
-	}
+	npc->coward = (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end() ||
+		npc->factionPtr->IsCoward());
+
+	npc->aggressive = npc->factionPtr->IsAggressive();
 
 	if (NPC::Presets[type].tags.find("hashands") != NPC::Presets[type].tags.end()) {
 		npc->hasHands = true;
