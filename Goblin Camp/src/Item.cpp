@@ -363,7 +363,7 @@ private:
 		} else if (boost::iequals(name, "containin")) {
 			Item::Presets[itemIndex].containInRaw = value.s;
 		} else if (boost::iequals(name, "nutrition")) {
-			Item::Presets[itemIndex].nutrition = value.i;
+			Item::Presets[itemIndex].nutrition = static_cast<int>(value.f * MONTH_LENGTH);
 			Item::Presets[itemIndex].organic = true;
 		} else if (boost::iequals(name, "growth")) {
 			presetGrowth[itemIndex] = value.s;
@@ -474,7 +474,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
 	itemTypeStruct->addListProperty("components", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("containIn", TCOD_TYPE_STRING, false);
-	itemTypeStruct->addProperty("nutrition", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("nutrition", TCOD_TYPE_FLOAT, false);
 	itemTypeStruct->addProperty("growth", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addListProperty("fruits", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("multiplier", TCOD_TYPE_INT, false);
