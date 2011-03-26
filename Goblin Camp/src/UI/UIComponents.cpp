@@ -368,7 +368,7 @@ void Panel::ShowModal() {
 	int _y = (Game::Inst()->ScreenHeight() - height) / 2;
 	TCOD_key_t key;
 	TCOD_mouse_t mouseStatus;
-
+	TCODMouse::showCursor(true);
 	while (true) {
 		TCODConsole::root->clear();
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
