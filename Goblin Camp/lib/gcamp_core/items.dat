@@ -506,7 +506,7 @@ item_type "Bloodberry" {
 	category = [ "Berry" ]
 	graphic = 248
 	color = "255,0,0"
-	nutrition = 9900
+	nutrition = 2.2
 	fruits = [ "Bloodberry seed" ]
 	decay = [ "Bloodberry seed", "Filth" ]
 	decaySpeed = 5
@@ -571,7 +571,7 @@ item_type "Nightbloom" {
 	category = [ "Fruit" ]
 	graphic = 248
 	color = "190,255,200"
-	nutrition = 9000
+	nutrition = 2.0
 	fruits = [ "Nightbloom seed" ]
 	decay = [ "Nightbloom seed", "Filth" ]
 	decaySpeed = 6
@@ -611,7 +611,7 @@ item_type "Dried fruit" {
 	color = "190,195,130"
 	components = ["Fruit","Fruit","Fruit"]
 	fitsin = "Basket"
-	nutrition = 9000
+	nutrition = 2.0
 	decaySpeed = 15
 	decay = ["Filth"]
 	constructedin = "Kitchen"
@@ -679,7 +679,7 @@ item_type "Corpse" {
 	fruits = [ "Bones", "Bones", "Hide", "Hide" ]
 	bulk = 6
 	durability = 5
-	nutrition = 20000
+	nutrition = 4.5
 }
 
 item_type "Small corpse" {
@@ -691,7 +691,7 @@ item_type "Small corpse" {
 	fruits = [ "Bones", "Hide" ]
 	bulk = 3
 	durability = 5
-	nutrition = 10000
+	nutrition = 3.0
 }
 
 item_type "Arthropod corpse" {
@@ -703,7 +703,7 @@ item_type "Arthropod corpse" {
 	fruits = [ "Chitin fragment", "Chitin fragment" ]
 	bulk = 4
 	durability = 5
-	nutrition = 12000
+	nutrition = 3.5
 }
 
 item_type "Berry wine" {
@@ -712,7 +712,7 @@ item_type "Berry wine" {
 	color = "127,0,0"
 	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
 	containIn = "Barrel"
-	nutrition = 72000
+	nutrition = 6.0
 	multiplier = 10
 	constructedin = "Winery"
 	fitsin = "Barrel"
@@ -725,7 +725,7 @@ item_type "Pie" {
 	graphic = 37
 	color = "255,0,220"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood"]
-	nutrition = 48000
+	nutrition = 10.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
 	decay = ["Filth"]
@@ -738,7 +738,7 @@ item_type "Meat" {
 	components = ["Corpse"]
 	decay = [ "Filth" ]
 	decaySpeed = 5
-	nutrition = 30000
+	nutrition = 6.0
 	constructedin = "Butcher"
 }
 
@@ -747,7 +747,7 @@ item_type "Bone Stew" {
 	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat", "Firewood"]
-	nutrition = 50000
+	nutrition = 11.0
 	constructedin = "Kitchen"
 	decaySpeed = 8
 	decay = ["Filth"]
@@ -758,7 +758,7 @@ item_type "Bread" {
 	graphic = 37
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood"]
-	nutrition = 40000
+	nutrition = 6.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
 	decay = ["Filth"]
@@ -780,7 +780,7 @@ item_type "Flower" {
 	category = ["Garbage"]
 	graphic = 12
 	color = "255,255,255"
-	nutrition = 500
+	nutrition = 0.5
 	decay = ["Filth"]
 	decaySpeed = 3
 }
@@ -1404,7 +1404,7 @@ item_type "Meat pie" {
 	graphic = 37
 	color = "127,0,0"
 	components = ["Meat", "Flour", "Flour", "Firewood"]
-	nutrition = 50000
+	nutrition = 11
 	constructedin = "Kitchen"
 	decaySpeed = 12
 	decay = ["Filth"]
@@ -1414,7 +1414,7 @@ item_type "Chillweed leaf" {
 	category = [ "Leaf" ]
 	graphic = 248
 	color = "221,234,234"
-	nutrition = 2000
+	nutrition = 1
 	decay = [ "Filth" ]
 	decaySpeed = 9
 	fitsin = "Sack"
@@ -1454,7 +1454,7 @@ item_type "Chillwine" {
 	color = "221,234,234"
 	components = [ "Wine", "Leaf" ]
 	containIn = "Barrel"
-	nutrition = 80000
+	nutrition = 7.0
 	multiplier = 10
 	constructedin = "Winery"
 	fitsin = "Barrel"
@@ -1487,7 +1487,7 @@ item_type "Hognut" {
 	category = [ "Nut" ]
 	graphic = 248
 	color = "153,87,38"
-	nutrition = 3000
+	nutrition = 2.5
 	fruits = [ "Hognut seed" ]
 	decay = [ "Hognut seed", "Filth" ]
 	decaySpeed = 12
@@ -1592,7 +1592,7 @@ item_type "Lichfruit" {
 	category = [ "Fruit" ]
 	graphic = 248
 	color = "255,255,0"
-	nutrition = 5000
+	nutrition = 3.0
 	fruits = [ "Lichfruit seed" ]
 	decay = [ "Lichfruit seed", "Filth" ]
 	decaySpeed = 6
@@ -1639,7 +1639,7 @@ item_type "Ghost cabbage" {
 	category = [ "Vegetable" ]
 	graphic = 248
 	color="183,177,174"
-	nutrition = 4000
+	nutrition = 3.0
 	fruits = [ "Ghost cabbage seed" ]
 	decay = [ "Ghost cabbage seed", "Filth" ]
 	decaySpeed = 6
@@ -1677,7 +1677,7 @@ item_type "Radish" {
 	category = [ "Vegetable" ]
 	graphic = 248
 	color="237,21,85"
-	nutrition = 3000
+	nutrition = 2.5
 	fruits = [ "Radish seed" ]
 	decay = [ "Radish seed", "Filth" ]
 	decaySpeed = 6
