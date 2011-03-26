@@ -110,11 +110,6 @@ category_type "Plant" {
 	flammable
 }
 
-category_type "Seed" {
-	parent="Plant"
-	flammable
-}
-
 category_type "Fiber" {
 	parent="Plant"
 	flammable
@@ -127,6 +122,25 @@ category_type "Cloth" {
 
 category_type "Flour" {
 	parent="Plant"
+	flammable
+}
+
+category_type "Seed" {
+	flammable
+}
+
+category_type "Food seed" {
+	parent="Seed"
+	flammable
+}
+
+category_type "Fiber seed" {
+	parent="Seed"
+	flammable
+}
+
+category_type "Alchemy seed" {
+	parent="Seed"
 	flammable
 }
 
@@ -500,7 +514,7 @@ item_type "Bloodberry" {
 }
 
 item_type "Bloodberry seed" {
-	category = ["Seed"]
+	category = ["Food seed"]
 	graphic = 250
 	color = "175,128,128"
 	growth = "Young Bloodberry shrub"
@@ -527,7 +541,7 @@ item_type "Bloodberry shrub" {
 }
 
 item_type "Blueleaf seed" {
-	category = ["Seed"]
+	category = ["Fiber seed"]
 	graphic = 250
 	color = "128,128,175"
 	growth = "Blueleaf sapling"
@@ -565,7 +579,7 @@ item_type "Nightbloom" {
 }
 
 item_type "Nightbloom seed" {
-	category = ["Seed"]
+	category = ["Food seed"]
 	graphic = 250
 	color = "190,255,70"
 	growth = "Nightbloom sapling"
@@ -1408,7 +1422,7 @@ item_type "Chillweed leaf" {
 }
 
 item_type "Chillweed seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic = 250
 	color = "221,234,234"
 	growth = "Young chillweed"
@@ -1481,7 +1495,7 @@ item_type "Hognut" {
 }
 
 item_type "Hognut seed" {
-	category = ["Seed"]
+	category = ["Food seed"]
 	graphic = 250
 	color = "153,87,38"
 	growth = "Young hognut bush"
@@ -1548,7 +1562,7 @@ item_type "Mandrake poison" {
 }
 
 item_type "Mandrake seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic = 250
 	color = "127,50,0"
 	growth = "Young Mandrake"
@@ -1595,7 +1609,7 @@ item_type "Lichfruit leaf" {
 }
 
 item_type "Lichfruit seed" {
-	category = [ "Seed" ]
+	category = [ "Food seed" ]
 	graphic = 250
 	color = "255,255,0"
 	growth = "Lichfruit sapling"
@@ -1633,7 +1647,7 @@ item_type "Ghost cabbage" {
 }
 
 item_type "Ghost cabbage seed" {
-	category = [ "Seed" ]
+	category = [ "Food seed" ]
 	graphic = 250
 	color="183,177,174"
 	growth = "Ghost cabbage shoot"
@@ -1671,7 +1685,7 @@ item_type "Radish" {
 }
 
 item_type "Radish seed" {
-	category = [ "Seed" ]
+	category = [ "Food seed" ]
 	graphic = 250
 	color="237,21,85"
 	growth = "Young radish plant"
@@ -1698,7 +1712,7 @@ item_type "Radish plant" {
 }
 
 item_type "Marshmerrow seed" {
-	category = ["Seed"]
+	category = ["Alchemy seed"]
 	graphic = 250
 	color = "0,136,14"
 	growth = "Young marshmerrow"
@@ -1731,7 +1745,7 @@ item_type "Marshmerrow shoot" {
 }
 
 item_type "Dreamvine seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic=250
 	color="77,234,81"
 	growth="Young dreamvine"
@@ -1772,7 +1786,7 @@ item_type "Marubium" {
 }
 
 item_type "Marubium seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic = 250
 	color="0,240,240"
 	growth = "Young marubium"
