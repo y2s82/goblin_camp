@@ -217,6 +217,7 @@ void UI::HandleKeyboard() {
 			if (menuOpen) {
 				rbuttonPressed = true;
 			} else {
+				TCODMouse::showCursor(true);
 				Game::Inst()->ToMainMenu(true);
 			}
 		}
@@ -251,16 +252,16 @@ void UI::HandleMouse() {
 
 	if (TCODConsole::isWindowClosed()) Game::Inst()->Exit();
 
-	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
-	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
-		mouseInput = tempStatus;
+	TCOD_mouse_t newMouseInput = TCODMouse::getStatus();
+	if (newMouseInput.x != oldMouseInput.x || newMouseInput.y != oldMouseInput.y) {
+		mouseInput = newMouseInput;
 		drawCursor = false;
 		TCODMouse::showCursor(true);
 	}
 
-	if (tempStatus.lbutton_pressed) lbuttonPressed = true;
-	if (tempStatus.mbutton_pressed) mbuttonPressed = true;
-	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
+	if (newMouseInput.lbutton_pressed) lbuttonPressed = true;
+	if (newMouseInput.mbutton_pressed) mbuttonPressed = true;
+	if (newMouseInput.rbutton_pressed) rbuttonPressed = true;
 
 	if (_state == UINORMAL) {
 		HandleUnderCursor(Game::Inst()->TileAt(mouseInput.x, mouseInput.y), &underCursor);
@@ -368,7 +369,7 @@ void UI::HandleMouse() {
 			}
 		}
 		draggingPlacement = false;
-	} else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
+	} else if (newMouseInput.lbutton && !oldMouseInput.lbutton) {
 		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
 		if (menuResult & NOMENUHIT) {
 			if (menuOpen) {
@@ -425,15 +426,15 @@ void UI::HandleMouse() {
 		menuHistory.pop_back();
 	}
 
-	if (tempStatus.lbutton && _state == UINORMAL) {
-		Game::Inst()->MoveCam(-(tempStatus.dx / 3.0f), -(tempStatus.dy / 3.0f));
-		if (tempStatus.dx > 0 || tempStatus.dy > 0) draggingViewport = true;
+	if (newMouseInput.lbutton && _state == UINORMAL) {
+		Game::Inst()->MoveCam(-(newMouseInput.dx / 3.0f), -(newMouseInput.dy / 3.0f));
+		if (newMouseInput.dx > 0 || newMouseInput.dy > 0) draggingViewport = true;
 	}
 
 	lbuttonPressed = false;
 	mbuttonPressed = false;
 	rbuttonPressed = false;
-	oldMouseInput = mouseInput;
+	oldMouseInput = newMouseInput;
 }
 
 void UI::Draw(TCODConsole* console) {
