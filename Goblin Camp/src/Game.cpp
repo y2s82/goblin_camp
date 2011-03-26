@@ -818,7 +818,8 @@ void Game::Update() {
 			Announce::Inst()->AddMsg("Spring has begun");
 			++age;
 			if (Config::GetCVar<bool>("autosave")) {
-				if (Data::SaveGame("autosave", false))
+				std::string saveName = "autosave" + std::string(age % 2 ? "1" : "2");
+				if (Data::SaveGame(saveName, false))
 					Announce::Inst()->AddMsg("Autosaved");
 				else
 					Announce::Inst()->AddMsg("Failed to autosave! Refer to the logfile", TCODColor::red);
