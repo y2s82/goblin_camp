@@ -1122,7 +1122,6 @@ void Game::Draw(TCODConsole * console, float focusX, float focusY, bool drawUI, 
 }
 
 void Game::FlipBuffer() {
-	buffer->flush();
 	TCODConsole::blit(buffer, 0, 0, screenWidth, screenHeight, TCODConsole::root, 0, 0);
 	TCODConsole::root->flush();
 }
