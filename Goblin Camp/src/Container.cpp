@@ -47,14 +47,16 @@ Container::~Container() {
 	}
 }
 
-bool Container::AddItem(boost::weak_ptr<Item> item) {
-	if (item.lock() && capacity >= std::max(item.lock()->GetBulk(), 1)) {
-		item.lock()->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
+bool Container::AddItem(boost::weak_ptr<Item> witem) {
+	boost::shared_ptr<Item> item = witem.lock();
+	if (item && capacity >= std::max(item->GetBulk(), 1)) {
+		item->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
-		capacity -= std::max(item.lock()->GetBulk(), 1); //<- so that bulk=0 items take space
+		capacity -= std::max(item->GetBulk(), 1); //<- so that bulk=0 items take space
 		for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
 			(*it)->ItemAdded(item);
 		}
+		if (item->Type() == Item::StringToItemType("water")) ++water;
 		return true;
 	}
 	return false;
@@ -62,7 +64,10 @@ bool Container::AddItem(boost::weak_ptr<Item> item) {
 
 void Container::RemoveItem(boost::weak_ptr<Item> item) {
 	items.erase(item);
-	if (item.lock()) capacity += std::max(item.lock()->GetBulk(), 1);
+	if (item.lock()) {
+		capacity += std::max(item.lock()->GetBulk(), 1);
+		if (item.lock()->Type() == Item::StringToItemType("water")) --water;
+	}
 	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
 		(*it)->ItemRemoved(item);
 	}
@@ -133,11 +138,29 @@ void Container::TranslateContainerListeners() {
 }
 
 void Container::AddWater(int amount) {
-	if (empty() && filth == 0) water += amount;
+	if (empty() && filth == 0) { 
+		for (int i = 0; i < amount; ++i) {
+			int waterUid = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Water"));
+			boost::shared_ptr<Item> waterItem = Game::Inst()->GetItem(waterUid).lock();
+			
+			if (!AddItem(waterItem)) {
+				Game::Inst()->RemoveItem(waterItem);
+				break;
+			}
+		}
+	}
 }
 
 void Container::RemoveWater(int amount) {
-	water -= amount;
+	for (int i = 0; i < amount; ++i) {
+		for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+			boost::shared_ptr<Item> waterItem = itemi->lock();
+			if (waterItem && waterItem->Type() == Item::StringToItemType("water")) {
+				RemoveItem(waterItem);
+				break;
+			}
+		}
+	}
 	if (water < 0) water = 0;
 }
 
