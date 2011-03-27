@@ -782,3 +782,16 @@ void OrganicItem::load(InputArchive& ar, const unsigned int version) {
 	ar & nutrition;
 	ar & growth;
 }
+
+void WaterItem::PutInContainer(boost::weak_ptr<Item> con) {
+	container = con;
+	attemptedStore = false;
+
+	Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
+
+	if (!container.lock() && !reserved) {
+		//WaterItems transform into an actual waternode if not contained
+		Game::Inst()->CreateWater(Position(), 1);
+		Game::Inst()->RemoveItem(boost::static_pointer_cast<Item>(shared_from_this()));
+	}
+}
