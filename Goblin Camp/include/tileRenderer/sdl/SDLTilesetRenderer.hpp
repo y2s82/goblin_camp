@@ -31,6 +31,8 @@ public:
 	void DrawSpriteCorner(int screenX, int screenY, boost::shared_ptr<TileSetTexture> texture, int tile, Corner corner) const;
 
 	void render(void *sdlSurface, void*sdlScreen);
+
+	void SetTranslucentUI(bool translucent);
 protected:
 	void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH);
 	void PostDrawMap();

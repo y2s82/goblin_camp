@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ogl/OGLSprite.hpp"
 #include "tileRenderer/ogl/OGLResources.hpp"
 #include "tileRenderer/ogl/OGLFunctionExt.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_image.h>
@@ -33,13 +34,24 @@ using namespace OGLFunctionExtension;
 
 // Note: Libtcod swaps the vertical axis depending on whether the renderer is GLSL or OpenGL.
 
+boost::shared_ptr<TilesetRenderer> CreateOGLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
+	boost::shared_ptr<OGLTilesetRenderer> oglRenderer(new OGLTilesetRenderer(width, height, console));
+	boost::shared_ptr<TileSet> tileset = TileSetLoader::LoadTileSet(oglRenderer, tilesetName);
+	if (tileset.get() != 0 && oglRenderer->SetTileset(tileset)) {
+		return oglRenderer;
+	}
+	return boost::shared_ptr<TilesetRenderer>();
+}
+
 namespace {
 
-	void CheckGL_Error(const char* GLcall, const char* file, const int line) {
+	bool CheckGL_Error(const char* GLcall, const char* file, const int line) {
 		GLenum errCode;
 		if ((errCode = glGetError()) != GL_NO_ERROR) {
 			LOG("" << file << "(" << line << "): error " << errCode << ": " << GLcall << std::endl); 
+			return false;
 		}
+		return true;
 	}
 
 	static std::string TCOD_con_vertex_shader =
@@ -202,7 +214,9 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 	consoleTexH = MathEx::NextPowerOfTwo(screenHeight / fontCharH);
 }
 
-OGLTilesetRenderer::~OGLTilesetRenderer() {}
+OGLTilesetRenderer::~OGLTilesetRenderer() {
+	TCODSystem::registerOGLRenderer(0);
+}
 
 Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	if (tilesetTexture->Count() <= tile) {
@@ -253,7 +267,11 @@ void OGLTilesetRenderer::DrawSpriteCorner(int screenX, int screenY, int tile, Co
 	renderQueue.push_back(RenderTile(x, y, tile));
 }
 
-void OGLTilesetRenderer::TilesetChanged() {
+bool OGLTilesetRenderer::TilesetChanged() {
+	if (!AssembleTextures()) {
+		return false;
+	}
+
 	viewportW = CeilToInt::convert(boost::numeric_cast<float>(GetScreenWidth()) / tileSet->TileWidth()) + 2;
 	viewportH = CeilToInt::convert(boost::numeric_cast<float>(GetScreenHeight()) / tileSet->TileHeight()) + 2;
 
@@ -282,11 +300,13 @@ void OGLTilesetRenderer::TilesetChanged() {
 		viewportProgram = CreateOGLShaderProgram(tiles_vertex_shader, tiles_frag_shader);
 		if (!viewportProgram) {
 			LOG("Failed to load tiles shader");
+			return false;
 		}
 	}
+	return true;
 }
 
-void OGLTilesetRenderer::AssembleTextures() {
+bool OGLTilesetRenderer::AssembleTextures() {
 	boost::shared_ptr<const unsigned int> tempTex(CreateOGLTexture());
 	GLint texSize; 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
@@ -299,7 +319,7 @@ void OGLTilesetRenderer::AssembleTextures() {
 			texSize /= 2;
 	}
 	if (width == 0)
-		return; // TODO: Error out
+		return false;
 
 	// Get initial horizontal tiles (based on tex size)
 	tilesTextureW = std::min(texSize / tileSet->TileWidth(), boost::numeric_cast<GLint>(rawTiles.size()));
@@ -311,9 +331,8 @@ void OGLTilesetRenderer::AssembleTextures() {
 	GLint heightPixels = std::min(texSize, MathEx::NextPowerOfTwo(CeilToInt::convert((float)rawTiles.size() / tilesTextureW) * tileSet->TileHeight()));
 	tilesTextureH = heightPixels / tileSet->TileHeight();
 
-	// TODO: Error out
 	if (tilesTextureH * tilesTextureW < rawTiles.size())
-		return;
+		return false;
 
 	// Build texture
 	Uint32 rmask, gmask, bmask, amask;
@@ -331,6 +350,7 @@ void OGLTilesetRenderer::AssembleTextures() {
 	boost::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, tileSet->TileWidth(), tileSet->TileHeight(), 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	if(tempSurface.get() == NULL) {
         LOG("CreateRGBSurface failed: " << SDL_GetError());
+		return false;
     }
 		
 	tilesTexture = CreateOGLTexture();
@@ -362,8 +382,11 @@ void OGLTilesetRenderer::AssembleTextures() {
 		}
 	}
 	
-	CheckGL_Error("glTexImage2D", __FILE__, __LINE__);
+	if (!CheckGL_Error("glTexImage2D", __FILE__, __LINE__)) {
+		return false;
+	}
 	rawTiles.clear();
+	return true;
 }
 
 void OGLTilesetRenderer::PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) {

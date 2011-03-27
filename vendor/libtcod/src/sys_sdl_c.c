@@ -145,7 +145,11 @@ static void check_ascii_to_tcod() {
 
 void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer, bool provideSurfaceWithAlpha) {
 	TCOD_ctx.sdl_cbk=renderer;
-	if (renderer && !renderTarget) {
+	if (renderTarget) {
+		SDL_FreeSurface(renderTarget);
+		renderTarget = NULL;
+	}
+	if (renderer) {	
 		int w, h;
 		SDL_Surface * temp;
 		// Width and height to next power of two
@@ -170,9 +174,6 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer, bool provideSurface
 		SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
 		renderTarget = (provideSurfaceWithAlpha) ? SDL_DisplayFormatAlpha(temp) : SDL_DisplayFormat(temp);
 		SDL_FreeSurface(temp);
-	} else if (!renderer && renderTarget) {
-		SDL_FreeSurface(renderTarget);
-		renderTarget = NULL;
 	}
 }
 

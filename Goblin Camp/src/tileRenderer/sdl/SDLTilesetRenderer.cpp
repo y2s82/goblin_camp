@@ -17,10 +17,21 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/sdl/SDLTilesetRenderer.hpp"
 #include "tileRenderer/sdl/SDLSprite.hpp"
+#include "tileRenderer/TileSetLoader.hpp"
 
 #include "Logger.hpp"
 #include "data/Config.hpp"
 #include "MathEx.hpp"
+
+boost::shared_ptr<TilesetRenderer> CreateSDLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
+	boost::shared_ptr<SDLTilesetRenderer> sdlRenderer(new SDLTilesetRenderer(width, height, console));
+	boost::shared_ptr<TileSet> tileset = TileSetLoader::LoadTileSet(sdlRenderer, tilesetName);
+	if (tileset.get() != 0 && sdlRenderer->SetTileset(tileset)) {
+		return sdlRenderer;
+	}
+	return boost::shared_ptr<TilesetRenderer>();
+
+}
 
 
 SDLTilesetRenderer::SDLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole)
@@ -52,6 +63,7 @@ SDLTilesetRenderer::SDLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 }
 
 SDLTilesetRenderer::~SDLTilesetRenderer() {
+	TCODSystem::registerSDLRenderer(0);
 }
 
 Sprite_ptr SDLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
@@ -86,6 +98,13 @@ void SDLTilesetRenderer::DrawSpriteCorner(int screenX, int screenY, boost::share
 
 void SDLTilesetRenderer::DrawNullTile(int screenX, int screenY) {
 	SDL_FillRect(mapSurface.get(), &CalcDest(screenX, screenY), 0);
+}
+
+void SDLTilesetRenderer::SetTranslucentUI(bool translucent) {
+	if (translucent != translucentUI) {
+		TCODSystem::registerSDLRenderer(this, translucent);
+	}
+	translucentUI = translucent;
 }
 
 namespace {
