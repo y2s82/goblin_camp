@@ -706,6 +706,14 @@ item_type "Arthropod corpse" {
 	nutrition = 3.5
 }
 
+item_type "Water" {
+	category = ["Drink"]
+	graphic = 33
+	color = "0,100,250"
+	nutrition = 5.0
+}
+
+
 item_type "Berry wine" {
 	category = ["Wine"]
 	graphic = 33
