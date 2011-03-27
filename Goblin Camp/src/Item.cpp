@@ -783,6 +783,8 @@ void OrganicItem::load(InputArchive& ar, const unsigned int version) {
 	ar & growth;
 }
 
+WaterItem::WaterItem(Coordinate pos, ItemType typeVal) : OrganicItem(pos, typeVal) {}
+
 void WaterItem::PutInContainer(boost::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
