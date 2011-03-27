@@ -91,7 +91,6 @@ class Item : public Entity {
 	ItemType type;
 	std::set<ItemCategory> categories;
 	bool flammable;
-	bool attemptedStore;
 	int decayCounter;
 
 	static boost::unordered_map<std::string, ItemType> itemTypeNames;
@@ -100,6 +99,7 @@ class Item : public Entity {
 	int resistances[RES_COUNT];
 
 protected:
+	bool attemptedStore;
 	Attack attack;
 	int condition;
 	TCODColor color;
@@ -132,7 +132,7 @@ public:
 
 	int GetGraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
-	void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
+	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 	boost::weak_ptr<Item> ContainedIn();
 	virtual void Position(Coordinate);
 	virtual Coordinate Position();
@@ -174,3 +174,14 @@ public:
 };
 
 BOOST_CLASS_VERSION(OrganicItem, 0)
+
+class WaterItem : public Item {
+	GC_SERIALIZABLE_CLASS
+
+	friend class Game;
+
+public:
+	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
+};
+
+BOOST_CLASS_VERSION(WaterItem, 0)
