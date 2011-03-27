@@ -797,3 +797,11 @@ void WaterItem::PutInContainer(boost::weak_ptr<Item> con) {
 		Game::Inst()->RemoveItem(boost::static_pointer_cast<Item>(shared_from_this()));
 	}
 }
+
+void WaterItem::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<OrganicItem>(*this);
+}
+
+void WaterItem::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<OrganicItem>(*this);
+}
