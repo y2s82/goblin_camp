@@ -1125,9 +1125,9 @@ CONTINUEEAT:
 
 			case FILL: {
 				boost::shared_ptr<Container> cont;
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					cont = boost::static_pointer_cast<Container>(carried.lock());
-				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					cont = boost::static_pointer_cast<Container>(mainHand.lock());
 				}
 					
@@ -1161,7 +1161,7 @@ CONTINUEEAT:
 					break;
 				} 
 					   }
-				TaskFinished(TASKFAILFATAL, "(FILL)Not carrying a liquid container");
+				TaskFinished(TASKFAILFATAL, "(FILL)Not carrying a container");
 				break;
 
 			case POUR: {
