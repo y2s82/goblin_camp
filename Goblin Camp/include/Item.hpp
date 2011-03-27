@@ -175,12 +175,13 @@ public:
 
 BOOST_CLASS_VERSION(OrganicItem, 0)
 
-class WaterItem : public Item {
+class WaterItem : public OrganicItem {
 	GC_SERIALIZABLE_CLASS
 
 	friend class Game;
 
 public:
+	WaterItem(Coordinate=Coordinate(0,0), ItemType=0);
 	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 };
 
