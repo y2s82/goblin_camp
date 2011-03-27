@@ -57,7 +57,7 @@ public:
 	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1) = 0;
 	template <typename IterT> static Sprite_ptr CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
 
-	void SetTileset(boost::shared_ptr<TileSet> tileSet);
+	bool SetTileset(boost::shared_ptr<TileSet> tileSet);
 
 	Coordinate TileAt(int screenX, int screenY, float focusX, float focusY, int viewportX, int viewportY, int viewportW, int viewportH) const;
 
@@ -76,14 +76,14 @@ public:
 	void DrawCursor(const Coordinate& pos, bool placeable);
 	void DrawCursor(const Coordinate& start, const Coordinate& end, bool placeable);
 
-	void SetTranslucentUI(bool translucent);
+	virtual void SetTranslucentUI(bool translucent);
 
 protected:
 	virtual void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH) = 0;
 	virtual void PostDrawMap() = 0;
 	virtual void DrawNullTile(int screenX, int screenY) = 0;
 
-	virtual void TilesetChanged();
+	virtual bool TilesetChanged();
 
 	TCODConsole * tcodConsole;
 	PermutationTable permutationTable;
@@ -120,3 +120,5 @@ template <typename IterT> Sprite_ptr TilesetRenderer::CreateSprite(boost::shared
 	std::vector<int> tiles(start, end);
 	return spriteFactory->CreateSprite(spriteLayer, tilesetTexture, tiles, connectionMap, frameRate, frameCount);
 }
+
+boost::shared_ptr<TilesetRenderer> CreateTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName);

@@ -42,15 +42,13 @@ public:
 	};
 	void DrawSpriteCorner(int screenX, int screenY, int tile, Corner corner);
 
-	void AssembleTextures();
-
 	void render();
 
 protected:
 	void PreDrawMap(int viewportX, int viewportY, int viewportW, int viewportH);
 	void PostDrawMap();
 	void DrawNullTile(int screenX, int screenY);
-	void TilesetChanged();
+	bool TilesetChanged();
 
 private:
 	std::vector<RawTileData> rawTiles;
@@ -109,6 +107,8 @@ private:
 	void RenderConsole();
 	void RenderOGLConsole();
 	void RenderGLSLConsole();
+
+	bool AssembleTextures();
 };
 
 const bool operator==(const RawTileData& lhs, const RawTileData& rhs);

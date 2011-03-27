@@ -472,9 +472,9 @@ void TilesetRenderer::DrawTerritoryOverlay(int screenX, int screenY, Coordinate 
 	tileSet->DrawTerritoryOverlay(screenX, screenY, isOwned, boost::bind(&TerritoryConnectionTest, map, pos, isOwned, _1));
 }
 
-void TilesetRenderer::SetTileset(boost::shared_ptr<TileSet> newTileset) {
+bool TilesetRenderer::SetTileset(boost::shared_ptr<TileSet> newTileset) {
 	tileSet = newTileset;
-	TilesetChanged();
+	return TilesetChanged();
 }
 
 int TilesetRenderer::GetScreenWidth() const {
@@ -489,9 +489,22 @@ TCODColor TilesetRenderer::GetKeyColor() const {
 	return keyColor;
 }
 
-void TilesetRenderer::TilesetChanged() {
+bool TilesetRenderer::TilesetChanged() {
+	return true;
 }
 
 void TilesetRenderer::SetTranslucentUI(bool translucent) {
 	translucentUI = translucent;
+}
+
+// Define these in their relevant cpps.
+boost::shared_ptr<TilesetRenderer> CreateOGLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName);
+boost::shared_ptr<TilesetRenderer> CreateSDLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName);
+
+boost::shared_ptr<TilesetRenderer> CreateTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
+	if (TCODSystem::getRenderer() == TCOD_RENDERER_SDL) {
+		return CreateSDLTilesetRenderer(width, height, console, tilesetName);
+	} else {
+		return CreateOGLTilesetRenderer(width, height, console, tilesetName);
+	}
 }
