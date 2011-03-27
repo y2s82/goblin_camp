@@ -1125,9 +1125,13 @@ CONTINUEEAT:
 
 			case FILL: {
 				boost::shared_ptr<Container> cont;
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				if (carried.lock() && 
+					(carried.lock()->IsCategory(Item::StringToItemCategory("Container")) || 
+					carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					cont = boost::static_pointer_cast<Container>(carried.lock());
-				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				} else if (mainHand.lock() && 
+					(mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")) ||
+					mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					cont = boost::static_pointer_cast<Container>(mainHand.lock());
 				}
 					
