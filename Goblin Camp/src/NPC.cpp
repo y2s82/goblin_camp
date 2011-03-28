@@ -1170,9 +1170,13 @@ CONTINUEEAT:
 
 			case POUR: {
 				boost::shared_ptr<Container> sourceContainer;
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				if (carried.lock() && 
+					(carried.lock()->IsCategory(Item::StringToItemCategory("Container")) || 
+					carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
-				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				} else if (mainHand.lock() && 
+					(mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")) ||
+					mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
 				}
 
@@ -1519,7 +1523,7 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 	if (item.lock()) {
 		inventory->RemoveItem(item);
 		item.lock()->Position(Position());
-		item.lock()->PutInContainer(boost::weak_ptr<Item>());
+		item.lock()->PutInContainer();
 		bulk -= item.lock()->GetBulk();
 
 		//If the item is a container with filth in it, spill it on the ground
