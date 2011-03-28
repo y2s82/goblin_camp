@@ -190,6 +190,16 @@ void Container::Draw(Coordinate upleft, TCODConsole* console) {
 
 int Container::GetReservedSpace() { return reservedSpace; }
 
+void Container::Position(Coordinate pos) {
+	Item::Position(pos);
+	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+		boost::shared_ptr<Item> item = itemi->lock();
+		if (item) item->Position(pos);
+	}
+}
+
+Coordinate Container::Position() {return Item::Position();}
+
 void Container::save(OutputArchive& ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Item>(*this);
 	ar & items;
