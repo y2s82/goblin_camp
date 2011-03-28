@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/weak_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "Faction.hpp"
 #include "NPC.hpp"
@@ -36,26 +37,11 @@ members(std::list<boost::weak_ptr<NPC> >()),
 	index(vindex),
 	currentGoal(0),
 	activeTime(0),
-	maxActiveTime(MONTH_LENGTH),
-	active(false)
+	maxActiveTime(MONTH_LENGTH/2),
+	active(false),
+	aggressive(false),
+	coward(false)
 {
-	//Hardcoding these for now, they will be moved to a data file eventually
-	if (boost::iequals(name, "Wolves")) {
-		goals.push_back(FACTIONSTEAL);
-	} else if (boost::iequals(name, "Giants")) {
-		goals.push_back(FACTIONDESTROY);
-	} else if (boost::iequals(name, "Bees")) {
-		goals.push_back(FACTIONKILL);
-	} else if (boost::iequals(name, "Trolls")) {
-		goals.push_back(FACTIONPATROL);
-		friends.insert(PLAYERFACTION);
-		factions[0]->friends.insert(index);
-	} else if (boost::iequals(name, "Peaceful animal")) {
-		goals.push_back(FACTIONIDLE);
-	} else if (boost::iequals(name, "Hostile monster")) {
-		goals.push_back(FACTIONKILL);
-		maxActiveTime = UPDATES_PER_SECOND*5;
-	}
 }
 
 void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
@@ -224,12 +210,16 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 			break;
 
 		case FACTIONSTEAL:
-			{
-				boost::shared_ptr<Job> stealJob(new Job("Steal food"));
-				boost::weak_ptr<Item> food = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), npc->Position());
-				if (GenerateStealJob(stealJob, food.lock())) {
-					npc->StartJob(stealJob);
-					return true;
+			if (currentGoal < goalSpecifiers.size() && goalSpecifiers[currentGoal] >= 0) {
+				boost::shared_ptr<Job> stealJob(new Job("Steal "+Item::ItemCategoryToString(goalSpecifiers[currentGoal])));
+				boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(goalSpecifiers[currentGoal], npc->Position());
+				if (item.lock()) {
+					if (GenerateStealJob(stealJob, item.lock())) {
+						npc->StartJob(stealJob);
+						return true;
+					}
+				} else {
+					++currentGoal;
 				}
 			}
 			break;
@@ -317,6 +307,105 @@ void Faction::TranslateMembers() {
 void Faction::TransferTrapInfo(boost::shared_ptr<Faction> otherFaction) {
 	otherFaction->trapVisible = this->trapVisible;
 }
+
+class FactionListener : public ITCODParserListener {
+	int factionIndex;
+
+	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		if (boost::iequals(str->getName(), "faction_type")) {
+			factionIndex = Faction::StringToFactionType(name);
+		}
+		return true;
+	}
+
+	bool parserFlag(TCODParser *parser,const char *name) {
+		if (boost::iequals(name,"aggressive")) {
+			Faction::factions[factionIndex]->aggressive = true;
+		} else if (boost::iequals(name,"coward")) {
+			Faction::factions[factionIndex]->coward = true;
+		}
+		return true;
+	}
+
+	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
+		if (boost::iequals(name,"goals")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				FactionGoal goal = Faction::StringToFactionGoal((char*)TCOD_list_get(value.list,i));
+				Faction::factions[factionIndex]->goals.push_back(goal);
+			}
+		} else if (boost::iequals(name,"goalSpecifiers")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				std::string specString((char*)TCOD_list_get(value.list,i));
+				int value = Item::StringToItemCategory(specString);
+				if (value < 0) value = boost::lexical_cast<int>(specString);
+				Faction::factions[factionIndex]->goalSpecifiers.push_back(value);
+			}
+		} else if (boost::iequals(name,"activeTime")) {
+			Faction::factions[factionIndex]->maxActiveTime = value.i;
+		} else if (boost::iequals(name,"friends")) {
+			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
+				Faction::factions[factionIndex]->friendNames.push_back((char*)TCOD_list_get(value.list,i));
+			}
+		}
+		return true;
+	}
+
+	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
+		return true;
+	}
+
+	void error(const char *msg) {
+		throw std::runtime_error(msg);
+	}
+};
+
+void Faction::LoadPresets(std::string filename) {
+	TCODParser parser = TCODParser();
+	TCODParserStruct *factionTypeStruct = parser.newStructure("faction_type");
+	factionTypeStruct->addListProperty("goals", TCOD_TYPE_STRING, false);
+	factionTypeStruct->addListProperty("goalSpecifiers", TCOD_TYPE_STRING, false);
+	factionTypeStruct->addProperty("activeTime", TCOD_TYPE_INT, false);
+	factionTypeStruct->addListProperty("friends", TCOD_TYPE_STRING, false);
+	factionTypeStruct->addFlag("aggressive");
+	factionTypeStruct->addFlag("coward");
+
+	FactionListener listener = FactionListener();
+	parser.run(filename.c_str(), &listener);
+
+	for (std::size_t i = 0; i < factions.size(); ++i) {
+		factions[i]->TranslateFriends();
+	}
+}
+
+FactionGoal Faction::StringToFactionGoal(std::string goal) {
+	if (boost::iequals(goal, "destroy")) {
+		return FACTIONDESTROY;
+	} else if (boost::iequals(goal, "kill")) {
+		return FACTIONKILL;
+	} else if (boost::iequals(goal, "steal")) {
+		return FACTIONSTEAL;
+	} else if (boost::iequals(goal, "patrol")) {
+		return FACTIONPATROL;
+	} else if (boost::iequals(goal, "idle")) {
+		return FACTIONIDLE;
+	}
+	return FACTIONIDLE;
+}
+
+std::string Faction::FactionGoalToString(FactionGoal goal) {
+	switch (goal) {
+	case FACTIONDESTROY: return "destroy";
+	case FACTIONKILL: return "kill";
+	case FACTIONSTEAL: return "steal";
+	case FACTIONPATROL: return "patrol";
+	case FACTIONIDLE: return "idle";
+	}
+	return "idle";
+}
+
+bool Faction::IsCoward() { return coward; }
+
+bool Faction::IsAggressive() { return aggressive; }
 
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	std::list< boost::weak_ptr<NPC> > unusedList;

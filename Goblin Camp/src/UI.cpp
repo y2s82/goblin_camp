@@ -214,9 +214,11 @@ void UI::HandleKeyboard() {
 			}
 		}
 		if (key.vk == TCODK_ESCAPE) {
+			extraTooltips.clear();
 			if (menuOpen) {
 				rbuttonPressed = true;
 			} else {
+				TCODMouse::showCursor(true);
 				Game::Inst()->ToMainMenu(true);
 			}
 		}
@@ -251,16 +253,16 @@ void UI::HandleMouse() {
 
 	if (TCODConsole::isWindowClosed()) Game::Inst()->Exit();
 
-	TCOD_mouse_t tempStatus = TCODMouse::getStatus();
-	if (tempStatus.x != oldMouseInput.x || tempStatus.y != oldMouseInput.y) {
-		mouseInput = tempStatus;
+	TCOD_mouse_t newMouseInput = TCODMouse::getStatus();
+	if (newMouseInput.x != oldMouseInput.x || newMouseInput.y != oldMouseInput.y) {
+		mouseInput = newMouseInput;
 		drawCursor = false;
 		TCODMouse::showCursor(true);
 	}
 
-	if (tempStatus.lbutton_pressed) lbuttonPressed = true;
-	if (tempStatus.mbutton_pressed) mbuttonPressed = true;
-	if (tempStatus.rbutton_pressed) rbuttonPressed = true;
+	if (newMouseInput.lbutton_pressed) lbuttonPressed = true;
+	if (newMouseInput.mbutton_pressed) mbuttonPressed = true;
+	if (newMouseInput.rbutton_pressed) rbuttonPressed = true;
 
 	if (_state == UINORMAL) {
 		HandleUnderCursor(Game::Inst()->TileAt(mouseInput.x, mouseInput.y), &underCursor);
@@ -368,7 +370,7 @@ void UI::HandleMouse() {
 			}
 		}
 		draggingPlacement = false;
-	} else if (tempStatus.lbutton && !oldMouseInput.lbutton) {
+	} else if (newMouseInput.lbutton && !oldMouseInput.lbutton) {
 		menuResult = sideBar.Update(mouseInput.cx, mouseInput.cy, false);
 		if (menuResult & NOMENUHIT) {
 			if (menuOpen) {
@@ -414,6 +416,7 @@ void UI::HandleMouse() {
 		}
 		if (menuOpen) currentMenu->Open();
 		menuHistory.clear();
+		extraTooltips.clear();
 	}
 
 	if (mbuttonPressed && menuOpen && !menuHistory.empty()) {
@@ -425,15 +428,15 @@ void UI::HandleMouse() {
 		menuHistory.pop_back();
 	}
 
-	if (tempStatus.lbutton && _state == UINORMAL) {
-		Game::Inst()->MoveCam(-(tempStatus.dx / 3.0f), -(tempStatus.dy / 3.0f));
-		if (tempStatus.dx > 0 || tempStatus.dy > 0) draggingViewport = true;
+	if (newMouseInput.lbutton && _state == UINORMAL) {
+		Game::Inst()->MoveCam(-(newMouseInput.dx / 3.0f), -(newMouseInput.dy / 3.0f));
+		if (newMouseInput.dx > 0 || newMouseInput.dy > 0) draggingViewport = true;
 	}
 
 	lbuttonPressed = false;
 	mbuttonPressed = false;
 	rbuttonPressed = false;
-	oldMouseInput = mouseInput;
+	oldMouseInput = newMouseInput;
 }
 
 void UI::Draw(TCODConsole* console) {
@@ -524,6 +527,9 @@ void UI::Draw(TCODConsole* console) {
 
 	Tooltip *tooltip = Tooltip::Inst();
 	tooltip->Clear();
+	for (std::list<std::string>::iterator tooltipIter = extraTooltips.begin(); tooltipIter != extraTooltips.end(); ++tooltipIter) {
+		tooltip->AddEntry(TooltipEntry(*tooltipIter, TCODColor::white));
+	}
 	if (menuOpen) {
 		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
 	}
@@ -639,6 +645,8 @@ void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 	UI::Inst()->blueprint(Construction::Blueprint(construct));
 	UI::Inst()->state(state);
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Construct);
+	UI::Inst()->HideMenu();
+	UI::Inst()->AddTooltip(Construction::Presets[construct].name);
 }
 
 void UI::ChooseStockpile(ConstructionType stockpile) {
@@ -648,6 +656,8 @@ void UI::ChooseStockpile(ConstructionType stockpile) {
 	UI::Inst()->blueprint(Construction::Blueprint(stockpile));
 	UI::Inst()->state(UIRECTPLACEMENT);
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Stockpile);
+	UI::Inst()->HideMenu();
+	UI::Inst()->AddTooltip(Construction::Presets[stockpile].name);
 }
 
 void UI::ChooseTreeFelling() {
@@ -656,6 +666,7 @@ void UI::ChooseTreeFelling() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_TreeFelling);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChoosePlantHarvest() {
@@ -664,6 +675,7 @@ void UI::ChoosePlantHarvest() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Harvest);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order) {
@@ -693,6 +705,7 @@ void UI::ChooseDesignateTree() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Tree);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChooseDismantle() {
@@ -701,6 +714,7 @@ void UI::ChooseDismantle() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Dismantle);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChooseUndesignate() {
@@ -709,13 +723,16 @@ void UI::ChooseUndesignate() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Undesignate);
+	UI::Inst()->HideMenu();
 }
+
 void UI::ChooseDesignateBog() {
 	UI::Inst()->state(UIRECTPLACEMENT);
 	UI::Inst()->SetRectCallback(boost::bind(Game::DesignateBog, _1, _2));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTileType, TILEBOG, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Bog);
+	UI::Inst()->HideMenu();
 }
 
 
@@ -851,6 +868,7 @@ void UI::ChooseDig() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, std::set<TileType>()));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Dig);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChooseNaturify() {
@@ -869,6 +887,7 @@ void UI::ChooseChangeTerritory(bool add) {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(add ? Cursor_AddTerritory : Cursor_RemoveTerritory);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChooseGatherItems() {
@@ -877,6 +896,7 @@ void UI::ChooseGatherItems() {
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, _2));
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Gather);
+	UI::Inst()->HideMenu();
 }
 
 void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
@@ -909,4 +929,8 @@ void UI::ChooseABPlacement(boost::function<void(Coordinate)> callback, boost::fu
 	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
+}
+
+void UI::AddTooltip(std::string tooltip) {
+	extraTooltips.push_back(tooltip);
 }

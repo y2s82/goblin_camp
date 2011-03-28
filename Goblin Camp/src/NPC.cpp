@@ -1125,9 +1125,13 @@ CONTINUEEAT:
 
 			case FILL: {
 				boost::shared_ptr<Container> cont;
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				if (carried.lock() && 
+					(carried.lock()->IsCategory(Item::StringToItemCategory("Container")) || 
+					carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					cont = boost::static_pointer_cast<Container>(carried.lock());
-				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				} else if (mainHand.lock() && 
+					(mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")) ||
+					mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					cont = boost::static_pointer_cast<Container>(mainHand.lock());
 				}
 					
@@ -1161,14 +1165,18 @@ CONTINUEEAT:
 					break;
 				} 
 					   }
-				TaskFinished(TASKFAILFATAL, "(FILL)Not carrying a liquid container");
+				TaskFinished(TASKFAILFATAL, "(FILL)Not carrying a container");
 				break;
 
 			case POUR: {
 				boost::shared_ptr<Container> sourceContainer;
-				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				if (carried.lock() && 
+					(carried.lock()->IsCategory(Item::StringToItemCategory("Container")) || 
+					carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
-				} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+				} else if (mainHand.lock() && 
+					(mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")) ||
+					mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
 					sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
 				}
 
@@ -1515,16 +1523,13 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 	if (item.lock()) {
 		inventory->RemoveItem(item);
 		item.lock()->Position(Position());
-		item.lock()->PutInContainer(boost::weak_ptr<Item>());
+		item.lock()->PutInContainer();
 		bulk -= item.lock()->GetBulk();
 
-		//If the item is a container with water/filth in it, spill it on the ground
+		//If the item is a container with filth in it, spill it on the ground
 		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
 			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item.lock()));
-			if (cont->ContainsWater() > 0) {
-				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
-				cont->RemoveWater(cont->ContainsWater());
-			} else if (cont->ContainsFilth() > 0) {
+			if (cont->ContainsFilth() > 0) {
 				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
 				cont->RemoveFilth(cont->ContainsFilth());
 			}
@@ -1741,40 +1746,11 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	}
 }
 
-void NPC::PeacefulAnimalReact(boost::shared_ptr<NPC> animal) {
+
+void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 	animal->ScanSurroundings();
 
-	if (animal->seenFire) {
-		animal->AddEffect(PANIC);
-		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
-		return;
-	}
-
-	for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
-		if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
-			animal->AddEffect(PANIC);
-		}
-	}
-
-	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
-		//Turn into a hostile animal if attacked by the player's creatures
-		if (animal->aggressor.lock()->GetFaction() == PLAYERFACTION){
-			animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
-			animal->React = boost::bind(NPC::HostileAnimalReact, _1);
-		}
-		animal->aggressive = true;
-		animal->RemoveEffect(PANIC);
-		animal->AddEffect(RAGE);
-	}
-}
-
-bool NPC::PeacefulAnimalFindJob(boost::shared_ptr<NPC> animal) {
-	animal->aggressive = false;
-	return false;
-}
-
-void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
-	animal->ScanSurroundings();
+	//Aggressive animals attack constructions/other creatures depending on faction
 	if (animal->aggressive) {
 		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
 			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
@@ -1805,50 +1781,24 @@ void NPC::HostileAnimalReact(boost::shared_ptr<NPC> animal) {
 		}
 	}
 
-	if (animal->seenFire) {
-		animal->AddEffect(PANIC);
-		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
-		return;
+	//Cowards run away from others
+	if (animal->coward) {
+		for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+			if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
+				animal->AddEffect(PANIC);
+			}
+		}
 	}
-}
 
-bool NPC::HostileAnimalFindJob(boost::shared_ptr<NPC> animal) {
-	//For now hostile animals will simply attempt to get inside the settlement
-	if (animal->Position() != Camp::Inst()->Center()) {
-		boost::shared_ptr<Job> attackJob(new Job("Attack settlement"));
-		attackJob->internal = true;
-		attackJob->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
-		animal->jobs.push_back(attackJob);
-		return true;
+	//Animals with the 'angers' tag get angry if attacked
+	if (animal->aggressor.lock() && NPC::Presets[animal->type].tags.find("angers") != NPC::Presets[animal->type].tags.end()) {
+		//Turn into a hostile animal if attacked by the player's creatures
+		animal->aggressive = true;
+		animal->RemoveEffect(PANIC);
+		animal->AddEffect(RAGE);
 	}
-	return false;
-}
 
-//A hungry animal will attempt to find food in the player's stockpiles and eat it,
-//alternatively it will change into a "normal" hostile animal if no food is available
-bool NPC::HungryAnimalFindJob(boost::shared_ptr<NPC> animal) {
-	//We could use Task(FIND for this, but it doesn't give us feedback if there's
-	//any food available
-	boost::weak_ptr<Item> wfood = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), animal->Position());
-	if (boost::shared_ptr<Item> food = wfood.lock()) {
-		//Found a food item
-		boost::shared_ptr<Job> stealJob(new Job("Steal food"));
-		stealJob->internal = true;
-		stealJob->tasks.push_back(Task(MOVE, food->Position()));
-		stealJob->tasks.push_back(Task(TAKE, food->Position(), food));
-		stealJob->tasks.push_back(Task(FLEEMAP));
-		animal->jobs.push_back(stealJob);
-		return true;
-	} else {
-		animal->FindJob = boost::bind(NPC::HostileAnimalFindJob, _1);
-		animal->React = boost::bind(NPC::HostileAnimalReact, _1);
-	}
-	return false;
-}
-
-void NPC::HungryAnimalReact(boost::shared_ptr<NPC> animal) {
-	animal->aggressive = true;
-	animal->ScanSurroundings();
+	//All animals avoid fire
 	if (animal->seenFire) {
 		animal->AddEffect(PANIC);
 		while (!animal->jobs.empty()) animal->TaskFinished(TASKFAILFATAL);
@@ -2301,18 +2251,12 @@ NPCType NPC::StringToNPCType(std::string typeName) {
 int NPC::GetNPCSymbol() { return Presets[type].graphic; }
 
 void NPC::InitializeAIFunctions() {
+	FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
+	React = boost::bind(NPC::AnimalReact, _1);
+
 	if (NPC::Presets[type].ai == "PlayerNPC") {
 		FindJob = boost::bind(NPC::JobManagerFinder, _1);
 		React = boost::bind(NPC::PlayerNPCReact, _1);
-	} else if (NPC::Presets[type].ai == "PeacefulAnimal") {
-		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
-		React = boost::bind(NPC::PeacefulAnimalReact, _1);
-	} else if (NPC::Presets[type].ai == "HungryAnimal") {
-		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
-		React = boost::bind(NPC::HungryAnimalReact, _1);
-	} else if (NPC::Presets[type].ai == "HostileAnimal") {
-		FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
-		React = boost::bind(NPC::HostileAnimalReact, _1);
 	}
 }
 

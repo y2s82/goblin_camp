@@ -363,7 +363,7 @@ private:
 		} else if (boost::iequals(name, "containin")) {
 			Item::Presets[itemIndex].containInRaw = value.s;
 		} else if (boost::iequals(name, "nutrition")) {
-			Item::Presets[itemIndex].nutrition = value.i;
+			Item::Presets[itemIndex].nutrition = static_cast<int>(value.f * MONTH_LENGTH);
 			Item::Presets[itemIndex].organic = true;
 		} else if (boost::iequals(name, "growth")) {
 			presetGrowth[itemIndex] = value.s;
@@ -474,7 +474,7 @@ void Item::LoadPresets(std::string filename) {
 	itemTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
 	itemTypeStruct->addListProperty("components", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("containIn", TCOD_TYPE_STRING, false);
-	itemTypeStruct->addProperty("nutrition", TCOD_TYPE_INT, false);
+	itemTypeStruct->addProperty("nutrition", TCOD_TYPE_FLOAT, false);
 	itemTypeStruct->addProperty("growth", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addListProperty("fruits", TCOD_TYPE_STRING, false);
 	itemTypeStruct->addProperty("multiplier", TCOD_TYPE_INT, false);
@@ -781,4 +781,27 @@ void OrganicItem::load(InputArchive& ar, const unsigned int version) {
 	ar & boost::serialization::base_object<Item>(*this);
 	ar & nutrition;
 	ar & growth;
+}
+
+WaterItem::WaterItem(Coordinate pos, ItemType typeVal) : OrganicItem(pos, typeVal) {}
+
+void WaterItem::PutInContainer(boost::weak_ptr<Item> con) {
+	container = con;
+	attemptedStore = false;
+
+	Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
+
+	if (!container.lock() && !reserved) {
+		//WaterItems transform into an actual waternode if not contained
+		Game::Inst()->CreateWater(Position(), 1);
+		Game::Inst()->RemoveItem(boost::static_pointer_cast<Item>(shared_from_this()));
+	}
+}
+
+void WaterItem::save(OutputArchive& ar, const unsigned int version) const {
+	ar & boost::serialization::base_object<OrganicItem>(*this);
+}
+
+void WaterItem::load(InputArchive& ar, const unsigned int version) {
+	ar & boost::serialization::base_object<OrganicItem>(*this);
 }

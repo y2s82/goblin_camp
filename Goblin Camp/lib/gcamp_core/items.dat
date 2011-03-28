@@ -110,11 +110,6 @@ category_type "Plant" {
 	flammable
 }
 
-category_type "Seed" {
-	parent="Plant"
-	flammable
-}
-
 category_type "Fiber" {
 	parent="Plant"
 	flammable
@@ -127,6 +122,25 @@ category_type "Cloth" {
 
 category_type "Flour" {
 	parent="Plant"
+	flammable
+}
+
+category_type "Seed" {
+	flammable
+}
+
+category_type "Food seed" {
+	parent="Seed"
+	flammable
+}
+
+category_type "Fiber seed" {
+	parent="Seed"
+	flammable
+}
+
+category_type "Alchemy seed" {
+	parent="Seed"
 	flammable
 }
 
@@ -492,7 +506,7 @@ item_type "Bloodberry" {
 	category = [ "Berry" ]
 	graphic = 248
 	color = "255,0,0"
-	nutrition = 9900
+	nutrition = 2.2
 	fruits = [ "Bloodberry seed" ]
 	decay = [ "Bloodberry seed", "Filth" ]
 	decaySpeed = 5
@@ -500,7 +514,7 @@ item_type "Bloodberry" {
 }
 
 item_type "Bloodberry seed" {
-	category = ["Seed"]
+	category = ["Food seed"]
 	graphic = 250
 	color = "175,128,128"
 	growth = "Young Bloodberry shrub"
@@ -527,7 +541,7 @@ item_type "Bloodberry shrub" {
 }
 
 item_type "Blueleaf seed" {
-	category = ["Seed"]
+	category = ["Fiber seed"]
 	graphic = 250
 	color = "128,128,175"
 	growth = "Blueleaf sapling"
@@ -557,7 +571,7 @@ item_type "Nightbloom" {
 	category = [ "Fruit" ]
 	graphic = 248
 	color = "190,255,200"
-	nutrition = 9000
+	nutrition = 2.0
 	fruits = [ "Nightbloom seed" ]
 	decay = [ "Nightbloom seed", "Filth" ]
 	decaySpeed = 6
@@ -565,7 +579,7 @@ item_type "Nightbloom" {
 }
 
 item_type "Nightbloom seed" {
-	category = ["Seed"]
+	category = ["Food seed"]
 	graphic = 250
 	color = "190,255,70"
 	growth = "Nightbloom sapling"
@@ -597,7 +611,7 @@ item_type "Dried fruit" {
 	color = "190,195,130"
 	components = ["Fruit","Fruit","Fruit"]
 	fitsin = "Basket"
-	nutrition = 9000
+	nutrition = 2.0
 	decaySpeed = 15
 	decay = ["Filth"]
 	constructedin = "Kitchen"
@@ -665,7 +679,7 @@ item_type "Corpse" {
 	fruits = [ "Bones", "Bones", "Hide", "Hide" ]
 	bulk = 6
 	durability = 5
-	nutrition = 20000
+	nutrition = 4.5
 }
 
 item_type "Small corpse" {
@@ -677,7 +691,7 @@ item_type "Small corpse" {
 	fruits = [ "Bones", "Hide" ]
 	bulk = 3
 	durability = 5
-	nutrition = 10000
+	nutrition = 3.0
 }
 
 item_type "Arthropod corpse" {
@@ -689,8 +703,17 @@ item_type "Arthropod corpse" {
 	fruits = [ "Chitin fragment", "Chitin fragment" ]
 	bulk = 4
 	durability = 5
-	nutrition = 12000
+	nutrition = 3.5
 }
+
+item_type "Water" {
+	category = ["Drink"]
+	graphic = 33
+	color = "0,100,250"
+	nutrition = 5.0
+	multiplier = 20
+}
+
 
 item_type "Berry wine" {
 	category = ["Wine"]
@@ -698,7 +721,7 @@ item_type "Berry wine" {
 	color = "127,0,0"
 	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
 	containIn = "Barrel"
-	nutrition = 72000
+	nutrition = 6.0
 	multiplier = 10
 	constructedin = "Winery"
 	fitsin = "Barrel"
@@ -711,7 +734,7 @@ item_type "Pie" {
 	graphic = 37
 	color = "255,0,220"
 	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood"]
-	nutrition = 48000
+	nutrition = 10.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
 	decay = ["Filth"]
@@ -724,7 +747,7 @@ item_type "Meat" {
 	components = ["Corpse"]
 	decay = [ "Filth" ]
 	decaySpeed = 5
-	nutrition = 30000
+	nutrition = 6.0
 	constructedin = "Butcher"
 }
 
@@ -733,7 +756,7 @@ item_type "Bone Stew" {
 	graphic = 37
 	color = "102,204,0"
 	components = ["Bone", "Drink", "Meat", "Firewood"]
-	nutrition = 50000
+	nutrition = 11.0
 	constructedin = "Kitchen"
 	decaySpeed = 8
 	decay = ["Filth"]
@@ -744,7 +767,7 @@ item_type "Bread" {
 	graphic = 37
 	color = "127,89,63"
 	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood"]
-	nutrition = 40000
+	nutrition = 6.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
 	decay = ["Filth"]
@@ -766,7 +789,7 @@ item_type "Flower" {
 	category = ["Garbage"]
 	graphic = 12
 	color = "255,255,255"
-	nutrition = 500
+	nutrition = 0.5
 	decay = ["Filth"]
 	decaySpeed = 3
 }
@@ -1390,7 +1413,7 @@ item_type "Meat pie" {
 	graphic = 37
 	color = "127,0,0"
 	components = ["Meat", "Flour", "Flour", "Firewood"]
-	nutrition = 50000
+	nutrition = 11
 	constructedin = "Kitchen"
 	decaySpeed = 12
 	decay = ["Filth"]
@@ -1400,7 +1423,7 @@ item_type "Chillweed leaf" {
 	category = [ "Leaf" ]
 	graphic = 248
 	color = "221,234,234"
-	nutrition = 2000
+	nutrition = 1
 	decay = [ "Filth" ]
 	decaySpeed = 9
 	fitsin = "Sack"
@@ -1408,7 +1431,7 @@ item_type "Chillweed leaf" {
 }
 
 item_type "Chillweed seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic = 250
 	color = "221,234,234"
 	growth = "Young chillweed"
@@ -1440,7 +1463,7 @@ item_type "Chillwine" {
 	color = "221,234,234"
 	components = [ "Wine", "Leaf" ]
 	containIn = "Barrel"
-	nutrition = 80000
+	nutrition = 7.0
 	multiplier = 10
 	constructedin = "Winery"
 	fitsin = "Barrel"
@@ -1473,7 +1496,7 @@ item_type "Hognut" {
 	category = [ "Nut" ]
 	graphic = 248
 	color = "153,87,38"
-	nutrition = 3000
+	nutrition = 2.5
 	fruits = [ "Hognut seed" ]
 	decay = [ "Hognut seed", "Filth" ]
 	decaySpeed = 12
@@ -1481,7 +1504,7 @@ item_type "Hognut" {
 }
 
 item_type "Hognut seed" {
-	category = ["Seed"]
+	category = ["Food seed"]
 	graphic = 250
 	color = "153,87,38"
 	growth = "Young hognut bush"
@@ -1548,7 +1571,7 @@ item_type "Mandrake poison" {
 }
 
 item_type "Mandrake seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic = 250
 	color = "127,50,0"
 	growth = "Young Mandrake"
@@ -1578,7 +1601,7 @@ item_type "Lichfruit" {
 	category = [ "Fruit" ]
 	graphic = 248
 	color = "255,255,0"
-	nutrition = 5000
+	nutrition = 3.0
 	fruits = [ "Lichfruit seed" ]
 	decay = [ "Lichfruit seed", "Filth" ]
 	decaySpeed = 6
@@ -1595,7 +1618,7 @@ item_type "Lichfruit leaf" {
 }
 
 item_type "Lichfruit seed" {
-	category = [ "Seed" ]
+	category = [ "Food seed" ]
 	graphic = 250
 	color = "255,255,0"
 	growth = "Lichfruit sapling"
@@ -1625,7 +1648,7 @@ item_type "Ghost cabbage" {
 	category = [ "Vegetable" ]
 	graphic = 248
 	color="183,177,174"
-	nutrition = 4000
+	nutrition = 3.0
 	fruits = [ "Ghost cabbage seed" ]
 	decay = [ "Ghost cabbage seed", "Filth" ]
 	decaySpeed = 6
@@ -1633,7 +1656,7 @@ item_type "Ghost cabbage" {
 }
 
 item_type "Ghost cabbage seed" {
-	category = [ "Seed" ]
+	category = [ "Food seed" ]
 	graphic = 250
 	color="183,177,174"
 	growth = "Ghost cabbage shoot"
@@ -1663,7 +1686,7 @@ item_type "Radish" {
 	category = [ "Vegetable" ]
 	graphic = 248
 	color="237,21,85"
-	nutrition = 3000
+	nutrition = 2.5
 	fruits = [ "Radish seed" ]
 	decay = [ "Radish seed", "Filth" ]
 	decaySpeed = 6
@@ -1671,7 +1694,7 @@ item_type "Radish" {
 }
 
 item_type "Radish seed" {
-	category = [ "Seed" ]
+	category = [ "Food seed" ]
 	graphic = 250
 	color="237,21,85"
 	growth = "Young radish plant"
@@ -1698,7 +1721,7 @@ item_type "Radish plant" {
 }
 
 item_type "Marshmerrow seed" {
-	category = ["Seed"]
+	category = ["Alchemy seed"]
 	graphic = 250
 	color = "0,136,14"
 	growth = "Young marshmerrow"
@@ -1731,7 +1754,7 @@ item_type "Marshmerrow shoot" {
 }
 
 item_type "Dreamvine seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic=250
 	color="77,234,81"
 	growth="Young dreamvine"
@@ -1772,7 +1795,7 @@ item_type "Marubium" {
 }
 
 item_type "Marubium seed" {
-	category = [ "Seed" ]
+	category = [ "Alchemy seed" ]
 	graphic = 250
 	color="0,240,240"
 	growth = "Young marubium"

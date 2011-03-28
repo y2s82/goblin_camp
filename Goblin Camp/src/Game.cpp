@@ -342,9 +342,10 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->AddEffect(FLYING);
 	}
 
-	if (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end()) {
-		npc->coward = true;
-	}
+	npc->coward = (NPC::Presets[type].tags.find("coward") != NPC::Presets[type].tags.end() ||
+		npc->factionPtr->IsCoward());
+
+	npc->aggressive = npc->factionPtr->IsAggressive();
 
 	if (NPC::Presets[type].tags.find("hashands") != NPC::Presets[type].tags.end()) {
 		npc->hasHands = true;
@@ -576,7 +577,13 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		if (type >= 0 && type < Item::Presets.size()) {
 			boost::shared_ptr<Item> newItem;
 			if (Item::Presets[type].organic) {
-				boost::shared_ptr<OrganicItem> orgItem(new OrganicItem(pos, type));
+				boost::shared_ptr<OrganicItem> orgItem;
+				
+				if (boost::iequals(Item::ItemTypeToString(type), "water"))
+					orgItem.reset(new WaterItem(pos, type));
+				else
+					orgItem.reset(new OrganicItem(pos, type));
+
 				newItem = boost::static_pointer_cast<Item>(orgItem);
 				orgItem->Nutrition(Item::Presets[type].nutrition);
 				orgItem->Growth(Item::Presets[type].growth);
@@ -816,7 +823,8 @@ void Game::Update() {
 			Announce::Inst()->AddMsg("Spring has begun");
 			++age;
 			if (Config::GetCVar<bool>("autosave")) {
-				if (Data::SaveGame("autosave", false))
+				std::string saveName = "autosave" + std::string(age % 2 ? "1" : "2");
+				if (Data::SaveGame(saveName, false))
 					Announce::Inst()->AddMsg("Autosaved");
 				else
 					Announce::Inst()->AddMsg("Failed to autosave! Refer to the logfile", TCODColor::red);

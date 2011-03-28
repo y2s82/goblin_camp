@@ -225,9 +225,9 @@ MenuResult ScrollPanel::Update(int x, int y, bool clicked, TCOD_key_t key) {
 					scroll -= step;
 				} else if (y == _y + height - 2) {
 					scroll += step;
-				} else if (y < scrollBar - _y) {
+				} else if (y < _y + scrollBar) {
 					scroll -= height;
-				} else if (y > scrollBar - _y) {
+				} else if (y > _y + scrollBar) {
 					scroll += height; 
 				}
 			} else {
@@ -368,7 +368,7 @@ void Panel::ShowModal() {
 	int _y = (Game::Inst()->ScreenHeight() - height) / 2;
 	TCOD_key_t key;
 	TCOD_mouse_t mouseStatus;
-
+	TCODMouse::showCursor(true);
 	while (true) {
 		TCODConsole::root->clear();
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -384,8 +384,8 @@ void Panel::ShowModal() {
 
 		MenuResult result = Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed!=0, key);
 		if((result & DISMISS) || key.vk == TCODK_ESCAPE) {
-				delete this;
-				return;
+			delete this;
+			return;
 		}
 	}    
 }
@@ -413,6 +413,11 @@ MenuResult UIContainer::Update(int x, int y, bool clicked, TCOD_key_t key) {
 			}
 		}
 	}
+
+	if (x >= _x && x < _x + width && y >= _y && y < _y + height) {
+		return MENUHIT;
+	}
+
 	return NOMENUHIT;
 }
 
