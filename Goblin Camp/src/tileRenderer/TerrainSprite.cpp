@@ -16,8 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "stdafx.hpp"
 #include "tileRenderer/TerrainSprite.hpp"
-
-#include "MathEx.hpp"
+#include <boost/bind.hpp>
 
 TerrainSprite::TerrainSprite()
 	: sprites(),
@@ -37,7 +36,7 @@ TerrainSprite::TerrainSprite()
 {
 }
 
-TerrainSprite::TerrainSprite(const Sprite& sprite) 
+TerrainSprite::TerrainSprite(Sprite_ptr sprite) 
   : sprites(),
 	snowSprites(),
 	heightSplits(),
@@ -55,19 +54,19 @@ TerrainSprite::TerrainSprite(const Sprite& sprite)
 {
 }
 
-TerrainSprite::TerrainSprite(std::vector<Sprite> sprites,
-							 std::vector<Sprite> snowSprites,
+TerrainSprite::TerrainSprite(std::vector<Sprite_ptr> sprites,
+							 std::vector<Sprite_ptr> snowSprites,
 							 std::vector<float> heightSplits,
-							 Sprite edge,
-							 Sprite snowEdge,
-	  						 std::vector<Sprite> details,
-							 std::vector<Sprite> burntDetails,
-							 std::vector<Sprite> snowedDetails,
-							 std::vector<Sprite> corruptedDetails,
+							 Sprite_ptr edge,
+							 Sprite_ptr snowEdge,
+	  						 std::vector<Sprite_ptr> details,
+							 std::vector<Sprite_ptr> burntDetails,
+							 std::vector<Sprite_ptr> snowedDetails,
+							 std::vector<Sprite_ptr> corruptedDetails,
 							 int detailsChance,
-							 Sprite corruption,
-							 Sprite corruptionOverlay,
-							 Sprite burntOverlay)
+							 Sprite_ptr corruption,
+							 Sprite_ptr corruptionOverlay,
+							 Sprite_ptr burntOverlay)
 : sprites(sprites),
   snowSprites(snowSprites),
   heightSplits(heightSplits),
@@ -111,78 +110,82 @@ namespace {
 }
 
 // Connection map draw
-void TerrainSprite::Draw(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected) const {
+void TerrainSprite::Draw(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected) const {
 	if (Exists()) {
-		DrawBaseLayer(dst, dstRect, coords, permTable, height);
-		edge.Draw(terrainConnected, dst, dstRect);
-		DrawDetails(dst, dstRect, details, coords, permTable);
+		DrawBaseLayer(screenX, screenY, coords, permTable, height);
+		edge.Draw(screenX, screenY, terrainConnected);
+		DrawDetails(screenX, screenY, details, coords, permTable);
 	}
 }
 
-void TerrainSprite::DrawCorrupted(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction corruptConnected) const {
+void TerrainSprite::DrawCorrupted(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction corruptConnected) const {
 	if (Exists()) {
-		DrawBaseLayer(dst, dstRect, coords, permTable, height);
-		corruption.Draw(corruptConnected, dst, dstRect);
-		edge.Draw(terrainConnected, dst, dstRect);
-		if (!corruptedDetails.empty()) {
-			DrawDetails(dst, dstRect, corruptedDetails, coords, permTable);
+		if (sprites.empty()) {
+			edge.Draw(screenX, screenY, terrainConnected);
+			corruption.Draw(screenX, screenY, corruptConnected);
 		} else {
-			DrawDetails(dst, dstRect, details, coords, permTable);
+			DrawBaseLayer(screenX, screenY, coords, permTable, height);
+			corruption.Draw(screenX, screenY, corruptConnected);
+			edge.Draw(screenX, screenY, terrainConnected);
+		}
+		if (!corruptedDetails.empty()) {
+			DrawDetails(screenX, screenY, corruptedDetails, coords, permTable);
+		} else {
+			DrawDetails(screenX, screenY, details, coords, permTable);
 		}
 	}
 }
 
-void TerrainSprite::DrawBurnt(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction burntConnected) const {
+void TerrainSprite::DrawBurnt(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction burntConnected) const {
 	if (Exists()) {
-		DrawBaseLayer(dst, dstRect, coords, permTable, height);
-		burntOverlay.Draw(burntConnected, dst, dstRect);
-		edge.Draw(terrainConnected, dst, dstRect);
+		DrawBaseLayer(screenX, screenY, coords, permTable, height);
+		burntOverlay.Draw(screenX, screenY, burntConnected);
+		edge.Draw(screenX, screenY, terrainConnected);
 		if (!burntDetails.empty()) {
-			DrawDetails(dst, dstRect, burntDetails, coords, permTable);
+			DrawDetails(screenX, screenY, burntDetails, coords, permTable);
 		} else {
-			DrawDetails(dst, dstRect, details, coords, permTable);
+			DrawDetails(screenX, screenY, details, coords, permTable);
 		}
 	}
 }
 
-void TerrainSprite::DrawSnowed(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const {
+void TerrainSprite::DrawSnowed(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const {
 	if (Exists() && (snowSprites.size() > 0 || snowEdge.Exists())) {
-		DrawSnowLayer(dst, dstRect, coords, permTable, height, terrainConnected, snowConnected);
+		DrawSnowLayer(screenX, screenY, coords, permTable, height, terrainConnected, snowConnected);
 		if (!snowedDetails.empty()) {
-			DrawDetails(dst, dstRect, snowedDetails, coords, permTable);
+			DrawDetails(screenX, screenY, snowedDetails, coords, permTable);
 		} else {
-			DrawDetails(dst, dstRect, details, coords, permTable);
+			DrawDetails(screenX, screenY, details, coords, permTable);
 		}
 	} else {
-		Draw(dst, dstRect, coords, permTable, height, terrainConnected);
+		Draw(screenX, screenY, coords, permTable, height, terrainConnected);
 	}
 }
 
-void TerrainSprite::DrawSnowedAndCorrupted(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, Sprite::ConnectedFunction corruptConnected) const {
+void TerrainSprite::DrawSnowedAndCorrupted(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, Sprite::ConnectedFunction corruptConnected) const {
 	if (Exists() && snowSprites.size() > 0) {
-		DrawSnowLayer(dst, dstRect, coords, permTable, height, terrainConnected, snowConnected);
-		corruption.Draw(corruptConnected, dst, dstRect);
+		DrawSnowLayer(screenX, screenY, coords, permTable, height, terrainConnected, snowConnected, true, corruptConnected);
 		if (!corruptedDetails.empty()) {
-			DrawDetails(dst, dstRect, corruptedDetails, coords, permTable);
+			DrawDetails(screenX, screenY, corruptedDetails, coords, permTable);
 		} else if (!snowedDetails.empty()) {
-			DrawDetails(dst, dstRect, snowedDetails, coords, permTable);
+			DrawDetails(screenX, screenY, snowedDetails, coords, permTable);
 		} else {
-			DrawDetails(dst, dstRect, details, coords, permTable);
+			DrawDetails(screenX, screenY, details, coords, permTable);
 		}
 	} else {
-		DrawCorrupted(dst, dstRect, coords, permTable, height, terrainConnected, corruptConnected);
+		DrawCorrupted(screenX, screenY, coords, permTable, height, terrainConnected, corruptConnected);
 	}
 }
 
-void TerrainSprite::DrawCorruptionOverlay(SDL_Surface * dst, SDL_Rect *dstRect, Sprite::ConnectedFunction connected) const {
-	corruptionOverlay.Draw(connected, dst, dstRect);
+void TerrainSprite::DrawCorruptionOverlay(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
+	corruptionOverlay.Draw(screenX, screenY, connected);
 }
 	
-void TerrainSprite::DrawBaseLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height) const {
+void TerrainSprite::DrawBaseLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height) const {
 	if (sprites.size() > 0) {
 		// Calculate height layer
 		int heightLayer = 0;
-		for (int i = 0; i < heightSplits.size(); ++i) {
+		for (unsigned int i = 0; i < heightSplits.size(); ++i) {
 			if (height >= heightSplits[i]) {
 				heightLayer++;
 			} else {
@@ -192,180 +195,71 @@ void TerrainSprite::DrawBaseLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordina
 
 		// Base Layer
 		if (numSprites > 1) {
-			sprites[heightLayer * numSprites + permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % numSprites].Draw(dst, dstRect);			
+			sprites[heightLayer * numSprites + permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % numSprites].Draw(screenX,screenY);			
 		} else {
 			if (sprites[heightLayer].IsConnectionMap()) {
-				sprites[heightLayer].Draw(boost::bind(&WangConnected, &permTable, coords, _1), dst, dstRect);
+				sprites[heightLayer].Draw(screenX, screenY, boost::bind(&WangConnected, &permTable, coords, _1));
 			} else {
-				sprites[heightLayer].Draw(dst, dstRect);
+				sprites[heightLayer].Draw(screenX, screenY);
 			}
 		}
 	}
 }
 
-void TerrainSprite::DrawSnowLayer(SDL_Surface * dst, SDL_Rect *dstRect, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected) const {
+void TerrainSprite::DrawSnowLayer(int screenX, int screenY, Coordinate coords, const PermutationTable& permTable, float height, Sprite::ConnectedFunction terrainConnected, Sprite::ConnectedFunction snowConnected, bool corrupt, Sprite::ConnectedFunction corruptConnected) const {
 	// If we don't have a snow edge or entirely connected, just render the snow sprites.
 	if ((!snowEdge.Exists() && sprites.size() > 0) || (snowConnected(NORTH) && snowConnected(EAST) && snowConnected(SOUTH) && snowConnected(WEST) && snowConnected(NORTHEAST) && snowConnected(NORTHWEST) && snowConnected(SOUTHEAST) && snowConnected(SOUTHWEST))) {
 		if (snowSprites.size() > 1) {
-			snowSprites.at(permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % snowSprites.size()).Draw(dst, dstRect);			
+			snowSprites.at(permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % snowSprites.size()).Draw(screenX, screenY);			
 		} else if (snowSprites.size() == 1) {
 			if (snowSprites[0].IsConnectionMap()) {
-				snowSprites[0].Draw(boost::bind(&WangConnected, &permTable, coords, _1), dst, dstRect);
+				snowSprites[0].Draw(screenX, screenY, boost::bind(&WangConnected, &permTable, coords, _1));
 			} else {
-				snowSprites.at(0).Draw(dst, dstRect);
+				snowSprites.at(0).Draw(screenX, screenY);
 			}
 		} else {
 			// snowEdge is being used to render everything
-			snowEdge.Draw(snowConnected, dst, dstRect);
+			snowEdge.Draw(screenX, screenY, snowConnected);
+		}
+		if (corrupt) {
+			corruption.Draw(screenX, screenY, corruptConnected);
 		}
 	} else {
-		DrawBaseLayer(dst, dstRect, coords, permTable, height);
-		edge.Draw(terrainConnected, dst, dstRect);
-		snowEdge.Draw(snowConnected, dst, dstRect);
+		DrawBaseLayer(screenX, screenY, coords, permTable, height);
+		edge.Draw(screenX, screenY, terrainConnected);
+		snowEdge.Draw(screenX, screenY, snowConnected);
+		if (sprites.empty()) {
+			snowEdge.Draw(screenX, screenY, snowConnected);
+			if (corrupt) {
+				corruption.Draw(screenX, screenY, corruptConnected);
+			}
+			edge.Draw(screenX, screenY, terrainConnected);
+		} else {
+			DrawBaseLayer(screenX, screenY, coords, permTable, height);
+			snowEdge.Draw(screenX, screenY, snowConnected);
+			if (corrupt) {
+				corruption.Draw(screenX, screenY, corruptConnected);
+			}
+			edge.Draw(screenX, screenY, terrainConnected);
+		}
 	}
 }
 
-void TerrainSprite::DrawDetails(SDL_Surface * dst, SDL_Rect *dstRect, const std::vector<Sprite>& detailSprites, Coordinate coords, const PermutationTable& permTable) const {
+void TerrainSprite::DrawDetails(int screenX, int screenY, const std::vector<Sprite_ptr>& detailSprites, Coordinate coords, const PermutationTable& permTable) const {
 	if (detailsChance != 0 && !detailSprites.empty()) {
 		int detailChoice = permTable.Hash(permTable.Hash(coords.X() + detailPermOffset) + coords.Y()) % (detailsChance * detailSprites.size());
 		if (detailChoice < detailSprites.size()) {
-			detailSprites[detailChoice].Draw(dst, dstRect);
+			detailSprites[detailChoice].Draw(screenX, screenY);
 		}
 	}
 }
 
-void TerrainSprite::SetCorruption(Sprite sprite) {
+void TerrainSprite::SetCorruption(Sprite_ptr sprite) {
 	corruption = sprite;
 }
 
-void TerrainSprite::SetCorruptionOverlay(Sprite sprite) {
+void TerrainSprite::SetCorruptionOverlay(Sprite_ptr sprite) {
 	corruptionOverlay = sprite;
 }
 
 
-TerrainSpriteFactory::TerrainSpriteFactory()
-	: spriteIndices(),
-	  snowSpriteIndices(),
-	  heightSplits(),
-	  edgeIndices(),
-	  snowEdgeIndices(),
-	  details(),
-	  burntDetails(),
-	  snowedDetails(),
-	  corruptedDetails(),
-	  detailsChance(1),
-	  corruption(),
-	  corruptionOverlay(),
-	  burntOverlay(),
-	  wang(false),
-	  snowWang(false)
-{
-
-}
-
-TerrainSpriteFactory::~TerrainSpriteFactory() {
-} 
-
-TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	std::vector<Sprite> sprites;
-	if (wang) {
-		int indicesPerSprite = spriteIndices.size() / (heightSplits.size() + 1);
-		for (int i = 0; i < heightSplits.size() + 1; ++i) {
-			sprites.push_back(Sprite(currentTexture, spriteIndices.begin() + i * indicesPerSprite, spriteIndices.begin() + (i + 1) * indicesPerSprite, true));
-		}
-	} else {
-		for (std::vector<int>::iterator iter = spriteIndices.begin(); iter != spriteIndices.end(); ++iter) {
-			sprites.push_back(Sprite(currentTexture, *iter));
-		}
-	}
-	
-	std::vector<Sprite> snowSprites;
-	if (snowWang) {
-		snowSprites.push_back(Sprite(currentTexture, snowSpriteIndices.begin(), snowSpriteIndices.end(), true));
-	} else {
-		for (std::vector<int>::iterator iter = snowSpriteIndices.begin(); iter != snowSpriteIndices.end(); ++iter) {
-			snowSprites.push_back(Sprite(currentTexture, *iter));
-		}
-	}
-
-	// Set the skipped edge sprite to an existing one
-	if (edgeIndices.size() == 4) {
-		edgeIndices.push_back(currentTexture->Count());
-	} else if (edgeIndices.size() == 15 || edgeIndices.size() == 46) {
-		edgeIndices.insert(edgeIndices.begin() + 10, currentTexture->Count());
-	} else if (edgeIndices.size() == 18) {
-		edgeIndices.insert(edgeIndices.begin() + 4, currentTexture->Count());
-	}
-	Sprite edgeSprite = Sprite(currentTexture, edgeIndices.begin(), edgeIndices.end(), true);
-	
-	// Add extra sprite to snowSprite to complete connection map
-	if (snowSpriteIndices.size() > 0) {
-		if (snowEdgeIndices.size() == 4) {
-			snowEdgeIndices.push_back(snowSpriteIndices.at(0));
-		} else if (snowEdgeIndices.size() == 15 || snowEdgeIndices.size() == 46) {
-			snowEdgeIndices.insert(snowEdgeIndices.begin() + 10, currentTexture->Count());
-		} else if (snowEdgeIndices.size() == 18) {
-			snowEdgeIndices.insert(snowEdgeIndices.begin() + 4, snowSpriteIndices.at(0));
-		}
-	} 
-	Sprite snowEdgeSprite = Sprite(currentTexture, snowEdgeIndices.begin(), snowEdgeIndices.end(), true);
-	return TerrainSprite(sprites, snowSprites, heightSplits, edgeSprite, snowEdgeSprite, details, burntDetails, snowedDetails, corruptedDetails, detailsChance, corruption, corruptionOverlay, burntOverlay);
-}
-
-void TerrainSpriteFactory::Reset() {
-	spriteIndices.clear();
-	snowSpriteIndices.clear();
-	heightSplits.clear();
-	edgeIndices.clear();
-	snowEdgeIndices.clear();
-	details.clear();
-	burntDetails.clear();
-	snowedDetails.clear();
-	corruptedDetails.clear();
-	detailsChance = 1;
-	corruption = Sprite();
-	corruptionOverlay = Sprite();
-	burntOverlay = Sprite();
-	wang = false;
-	snowWang = false;
-}
-
-void TerrainSpriteFactory::AddDetailSprite(const Sprite& sprite) {
-	details.push_back(sprite);
-}
-
-void TerrainSpriteFactory::AddBurntDetailSprite(const Sprite& sprite) {
-	burntDetails.push_back(sprite);
-}
-
-void TerrainSpriteFactory::AddSnowedDetailSprite(const Sprite& sprite) {
-	snowedDetails.push_back(sprite);
-}
-
-void TerrainSpriteFactory::AddCorruptedDetailSprite(const Sprite& sprite) {
-	corruptedDetails.push_back(sprite);
-}
-
-void TerrainSpriteFactory::SetDetailsChance(float chance) {
-	detailsChance = CeilToInt::convert(1.0f / chance);
-}
-
-void TerrainSpriteFactory::SetCorruptionSprite(const Sprite& sprite) {
-	corruption = sprite;
-}
-
-void TerrainSpriteFactory::SetCorruptionOverlaySprite(const Sprite& sprite) {
-	corruptionOverlay = sprite;
-}
-
-void TerrainSpriteFactory::SetBurntSprite(const Sprite& sprite) {
-	burntOverlay = sprite;
-}
-
-void TerrainSpriteFactory::SetWang(bool value) {
-	wang = value;
-}
-
-void TerrainSpriteFactory::SetSnowWang(bool value) {
-	snowWang = value;
-}

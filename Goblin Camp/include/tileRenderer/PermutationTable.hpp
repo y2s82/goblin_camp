@@ -30,7 +30,7 @@ public:
 	}
 
 	inline int ExtHash(int val) const {
-		return table[(table[bitMask & val] + val >> power) & bitMask];
+		return table[(table[bitMask & val] + (val >> power)) & bitMask];
 	}
 private:
 	std::vector<int> table;
