@@ -21,6 +21,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "data/Serialization.hpp"
 
+class Job;
+
 class FireNode : public boost::enable_shared_from_this<FireNode> {
 	GC_SERIALIZABLE_CLASS
 	
@@ -28,6 +30,8 @@ class FireNode : public boost::enable_shared_from_this<FireNode> {
 	int graphic;
 	TCODColor color;
 	int temperature;
+	boost::weak_ptr<Job> waterJob;
+
 public:
 	FireNode(int x=0,int y=0,int temperature=0);
 	~FireNode();
@@ -40,4 +44,4 @@ public:
 	void SetHeat(int);
 };
 
-BOOST_CLASS_VERSION(FireNode, 0)
+BOOST_CLASS_VERSION(FireNode, 1)

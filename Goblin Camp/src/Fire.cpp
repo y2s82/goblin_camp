@@ -24,6 +24,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Water.hpp"
 #include "SpawningPool.hpp"
 #include "Stockpile.hpp"
+#include "JobManager.hpp"
+#include "Job.hpp"
 
 FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 	temperature(vtemp) {
@@ -33,7 +35,11 @@ FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 		graphic = Random::Generate(176,178);
 }
 
-FireNode::~FireNode() {}
+FireNode::~FireNode() {
+	if (waterJob.lock()) {
+		JobManager::Inst()->RemoveJob(waterJob);
+	}
+}
 
 Coordinate FireNode::GetPosition() { return Coordinate(x,y); }
 
@@ -50,6 +56,53 @@ void FireNode::Draw(Coordinate upleft, TCODConsole* console) {
 	if (screenX >= 0 && screenX < console->getWidth() &&
 		screenY >= 0 && screenY < console->getHeight()) {
 			console->putCharEx(screenX, screenY, graphic, color, TCODColor::black);
+	}
+}
+
+inline void CreateWaterJob(boost::shared_ptr<Job> waterJob, Coordinate location) {
+	waterJob->Attempts(1);
+
+	//First search for a container containing water
+	boost::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
+		location).lock();
+	Coordinate waterLocation = Game::Inst()->FindWater(location);
+
+	//If a water item exists, is closer and contained then use that
+	bool waterContainerFound = false;
+	if (waterItem) {
+		int distanceToWater = INT_MAX;
+		if (waterLocation.X() != -1) distanceToWater = Distance(location, waterLocation);
+		int distanceToItem = Distance(location, waterItem->Position());
+
+		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
+			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
+				//Reserve everything inside the container
+				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); 
+					itemi != container->end(); ++itemi) {
+						waterJob->ReserveEntity(*itemi);
+				}
+				waterJob->ReserveEntity(container);
+				waterJob->tasks.push_back(Task(MOVE, container->Position()));
+				waterJob->tasks.push_back(Task(TAKE, container->Position(), container));
+				waterContainerFound = true;
+		}
+	}
+
+	if (!waterContainerFound && waterLocation.X() != -1) {
+		waterJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
+		waterJob->tasks.push_back(Task(MOVEADJACENT, waterLocation));
+		waterJob->tasks.push_back(Task(FILL, waterLocation));
+	}
+
+	if (waterContainerFound || waterLocation.X() != -1) {
+		waterJob->tasks.push_back(Task(MOVEADJACENT, location));
+		waterJob->tasks.push_back(Task(POUR, location));
+		if (waterContainerFound) waterJob->tasks.push_back(Task(STOCKPILEITEM));
+		waterJob->DisregardTerritory();
+		waterJob->AllowFire();
+	} else {
+		waterJob.reset();
 	}
 }
 
@@ -188,6 +241,16 @@ void FireNode::Update() {
 					temperature += tree ? 500 : 100;
 			}
 
+			//Create pour water job here if in player territory
+			if (Map::Inst()->IsTerritory(x,y) && !waterJob.lock()) {
+				boost::shared_ptr<Job> pourWaterJob(new Job("Douse flames", HIGH));
+				CreateWaterJob(pourWaterJob, GetPosition());
+				if (pourWaterJob) {
+					pourWaterJob->MarkGround(GetPosition());
+					waterJob = pourWaterJob;
+					JobManager::Inst()->AddJob(pourWaterJob);
+				}
+			}
 		}
 	}
 }
@@ -199,6 +262,7 @@ void FireNode::save(OutputArchive& ar, const unsigned int version) const {
 	ar & color.g;
 	ar & color.b;
 	ar & temperature;
+	ar & waterJob;
 }
 
 void FireNode::load(InputArchive& ar, const unsigned int version) {
@@ -208,4 +272,7 @@ void FireNode::load(InputArchive& ar, const unsigned int version) {
 	ar & color.g;
 	ar & color.b;
 	ar & temperature;
+	if (version >= 1) {
+		ar & waterJob;
+	}
 }
