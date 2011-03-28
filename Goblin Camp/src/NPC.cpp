@@ -1697,8 +1697,9 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 		if (!surroundingsScanned) npc->ScanSurroundings();
 		surroundingsScanned = true;
 		
+		//NPCs with the CHICKENHEART trait panic more than usual if they see fire
 		if (npc->HasTrait(CHICKENHEART) && npc->seenFire && (npc->jobs.empty() || npc->jobs.front()->name != "Aaaaaaaah!!")) {
-			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Chickenheart");
 			boost::shared_ptr<Job> runAroundLikeAHeadlessChickenJob(new Job("Aaaaaaaah!!"));
 			for (int i = 0; i < 30; ++i)
 				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, npc->Position() + Coordinate(Random::Generate(-2, 2), Random::Generate(-2, 2))));
@@ -1708,16 +1709,18 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			return;
 		}
 
+		//Cowards panic if they see aggressive unfriendlies or their attacker
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			if ((!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction()) && npci->lock()->aggressive) || 
-				npci->lock() == npc->aggressor.lock() || 
-				(npc->seenFire && (npc->jobs.empty() || !boost::iequals(npc->jobs.front()->name,"Pour water")))) {
+				npci->lock() == npc->aggressor.lock()) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
-				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Enemy sighted");
 				npc->AddEffect(PANIC);
 			}
 		}
 	} else {
+
+		//Aggressive npcs attack unfriendlies
 		if (npc->aggressive) {
 			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
 				if (!surroundingsScanned) npc->ScanSurroundings(true);
@@ -1728,19 +1731,21 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 						boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 						killJob->internal = true;
 						killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Kill enemy");
 						npc->jobs.push_back(killJob);
 						return;
 					}
 				}
 			}
 		}
+
+		//Idlle npcs panic if they see fire
 		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
 			if (!surroundingsScanned) npc->ScanSurroundings();
 			surroundingsScanned = true;
 			if (npc->seenFire) {
 				npc->AddEffect(PANIC);
-				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL);
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL, "(FAIL)Seen fire");
 			}
 		}
 	}
