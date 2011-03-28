@@ -222,7 +222,8 @@ bool Game::LoadGame(const std::string& filename) {
 		}
 		
 		Game::Inst()->TranslateContainerListeners();
-		
+		Game::Inst()->Pause();
+
 		return true;
 	} catch (const std::exception& e) {
 		LOG("std::exception while trying to load the game: " << e.what());
