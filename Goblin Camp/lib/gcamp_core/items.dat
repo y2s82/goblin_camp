@@ -711,6 +711,7 @@ item_type "Water" {
 	graphic = 33
 	color = "0,100,250"
 	nutrition = 5.0
+	multiplier = 20
 }
 
 
