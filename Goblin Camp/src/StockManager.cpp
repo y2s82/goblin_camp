@@ -30,6 +30,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 #include "Map.hpp"
 #include "Game.hpp"
+#include "Camp.hpp"
+#include "Job.hpp"
+#include "Stockpile.hpp"
 
 #ifdef DEBUG
 #include <iostream>
@@ -71,9 +74,11 @@ void StockManager::Init() {
 		bool producerFound = false;
 
 		//Bog iron is a hard coded special case, for now. TODO: Think about this
-		if (boost::iequals(Item::Presets[item].name, "Bog iron")) {
+		if (boost::iequals(Item::Presets[item].name, "Bog iron") ||
+			boost::iequals(Item::Presets[item].name, "Water")) {
 			producables.insert(item);
-			fromEarth.insert(item);
+			if (boost::iequals(Item::Presets[item].name, "Bog iron"))
+				fromEarth.insert(item);
 			producerFound = true;
 			UpdateQuantity(item, 0);
 		}
@@ -94,16 +99,10 @@ void StockManager::Init() {
 		}
 
 		if (!producerFound) {//Haven't found a producer, so check NatureObjects if a tree has this item as a component
-#ifdef DEBUG
-			std::cout<<"Checking trees for production of "<<Item::Presets[item].name<<"\n";
-#endif
 			for (unsigned int natObj = 0; natObj < NatureObject::Presets.size(); ++natObj) {
 				if (NatureObject::Presets[natObj].tree) {
 					for (std::list<ItemType>::iterator compi = NatureObject::Presets[natObj].components.begin(); 
 						compi != NatureObject::Presets[natObj].components.end(); ++compi) {
-#ifdef DEBUG
-							std::cout<<"Is "<<Item::ItemTypeToString(*compi)<<" = "<<Item::Presets[item].name<<"\n";
-#endif
 							if (*compi == item) {
 								producables.insert(item);
 								fromTrees.insert(item);
@@ -112,17 +111,11 @@ void StockManager::Init() {
 					}
 				}
 			}
-#ifdef DEBUG
-			std::cout<<"No producer found for "<<Item::Presets[item].name<<"\n";
-#endif
 			//Add items that aren't produced, but are still handy to see on the stockmanager screen
 			if (Item::Presets[item].categories.find(Item::StringToItemCategory("Seed")) != Item::Presets[item].categories.end() ||
 				Item::Presets[item].categories.find(Item::StringToItemCategory("Food")) != Item::Presets[item].categories.end() ||
 				Item::Presets[item].categories.find(Item::StringToItemCategory("Fiber")) != Item::Presets[item].categories.end() ||
 				Item::Presets[item].categories.find(Item::StringToItemCategory("Bone")) != Item::Presets[item].categories.end()) {
-#ifdef DEBUG
-					std::cout<<"Adding "<<Item::Presets[item].name<<" to stocks anyway\n";
-#endif
 					producables.insert(item);
 			}
 		}
@@ -183,6 +176,23 @@ void StockManager::Update() {
 							--difference;
 						}
 					}
+				} else if (*prodi == Item::StringToItemType("Water")) {
+					difference -= barrelWaterJobs.size();
+					if (difference > 0) {
+						Coordinate waterLocation = Game::Inst()->FindWater(Camp::Inst()->Center());
+						if (waterLocation.X() >= 0 && waterLocation.Y() >= 0) {
+							boost::shared_ptr<Job> barrelWaterJob(new Job("Fill barrel", MED, 0, true));
+							barrelWaterJob->tasks.push_back(Task(FIND, waterLocation, boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
+							barrelWaterJob->tasks.push_back(Task(MOVE));
+							barrelWaterJob->tasks.push_back(Task(TAKE));
+							barrelWaterJob->tasks.push_back(Task(FORGET));
+							barrelWaterJob->tasks.push_back(Task(MOVEADJACENT, waterLocation));
+							barrelWaterJob->tasks.push_back(Task(FILL, waterLocation));
+							barrelWaterJob->tasks.push_back(Task(STOCKPILEITEM));
+							JobManager::Inst()->AddJob(barrelWaterJob);
+							barrelWaterJobs.push_back(barrelWaterJob);
+						}
+					}
 				} else {
 					//First get all the workshops capable of producing this product
 					std::pair<std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator,
@@ -240,6 +250,13 @@ void StockManager::Update() {
 		}
 	}
 
+	for (std::list<boost::weak_ptr<Job> >::iterator jobi = barrelWaterJobs.begin(); jobi != barrelWaterJobs.end();) {
+		if (!jobi->lock()) {
+			jobi = barrelWaterJobs.erase(jobi);
+		} else {
+			++jobi;
+		}
+	}
 }
 
 void StockManager::UpdateQuantity(ItemType type, int quantity) {
@@ -345,6 +362,7 @@ void StockManager::Reset() {
 	designatedTrees.clear();
 	treeFellingJobs.clear();
 	designatedBog.clear();
+	barrelWaterJobs.clear();
 	Init();
 }
 
@@ -361,6 +379,7 @@ void StockManager::save(OutputArchive& ar, const unsigned int version) const {
 	ar & treeFellingJobs;
 	ar & designatedBog;
 	ar & bogIronJobs;
+	ar & barrelWaterJobs;
 }
 
 void StockManager::load(InputArchive& ar, const unsigned int version) {
@@ -376,4 +395,7 @@ void StockManager::load(InputArchive& ar, const unsigned int version) {
 	ar & treeFellingJobs;
 	ar & designatedBog;
 	ar & bogIronJobs;
+	if (version >= 1) {
+		ar & barrelWaterJobs;
+	}
 }

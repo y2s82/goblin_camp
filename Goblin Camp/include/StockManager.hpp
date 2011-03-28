@@ -48,6 +48,7 @@ class StockManager {
 	std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > > treeFellingJobs;
 	std::set<Coordinate> designatedBog;
 	std::list<boost::weak_ptr<Job> > bogIronJobs;
+	std::list<boost::weak_ptr<Job> > barrelWaterJobs;
 public:
 	static StockManager* Inst();
 	~StockManager(void);
@@ -68,4 +69,4 @@ public:
 	void UpdateBogDesignations(Coordinate, bool add);
 };
 
-BOOST_CLASS_VERSION(StockManager, 0)
+BOOST_CLASS_VERSION(StockManager, 1)
