@@ -1522,13 +1522,10 @@ void NPC::DropItem(boost::weak_ptr<Item> item) {
 		item.lock()->PutInContainer(boost::weak_ptr<Item>());
 		bulk -= item.lock()->GetBulk();
 
-		//If the item is a container with water/filth in it, spill it on the ground
+		//If the item is a container with filth in it, spill it on the ground
 		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
 			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item.lock()));
-			if (cont->ContainsWater() > 0) {
-				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
-				cont->RemoveWater(cont->ContainsWater());
-			} else if (cont->ContainsFilth() > 0) {
+			if (cont->ContainsFilth() > 0) {
 				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
 				cont->RemoveFilth(cont->ContainsFilth());
 			}
