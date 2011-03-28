@@ -63,13 +63,15 @@ bool Container::AddItem(boost::weak_ptr<Item> witem) {
 }
 
 void Container::RemoveItem(boost::weak_ptr<Item> item) {
-	items.erase(item);
-	if (item.lock()) {
-		capacity += std::max(item.lock()->GetBulk(), 1);
-		if (item.lock()->Type() == Item::StringToItemType("water")) --water;
-	}
-	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
-		(*it)->ItemRemoved(item);
+	if (items.find(item) != items.end()) {
+		items.erase(item);
+		if (item.lock()) {
+			capacity += std::max(item.lock()->GetBulk(), 1);
+			if (item.lock()->Type() == Item::StringToItemType("water")) --water;
+		}
+		for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
+			(*it)->ItemRemoved(item);
+		}
 	}
 }
 
@@ -155,12 +157,11 @@ void Container::RemoveWater(int amount) {
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 			boost::shared_ptr<Item> waterItem = itemi->lock();
 			if (waterItem && waterItem->Type() == Item::StringToItemType("water")) {
-				RemoveItem(waterItem);
+				Game::Inst()->RemoveItem(waterItem);
 				break;
 			}
 		}
 	}
-	if (water < 0) water = 0;
 }
 
 int Container::ContainsWater() { return water; }
