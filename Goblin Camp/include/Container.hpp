@@ -69,6 +69,8 @@ public:
 	int ContainsFilth();
 	void Draw(Coordinate, TCODConsole*);
 	int GetReservedSpace();
+	virtual void Position(Coordinate);
+	virtual Coordinate Position();
 };
 
 BOOST_CLASS_VERSION(::Container, 0)
