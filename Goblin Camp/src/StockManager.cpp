@@ -182,6 +182,7 @@ void StockManager::Update() {
 						Coordinate waterLocation = Game::Inst()->FindWater(Camp::Inst()->Center());
 						if (waterLocation.X() >= 0 && waterLocation.Y() >= 0) {
 							boost::shared_ptr<Job> barrelWaterJob(new Job("Fill barrel", MED, 0, true));
+							barrelWaterJob->DisregardTerritory();
 							barrelWaterJob->tasks.push_back(Task(FIND, waterLocation, boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
 							barrelWaterJob->tasks.push_back(Task(MOVE));
 							barrelWaterJob->tasks.push_back(Task(TAKE));
