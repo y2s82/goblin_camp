@@ -164,8 +164,6 @@ void Camp::ConstructionBuilt(int type) {
 	if (Construction::Presets[type].tags[FARMPLOT]) ++farmplots;
 }
 
-void Camp::ItemProduced() { ++production; }
-
 void Camp::DisableAutoTerritory() { autoTerritory = false; }
 void Camp::ToggleAutoTerritory() {
 	autoTerritory = !autoTerritory;
