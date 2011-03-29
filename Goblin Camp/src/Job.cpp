@@ -354,6 +354,7 @@ void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar & internal;
 	ar & markedGround;
 	ar & obeyTerritory;
+	ar & statusEffects;
 }
 
 void Job::load(InputArchive& ar, const unsigned int version) {
@@ -392,5 +393,8 @@ void Job::load(InputArchive& ar, const unsigned int version) {
 	ar & internal;
 	ar & markedGround;
 	ar & obeyTerritory;
+	if (version >= 1) {
+		ar & statusEffects;
+	}
 }
 
