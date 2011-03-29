@@ -225,6 +225,7 @@ int Construction::Build() {
 		if (!HasTag(CENTERSCAMP)) Camp::Inst()->UpdateCenter(Center(), true);
 		else Camp::Inst()->LockCenter(Center());
 		Camp::Inst()->ConstructionBuilt(type);
+		Stats::Inst()->ConstructionBuilt(Construction::Presets[type].name);
 
 		Script::Event::BuildingCreated(boost::static_pointer_cast<Construction>(shared_from_this()), x, y);
 	}
