@@ -66,7 +66,7 @@ private:
 	bool textMode;
 	std::string inputString;
 	int inputStringLimit;
-	std::list<std::string> extraTooltips;
+	std::string extraTooltip;
 
 	boost::weak_ptr<Entity> GetEntity(Coordinate);
 	int DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut);
@@ -119,5 +119,5 @@ public:
 	bool ShiftPressed();
 	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
-	void AddTooltip(std::string);
+	void SetExtraTooltip(std::string);
 };
