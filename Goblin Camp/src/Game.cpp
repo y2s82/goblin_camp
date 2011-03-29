@@ -1618,11 +1618,17 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 
 				default: break;
 				}
-				while (flowTo == pos || (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
-					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height())) {
+
+				while (flowTo == pos) {
 						flowTo = Coordinate(pos.X() + Random::Generate(-diff, diff), pos.Y() + Random::Generate(-diff, diff));
 				}
 				pos = flowTo;
+				
+				//If the filth flows off-map just stop creating more
+				if (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
+					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height()) {
+						return;
+				 }
 			}
 		}
 	}
