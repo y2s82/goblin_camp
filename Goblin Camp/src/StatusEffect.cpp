@@ -247,6 +247,14 @@ graphic(g),
 		statChanges[DODGE] = 0.2;
 		break;
 
+	case BRAVE:
+		name = "Brave";
+		cooldown = UPDATES_PER_SECOND;
+		graphic = 30;
+		color = TCODColor(0,255,255);
+		negative = false;
+		break;
+
 	default: break;
 	}
 	cooldownDefault = cooldown;
@@ -270,6 +278,7 @@ bool StatusEffect::IsApplyableStatusEffect(StatusEffectType type) {
 	case HELPLESS: 
 	case HIGHGROUND:
 	case TRIPPED:
+	case BRAVE:
 		return true;
 	default: 
 		return false;
@@ -325,6 +334,8 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return HIGHGROUND;
 	} else if (boost::iequals(str, "tripped")) {
 		return TRIPPED;
+	} else if (boost::iequals(str, "brave")) {
+		return BRAVE;
 	}
 	return HUNGER;
 }
@@ -355,6 +366,7 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case HELPLESS: return "helpless";
 	case HIGHGROUND: return "highground";
 	case TRIPPED: return "tripped";
+	case BRAVE: return "brave";
 	default: return "";
 	}
 }
