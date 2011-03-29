@@ -38,6 +38,12 @@ unsigned Stats::GetFilthFlownOff() { return filthOutsideMap; }
 void Stats::ItemBurned(unsigned amount) { itemsBurned += amount; }
 unsigned Stats::GetItemsBurned() { return itemsBurned; }
 
+void Stats::ConstructionBuilt(std::string name) { constructionsBuilt[name] += 1; ++constructions; }
+unsigned Stats::GetConstructionsBuilt() { return constructions; }
+
+void Stats::ItemBuilt(std::string name) { itemsBuilt[name] += 1; ++production; }
+unsigned Stats::GetItemsBuilt() { return production; }
+
 namespace {
 	template<typename A, typename B>
 	void SerializeUnorderedMap(const boost::unordered_map<A,B> &map, OutputArchive& ar) {
