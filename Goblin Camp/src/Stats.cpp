@@ -17,7 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Stats.hpp"
 
-Stats::Stats() : points(0), itemsBurned(0), filthCreated(0), filthOutsideMap(0) {}
+Stats::Stats() : points(0), itemsBurned(0), filthCreated(0), filthOutsideMap(0),
+constructions(0), production(0) {}
 
 Stats* Stats::instance = 0;
 
