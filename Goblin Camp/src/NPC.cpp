@@ -443,6 +443,14 @@ void NPC::Update() {
 }
 
 void NPC::UpdateStatusEffects() {
+	//Add job related effects
+	if (!jobs.empty()) {
+		for (std::list<StatusEffectType>::iterator stati = jobs.front()->statusEffects.begin();
+			stati != jobs.front()->statusEffects.end(); ++stati) {
+				AddEffect(*stati);
+		}
+	}
+
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		effectiveStats[i] = baseStats[i];
 	}
