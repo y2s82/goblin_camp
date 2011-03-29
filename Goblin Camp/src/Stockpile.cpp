@@ -47,6 +47,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
 	Camp::Inst()->ConstructionBuilt(type);
+	Stats::Inst()->ConstructionBuilt(Construction::Presets[type].name);
 }
 
 Stockpile::~Stockpile() {
