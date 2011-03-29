@@ -2245,20 +2245,33 @@ namespace {
 }
 
 void Game::DisplayStats() {
-	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 23);
-	Dialog *statDialog = new Dialog(contents, "Statistics", 50, 20);
-	Frame *filthFrame = new Frame("Filth", std::vector<Drawable *>(), 1, 1, 24, 18);
-	filthFrame->AddComponent(new Label((boost::format("created:       %d") % Stats::Inst()->GetFilthCreated()).str(),1,1,TCOD_LEFT));
-	filthFrame->AddComponent(new Label((boost::format("flown off-map: %d") % Stats::Inst()->GetFilthFlownOff()).str(),1,2,TCOD_LEFT));
+	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 77, 23);
+	Dialog *statDialog = new Dialog(contents, "Statistics", 77, 23);
+
+	Frame *filthFrame = new Frame("Filth", std::vector<Drawable *>(), 1, 1, 25, 4);
+	filthFrame->AddComponent(new Label((boost::format("created: %d") % Stats::Inst()->GetFilthCreated()).str(),1,1,TCOD_LEFT));
+	filthFrame->AddComponent(new Label((boost::format("off-map: %d") % Stats::Inst()->GetFilthFlownOff()).str(),1,2,TCOD_LEFT));
 	contents->AddComponent(filthFrame);
 
-	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 25, 1, 24, 18);
-	deathFrame->AddComponent(new ScrollPanel(0, 1, 22, 18,
+	Frame *productionFrame = new Frame("Production", std::vector<Drawable*>(), 26, 1, 25, 4);
+	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,1,TCOD_LEFT));
+	productionFrame->AddComponent(new Label((boost::format("        items: %d") % Stats::Inst()->GetItemsBuilt()).str(),1,2,TCOD_LEFT));
+	productionFrame->AddComponent(new ScrollPanel(1, 1, 23, 16,
+		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
+		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+	productionFrame->AddComponent(new ScrollPanel(1, 1, 23, 16,
+		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
+		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+	contents->AddComponent(productionFrame);
+
+
+	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 51, 1, 25, 18);
+	deathFrame->AddComponent(new ScrollPanel(1, 1, 23, 16,
 		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
 		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
 	contents->AddComponent(deathFrame);
 
-	Button *okButton = new Button("OK", NULL, 20, 20, 10, 'o', true);
+	Button *okButton = new Button("OK", NULL, 30, 19, 10, 'o', true);
 	contents->AddComponent(okButton);
 
 	statDialog->ShowModal();
