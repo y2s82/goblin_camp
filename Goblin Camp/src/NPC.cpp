@@ -1691,13 +1691,16 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	bool surroundingsScanned = false;
 
-	//If carrying a bucket and adjacent to fire, dump it on it immediately
-	if (npc->Carrying().lock() && npc->Carrying().lock()->IsCategory(Item::StringToItemCategory("bucket"))) {
-		npc->ScanSurroundings(true);
-		surroundingsScanned = true;
-		if (npc->seenFire && Game::Inst()->Adjacent(npc->threatLocation, npc->Position())) {
-			npc->DumpContainer(npc->threatLocation);
-			npc->TaskFinished(TASKFAILNONFATAL);
+	//If carrying a container and adjacent to fire, dump it on it immediately
+	if (boost::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
+		if (carriedItem->IsCategory(Item::StringToItemCategory("bucket")) ||
+			carriedItem->IsCategory(Item::StringToItemCategory("container"))) {
+				npc->ScanSurroundings(true);
+				surroundingsScanned = true;
+				if (npc->seenFire && Game::Inst()->Adjacent(npc->threatLocation, npc->Position())) {
+					npc->DumpContainer(npc->threatLocation);
+					npc->TaskFinished(TASKFAILNONFATAL);
+				}
 		}
 	}
 
@@ -1824,9 +1827,9 @@ void NPC::AddEffect(StatusEffectType effect) {
 }
 
 void NPC::AddEffect(StatusEffect effect) {
-	//BRAVE stops the npc from panicking
-	if (effect.type == PANIC && HasEffect(BRAVE)) return;
-	if (effect.type == BRAVE && HasEffect(PANIC)) RemoveEffect(PANIC);
+	if (effect.type == PANIC && HasEffect(BRAVE)) return; //BRAVE prevents PANIC
+	if (effect.type == BRAVE && HasTrait(CHICKENHEART)) return; //CHICKENHEARTs can't be BRAVE
+	if (effect.type == BRAVE && HasEffect(PANIC)) RemoveEffect(PANIC); //Becoming BRAVE stops PANIC
 
 	if (effect.type == FLYING) isFlying = true;
 
@@ -2648,9 +2651,11 @@ void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
 
 void NPC::DumpContainer(Coordinate location) {
 	boost::shared_ptr<Container> sourceContainer;
-	if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+	if (carried.lock() && (carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
+		carried.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
 		sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
-	} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+	} else if (mainHand.lock() && (mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
+		mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
 		sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
 	}
 
