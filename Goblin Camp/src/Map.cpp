@@ -618,8 +618,8 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 		for (int y = current.Y()-1; y <= current.Y()+1; ++y) {
 			for (int x = current.X()-1; x <= current.X()+1; ++x) {
-				if (x > 0 && x < Width() &&
-					y > 0 && y < Height()) {
+				if (x >= 0 && x < Width() &&
+					y >= 0 && y < Height()) {
 						if (touched.find(Coordinate(x,y)) == touched.end() && tileMap[x][y].water) {
 							int distance = Distance(beginning, Coordinate(x,y));
 							touched.insert(Coordinate(x,y));
