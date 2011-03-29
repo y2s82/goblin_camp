@@ -1820,20 +1820,14 @@ void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::AddEffect(StatusEffectType effect) {
-	if (effect == FLYING) isFlying = true;
-
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
-		if (statusEffectI->type == effect) {
-			statusEffectI->cooldown = statusEffectI->cooldownDefault;
-			return;
-		}
-	}
-
-	statusEffects.push_back(StatusEffect(effect));
-	statusEffectsChanged = true;
+	AddEffect(StatusEffect(effect));
 }
 
 void NPC::AddEffect(StatusEffect effect) {
+	//BRAVE stops the npc from panicking
+	if (effect.type == PANIC && HasEffect(BRAVE)) return;
+	if (effect.type == BRAVE && HasEffect(PANIC)) RemoveEffect(PANIC);
+
 	if (effect.type == FLYING) isFlying = true;
 
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
