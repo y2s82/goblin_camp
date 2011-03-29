@@ -285,6 +285,8 @@ Menu* Menu::DevMenu() {
 
 		devMenu->AddChoice(MenuChoice("Normal weather", boost::bind(&Weather::ChangeWeather, Map::Inst()->weather, NORMALWEATHER)));
 		devMenu->AddChoice(MenuChoice("Rain", boost::bind(&Weather::ChangeWeather, Map::Inst()->weather, RAIN)));	
+
+		devMenu->AddChoice(MenuChoice("Stats", boost::bind(&Game::DisplayStats, Game::Inst())));
 	}
 	return devMenu;
 }
