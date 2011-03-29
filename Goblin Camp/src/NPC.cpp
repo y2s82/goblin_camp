@@ -1750,8 +1750,8 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			}
 		}
 
-		//Idlle npcs panic if they see fire
-		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
+		//Npcs without BRAVE panic if they see fire
+		if (!npc->HasEffect(BRAVE)) {
 			if (!surroundingsScanned) npc->ScanSurroundings();
 			surroundingsScanned = true;
 			if (npc->seenFire) {
