@@ -137,19 +137,6 @@ bool Job::ParentCompleted() {
 	return parent.lock()->Completed();
 }
 
-boost::shared_ptr<Job> Job::MoveJob(Coordinate tar) {
-	boost::shared_ptr<Job> moveJob(new Job("Move"));
-	moveJob->tasks.push_back(Task(MOVE, tar));
-	return moveJob;
-}
-
-boost::shared_ptr<Job> Job::BuildJob(boost::weak_ptr<Construction> construct) {
-	boost::shared_ptr<Job> buildJob(new Job("Build"));
-	buildJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(construct.lock()->X(),construct.lock()->Y()), construct));
-	buildJob->tasks.push_back(Task(BUILD, Coordinate(construct.lock()->X(),construct.lock()->Y()), construct));
-	return buildJob;
-}
-
 void Job::ReserveEntity(boost::weak_ptr<Entity> entity) {
 	if (entity.lock()) {
 		reservedEntities.push_back(entity);
