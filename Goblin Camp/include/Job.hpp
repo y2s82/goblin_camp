@@ -182,6 +182,8 @@ public:
 	void AllowFire();
 	bool InvalidFireAllowance();
 
+	std::list<StatusEffectType> statusEffects;
+	
 	static void CreatePourWaterJob(boost::shared_ptr<Job>, Coordinate);
 };
 
