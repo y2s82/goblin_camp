@@ -29,6 +29,8 @@ class Stats {
 	unsigned itemsBurned;
 	unsigned filthCreated;
 	unsigned filthOutsideMap;
+	unsigned constructions;
+	unsigned production;
 public:
 	static Stats* Inst();
 
@@ -43,7 +45,12 @@ public:
 
 	boost::unordered_map<std::string, unsigned> deaths;
 	boost::unordered_map<std::string, unsigned> constructionsBuilt;
+	void ConstructionBuilt(std::string);
+	unsigned GetConstructionsBuilt();
+
 	boost::unordered_map<std::string, unsigned> itemsBuilt;
+	void ItemBuilt(std::string);
+	unsigned GetItemsBuilt();
 
 	void ItemBurned(unsigned amount=1);
 	unsigned GetItemsBurned();
