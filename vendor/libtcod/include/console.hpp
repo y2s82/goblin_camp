@@ -1071,6 +1071,11 @@ public :
 	int getChar(int x, int y) const;
 
 	/**
+	Internal character code for rendering
+	*/
+	int getCharCode(int x, int y) const;
+
+	/**
 	@PageName console_fading
 	@PageTitle Screen fading functions
 	@PageFather console_draw

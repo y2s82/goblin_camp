@@ -20,7 +20,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Farmplot.hpp"
 #include "Door.hpp"
 #include "SpawningPool.hpp"
-#include "Logger.hpp"
 
 ConstructionSprite::ConstructionSprite()
 	: sprites(), 
@@ -31,17 +30,17 @@ ConstructionSprite::ConstructionSprite()
 
 ConstructionSprite::~ConstructionSprite() {}
 
-void ConstructionSprite::Draw(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::Draw(int screenX, int screenY, const Coordinate& internalPos) const {
 	if (IsValid()) {
 		int xOffset = internalPos.X() % width;
 		int yOffset = internalPos.Y() % (sprites.size() / width);
 
 		int graphicIndex = xOffset + width * yOffset;
-		sprites.at(graphicIndex).Draw(dst, dstRect);
+		sprites.at(graphicIndex).Draw(screenX, screenY);
 	}
 }
 
-void ConstructionSprite::DrawUnderConstruction(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::DrawUnderConstruction(int screenX, int screenY, const Coordinate& internalPos) const {
 	if (underconstructionSprites.size() > 0)
 	{
 		if (!IsConnectionMap() && underconstructionSprites.size() == sprites.size() && IsValid()) {
@@ -49,14 +48,14 @@ void ConstructionSprite::DrawUnderConstruction(const Coordinate& internalPos, SD
 			int yOffset = internalPos.Y() % (sprites.size() / width);
 
 			int graphicIndex = xOffset + width * yOffset;
-			underconstructionSprites.at(graphicIndex).Draw(dst, dstRect);
+			underconstructionSprites.at(graphicIndex).Draw(screenX, screenY);
 		} else {
-			underconstructionSprites.at(0).Draw(dst, dstRect);
+			underconstructionSprites.at(0).Draw(screenX, screenY);
 		}
 	}
 }
 
-void ConstructionSprite::DrawUnreadyTrap(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::DrawUnreadyTrap(int screenX, int screenY, const Coordinate& internalPos) const {
 	if (unreadyTrapSprites.size() > 0)
 	{
 		if (!IsConnectionMap() && unreadyTrapSprites.size() == sprites.size() && IsValid()) {
@@ -64,64 +63,64 @@ void ConstructionSprite::DrawUnreadyTrap(const Coordinate& internalPos, SDL_Surf
 			int yOffset = internalPos.Y() % (sprites.size() / width);
 
 			int graphicIndex = xOffset + width * yOffset;
-			unreadyTrapSprites.at(graphicIndex).Draw(dst, dstRect);
+			unreadyTrapSprites.at(graphicIndex).Draw(screenX, screenY);
 		} else {
-			unreadyTrapSprites.at(0).Draw(dst, dstRect);
+			unreadyTrapSprites.at(0).Draw(screenX, screenY);
 		}
 	} else { 
-		Draw(internalPos, dst, dstRect);
+		Draw(screenX, screenY, internalPos);
 	}
 }
 
-void ConstructionSprite::DrawOpen(const Coordinate& internalPos, SDL_Surface * dst, SDL_Rect * dstRect) const {
+void ConstructionSprite::DrawOpen(int screenX, int screenY, const Coordinate& internalPos) const {
 	if (openSprite.Exists()) {
-		openSprite.Draw(dst, dstRect);
+		openSprite.Draw(screenX, screenY);
 	} else {
-		Draw(internalPos, dst, dstRect);
+		Draw(screenX, screenY, internalPos);
 	}
 }
 
-void ConstructionSprite::Draw(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::Draw(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
 	if (IsValid() && IsConnectionMap()) {
-		sprites[0].Draw(connected, dst, dstRect);
+		sprites[0].Draw(screenX, screenY, connected);
 	}
 }
 
-void ConstructionSprite::DrawUnderConstruction(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::DrawUnderConstruction(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
 	if (underconstructionSprites.size() > 0) {
-		underconstructionSprites[0].Draw(connected, dst, dstRect);
+		underconstructionSprites[0].Draw(screenX, screenY, connected);
 	}
 }
 
-void ConstructionSprite::DrawUnreadyTrap(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::DrawUnreadyTrap(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
 	if (unreadyTrapSprites.size() > 0) {
-		unreadyTrapSprites[0].Draw(connected, dst, dstRect);
+		unreadyTrapSprites[0].Draw(screenX, screenY, connected);
 	} else {
-		Draw(connected, dst, dstRect);
+		Draw(screenX, screenY, connected);
 	}
 }
 
-void ConstructionSprite::DrawOpen(Sprite::ConnectedFunction connected, SDL_Surface * dst, SDL_Rect *dstRect) const {
+void ConstructionSprite::DrawOpen(int screenX, int screenY, Sprite::ConnectedFunction connected) const {
 	if (openSprite.Exists()) {
-		openSprite.Draw(dst, dstRect);
+		openSprite.Draw(screenX, screenY);
 	} else {
-		Draw(connected, dst, dstRect);
+		Draw(screenX, screenY, connected);
 	}
 }
 
-void ConstructionSprite::AddSprite(const Sprite& sprite) {
+void ConstructionSprite::AddSprite(Sprite_ptr sprite) {
 	sprites.push_back(sprite);
 }
 
-void ConstructionSprite::AddUnderConstructionSprite(const Sprite& sprite) {
+void ConstructionSprite::AddUnderConstructionSprite(Sprite_ptr sprite) {
 	underconstructionSprites.push_back(sprite);
 }
 
-void ConstructionSprite::AddUnreadyTrapSprite(const Sprite& sprite) {
+void ConstructionSprite::AddUnreadyTrapSprite(Sprite_ptr sprite) {
 	unreadyTrapSprites.push_back(sprite);
 }
 
-void ConstructionSprite::SetOpenSprite(const Sprite& sprite) {
+void ConstructionSprite::SetOpenSprite(Sprite_ptr sprite) {
 	openSprite = sprite;
 }
 
@@ -139,83 +138,4 @@ bool ConstructionSprite::IsConnectionMap() const {
 
 bool ConstructionSprite::HasUnderConstructionSprites() const {
 	return (underconstructionSprites.size() > 0);
-}
-
-ConstructionSpriteFactory::ConstructionSpriteFactory() 
-	: spriteIndices(),
-	  underConstructionSpriteIndices(),
-	  unreadyTrapSpriteIndices(),
-	  openDoorSprite(),
-	  width(1),
-	  frameRate(15),
-	  frameCount(1),
-	  connectionMapped(false)
-{}
-
-ConstructionSpriteFactory::~ConstructionSpriteFactory() {}
-
-void ConstructionSpriteFactory::Reset() {
-	spriteIndices.clear();
-	underConstructionSpriteIndices.clear();
-	unreadyTrapSpriteIndices.clear();
-	openDoorSprite = Sprite();
-	width = 1;
-	frameRate = 15;
-	frameCount = 1;
-	connectionMapped = false;
-}
-
-ConstructionSprite ConstructionSpriteFactory::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	ConstructionSprite spriteSet = ConstructionSprite();
-	if (connectionMapped) {
-		if (spriteIndices.size() > 0) {
-			spriteSet.AddSprite(Sprite(currentTexture, spriteIndices.begin(), spriteIndices.end(), true, frameRate, frameCount));
-		}
-		if (underConstructionSpriteIndices.size() > 0) {
-			spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, underConstructionSpriteIndices.begin(), underConstructionSpriteIndices.end(), true));
-		}
-		if (unreadyTrapSpriteIndices.size() > 0) {
-			spriteSet.AddUnreadyTrapSprite(Sprite(currentTexture, unreadyTrapSpriteIndices.begin(), unreadyTrapSpriteIndices.end(), true));
-		}
-	} else {
-		int numSprites = spriteIndices.size() / frameCount;
-		for (int sprite = 0; sprite < numSprites; ++sprite)
-		{
-			std::vector<int> frames;
-			for (int frame = 0; frame < frameCount; ++frame) {
-				frames.push_back(spriteIndices.at(sprite + frame * numSprites));
-			}
-			spriteSet.AddSprite(Sprite(currentTexture, frames.begin(), frames.end(), false, frameRate));
-		}
-		
-		for (std::vector<int>::iterator iter = underConstructionSpriteIndices.begin(); iter != underConstructionSpriteIndices.end(); ++iter) {
-			spriteSet.AddUnderConstructionSprite(Sprite(currentTexture, *iter));
-		}
-		for (std::vector<int>::iterator iter = unreadyTrapSpriteIndices.begin(); iter != unreadyTrapSpriteIndices.end(); ++iter) {
-			spriteSet.AddUnreadyTrapSprite(Sprite(currentTexture, *iter));
-		}
-		spriteSet.SetWidth(width);
-	}
-	spriteSet.SetOpenSprite(openDoorSprite);
-	return spriteSet;
-}
-
-void ConstructionSpriteFactory::SetOpenDoorSprite(const Sprite& sprite) {
-	openDoorSprite = sprite;
-}
-
-void ConstructionSpriteFactory::SetWidth(int w) {
-	width = w;
-}
-
-void ConstructionSpriteFactory::SetFPS(int fps) {
-	frameRate = fps;
-}
-
-void ConstructionSpriteFactory::SetFrameCount(int frames) {
-	frameCount = frames;
-}
-
-void ConstructionSpriteFactory::SetConnectionMap(bool isConnectionMap) {
-	connectionMapped = isConnectionMap;
 }

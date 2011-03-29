@@ -87,6 +87,7 @@ TCODLIB_API TCOD_color_t TCOD_console_get_default_foreground(TCOD_console_t con)
 TCODLIB_API TCOD_color_t TCOD_console_get_char_background(TCOD_console_t con,int x, int y);
 TCODLIB_API TCOD_color_t TCOD_console_get_char_foreground(TCOD_console_t con,int x, int y);
 TCODLIB_API int TCOD_console_get_char(TCOD_console_t con,int x, int y);
+TCODLIB_API int TCOD_console_get_char_code(TCOD_console_t con,int x, int y);
 
 TCODLIB_API void TCOD_console_set_fade(uint8 val, TCOD_color_t fade);
 TCODLIB_API uint8 TCOD_console_get_fade();
