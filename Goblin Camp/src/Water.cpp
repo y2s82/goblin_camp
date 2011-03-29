@@ -28,6 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "GCamp.hpp"
 #include "Coordinate.hpp"
+#include "Stats.hpp"
 
 WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 	x(vx), y(vy), depth(vdepth),
@@ -122,8 +123,8 @@ void WaterNode::Update() {
 			if (flowTarget.X() < 0 || flowTarget.X() >= Map::Inst()->Width() ||
 				flowTarget.Y() < 0 || flowTarget.Y() >= Map::Inst()->Height()) {
 					if (filth > 0) {
-						if (filth > 10) filth -= 10;
-						else filth = 0;
+						Stats::Inst()->FilthFlowsOffEdge(std::min(filth, 10));
+						filth -= std::min(filth, 10);
 					}
 					if (item) {
 						Game::Inst()->RemoveItem(item);
