@@ -56,7 +56,6 @@ public:
 	void UpdateTier();
 	std::string GetName();
 	void ConstructionBuilt(int type);
-	void ItemProduced();
 	void DisableAutoTerritory();
 	void ToggleAutoTerritory();
 	bool IsAutoTerritoryEnabled();
