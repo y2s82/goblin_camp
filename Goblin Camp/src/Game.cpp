@@ -56,6 +56,10 @@ namespace py = boost::python;
 #include "Trap.hpp"
 #include "Faction.hpp"
 #include "data/Data.hpp"
+#include "Stats.hpp"
+#include "UI/Label.hpp"
+#include "UI/Button.hpp"
+#include "UI/ScrollPanel.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -976,7 +980,9 @@ void Game::Update() {
 
 	if (!gameOver && orcCount == 0 && goblinCount == 0) {
 		gameOver = true;
-		MessageBox::ShowMessageBox("All your orcs and goblins have died.", boost::bind(&Game::GameOver, Game::Inst()), "Main Menu", NULL, "Keep watching");
+		//Game over, display stats
+		DisplayStats();
+		MessageBox::ShowMessageBox("Do you wish to keep watching?", NULL, "Keep watching", boost::bind(&Game::GameOver, Game::Inst()), "Quit");
 	}
 
 	for (std::list<boost::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
@@ -1529,6 +1535,7 @@ void Game::CreateFilth(Coordinate pos) {
 }
 
 void Game::CreateFilth(Coordinate pos, int amount) {
+	Stats::Inst()->FilthCreated(amount);
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
 		int loops = -1;
 		while (amount > 0 && loops < 1000) {
@@ -1627,6 +1634,7 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 				//If the filth flows off-map just stop creating more
 				if (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
 					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height()) {
+						Stats::Inst()->FilthFlowsOffEdge(amount);
 						return;
 				 }
 			}
@@ -2228,6 +2236,32 @@ boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
 		}
 	}
 	return boost::weak_ptr<Construction>();
+}
+
+namespace {
+	void DrawText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
+		console->print(x, y, (boost::format("%s : %d") % text.first % text.second).str().c_str());
+	}
+}
+
+void Game::DisplayStats() {
+	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 23);
+	Dialog *statDialog = new Dialog(contents, "Statistics", 50, 20);
+	Frame *filthFrame = new Frame("Filth", std::vector<Drawable *>(), 1, 1, 24, 18);
+	filthFrame->AddComponent(new Label((boost::format("created:       %d") % Stats::Inst()->GetFilthCreated()).str(),1,1,TCOD_LEFT));
+	filthFrame->AddComponent(new Label((boost::format("flown off-map: %d") % Stats::Inst()->GetFilthFlownOff()).str(),1,2,TCOD_LEFT));
+	contents->AddComponent(filthFrame);
+
+	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 25, 1, 24, 18);
+	deathFrame->AddComponent(new ScrollPanel(0, 1, 22, 18,
+		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
+		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+	contents->AddComponent(deathFrame);
+
+	Button *okButton = new Button("OK", NULL, 20, 20, 10, 'o', true);
+	contents->AddComponent(okButton);
+
+	statDialog->ShowModal();
 }
 
 void Game::save(OutputArchive& ar, const unsigned int version) const  {

@@ -257,6 +257,8 @@ public:
 	std::list<boost::shared_ptr<Spell> > spellList;
 
 	int GetAge();
+
+	void DisplayStats();
 };
 
 BOOST_CLASS_VERSION(Game, 1)
