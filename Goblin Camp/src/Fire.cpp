@@ -24,6 +24,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Water.hpp"
 #include "SpawningPool.hpp"
 #include "Stockpile.hpp"
+#include "JobManager.hpp"
+#include "Job.hpp"
 
 FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 	temperature(vtemp) {
@@ -33,7 +35,11 @@ FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 		graphic = Random::Generate(176,178);
 }
 
-FireNode::~FireNode() {}
+FireNode::~FireNode() {
+	if (waterJob.lock()) {
+		JobManager::Inst()->RemoveJob(waterJob);
+	}
+}
 
 Coordinate FireNode::GetPosition() { return Coordinate(x,y); }
 
@@ -188,6 +194,16 @@ void FireNode::Update() {
 					temperature += tree ? 500 : 100;
 			}
 
+			//Create pour water job here if in player territory
+			if (Map::Inst()->IsTerritory(x,y) && !waterJob.lock()) {
+				boost::shared_ptr<Job> pourWaterJob(new Job("Douse flames", HIGH));
+				Job::CreatePourWaterJob(pourWaterJob, GetPosition());
+				if (pourWaterJob) {
+					pourWaterJob->MarkGround(GetPosition());
+					waterJob = pourWaterJob;
+					JobManager::Inst()->AddJob(pourWaterJob);
+				}
+			}
 		}
 	}
 }
@@ -199,6 +215,7 @@ void FireNode::save(OutputArchive& ar, const unsigned int version) const {
 	ar & color.g;
 	ar & color.b;
 	ar & temperature;
+	ar & waterJob;
 }
 
 void FireNode::load(InputArchive& ar, const unsigned int version) {
@@ -208,4 +225,7 @@ void FireNode::load(InputArchive& ar, const unsigned int version) {
 	ar & color.g;
 	ar & color.b;
 	ar & temperature;
+	if (version >= 1) {
+		ar & waterJob;
+	}
 }

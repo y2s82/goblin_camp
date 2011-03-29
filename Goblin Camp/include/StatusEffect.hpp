@@ -64,6 +64,7 @@ enum StatusEffectType {
 	HELPLESS,
 	HIGHGROUND,
 	TRIPPED,
+	BRAVE,
 	STATUS_EFFECT_COUNT
 };
 

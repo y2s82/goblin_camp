@@ -443,6 +443,14 @@ void NPC::Update() {
 }
 
 void NPC::UpdateStatusEffects() {
+	//Add job related effects
+	if (!jobs.empty()) {
+		for (std::list<StatusEffectType>::iterator stati = jobs.front()->statusEffects.begin();
+			stati != jobs.front()->statusEffects.end(); ++stati) {
+				AddEffect(*stati);
+		}
+	}
+
 	for (int i = 0; i < STAT_COUNT; ++i) {
 		effectiveStats[i] = baseStats[i];
 	}
@@ -1683,13 +1691,16 @@ bool NPC::JobManagerFinder(boost::shared_ptr<NPC> npc) {
 void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 	bool surroundingsScanned = false;
 
-	//If carrying a bucket and adjacent to fire, dump it on it immediately
-	if (npc->Carrying().lock() && npc->Carrying().lock()->IsCategory(Item::StringToItemCategory("bucket"))) {
-		npc->ScanSurroundings(true);
-		surroundingsScanned = true;
-		if (npc->seenFire && Game::Inst()->Adjacent(npc->threatLocation, npc->Position())) {
-			npc->DumpContainer(npc->threatLocation);
-			npc->TaskFinished(TASKFAILNONFATAL);
+	//If carrying a container and adjacent to fire, dump it on it immediately
+	if (boost::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
+		if (carriedItem->IsCategory(Item::StringToItemCategory("bucket")) ||
+			carriedItem->IsCategory(Item::StringToItemCategory("container"))) {
+				npc->ScanSurroundings(true);
+				surroundingsScanned = true;
+				if (npc->seenFire && Game::Inst()->Adjacent(npc->threatLocation, npc->Position())) {
+					npc->DumpContainer(npc->threatLocation);
+					npc->TaskFinished(TASKFAILNONFATAL);
+				}
 		}
 	}
 
@@ -1697,8 +1708,9 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 		if (!surroundingsScanned) npc->ScanSurroundings();
 		surroundingsScanned = true;
 		
+		//NPCs with the CHICKENHEART trait panic more than usual if they see fire
 		if (npc->HasTrait(CHICKENHEART) && npc->seenFire && (npc->jobs.empty() || npc->jobs.front()->name != "Aaaaaaaah!!")) {
-			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Chickenheart");
 			boost::shared_ptr<Job> runAroundLikeAHeadlessChickenJob(new Job("Aaaaaaaah!!"));
 			for (int i = 0; i < 30; ++i)
 				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, npc->Position() + Coordinate(Random::Generate(-2, 2), Random::Generate(-2, 2))));
@@ -1708,16 +1720,18 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			return;
 		}
 
+		//Cowards panic if they see aggressive unfriendlies or their attacker
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			if ((!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction()) && npci->lock()->aggressive) || 
-				npci->lock() == npc->aggressor.lock() || 
-				(npc->seenFire && (npc->jobs.empty() || !boost::iequals(npc->jobs.front()->name,"Pour water")))) {
+				npci->lock() == npc->aggressor.lock()) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
-				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Enemy sighted");
 				npc->AddEffect(PANIC);
 			}
 		}
 	} else {
+
+		//Aggressive npcs attack unfriendlies
 		if (npc->aggressive) {
 			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
 				if (!surroundingsScanned) npc->ScanSurroundings(true);
@@ -1728,19 +1742,21 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 						boost::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
 						killJob->internal = true;
 						killJob->tasks.push_back(Task(KILL, npci->lock()->Position(), *npci));
-						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL);
+						while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Kill enemy");
 						npc->jobs.push_back(killJob);
 						return;
 					}
 				}
 			}
 		}
-		if (npc->jobs.empty() || npc->jobs.front()->name == "Idle") {
+
+		//Npcs without BRAVE panic if they see fire
+		if (!npc->HasEffect(BRAVE)) {
 			if (!surroundingsScanned) npc->ScanSurroundings();
 			surroundingsScanned = true;
 			if (npc->seenFire) {
 				npc->AddEffect(PANIC);
-				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL);
+				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILFATAL, "(FAIL)Seen fire");
 			}
 		}
 	}
@@ -1807,20 +1823,14 @@ void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 }
 
 void NPC::AddEffect(StatusEffectType effect) {
-	if (effect == FLYING) isFlying = true;
-
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
-		if (statusEffectI->type == effect) {
-			statusEffectI->cooldown = statusEffectI->cooldownDefault;
-			return;
-		}
-	}
-
-	statusEffects.push_back(StatusEffect(effect));
-	statusEffectsChanged = true;
+	AddEffect(StatusEffect(effect));
 }
 
 void NPC::AddEffect(StatusEffect effect) {
+	if (effect.type == PANIC && HasEffect(BRAVE)) return; //BRAVE prevents PANIC
+	if (effect.type == BRAVE && HasTrait(CHICKENHEART)) return; //CHICKENHEARTs can't be BRAVE
+	if (effect.type == BRAVE && HasEffect(PANIC)) RemoveEffect(PANIC); //Becoming BRAVE stops PANIC
+
 	if (effect.type == FLYING) isFlying = true;
 
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
@@ -2641,9 +2651,11 @@ void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
 
 void NPC::DumpContainer(Coordinate location) {
 	boost::shared_ptr<Container> sourceContainer;
-	if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+	if (carried.lock() && (carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
+		carried.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
 		sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
-	} else if (mainHand.lock() && mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket"))) {
+	} else if (mainHand.lock() && (mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
+		mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
 		sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
 	}
 

@@ -137,19 +137,6 @@ bool Job::ParentCompleted() {
 	return parent.lock()->Completed();
 }
 
-boost::shared_ptr<Job> Job::MoveJob(Coordinate tar) {
-	boost::shared_ptr<Job> moveJob(new Job("Move"));
-	moveJob->tasks.push_back(Task(MOVE, tar));
-	return moveJob;
-}
-
-boost::shared_ptr<Job> Job::BuildJob(boost::weak_ptr<Construction> construct) {
-	boost::shared_ptr<Job> buildJob(new Job("Build"));
-	buildJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(construct.lock()->X(),construct.lock()->Y()), construct));
-	buildJob->tasks.push_back(Task(BUILD, Coordinate(construct.lock()->X(),construct.lock()->Y()), construct));
-	return buildJob;
-}
-
 void Job::ReserveEntity(boost::weak_ptr<Entity> entity) {
 	if (entity.lock()) {
 		reservedEntities.push_back(entity);
@@ -288,6 +275,54 @@ bool Job::InvalidFireAllowance() {
 	return false;
 }
 
+void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
+	job->Attempts(1);
+
+	//First search for a container containing water
+	boost::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
+		location).lock();
+	Coordinate waterLocation = Game::Inst()->FindWater(location);
+
+	//If a water item exists, is closer and contained then use that
+	bool waterContainerFound = false;
+	if (waterItem) {
+		int distanceToWater = INT_MAX;
+		if (waterLocation.X() != -1) distanceToWater = Distance(location, waterLocation);
+		int distanceToItem = Distance(location, waterItem->Position());
+
+		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
+			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
+				//Reserve everything inside the container
+				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); 
+					itemi != container->end(); ++itemi) {
+						job->ReserveEntity(*itemi);
+				}
+				job->ReserveEntity(container);
+				job->tasks.push_back(Task(MOVE, container->Position()));
+				job->tasks.push_back(Task(TAKE, container->Position(), container));
+				waterContainerFound = true;
+		}
+	}
+
+	if (!waterContainerFound && waterLocation.X() != -1) {
+		job->SetRequiredTool(Item::StringToItemCategory("Bucket"));
+		job->tasks.push_back(Task(MOVEADJACENT, waterLocation));
+		job->tasks.push_back(Task(FILL, waterLocation));
+	}
+
+	if (waterContainerFound || waterLocation.X() != -1) {
+		job->tasks.push_back(Task(MOVEADJACENT, location));
+		job->tasks.push_back(Task(POUR, location));
+		if (waterContainerFound) job->tasks.push_back(Task(STOCKPILEITEM));
+		job->DisregardTerritory();
+		job->AllowFire();
+		job->statusEffects.push_back(BRAVE);
+	} else {
+		job.reset();
+	}
+}
+
 void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
@@ -320,6 +355,7 @@ void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar & internal;
 	ar & markedGround;
 	ar & obeyTerritory;
+	ar & statusEffects;
 }
 
 void Job::load(InputArchive& ar, const unsigned int version) {
@@ -358,5 +394,8 @@ void Job::load(InputArchive& ar, const unsigned int version) {
 	ar & internal;
 	ar & markedGround;
 	ar & obeyTerritory;
+	if (version >= 1) {
+		ar & statusEffects;
+	}
 }
 

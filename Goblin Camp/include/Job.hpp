@@ -130,9 +130,6 @@ class Job {
 	std::list<int> mapMarkers;
 	bool fireAllowed;
 public:
-	static boost::shared_ptr<Job> MoveJob(Coordinate);
-	static boost::shared_ptr<Job> BuildJob(boost::weak_ptr<Construction>);
-
 	Job(std::string = "NONAME JOB", JobPriority = MED, int zone = 0, bool menial = true);
 	~Job();
 	std::string name;
@@ -184,6 +181,10 @@ public:
 
 	void AllowFire();
 	bool InvalidFireAllowance();
+
+	std::list<StatusEffectType> statusEffects;
+	
+	static void CreatePourWaterJob(boost::shared_ptr<Job>, Coordinate);
 };
 
 BOOST_CLASS_VERSION(Job, 0)
