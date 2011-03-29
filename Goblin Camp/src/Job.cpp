@@ -317,6 +317,7 @@ void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
 		if (waterContainerFound) job->tasks.push_back(Task(STOCKPILEITEM));
 		job->DisregardTerritory();
 		job->AllowFire();
+		job->statusEffects.push_back(BRAVE);
 	} else {
 		job.reset();
 	}
