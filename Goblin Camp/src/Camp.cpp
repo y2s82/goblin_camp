@@ -224,53 +224,6 @@ void Camp::RemoveWaterZone(Coordinate from, Coordinate to) {
 	}
 }
 
-inline void CreateWaterJob(boost::shared_ptr<Job> waterJob, Coordinate location) {
-	waterJob->Attempts(1);
-
-	//First search for a container containing water
-	boost::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
-		location).lock();
-	Coordinate waterLocation = Game::Inst()->FindWater(location);
-
-	//If a water item exists, is closer and contained then use that
-	bool waterContainerFound = false;
-	if (waterItem) {
-		int distanceToWater = INT_MAX;
-		if (waterLocation.X() != -1) distanceToWater = Distance(location, waterLocation);
-		int distanceToItem = Distance(location, waterItem->Position());
-
-		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
-			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-				boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
-				//Reserve everything inside the container
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); 
-					itemi != container->end(); ++itemi) {
-						waterJob->ReserveEntity(*itemi);
-				}
-				waterJob->ReserveEntity(container);
-				waterJob->tasks.push_back(Task(MOVE, container->Position()));
-				waterJob->tasks.push_back(Task(TAKE, container->Position(), container));
-				waterContainerFound = true;
-		}
-	}
-
-	if (!waterContainerFound && waterLocation.X() != -1) {
-		waterJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
-		waterJob->tasks.push_back(Task(MOVEADJACENT, waterLocation));
-		waterJob->tasks.push_back(Task(FILL, waterLocation));
-	}
-
-	if (waterContainerFound || waterLocation.X() != -1) {
-		waterJob->tasks.push_back(Task(MOVEADJACENT, location));
-		waterJob->tasks.push_back(Task(POUR, location));
-		if (waterContainerFound) waterJob->tasks.push_back(Task(STOCKPILEITEM));
-		waterJob->DisregardTerritory();
-		waterJob->AllowFire();
-	} else {
-		waterJob.reset();
-	}
-}
-
 void Camp::UpdateWaterJobs() {
 
 	//Remove finished jobs
@@ -289,7 +242,7 @@ void Camp::UpdateWaterJobs() {
 			for (int i = 0; menialWaterJobs.size() < Game::Inst()->GoblinCount() && i < 10; ++i) {
 				boost::shared_ptr<Job> waterJob(new Job("Pour water", HIGH, 0, true));
 				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
-				CreateWaterJob(waterJob, location);
+				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					menialWaterJobs.push_back(waterJob);
 					JobManager::Inst()->AddJob(waterJob);
@@ -299,7 +252,7 @@ void Camp::UpdateWaterJobs() {
 			for (int i = 0; expertWaterJobs.size() < Game::Inst()->OrcCount() && i < 10; ++i) {
 				boost::shared_ptr<Job> waterJob(new Job("Pour water", HIGH, 0, false));
 				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
-				CreateWaterJob(waterJob, location);
+				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					expertWaterJobs.push_back(waterJob);
 					JobManager::Inst()->AddJob(waterJob);
@@ -310,7 +263,7 @@ void Camp::UpdateWaterJobs() {
 			if (menialWaterJobs.size() < 5) {
 				boost::shared_ptr<Job> waterJob(new Job("Pour water", LOW, 0, true));
 				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
-				CreateWaterJob(waterJob, location);
+				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					menialWaterJobs.push_back(waterJob);
 					JobManager::Inst()->AddJob(waterJob);

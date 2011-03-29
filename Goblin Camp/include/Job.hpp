@@ -181,6 +181,8 @@ public:
 
 	void AllowFire();
 	bool InvalidFireAllowance();
+
+	static void CreatePourWaterJob(boost::shared_ptr<Job>, Coordinate);
 };
 
 BOOST_CLASS_VERSION(Job, 0)

@@ -275,6 +275,53 @@ bool Job::InvalidFireAllowance() {
 	return false;
 }
 
+void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
+	job->Attempts(1);
+
+	//First search for a container containing water
+	boost::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
+		location).lock();
+	Coordinate waterLocation = Game::Inst()->FindWater(location);
+
+	//If a water item exists, is closer and contained then use that
+	bool waterContainerFound = false;
+	if (waterItem) {
+		int distanceToWater = INT_MAX;
+		if (waterLocation.X() != -1) distanceToWater = Distance(location, waterLocation);
+		int distanceToItem = Distance(location, waterItem->Position());
+
+		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
+			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+				boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
+				//Reserve everything inside the container
+				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); 
+					itemi != container->end(); ++itemi) {
+						job->ReserveEntity(*itemi);
+				}
+				job->ReserveEntity(container);
+				job->tasks.push_back(Task(MOVE, container->Position()));
+				job->tasks.push_back(Task(TAKE, container->Position(), container));
+				waterContainerFound = true;
+		}
+	}
+
+	if (!waterContainerFound && waterLocation.X() != -1) {
+		job->SetRequiredTool(Item::StringToItemCategory("Bucket"));
+		job->tasks.push_back(Task(MOVEADJACENT, waterLocation));
+		job->tasks.push_back(Task(FILL, waterLocation));
+	}
+
+	if (waterContainerFound || waterLocation.X() != -1) {
+		job->tasks.push_back(Task(MOVEADJACENT, location));
+		job->tasks.push_back(Task(POUR, location));
+		if (waterContainerFound) job->tasks.push_back(Task(STOCKPILEITEM));
+		job->DisregardTerritory();
+		job->AllowFire();
+	} else {
+		job.reset();
+	}
+}
+
 void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
