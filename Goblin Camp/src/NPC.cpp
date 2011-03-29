@@ -46,6 +46,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "Stockpile.hpp"
 #include "Faction.hpp"
+#include "Stats.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -1524,6 +1525,8 @@ void NPC::Kill() {
 
 		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
 		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red, Position());
+		
+		Stats::Inst()->deaths[NPC::NPCTypeToString(type)] += 1;
 	}
 }
 
