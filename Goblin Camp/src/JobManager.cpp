@@ -86,7 +86,7 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 	int skip = 0;
 	int y = pos.Y();
 	boost::shared_ptr<NPC> npc;
-	TCODColor color_mappings[] = { TCODColor::green, TCODColor::yellow, TCODColor::red, TCODColor::grey };
+	TCODColor color_mappings[] = { TCODColor::green, TCODColor::TCODColor(0,160,60), TCODColor(175,150,50), TCODColor(165,95,0), TCODColor::grey };
 
 	for (int i=0; i<=PRIORITY_COUNT; i++) {
 		console->setDefaultForeground(color_mappings[i]);
