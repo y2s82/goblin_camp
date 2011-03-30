@@ -26,11 +26,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Event.hpp"
 #include "Random.hpp"
 #include "JobManager.hpp"
+#include "Stats.hpp"
 
 Camp* Camp::instance = 0;
 
 Camp::Camp() :
-	centerX(220.0),
+centerX(220.0),
 	centerY(220.0),
 	buildingCount(0),
 	locked(false),
@@ -39,7 +40,6 @@ Camp::Camp() :
 	name("Clearing"),
 	workshops(0),
 	farmplots(0),
-	production(0),
 	upperCorner(Coordinate()),
 	lowerCorner(Coordinate()),
 	autoTerritory(true)
@@ -98,7 +98,7 @@ void Camp::UnlockCenter() { locked = false; }
 int Camp::GetTier() { return tier; }
 
 void Camp::UpdateTier() {
-	
+
 	int population = Game::Inst()->OrcCount() + Game::Inst()->GoblinCount();
 
 	// Immortius: There was previously an issue with new tier calculation - because
@@ -108,20 +108,20 @@ void Camp::UpdateTier() {
 	int newTier = 0;
 	if (farmplots > 0)
 	{
-		if      (workshops > 10 && production > 10000 && population >= 200)
+		if      (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 10000 && population >= 200)
 			newTier = 6;
-		else if (workshops > 10 && production > 3000  && population >= 100)
+		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 3000  && population >= 100)
 			newTier = 5;
-		else if (workshops > 10 && production > 1000  && population >= 60)
+		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 1000  && population >= 60)
 			newTier = 4;
-		else if (workshops > 10 && production > 500   && population >= 40)
+		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 500   && population >= 40)
 			newTier = 3;
-		else if (workshops > 5  && production > 100   && population >= 30)
+		else if (workshops > 5  && Stats::Inst()->GetItemsBuilt() > 100   && population >= 30)
 			newTier = 2;
-		else if (workshops > 1  && production > 20    && population >= 20)
+		else if (workshops > 1  && Stats::Inst()->GetItemsBuilt() > 20    && population >= 20)
 			newTier = 1;
 	}
-	
+
 	if (newTier < tier) ++newTier; //Only drop the camp tier down if newtier <= tier-2
 
 	if (newTier != tier) {
@@ -150,7 +150,7 @@ void Camp::UpdateTier() {
 			article = "a";
 			name = "Citadel";
 		}
-	
+
 		Announce::Inst()->AddMsg("Your "+oldName+" is now " + article + " " + name + "!", 
 			positive ? TCODColor::lightGreen : TCODColor::yellow);
 		Script::Event::TierChanged(tier, name);
@@ -182,7 +182,6 @@ void Camp::Reset() {
 	name = "Clearing";
 	workshops = 0;
 	farmplots = 0;
-	production = 0;
 	upperCorner = Coordinate(0, 0);
 	lowerCorner = Coordinate(0, 0);
 	autoTerritory = true;
@@ -285,7 +284,6 @@ void Camp::save(OutputArchive& ar, const unsigned int version) const {
 	ar & name;
 	ar & workshops;
 	ar & farmplots;
-	ar & production;
 	ar & upperCorner;
 	ar & lowerCorner;
 	ar & autoTerritory;
@@ -306,7 +304,10 @@ void Camp::load(InputArchive& ar, const unsigned int version) {
 	ar & name;
 	ar & workshops;
 	ar & farmplots;
-	ar & production;
+	if (version == 0) {
+		int unused;
+		ar & unused;
+	}
 	ar & upperCorner;
 	ar & lowerCorner;
 	ar & autoTerritory;
