@@ -319,7 +319,7 @@ npc_type "ogre" {
 		statusEffects=["Concussion"]
 		effectChances=[     75     ]
 	}
-	death="Corpse"
+	death="Large corpse"
 }
 
 npc_type "troll" { 
@@ -426,7 +426,7 @@ npc_type "jabberwock" {
 		size=15
 	}
 	resistances {
-		physical=10
+		physical=70
 		poison=50
 	}
 	attack "Claw" {
@@ -510,7 +510,7 @@ npc_type "cyclops" {
 		cooldown=100
 		statusEffects=["Concussion"]
 	}
-	death="Corpse"
+	death="Huge corpse"
 	faction="Giants"
 }
 
@@ -541,7 +541,7 @@ npc_type "giant" {
 	stats {
 	    strength=25
 	}
-	death="Corpse"
+	death="Huge corpse"
 	faction="Giants"
 }
 
@@ -690,10 +690,10 @@ npc_type "imp" {
 	graphic='i'
 	AI="HostileAnimal"
 	stats {
-		speed=20
+		speed=18
 		health=100
 		dodge=15
-		size=5
+		size=8
 	}
 	resistances {
 		physical=5
@@ -913,7 +913,7 @@ npc_type "manticore" {
 		cooldown=30
 	}
 	spawnAsGroup="1d2"
-	death="Corpse"
+	death="Large corpse"
 }
 
 npc_type "cave worm" {
