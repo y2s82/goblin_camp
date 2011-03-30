@@ -447,7 +447,11 @@ void JobManager::RemoveJob(Action action, Coordinate location) {
 }
 
 void JobManager::save(OutputArchive& ar, const unsigned int version) const {
-	ar & availableList;
+	int count = PRIORITY_COUNT;
+	ar & count;
+	for (int i = 0; i < count; ++i) {
+		ar & availableList[i];
+	}
 	ar & waitingList;
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
@@ -456,7 +460,19 @@ void JobManager::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void JobManager::load(InputArchive& ar, const unsigned int version) {
-	ar & availableList;
+	if (version == 0) {
+		std::list<boost::shared_ptr<Job> > oldList[3];
+		ar & oldList;
+		for (int i = 0; i < 3 && i < PRIORITY_COUNT; ++i) {
+			availableList[i] = oldList[i];
+		}
+	} else {
+		int count;
+		ar & count;
+		for (int i = 0; i < count && i < PRIORITY_COUNT; ++i) {
+			ar & availableList[i];
+		}
+	}
 	ar & waitingList;
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
