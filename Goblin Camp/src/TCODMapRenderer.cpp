@@ -100,7 +100,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 					}
 				}
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
-					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor::darkGreen : TCODColor::darkRed);
+					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor(45,85,0) : TCODColor(80,0,0));
 				}
 			}
 			else {
