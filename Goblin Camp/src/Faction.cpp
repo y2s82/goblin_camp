@@ -408,8 +408,6 @@ bool Faction::IsCoward() { return coward; }
 bool Faction::IsAggressive() { return aggressive; }
 
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
-	std::list< boost::weak_ptr<NPC> > unusedList;
-	ar & unusedList;
 	ar & trapVisible;
 	ar & name;
 	ar & jobs;
@@ -438,8 +436,10 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
-	std::list< boost::weak_ptr<NPC> > unusedList;
-	ar & unusedList;
+	if (version == 0) {
+		std::list< boost::weak_ptr<NPC> > unusedList;
+		ar & unusedList;
+	}
 	ar & trapVisible;
 	ar & name;
 	if (version >= 1) {
