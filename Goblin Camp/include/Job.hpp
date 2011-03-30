@@ -187,4 +187,4 @@ public:
 	static void CreatePourWaterJob(boost::shared_ptr<Job>, Coordinate);
 };
 
-BOOST_CLASS_VERSION(Job, 0)
+BOOST_CLASS_VERSION(Job, 1)
