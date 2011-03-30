@@ -153,6 +153,7 @@ Menu* Menu::MainMenu() {
 		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceDialog::AnnouncementsDialog())));
 		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
 		mainMenu->AddChoice(MenuChoice("Territory", boost::bind(UI::ChangeMenu, Menu::TerritoryMenu())));
+		mainMenu->AddChoice(MenuChoice("Stats", boost::bind(&Game::DisplayStats, Game::Inst())));
 		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
 		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));
 		menuTier = Camp::Inst()->GetTier();
@@ -285,8 +286,6 @@ Menu* Menu::DevMenu() {
 
 		devMenu->AddChoice(MenuChoice("Normal weather", boost::bind(&Weather::ChangeWeather, Map::Inst()->weather, NORMALWEATHER)));
 		devMenu->AddChoice(MenuChoice("Rain", boost::bind(&Weather::ChangeWeather, Map::Inst()->weather, RAIN)));	
-
-		devMenu->AddChoice(MenuChoice("Stats", boost::bind(&Game::DisplayStats, Game::Inst())));
 	}
 	return devMenu;
 }
