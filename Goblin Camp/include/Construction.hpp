@@ -133,7 +133,7 @@ public:
 	int GetMaxCondition() const;
 	virtual void Draw(Coordinate, TCODConsole*);
 	int GetGraphicsHint() const;
-	int Build();
+	virtual int Build();
 	ConstructionType Type();
 	std::list<ItemCategory>* MaterialList();
 	bool Producer();
