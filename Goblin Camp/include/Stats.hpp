@@ -22,6 +22,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class Stats {
 	GC_SERIALIZABLE_CLASS
 	
+	friend class Game;
+
 	Stats();
 	static Stats* instance;
 

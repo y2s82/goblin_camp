@@ -2258,8 +2258,8 @@ void Game::DisplayStats() {
 	productionFrame->AddComponent(new ScrollPanel(1, 2, 23, 15,
 		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
 		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
-	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,18,TCOD_LEFT));
-	productionFrame->AddComponent(new ScrollPanel(1, 19, 23, 15,
+	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,17,TCOD_LEFT));
+	productionFrame->AddComponent(new ScrollPanel(1, 18, 23, 15,
 		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
 		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
 	contents->AddComponent(productionFrame);
@@ -2286,6 +2286,7 @@ void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar.register_type<SpawningPool>();
 	ar.register_type<Trap>();
 	ar.register_type<Ice>();
+	ar.register_type<Stats>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -2312,6 +2313,7 @@ void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
+	ar & Stats::instance;
 }
 
 void Game::load(InputArchive& ar, const unsigned int version) {
@@ -2323,7 +2325,10 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar.register_type<Door>();
 	ar.register_type<SpawningPool>();
 	ar.register_type<Trap>();
-	if (version >= 1) ar.register_type<Ice>();
+	if (version >= 1) {
+		ar.register_type<Ice>();
+		ar.register_type<Stats>();
+	}
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -2363,4 +2368,7 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
+	if (version >= 1) {
+		ar & Stats::instance;
+	}
 }
