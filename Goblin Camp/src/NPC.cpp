@@ -1102,7 +1102,9 @@ CONTINUEEAT:
 							stockJob->tasks.push_back(jobs.front()->tasks[taskIndex+i]);
 						}
 						jobs.front()->tasks.clear();
-						jobs.push_back(stockJob);
+						std::deque<boost::shared_ptr<Job> >::const_iterator jobi = jobs.begin();
+						++jobi;
+						jobs.insert(jobi, stockJob);
 						DropItem(carried); //The stockpiling job will pickup the item
 						carried.reset();
 						TaskFinished(TASKSUCCESS);
