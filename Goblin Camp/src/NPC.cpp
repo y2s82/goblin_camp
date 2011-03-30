@@ -853,6 +853,7 @@ CONTINUEEAT:
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[plant->Type()].fruits.begin(); fruiti != Item::Presets[plant->Type()].fruits.end(); ++fruiti) {
 						if (stockpile) {
 							int item = Game::Inst()->CreateItem(Position(), *fruiti, false);
+							Stats::Inst()->ItemBuilt(Item::Presets[*fruiti].name); //Harvesting counts as production
 							PickupItem(Game::Inst()->GetItem(item));
 							stockpile = false;
 						} else {
@@ -882,6 +883,7 @@ CONTINUEEAT:
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[tree->Type()].components.begin(); iti != NatureObject::Presets[tree->Type()].components.end(); ++iti) {
 							if (stockpile) {
 								int item = Game::Inst()->CreateItem(tree->Position(), *iti, false);
+								Stats::Inst()->ItemBuilt(Item::Presets[*iti].name); //Felling trees counts as item production
 								DropItem(carried);
 								PickupItem(Game::Inst()->GetItem(item));
 								stockpile = false;
