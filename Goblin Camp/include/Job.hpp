@@ -34,6 +34,7 @@ typedef int ItemCategory;
 typedef int ItemType;
 
 enum JobPriority {
+	VERYHIGH,
 	HIGH,
 	MED,
 	LOW,
