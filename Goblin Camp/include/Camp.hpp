@@ -38,7 +38,7 @@ class Camp {
 	int tier;
 	std::string name;
 	std::string article;
-	int workshops, farmplots, production;
+	int workshops, farmplots;
 	Coordinate upperCorner, lowerCorner;
 	bool autoTerritory;
 	std::set<Coordinate> waterZones;
@@ -68,4 +68,4 @@ public:
 	Coordinate GetLowTerritoryCorner() const;
 };
 
-BOOST_CLASS_VERSION(Camp, 0)
+BOOST_CLASS_VERSION(Camp, 1)
