@@ -80,6 +80,8 @@ void Stats::save(OutputArchive& ar, const unsigned int version) const {
 	ar & itemsBurned;
 	ar & filthCreated;
 	ar & filthOutsideMap;
+	ar & constructions;
+	ar & production;
 }
 
 void Stats::load(InputArchive& ar, const unsigned int version) {
@@ -92,4 +94,6 @@ void Stats::load(InputArchive& ar, const unsigned int version) {
 	ar & itemsBurned;
 	ar & filthCreated;
 	ar & filthOutsideMap;
+	ar & constructions;
+	ar & production;
 }
