@@ -37,7 +37,10 @@ int JobDialog::TotalHeight() {
 Dialog* JobDialog::jobListingDialog = 0;
 Dialog* JobDialog::JobListingDialog() {
 	if (!jobListingDialog) {
-		int width = Game::Inst()->ScreenWidth() - 20;
+		int width = 50;
+#ifdef DEBUG
+		width = 100;
+#endif
 		int height = Game::Inst()->ScreenHeight() - 20;
 		jobListingDialog = new Dialog(new ScrollPanel(0, 0, width, height, new JobDialog(), false), "Jobs", width, height);
 	}
