@@ -302,6 +302,11 @@ void SpawningPool::Burn() {
 	}
 }
 
+int SpawningPool::Build() {
+	Map::Inst()->Corrupt(x, y, 100);
+	return Construction::Build();
+}
+
 void SpawningPool::save(OutputArchive& ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Construction>(*this);
 	ar & dumpFilth;
