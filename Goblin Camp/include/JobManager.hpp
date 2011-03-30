@@ -47,4 +47,4 @@ public:
 	void AssignJobs();
 };
 
-BOOST_CLASS_VERSION(JobManager, 0)
+BOOST_CLASS_VERSION(JobManager, 1)
