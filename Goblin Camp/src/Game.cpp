@@ -2242,6 +2242,9 @@ namespace {
 	void DrawText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
 		console->print(x, y, (boost::format("%s : %d") % text.first % text.second).str().c_str());
 	}
+	void DrawDeathText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
+		console->print(x, y, (boost::format("%d : %s") % text.second % text.first).str().c_str());
+	}
 }
 
 void Game::DisplayStats() {
@@ -2267,7 +2270,7 @@ void Game::DisplayStats() {
 	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 51, 1, 25, 18);
 	deathFrame->AddComponent(new ScrollPanel(1, 1, 23, 16,
 		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
-		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		boost::bind(DrawDeathText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
 	contents->AddComponent(deathFrame);
 
 	Button *okButton = new Button("OK", NULL, 33, 35, 10, 'o', true);
@@ -2287,6 +2290,7 @@ void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar.register_type<Trap>();
 	ar.register_type<Ice>();
 	ar.register_type<Stats>();
+	ar.register_type<WaterItem>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -2328,6 +2332,7 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	if (version >= 1) {
 		ar.register_type<Ice>();
 		ar.register_type<Stats>();
+		ar.register_type<WaterItem>();
 	}
 	ar & season;
 	ar & time;
