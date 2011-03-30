@@ -97,6 +97,10 @@ category_type "Vegetable" {
 category_type "Drink" {
 }
 
+category_type "Water" {
+	parent="Drink"
+}
+
 category_type "Wine" {
 	parent="Drink"
 	flammable
@@ -695,7 +699,7 @@ item_type "Boiled leather" {
 	category = ["Hardened leather"]
 	graphic = 245
 	color = "115,45,20"
-	components = ["Leather", "Firewood"]
+	components = ["Leather", "Firewood", "Water"]
 	fitsin = "Crate"
 	constructedin = "Leather crafter"
 }
@@ -773,7 +777,7 @@ item_type "Arthropod corpse" {
 }
 
 item_type "Water" {
-	category = ["Drink"]
+	category = ["Water"]
 	graphic = 33
 	color = "0,100,250"
 	nutrition = 5.0
@@ -785,7 +789,7 @@ item_type "Berry wine" {
 	category = ["Wine"]
 	graphic = 33
 	color = "127,0,0"
-	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
+	components = [ "Berry", "Berry", "Berry", "Berry", "Berry", "Water" ]
 	containIn = "Barrel"
 	nutrition = 6.0
 	multiplier = 10
@@ -799,7 +803,7 @@ item_type "Pie" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "255,0,220"
-	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood"]
+	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood", "Water"]
 	nutrition = 10.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -833,7 +837,7 @@ item_type "Bark bread" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "107,66,38"
-	components = ["Powdered bark", "Powdered bark", "Flour", "Firewood"]
+	components = ["Powdered bark", "Powdered bark", "Flour", "Firewood", "Water"]
 	nutrition = 3.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -844,7 +848,7 @@ item_type "Bone Stew" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "102,204,0"
-	components = ["Bone", "Drink", "Meat", "Firewood"]
+	components = ["Bone", "Water", "Meat", "Firewood"]
 	nutrition = 11.0
 	constructedin = "Kitchen"
 	decaySpeed = 8
@@ -855,7 +859,7 @@ item_type "Bread" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "127,89,63"
-	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood"]
+	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood", "Water"]
 	nutrition = 6.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -1548,7 +1552,7 @@ item_type "Meat pie" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "127,0,0"
-	components = ["Meat", "Flour", "Flour", "Firewood"]
+	components = ["Meat", "Flour", "Flour", "Firewood", "Water"]
 	nutrition = 11
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -1623,7 +1627,7 @@ item_type "Healing tonic" {
 	category = [ "Tonic" ]
 	graphic = 33
 	color="0,136,14"
-	components = [ "Shoot", "Shoot" ]
+	components = [ "Shoot", "Shoot", "Water" ]
 	constructedin = "Alchemist"
 	addStatusEffects=["Healing"]
 }
