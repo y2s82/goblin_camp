@@ -1534,16 +1534,16 @@ void NPC::Kill() {
 	}
 }
 
-void NPC::DropItem(boost::weak_ptr<Item> item) {
-	if (item.lock()) {
+void NPC::DropItem(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
 		inventory->RemoveItem(item);
-		item.lock()->Position(Position());
-		item.lock()->PutInContainer();
-		bulk -= item.lock()->GetBulk();
+		item->Position(Position());
+		item->PutInContainer();
+		bulk -= item->GetBulk();
 
 		//If the item is a container with filth in it, spill it on the ground
-		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
-			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item.lock()));
+		if (boost::dynamic_pointer_cast<Container>(item)) {
+			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item));
 			if (cont->ContainsFilth() > 0) {
 				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
 				cont->RemoveFilth(cont->ContainsFilth());
@@ -2550,17 +2550,17 @@ bool NPC::HasTrait(Trait trait) { return traits.find(trait) != traits.end(); }
 
 void NPC::GoBerserk() {
 	ScanSurroundings();
-	if (carried.lock()) {
-		inventory->RemoveItem(carried);
-		carried.lock()->PutInContainer();
-		carried.lock()->Position(Position());
+	if (boost::shared_ptr<Item> carriedItem = carried.lock()) {
+		inventory->RemoveItem(carriedItem);
+		carriedItem->PutInContainer();
+		carriedItem->Position(Position());
 		Coordinate target(-1,-1);
 		if (!nearNpcs.empty()) {
 			boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
 			if (creature) target = creature->Position();
 		}
 		if (target.X() == -1) target = Coordinate(Random::Generate(x-7, x+7), Random::Generate(y-7, y+7));
-		carried.lock()->CalculateFlightPath(target, 50, GetHeight());
+		carriedItem->CalculateFlightPath(target, 50, GetHeight());
 	}
 	carried.reset();
 
