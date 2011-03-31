@@ -283,6 +283,7 @@ void Faction::InitAfterLoad() {
 		factionNames.insert(std::make_pair(factions[i]->name, i));
 	}
 	for (int i = 0; i < factions.size(); ++i) {
+		factions[i]->index = i;
 		factions[i]->MakeFriendsWith(i);
 		factions[i]->TranslateFriends();
 	}
