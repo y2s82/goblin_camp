@@ -812,7 +812,7 @@ Coordinate Game::FindWater(Coordinate pos) {
 void Game::Update() {
 	++time;
 
-	if (time == MONTH_LENGTH) {
+	if (time >= MONTH_LENGTH) {
 		if (safeMonths > 0) --safeMonths;
 
 		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = staticConstructionList.begin();
@@ -865,7 +865,7 @@ void Game::Update() {
 
 		default: break;
 		}
-		time = 0;
+		time -= MONTH_LENGTH;
 	}
 
 	//This actually only updates every 50th waternode. This is due to 2 things: updating one water tile actually also
