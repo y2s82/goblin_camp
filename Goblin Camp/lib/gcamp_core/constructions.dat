@@ -275,7 +275,7 @@ construction_type "Battlement" {
 	tier=2
 	category="Basics"
 	graphicLength=1
-	graphic=[223]
+	graphic=[127]
 	walkable
 	maxCondition=30
 	materials=["Plank","Plank","Plank","Plank","Plank"]
