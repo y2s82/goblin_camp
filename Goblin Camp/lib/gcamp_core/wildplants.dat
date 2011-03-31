@@ -139,12 +139,12 @@ plant_type "Thornbush" {
 }
 
 plant_type "Withering tree" {
-	tree
 	graphic=214
 	color="127,50,0"
 	components=["Wood log"]
 	rarity=0
 	condition=30
+	harvestable
 	minheight=-100.0
 	maxheight=-100.0
 }
