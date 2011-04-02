@@ -124,7 +124,7 @@ void Faction::Reset() {
 }
 
 void Faction::Update() {
-	if (active) {
+	if (active && maxActiveTime >= 0) {
 		++activeTime;
 	}
 };
@@ -177,7 +177,7 @@ namespace {
 
 bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 	
-	if (activeTime >= maxActiveTime) {
+	if (maxActiveTime >= 0 && activeTime >= maxActiveTime) {
 		boost::shared_ptr<Job> fleeJob(new Job("Leave"));
 		fleeJob->internal = true;
 		fleeJob->tasks.push_back(Task(CALMDOWN));
