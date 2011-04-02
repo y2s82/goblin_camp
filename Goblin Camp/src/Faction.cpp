@@ -413,6 +413,7 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 	ar & name;
 	ar & jobs;
 	ar & goals;
+	ar & goalSpecifiers;
 	ar & currentGoal;
 	ar & activeTime;
 	ar & maxActiveTime;
@@ -434,6 +435,9 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 		}
 		ar & uid;
 	}
+
+	ar & aggressive;
+	ar & coward;
 }
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
@@ -446,6 +450,7 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 	if (version >= 1) {
 		ar & jobs;
 		ar & goals;
+		ar & goalSpecifiers;
 		ar & currentGoal;
 		ar & activeTime;
 		ar & maxActiveTime;
@@ -465,5 +470,7 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 			ar & uid;
 			membersAsUids.push_back(uid);
 		}
+		ar & aggressive;
+		ar & coward;
 	}
 }
