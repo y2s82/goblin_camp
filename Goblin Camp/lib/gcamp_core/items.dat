@@ -1201,7 +1201,7 @@ item_type "Quiver" {
 	graphic = 91
 	color ="200,64,0"
 	components = ["Leather"]
-	containerSize = 100
+	containerSize = 20
 	constructedin = "Leather crafter"
 	fitsin = "Crate"
 }
