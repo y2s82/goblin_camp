@@ -1773,6 +1773,7 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, C
 }
 
 void Game::Reset() {
+	Map::Inst()->Reset(-1,-1);
 	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 0; y < Map::Inst()->Height(); ++y) {
 			Map::Inst()->Reset(x,y);
