@@ -21,20 +21,31 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 
 Weather::Weather(Map* vmap) : map(vmap), windDirection(NORTH),
-currentWeather(NORMALWEATHER), tileChange(false),
-changeAll(false), tileChangeRate(0), changePosition(0),
-currentSeason(-1) {
+	prevailingWindDirection(NORTH), currentWeather(NORMALWEATHER), 
+	tileChange(false),
+	changeAll(false), tileChangeRate(0), changePosition(0),
+	currentSeason(-1) {
 }
 
 Direction Weather::GetWindDirection() { return windDirection; }
 
 void Weather::RandomizeWind() {
-	windDirection = (Direction)Random::Generate(7);
+	prevailingWindDirection = static_cast<Direction>(Random::Generate(7));
+	windDirection = prevailingWindDirection;
 }
 
 void Weather::ShiftWind() {
 	if (Random::Generate(2) == 0) {
-		windDirection = (Direction)(windDirection + Random::Generate(-1, 1));
+		windDirection = static_cast<Direction>(windDirection + Random::Generate(-1, 1));
+		if (windDirection < 0) windDirection = NORTHWEST;
+		if (windDirection > NORTHWEST) windDirection = NORTH;
+
+		int distanceFromPrevailing = windDirection - prevailingWindDirection;
+
+		if (distanceFromPrevailing == 3 || distanceFromPrevailing == 4 || distanceFromPrevailing == -5) 
+			windDirection = static_cast<Direction>(windDirection - 1);
+		else if (distanceFromPrevailing == -3 || distanceFromPrevailing == -4 || distanceFromPrevailing == 5) 
+			windDirection = static_cast<Direction>(windDirection + 1);
 		if (windDirection < 0) windDirection = NORTHWEST;
 		if (windDirection > NORTHWEST) windDirection = NORTH;
 	}
@@ -201,6 +212,7 @@ void Weather::ApplySeasonalEffects() {
 void Weather::save(OutputArchive& ar, const unsigned int version) const {
 	ar & map;
 	ar & windDirection;
+	ar & prevailingWindDirection;
 	ar & currentWeather;
 	ar & tileChange;
 	ar & changeAll;
@@ -212,6 +224,7 @@ void Weather::save(OutputArchive& ar, const unsigned int version) const {
 void Weather::load(InputArchive& ar, const unsigned int version) {
 	ar & map;
 	ar & windDirection;
+	ar & prevailingWindDirection;
 	ar & currentWeather;
 	ar & tileChange;
 	ar & changeAll;
