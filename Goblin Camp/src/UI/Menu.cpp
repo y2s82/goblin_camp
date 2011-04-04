@@ -283,9 +283,6 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Thirstify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
 		call = boost::bind(&Game::Badsleepify, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Badsleepify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
-
-		devMenu->AddChoice(MenuChoice("Normal weather", boost::bind(&Weather::ChangeWeather, Map::Inst()->weather, NORMALWEATHER)));
-		devMenu->AddChoice(MenuChoice("Rain", boost::bind(&Weather::ChangeWeather, Map::Inst()->weather, RAIN)));	
 	}
 	return devMenu;
 }
