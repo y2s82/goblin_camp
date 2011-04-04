@@ -421,7 +421,7 @@ int CacheTile::GetMoveCost(void* ptr) const {
 		NPC* npc = static_cast<NPC*>(ptr);
 
 		if (npc) {
-			if (door && npc->HasHands()) {
+			if (door && !npc->HasHands()) {
 				cost += 50;
 			}
 			if (trap) { 
