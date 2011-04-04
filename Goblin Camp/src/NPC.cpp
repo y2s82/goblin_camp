@@ -1364,10 +1364,29 @@ CONTINUEEAT:
 				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
-				idleJob->tasks.push_back(Task(MOVENEAR, faction == PLAYERFACTION ? Camp::Inst()->Center() : Position()));
+				if (faction == PLAYERFACTION) {
+					if (Random::Generate(8) < 7) {
+						idleJob->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
+					} else {
+						Coordinate randomLocation(-1,-1);
+						for (int tries = 0; tries < 20 && (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+							Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)); ++tries) {
+							Coordinate upperCorner = Camp::Inst()->GetUprTerritoryCorner();
+							Coordinate lowerCorner = Camp::Inst()->GetLowTerritoryCorner();
+							randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
+							randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
+						}
+						if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+							Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(),PLAYERFACTION)) randomLocation = Camp::Inst()->Center();
+						idleJob->tasks.push_back(Task(MOVENEAR, randomLocation));
+					}
+					if (Map::Inst()->IsTerritory(x,y)) run = false;
+				} else {
+					idleJob->tasks.push_back(Task(MOVENEAR, Position()));
+					run = false;
+				}
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(9), 0)));
 				jobs.push_back(idleJob);
-				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
 			}
 		}
 	}
@@ -1631,7 +1650,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			} else if (npc->quiver.lock()->empty()) {
 				if (Game::Inst()->FindItemByCategoryFromStockpiles(
 					npc->mainHand.lock()->GetAttack().Projectile(), npc->Position()).lock()) {
-						for (int i = 0; i < 10; ++i) {
+						for (int i = 0; i < 20; ++i) {
 							newJob->tasks.push_back(Task(FIND, npc->Position(), boost::shared_ptr<Entity>(), 
 								npc->mainHand.lock()->GetAttack().Projectile()));
 							newJob->tasks.push_back(Task(MOVE));
@@ -1778,7 +1797,7 @@ void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
 			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
 				if (boost::shared_ptr<Construction> construct = consi->lock()) {
-					if (construct->HasTag(WORKSHOP) || construct->HasTag(WALL)) {
+					if (construct->HasTag(WORKSHOP) || (construct->HasTag(WALL) && Random::Generate(10) == 0)) {
 						boost::shared_ptr<Job> destroyJob(new Job("Destroy "+construct->Name()));
 						destroyJob->internal = true;
 						destroyJob->tasks.push_back(Task(MOVEADJACENT, construct->Position(), construct));
