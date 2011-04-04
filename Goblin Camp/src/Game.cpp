@@ -83,7 +83,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
-	safeMonths(6),
+	safeMonths(3),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
@@ -1802,7 +1802,7 @@ void Game::Reset() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
-	safeMonths = 6;
+	safeMonths = 3;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
 	renderer->PreparePrefabs();
