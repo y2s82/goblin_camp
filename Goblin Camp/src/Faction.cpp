@@ -249,6 +249,7 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 				}
 				if (location.X() >= 0 && location.Y() >= 0) {
 					patrolJob->tasks.push_back(Task(MOVENEAR, location));
+					patrolJob->tasks.push_back(Task(WAIT, Random::Generate(5,20)));
 					npc->StartJob(patrolJob);
 					return true;
 				}
