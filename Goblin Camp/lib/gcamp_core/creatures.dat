@@ -325,7 +325,7 @@ npc_type "ogre" {
 npc_type "troll" { 
 	name="Troll"
 	tier=5
-	tags=["attacksRandomly", "hasHands"]
+	tags=["hasHands"]
 	color="128,128,128"
 	graphic='T'
 	AI="HostileAnimal"
