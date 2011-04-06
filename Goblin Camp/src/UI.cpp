@@ -528,6 +528,9 @@ void UI::Draw(TCODConsole* console) {
 	Tooltip *tooltip = Tooltip::Inst();
 	tooltip->Clear();
 	if (extraTooltip != "") tooltip->AddEntry(TooltipEntry(extraTooltip, TCODColor::white));
+	for (std::list<std::string>::iterator tooltipIter = extraTooltips.begin(); tooltipIter != extraTooltips.end(); ++tooltipIter) {
+		tooltip->AddEntry(TooltipEntry(*tooltipIter, TCODColor::white));
+	}
 	if (menuOpen) {
 		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
 	}
