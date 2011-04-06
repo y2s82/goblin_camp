@@ -37,6 +37,8 @@ map(vmap),
 			hostileSpawningMonsters.push_back(i);
 		if (NPC::Presets[i].tags.find("localwildlife") != NPC::Presets[i].tags.end())
 			peacefulAnimals.push_back(i);
+		if (NPC::Presets[i].tags.find("immigrant") != NPC::Presets[i].tags.end())
+			immigrants.push_back(i);
 	}
 }
 
@@ -50,6 +52,55 @@ void Events::Update(bool safe) {
 
 	if (Random::Generate(UPDATES_PER_SECOND * 60 * 2 - 1) == 0) {
 		SpawnBenignFauna();
+	}
+
+	//Remove immigrants that have left/died
+	for (std::vector<boost::weak_ptr<NPC> >::iterator immi = existingImmigrants.begin(); immi != existingImmigrants.end();) {
+		if (!immi->lock()) immi = existingImmigrants.erase(immi);
+		else ++immi;
+	}
+
+	if (existingImmigrants.size() < Game::Inst()->OrcCount() / 7 && 
+		Random::Generate(UPDATES_PER_SECOND * 60 * 30) == 0) {
+			SpawnImmigrants();
+	}
+}
+
+namespace {
+	void GenerateEdgeCoordinates(Map* map, Coordinate& a, Coordinate& b) {
+		int counter = 0;
+		do {
+			switch (Random::Generate(3)) {
+			case 0:
+				a.X(0);
+				a.Y(Random::Generate(map->Height() - 21));
+				b.X(1);
+				b.Y(a.Y() + 20);
+				break;
+
+			case 1:
+				a.X(Random::Generate(map->Width() - 21));
+				a.Y(0);
+				b.X(a.X() + 20);
+				b.Y(1);
+				break;
+
+			case 2:
+				a.X(map->Width() - 2);
+				a.Y(Random::Generate(map->Height() - 21));
+				b.X(map->Width() - 1);
+				b.Y(a.Y() + 20);
+				break;
+
+			case 3:
+				a.X(Random::Generate(map->Width() - 21));
+				a.Y(map->Height() - 2);
+				b.X(a.X() + 20);
+				b.Y(map->Height() - 1);
+				break;
+			}
+			++counter;
+		} while ((Map::Inst()->IsUnbridgedWater(a.X(), a.Y()) || Map::Inst()->IsUnbridgedWater(b.X(), b.Y())) && counter < 100);
 	}
 }
 
@@ -77,39 +128,7 @@ void Events::SpawnHostileMonsters() {
 		% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
 
 	Coordinate a,b;
-	int counter = 0;
-	do {
-	switch (Random::Generate(3)) {
-		case 0:
-			a.X(0);
-		a.Y(Random::Generate(map->Height() - 21));
-			b.X(1);
-			b.Y(a.Y() + 20);
-			break;
-
-	case 1:
-		a.X(Random::Generate(map->Width() - 21));
-			a.Y(0);
-			b.X(a.X() + 20);
-			b.Y(1);
-			break;
-
-		case 2:
-			a.X(map->Width() - 2);
-			a.Y(Random::Generate(map->Height() - 21));
-			b.X(map->Width() - 1);
-			b.Y(a.Y() + 20);
-			break;
-
-		case 3:
-			a.X(Random::Generate(map->Width() - 21));
-			a.Y(map->Height() - 2);
-			b.X(a.X() + 20);
-			b.Y(map->Height() - 1);
-			break;
-		}
-		++counter;
-	} while ((Map::Inst()->IsUnbridgedWater(a.X(), a.Y()) || Map::Inst()->IsUnbridgedWater(b.X(), b.Y())) && counter < 100);
+	GenerateEdgeCoordinates(map, a, b);
 
 	Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 	Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
@@ -131,4 +150,39 @@ void Events::SpawnBenignFauna() {
 			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);
 		}
 	}
+}
+
+void Events::SpawnImmigrants() {
+	std::vector<NPCType> possibleImmigrants;
+	for (std::vector<int>::iterator immi = immigrants.begin(); immi != immigrants.end(); ++immi) {
+		if (NPC::Presets[*immi].tier <= Camp::Inst()->GetTier() - 2) {
+			possibleImmigrants.push_back((NPCType)*immi);
+		} else if (NPC::Presets[*immi].tier <= Camp::Inst()->GetTier()) {
+			possibleImmigrants.push_back((NPCType)*immi); // This is intentional, it raises the odds that monsters at or lower
+			possibleImmigrants.push_back((NPCType)*immi); // than this tier are spawned vs. one tier higher.
+		} else if (NPC::Presets[*immi].tier == Camp::Inst()->GetTier() + 1) {
+			possibleImmigrants.push_back((NPCType)*immi);
+		}
+	}
+
+	NPCType monsterType = Random::ChooseElement(possibleImmigrants);
+	int spawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+
+	std::string msg;
+	if (spawnCount > 1) 
+		msg = (boost::format("%s join your %s!") 
+		% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
+	else msg = (boost::format("A %s joins your %s!")
+		% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
+	
+	Coordinate a, b;
+	GenerateEdgeCoordinates(map, a, b);
+
+	for (int i = 0; i < spawnCount; ++i) {
+		int npcUid = Game::Inst()->CreateNPC(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())),
+			monsterType);
+		existingImmigrants.push_back(Game::Inst()->GetNPC(npcUid));
+	}
+
+	Announce::Inst()->AddMsg(msg, TCODColor(0,150,255), Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 }
