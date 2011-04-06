@@ -1,0 +1,50 @@
+# Generators for _version.cpp and _version.rc
+
+import type ;
+import generators ;
+import toolset ;
+import os ;
+import modules ;
+import feature ;
+
+type.register TXT_IN   : txt_in ;
+type.register TXT      : txt ;
+type.register RC_IN    : rc_in ;
+type.register CPP_IN   : cpp_in ;
+type.register DAT      : dat ;
+type.register DAT_IN   : dat_in ;
+
+if [ os.name ] = NT {
+    # RC "headers"
+    feature.feature rch : : free ;
+    toolset.flags gc-version.generate RCH <rch> ;
+    generators.register-standard gc-version.generate : RC_IN : RC ;
+}
+
+generators.register-standard gc-version.generate : CPP_IN : CPP ;
+generators.register-standard gc-version.generate : TXT_IN : TXT ;
+generators.register-standard gc-version.generate : DAT_IN : DAT ;
+
+toolset.flags gc-version.generate APPEND_HG <variant>debug : yes ;
+
+local rule set-appendhg-flag ( what ) {
+    local variants = release profile ;
+    
+    for local variant in $(variants) {
+        toolset.flags gc-version.generate APPEND_HG <variant>$(variant) : $(what) ;
+    }
+}
+
+if --with-revid in [ modules.peek : ARGV ] {
+    set-appendhg-flag yes ;
+} else {
+    set-appendhg-flag no  ;
+}
+
+GC_ROOT    = [ modules.peek : GC_ROOT ] ;
+GC_VERSION = [ modules.peek : GC_VERSION ] ;
+PYTHON     = [ modules.peek : PYTHON ] ;
+
+actions generate {
+    $(PYTHON) "$(GC_ROOT)/tools/generate-version.py" "$(GC_VERSION)" "$(APPEND_HG)" "$(>)" "$(<)" "$(RCH[0])"
+}
