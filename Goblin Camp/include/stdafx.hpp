@@ -89,6 +89,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/python.hpp>
 		namespace py = boost::python;
 #	pragma warning(pop)
+
+// Memory debugging.
+#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
+#   include <boost/iostreams/detail/optional.hpp> // Include this before DBG_NEW defined
+#   define _CRTDBG_MAP_ALLOC
+#	ifndef DBG_NEW
+#		define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#		define new DBG_NEW
+#	endif
+#endif
+		
 // libtcod
 #	include <libtcod.hpp>
 // SDL
@@ -138,10 +149,3 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	define GC_ASSERT BOOST_ASSERT
 #endif
 
-// Memory debugging.
-#if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
-#	ifndef DBG_NEW
-#		define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
-#		define new DBG_NEW
-#	endif
-#endif
