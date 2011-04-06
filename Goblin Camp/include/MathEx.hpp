@@ -18,10 +18,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/numeric/conversion/cast.hpp>
 
 typedef boost::numeric::converter<
-	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Floor<float>
+	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Floor<double>
 > FloorToInt;
 typedef boost::numeric::converter<
-	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Ceil<float>
+	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Ceil<double>
 > CeilToInt;
 
 namespace MathEx {
