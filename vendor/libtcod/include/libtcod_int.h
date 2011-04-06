@@ -120,6 +120,7 @@ typedef struct {
 	TCOD_renderer_t renderer;
 	/* user post-processing callback */
 	SDL_renderer_t sdl_cbk;
+	OGL_renderer_t ogl_cbk;
 	/* fading data */
 	TCOD_color_t fading_color;
 	uint8 fade;

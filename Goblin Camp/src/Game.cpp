@@ -517,20 +517,18 @@ void Game::ResetRenderer() {
 	bool useTileset = Config::GetCVar<bool>("useTileset");
 	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
 
-	TCODSystem::registerSDLRenderer(0);
-	if (renderer_type == TCOD_RENDERER_SDL && useTileset) {
+	renderer.reset();
+
+	if (useTileset) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
-				
-		// Try to load the configured tileset, else fallback on the default tileset, else revert to TCOD rendering
-		boost::shared_ptr<TileSet> tileSet = TileSetLoader::LoadTileSet(tilesetName);
-		if (tileSet)
-		{
-			renderer = boost::shared_ptr<MapRenderer>(new TileSetRenderer(width, height, tileSet, buffer));
-		}
-		else
-		{
-			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer)); 
+	
+		boost::shared_ptr<TilesetRenderer> tilesetRenderer(CreateTilesetRenderer(width, height, buffer, tilesetName));
+
+		if (tilesetRenderer) {
+			renderer = tilesetRenderer;
+		} else {
+			renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
 		}
 	} else {
 		renderer = boost::shared_ptr<MapRenderer>(new TCODMapRenderer(buffer));
@@ -540,6 +538,7 @@ void Game::ResetRenderer() {
 	if (running) {
 		renderer->PreparePrefabs();
 	}
+	renderer->SetTranslucentUI(Config::GetCVar<bool>("translucentUI"));
 }
 
 void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {

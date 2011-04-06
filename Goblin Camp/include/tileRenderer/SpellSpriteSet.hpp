@@ -21,11 +21,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class SpellSpriteSet
 {
 private:
-	Sprite tile;
+	Sprite_ptr tile;
 public:
 	explicit SpellSpriteSet();
-	explicit SpellSpriteSet(Sprite tile);
+	explicit SpellSpriteSet(Sprite_ptr tile);
 	~SpellSpriteSet();
 
-	void Draw(SDL_Surface * dst, SDL_Rect * dstRect) const;
+	void Draw(int screenX, int screenY) const;
 };

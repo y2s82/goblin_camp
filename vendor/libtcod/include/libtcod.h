@@ -147,6 +147,10 @@ char *strcasestr (const char *haystack, const char *needle);
 #endif
 #ifdef TCOD_WINDOWS
 #define vsnwprintf _vsnwprintf
+#if defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
+#define _CRTDBG_MAP_ALLOC
+#include <crtdbg.h>
+#endif
 #endif
 
 /******************************************

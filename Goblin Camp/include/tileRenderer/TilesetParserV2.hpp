@@ -16,22 +16,24 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
 
+#include <boost/noncopyable.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/filesystem.hpp>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
+#include "tileRenderer/SpriteSetFactories.hpp"
 #include "tileRenderer/NPCSprite.hpp"
 #include "tileRenderer/ItemSprite.hpp"
 #include "tileRenderer/ConstructionSprite.hpp"
 #include "tileRenderer/SpellSpriteSet.hpp"
 #include "tileRenderer/StatusEffectSprite.hpp"
 
-class TileSetParserV2 : public ITCODParserListener
+class TileSetParserV2 : public ITCODParserListener, private boost::noncopyable
 {
 public:
-	explicit TileSetParserV2();
+	explicit TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactory);
 	~TileSetParserV2();
 
 	boost::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
@@ -39,12 +41,13 @@ public:
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
-	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value);
+	bool parserProperty(TCODParser *pakrser,const char *name, TCOD_value_type_t type, TCOD_value_t value);
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name);
 	void error(const char *msg);
 
 private:
 	TCODParser parser;
+	boost::shared_ptr<TilesetRenderer> spriteFactory;
 
 	boost::shared_ptr<TileSet> tileSet;
 	bool success;
@@ -84,7 +87,7 @@ private:
 
 		AnimatedSpriteFactory() : sprites(), fps(15) {}
 
-		Sprite Build(boost::shared_ptr<TileSetTexture> currentTexture);
+		Sprite_ptr Build(SpriteLayerType layer, boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
 	};
 	AnimatedSpriteFactory animSpriteFactory;
 	ConstructionSpriteFactory constructionFactory;
@@ -93,8 +96,8 @@ private:
 	TerrainSpriteFactory terrainSpriteFactory;
 		
 	ItemSprite itemSprite;
-	Sprite corruptionOverride;
-	Sprite corruptionOverlayOverride;
+	Sprite_ptr corruptionOverride;
+	Sprite_ptr corruptionOverlayOverride;
 	
 	static const char * uninitialisedTilesetError;
 	

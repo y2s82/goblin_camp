@@ -19,11 +19,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 SpellSpriteSet::SpellSpriteSet() : tile() {}
 
-SpellSpriteSet::SpellSpriteSet(Sprite sprite)
+SpellSpriteSet::SpellSpriteSet(Sprite_ptr sprite)
 	: tile(sprite) {}
 
 SpellSpriteSet::~SpellSpriteSet() {}
 
-void SpellSpriteSet::Draw(SDL_Surface * dst, SDL_Rect * dstRect) const {
-	tile.Draw(dst, dstRect);
+void SpellSpriteSet::Draw(int screenX, int screenY) const {
+	tile.Draw(screenX, screenY);
 }
