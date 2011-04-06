@@ -155,12 +155,7 @@ void Events::SpawnBenignFauna() {
 void Events::SpawnImmigrants() {
 	std::vector<NPCType> possibleImmigrants;
 	for (std::vector<int>::iterator immi = immigrants.begin(); immi != immigrants.end(); ++immi) {
-		if (NPC::Presets[*immi].tier <= Camp::Inst()->GetTier() - 2) {
-			possibleImmigrants.push_back((NPCType)*immi);
-		} else if (NPC::Presets[*immi].tier <= Camp::Inst()->GetTier()) {
-			possibleImmigrants.push_back((NPCType)*immi); // This is intentional, it raises the odds that monsters at or lower
-			possibleImmigrants.push_back((NPCType)*immi); // than this tier are spawned vs. one tier higher.
-		} else if (NPC::Presets[*immi].tier == Camp::Inst()->GetTier() + 1) {
+		if (NPC::Presets[*immi].tier <= Camp::Inst()->GetTier()) {
 			possibleImmigrants.push_back((NPCType)*immi);
 		}
 	}
