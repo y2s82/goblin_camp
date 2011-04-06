@@ -46,6 +46,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "Stockpile.hpp"
 #include "Faction.hpp"
+#include "Stats.hpp"
 
 SkillSet::SkillSet() {
 	for (int i = 0; i < SKILLAMOUNT; ++i) { skills[i] = 0; }
@@ -852,6 +853,7 @@ CONTINUEEAT:
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[plant->Type()].fruits.begin(); fruiti != Item::Presets[plant->Type()].fruits.end(); ++fruiti) {
 						if (stockpile) {
 							int item = Game::Inst()->CreateItem(Position(), *fruiti, false);
+							Stats::Inst()->ItemBuilt(Item::Presets[*fruiti].name); //Harvesting counts as production
 							PickupItem(Game::Inst()->GetItem(item));
 							stockpile = false;
 						} else {
@@ -881,6 +883,7 @@ CONTINUEEAT:
 						for (std::list<ItemType>::iterator iti = NatureObject::Presets[tree->Type()].components.begin(); iti != NatureObject::Presets[tree->Type()].components.end(); ++iti) {
 							if (stockpile) {
 								int item = Game::Inst()->CreateItem(tree->Position(), *iti, false);
+								Stats::Inst()->ItemBuilt(Item::Presets[*iti].name); //Felling trees counts as item production
 								DropItem(carried);
 								PickupItem(Game::Inst()->GetItem(item));
 								stockpile = false;
@@ -1099,7 +1102,9 @@ CONTINUEEAT:
 							stockJob->tasks.push_back(jobs.front()->tasks[taskIndex+i]);
 						}
 						jobs.front()->tasks.clear();
-						jobs.push_back(stockJob);
+						std::deque<boost::shared_ptr<Job> >::const_iterator jobi = jobs.begin();
+						++jobi;
+						jobs.insert(jobi, stockJob);
 						DropItem(carried); //The stockpiling job will pickup the item
 						carried.reset();
 						TaskFinished(TASKSUCCESS);
@@ -1359,10 +1364,29 @@ CONTINUEEAT:
 				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
 				boost::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
-				idleJob->tasks.push_back(Task(MOVENEAR, faction == PLAYERFACTION ? Camp::Inst()->Center() : Position()));
+				if (faction == PLAYERFACTION) {
+					if (Random::Generate(8) < 7) {
+						idleJob->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
+					} else {
+						Coordinate randomLocation(-1,-1);
+						for (int tries = 0; tries < 20 && (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+							Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)); ++tries) {
+							Coordinate upperCorner = Camp::Inst()->GetUprTerritoryCorner();
+							Coordinate lowerCorner = Camp::Inst()->GetLowTerritoryCorner();
+							randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
+							randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
+						}
+						if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+							Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(),PLAYERFACTION)) randomLocation = Camp::Inst()->Center();
+						idleJob->tasks.push_back(Task(MOVENEAR, randomLocation));
+					}
+					if (Map::Inst()->IsTerritory(x,y)) run = false;
+				} else {
+					idleJob->tasks.push_back(Task(MOVENEAR, Position()));
+					run = false;
+				}
 				idleJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(9), 0)));
 				jobs.push_back(idleJob);
-				if (Distance(Camp::Inst()->Center().X(), Camp::Inst()->Center().Y(), x, y) < 15) run = false;
 			}
 		}
 	}
@@ -1524,19 +1548,21 @@ void NPC::Kill() {
 
 		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
 		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red, Position());
+		
+		Stats::Inst()->deaths[NPC::NPCTypeToString(type)] += 1;
 	}
 }
 
-void NPC::DropItem(boost::weak_ptr<Item> item) {
-	if (item.lock()) {
+void NPC::DropItem(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
 		inventory->RemoveItem(item);
-		item.lock()->Position(Position());
-		item.lock()->PutInContainer();
-		bulk -= item.lock()->GetBulk();
+		item->Position(Position());
+		item->PutInContainer();
+		bulk -= item->GetBulk();
 
 		//If the item is a container with filth in it, spill it on the ground
-		if (boost::dynamic_pointer_cast<Container>(item.lock())) {
-			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item.lock()));
+		if (boost::dynamic_pointer_cast<Container>(item)) {
+			boost::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item));
 			if (cont->ContainsFilth() > 0) {
 				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
 				cont->RemoveFilth(cont->ContainsFilth());
@@ -1624,7 +1650,7 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 			} else if (npc->quiver.lock()->empty()) {
 				if (Game::Inst()->FindItemByCategoryFromStockpiles(
 					npc->mainHand.lock()->GetAttack().Projectile(), npc->Position()).lock()) {
-						for (int i = 0; i < 10; ++i) {
+						for (int i = 0; i < 20; ++i) {
 							newJob->tasks.push_back(Task(FIND, npc->Position(), boost::shared_ptr<Entity>(), 
 								npc->mainHand.lock()->GetAttack().Projectile()));
 							newJob->tasks.push_back(Task(MOVE));
@@ -1771,7 +1797,7 @@ void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
 			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
 				if (boost::shared_ptr<Construction> construct = consi->lock()) {
-					if (construct->HasTag(WORKSHOP) || construct->HasTag(WALL)) {
+					if (construct->HasTag(WORKSHOP) || (construct->HasTag(WALL) && Random::Generate(10) == 0)) {
 						boost::shared_ptr<Job> destroyJob(new Job("Destroy "+construct->Name()));
 						destroyJob->internal = true;
 						destroyJob->tasks.push_back(Task(MOVEADJACENT, construct->Position(), construct));
@@ -2543,17 +2569,17 @@ bool NPC::HasTrait(Trait trait) { return traits.find(trait) != traits.end(); }
 
 void NPC::GoBerserk() {
 	ScanSurroundings();
-	if (carried.lock()) {
-		inventory->RemoveItem(carried);
-		carried.lock()->PutInContainer();
-		carried.lock()->Position(Position());
+	if (boost::shared_ptr<Item> carriedItem = carried.lock()) {
+		inventory->RemoveItem(carriedItem);
+		carriedItem->PutInContainer();
+		carriedItem->Position(Position());
 		Coordinate target(-1,-1);
 		if (!nearNpcs.empty()) {
 			boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
 			if (creature) target = creature->Position();
 		}
 		if (target.X() == -1) target = Coordinate(Random::Generate(x-7, x+7), Random::Generate(y-7, y+7));
-		carried.lock()->CalculateFlightPath(target, 50, GetHeight());
+		carriedItem->CalculateFlightPath(target, 50, GetHeight());
 	}
 	carried.reset();
 

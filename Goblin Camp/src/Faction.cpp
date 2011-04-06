@@ -124,7 +124,7 @@ void Faction::Reset() {
 }
 
 void Faction::Update() {
-	if (active) {
+	if (active && maxActiveTime >= 0) {
 		++activeTime;
 	}
 };
@@ -177,7 +177,7 @@ namespace {
 
 bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 	
-	if (activeTime >= maxActiveTime) {
+	if (maxActiveTime >= 0 && activeTime >= maxActiveTime) {
 		boost::shared_ptr<Job> fleeJob(new Job("Leave"));
 		fleeJob->internal = true;
 		fleeJob->tasks.push_back(Task(CALMDOWN));
@@ -283,6 +283,7 @@ void Faction::InitAfterLoad() {
 		factionNames.insert(std::make_pair(factions[i]->name, i));
 	}
 	for (int i = 0; i < factions.size(); ++i) {
+		factions[i]->index = i;
 		factions[i]->MakeFriendsWith(i);
 		factions[i]->TranslateFriends();
 	}
@@ -408,12 +409,11 @@ bool Faction::IsCoward() { return coward; }
 bool Faction::IsAggressive() { return aggressive; }
 
 void Faction::save(OutputArchive& ar, const unsigned int version) const {
-	std::list< boost::weak_ptr<NPC> > unusedList;
-	ar & unusedList;
 	ar & trapVisible;
 	ar & name;
 	ar & jobs;
 	ar & goals;
+	ar & goalSpecifiers;
 	ar & currentGoal;
 	ar & activeTime;
 	ar & maxActiveTime;
@@ -435,16 +435,22 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 		}
 		ar & uid;
 	}
+
+	ar & aggressive;
+	ar & coward;
 }
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
-	std::list< boost::weak_ptr<NPC> > unusedList;
-	ar & unusedList;
+	if (version == 0) {
+		std::list< boost::weak_ptr<NPC> > unusedList;
+		ar & unusedList;
+	}
 	ar & trapVisible;
 	ar & name;
 	if (version >= 1) {
 		ar & jobs;
 		ar & goals;
+		ar & goalSpecifiers;
 		ar & currentGoal;
 		ar & activeTime;
 		ar & maxActiveTime;
@@ -464,5 +470,7 @@ void Faction::load(InputArchive& ar, const unsigned int version) {
 			ar & uid;
 			membersAsUids.push_back(uid);
 		}
+		ar & aggressive;
+		ar & coward;
 	}
 }

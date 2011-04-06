@@ -45,6 +45,7 @@ public:
 	virtual void CancelJob(int=0);
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	void Burn();
+	virtual int Build();
 };
 
 BOOST_CLASS_VERSION(SpawningPool, 0)

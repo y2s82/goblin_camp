@@ -196,7 +196,7 @@ void FireNode::Update() {
 
 			//Create pour water job here if in player territory
 			if (Map::Inst()->IsTerritory(x,y) && !waterJob.lock()) {
-				boost::shared_ptr<Job> pourWaterJob(new Job("Douse flames", HIGH));
+				boost::shared_ptr<Job> pourWaterJob(new Job("Douse flames", VERYHIGH));
 				Job::CreatePourWaterJob(pourWaterJob, GetPosition());
 				if (pourWaterJob) {
 					pourWaterJob->MarkGround(GetPosition());
