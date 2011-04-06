@@ -263,31 +263,34 @@ bool Map::LineOfSight(int ax, int ay, int bx, int by) {
 }
 
 void Map::Reset(int x, int y) {
-	tileMap[x][y].ResetType(TILEGRASS);
-	tileMap[x][y].SetWalkable(true);
-	tileMap[x][y].SetBuildable(true);
-	tileMap[x][y].SetConstruction(-1);
-	tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
-	tileMap[x][y].SetLow(false);
-	tileMap[x][y].SetBlocksWater(false);
-	tileMap[x][y].SetBlocksLight(false);
-	tileMap[x][y].SetNatureObject(-1);
-	tileMap[x][y].itemList.clear();
-	tileMap[x][y].npcList.clear();
-	tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
-	tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
-	tileMap[x][y].marked = false;
-	tileMap[x][y].walkedOver = 0;
-	tileMap[x][y].corruption = 0;
-	tileMap[x][y].territory = false;
-	tileMap[x][y].burnt = 0;
-	changedTiles.insert(Coordinate(x,y));
-	heightMap->setValue(x,y,0.5f);
-	waterlevel = -0.8f;
-	overlayFlags = 0;
-	mapMarkers.clear();
-	markerids = 0;
-	weather.reset(new Weather(this));
+	if (x >= 0 && x < width && y >= 0 && y < height) {
+		tileMap[x][y].ResetType(TILEGRASS);
+		tileMap[x][y].SetWalkable(true);
+		tileMap[x][y].SetBuildable(true);
+		tileMap[x][y].SetConstruction(-1);
+		tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
+		tileMap[x][y].SetLow(false);
+		tileMap[x][y].SetBlocksWater(false);
+		tileMap[x][y].SetBlocksLight(false);
+		tileMap[x][y].SetNatureObject(-1);
+		tileMap[x][y].itemList.clear();
+		tileMap[x][y].npcList.clear();
+		tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
+		tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
+		tileMap[x][y].marked = false;
+		tileMap[x][y].walkedOver = 0;
+		tileMap[x][y].corruption = 0;
+		tileMap[x][y].territory = false;
+		tileMap[x][y].burnt = 0;
+		changedTiles.insert(Coordinate(x,y));
+		heightMap->setValue(x,y,0.5f);
+	} else {
+		waterlevel = -0.8f;
+		overlayFlags = 0;
+		mapMarkers.clear();
+		markerids = 0;
+		weather.reset(new Weather(this));
+	}
 }
 
 void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
@@ -618,8 +621,8 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 		for (int y = current.Y()-1; y <= current.Y()+1; ++y) {
 			for (int x = current.X()-1; x <= current.X()+1; ++x) {
-				if (x > 0 && x < Width() &&
-					y > 0 && y < Height()) {
+				if (x >= 0 && x < Width() &&
+					y >= 0 && y < Height()) {
 						if (touched.find(Coordinate(x,y)) == touched.end() && tileMap[x][y].water) {
 							int distance = Distance(beginning, Coordinate(x,y));
 							touched.insert(Coordinate(x,y));

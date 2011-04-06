@@ -86,7 +86,7 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 	int skip = 0;
 	int y = pos.Y();
 	boost::shared_ptr<NPC> npc;
-	TCODColor color_mappings[] = { TCODColor::green, TCODColor::yellow, TCODColor::red, TCODColor::grey };
+	TCODColor color_mappings[] = { TCODColor::green, TCODColor(0,160,60), TCODColor(175,150,50), TCODColor(165,95,0), TCODColor::grey };
 
 	for (int i=0; i<=PRIORITY_COUNT; i++) {
 		console->setDefaultForeground(color_mappings[i]);
@@ -447,7 +447,11 @@ void JobManager::RemoveJob(Action action, Coordinate location) {
 }
 
 void JobManager::save(OutputArchive& ar, const unsigned int version) const {
-	ar & availableList;
+	int count = PRIORITY_COUNT;
+	ar & count;
+	for (int i = 0; i < count; ++i) {
+		ar & availableList[i];
+	}
 	ar & waitingList;
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;
@@ -456,7 +460,19 @@ void JobManager::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void JobManager::load(InputArchive& ar, const unsigned int version) {
-	ar & availableList;
+	if (version == 0) {
+		std::list<boost::shared_ptr<Job> > oldList[3];
+		ar & oldList;
+		for (int i = 0; i < 3 && i < PRIORITY_COUNT; ++i) {
+			availableList[i] = oldList[i];
+		}
+	} else {
+		int count;
+		ar & count;
+		for (int i = 0; i < count && i < PRIORITY_COUNT; ++i) {
+			ar & availableList[i];
+		}
+	}
 	ar & waitingList;
 	ar & menialNPCsWaiting;
 	ar & expertNPCsWaiting;

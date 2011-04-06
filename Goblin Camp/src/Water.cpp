@@ -28,6 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "GCamp.hpp"
 #include "Coordinate.hpp"
+#include "Stats.hpp"
 
 WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 	x(vx), y(vy), depth(vdepth),
@@ -116,6 +117,21 @@ void WaterNode::Update() {
 			if (!Map::Inst()->ItemList(x,y)->empty())
 				item = Game::Inst()->GetItem(*Map::Inst()->ItemList(x,y)->begin()).lock();
 
+			//Filth and items flow off the map
+			Direction flow = Map::Inst()->GetFlow(x,y);
+			Coordinate flowTarget = Coordinate::DirectionToCoordinate(flow) + Coordinate(x,y);
+			if (flowTarget.X() < 0 || flowTarget.X() >= Map::Inst()->Width() ||
+				flowTarget.Y() < 0 || flowTarget.Y() >= Map::Inst()->Height()) {
+					if (filth > 0) {
+						Stats::Inst()->FilthFlowsOffEdge(std::min(filth, 10));
+						filth -= std::min(filth, 10);
+					}
+					if (item) {
+						Game::Inst()->RemoveItem(item);
+						item.reset();
+					}
+			}
+
 			//Loop through neighbouring waternodes
 			for (unsigned int i = 0; i < waterList.size(); ++i) {
 				if (boost::shared_ptr<WaterNode> water = waterList[i].lock()) {
@@ -126,7 +142,7 @@ void WaterNode::Update() {
 					//So much filth it'll go anywhere
 					if (filth > 10 && Random::Generate(3) == 0) { filth -= 5; water->filth += 5; }
 					//Filth and items go with the flow
-					switch (Map::Inst()->GetFlow(x, y)) {
+					switch (flow) {
 					case NORTH:
 						if (coordList[i].Y() < y) {
 							if (filth > 0) {

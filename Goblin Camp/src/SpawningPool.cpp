@@ -111,7 +111,7 @@ void SpawningPool::Update() {
 			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(corpses, (unsigned int)50));
 		}
 
-		if (corpses + filth > std::min(2 + 2*spawns, (unsigned int)10)) {
+		if (corpses + filth > std::min(2 + 2*spawns, 10U)) {
 			Coordinate spawnLocation(-1,-1);
 			for (int x = a.X(); x <= b.X(); ++x) {
 				for (int y = a.Y(); y <= b.Y(); ++y) {
@@ -137,7 +137,7 @@ void SpawningPool::Update() {
 				++spawns;
 				if (filth >= corpses*2) {
 					for (int i = 0; i < 10 && filth > 0; ++i) --filth;
-					if (Random::Generate(2) < 2) {
+					if (Random::Generate(3) < 3) {
 						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
 						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
 					} else {
@@ -300,6 +300,11 @@ void SpawningPool::Burn() {
 	if (burn > 30000) {
 		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
+}
+
+int SpawningPool::Build() {
+	Map::Inst()->Corrupt(x, y, 100);
+	return Construction::Build();
 }
 
 void SpawningPool::save(OutputArchive& ar, const unsigned int version) const {

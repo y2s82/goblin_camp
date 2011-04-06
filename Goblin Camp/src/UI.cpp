@@ -138,13 +138,13 @@ void UI::HandleKeyboard() {
 			int addition = 1;
 			if (ShiftPressed()) addition *= 10;
 			if (key.vk == TCODK_UP) {
-				diffY -= 1;
+				diffY -= addition;
 			} else if (key.vk == TCODK_DOWN) {
-				diffY += 1;
+				diffY += addition;
 			} else if (key.vk == TCODK_LEFT) {
-				diffX -= 1;
+				diffX -= addition;
 			} else if (key.vk == TCODK_RIGHT) {
-				diffX += 1;
+				diffX += addition;
 			} else if (key.vk == TCODK_KP1) {
 				TCODMouse::showCursor(false);
 				drawCursor = true;
@@ -214,7 +214,7 @@ void UI::HandleKeyboard() {
 			}
 		}
 		if (key.vk == TCODK_ESCAPE) {
-			extraTooltips.clear();
+			extraTooltip = "";
 			if (menuOpen) {
 				rbuttonPressed = true;
 			} else {
@@ -416,7 +416,7 @@ void UI::HandleMouse() {
 		}
 		if (menuOpen) currentMenu->Open();
 		menuHistory.clear();
-		extraTooltips.clear();
+		extraTooltip = "";
 	}
 
 	if (mbuttonPressed && menuOpen && !menuHistory.empty()) {
@@ -527,6 +527,7 @@ void UI::Draw(TCODConsole* console) {
 
 	Tooltip *tooltip = Tooltip::Inst();
 	tooltip->Clear();
+	if (extraTooltip != "") tooltip->AddEntry(TooltipEntry(extraTooltip, TCODColor::white));
 	for (std::list<std::string>::iterator tooltipIter = extraTooltips.begin(); tooltipIter != extraTooltips.end(); ++tooltipIter) {
 		tooltip->AddEntry(TooltipEntry(*tooltipIter, TCODColor::white));
 	}
@@ -646,7 +647,7 @@ void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 	UI::Inst()->state(state);
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Construct);
 	UI::Inst()->HideMenu();
-	UI::Inst()->AddTooltip(Construction::Presets[construct].name);
+	UI::Inst()->SetExtraTooltip(Construction::Presets[construct].name);
 }
 
 void UI::ChooseStockpile(ConstructionType stockpile) {
@@ -657,7 +658,7 @@ void UI::ChooseStockpile(ConstructionType stockpile) {
 	UI::Inst()->state(UIRECTPLACEMENT);
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Stockpile);
 	UI::Inst()->HideMenu();
-	UI::Inst()->AddTooltip(Construction::Presets[stockpile].name);
+	UI::Inst()->SetExtraTooltip(Construction::Presets[stockpile].name);
 }
 
 void UI::ChooseTreeFelling() {
@@ -811,6 +812,7 @@ void UI::CloseMenu() {
 	textMode = false;
 	if (currentMenu) currentMenu->Close();
 	currentMenu = Menu::MainMenu();
+	extraTooltip = "";
 }
 
 bool UI::ShiftPressed() { return TCODConsole::isKeyPressed(TCODK_SHIFT); }
@@ -931,6 +933,6 @@ void UI::ChooseABPlacement(boost::function<void(Coordinate)> callback, boost::fu
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
 }
 
-void UI::AddTooltip(std::string tooltip) {
-	extraTooltips.push_back(tooltip);
+void UI::SetExtraTooltip(std::string tooltip) {
+	extraTooltip = tooltip;
 }
