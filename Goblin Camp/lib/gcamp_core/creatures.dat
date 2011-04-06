@@ -324,7 +324,7 @@ npc_type "ogre" {
 
 npc_type "troll" { 
 	name="Troll"
-	tier=5
+	tier=3
 	tags=["hasHands", "immigrant"]
 	color="128,128,128"
 	graphic='T'
