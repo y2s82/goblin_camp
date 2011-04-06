@@ -49,6 +49,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "scripting/Event.hpp"
 #include "Faction.hpp"
 #include "Stockpile.hpp"
+#include "Stats.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -224,6 +225,7 @@ int Construction::Build() {
 		if (!HasTag(CENTERSCAMP)) Camp::Inst()->UpdateCenter(Center(), true);
 		else Camp::Inst()->LockCenter(Center());
 		Camp::Inst()->ConstructionBuilt(type);
+		Stats::Inst()->ConstructionBuilt(Construction::Presets[type].name);
 
 		Script::Event::BuildingCreated(boost::static_pointer_cast<Construction>(shared_from_this()), x, y);
 	}
@@ -372,7 +374,7 @@ int Construction::Use() {
 			for (int i = 0; i < Item::Presets[jobList[0]].multiplier; ++i) {
 				if (itemContainer) Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], false, 0, components, itemContainer);
 				else Game::Inst()->CreateItem(Position()+Construction::Presets[type].productionSpot, jobList[0], true, 0, components);
-				Camp::Inst()->ItemProduced();
+				Stats::Inst()->ItemBuilt(Item::Presets[jobList[0]].name);
 			}
 
 			//Destroy the components

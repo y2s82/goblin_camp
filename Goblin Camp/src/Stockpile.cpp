@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "StockManager.hpp"
 #include "Camp.hpp"
+#include "Stats.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Construction(type, target),
@@ -47,6 +48,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
 	Camp::Inst()->ConstructionBuilt(type);
+	Stats::Inst()->ConstructionBuilt(Construction::Presets[type].name);
 }
 
 Stockpile::~Stockpile() {

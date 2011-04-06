@@ -5,6 +5,7 @@ faction_type "Player" {
 faction_type "Peaceful animal" {
 	goals = ["idle"]
 	coward
+	activeTime = -1
 }
 
 faction_type "Hostile monster" {

@@ -97,6 +97,10 @@ category_type "Vegetable" {
 category_type "Drink" {
 }
 
+category_type "Water" {
+	parent="Drink"
+}
+
 category_type "Wine" {
 	parent="Drink"
 	flammable
@@ -121,6 +125,11 @@ category_type "Cloth" {
 }
 
 category_type "Flour" {
+	parent="Plant"
+	flammable
+}
+
+category_type "Powdered bark" {
 	parent="Plant"
 	flammable
 }
@@ -190,6 +199,9 @@ category_type "Rope" {
 
 category_type "Leather" {
 	flammable
+}
+
+category_type "Hardened leather" {
 }
 
 category_type "Clay" {
@@ -323,6 +335,13 @@ category_type "Anvil" {
 	parent="Tool"
 }
 
+category_type "Trap" {
+}
+
+category_type "Leghold trap" {
+	parent="Trap"
+}
+
 category_type "Alchemy" {
 }
 
@@ -382,6 +401,11 @@ category_type "Earth" {
 
 category_type "Chitin" {
 	parent="Garbage"
+}
+
+category_type "Bark" {
+	parent="Garbage"
+	flammable
 }
 
 category_type "Misc." {
@@ -659,15 +683,25 @@ item_type "Hide" {
 	decay = [ "Filth" ]
 	decaySpeed = 4
 	fruits = [ "Hair" ]
+	fitsin = "Crate"
 }
 
 item_type "Leather" {
 	category = ["Leather"]
 	graphic = 245
 	color = "127,51,0"
-	components = ["Hide"]
+	components = ["Hide", "Powdered bark"]
 	fitsin = "Crate"
 	constructedin = "Tanner"
+}
+
+item_type "Boiled leather" {
+	category = ["Hardened leather"]
+	graphic = 245
+	color = "115,45,20"
+	components = ["Leather", "Firewood", "Water"]
+	fitsin = "Crate"
+	constructedin = "Leather crafter"
 }
 
 item_type "Corpse" {
@@ -676,10 +710,46 @@ item_type "Corpse" {
 	color = "127,0,55"
 	decay = [ "Bones", "Bones", "Filth", "Filth" ]
 	decaySpeed = 3
-	fruits = [ "Bones", "Bones", "Hide", "Hide" ]
+	fruits = [ "Bones", "Hide", "Hide", "Body part" ]
 	bulk = 6
 	durability = 5
 	nutrition = 4.5
+}
+
+item_type "Large corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Bones", "Bones", "Filth", "Filth", "Filth"]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide", "Hide", "Hide", "Body part", "Body part" ]
+	bulk = 3
+	durability = 5
+	nutrition = 5.0
+}
+
+item_type "Huge corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Bones", "Bones", "Bones", "Filth", "Filth", "Filth", "Filth", "Body part"]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide", "Hide", "Hide", "Hide", "Body part", "Body part", "Body part", "Body part" ]
+	bulk = 3
+	durability = 5
+	nutrition = 6.0
+}
+
+item_type "Body part" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Filth"]
+	decaySpeed = 2
+	fruits = ["Bones"]
+	bulk = 2
+	durability = 4
+	nutrition = 2.0
 }
 
 item_type "Small corpse" {
@@ -707,7 +777,7 @@ item_type "Arthropod corpse" {
 }
 
 item_type "Water" {
-	category = ["Drink"]
+	category = ["Water"]
 	graphic = 33
 	color = "0,100,250"
 	nutrition = 5.0
@@ -719,7 +789,7 @@ item_type "Berry wine" {
 	category = ["Wine"]
 	graphic = 33
 	color = "127,0,0"
-	components = [ "Berry", "Berry", "Berry", "Berry", "Berry" ]
+	components = [ "Berry", "Berry", "Berry", "Berry", "Berry", "Water" ]
 	containIn = "Barrel"
 	nutrition = 6.0
 	multiplier = 10
@@ -733,7 +803,7 @@ item_type "Pie" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "255,0,220"
-	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood"]
+	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood", "Water"]
 	nutrition = 10.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -751,11 +821,34 @@ item_type "Meat" {
 	constructedin = "Butcher"
 }
 
+item_type "Jerked meat" {
+	category = ["Preserved food"]
+	graphic = 37
+	color = "92,51,23"
+	components = ["Meat"]
+	fitsin = "Basket"
+	nutrition = 5.0
+	decaySpeed = 18
+	decay = ["Filth"]
+	constructedin = "Kitchen"
+}
+
+item_type "Bark bread" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "107,66,38"
+	components = ["Powdered bark", "Powdered bark", "Flour", "Firewood", "Water"]
+	nutrition = 3.0
+	constructedin = "Kitchen"
+	decaySpeed = 12
+	decay = ["Filth"]
+}
+
 item_type "Bone Stew" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "102,204,0"
-	components = ["Bone", "Drink", "Meat", "Firewood"]
+	components = ["Bone", "Water", "Meat", "Firewood"]
 	nutrition = 11.0
 	constructedin = "Kitchen"
 	decaySpeed = 8
@@ -766,7 +859,7 @@ item_type "Bread" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "127,89,63"
-	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood"]
+	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood", "Water"]
 	nutrition = 6.0
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -783,6 +876,53 @@ item_type "Flour" {
 	constructedin = "Mill"
 	multiplier = 10
 	fitsin = "Sack"
+}
+
+item_type "Bark powder" {
+	category = ["Powdered bark"]
+	graphic = 44
+	color = "255,233,177"
+	components = ["Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark"]
+	containIn = "Sack"
+	constructedin = "Mill"
+	multiplier = 10
+	fitsin = "Sack"
+}
+
+item_type "Tree bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="139,90,43"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
+}
+
+item_type "Birch bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="255,250,240"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
+}
+
+item_type "Pine bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="139,90,43"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
+}
+
+item_type "Willow bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="85,107,47"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
 }
 
 item_type "Flower" {
@@ -1061,7 +1201,7 @@ item_type "Quiver" {
 	graphic = 91
 	color ="200,64,0"
 	components = ["Leather"]
-	containerSize = 100
+	containerSize = 20
 	constructedin = "Leather crafter"
 	fitsin = "Crate"
 }
@@ -1163,9 +1303,9 @@ item_type "Leather armor" {
 	category = ["Light armor"]
 	graphic = 91
 	color = "160,82,45"
-	components = ["Leather", "Leather", "Leather", "Cloth"]
+	components = ["Leather", "Leather", "Cloth", "Hardened leather", "Hardened leather"]
 	resistances {
-		physical = 10
+		physical = 12
 	}
 	constructedin = "Leather Crafter"
 	bulk = 2
@@ -1412,7 +1552,7 @@ item_type "Meat pie" {
 	category = ["Prepared food"]
 	graphic = 37
 	color = "127,0,0"
-	components = ["Meat", "Flour", "Flour", "Firewood"]
+	components = ["Meat", "Flour", "Flour", "Firewood", "Water"]
 	nutrition = 11
 	constructedin = "Kitchen"
 	decaySpeed = 12
@@ -1487,7 +1627,7 @@ item_type "Healing tonic" {
 	category = [ "Tonic" ]
 	graphic = 33
 	color="0,136,14"
-	components = [ "Shoot", "Shoot" ]
+	components = [ "Shoot", "Shoot", "Water" ]
 	constructedin = "Alchemist"
 	addStatusEffects=["Healing"]
 }
@@ -1639,7 +1779,7 @@ item_type "Stunted lichfruit tree" {
 	category = ["Misc."]
 	graphic = 215
 	color = "255,255,0"
-	fruits = [ "Lichfruit", "Lichfruit" ]
+	fruits = [ "Lichfruit", "Lichfruit", "Lichfruit leaf" ]
 	decay = [ "Filth" ]
 	decaySpeed = 12
 }
@@ -1697,18 +1837,9 @@ item_type "Radish seed" {
 	category = [ "Food seed" ]
 	graphic = 250
 	color="237,21,85"
-	growth = "Young radish plant"
+	growth = "Radish plant"
 	fitsin = "Sack"
 	bulk=0
-}
-
-item_type "Young radish plant" {
-	category = [ "Misc." ]
-	graphic = 42
-	color="237,21,85"
-	growth = "Radish plant"
-	decay = [ "Filth" ]
-	decaySpeed = 12
 }
 
 item_type "Radish plant" {
@@ -1751,6 +1882,7 @@ item_type "Marshmerrow shoot" {
 	category = [ "Shoot" ]
 	graphic = 47
 	color = "0,136,14"
+	fitsin="Sack"
 }
 
 item_type "Dreamvine seed" {
@@ -1783,15 +1915,16 @@ item_type "Dreamvine plant" {
 item_type "Dreamvine" {
 	category = [ "Vine" ]
 	graphic = 167
-	color="77,234,81"
+	color = "77,234,81"
+	fitsin = "Sack"
 }
 
 item_type "Marubium" {
 	category = [ "Branch" ]
 	graphic = 47
-	color="0,240,240"
-	fruits= [ "Marubium seed" ]
-	fitsin="Sack"
+	color = "0,240,240"
+	fruits = [ "Marubium seed" ]
+	fitsin ="Sack"
 }
 
 item_type "Marubium seed" {
@@ -1833,4 +1966,13 @@ item_type "Ice" {
 	color="170,255,255"
 	bulk = 10
 	decaySpeed = 1
+}
+
+item_type "Iron foothold trap" {
+	category = ["Leghold trap"]
+	graphic = 209
+	color = "155,128,128"
+	components = [ "Metal plate", "Metal plate", "Metal plate", "Metal bar", "Metal bar", "Charcoal", "Charcoal"]
+	constructedin = "Blacksmith"
+	bulk = 3
 }

@@ -56,6 +56,10 @@ namespace py = boost::python;
 #include "Trap.hpp"
 #include "Faction.hpp"
 #include "data/Data.hpp"
+#include "Stats.hpp"
+#include "UI/Label.hpp"
+#include "UI/Button.hpp"
+#include "UI/ScrollPanel.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -79,7 +83,7 @@ screenWidth(0),
 	paused(false),
 	toMainMenu(false),
 	running(false),
-	safeMonths(6),
+	safeMonths(3),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
@@ -807,7 +811,7 @@ Coordinate Game::FindWater(Coordinate pos) {
 void Game::Update() {
 	++time;
 
-	if (time == MONTH_LENGTH) {
+	if (time >= MONTH_LENGTH) {
 		if (safeMonths > 0) --safeMonths;
 
 		for (std::map<int, boost::shared_ptr<Construction> >::iterator cons = staticConstructionList.begin();
@@ -860,7 +864,7 @@ void Game::Update() {
 
 		default: break;
 		}
-		time = 0;
+		time -= MONTH_LENGTH;
 	}
 
 	//This actually only updates every 50th waternode. This is due to 2 things: updating one water tile actually also
@@ -975,7 +979,9 @@ void Game::Update() {
 
 	if (!gameOver && orcCount == 0 && goblinCount == 0) {
 		gameOver = true;
-		MessageBox::ShowMessageBox("All your orcs and goblins have died.", boost::bind(&Game::GameOver, Game::Inst()), "Main Menu", NULL, "Keep watching");
+		//Game over, display stats
+		DisplayStats();
+		MessageBox::ShowMessageBox("Do you wish to keep watching?", NULL, "Keep watching", boost::bind(&Game::GameOver, Game::Inst()), "Quit");
 	}
 
 	for (std::list<boost::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
@@ -1528,6 +1534,7 @@ void Game::CreateFilth(Coordinate pos) {
 }
 
 void Game::CreateFilth(Coordinate pos, int amount) {
+	Stats::Inst()->FilthCreated(amount);
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
 		int loops = -1;
 		while (amount > 0 && loops < 1000) {
@@ -1617,11 +1624,18 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 
 				default: break;
 				}
-				while (flowTo == pos || (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
-					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height())) {
+
+				while (flowTo == pos) {
 						flowTo = Coordinate(pos.X() + Random::Generate(-diff, diff), pos.Y() + Random::Generate(-diff, diff));
 				}
 				pos = flowTo;
+				
+				//If the filth flows off-map just stop creating more
+				if (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
+					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height()) {
+						Stats::Inst()->FilthFlowsOffEdge(amount);
+						return;
+				 }
 			}
 		}
 	}
@@ -1758,6 +1772,7 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, C
 }
 
 void Game::Reset() {
+	Map::Inst()->Reset(-1,-1);
 	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 0; y < Map::Inst()->Height(); ++y) {
 			Map::Inst()->Reset(x,y);
@@ -1786,7 +1801,7 @@ void Game::Reset() {
 	season = LateWinter;
 	camX = 180;
 	camY = 180;
-	safeMonths = 6;
+	safeMonths = 3;
 	Announce::Inst()->Reset();
 	Camp::Inst()->Reset();
 	renderer->PreparePrefabs();
@@ -2223,6 +2238,47 @@ boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
 	return boost::weak_ptr<Construction>();
 }
 
+namespace {
+	void DrawText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
+		console->print(x, y, (boost::format("%s : %d") % text.first % text.second).str().c_str());
+	}
+	void DrawDeathText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
+		console->print(x, y, (boost::format("%d : %s") % text.second % text.first).str().c_str());
+	}
+}
+
+void Game::DisplayStats() {
+	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 77, 39);
+	Dialog *statDialog = new Dialog(contents, "Statistics", 77, 39);
+
+	Frame *filthFrame = new Frame("Filth", std::vector<Drawable *>(), 1, 1, 25, 4);
+	filthFrame->AddComponent(new Label((boost::format("created: %d") % Stats::Inst()->GetFilthCreated()).str(),1,1,TCOD_LEFT));
+	filthFrame->AddComponent(new Label((boost::format("off-map: %d") % Stats::Inst()->GetFilthFlownOff()).str(),1,2,TCOD_LEFT));
+	contents->AddComponent(filthFrame);
+
+	Frame *productionFrame = new Frame("Production", std::vector<Drawable*>(), 26, 1, 25, 34);
+	productionFrame->AddComponent(new Label((boost::format("items: %d") % Stats::Inst()->GetItemsBuilt()).str(),1,1,TCOD_LEFT));
+	productionFrame->AddComponent(new ScrollPanel(1, 2, 23, 15,
+		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
+		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,17,TCOD_LEFT));
+	productionFrame->AddComponent(new ScrollPanel(1, 18, 23, 15,
+		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
+		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+	contents->AddComponent(productionFrame);
+
+	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 51, 1, 25, 18);
+	deathFrame->AddComponent(new ScrollPanel(1, 1, 23, 16,
+		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
+		boost::bind(DrawDeathText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+	contents->AddComponent(deathFrame);
+
+	Button *okButton = new Button("OK", NULL, 33, 35, 10, 'o', true);
+	contents->AddComponent(okButton);
+
+	statDialog->ShowModal();
+}
+
 void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar.register_type<Container>();
 	ar.register_type<Item>();
@@ -2233,6 +2289,8 @@ void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar.register_type<SpawningPool>();
 	ar.register_type<Trap>();
 	ar.register_type<Ice>();
+	ar.register_type<Stats>();
+	ar.register_type<WaterItem>();
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -2259,6 +2317,7 @@ void Game::save(OutputArchive& ar, const unsigned int version) const  {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
+	ar & Stats::instance;
 }
 
 void Game::load(InputArchive& ar, const unsigned int version) {
@@ -2270,7 +2329,11 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar.register_type<Door>();
 	ar.register_type<SpawningPool>();
 	ar.register_type<Trap>();
-	if (version >= 1) ar.register_type<Ice>();
+	if (version >= 1) {
+		ar.register_type<Ice>();
+		ar.register_type<Stats>();
+		ar.register_type<WaterItem>();
+	}
 	ar & season;
 	ar & time;
 	ar & orcCount;
@@ -2310,4 +2373,7 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & fireList;
 	ar & spellList;
 	ar & age;
+	if (version >= 1) {
+		ar & Stats::instance;
+	}
 }

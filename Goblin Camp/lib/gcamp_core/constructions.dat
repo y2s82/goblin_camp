@@ -63,7 +63,8 @@ construction_type "Carpenter" {
 			 178, 46,177]
 	walkable
 	maxCondition=90
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=1
 	description="A carpenter's workshop allows your orcs to create basic wooden items"
@@ -80,7 +81,8 @@ construction_type "Basket Weaver" {
 	maxCondition=90
 	productionx=1
 	productiony=1
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	description="Baskets are mainly used to store berries and fruit"
 }
 
@@ -92,7 +94,8 @@ construction_type "Winery" {
 			  10, 33, 35,231]
 	walkable
 	maxCondition=90
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
 }
@@ -131,7 +134,9 @@ construction_type "Kitchen" {
 			 127,  95, 95, 127]
 	walkable
 	maxCondition=90
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 	description="Dry fruits to keep longer, make bread, pies etc"
@@ -150,7 +155,8 @@ construction_type "Weaver" {
 	maxCondition=90
 	productionx=1
 	productiony=1
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	description="Make cloth, sacks and rope"
 }
 
@@ -163,7 +169,9 @@ construction_type "Bone Carver" {
 			  41,  42, 42, 40]
 	walkable
 	maxCondition=90
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 	description="Bones can be carved into weapons, furniture and decorations"
@@ -178,7 +186,9 @@ construction_type "Butcher" {
 			  37, 42, 42, 37]
 	walkable
 	maxCondition=90
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=1
 	productiony=2
 }
@@ -239,16 +249,16 @@ construction_type "Spiked pit" {
 	tileReqs=["ditch"]
 }
 
-construction_type "Breastwork" {
+construction_type "Rampart" {
 	tier=1
 	category="Basics"
 	graphicLength=1
 	graphic=[178]
-	slowMovement=5
+	slowMovement=15
 	maxCondition=30
-	materials=["Earth"]
+	materials=["Earth", "Earth"]
 	placementType=2
-	description="Breastwork helps slow down creatures"
+	description="Earthen rampart helps slow down creatures"
 }
 
 construction_type "Palisade" {
@@ -265,7 +275,7 @@ construction_type "Battlement" {
 	tier=2
 	category="Basics"
 	graphicLength=1
-	graphic=[223]
+	graphic=[127]
 	walkable
 	maxCondition=30
 	materials=["Plank","Plank","Plank","Plank","Plank"]
@@ -309,7 +319,9 @@ construction_type "Stone mason" {
 	maxCondition=90
 	productionx=2
 	productiony=1
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Weapon crafter" {
@@ -324,7 +336,8 @@ construction_type "Weapon crafter" {
 	maxCondition=90
 	productionx=1
 	productiony=2
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Leather Crafter" {
@@ -339,7 +352,8 @@ construction_type "Leather Crafter" {
 	maxCondition=80
 	productionx=1
 	productiony=2
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 }
 
 construction_type "Tanner" {
@@ -351,7 +365,9 @@ construction_type "Tanner" {
 			  35, 35,  9,231]
 	walkable
 	maxCondition=120
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=1
 	description="Tanners create leather from animal hides"
@@ -380,7 +396,7 @@ construction_type "Duckboard" {
 	bridge
 	walkable
 	maxCondition=30
-	materials=["Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank"]
 	graphicLength=1
 	graphic=[19]
 	tileReqs=["grass", "rock", "mud", "bog"]
@@ -516,10 +532,30 @@ construction_type "Oil press" {
 			  35, 153,  9,231]
 	walkable
 	maxCondition=120
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=1
 	description="Creates oil from nuts and vegetables."
+}
+
+construction_type "Bear trap" {
+	tier=3
+	category="Traps"
+	graphicLength=1
+	graphic=[94]
+	color="255,255,255"
+	walkable
+	maxCondition=20
+	materials=["Leghold trap"]
+	description="Bear trap"
+	attack "Jaws" {
+		type="piercing"
+		damage="2d15+10"
+		statusEffects=["Helpless", "Bleeding"]
+		effectChances=[    95    , 		80	 ]
+	}
 }
 
 construction_type "Alchemist" {
@@ -531,7 +567,9 @@ construction_type "Alchemist" {
 			 127,  33, 95, 127]
 	walkable
 	maxCondition=90
-	materials=["Log", "Log", "Plank","Plank","Plank","Plank","Plank"]
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
 	productionx=2
 	productiony=0
 	description="The alchemist creates tonics, tinctures and poisons."

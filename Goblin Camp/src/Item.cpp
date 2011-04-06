@@ -140,9 +140,9 @@ void Item::Color(TCODColor col) {color = col;}
 
 void Item::Position(Coordinate pos) {
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		if (!internal) Map::Inst()->ItemList(x,y)->erase(uid);
+		if (!internal && !container.lock()) Map::Inst()->ItemList(x,y)->erase(uid);
 		x = pos.X(); y = pos.Y();
-		if (!internal) Map::Inst()->ItemList(x,y)->insert(uid);
+		if (!internal && !container.lock()) Map::Inst()->ItemList(x,y)->insert(uid);
 	}
 }
 Coordinate Item::Position() {

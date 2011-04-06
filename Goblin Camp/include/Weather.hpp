@@ -32,6 +32,7 @@ class Weather {
 	
 	Map* map;
 	Direction windDirection;
+	Direction prevailingWindDirection;
 	WeatherType currentWeather;
 	bool tileChange;
 	bool changeAll;
