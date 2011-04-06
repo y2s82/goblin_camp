@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 #include "JobManager.hpp"
 #include "Job.hpp"
+#include "Stats.hpp"
 
 FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
 	temperature(vtemp) {
@@ -139,6 +140,7 @@ void FireNode::Update() {
 					Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
 					Game::Inst()->RemoveItem(item);
 					temperature += 250;
+					Stats::Inst()->ItemBurned();
 					break;
 				}
 			}
