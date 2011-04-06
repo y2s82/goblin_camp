@@ -33,16 +33,20 @@ unsigned Stats::GetPoints() { return points; }
 void Stats::FilthCreated(unsigned amount) { filthCreated += amount; }
 unsigned Stats::GetFilthCreated() { return filthCreated; }
 
-void Stats::FilthFlowsOffEdge(unsigned amount) { filthOutsideMap += amount; }
+void Stats::FilthFlowsOffEdge(unsigned amount) { filthOutsideMap += amount; AddPoints(amount); }
 unsigned Stats::GetFilthFlownOff() { return filthOutsideMap; }
 
 void Stats::ItemBurned(unsigned amount) { itemsBurned += amount; }
 unsigned Stats::GetItemsBurned() { return itemsBurned; }
 
-void Stats::ConstructionBuilt(std::string name) { constructionsBuilt[name] += 1; ++constructions; }
+void Stats::ConstructionBuilt(std::string name) { 
+	constructionsBuilt[name] += 1; 
+	++constructions; 
+	AddPoints(10U);
+}
 unsigned Stats::GetConstructionsBuilt() { return constructions; }
 
-void Stats::ItemBuilt(std::string name) { itemsBuilt[name] += 1; ++production; }
+void Stats::ItemBuilt(std::string name) { itemsBuilt[name] += 1; ++production; AddPoints(); }
 unsigned Stats::GetItemsBuilt() { return production; }
 
 namespace {
