@@ -21,9 +21,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ogl/OGLFunctionExt.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
 
-#include <SDL/SDL.h>
-#include <SDL/SDL_image.h>
-#include <SDL/SDL_opengl.h>
+#include <SDL.h>
+#include <SDL_image.h>
+#include <SDL_opengl.h>
 #include "MathEx.hpp"
 #include "Logger.hpp"
 #include <boost/scoped_array.hpp>
