@@ -81,7 +81,7 @@ void Weather::Update() {
 			currentWeather = NORMALWEATHER;
 		} else currentWeather = RAIN;
 	}
-	if (currentTemperature >= 0 && currentWeather == RAIN) Game::Inst()->CreateWater(Coordinate(Random::Generate(map->Width()-1),Random::Generate(map->Height()-1)),1);
+	if (!tileChange && currentTemperature >= 0 && currentWeather == RAIN) Game::Inst()->CreateWater(Coordinate(Random::Generate(map->Width()-1),Random::Generate(map->Height()-1)),1);
 
 	if (Game::Inst()->CurrentSeason() != static_cast<Season>(currentSeason)) {
 		currentSeason = static_cast<int>(Game::Inst()->CurrentSeason());
