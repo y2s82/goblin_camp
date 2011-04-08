@@ -264,6 +264,7 @@ void NPC::HandleThirst() {
 				}
 CONTINUEDRINKBLOCK:
 				newJob->tasks.push_back(Task(DRINK, tmpCoord));
+				if (jobs.empty()) JobManager::Inst()->NPCNotWaiting(uid);
 				jobs.push_back(newJob);
 			}
 		}
@@ -312,6 +313,7 @@ void NPC::HandleHunger() {
 			newJob->tasks.push_back(Task(MOVE,item.lock()->Position()));
 			newJob->tasks.push_back(Task(TAKE,item.lock()->Position(), item));
 			newJob->tasks.push_back(Task(EAT));
+			if (jobs.empty()) JobManager::Inst()->NPCNotWaiting(uid);
 			jobs.push_back(newJob);
 		}
 	}
@@ -342,6 +344,7 @@ void NPC::HandleWeariness() {
 			}
 		}
 		sleepJob->tasks.push_back(Task(SLEEP, Position()));
+		if (jobs.empty()) JobManager::Inst()->NPCNotWaiting(uid);
 		jobs.push_back(sleepJob);
 	}
 }
@@ -1093,8 +1096,8 @@ CONTINUEEAT:
 				break;
 
 			case STOCKPILEITEM:
-				if (carried.lock()) {
-					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(carried, true, true, false);
+				if (boost::shared_ptr<Item> item = carried.lock()) {
+					boost::shared_ptr<Job> stockJob = Game::Inst()->StockpileItem(item, true, true, !item->Reserved());
 					if (stockJob) {
 						stockJob->internal = true;
 						//Add remaining tasks into stockjob
@@ -1105,7 +1108,7 @@ CONTINUEEAT:
 						std::deque<boost::shared_ptr<Job> >::const_iterator jobi = jobs.begin();
 						++jobi;
 						jobs.insert(jobi, stockJob);
-						DropItem(carried); //The stockpiling job will pickup the item
+						DropItem(item); //The stockpiling job will pickup the item
 						carried.reset();
 						TaskFinished(TASKSUCCESS);
 						break;
