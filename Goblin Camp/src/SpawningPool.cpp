@@ -111,7 +111,7 @@ void SpawningPool::Update() {
 			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(corpses, (unsigned int)50));
 		}
 
-		if (corpses + filth > std::min(2 + 2*spawns, 10U)) {
+		if ((corpses*10) + filth > 10U) {
 			Coordinate spawnLocation(-1,-1);
 			for (int x = a.X(); x <= b.X(); ++x) {
 				for (int y = a.Y(); y <= b.Y(); ++y) {
@@ -135,34 +135,26 @@ void SpawningPool::Update() {
 
 			if (spawnLocation.X() != -1 && spawnLocation.Y() != -1) {
 				++spawns;
-				if (filth >= corpses*2) {
-					for (int i = 0; i < 10 && filth > 0; ++i) --filth;
-					if (Random::Generate(3) < 3) {
-						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
-					} else {
-						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
-					}
-				} else if (filth >= corpses) {
-					for (int i = 0; i < 5 && filth > 0; ++i) --filth;
-					--corpses;
-					if (Random::GenerateBool()) {
-						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
-					} else {
-						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
-					}
-				} else {
-					corpses -= 2;
-					if (Random::Generate(2) < 2) {
-						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-						Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
-					} else {
-						Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-						Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
-					}
+
+				float goblinRatio = static_cast<float>(Game::Inst()->GoblinCount()) / Game::Inst()->OrcCount();
+				bool goblin = false;
+				bool orc = false;
+				if (goblinRatio < 2) goblin = true;
+				else if (goblinRatio > 4) orc = true;
+				else if (Random::Generate(2) < 2) goblin = true;
+				else orc = true;
+
+				if (corpses > 0) --corpses;
+				else filth -= std::min(filth, 10U);
+
+				if (goblin) {
+					Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
+					Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
+				}
+
+				if (orc) {
+					Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
+					Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
 				}
 
 				if (Random::Generate(std::min(expansion, 10U)) == 0) Expand();
