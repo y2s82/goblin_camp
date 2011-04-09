@@ -24,6 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StockManager.hpp"
 #include "JobManager.hpp"
 #include "Announce.hpp"
+#include "Stats.hpp"
 
 SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construction(type, target),
 	dumpFilth(false),
@@ -100,11 +101,13 @@ void SpawningPool::Update() {
 		if (Map::Inst()->GetFilth(x, y).lock() && Map::Inst()->GetFilth(x, y).lock()->Depth() > 0) {
 			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
 			filth += filthNode->Depth();
+			Stats::Inst()->AddPoints(filthNode->Depth());
 			Map::Inst()->Corrupt(x, y, filthNode->Depth() * std::min(100 * filth, (unsigned int)10000));
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
 			++corpses;
+			Stats::Inst()->AddPoints(100);
 			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
