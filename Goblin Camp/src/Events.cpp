@@ -117,22 +117,24 @@ void Events::SpawnHostileMonsters() {
 		}
 	}
 
-	NPCType monsterType = Random::ChooseElement(possibleMonsters);
-	int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+	if (!possibleMonsters.empty()) {
+		NPCType monsterType = Random::ChooseElement(possibleMonsters);
+		int hostileSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
 
-	std::string msg;
-	if (hostileSpawnCount > 1) 
-		msg = (boost::format("%s have been sighted outside your %s!") 
-		% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
-	else msg = (boost::format("A %s has been sighted outside your %s!")
-		% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
+		std::string msg;
+		if (hostileSpawnCount > 1) 
+			msg = (boost::format("%s have been sighted outside your %s!") 
+			% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
+		else msg = (boost::format("A %s has been sighted outside your %s!")
+			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
 
-	Coordinate a,b;
-	GenerateEdgeCoordinates(map, a, b);
+		Coordinate a,b;
+		GenerateEdgeCoordinates(map, a, b);
 
-	Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
-	Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
-	timeSinceHostileSpawn = 0;
+		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
+		Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+		timeSinceHostileSpawn = 0;
+	}
 }
 
 void Events::SpawnBenignFauna() {
@@ -160,24 +162,26 @@ void Events::SpawnImmigrants() {
 		}
 	}
 
-	NPCType monsterType = Random::ChooseElement(possibleImmigrants);
-	int spawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+	if (!possibleImmigrants.empty()) {
+		NPCType monsterType = Random::ChooseElement(possibleImmigrants);
+		int spawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
 
-	std::string msg;
-	if (spawnCount > 1) 
-		msg = (boost::format("%s join your %s!") 
-		% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
-	else msg = (boost::format("A %s joins your %s!")
-		% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
-	
-	Coordinate a, b;
-	GenerateEdgeCoordinates(map, a, b);
+		std::string msg;
+		if (spawnCount > 1) 
+			msg = (boost::format("%s join your %s!") 
+			% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
+		else msg = (boost::format("A %s joins your %s!")
+			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
 
-	for (int i = 0; i < spawnCount; ++i) {
-		int npcUid = Game::Inst()->CreateNPC(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())),
-			monsterType);
-		existingImmigrants.push_back(Game::Inst()->GetNPC(npcUid));
+		Coordinate a, b;
+		GenerateEdgeCoordinates(map, a, b);
+
+		for (int i = 0; i < spawnCount; ++i) {
+			int npcUid = Game::Inst()->CreateNPC(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())),
+				monsterType);
+			existingImmigrants.push_back(Game::Inst()->GetNPC(npcUid));
+		}
+
+		Announce::Inst()->AddMsg(msg, TCODColor(0,150,255), Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 	}
-
-	Announce::Inst()->AddMsg(msg, TCODColor(0,150,255), Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 }
