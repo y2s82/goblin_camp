@@ -1279,8 +1279,26 @@ void Game::GenerateMap(uint32 seed) {
 		for (int y = 0; y < map->Height(); ++y) {
 			float height = map->heightMap->getValue(x,y);
 			if (height < map->GetWaterlevel()) {
-				if (random.GenerateBool()) map->ResetType(x,y,TILERIVERBED);
-				else map->ResetType(x,y,TILEDITCH);
+				bool tileChosen = false;
+				for (int ix = x - 3; ix <= x + 3; ++ix) {
+					if (ix >= 0 && ix < map->Width() && 
+						map->heightMap->getValue(ix,y) >= map->GetWaterlevel()) {
+							map->ResetType(x,y,TILEDITCH);
+							tileChosen = true;
+							break;
+					}
+				}
+				if (!tileChosen) {
+					for (int iy = y - 3; iy <= y + 3; ++iy) {
+						if (iy >= 0 && iy < map->Height() &&
+							map->heightMap->getValue(x,iy) >= map->GetWaterlevel()) {
+								map->ResetType(x,y,TILEDITCH);
+								tileChosen = true;
+								break;
+						}
+					}
+				}
+				if (!tileChosen) map->ResetType(x,y,TILERIVERBED);
 				CreateWater(Coordinate(x,y), RIVERDEPTH);
 			} else if (height < 4.5f) {
 				map->ResetType(x,y,TILEGRASS);
