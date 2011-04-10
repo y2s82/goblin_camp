@@ -1553,6 +1553,7 @@ void NPC::Kill() {
 		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red, Position());
 		
 		Stats::Inst()->deaths[NPC::NPCTypeToString(type)] += 1;
+		Stats::Inst()->AddPoints(NPC::Presets[type].health);
 	}
 }
 
