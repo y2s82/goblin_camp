@@ -2138,6 +2138,8 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 		fireList.push_back(boost::weak_ptr<FireNode>(newFire));
 		Map::Inst()->SetFire(pos.X(), pos.Y(), newFire);
 	} else {
+		boost::shared_ptr<FireNode> existingFire = fire.lock();
+		if (existingFire) existingFire->AddHeat(temperature);
 	}
 }
 
