@@ -27,6 +27,7 @@ faction_type "Trolls" {
 	goals = ["patrol"]
 	friends=["Player"]
 	aggressive
+	activeTime = -1
 }
 
 faction_type "Bees" {
@@ -64,3 +65,7 @@ faction_type "Elementals" {
 	aggressive
 }
 
+faction_type "Rats" {
+	goals =        ["steal"]
+	goalSpecifiers=["food"]
+}
