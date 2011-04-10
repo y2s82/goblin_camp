@@ -610,11 +610,13 @@ void SettingsMenu() {
 	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
 	bool tutorial            = Config::GetCVar<bool>("tutorial");
 	bool translucentUI       = Config::GetCVar<bool>("translucentUI");
+	bool compressSaves       = Config::GetCVar<bool>("compressSaves");
+	bool autosave            = Config::GetCVar<bool>("autosave");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	const int w = 40;
-	const int h = 23;
+	const int h = 27;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
@@ -693,6 +695,14 @@ void SettingsMenu() {
 		TCODConsole::root->print(x + 1, currentY, "Translucent UI");
 
 		currentY += 2;
+		TCODConsole::root->setDefaultForeground((compressSaves ? TCODColor::green : TCODColor::grey));
+		TCODConsole::root->print(x + 1, currentY, "Compress saves");
+
+		currentY += 2;
+		TCODConsole::root->setDefaultForeground((autosave ? TCODColor::green : TCODColor::grey));
+		TCODConsole::root->print(x + 1, currentY, "Autosave");
+
+		currentY += 2;
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->print(x + 1, currentY, "Renderer");
 
@@ -716,9 +726,11 @@ void SettingsMenu() {
 			clicked = false;
 			int whereY      = mouse.cy - y - 1;
 			int rendererY   = currentY - y - 1;
-			int fullscreenY = rendererY - 6;
-			int tutorialY = rendererY - 4;
-			int translucentUIY = rendererY - 2;
+			int fullscreenY = rendererY - 10;
+			int tutorialY = rendererY - 8;
+			int translucentUIY = rendererY - 6;
+			int compressSavesY = rendererY - 4;
+			int autosaveY = rendererY - 2;
 
 			if (whereY > 1 && whereY < fullscreenY) {
 				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
@@ -731,6 +743,10 @@ void SettingsMenu() {
 				tutorial = !tutorial;
 			} else if (whereY == translucentUIY) {
 				translucentUI = !translucentUI;
+			} else if (whereY == compressSavesY) {
+				compressSaves = !compressSaves;
+			} else if (whereY == autosaveY) {
+				autosave = !autosave;
 			} else if (whereY > rendererY) {
 				int whereRenderer = whereY - rendererY - 1;
 				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
@@ -748,6 +764,8 @@ void SettingsMenu() {
 	Config::SetCVar("fullscreen", fullscreen);
 	Config::SetCVar("tutorial", tutorial);
 	Config::SetCVar("translucentUI", translucentUI);
+	Config::SetCVar("compressSaves", compressSaves);
+	Config::SetCVar("autosave", autosave);
 
 	try {
 		Config::Save();
