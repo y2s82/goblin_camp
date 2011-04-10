@@ -134,6 +134,7 @@ npc_type "rabid albino rat" {
 	}
 	spawnAsGroup="1d10+5"
 	death="Small corpse"
+	faction="Rats"
 }
 
 npc_type "snake" {
@@ -329,6 +330,8 @@ npc_type "troll" {
 	color="128,128,128"
 	graphic='T'
 	AI="HostileAnimal"
+	needsNutrition
+	needsSleep
 	stats {
 		speed=15
 		health=300
