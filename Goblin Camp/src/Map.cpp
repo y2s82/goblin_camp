@@ -282,6 +282,8 @@ void Map::Reset(int x, int y) {
 		tileMap[x][y].corruption = 0;
 		tileMap[x][y].territory = false;
 		tileMap[x][y].burnt = 0;
+		tileMap[x][y].moveCost = 1;
+		tileMap[x][y].flow = NODIRECTION;
 		changedTiles.insert(Coordinate(x,y));
 		heightMap->setValue(x,y,0.5f);
 	} else {
