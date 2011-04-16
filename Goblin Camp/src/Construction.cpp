@@ -453,6 +453,7 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
 		} else if (boost::iequals(name, "permanent")) {
 			Construction::Presets[constructionIndex].permanent = true;
+			Construction::Presets[constructionIndex].tags[PERMANENT] = true;
 		} else if (boost::iequals(name, "blocksLight")) {
 			Construction::Presets[constructionIndex].blocksLight = true;
 		} else if (boost::iequals(name, "unique")) {
