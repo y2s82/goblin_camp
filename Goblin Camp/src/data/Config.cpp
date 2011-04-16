@@ -87,6 +87,7 @@ namespace Config {
 			("compressSaves","0")
 			("translucentUI","0")
 			("autosave","1")
+			("pauseOnDanger","0")
 		;
 		
 		insert(Globals::keys)

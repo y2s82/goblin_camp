@@ -2132,6 +2132,12 @@ void Game::CreateFire(Coordinate pos) {
 }
 
 void Game::CreateFire(Coordinate pos, int temperature) {
+	if (fireList.empty()) {
+		Announce::Inst()->AddMsg("Fire!", TCODColor::red, pos);
+		if (Config::GetCVar<bool>("pauseOnDanger"))
+			Pause();
+	}
+
 	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos.X(), pos.Y()));
 	if (!fire.lock()) { //No existing firenode
 		boost::shared_ptr<FireNode> newFire(new FireNode(pos.X(), pos.Y(), temperature));
