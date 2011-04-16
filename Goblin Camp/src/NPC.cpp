@@ -563,13 +563,13 @@ void NPC::Think() {
 	while (timeCount > UPDATES_PER_SECOND) {
 		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
-		if (aggressor.lock()) {
+		if (boost::shared_ptr<NPC> enemy = aggressor.lock()) {
 			JobManager::Inst()->NPCNotWaiting(uid);
-			if (Game::Adjacent(Position(), aggressor)) {
-				if (currentTask() && currentTask()->action == KILL) Hit(aggressor, currentTask()->flags != 0);
-				else Hit(aggressor);
+			if (Game::Adjacent(Position(), enemy)) {
+				if (currentTask() && currentTask()->action == KILL) Hit(enemy, currentTask()->flags != 0);
+				else Hit(enemy);
 			}
-			if (Random::Generate(9) <= 3 && Distance(Position(), aggressor.lock()->Position()) > LOS_DISTANCE) {
+			if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(x,y,enemy->X(),enemy->Y())) {
 				aggressor.reset();
 				TaskFinished(TASKFAILFATAL, "Target lost");
 			}
