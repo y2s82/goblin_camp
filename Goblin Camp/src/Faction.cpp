@@ -144,7 +144,8 @@ namespace {
 			int constructionID = Map::Inst()->GetConstruction(x,y);
 			if (constructionID >= 0) {
 				construction = Game::Inst()->GetConstruction(constructionID).lock();
-				if (construction && !construction->HasTag(WORKSHOP) && !construction->HasTag(WALL))
+				if (construction && (construction->HasTag(PERMANENT) || 
+					(!construction->HasTag(WORKSHOP) && !construction->HasTag(WALL))))
 					construction.reset();
 			}
 		} while (!TCODLine::step(&x, &y) && !construction);
