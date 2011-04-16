@@ -354,6 +354,8 @@ construction_type "Leather Crafter" {
 	productiony=2
 	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
 	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	chimneyx=1
+	chimneyy=1
 }
 
 construction_type "Tanner" {
