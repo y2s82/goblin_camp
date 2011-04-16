@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "GCamp.hpp"
 #include "Camp.hpp"
 #include "StockManager.hpp"
+#include "data/Config.hpp"
 
 Events::Events(Map* vmap) :
 map(vmap),
@@ -134,6 +135,8 @@ void Events::SpawnHostileMonsters() {
 		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 		Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 		timeSinceHostileSpawn = 0;
+		if (Config::GetCVar<bool>("pauseOnDanger")) 
+			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
 	}
 }
 

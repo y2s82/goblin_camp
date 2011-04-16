@@ -612,11 +612,12 @@ void SettingsMenu() {
 	bool translucentUI       = Config::GetCVar<bool>("translucentUI");
 	bool compressSaves       = Config::GetCVar<bool>("compressSaves");
 	bool autosave            = Config::GetCVar<bool>("autosave");
+	bool pauseOnDanger       = Config::GetCVar<bool>("pauseOnDanger");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
 	const int w = 40;
-	const int h = 27;
+	const int h = 29;
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 
@@ -703,6 +704,10 @@ void SettingsMenu() {
 		TCODConsole::root->print(x + 1, currentY, "Autosave");
 
 		currentY += 2;
+		TCODConsole::root->setDefaultForeground((pauseOnDanger ? TCODColor::green : TCODColor::grey));
+		TCODConsole::root->print(x + 1, currentY, "Pause on danger");
+
+		currentY += 2;
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->print(x + 1, currentY, "Renderer");
 
@@ -726,11 +731,12 @@ void SettingsMenu() {
 			clicked = false;
 			int whereY      = mouse.cy - y - 1;
 			int rendererY   = currentY - y - 1;
-			int fullscreenY = rendererY - 10;
-			int tutorialY = rendererY - 8;
-			int translucentUIY = rendererY - 6;
-			int compressSavesY = rendererY - 4;
-			int autosaveY = rendererY - 2;
+			int fullscreenY = rendererY - 12;
+			int tutorialY = rendererY - 10;
+			int translucentUIY = rendererY - 8;
+			int compressSavesY = rendererY - 6;
+			int autosaveY = rendererY - 4;
+			int pauseOnDangerY = rendererY - 2;
 
 			if (whereY > 1 && whereY < fullscreenY) {
 				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
@@ -747,6 +753,8 @@ void SettingsMenu() {
 				compressSaves = !compressSaves;
 			} else if (whereY == autosaveY) {
 				autosave = !autosave;
+			} else if (whereY == pauseOnDangerY) {
+				pauseOnDanger = !pauseOnDanger;
 			} else if (whereY > rendererY) {
 				int whereRenderer = whereY - rendererY - 1;
 				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
@@ -766,6 +774,7 @@ void SettingsMenu() {
 	Config::SetCVar("translucentUI", translucentUI);
 	Config::SetCVar("compressSaves", compressSaves);
 	Config::SetCVar("autosave", autosave);
+	Config::SetCVar("pauseOnDanger", pauseOnDanger);
 
 	try {
 		Config::Save();
