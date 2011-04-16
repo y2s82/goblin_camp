@@ -1801,7 +1801,9 @@ void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
 			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
 				if (boost::shared_ptr<Construction> construct = consi->lock()) {
-					if (construct->HasTag(WORKSHOP) || (construct->HasTag(WALL) && Random::Generate(10) == 0)) {
+					if (!construct->HasTag(PERMANENT) &&
+						(construct->HasTag(WORKSHOP) || 
+						(construct->HasTag(WALL) && Random::Generate(10) == 0))) {
 						boost::shared_ptr<Job> destroyJob(new Job("Destroy "+construct->Name()));
 						destroyJob->internal = true;
 						destroyJob->tasks.push_back(Task(MOVEADJACENT, construct->Position(), construct));
