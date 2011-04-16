@@ -58,6 +58,7 @@ enum ConstructionTag {
 	BRIDGE,
 	TRAP,
 	RANGEDADVANTAGE,
+	PERMANENT,
 	TAGCOUNT
 };
 
