@@ -54,7 +54,7 @@ namespace {
 	void SerializeUnorderedMap(const boost::unordered_map<A,B> &map, OutputArchive& ar) {
 		size_t size = map.size();
 		ar & size;
-		for (boost::unordered_map<A,B>::const_iterator iter = map.begin(); iter != map.end(); ++iter) {
+		for (typename boost::unordered_map<A, B>::const_iterator iter = map.begin(); iter != map.end(); ++iter) {
 			ar & iter->first;
 			ar & iter->second;
 		}
