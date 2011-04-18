@@ -2136,7 +2136,7 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 	if (fireList.empty()) {
 		Announce::Inst()->AddMsg("Fire!", TCODColor::red, pos);
 		if (Config::GetCVar<bool>("pauseOnDanger"))
-			Pause();
+			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
 	}
 
 	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos.X(), pos.Y()));
