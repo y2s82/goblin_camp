@@ -50,6 +50,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Faction.hpp"
 #include "Stockpile.hpp"
 #include "Stats.hpp"
+#include "data/Config.hpp"
 
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
@@ -854,6 +855,10 @@ void Construction::Update() {
 			NPCType monsterType = Game::Inst()->GetRandomNPCTypeByTag(Construction::Presets[type].spawnCreaturesTag);
 			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
+
+			if (announceColor == TCODColor::red && Config::GetCVar<bool>("pauseOnDanger")) 
+				Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
+
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
 			if (amount == 1) {
 				Announce::Inst()->AddMsg("A "+NPC::NPCTypeToString(monsterType)+" emerges from the "+name+"!", announceColor, Position());
