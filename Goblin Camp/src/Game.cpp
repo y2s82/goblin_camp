@@ -1857,6 +1857,7 @@ void Game::MoveCam(float x, float y) {
 
 void Game::SetMark(int i) {
 	marks[i] = Coordinate(FloorToInt::convert(camX), FloorToInt::convert(camY));
+	Announce::Inst()->AddMsg("Mark set");
 }
 
 void Game::ReturnToMark(int i) {
