@@ -253,6 +253,7 @@ graphic(g),
 		graphic = 30;
 		color = TCODColor(0,255,255);
 		negative = false;
+		visible = false;
 		break;
 
 	default: break;
