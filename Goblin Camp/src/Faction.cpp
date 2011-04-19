@@ -232,14 +232,7 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 				int limit = 0;
 				Coordinate location(-1,-1);
 				if (IsFriendsWith(PLAYERFACTION)) {
-					do {
-						int x = Random::Generate(Camp::Inst()->GetUprTerritoryCorner().X(),
-							Camp::Inst()->GetLowTerritoryCorner().X());
-						int y = Random::Generate(Camp::Inst()->GetUprTerritoryCorner().Y(),
-							Camp::Inst()->GetLowTerritoryCorner().Y());
-						if (Map::Inst()->IsTerritory(x,y)) location = Coordinate(x,y);
-						++limit;
-					} while (location.X() < 0 && limit < 100);
+					location = Camp::Inst()->GetRandomSpot();
 				} else {
 					do {
 						int x = Random::Generate(Map::Inst()->Width());
