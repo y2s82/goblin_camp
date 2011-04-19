@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Random.hpp"
 #include "JobManager.hpp"
 #include "Stats.hpp"
+#include "Faction.hpp"
 
 Camp* Camp::instance = 0;
 
@@ -272,6 +273,20 @@ void Camp::UpdateWaterJobs() {
 
 Coordinate Camp::GetUprTerritoryCorner() const { return upperCorner; }
 Coordinate Camp::GetLowTerritoryCorner() const { return lowerCorner; }
+
+Coordinate Camp::GetRandomSpot() const {
+	Coordinate randomLocation(-1,-1);
+	for (int tries = 0; tries < 20 && (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+		Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)); ++tries) {
+			Coordinate upperCorner = Camp::Inst()->GetUprTerritoryCorner();
+			Coordinate lowerCorner = Camp::Inst()->GetLowTerritoryCorner();
+			randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
+			randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
+	}
+	if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+		Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)) randomLocation = Camp::Inst()->Center();
+	return randomLocation;
+}
 
 void Camp::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Coordinate>();

@@ -1371,17 +1371,9 @@ CONTINUEEAT:
 					if (Random::Generate(8) < 7) {
 						idleJob->tasks.push_back(Task(MOVENEAR, Camp::Inst()->Center()));
 					} else {
-						Coordinate randomLocation(-1,-1);
-						for (int tries = 0; tries < 20 && (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
-							Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)); ++tries) {
-							Coordinate upperCorner = Camp::Inst()->GetUprTerritoryCorner();
-							Coordinate lowerCorner = Camp::Inst()->GetLowTerritoryCorner();
-							randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
-							randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
-						}
-						if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
-							Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(),PLAYERFACTION)) randomLocation = Camp::Inst()->Center();
-						idleJob->tasks.push_back(Task(MOVENEAR, randomLocation));
+						Coordinate randomLocation = Camp::Inst()->GetRandomSpot();
+						idleJob->tasks.push_back(Task(MOVENEAR, 
+							randomLocation.X() != -1 ? randomLocation : Camp::Inst()->Center()));
 					}
 					if (Map::Inst()->IsTerritory(x,y)) run = false;
 				} else {

@@ -66,6 +66,7 @@ public:
 	void UpdateWaterJobs();
 	Coordinate GetUprTerritoryCorner() const;
 	Coordinate GetLowTerritoryCorner() const;
+	Coordinate GetRandomSpot() const;
 };
 
 BOOST_CLASS_VERSION(Camp, 1)
