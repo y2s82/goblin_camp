@@ -585,7 +585,7 @@ construction_type "Brick road" {
 	maxCondition=50
 	materials=["Brick","Brick","Brick","Brick"]
 	graphicLength=1
-	graphic=[35]
+	graphic=[177]
 	tileReqs=["grass", "rock", "mud"]
 	placementType=2
 	description="Brick paved road"
