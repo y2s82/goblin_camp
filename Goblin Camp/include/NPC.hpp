@@ -195,6 +195,7 @@ class NPC : public Entity {
 
 	void UpdateHealth();
 	boost::shared_ptr<Faction> factionPtr;
+
 public:
 	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
 
