@@ -276,15 +276,21 @@ Coordinate Camp::GetLowTerritoryCorner() const { return lowerCorner; }
 
 Coordinate Camp::GetRandomSpot() const {
 	Coordinate randomLocation(-1,-1);
-	for (int tries = 0; tries < 20 && (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
-		Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)); ++tries) {
-			Coordinate upperCorner = Camp::Inst()->GetUprTerritoryCorner();
-			Coordinate lowerCorner = Camp::Inst()->GetLowTerritoryCorner();
-			randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
-			randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
+	int tries = 0;
+	
+	while (tries < 20 && randomLocation.X() == -1) {
+		++tries;
+
+		randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
+		randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
+		
+		if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
+			Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION) ||
+			!Map::Inst()->IsWalkable(randomLocation.X(), randomLocation.Y() ||
+			Map::Inst()->GetWater(randomLocation.X(), randomLocation.Y()).lock()))
+			randomLocation = Coordinate(-1,-1);
 	}
-	if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
-		Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION)) randomLocation = Camp::Inst()->Center();
+
 	return randomLocation;
 }
 
