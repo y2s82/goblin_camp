@@ -515,7 +515,7 @@ npc_type "cyclops" {
 	}
 	death="Huge corpse"
 	faction="Giants"
-	spawnAsgroup="1d6"
+	spawnAsGroup="1d6"
 }
 
 npc_type "giant" { 
