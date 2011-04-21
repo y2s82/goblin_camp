@@ -111,13 +111,13 @@ void Camp::UpdateTier() {
 	{
 		if      (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 10000 && population >= 200)
 			newTier = 6;
-		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 3000  && population >= 100)
+		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 5000  && population >= 100)
 			newTier = 5;
-		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 1000  && population >= 60)
+		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 3000  && population >= 70)
 			newTier = 4;
-		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 500   && population >= 40)
+		else if (workshops > 10 && Stats::Inst()->GetItemsBuilt() > 1000   && population >= 50)
 			newTier = 3;
-		else if (workshops > 5  && Stats::Inst()->GetItemsBuilt() > 100   && population >= 30)
+		else if (workshops > 5  && Stats::Inst()->GetItemsBuilt() > 400   && population >= 30)
 			newTier = 2;
 		else if (workshops > 1  && Stats::Inst()->GetItemsBuilt() > 20    && population >= 20)
 			newTier = 1;
