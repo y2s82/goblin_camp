@@ -40,6 +40,7 @@ class StockManager {
 	std::map<ItemType,int> typeQuantities;
 	std::map<ItemType,int> minimums; //If minimum is -1, the product isn't available yet
 	std::set<ItemType> producables;
+	std::set<ItemType> dumpables;
 	std::map<ItemType, ConstructionType> producers;
 	std::multimap<ConstructionType, boost::weak_ptr<Construction> > workshops;
 	std::set<ItemType> fromTrees; //Trees and stones are a special case, possibly fish in the future as well
