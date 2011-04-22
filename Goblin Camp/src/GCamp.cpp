@@ -180,7 +180,7 @@ void StartNewGame() {
 	Script::Event::GameStart();
 
 	game->GenerateMap(time(0));
-	game->SetSeason(LateFall);
+	game->SetSeason(EarlySpring);
 
 	std::priority_queue<std::pair<int, Coordinate> > spawnCenterCandidates;
 
@@ -288,6 +288,9 @@ void StartNewGame() {
 	Map::Inst()->SetTerritoryRectangle(spawnTopCorner, spawnBottomCorner, true);
 
 	Map::Inst()->weather->ApplySeasonalEffects();
+
+	for (int i = 0; i < 10; ++i)
+		Game::Inst()->events->SpawnBenignFauna();
 
 	MainLoop();
 }

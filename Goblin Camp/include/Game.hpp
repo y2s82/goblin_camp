@@ -66,7 +66,8 @@ class Game {
 	friend class TCODMapRenderer;
 	friend class TilesetRenderer;
 	friend class NPCDialog;
-	
+	friend void StartNewGame();
+
 	Game();
 	static Game* instance;
 	int screenWidth, screenHeight;
