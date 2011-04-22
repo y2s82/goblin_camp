@@ -252,6 +252,10 @@ void JobManager::Reset() {
 	waitingList.clear();
 	menialNPCsWaiting.clear();
 	expertNPCsWaiting.clear();
+	for (std::vector<std::vector<boost::weak_ptr<Job> > >::iterator iter = toolJobs.begin(); iter != toolJobs.end(); ++iter) {
+		iter->clear();
+	}
+	failList.clear();
 }
 
 void JobManager::NPCWaiting(int uid) {
