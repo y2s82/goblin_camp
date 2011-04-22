@@ -2087,6 +2087,13 @@ void NPC::DestroyAllItems() {
 	while (!inventory->empty()) {
 		boost::weak_ptr<Item> item = inventory->GetFirstItem();
 		inventory->RemoveItem(item);
+		if (boost::shared_ptr<Container> container = boost::dynamic_pointer_cast<Container>(item.lock())) {
+			while (!container->empty()) {
+				boost::weak_ptr<Item> item = container->GetFirstItem();
+				container->RemoveItem(item);
+				Game::Inst()->RemoveItem(item);
+			}
+		}
 		Game::Inst()->RemoveItem(item);
 	}
 }
