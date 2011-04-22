@@ -258,6 +258,7 @@ void SpawningPool::Expand(bool message) {
 		}
 
 		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
+		Map::Inst()->SetBuildable(location.X(), location.Y(), false);
 		Map::Inst()->SetTerritory(location.X(), location.Y(), true);
 
 		Map::Inst()->Corrupt(location.X(), location.Y(), 2000 * std::min(expansion, (unsigned int)100));
