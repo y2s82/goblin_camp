@@ -46,6 +46,7 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	void Burn();
 	virtual int Build();
+	boost::shared_ptr<Container>& GetContainer();
 };
 
 BOOST_CLASS_VERSION(SpawningPool, 0)

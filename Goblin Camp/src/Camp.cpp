@@ -28,6 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 #include "Stats.hpp"
 #include "Faction.hpp"
+#include "SpawningPool.hpp"
 
 Camp* Camp::instance = 0;
 
@@ -312,6 +313,7 @@ void Camp::save(OutputArchive& ar, const unsigned int version) const {
 	ar & waterZones;
 	ar & menialWaterJobs;
 	ar & expertWaterJobs;
+	ar & spawningPool;
 }
 
 void Camp::load(InputArchive& ar, const unsigned int version) {
@@ -336,4 +338,5 @@ void Camp::load(InputArchive& ar, const unsigned int version) {
 	ar & waterZones;
 	ar & menialWaterJobs;
 	ar & expertWaterJobs;
+	ar & spawningPool;
 }

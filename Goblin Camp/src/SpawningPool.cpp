@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "JobManager.hpp"
 #include "Announce.hpp"
 #include "Stats.hpp"
+#include "Camp.hpp"
 
 SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construction(type, target),
 	dumpFilth(false),
@@ -106,11 +107,16 @@ void SpawningPool::Update() {
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
-			++corpses;
-			Stats::Inst()->AddPoints(100);
 			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
+			if (boost::shared_ptr<Item> actualItem = corpse.lock()) {
+				if (actualItem->IsCategory(Item::StringToItemCategory("corpse"))) {
+					++corpses;
+					Stats::Inst()->AddPoints(100);
+				}
+			}
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
+			if (corpses == 0) corpses = 1; //Non-corpses don't count as corpses, but we want to generate corruption anyhow
 			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(corpses, (unsigned int)50));
 		}
 
@@ -231,10 +237,10 @@ void SpawningPool::Expand(bool message) {
 					Attack attack;
 					attack.Type(DAMAGE_MAGIC);
 					TCOD_dice_t damage;
-					damage.nb_dices = 100;
-					damage.nb_faces = 100;
-					damage.multiplier = 100;
-					damage.addsub = 1000;
+					damage.nb_dices = 1;
+					damage.nb_faces = 1;
+					damage.multiplier = 1;
+					damage.addsub = 100000;
 					attack.Amount(damage);
 					construct->Damage(&attack);
 				}
@@ -298,9 +304,14 @@ void SpawningPool::Burn() {
 }
 
 int SpawningPool::Build() {
+	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != boost::static_pointer_cast<SpawningPool>(shared_from_this())) {
+		Camp::Inst()->spawningPool = boost::static_pointer_cast<SpawningPool>(shared_from_this());
+	}
 	Map::Inst()->Corrupt(x, y, 100);
 	return Construction::Build();
 }
+
+boost::shared_ptr<Container>& SpawningPool::GetContainer() { return corpseContainer; }
 
 void SpawningPool::save(OutputArchive& ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Construction>(*this);
