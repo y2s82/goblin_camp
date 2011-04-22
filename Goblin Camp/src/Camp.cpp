@@ -182,6 +182,7 @@ void Camp::Reset() {
 	lockedCenter = Coordinate(0,0);
 	tier = 0;
 	name = "Clearing";
+	article = "a";
 	workshops = 0;
 	farmplots = 0;
 	upperCorner = Coordinate(0, 0);

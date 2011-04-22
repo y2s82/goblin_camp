@@ -1792,28 +1792,36 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, C
 }
 
 void Game::Reset() {
+	npcList.clear();
+	squadList.clear();
+	hostileSquadList.clear();
+
+	itemList.clear();
+	freeItems.clear();
+	flyingItems.clear();
+	stoppedItems.clear();
+	natureList.clear();
+	itemList.clear();
+
+	waterList.clear();
+	filthList.clear();
+	bloodList.clear();
+
 	Map::Inst()->Reset(-1,-1);
 	for (int x = 0; x < Map::Inst()->Width(); ++x) {
 		for (int y = 0; y < Map::Inst()->Height(); ++y) {
 			Map::Inst()->Reset(x,y);
 		}
 	}
-	npcList.clear();
-	squadList.clear();
-	hostileSquadList.clear();
-	itemList.clear();
 	staticConstructionList.clear();
 	dynamicConstructionList.clear();
-	natureList.clear();
-	waterList.clear();
-	filthList.clear();
-	bloodList.clear();
 	JobManager::Inst()->Reset();
 	StockManager::Inst()->Reset();
 	time = 0;
 	age = 0;
 	orcCount = 0;
 	goblinCount = 0;
+	peacefulFaunaCount = 0;
 	paused = false;
 	toMainMenu = false;
 	running = false;

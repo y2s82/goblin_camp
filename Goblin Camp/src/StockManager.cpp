@@ -379,6 +379,7 @@ void StockManager::Reset() {
 	typeQuantities.clear();
 	minimums.clear();
 	producables.clear();
+	dumpables.clear();
 	producers.clear();
 	workshops.clear();
 	fromTrees.clear();
@@ -386,6 +387,7 @@ void StockManager::Reset() {
 	designatedTrees.clear();
 	treeFellingJobs.clear();
 	designatedBog.clear();
+	bogIronJobs.clear();
 	barrelWaterJobs.clear();
 	Init();
 }
