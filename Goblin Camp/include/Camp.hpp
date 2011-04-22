@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "data/Serialization.hpp"
 
 class Job;
+class SpawningPool;
 
 class Camp {
 	GC_SERIALIZABLE_CLASS
@@ -44,7 +45,6 @@ class Camp {
 	std::set<Coordinate> waterZones;
 	std::list<boost::weak_ptr<Job> > menialWaterJobs;
 	std::list<boost::weak_ptr<Job> > expertWaterJobs;
-
 public:
 	static Camp* Inst();
 	Coordinate Center();
@@ -67,6 +67,7 @@ public:
 	Coordinate GetUprTerritoryCorner() const;
 	Coordinate GetLowTerritoryCorner() const;
 	Coordinate GetRandomSpot() const;
+	boost::weak_ptr<SpawningPool> spawningPool;
 };
 
 BOOST_CLASS_VERSION(Camp, 1)
