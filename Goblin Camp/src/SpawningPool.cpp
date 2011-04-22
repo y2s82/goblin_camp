@@ -64,7 +64,7 @@ void SpawningPool::Update() {
 		//Generate jobs
 
 		if (jobCount < 4) {
-			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 2) == 0) {
+			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 4) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
 					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", MED));
 					filthDumpJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
@@ -84,7 +84,7 @@ void SpawningPool::Update() {
 				}
 			}
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
-				Random::Generate(UPDATES_PER_SECOND * 2) == 0) {
+				Random::Generate(UPDATES_PER_SECOND * 4) == 0) {
 					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", MED));
 					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
