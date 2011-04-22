@@ -5,7 +5,7 @@ faction_type "Player" {
 faction_type "Peaceful animal" {
 	goals = ["idle"]
 	coward
-	activeTime = -1
+	activeTime = -1.0
 }
 
 faction_type "Hostile monster" {
@@ -14,6 +14,7 @@ faction_type "Hostile monster" {
 }
 
 faction_type "Giants" {
+	friends=["Humans"]
 	goals = ["destroy"]
 	aggressive
 }
@@ -27,7 +28,7 @@ faction_type "Trolls" {
 	goals = ["patrol"]
 	friends=["Player"]
 	aggressive
-	activeTime = -1
+	activeTime = -1.0
 }
 
 faction_type "Bees" {
@@ -74,4 +75,11 @@ faction_type "Elven scouts" {
 	friends=["Peaceful animal"]
 	goals = ["patrol"]
 	aggressive
+}
+
+faction_type "Humans" {
+	friends=["Giants", "Peaceful animal"]
+	goals=["kill"]
+	aggressive
+	activeTime = 1.0
 }
