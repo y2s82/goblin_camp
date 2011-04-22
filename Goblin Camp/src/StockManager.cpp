@@ -33,6 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "Job.hpp"
 #include "Stockpile.hpp"
+#include "SpawningPool.hpp"
 
 #ifdef DEBUG
 #include <iostream>
@@ -76,11 +77,11 @@ void StockManager::Init() {
 		//Bog iron is a hard coded special case, for now. TODO: Think about this
 		if (boost::iequals(Item::Presets[item].name, "Bog iron") ||
 			boost::iequals(Item::Presets[item].name, "Water")) {
-			producables.insert(item);
-			if (boost::iequals(Item::Presets[item].name, "Bog iron"))
-				fromEarth.insert(item);
-			producerFound = true;
-			UpdateQuantity(item, 0);
+				producables.insert(item);
+				if (boost::iequals(Item::Presets[item].name, "Bog iron"))
+					fromEarth.insert(item);
+				producerFound = true;
+				UpdateQuantity(item, 0);
 		}
 
 		for (unsigned int cons = 0; cons < Construction::Presets.size(); ++cons) { //Look through all constructions
@@ -90,9 +91,6 @@ void StockManager::Init() {
 					producables.insert(item);
 					producers.insert(std::pair<ItemType, ConstructionType>(item, cons));
 					producerFound = true;
-#ifdef DEBUG
-					std::cout<<"Found producer for "<<Item::Presets[item].name<<": "<<Construction::Presets[cons].name<<"\n";
-#endif
 					break;
 				}
 			}
@@ -120,17 +118,22 @@ void StockManager::Init() {
 			}
 		}
 
+		//Flag all inorganic materials for dumping (except seeds which are technically not organic)
+		if (!Item::Presets[item].organic &&
+			Item::Presets[item].categories.find(Item::StringToItemCategory("Seed")) == Item::Presets[item].categories.end())
+			dumpables.insert(item);
 	}
 }
 
 void StockManager::Update() {
-	for (std::set<ItemType>::iterator prodi = producables.begin(); prodi != producables.end(); ++prodi) {
-		if (minimums[*prodi] > 0) {
-			int difference = minimums[*prodi] - typeQuantities[*prodi];
-			if (difference > 0) {
-				difference = std::max(1, difference / Item::Presets[*prodi].multiplier);
+	//Check all ItemTypes
+	for (ItemType type = 0; type < Item::Presets.size(); ++type) {
+		int difference = minimums[type] - typeQuantities[type];
+		if (producables.find(type) != producables.end()) {
+			if (minimums[type] > 0 && difference > 0) { //Only consider production if we have a positive minimum
+				difference = std::max(1, difference / Item::Presets[type].multiplier);
 				//Difference is now equal to how many jobs are required to fulfill the deficit
-				if (fromTrees.find(*prodi) != fromTrees.end()) { //Item is a component of trees
+				if (fromTrees.find(type) != fromTrees.end()) { //Item is a component of trees
 					//Subtract the amount of active tree felling jobs from the difference
 					difference -= treeFellingJobs.size();
 					//Pick a designated tree and go chop it
@@ -141,7 +144,7 @@ void StockManager::Update() {
 							bool componentInTree = false;
 							for (std::list<ItemType>::iterator compi = NatureObject::Presets[treei->lock()->Type()].components.begin(); 
 								compi != NatureObject::Presets[treei->lock()->Type()].components.end(); ++compi) {
-									if (*compi==*prodi) {
+									if (*compi==type) {
 										componentInTree = true;
 										break;
 									}
@@ -161,7 +164,7 @@ void StockManager::Update() {
 								treei = designatedTrees.erase(treei);
 							}
 					}
-				} else if (fromEarth.find(*prodi) != fromEarth.end()) {
+				} else if (fromEarth.find(type) != fromEarth.end()) {
 					difference -= bogIronJobs.size();
 					if (designatedBog.size() > 0) {
 						for (int i = bogIronJobs.size(); i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
@@ -176,7 +179,7 @@ void StockManager::Update() {
 							--difference;
 						}
 					}
-				} else if (*prodi == Item::StringToItemType("Water")) {
+				} else if (type == Item::StringToItemType("Water")) {
 					difference -= barrelWaterJobs.size();
 					if (difference > 0) {
 						Coordinate waterLocation = Game::Inst()->FindWater(Camp::Inst()->Center());
@@ -198,7 +201,7 @@ void StockManager::Update() {
 					//First get all the workshops capable of producing this product
 					std::pair<std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator,
 						std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator> 
-						workshopRange = workshops.equal_range(producers[*prodi]);
+						workshopRange = workshops.equal_range(producers[type]);
 					//By dividing the difference by the amount of workshops we get how many jobs each one should handle
 					int workshopCount = std::distance(workshopRange.first, workshopRange.second);
 					if (workshopCount > 0) {
@@ -209,18 +212,38 @@ void StockManager::Update() {
 							workshopRange.first; worki != workshopRange.second && difference > 0; ++worki) {
 								int jobsFound = 0;
 								for (int jobi = 0; jobi < (signed int)worki->second.lock()->JobList()->size(); ++jobi) {
-									if ((*worki->second.lock()->JobList())[jobi] == *prodi) {
+									if ((*worki->second.lock()->JobList())[jobi] == type) {
 										++jobsFound;
 										--difference;
 									}
 								}
 								if (jobsFound < jobCount) {
 									for (int i = 0; i < jobCount - jobsFound; ++i) {
-										worki->second.lock()->AddJob(*prodi);
+										worki->second.lock()->AddJob(type);
 										if (Random::Generate(9) < 8) --difference; //Adds a bit of inexactness (see orcyness) to production
 									}
 								}
 						}
+					}
+				}
+			}
+		}
+		
+		if (dumpables.find(type) != dumpables.end() && 
+			       difference < (minimums[type] <= 0 ? 100 : minimums[type]) * -2) {
+			//The item is eligible for dumping and we have a surplus
+			if (Random::Generate(59) == 0) {
+				if (boost::shared_ptr<SpawningPool> spawningPool = Camp::Inst()->spawningPool.lock()) {
+					boost::shared_ptr<Job> dumpJob(new Job("Dump "+Item::ItemTypeToString(type), LOW));
+					boost::shared_ptr<Item> item = Game::Inst()->FindItemByTypeFromStockpiles(type, spawningPool->Position()).lock();
+					if (item) {
+						dumpJob->Attempts(1);
+						dumpJob->ReserveEntity(item);
+						dumpJob->tasks.push_back(Task(MOVE, item->Position()));
+						dumpJob->tasks.push_back(Task(TAKE, item->Position(), item));
+						dumpJob->tasks.push_back(Task(MOVEADJACENT, spawningPool->GetContainer()->Position()));
+						dumpJob->tasks.push_back(Task(PUTIN, spawningPool->GetContainer()->Position(), spawningPool->GetContainer()));
+						JobManager::Inst()->AddJob(dumpJob);
 					}
 				}
 			}
