@@ -1002,31 +1002,6 @@ npc_type "netch" {
 	death="Hide"
 }
 
-npc_type "human woodsman" {
-	tags = ["hasHands"]
-	name="Human woodsman"
-	color="255,255,255"
-	graphic='@'
-	AI="PeacefulAnimal"
-	stats {
-		speed=12
-		health=100
-		dodge=8
-		size=8
-	}
-	resistances {
-		physical=5
-	}
-	attack "attack" {
-		type="wielded"
-		damage="1d5+3"
-		cooldown=25
-	}
-	death="Corpse"
-	equipOneOf=["leather armor", "nothing", "nothing"]
-	equipOneOf=["stone axe", "stone axe", "stone spear"]
-}
-
 npc_type "elven scout" {
 	tags = ["hasHands", "localWildlife"]
 	tier = 4
@@ -1035,8 +1010,8 @@ npc_type "elven scout" {
 	graphic='@'
 	AI="HostileAnimal"
 	stats {
-		speed=15
-		health=80
+		speed=19
+		health=100
 		dodge=25
 		size=7
 	}
@@ -1045,13 +1020,44 @@ npc_type "elven scout" {
 	}
 	attack "attack" {
 		type="wielded"
-		damage="1d5+2"
+		damage="1d5+5"
 		cooldown=25
 	}
 	death="Corpse"
-	equipOneOf=["leather armor"]
-	equipOneOf=["quiver"]
-	equipOneOf=["wooden bow"]
-	equipOneOf=["wooden arrow"]
+	equipOneOf=["Leather armor"]
+	equipOneOf=["Quiver"]
+	equipOneOf=["Wooden bow"]
+	equipOneOf=["Wooden arrow"]
 	faction = "Elven scouts"
 }
+
+npc_type "human soldier" {
+	tags = ["hasHands", "attacksRandomly"]
+	tier = 6
+	name = "Human soldier"
+	color = "255,255,255"
+	graphic='@'
+	AI="HostileAnimal"
+	stats {
+		speed=16
+		health=150
+		dodge=10
+		size=8
+	}
+	resistances {
+		physical=5
+		magic=10
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d10+2"
+		cooldown=25
+	}
+	equipOneOf=["Brigandine", "Mail hauberk", "Plate armor"]
+	equipOneOf=["Quiver"]
+	equipOneOf=["Wooden bow", "Iron spear", "Iron war hammer", "Iron axe", "Iron sword"]
+	equipOneOf=["Iron arrow"]
+	spawnAsGroup="10+1d20"
+	faction = "Humans"
+}
+	
