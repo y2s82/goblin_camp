@@ -337,7 +337,11 @@ class FactionListener : public ITCODParserListener {
 				Faction::factions[factionIndex]->goalSpecifiers.push_back(value);
 			}
 		} else if (boost::iequals(name,"activeTime")) {
-			Faction::factions[factionIndex]->maxActiveTime = value.i;
+			float activeTime = value.f;
+			if (activeTime < 0.0f)
+				Faction::factions[factionIndex]->maxActiveTime = -1;
+			else
+				Faction::factions[factionIndex]->maxActiveTime = static_cast<int>(activeTime * MONTH_LENGTH);
 		} else if (boost::iequals(name,"friends")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Faction::factions[factionIndex]->friendNames.push_back((char*)TCOD_list_get(value.list,i));
@@ -360,7 +364,7 @@ void Faction::LoadPresets(std::string filename) {
 	TCODParserStruct *factionTypeStruct = parser.newStructure("faction_type");
 	factionTypeStruct->addListProperty("goals", TCOD_TYPE_STRING, false);
 	factionTypeStruct->addListProperty("goalSpecifiers", TCOD_TYPE_STRING, false);
-	factionTypeStruct->addProperty("activeTime", TCOD_TYPE_INT, false);
+	factionTypeStruct->addProperty("activeTime", TCOD_TYPE_FLOAT, false);
 	factionTypeStruct->addListProperty("friends", TCOD_TYPE_STRING, false);
 	factionTypeStruct->addFlag("aggressive");
 	factionTypeStruct->addFlag("coward");
