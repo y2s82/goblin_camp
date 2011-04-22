@@ -69,3 +69,9 @@ faction_type "Rats" {
 	goals =        ["steal"]
 	goalSpecifiers=["food"]
 }
+
+faction_type "Elven scouts" {
+	friends=["Peaceful animal"]
+	goals = ["patrol"]
+	aggressive
+}

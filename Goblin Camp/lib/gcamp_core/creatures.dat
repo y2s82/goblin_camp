@@ -1026,3 +1026,32 @@ npc_type "human woodsman" {
 	equipOneOf=["leather armor", "nothing", "nothing"]
 	equipOneOf=["stone axe", "stone axe", "stone spear"]
 }
+
+npc_type "elven scout" {
+	tags = ["hasHands", "localWildlife"]
+	tier = 4
+	name = "Elven scout"
+	color = "000,255,000"
+	graphic='@'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=80
+		dodge=25
+		size=7
+	}
+	resistances {
+		poison=50
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d5+2"
+		cooldown=25
+	}
+	death="Corpse"
+	equipOneOf=["leather armor"]
+	equipOneOf=["quiver"]
+	equipOneOf=["wooden bow"]
+	equipOneOf=["wooden arrow"]
+	faction = "Elven scouts"
+}
