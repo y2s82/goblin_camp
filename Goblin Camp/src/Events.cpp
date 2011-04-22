@@ -143,8 +143,14 @@ void Events::SpawnHostileMonsters() {
 void Events::SpawnBenignFauna() {
 	if (peacefulAnimals.size() > 0 && Game::Inst()->PeacefulFaunaCount() < 20) {
 		//Generate benign fauna
+		std::vector<NPCType> possibleFauna;
+		for (std::vector<int>::iterator iter = peacefulAnimals.begin(); iter != peacefulAnimals.end(); ++iter) {
+			if (NPC::Presets[*iter].tier <= Camp::Inst()->GetTier())
+				possibleFauna.push_back((NPCType)*iter);
+		}
+
 		for (int i = 0; i < Random::Generate(1, 10); ++i) {
-			unsigned type = Random::ChooseIndex(peacefulAnimals);
+			unsigned type = Random::ChooseIndex(possibleFauna);
 			Coordinate target;
 			do {
 				target.X(Random::Generate(map->Width() - 1));
@@ -152,7 +158,7 @@ void Events::SpawnBenignFauna() {
 			} while (!map->IsWalkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
 				|| (map->GetType(target.X(), target.Y()) != TILEGRASS && map->GetType(target.X(), target.Y()) != TILESNOW
 				&& map->GetType(target.X(), target.Y()) != TILEMUD));
-			Game::Inst()->CreateNPC(target, peacefulAnimals[type]);
+			Game::Inst()->CreateNPC(target, possibleFauna[type]);
 		}
 	}
 }
