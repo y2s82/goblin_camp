@@ -171,6 +171,7 @@ void StockManager::Update() {
 							unsigned cIndex = Random::ChooseIndex(designatedBog);
 							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
 							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
+							ironJob->DisregardTerritory();
 							ironJob->tasks.push_back(Task(MOVE, coord));
 							ironJob->tasks.push_back(Task(BOGIRON));
 							ironJob->tasks.push_back(Task(STOCKPILEITEM));
