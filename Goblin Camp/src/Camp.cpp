@@ -339,5 +339,7 @@ void Camp::load(InputArchive& ar, const unsigned int version) {
 	ar & waterZones;
 	ar & menialWaterJobs;
 	ar & expertWaterJobs;
-	ar & spawningPool;
+	if (version >= 1) {
+		ar & spawningPool;
+	}
 }
