@@ -104,9 +104,6 @@ class NatureObjectListener : public ITCODParserListener {
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name, "walkable")) {
 			NatureObject::Presets[natureIndex].walkable = true;
 		} else if (boost::iequals(name, "harvestable")) {
@@ -120,9 +117,6 @@ class NatureObjectListener : public ITCODParserListener {
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name, "graphic")) {
 			NatureObject::Presets[natureIndex].graphic = value.i;
 		} else if (boost::iequals(name, "components")) {
@@ -148,9 +142,6 @@ class NatureObjectListener : public ITCODParserListener {
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
-#endif
 		return true;
 	}
 	void error(const char *msg) {

@@ -283,9 +283,6 @@ public:
 
 private:
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("new %s structure\n") % str->getName()).str();
-#endif
 		if (name && boost::iequals(str->getName(), "category_type")) {
 			std::string strName(name);
 			boost::to_upper(strName);
@@ -331,9 +328,6 @@ private:
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name, "flammable")) {
 			Item::Categories[categoryIndex].flammable = true;
 		}
@@ -341,9 +335,6 @@ private:
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name, "category")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
@@ -448,9 +439,6 @@ private:
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % str->getName()).str();
-#endif
 		if (boost::iequals(str->getName(), "category_type")) {
 			if (presetCategoryParent[categoryIndex] == "")
 				Item::ParentCategories.push_back(Item::Categories[categoryIndex]);

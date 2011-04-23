@@ -175,16 +175,10 @@ class SpellListener : public ITCODParserListener {
 		return true;
 	}
 	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name,"immaterial")) { Spell::Presets[spellIndex].immaterial = true; }
 		return true;
 	}
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name,"name")) { Spell::Presets[spellIndex].name = value.s; }
 		else if (boost::iequals(name,"speed")) { Spell::Presets[spellIndex].speed = value.i; }
 		else if (boost::iequals(name,"color")) { Spell::Presets[spellIndex].color = value.col; }
@@ -210,9 +204,6 @@ class SpellListener : public ITCODParserListener {
 		return true;
 	}
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<boost::format("end of %s\n") % str->getName();
-#endif
 		return true;
 	}
 	void error(const char *msg) {
