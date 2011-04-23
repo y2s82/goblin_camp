@@ -452,15 +452,15 @@ void Stockpile::SetAllAllowed(bool nallowed) {
 	Game::Inst()->RefreshStockpiles();
 }
 
-void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
-	if (item.lock()) {
-		std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
+void Stockpile::ItemAdded(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
+		std::set<ItemCategory> categories = Item::Presets[item->Type()].categories;
 		for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
 			amount[*it] = amount[*it] + 1;
 		}
 
-		if(item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+		if(item->IsCategory(Item::StringToItemCategory("Container"))) {
+			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 			for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
 				ItemAdded(*i);
 			}
@@ -469,17 +469,17 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> item) {
 	}
 }
 
-void Stockpile::ItemRemoved(boost::weak_ptr<Item> item) {
-	if (item.lock()) {
-		if(item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+void Stockpile::ItemRemoved(boost::weak_ptr<Item> witem) {
+	if (boost::shared_ptr<Item> item = witem.lock()) {
+		if(item->IsCategory(Item::StringToItemCategory("Container"))) {
+			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 			container->RemoveListener(this);
 			for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
 				ItemRemoved(*i);
 			}
 		}
 
-		std::set<ItemCategory> categories = Item::Presets[item.lock()->Type()].categories;
+		std::set<ItemCategory> categories = Item::Presets[item->Type()].categories;
 		for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
 			amount[*it] = amount[*it] - 1;
 		}
