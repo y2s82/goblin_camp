@@ -402,9 +402,6 @@ class ConstructionListener : public ITCODParserListener {
 	int constructionIndex;
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("new %s structure: '%s'\n") % str->getName() % name).str();
-#endif
 		if (name && boost::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
@@ -428,9 +425,6 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name, "walkable")) {
 			Construction::Presets[constructionIndex].walkable = true;
 			Construction::Presets[constructionIndex].blocksLight = false;
@@ -472,9 +466,6 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-#ifdef DEBUG
-		std::cout<<(boost::format("%s\n") % name).str();
-#endif
 		if (boost::iequals(name, "graphicLength")) {
 			if (Construction::Presets[constructionIndex].graphic.size() == 0)
 				Construction::Presets[constructionIndex].graphic.push_back(value.i);
@@ -513,9 +504,6 @@ class ConstructionListener : public ITCODParserListener {
 		} else if (boost::iequals(name, "tileReqs")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
-#ifdef DEBUG
-				std::cout<<"("<<Construction::Presets[constructionIndex].name<<") Adding tile req "<<(char*)TCOD_list_get(value.list,i)<<"\n";
-#endif
 				//TILEGRASS changes to TILESNOW in winter
 				if (Tile::StringToTileType((char*)TCOD_list_get(value.list,i)) == TILEGRASS) {
 					Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
@@ -593,9 +581,6 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<(boost::format("end of %s structure\n") % name).str();
-#endif
 		if (boost::iequals(str->getName(), "construction_type")) {
 			Construction::Presets[constructionIndex].blueprint = Coordinate(Construction::Presets[constructionIndex].graphic[0],
 				(Construction::Presets[constructionIndex].graphic.size()-1)/Construction::Presets[constructionIndex].graphic[0]);

@@ -2201,9 +2201,6 @@ class NPCListener : public ITCODParserListener {
 		return true;
 	}
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-#ifdef DEBUG
-		std::cout<<boost::format("end of %s\n") % str->getName();
-#endif
 		if (NPC::Presets[npcIndex].plural == "") NPC::Presets[npcIndex].plural = NPC::Presets[npcIndex].name + "s";
 		if (NPC::Presets[npcIndex].faction == -1) {
 			if (NPC::Presets[npcIndex].ai == "PlayerNPC") {
