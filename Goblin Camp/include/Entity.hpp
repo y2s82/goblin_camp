@@ -55,8 +55,8 @@ public:
 	int Y();
 	int Uid();
 	static int uids;
-	virtual Coordinate Position();
-	virtual Coordinate Center();
+	virtual Coordinate Position() const;
+	virtual Coordinate Center() const;
 	virtual void Position(Coordinate);
 	void Zone(int);
 	int Zone();

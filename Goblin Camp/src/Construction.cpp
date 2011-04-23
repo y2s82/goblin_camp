@@ -141,7 +141,7 @@ Construction::~Construction() {
 
 
 void Construction::Condition(int value) {condition = value;}
-int Construction::Condition() {return condition;}
+int Construction::Condition() const {return condition;}
 int Construction::GetMaxCondition() const {return maxCondition;}
 
 
@@ -169,7 +169,7 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	}
 }
 
-Coordinate Construction::Center() {
+Coordinate Construction::Center() const {
 	int width = graphic[0];
 	int height = (graphic.size() - 1) / width;
 	return Coordinate(Position().X() + (width - 1) / 2, Position().Y() + (height - 1) / 2);
@@ -233,17 +233,17 @@ int Construction::Build() {
 	return condition;
 }
 
-ConstructionType Construction::Type() { return type; }
+ConstructionType Construction::Type() const { return type; }
 
 std::list<ItemCategory>* Construction::MaterialList() {return &materials;}
 
-bool Construction::Producer() {return producer;}
+bool Construction::Producer() const {return producer;}
 
 std::vector<ItemType>* Construction::Products() { return &products; }
-ItemType Construction::Products(int index) { return products[index]; }
+ItemType Construction::Products(int index) const { return products[index]; }
 
 std::deque<ItemType>* Construction::JobList() { return &jobList; }
-ItemType Construction::JobList(int index) { return jobList[index]; }
+ItemType Construction::JobList(int index) const { return jobList[index]; }
 
 void Construction::AddJob(ItemType item) {
 	if (!dismantle) {
@@ -770,7 +770,7 @@ std::cout<<"Couldn't spawn a production job at "<<name<<": Reserved\n";
 	return false;
 }
 
-boost::weak_ptr<Container> Construction::Storage() {
+boost::weak_ptr<Container> Construction::Storage() const {
 	if (condition > 0) return container;
 	else return materialsUsed;
 }
@@ -832,7 +832,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 	}
 }
 
-bool Construction::HasTag(ConstructionTag tag) { return Construction::Presets[type].tags[tag]; }
+bool Construction::HasTag(ConstructionTag tag) const { return Construction::Presets[type].tags[tag]; }
 
 void Construction::Update() {
 	if (Construction::Presets[type].spawnCreaturesTag != "" && condition > 0) {
@@ -979,7 +979,7 @@ void Construction::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
 }
 
-bool Construction::IsFlammable() { return flammable; }
+bool Construction::IsFlammable() const { return flammable; }
 
 int Construction::Repair() {
 	if (condition < maxCondition) ++condition;

@@ -207,7 +207,7 @@ public:
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 	void Position(Coordinate,bool);
 	virtual void Position(Coordinate);
-	virtual Coordinate Position();
+	virtual Coordinate Position() const;
 	void speed(unsigned int);
 	unsigned int speed() const;
 	void color(TCODColor,TCODColor=TCODColor::black);
