@@ -173,7 +173,7 @@ class NPC : public Entity {
 	std::list<Attack> attacks;
 
 	bool escaped;
-	bool Escaped();
+	bool Escaped() const;
 	void Escape();
 	void DestroyAllItems();
 	void UpdateStatusEffects();
@@ -209,17 +209,17 @@ public:
 	virtual void Position(Coordinate);
 	virtual Coordinate Position();
 	void speed(unsigned int);
-	unsigned int speed();
+	unsigned int speed() const;
 	void color(TCODColor,TCODColor=TCODColor::black);
 	void graphic(int);
 
 	int GetGraphicsHint() const;
 
-	Task* currentTask();
-	Task* nextTask();
-	boost::weak_ptr<Job> currentJob();
-	Coordinate currentTarget();
-	boost::weak_ptr<Entity> currentEntity();
+	Task* currentTask() const;
+	Task* nextTask() const;
+	boost::weak_ptr<Job> currentJob() const;
+	Coordinate currentTarget() const;
+	boost::weak_ptr<Entity> currentEntity() const;
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
@@ -227,15 +227,15 @@ public:
 	void AddEffect(StatusEffectType);
 	void AddEffect(StatusEffect);
 	void RemoveEffect(StatusEffectType);
-	bool HasEffect(StatusEffectType);
+	bool HasEffect(StatusEffectType) const;
 	std::list<StatusEffect>* StatusEffects();
 	void AbortCurrentJob(bool);
 	void AbortJob(boost::weak_ptr<Job>);
 
-	bool Expert();
+	bool Expert() const;
 	void Expert(bool);
 
-	bool Dead();
+	bool Dead() const;
 	void Kill();
 	void PickupItem(boost::weak_ptr<Item>);
 	void DropItem(boost::weak_ptr<Item>);
@@ -245,27 +245,27 @@ public:
 	void CastOffensiveSpell(boost::weak_ptr<Entity>);
 
 	void MemberOf(boost::weak_ptr<Squad>);
-	boost::weak_ptr<Squad> MemberOf();
+	boost::weak_ptr<Squad> MemberOf() const;
 	void GetMainHandAttack(Attack&);
 	bool WieldingRangedWeapon();
 	void FindNewWeapon();
-	boost::weak_ptr<Item> Wielding() ;
+	boost::weak_ptr<Item> Wielding() const;
 	boost::weak_ptr<Item> Carrying() const;
-	bool HasHands();
-	bool IsTunneler();
-	bool IsFlying(); //Special case for pathing's sake. Equivalent to HasEffect(FLYING) except it's threadsafe
+	bool HasHands() const;
+	bool IsTunneler() const;
+	bool IsFlying() const; //Special case for pathing's sake. Equivalent to HasEffect(FLYING) except it's threadsafe
 	void FindNewArmor();
-	boost::weak_ptr<Item> Wearing();
+	boost::weak_ptr<Item> Wearing() const;
 	void DecreaseItemCondition(boost::weak_ptr<Item>);
 
-	int GetHealth();
-	int GetMaxHealth();
+	int GetHealth() const;
+	int GetMaxHealth() const;
 
 	static void LoadPresets(std::string);
 	static std::vector<NPCPreset> Presets;
 	static std::string NPCTypeToString(NPCType);
 	static NPCType StringToNPCType(std::string);
-	int GetNPCSymbol();
+	int GetNPCSymbol() const;
 
 	void InitializeAIFunctions();
 
@@ -279,7 +279,7 @@ public:
 
 	void AddTrait(Trait);
 	void RemoveTrait(Trait);
-	bool HasTrait(Trait);
+	bool HasTrait(Trait) const;
 
 	void GoBerserk();
 	void ApplyEffects(boost::shared_ptr<Item>);
@@ -287,7 +287,7 @@ public:
 	void DumpContainer(Coordinate);
 	void ValidateCurrentJob();
 
-	virtual int GetHeight();
+	virtual int GetHeight() const;
 	virtual void SetFaction(int);
 };
 
