@@ -1497,7 +1497,7 @@ int NPC::GetGraphicsHint() const { return NPC::Presets[type].graphicsHint; }
 bool NPC::Expert() const {return expert;}
 void NPC::Expert(bool value) {expert = value;}
 
-Coordinate NPC::Position() {return Coordinate(x,y);}
+Coordinate NPC::Position() const {return Coordinate(x,y);}
 
 bool NPC::Dead() const { return dead; }
 void NPC::Kill() {
