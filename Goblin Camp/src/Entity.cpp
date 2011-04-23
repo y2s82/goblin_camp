@@ -70,7 +70,7 @@ void Entity::SetVelocity(int value) { velocity = value; }
 Coordinate Entity::GetVelocityTarget() { return velocityTarget; }
 void Entity::SetVelocityTarget(Coordinate value) { velocityTarget = value; }
 
-int Entity::GetHeight() { return flightPath.size() ? flightPath.back().height : 0; }
+int Entity::GetHeight() const { return flightPath.size() ? flightPath.back().height : 0; }
 
 void Entity::CalculateFlightPath(Coordinate target, int speed, int initialHeight) {
 #ifdef DEBUG

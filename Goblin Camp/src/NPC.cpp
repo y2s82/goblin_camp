@@ -152,32 +152,27 @@ NPC::~NPC() {
 }
 
 void NPC::Position(Coordinate pos, bool firstTime) {
-	if (!firstTime) {
-		Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+	Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+	if (!firstTime)
 		Map::Inst()->MoveFrom(x, y, uid);
-		x = pos.X();
-		y = pos.Y();
-	} else {
-		Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
-		x = pos.X();
-		y = pos.Y();
-	}
+	x = pos.X();
+	y = pos.Y();
 	inventory->Position(pos);
 }
 
 void NPC::Position(Coordinate pos) { Position(pos, false); }
 
-Task* NPC::currentTask() { return jobs.empty() ? 0 : &(jobs.front()->tasks[taskIndex]); }
-Task* NPC::nextTask() { 
+Task* NPC::currentTask() const { return jobs.empty() ? 0 : &(jobs.front()->tasks[taskIndex]); }
+Task* NPC::nextTask() const { 
 	if (!jobs.empty()) {
-		if ((signed int)jobs.front()->tasks.size() > taskIndex+1) {
+		if (static_cast<signed int>(jobs.front()->tasks.size()) > taskIndex+1) {
 			return &jobs.front()->tasks[taskIndex+1];
 		}
 	}
 	return 0;
 }
 
-boost::weak_ptr<Job> NPC::currentJob() { return jobs.empty() ? boost::weak_ptr<Job>() : boost::weak_ptr<Job>(jobs.front()); }
+boost::weak_ptr<Job> NPC::currentJob() const { return jobs.empty() ? boost::weak_ptr<Job>() : boost::weak_ptr<Job>(jobs.front()); }
 
 void NPC::TaskFinished(TaskResult result, std::string msg) {
 #ifdef DEBUG
@@ -232,7 +227,6 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 }
 
 void NPC::HandleThirst() {
-	Coordinate tmpCoord;
 	bool found = false;
 
 	for (std::deque<boost::shared_ptr<Job> >::iterator jobIter = jobs.begin(); jobIter != jobs.end(); ++jobIter) {
@@ -240,10 +234,9 @@ void NPC::HandleThirst() {
 	}
 	if (!found) {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"), Position());
-		if (!item.lock()) {tmpCoord = Game::Inst()->FindWater(Position());}
-		if (!item.lock() && tmpCoord.X() == -1) { //Nothing to drink!
-			//:ohdear:
-		} else { //Something to drink!
+		Coordinate waterCoordinate;
+		if (!item.lock()) {waterCoordinate = Game::Inst()->FindWater(Position());}
+		if (item.lock() || waterCoordinate.X() != -1) { //Found something to drink
 			boost::shared_ptr<Job> newJob(new Job("Drink", MED, 0, !expert));
 			newJob->internal = true;
 
@@ -254,25 +247,19 @@ void NPC::HandleThirst() {
 				newJob->tasks.push_back(Task(DRINK));
 				jobs.push_back(newJob);
 			} else {
-				for (int ix = tmpCoord.X()-1; ix <= tmpCoord.X()+1; ++ix) {
-					for (int iy = tmpCoord.Y()-1; iy <= tmpCoord.Y()+1; ++iy) {
-						if (Map::Inst()->IsWalkable(ix,iy,(void*)this)) {
-							newJob->tasks.push_back(Task(MOVE, Coordinate(ix,iy)));
-							goto CONTINUEDRINKBLOCK;
-						}
-					}
+				Coordinate adjacentTile = Game::Inst()->FindClosestAdjacent(Position(), waterCoordinate, faction);
+				if (adjacentTile.X() >= 0) {
+					newJob->tasks.push_back(Task(MOVE, adjacentTile));
+					newJob->tasks.push_back(Task(DRINK, waterCoordinate));
+					if (jobs.empty()) JobManager::Inst()->NPCNotWaiting(uid);
+					jobs.push_back(newJob);
 				}
-CONTINUEDRINKBLOCK:
-				newJob->tasks.push_back(Task(DRINK, tmpCoord));
-				if (jobs.empty()) JobManager::Inst()->NPCNotWaiting(uid);
-				jobs.push_back(newJob);
 			}
 		}
 	}
 }
 
 void NPC::HandleHunger() {
-	Coordinate tmpCoord;
 	bool found = false;
 
 	if (hunger > 48000 && !jobs.empty() &&  jobs.front()->name.find("Eat") == std::string::npos) { //Starving and doing something else
@@ -484,7 +471,7 @@ void NPC::UpdateStatusEffects() {
 			Damage(&attack);
 		}
 
-		if (faction == PLAYERFACTION && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
+		if (factionPtr->IsFriendsWith(PLAYERFACTION) && statusEffectI->negative && !HasEffect(SLEEPING) && (statusEffectsChanged || Random::Generate(MONTH_LENGTH) == 0)) {
 			statusEffectsChanged = false;
 			bool removalJobFound = false;
 			for (std::deque<boost::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
@@ -1479,7 +1466,7 @@ void NPC::findPath(Coordinate target) {
 }
 
 void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
-unsigned int NPC::speed() {return effectiveStats[MOVESPEED];}
+unsigned int NPC::speed() const {return effectiveStats[MOVESPEED];}
 
 void NPC::Draw(Coordinate upleft, TCODConsole *console) {
 	int screenx = x - upleft.X();
@@ -1507,12 +1494,12 @@ void NPC::color(TCODColor value, TCODColor bvalue) { _color = value; _bgcolor = 
 void NPC::graphic(int value) { _graphic = value; }
 int NPC::GetGraphicsHint() const { return NPC::Presets[type].graphicsHint; }
 
-bool NPC::Expert() {return expert;}
+bool NPC::Expert() const {return expert;}
 void NPC::Expert(bool value) {expert = value;}
 
 Coordinate NPC::Position() {return Coordinate(x,y);}
 
-bool NPC::Dead() { return dead; }
+bool NPC::Dead() const { return dead; }
 void NPC::Kill() {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
@@ -1567,14 +1554,14 @@ void NPC::DropItem(boost::weak_ptr<Item> witem) {
 	}
 }
 
-Coordinate NPC::currentTarget() {
+Coordinate NPC::currentTarget() const {
 	if (currentTask()->target == Coordinate(-1,-1) && foundItem.lock()) {
 		return foundItem.lock()->Position();
 	}
 	return currentTask()->target;
 }
 
-boost::weak_ptr<Entity> NPC::currentEntity() {
+boost::weak_ptr<Entity> NPC::currentEntity() const {
 	if (currentTask()->entity.lock()) return currentTask()->entity;
 	else if (foundItem.lock()) return boost::weak_ptr<Entity>(foundItem.lock());
 	return boost::weak_ptr<Entity>();
@@ -1895,8 +1882,8 @@ void NPC::RemoveEffect(StatusEffectType effect) {
 	}
 }
 
-bool NPC::HasEffect(StatusEffectType effect) {
-	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
+bool NPC::HasEffect(StatusEffectType effect) const {
+	for (std::list<StatusEffect>::const_iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end(); ++statusEffectI) {
 		if (statusEffectI->type == effect) {
 			return true;
 		}
@@ -2072,7 +2059,7 @@ void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
 		aggressive = false;
 	}
 }
-boost::weak_ptr<Squad> NPC::MemberOf() {return squad;}
+boost::weak_ptr<Squad> NPC::MemberOf() const {return squad;}
 
 void NPC::Escape() {
 	if (carried.lock()) {
@@ -2098,7 +2085,7 @@ void NPC::DestroyAllItems() {
 	}
 }
 
-bool NPC::Escaped() { return escaped; }
+bool NPC::Escaped() const { return escaped; }
 
 class NPCListener : public ITCODParserListener {
 
@@ -2286,7 +2273,7 @@ NPCType NPC::StringToNPCType(std::string typeName) {
 	return NPCTypeNames[typeName];
 }
 
-int NPC::GetNPCSymbol() { return Presets[type].graphic; }
+int NPC::GetNPCSymbol() const { return Presets[type].graphic; }
 
 void NPC::InitializeAIFunctions() {
 	FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
@@ -2356,7 +2343,7 @@ void NPC::FindNewArmor() {
 	}
 }
 
-boost::weak_ptr<Item> NPC::Wielding() {
+boost::weak_ptr<Item> NPC::Wielding() const {
 	return mainHand;
 }
 
@@ -2364,11 +2351,11 @@ boost::weak_ptr<Item> NPC::Carrying() const {
 	return carried;
 }
 
-boost::weak_ptr<Item> NPC::Wearing() {
+boost::weak_ptr<Item> NPC::Wearing() const {
 	return armor;
 }
 
-bool NPC::HasHands() { return hasHands; }
+bool NPC::HasHands() const { return hasHands; }
 
 void NPC::UpdateVelocity() {
 	if (velocity > 0) {
@@ -2476,8 +2463,8 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	group.nb_faces = 1;
 }
 
-int NPC::GetHealth() { return health; }
-int NPC::GetMaxHealth() { return maxHealth; }
+int NPC::GetHealth() const { return health; }
+int NPC::GetMaxHealth() const { return maxHealth; }
 
 void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 	if (boost::shared_ptr<Job> job = wjob.lock()) {
@@ -2492,7 +2479,7 @@ void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 	}
 }
 
-bool NPC::IsTunneler() { return isTunneler; }
+bool NPC::IsTunneler() const { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
 	nearNpcs.clear();
@@ -2567,7 +2554,7 @@ void NPC::RemoveTrait(Trait trait) {
 	}
 }
 
-bool NPC::HasTrait(Trait trait) { return traits.find(trait) != traits.end(); }
+bool NPC::HasTrait(Trait trait) const { return traits.find(trait) != traits.end(); }
 
 void NPC::GoBerserk() {
 	ScanSurroundings();
@@ -2741,13 +2728,13 @@ void NPC::ValidateCurrentJob() {
 	}
 }
 
-int NPC::GetHeight() {
+int NPC::GetHeight() const {
 	if (!flightPath.empty()) return flightPath.back().height;
 	if (HasEffect(FLYING) || HasEffect(HIGHGROUND)) return ENTITYHEIGHT+2;
 	return 0;
 }
 
-bool NPC::IsFlying() { return isFlying; }
+bool NPC::IsFlying() const { return isFlying; }
 
 void NPC::SetFaction(int newFaction) {
 	if (newFaction >= 0 && newFaction < Faction::factions.size()) {
