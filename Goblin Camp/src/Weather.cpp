@@ -178,7 +178,7 @@ void Weather::SeasonChange() {
 	case Winter:
 		tileChange = true;
 		changeAll = true;
-		tileChangeRate = 10;
+		tileChangeRate = 500;
 		changePosition = 0;
 		currentTemperature = -1;
 		break;
@@ -198,7 +198,7 @@ void Weather::SeasonChange() {
 	case LateSpring:
 		tileChange = true;
 		changeAll = true;
-		tileChangeRate = 10;
+		tileChangeRate = 500;
 		changePosition = 0;
 		currentTemperature = 1;
 		break;
