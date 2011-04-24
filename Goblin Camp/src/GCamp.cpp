@@ -406,6 +406,8 @@ int MainMenu() {
 			lButtonDown = true;
 		}
 
+		if (TCODConsole::isWindowClosed()) break;
+
 		if (function != NULL) {
 			function();
 		} else {
