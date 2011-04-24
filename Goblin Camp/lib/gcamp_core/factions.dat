@@ -49,6 +49,7 @@ faction_type "Kobolds" {
 faction_type "Undead" {
 	goals = ["kill"]
 	aggressive
+	activeTime = 1.0
 }
 
 faction_type "Minotaurs" {
