@@ -143,4 +143,4 @@ public:
 	void TileChanged(int x, int y);
 };
 
-BOOST_CLASS_VERSION(Map, 1)
+BOOST_CLASS_VERSION(Map, 2)
