@@ -9,6 +9,42 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.15 --
+
+v0.15 has a slew of new features, among them seasonal changes (ice!), battlements, new invader ai, 
+stat tracking and exotic immigrants. Also old features were balanced and bugs squashed. Version 0.15
+also has a rewritten multithreaded pathfinder that should eliminate most of the crashes that were
+present in earlier versions.
+
+*Battlements allow your orcs to fire over walls with their bows
+*Rain
+*Winter - The ground gets covered with snow and the river freezes over
+*Terrain overlay, press 't' to view only the terrain + creatures
+*Immigrant creatures. Trolls are the only immigrants right now, but more can easily be modded in.
+*River width and depth configurable in config.py
+*Performance optimizations
+*Many tileset renderer improvements both in performance and features 
+  (you can find the translucent ui option in the settings menu)
+*Statistics are now gathered (production, death, filth generated) and points are calculated from it.
+*Items flow downstream
+*Rewrite of the pathfinder in terms of threadsafety. Should eliminate most if not all crashes.
+*Autosaves
+*Keyboard cursor movement was finally fixed. You can use the numberpad instead of the mouse if you want to.
+*UI has been improved, scroll bars are better and the menu disappears when you make a choice, though it
+  leaves your choice visible as a tooltip.
+*Water can be barreled and is now required for several products.
+*Creatures avoid fire better.
+*Wind now behaves more realistically, and instead of being completely random will only shift a set amount
+  from the prevailing direction. This allows better planning against total death by fire.
+*The river is now generated slightly smarter, and filling tiles with earth should work more as expected.
+*Save compression, saves a lot of space and isn't very notable speed-wise.
+*Improved tutorial
+*Setting to pause on danger (attack or fire)
+*Goblins will now dump surplus items into the spawning pool, handily eliminating the problem of accumulating
+  a big pile of wooden clubs from kobold attacks.
+
+
+
 -- Version 0.141 --
 
 Version v0.141 fixes (hopefully) all of the crash bugs found in v0.14, as well as the content that was sligthly 
