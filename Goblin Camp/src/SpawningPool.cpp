@@ -116,8 +116,7 @@ void SpawningPool::Update() {
 			}
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
-			if (corpses == 0) corpses = 1; //Non-corpses don't count as corpses, but we want to generate corruption anyhow
-			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(corpses, (unsigned int)50));
+			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(std::max(1U, corpses), (unsigned int)50));
 		}
 
 		if ((corpses*10) + filth > 10U) {
