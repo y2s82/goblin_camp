@@ -1057,7 +1057,7 @@ npc_type "human soldier" {
 	equipOneOf=["Quiver"]
 	equipOneOf=["Wooden bow", "Iron spear", "Iron war hammer", "Iron axe", "Iron sword"]
 	equipOneOf=["Iron arrow"]
-	spawnAsGroup="10+1d20"
+	spawnAsGroup="1d20+10"
 	faction = "Humans"
 }
 	
