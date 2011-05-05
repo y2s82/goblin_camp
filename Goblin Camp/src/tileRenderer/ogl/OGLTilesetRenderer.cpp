@@ -218,7 +218,7 @@ OGLTilesetRenderer::~OGLTilesetRenderer() {
 	TCODSystem::registerOGLRenderer(0);
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	if (tilesetTexture->Count() <= tile) {
 		return Sprite_ptr();
 	}
@@ -233,7 +233,7 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::
 	}
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
 	if (tiles.empty())
 		return Sprite_ptr();
 
