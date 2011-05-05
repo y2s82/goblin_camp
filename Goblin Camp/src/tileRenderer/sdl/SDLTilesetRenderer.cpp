@@ -66,11 +66,11 @@ SDLTilesetRenderer::~SDLTilesetRenderer() {
 	TCODSystem::registerSDLRenderer(0);
 }
 
-Sprite_ptr SDLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
+Sprite_ptr SDLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	return Sprite_ptr(new SDLSprite(this, tilesetTexture, tile));
 }
 
-Sprite_ptr SDLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
+Sprite_ptr SDLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
 	return Sprite_ptr(new SDLSprite(this, tilesetTexture, tiles.begin(), tiles.end(), connectionMap, frameRate, frameCount));
 }
 
