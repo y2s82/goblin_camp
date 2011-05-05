@@ -144,7 +144,7 @@ namespace {
 
 	"   vec2 address = vec2(rawCoord.x*termcoef.x,rawCoord.y*termcoef.y); \n"
 	"   vec4 tileInfo = texture2D(tiles, address); \n"
-	"   float inchar = tileInfo.r*256.0 + tileInfo.g * 256.0 *256.0 + tileInfo.b * 256.0 * 256.0 * 256.0; \n"
+	"   float inchar = tileInfo.r*255.0 + tileInfo.g * 256.0 * 255.0 + tileInfo.b * 65536.0 * 255.0; \n"
 	"   vec2 tchar = vec2(mod(floor(inchar),floor(tilew)),floor(inchar/tilew)); \n"  /* 1D index to 2D index map for character */
 
 	"   gl_FragColor = texture2D(tilesheet, vec2((tchar.x*tilecoef.x),(tchar.y*tilecoef.y))+pixPos.xy); \n"   /* magic func: finds pixel value in font file */
