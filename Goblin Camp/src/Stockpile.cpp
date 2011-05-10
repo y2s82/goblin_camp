@@ -41,9 +41,9 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	colors.insert(std::pair<Coordinate, TCODColor>(target, TCODColor::lerp(color, Map::Inst()->GetColor(target.X(), target.Y()), 0.75f)));
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
-		allowed.insert(std::pair<ItemCategory, bool>(i,false));
+		allowed.insert(std::pair<ItemCategory, bool>(i,true));
 		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
-				limits.insert(std::pair<ItemCategory, int>(i,0));
+				limits.insert(std::pair<ItemCategory, int>(i,100));
 		}
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
@@ -91,7 +91,7 @@ boost::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags,
 
 	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = containers.begin(); 
 		conti != containers.end() && itemsFound < amount[cat]; ++conti) {
-		if (!conti->second->empty()) {
+		if (conti->second && !conti->second->empty()) {
 			boost::weak_ptr<Item> witem = *conti->second->begin();
 			if (boost::shared_ptr<Item> item = witem.lock()) {
 				if (item->IsCategory(cat) && !item->Reserved()) {
@@ -273,11 +273,10 @@ boost::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, i
 	return savedItem;
 }
 
-void Stockpile::Expand(Coordinate from, Coordinate to) {
-	//We can assume that from < to
-
+int Stockpile::Expand(Coordinate from, Coordinate to) {
 	//The algorithm: Check each tile inbetween from and to, and if a tile is adjacent to this
 	//stockpile, add it. Do this max(width,height) times.
+	int expansion = 0;
 	int repeats = std::max(to.X() - from.X(), to.Y() - from.Y());
 	for (int repeatCount = 0; repeatCount <= repeats; ++repeatCount) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
@@ -298,17 +297,19 @@ void Stockpile::Expand(Coordinate from, Coordinate to) {
 							if (iy < a.Y()) a.Y(iy);
 							if (iy > b.Y()) b.Y(iy);
 							reserved.insert(std::pair<Coordinate,bool>(Coordinate(ix,iy),false));
-							Container *container = new Container(Coordinate(ix,iy), -1, 1000, -1);
+							boost::shared_ptr<Container> container = boost::shared_ptr<Container>(new Container(Coordinate(ix,iy), -1, 1000, -1));
 							container->AddListener(this);
-							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), boost::shared_ptr<Container>(container)));
+							containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(Coordinate(ix,iy), container));
 
 							//Update color
 							colors.insert(std::pair<Coordinate, TCODColor>(Coordinate(ix,iy), TCODColor::lerp(color, Map::Inst()->GetColor(ix, iy), 0.75f)));
+							++expansion;
 					}
 				}
 			}
 		}
 	}
+	return expansion;
 }
 
 void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
@@ -349,19 +350,22 @@ bool Stockpile::Allowed(std::set<ItemCategory> cats) {
 	return false;
 }
 
-bool Stockpile::Full(ItemType type) {
-	for (int ix = a.X(); ix <= b.X(); ++ix) {
-		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+namespace {
+	bool CardinalAdjacentTo(int x, int y, int uid) {
+		return (Map::Inst()->GetConstruction(x-1,y) == uid || 
+			Map::Inst()->GetConstruction(x+1,y) == uid || 
+			Map::Inst()->GetConstruction(x,y-1) == uid || 
+			Map::Inst()->GetConstruction(x,y+1) == uid);
+	}
+}
+
+//New pile system: A pile is only full if there are no buildable tiles to expand to
+bool Stockpile::Full(ItemType itemType) {
+	//Check if there's either a free space, or that we can expand the pile
+	for (int ix = a.X() - 1; ix <= b.X() + 1; ++ix) {
+		for (int iy = a.Y() - 1; iy <= b.Y() + 1; ++iy) {
 			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
 				Coordinate location(ix,iy);
-				//If the stockpile has hit the limit then it's full for this itemtype
-				if (type != 1) {
-					for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
-						cati != Item::Presets[type].categories.end(); ++cati) {
-							if (GetLimit(*cati) > 0 && amount[*cati] >= GetLimit(*cati)) return true;
-					}
-				}
-
 				//If theres a free space then it obviously is not full
 				if (containers[location]->empty() && !reserved[location]) return false;
 
@@ -369,21 +373,24 @@ bool Stockpile::Full(ItemType type) {
 				boost::weak_ptr<Item> item = containers[location]->GetFirstItem();
 				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
-					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 
-						container->Capacity() >= Item::Presets[type].bulk) return false;
+					if (type != -1 && container->IsCategory(Item::Presets[itemType].fitsin) && 
+						container->Capacity() >= Item::Presets[itemType].bulk) return false;
 				}
-			}
+			} else if (Map::Inst()->IsBuildable(ix,iy) &&
+				Construction::Presets[type].tileReqs.find(Map::Inst()->GetType(ix,iy)) != Construction::Presets[type].tileReqs.end()
+				&& CardinalAdjacentTo(ix,iy,uid)) return false;
 		}
 	}
 	return true;
 }
 
+//New pile system: A free position is an existing empty space, or if there are none then we create one adjacent
 Coordinate Stockpile::FreePosition() {
 	if (containers.size() > 0) {
 		//First attempt to find a random position
 		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
 			std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
-			if (conti != containers.end() && conti->second->empty() && !reserved[conti->first]) 
+			if (conti != containers.end() && conti->second && conti->second->empty() && !reserved[conti->first]) 
 				return conti->first;
 		}
 		//If that fails still iterate through each position because a free position _should_ exist
@@ -395,6 +402,49 @@ Coordinate Stockpile::FreePosition() {
 			}
 		}
 	}
+
+	std::vector<std::pair<Coordinate,Coordinate> > candidates;
+	//Getting here means that we need to expand the pile
+	for (int ix = a.X() - 1; ix <= b.X() + 1; ++ix) {
+		for (int iy = a.Y() - 1; iy <= b.Y() + 1; ++iy) {
+			if (Map::Inst()->IsBuildable(ix,iy) &&
+				Construction::Presets[type].tileReqs.find(Map::Inst()->GetType(ix,iy)) != Construction::Presets[type].tileReqs.end()) {
+				//Found a buildable tile, check that it's adjacent to the pile
+				for (int adjacentX = ix - 1; adjacentX <= ix + 1; ++adjacentX) {
+					for (int adjacentY = iy - 1; adjacentY <= iy + 1; ++adjacentY) {
+						if (adjacentX == ix || adjacentY == iy) {
+							if (Map::Inst()->GetConstruction(adjacentX, adjacentY) == uid) {
+								Coordinate from = Coordinate(ix, iy);
+								Coordinate to = Coordinate(adjacentX, adjacentY);
+								if (adjacentX < ix || adjacentY < iy) {
+									from = Coordinate(adjacentX, adjacentY);
+									to = Coordinate(ix, iy);
+								}
+								candidates.push_back(std::make_pair(from, to));
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	if (!candidates.empty()) {
+		std::pair<Coordinate,Coordinate> choice = Random::ChooseElement(candidates);
+		//We want to return the coordinate that was expanded to
+		Coordinate expansion = Map::Inst()->GetConstruction(choice.first.X(), choice.first.Y()) == uid ?
+			choice.first : choice.second;
+#ifdef DEBUG
+		int res = Expand(choice.first, choice.second);
+		std::cout<<"Stockpile expanded "<<res<<"\n";
+		return res;
+#else
+		if (Expand(choice.first, choice.second))
+			return expansion;
+#endif
+	}
+
+
 	return Coordinate(-1,-1);
 }
 

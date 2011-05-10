@@ -165,6 +165,55 @@ void FarmPlot::AcceptVisitor(ConstructionVisitor& visitor) {
 	visitor.Visit(this);
 }
 
+bool FarmPlot::Full(ItemType type) {
+	for (int ix = a.X(); ix <= b.X(); ++ix) {
+		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
+				Coordinate location(ix,iy);
+				//If the stockpile has hit the limit then it's full for this itemtype
+				if (type != 1) {
+					for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
+						cati != Item::Presets[type].categories.end(); ++cati) {
+							if (GetLimit(*cati) > 0 && amount[*cati] >= GetLimit(*cati)) return true;
+					}
+				}
+
+				//If theres a free space then it obviously is not full
+				if (containers[location]->empty() && !reserved[location]) return false;
+
+				//Check if a container exists for this ItemCategory that isn't full
+				boost::weak_ptr<Item> item = containers[location]->GetFirstItem();
+				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
+					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 
+						container->Capacity() >= Item::Presets[type].bulk) return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
+Coordinate FarmPlot::FreePosition() {
+	if (containers.size() > 0) {
+		//First attempt to find a random position
+		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
+			std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
+			if (conti != containers.end() && conti->second->empty() && !reserved[conti->first]) 
+				return conti->first;
+		}
+		//If that fails still iterate through each position because a free position _should_ exist
+		for (int ix = a.X(); ix <= b.X(); ++ix) {
+			for (int iy = a.Y(); iy <= b.Y(); ++iy) {
+				if (Map::Inst()->GetConstruction(ix,iy) == uid) {
+					if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+				}
+			}
+		}
+	}
+	return Coordinate(-1,-1);
+}
+
 void FarmPlot::save(OutputArchive& ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Stockpile>(*this);
 	ar & tilled;

@@ -1,4 +1,4 @@
-construction_type "Stockpile" {
+construction_type "Pile" {
 	tier=0
 	category="Basics"
 	stockpile
@@ -7,7 +7,8 @@ construction_type "Stockpile" {
 	graphic=[61]
 	color="255,255,255"
 	maxCondition=10
-	description="Stockpiles are required to store items. Only items in stockpiles are usable."
+	description="Piles designate an area meant for piling stuff."
+	placementType=1
 }
 
 construction_type "Farm plot" {

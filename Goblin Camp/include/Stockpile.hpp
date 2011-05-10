@@ -53,11 +53,11 @@ public:
 	boost::weak_ptr<Item> FindItemByType(ItemType, int flags=0, int value=0);
 	int Symbol();
 	void Symbol(int);
-	void Expand(Coordinate,Coordinate);
+	int Expand(Coordinate,Coordinate);
 	bool Allowed(ItemCategory);
 	bool Allowed(std::set<ItemCategory>);
-	bool Full(ItemType = -1);
-	Coordinate FreePosition();
+	virtual bool Full(ItemType = -1);
+	virtual Coordinate FreePosition();
 	void ReserveSpot(Coordinate, bool, ItemType);
 	boost::weak_ptr<Container> Storage(Coordinate);
 	void SwitchAllowed(ItemCategory, bool childrenAlso = true, bool countParentsOnly = false);

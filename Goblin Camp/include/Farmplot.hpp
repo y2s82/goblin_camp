@@ -36,6 +36,8 @@ public:
 	bool SeedAllowed(ItemType);
 	std::map<ItemType, bool>* AllowedSeeds();
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
+	virtual bool Full(ItemType);
+	virtual Coordinate FreePosition();
 };
 
 BOOST_CLASS_VERSION(FarmPlot, 0)
