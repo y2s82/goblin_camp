@@ -1,0 +1,34 @@
+###############################################################################
+##### Patcher base template (currently only Windows)
+###############################################################################
+
+path-constant HERE : . ;
+
+project patcher-base
+    : requirements
+      <include>$(HERE)
+      <user-interface>gui
+;
+
+###############################################################################
+##### _patcher.exe
+## This executable is used by tools/create-patch.py. Refer to that file
+## for details on how this thing exactly works.
+###############################################################################
+
+import gc-version ;
+make _patcher.rc
+    : $(HERE)/../common.rc_in
+    : @gc-version.generate
+    : <rch>$(HERE)/_patcher.rch <implicit-dependency>$(HERE)/_patcher.rch
+;
+
+always _patcher.rc ;
+
+# Weird name until it's done, to avoid UAC elevation prompts
+exe _p_tcher
+    : [ glob-tree *.cpp ]
+      _patcher.rc
+      /winsdk /xdelta3
+      "/Goblin Camp//libuserialize"
+;

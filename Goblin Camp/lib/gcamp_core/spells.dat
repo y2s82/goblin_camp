@@ -1,0 +1,40 @@
+spell_type "smoke" {
+	graphic = 177
+	color = "45, 45, 45"
+	immaterial
+}
+
+spell_type "steam" {
+	graphic = 176
+	color = "180, 180, 180"
+	immaterial
+}
+
+spell_type "spark" {
+	graphic = 250
+	color = "255,105,0"
+	attack "Burn" {
+		type = "fire"
+		damage = "1d1+0"
+	}
+}
+
+spell_type "fireball" {
+	graphic = 15
+	color = "255, 40, 0"
+	speed = 50
+	attack "Burn" {
+		type = "fire"
+		damage = "1d10+2"
+	}
+}
+
+spell_type "large fireball" {
+	graphic = 15
+	color = "255, 40, 0"
+	speed = 50
+	attack "Burn" {
+		type = "fire"
+		damage = "1d50+10"
+	}
+}
