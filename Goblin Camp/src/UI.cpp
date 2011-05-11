@@ -649,10 +649,15 @@ void UI::ChooseConstruct(ConstructionType construct, UIState state) {
 
 void UI::ChooseStockpile(ConstructionType stockpile) {
 	int stockpileSymbol = '%';
-	UI::Inst()->SetRectCallback(boost::bind(Game::PlaceStockpile, _1, _2, stockpile, stockpileSymbol));
+	if (Construction::Presets[stockpile].tags[STOCKPILE]) {
+		UI::Inst()->SetCallback(boost::bind(Game::PlaceStockpile, _1, _1, stockpile, stockpileSymbol));
+		UI::Inst()->state(UIPLACEMENT);
+	} else {
+		UI::Inst()->SetRectCallback(boost::bind(Game::PlaceStockpile, _1, _2, stockpile, stockpileSymbol));
+		UI::Inst()->state(UIRECTPLACEMENT);
+	}
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckPlacement, _1, _2, Construction::Presets[stockpile].tileReqs));
 	UI::Inst()->blueprint(Construction::Blueprint(stockpile));
-	UI::Inst()->state(UIRECTPLACEMENT);
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Stockpile);
 	UI::Inst()->HideMenu();
 	UI::Inst()->SetExtraTooltip(Construction::Presets[stockpile].name);
