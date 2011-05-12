@@ -43,7 +43,8 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,true));
 		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
-				limits.insert(std::pair<ItemCategory, int>(i,100));
+			limits.insert(std::pair<ItemCategory, int>(i,100));
+			demand.insert(std::pair<ItemCategory, int>(i,0)); //Initial demand for each container is 0
 		}
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
@@ -509,6 +510,10 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> witem) {
 			amount[*it] = amount[*it] + 1;
 		}
 
+		//Increase container demand for each containable item
+		if (Item::Presets[item->Type()].fitsin >= 0)
+			++demand[Item::Presets[item->Type()].fitsin];
+
 		if(item->IsCategory(Item::StringToItemCategory("Container"))) {
 			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 			for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
@@ -528,6 +533,10 @@ void Stockpile::ItemRemoved(boost::weak_ptr<Item> witem) {
 				ItemRemoved(*i);
 			}
 		}
+
+		//Decrease container demand
+		if (Item::Presets[item->Type()].fitsin >= 0)
+			--demand[Item::Presets[item->Type()].fitsin];
 
 		std::set<ItemCategory> categories = Item::Presets[item->Type()].categories;
 		for(std::set<ItemCategory>::iterator it = categories.begin(); it != categories.end(); it++) {
@@ -641,6 +650,13 @@ void Stockpile::Dismantle(Coordinate location) {
 		}
 		if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
+}
+
+int Stockpile::GetDemand(ItemCategory category) { 
+	if (demand.find(category) != demand.end())
+		return demand[category];
+	else
+		return -1;
 }
 
 void Stockpile::save(OutputArchive& ar, const unsigned int version) const {
