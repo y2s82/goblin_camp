@@ -1019,6 +1019,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			int nearestDistance = INT_MAX;
 			ItemType itemType = item->Type();
+			bool useDemand = false;
 
 			/* If this is a container and it contains items, then stockpile it based on the items inside
 			instead of the container's type */
@@ -1027,7 +1028,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 				if (boost::shared_ptr<Item> innerItem = containerItem->GetFirstItem().lock()) {
 					itemType = innerItem->Type();
 				}
-			}
+			} else if (containerItem) useDemand = true; //Empty containers are stored based on demand
 
 			for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 				if (stocki->second->stockpile) {
@@ -1035,7 +1036,10 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 					if (sp->Allowed(Item::Presets[itemType].specificCategories) && !sp->Full(itemType)) {
 
 						//Found a stockpile that both allows the item, and has space
-						int distance = Distance(sp->Center(), item->Position());
+						ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
+						int distance = useDemand ? (INT_MAX - 2) - sp->GetDemand(category) :
+							Distance(sp->Center(), item->Position());
+
 						if(distance < nearestDistance) {
 							nearestDistance = distance;
 							nearest = sp;

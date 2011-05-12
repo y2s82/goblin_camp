@@ -45,6 +45,7 @@ protected:
 	std::map<Coordinate, boost::shared_ptr<Container> > containers;
 	std::map<Coordinate, TCODColor> colors;
 	std::map<ItemCategory, int> limits;
+	std::map<ItemCategory, int> demand;
 public:
 	virtual ~Stockpile();
 	int Build();
@@ -71,6 +72,7 @@ public:
 	int GetLimit(ItemCategory);
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	virtual void Dismantle(Coordinate pos=Coordinate(-1,-1));
+	int GetDemand(ItemCategory);
 };
 
 BOOST_CLASS_VERSION(Stockpile, 0)
