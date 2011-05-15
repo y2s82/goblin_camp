@@ -434,15 +434,9 @@ Coordinate Stockpile::FreePosition() {
 		std::pair<Coordinate,Coordinate> choice = Random::ChooseElement(candidates);
 		//We want to return the coordinate that was expanded to
 		Coordinate expansion = Map::Inst()->GetConstruction(choice.first.X(), choice.first.Y()) == uid ?
-			choice.first : choice.second;
-#ifdef DEBUG
-		int res = Expand(choice.first, choice.second);
-		std::cout<<"Stockpile expanded "<<res<<"\n";
-		return res;
-#else
+			choice.second : choice.first;
 		if (Expand(choice.first, choice.second))
 			return expansion;
-#endif
 	}
 
 
