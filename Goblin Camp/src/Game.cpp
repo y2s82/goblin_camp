@@ -1036,6 +1036,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 					if (sp->Allowed(Item::Presets[itemType].specificCategories) && !sp->Full(itemType)) {
 
 						//Found a stockpile that both allows the item, and has space
+						//Assuming that containers only have one specific category
 						ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
 						int distance = useDemand ? (INT_MAX - 2) - sp->GetDemand(category) :
 							Distance(sp->Center(), item->Position());
