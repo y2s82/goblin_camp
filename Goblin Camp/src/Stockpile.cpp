@@ -515,23 +515,36 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> witem) {
 			++demand[Item::Presets[item->Type()].fitsin];
 
 		if(item->IsCategory(Item::StringToItemCategory("Container"))) {
+
+			//"Add" each item inside a container as well
 			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 			for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
 				ItemAdded(*i);
 			}
 			container->AddListener(this);
+
+			//Decrease container demand by how much this container can hold
+			//Assumes that contaieners only have one specific category
+			ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
+			demand[category] = demand[category] - Item::Presets[item->Type()].container;
 		}
 	}
 }
 
 void Stockpile::ItemRemoved(boost::weak_ptr<Item> witem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
+
+		//"Remove" each item inside a container
 		if(item->IsCategory(Item::StringToItemCategory("Container"))) {
 			boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item);
 			container->RemoveListener(this);
 			for(std::set<boost::weak_ptr<Item> >::iterator i = container->begin(); i != container->end(); i++) {
 				ItemRemoved(*i);
 			}
+
+			//Increase demand for the container by how much it can hold
+			ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
+			demand[category] = demand[category] - Item::Presets[item->Type()].container;
 		}
 
 		//Decrease container demand
@@ -654,7 +667,9 @@ void Stockpile::Dismantle(Coordinate location) {
 
 int Stockpile::GetDemand(ItemCategory category) { 
 	if (demand.find(category) != demand.end())
-		return demand[category];
+		return std::max(0, demand[category]); /*This way even though containers might drop demand below 0
+											  it'll still have a higher demand than a stockpile with no
+											  items that require those containers */
 	else
 		return -1;
 }
