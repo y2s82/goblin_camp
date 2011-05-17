@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "StockManager.hpp"
 #include "Camp.hpp"
 #include "Stats.hpp"
+#include "JobManager.hpp"
 
 Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Construction(type, target),
@@ -535,6 +536,15 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> witem) {
 			//Assumes that contaieners only have one specific category (TODO: might not be true in the future)
 			ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
 			demand[category] -= Item::Presets[item->Type()].container;
+
+			//If this is an empty container, re-organize the stockpile to use it
+			if (container->empty()) {
+				//We have to unreserve the item here, otherwise it won't be found for reorganization
+				//In pretty much every case it'll still be reserved at this point, as the job to place it
+				//here hasn't yet finished
+				container->Reserve(false);
+				Reorganize();
+			}
 		}
 	}
 }
@@ -682,6 +692,30 @@ int Stockpile::GetDemand(ItemCategory category) {
 
 int Stockpile::GetAmount(ItemCategory category) {
 	return amount[category];
+}
+
+//Checks if new containers exist to hold items not in containers
+void Stockpile::Reorganize() {
+	for (std::map<Coordinate, boost::shared_ptr<Container> >::const_iterator space = containers.begin();
+		space != containers.end(); ++space) {
+			if (!space->second->empty()) {
+				if (boost::shared_ptr<Item> item = space->second->GetFirstItem().lock()) {
+					if (Item::Presets[item->Type()].fitsin >= 0) {
+						if (boost::shared_ptr<Item> container = 
+							FindItemByCategory(Item::Presets[item->Type()].fitsin, NOTFULL).lock()) {
+								boost::shared_ptr<Job> reorgJob(new Job("Reorganize stockpile", LOW));
+								reorgJob->Attempts(1);
+								reorgJob->ReserveSpace(boost::static_pointer_cast<Container>(container));
+								reorgJob->tasks.push_back(Task(MOVE, item->Position()));
+								reorgJob->tasks.push_back(Task(TAKE, item->Position(), item));
+								reorgJob->tasks.push_back(Task(MOVE, container->Position()));
+								reorgJob->tasks.push_back(Task(PUTIN, container->Position(), container));
+								JobManager::Inst()->AddJob(reorgJob);
+						}
+					}
+				}
+			}
+	}
 }
 
 void Stockpile::save(OutputArchive& ar, const unsigned int version) const {
