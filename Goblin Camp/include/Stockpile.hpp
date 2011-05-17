@@ -75,6 +75,7 @@ public:
 	virtual void Dismantle(Coordinate pos=Coordinate(-1,-1));
 	int GetDemand(ItemCategory);
 	int GetAmount(ItemCategory);
+	void Reorganize();
 };
 
 BOOST_CLASS_VERSION(Stockpile, 0)
