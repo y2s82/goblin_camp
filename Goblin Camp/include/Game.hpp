@@ -175,6 +175,7 @@ public:
 	void RemoveConstruction(boost::weak_ptr<Construction>);
 	static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
 	void RefreshStockpiles() { refreshStockpiles = true; }
+	void RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<Stockpile> excluded);
 	Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>, int faction = -1);
 	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
 	boost::weak_ptr<Construction> GetConstruction(int);

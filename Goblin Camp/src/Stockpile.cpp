@@ -45,6 +45,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
 			limits.insert(std::pair<ItemCategory, int>(i,100));
 			demand.insert(std::pair<ItemCategory, int>(i,0)); //Initial demand for each container is 0
+			lastDemandBalance.insert(std::pair<ItemCategory, int>(i,0));
 		}
 	}
 	Camp::Inst()->UpdateCenter(Center(), true);
@@ -439,7 +440,6 @@ Coordinate Stockpile::FreePosition() {
 			return expansion;
 	}
 
-
 	return Coordinate(-1,-1);
 }
 
@@ -447,13 +447,21 @@ void Stockpile::ReserveSpot(Coordinate pos, bool val, ItemType type) {
 	reserved[pos] = val;
 
 	/*Update amounts based on reserves if limits exist for the item
-	This is necessary to stop too many stockpilation jobs being queued up*/
+	This is necessary to stop too many stockpilation jobs being queued up
+	Also update demand so that too many items aren't brought here instead of
+	elsewhere that might demand them as well*/
 	if (type >= 0) {
 		for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
 			cati != Item::Presets[type].categories.end(); ++cati) {
 				if (GetLimit(*cati) >= 0) {
 					amount[*cati] += val ? 1 : -1;
 				}
+		}
+
+		//We only care about container demand, and they all have _1_ specific category (TODO: They might not)
+		ItemCategory category = *Item::Presets[type].specificCategories.begin();
+		if (demand.find(category) != demand.end()) {
+			demand[category] -= (Item::Presets[type].container * (val ? 1 : -1));
 		}
 	}
 }
@@ -505,8 +513,14 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> witem) {
 		}
 
 		//Increase container demand for each containable item
-		if (Item::Presets[item->Type()].fitsin >= 0)
+		if (Item::Presets[item->Type()].fitsin >= 0) {
 			++demand[Item::Presets[item->Type()].fitsin];
+			if (std::abs(demand[Item::Presets[item->Type()].fitsin] - lastDemandBalance[Item::Presets[item->Type()].fitsin]) > 10) {
+				Game::Inst()->RebalanceStockpiles(Item::Presets[item->Type()].fitsin, 
+					boost::static_pointer_cast<Stockpile>(shared_from_this()));
+				lastDemandBalance[Item::Presets[item->Type()].fitsin] = demand[Item::Presets[item->Type()].fitsin];
+			}
+		}
 
 		if(item->IsCategory(Item::StringToItemCategory("Container"))) {
 
@@ -518,9 +532,9 @@ void Stockpile::ItemAdded(boost::weak_ptr<Item> witem) {
 			container->AddListener(this);
 
 			//Decrease container demand by how much this container can hold
-			//Assumes that contaieners only have one specific category
+			//Assumes that contaieners only have one specific category (TODO: might not be true in the future)
 			ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
-			demand[category] = demand[category] - Item::Presets[item->Type()].container;
+			demand[category] -= Item::Presets[item->Type()].container;
 		}
 	}
 }
@@ -661,11 +675,13 @@ void Stockpile::Dismantle(Coordinate location) {
 
 int Stockpile::GetDemand(ItemCategory category) { 
 	if (demand.find(category) != demand.end())
-		return std::max(0, demand[category]); /*This way even though containers might drop demand below 0
-											  it'll still have a higher demand than a stockpile with no
-											  items that require those containers */
+		return std::max(0, demand[category]);
 	else
 		return -1;
+}
+
+int Stockpile::GetAmount(ItemCategory category) {
+	return amount[category];
 }
 
 void Stockpile::save(OutputArchive& ar, const unsigned int version) const {

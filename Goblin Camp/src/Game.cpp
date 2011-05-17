@@ -1017,7 +1017,8 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 	if (boost::shared_ptr<Item> item = witem.lock()) {
 		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
-			int nearestDistance = INT_MAX;
+			//first = primary distance, second = secondary
+			std::pair<int, int> nearestDistance = std::make_pair(INT_MAX, INT_MAX);
 			ItemType itemType = item->Type();
 			bool useDemand = false;
 
@@ -1041,9 +1042,17 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 						int distance = useDemand ? (INT_MAX - 2) - sp->GetDemand(category) :
 							Distance(sp->Center(), item->Position());
 
-						if(distance < nearestDistance) {
-							nearestDistance = distance;
+						if (distance < nearestDistance.first) {
+							nearestDistance.first = distance;
 							nearest = sp;
+							if (useDemand) nearestDistance.second = Distance(sp->Center(), item->Position());
+						} else if (useDemand && distance == nearestDistance.first) {
+							int realDistance = Distance(sp->Center(), item->Position());
+							if (nearestDistance.second > realDistance) {
+								nearestDistance.first = distance;
+								nearest = sp;
+								nearestDistance.second = realDistance;
+							}
 						}
 					}
 				}
@@ -1062,6 +1071,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
 					priority));
 				stockJob->Attempts(1);
+				stockJob->ConnectToEntity(nearest);
 				Coordinate target = Coordinate(-1,-1);
 				boost::weak_ptr<Item> container;
 
@@ -2326,6 +2336,23 @@ void Game::DisplayStats() {
 	contents->AddComponent(okButton);
 
 	statDialog->ShowModal();
+}
+
+//Check each stockpile for empty not-needed containers, and see if some other pile needs them
+void Game::RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<Stockpile> excluded) {
+	for (std::map<int,boost::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
+		if (stocki->second->stockpile) {
+			boost::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
+			if (sp != excluded && sp->GetAmount(requiredCategory) > sp->GetDemand(requiredCategory)) {
+				boost::shared_ptr<Item> surplus = sp->FindItemByCategory(requiredCategory, EMPTY).lock();
+				if (surplus) {
+					boost::shared_ptr<Job> stockpileJob = StockpileItem(surplus, true);
+					if (stockpileJob && stockpileJob->ConnectedEntity().lock() != sp)
+						JobManager::Inst()->AddJob(stockpileJob);
+				}
+			}
+		}
+	}
 }
 
 void Game::save(OutputArchive& ar, const unsigned int version) const  {

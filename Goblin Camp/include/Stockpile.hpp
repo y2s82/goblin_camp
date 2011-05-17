@@ -46,6 +46,7 @@ protected:
 	std::map<Coordinate, TCODColor> colors;
 	std::map<ItemCategory, int> limits;
 	std::map<ItemCategory, int> demand;
+	std::map<ItemCategory, int> lastDemandBalance; //At what amount did we last check container demand?
 public:
 	virtual ~Stockpile();
 	int Build();
@@ -73,6 +74,7 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	virtual void Dismantle(Coordinate pos=Coordinate(-1,-1));
 	int GetDemand(ItemCategory);
+	int GetAmount(ItemCategory);
 };
 
 BOOST_CLASS_VERSION(Stockpile, 0)

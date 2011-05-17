@@ -270,8 +270,7 @@ void Construction::CancelJob(int index) {
 		while (!jobList.empty() && !reserved && !SpawnProductionJob());
 	} else if (index > 0 && index < (signed int)jobList.size()) { 
 		jobList.erase(jobList.begin() + index); 
-	}
-	else if (condition <= 0) {
+	} else if (condition <= 0) {
 		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
 	else if (dismantle) dismantle = false; //Stop trying to dismantle
