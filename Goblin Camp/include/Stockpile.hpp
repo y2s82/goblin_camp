@@ -78,4 +78,5 @@ public:
 	void Reorganize();
 };
 
-BOOST_CLASS_VERSION(Stockpile, 0)
+//1 = v0.2
+BOOST_CLASS_VERSION(Stockpile, 1)

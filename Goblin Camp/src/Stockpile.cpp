@@ -739,6 +739,8 @@ void Stockpile::save(OutputArchive& ar, const unsigned int version) const {
 		ar & it->second.b;
 	}
 	ar & limits;
+	ar & demand;
+	ar & lastDemandBalance;
 }
 
 void Stockpile::load(InputArchive& ar, const unsigned int version) {
@@ -763,4 +765,8 @@ void Stockpile::load(InputArchive& ar, const unsigned int version) {
 		colors.insert(std::pair<Coordinate, TCODColor>(location, TCODColor(r, g, b)));
 	}
 	ar & limits;
+	if (version >= 1) {
+		ar & demand;
+		ar & lastDemandBalance;
+	}
 }
