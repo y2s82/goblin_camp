@@ -110,8 +110,9 @@ void StockManager::Init() {
 				}
 			}
 
-			//Add every item to the view anyway
-			producables.insert(item);
+			//Anything not in the Misc. category can be shown in the stock manager dialog
+			if (Item::Presets[item].categories.find(Item::StringToItemCategory("Misc.")) == Item::Presets[item].categories.end())
+				  producables.insert(item);
 		}
 
 		//Flag all inorganic materials for dumping (except seeds which are technically not organic)
