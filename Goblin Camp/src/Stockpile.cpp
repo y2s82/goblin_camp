@@ -659,6 +659,8 @@ void Stockpile::AcceptVisitor(ConstructionVisitor& visitor) {
 void Stockpile::Dismantle(Coordinate location) {
 	if (!Construction::Presets[type].permanent) {
 		if (location.X() == -1 && location.Y() == -1) {
+			//Need to remove the pile first, otherwise when the items are emptied out they'll just be restockpiled in this pile
+			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 			for (int ix = a.X(); ix <= b.X(); ++ix) {
 				for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 					if (Map::Inst()->GetConstruction(ix, iy) == uid) {
@@ -678,8 +680,8 @@ void Stockpile::Dismantle(Coordinate location) {
 				containers.erase(location);
 				colors.erase(location);
 			}
+			if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 		}
-		if (containers.empty()) Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
 
