@@ -42,7 +42,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 			cachedConstruct = cons;
 			ConstructionDialog *dialog = new ConstructionDialog(50, 5);
 			constructionInfoDialog = new Dialog(dialog, "", 50, 5);
-			if (!cons->HasTag(STOCKPILE) && !cons->HasTag(FARMPLOT)) {
+			if (!cons->HasTag(FARMPLOT)) {
 				dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
 				dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
 			} else {
@@ -50,28 +50,8 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 				dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 18, 1, 13));
 				dialog->AddComponent(new Button("Expand", boost::bind(&ConstructionDialog::Expand, dialog), 37, 1, 10));
 			}
-			if(cons->HasTag(STOCKPILE)) {
-				constructionInfoDialog->SetHeight(40);
-				dialog->AddComponent(new Button("All", boost::bind(&Stockpile::SetAllAllowed, boost::static_pointer_cast<Stockpile>(cons), true), 2, 5, 8));
-				dialog->AddComponent(new Button("None", boost::bind(&Stockpile::SetAllAllowed, boost::static_pointer_cast<Stockpile>(cons), false), 11, 5, 8));
-				dialog->AddComponent(new ScrollPanel(2, 8, 23, 31,
-					new UIList<ItemCat>(&Item::Categories, 0, 0, 46, Item::Categories.size(),
-					boost::bind(&ConstructionDialog::DrawCategory, cons.get(), _1, _2, _3, _4, _5, _6, _7),
-					boost::bind(&Stockpile::SwitchAllowed, boost::static_pointer_cast<Stockpile>(cons), _1, true, false)), true));
-				dialog->AddComponent(new Label("Limits", 30, 7));
-				//Construct list of spinners for container limits
-				Grid *grid = new Grid(std::vector<Drawable *>(), 1, 0, 0, 48, 46);
-				for (int i = 0; i < Item::Categories.size(); ++i) {
-					if ((Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container"))) {
-						grid->AddComponent(new Label(Item::Categories[i].GetName(), 10, 0));
-						grid->AddComponent(new Spinner(0, 0, 20, boost::bind(&Stockpile::GetLimit, boost::static_pointer_cast<Stockpile>(cons), i),
-							boost::bind(&Stockpile::AdjustLimit, boost::static_pointer_cast<Stockpile>(cons), i, _1)));
-						grid->AddComponent(new Label("       ", 12, 0));
-					}
-				}
 
-				dialog->AddComponent(new ScrollPanel(24, 8, 23, 31, grid));
-			} else if(cons->Producer()) {
+			if (cons->Producer()) {
 				constructionInfoDialog->SetHeight(40);
 				dialog->AddComponent(new Label("Job Queue", 2, 5, TCOD_LEFT));
 				dialog->AddComponent(new ScrollPanel(2, 6, 23, 34, 
@@ -126,28 +106,6 @@ void ConstructionDialog::Expand() {
 		UI::Inst()->CloseMenu();
 		UI::ChooseRectPlacementCursor(rectCall, placement, Cursor_Stockpile);
 	}
-}
-
-void ConstructionDialog::DrawCategory(Construction *construct, ItemCat category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
-	Stockpile *sp = static_cast<Stockpile*>(construct);
-	if (category != Item::Categories[i]) {
-		i = 0;
-		for (std::vector<ItemCat>::iterator cati = Item::Categories.begin(); cati != Item::Categories.end(); ++cati) {
-			if ((*cati) == category) break;
-			++i;
-		}
-	}
-	console->setDefaultForeground(sp->Allowed(i) ? TCODColor::green : TCODColor::red);
-	if (category.parent < 0) {
-		console->print(x, y, "%c %s", sp->Allowed(i) ? 225 : 224, Item::Categories[i].name.substr(0,width-3).c_str());
-	} else {
-		if (i+1 < (signed int)Item::Categories.size() && Item::Categories[i+1].parent == category.parent) {
-			console->print(x, y, "%c%c %s", 195, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
-		} else {
-			console->print(x, y, "%c%c %s", 192, sp->Allowed(i) ? 225 : 224, category.name.substr(0,width-4).c_str());
-		}
-	}
-	console->setDefaultForeground(TCODColor::white);
 }
 
 void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int width, bool selected, TCODConsole *console) {
