@@ -2482,6 +2482,7 @@ void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 bool NPC::IsTunneler() const { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
+	adjacentNpcs.clear();
 	nearNpcs.clear();
 	nearConstructions.clear();
 	threatLocation = Coordinate(-1,-1);
@@ -2492,6 +2493,7 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 				|| endy == std::max((signed int)y - LOS_DISTANCE, 0) || endy == std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
 					int tx = x;
 					int ty = y;
+					int adjacent = 2; //We're adjacent for the first two iterations
 					TCODLine::init(tx, ty, endx, endy);
 					do {
 						/*Check constructions before checking for lightblockage because we can see a wall
@@ -2507,14 +2509,17 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 						//Add all the npcs on this tile, or only hostiles if that boolean is set
 						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
 							if (*npci != uid) {
-								if (!factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction())) threatLocation = Coordinate(tx,ty);
+								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*npci);
+								if (!factionPtr->IsFriendsWith(npc->GetFaction())) threatLocation = Coordinate(tx,ty);
 								if (!onlyHostiles || 
-									(onlyHostiles && !factionPtr->IsFriendsWith(Game::Inst()->GetNPC(*npci)->GetFaction()))) 
-									nearNpcs.push_back(Game::Inst()->GetNPC(*npci));
+									(onlyHostiles && !factionPtr->IsFriendsWith(npc->GetFaction()))) {
+										nearNpcs.push_back(npc);
+										adjacentNpcs.push_back(npc);
+								}
 							}
 						}
 
-						//Only care about fire if we're not flying and not effectively immune
+						//Only care about fire if we're not flying and/or not effectively immune
 						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
 							if (effectiveResistances[FIRE_RES] < 90) {
 								threatLocation = Coordinate(tx,ty);
@@ -2524,7 +2529,7 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 
 						/*Stop if we already see many npcs, otherwise this can start to bog down in
 						high traffic places*/
-						if (nearNpcs.size() > 10) break;
+						if (adjacent <= 0 && nearNpcs.size() > 16) break;
 
 					} while(!TCODLine::step(&tx, &ty));
 			}
