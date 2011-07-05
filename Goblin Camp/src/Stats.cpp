@@ -49,6 +49,12 @@ unsigned Stats::GetConstructionsBuilt() { return constructions; }
 void Stats::ItemBuilt(std::string name) { itemsBuilt[name] += 1; ++production; AddPoints(); }
 unsigned Stats::GetItemsBuilt() { return production; }
 
+
+void Stats::Reset() {
+	delete instance;
+	instance = new Stats();
+}
+
 namespace {
 	template<typename A, typename B>
 	void SerializeUnorderedMap(const boost::unordered_map<A,B> &map, OutputArchive& ar) {

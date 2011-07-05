@@ -1855,6 +1855,8 @@ void Game::Reset() {
 	for (int i = 0; i < Faction::factions.size(); ++i) {
 		Faction::factions[i]->Reset();
 	}
+
+	Stats::Inst()->Reset();
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
