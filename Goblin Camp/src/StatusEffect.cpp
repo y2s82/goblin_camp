@@ -31,7 +31,9 @@ graphic(g),
 	type(typeval),
 	damageType(DAMAGE_BLUNT),
 	visible(true),
-	negative(true)
+	negative(true),
+	contagionChance(0),
+	applicableResistance(DISEASE_RES)
 {
 	//Initialize changes to nothing, ie. 100%
 	for (int i = 0; i < STAT_COUNT; ++i) { statChanges[i] = 1.0; }
@@ -256,6 +258,16 @@ graphic(g),
 		visible = false;
 		break;
 
+	case COLLYWOBBLES:
+		name = "Collywobbles";
+		cooldown = MONTH_LENGTH*3;
+		graphic = 207;
+		color = TCODColor(127,106,0);
+		statChanges[STRENGTH] = 0.5;
+		statChanges[MOVESPEED] = 0.75;
+		contagionChance = 50;
+		break;
+
 	default: break;
 	}
 	cooldownDefault = cooldown;
@@ -280,6 +292,7 @@ bool StatusEffect::IsApplyableStatusEffect(StatusEffectType type) {
 	case HIGHGROUND:
 	case TRIPPED:
 	case BRAVE:
+	case COLLYWOBBLES:
 		return true;
 	default: 
 		return false;
@@ -337,6 +350,8 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return TRIPPED;
 	} else if (boost::iequals(str, "brave")) {
 		return BRAVE;
+	} else if (boost::iequals(str, "collywobbles")) {
+		return COLLYWOBBLES;
 	}
 	return HUNGER;
 }
@@ -368,6 +383,7 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case HIGHGROUND: return "highground";
 	case TRIPPED: return "tripped";
 	case BRAVE: return "brave";
+	case COLLYWOBBLES: return "collywobbles";
 	default: return "";
 	}
 }
@@ -387,6 +403,8 @@ void StatusEffect::save(OutputArchive& ar, const unsigned int version) const {
 	ar & damageType;
 	ar & visible;
 	ar & negative;
+	ar & contagionChance;
+	ar & applicableResistance;
 }
 
 void StatusEffect::load(InputArchive& ar, const unsigned int version) {
@@ -404,4 +422,8 @@ void StatusEffect::load(InputArchive& ar, const unsigned int version) {
 	ar & damageType;
 	ar & visible;
 	ar & negative;
+	if (version >= 1) {
+		ar & contagionChance;
+		ar & applicableResistance;
+	}
 }

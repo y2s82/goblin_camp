@@ -290,6 +290,8 @@ public:
 
 	virtual int GetHeight() const;
 	virtual void SetFaction(int);
+
+	void TransmitEffect(StatusEffect);
 };
 
 BOOST_CLASS_VERSION(NPC, 1)
