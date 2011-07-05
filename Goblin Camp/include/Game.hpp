@@ -166,6 +166,7 @@ public:
 	void Thirstify(Coordinate);
 	void Tire(Coordinate);
 	void Badsleepify(Coordinate);
+	void Diseasify(Coordinate);
 	boost::shared_ptr<NPC> GetNPC(int) const;
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
