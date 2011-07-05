@@ -283,6 +283,9 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Thirstify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
 		call = boost::bind(&Game::Badsleepify, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Badsleepify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
+
+		call = boost::bind(&Game::Diseasify, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Diseasify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'D')));
 	}
 	return devMenu;
 }
