@@ -501,6 +501,17 @@ void NPC::UpdateStatusEffects() {
 			}
 		}
 
+		if (statusEffectI->contagionChance > 0 && Random::Generate(1000) == 0) { //See if we transmit this effect
+			ScanSurroundings();
+			if (adjacentNpcs.size() > 0 &&
+				Random::Generate(100) < statusEffectI->contagionChance) {
+					for (std::list<boost::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
+						if (boost::shared_ptr<NPC> npc = npci->lock())
+							npc->TransmitEffect(*statusEffectI);
+					}
+			}
+		}
+
 		//Remove the statuseffect if its cooldown has run out
 		if (statusEffectI->cooldown > 0 && --statusEffectI->cooldown == 0) {
 			if (statusEffectI == statusEffectIterator) {
@@ -2457,6 +2468,7 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 	for (int i = 0; i < RES_COUNT; ++i) {
 		resistances[i] = 0;
 	}
+	resistances[DISEASE_RES] = 75; //Pretty much every creature is somewhat resistant to disease
 	group.addsub = 0;
 	group.multiplier = 1;
 	group.nb_dices = 1;
@@ -2514,7 +2526,8 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 								if (!onlyHostiles || 
 									(onlyHostiles && !factionPtr->IsFriendsWith(npc->GetFaction()))) {
 										nearNpcs.push_back(npc);
-										adjacentNpcs.push_back(npc);
+										if (adjacent-- > 0)
+											adjacentNpcs.push_back(npc);
 								}
 							}
 						}
@@ -2748,6 +2761,11 @@ void NPC::SetFaction(int newFaction) {
 	} else if (!Faction::factions.empty()) {
 		factionPtr = Faction::factions[0];
 	}
+}
+
+void NPC::TransmitEffect(StatusEffect effect) {
+	if (Random::Generate(effectiveResistances[effect.applicableResistance]) == 0)
+		AddEffect(effect);
 }
 
 void NPC::save(OutputArchive& ar, const unsigned int version) const {
