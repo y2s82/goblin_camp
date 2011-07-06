@@ -2499,6 +2499,7 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 	nearConstructions.clear();
 	threatLocation = Coordinate(-1,-1);
 	seenFire = false;
+	bool skipPosition = false; //We should skip checking this npc's position after the first time
 	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
 		for (int endy = std::max((signed int)y - LOS_DISTANCE, 0); endy <= std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
 			if (endx == std::max((signed int)x - LOS_DISTANCE, 0) || endx == std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1)
@@ -2507,6 +2508,13 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 					int ty = y;
 					int adjacent = 2; //We're adjacent for the first two iterations
 					TCODLine::init(tx, ty, endx, endy);
+
+					if (skipPosition) {
+						TCODLine::step(&tx, &ty);
+						--adjacent;
+					}
+					skipPosition = true;
+
 					do {
 						/*Check constructions before checking for lightblockage because we can see a wall
 						even though we can't see through it*/
