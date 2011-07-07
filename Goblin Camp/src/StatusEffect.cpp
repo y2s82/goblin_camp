@@ -33,7 +33,7 @@ graphic(g),
 	visible(true),
 	negative(true),
 	contagionChance(0),
-	applicableResistance(DISEASE_RES)
+	applicableResistance(MAGIC_RES)
 {
 	//Initialize changes to nothing, ie. 100%
 	for (int i = 0; i < STAT_COUNT; ++i) { statChanges[i] = 1.0; }
@@ -266,6 +266,7 @@ graphic(g),
 		statChanges[STRENGTH] = 0.5;
 		statChanges[MOVESPEED] = 0.75;
 		contagionChance = 50;
+		applicableResistance = DISEASE_RES;
 		break;
 
 	default: break;

@@ -746,6 +746,12 @@ MOVENEARend:
 								if (water->Depth() > DRINKABLE_WATER_DEPTH) {
 									thirst -= (int)(THIRST_THRESHOLD / 10);
 									AddEffect(DRINKING);
+
+									//Create a temporary water item to give us the right effects
+									boost::shared_ptr<Item> waterItem = Game::Inst()->GetItem(Game::Inst()->CreateItem(Position(), Item::StringToItemType("water"), false, -1)).lock();
+									ApplyEffects(waterItem);
+									Game::Inst()->RemoveItem(waterItem);
+
 									if (thirst < 0) { 
 										TaskFinished(TASKSUCCESS); 
 									}
@@ -2616,7 +2622,7 @@ void NPC::ApplyEffects(boost::shared_ptr<Item> item) {
 		for (std::vector<std::pair<StatusEffectType, int> >::iterator addEffecti = Item::Presets[item->Type()].addsEffects.begin();
 			addEffecti != Item::Presets[item->Type()].addsEffects.end(); ++addEffecti) {
 				if (Random::Generate(99) < addEffecti->second)
-					AddEffect(addEffecti->first);
+					TransmitEffect(addEffecti->first);
 		}
 		for (std::vector<std::pair<StatusEffectType, int> >::iterator remEffecti = Item::Presets[item->Type()].removesEffects.begin();
 			remEffecti != Item::Presets[item->Type()].removesEffects.end(); ++remEffecti) {
