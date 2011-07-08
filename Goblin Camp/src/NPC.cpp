@@ -448,6 +448,9 @@ void NPC::UpdateStatusEffects() {
 	for (int i = 0; i < RES_COUNT; ++i) {
 		effectiveResistances[i] = baseResistances[i];
 	}
+	
+	if (factionPtr->IsFriendsWith(PLAYERFACTION)) effectiveResistances[DISEASE_RES] -= Camp::Inst()->GetDiseaseModifier();
+
 	++statusGraphicCounter;
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end();) {
 		//Apply effects to stats
@@ -2635,7 +2638,7 @@ void NPC::ApplyEffects(boost::shared_ptr<Item> item) {
 }
 
 void NPC::UpdateHealth() {
-	if (health <= 0) {Kill(); return;}
+	if (health <= 0 || effectiveStats[STRENGTH] <= baseStats[STRENGTH]/10) {Kill(); return;}
 	if (health > maxHealth) health = maxHealth;
 
 	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
