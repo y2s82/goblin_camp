@@ -45,6 +45,7 @@ class Camp {
 	std::set<Coordinate> waterZones;
 	std::list<boost::weak_ptr<Job> > menialWaterJobs;
 	std::list<boost::weak_ptr<Job> > expertWaterJobs;
+	int diseaseModifier;
 public:
 	static Camp* Inst();
 	Coordinate Center();
@@ -68,6 +69,9 @@ public:
 	Coordinate GetLowTerritoryCorner() const;
 	Coordinate GetRandomSpot() const;
 	boost::weak_ptr<SpawningPool> spawningPool;
+	int GetDiseaseModifier();
 };
 
-BOOST_CLASS_VERSION(Camp, 1)
+BOOST_CLASS_VERSION(Camp, 2)
+
+//Version 2 = 0.2 - diseaseChance
