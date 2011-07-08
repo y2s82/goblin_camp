@@ -269,6 +269,39 @@ graphic(g),
 		applicableResistance = DISEASE_RES;
 		break;
 
+	case DROOPS:
+		name = "Droops";
+		cooldown = MONTH_LENGTH*3;
+		graphic = 207;
+		color = TCODColor(127,106,0);
+		statChanges[STRENGTH] = 0.5;
+		statChanges[MOVESPEED] = 0.75;
+		contagionChance = 50;
+		applicableResistance = DISEASE_RES;
+		break;
+
+	case RATTLES:
+		name = "Rattles";
+		cooldown = MONTH_LENGTH*3;
+		graphic = 207;
+		color = TCODColor(127,106,0);
+		statChanges[STRENGTH] = 0.5;
+		statChanges[MOVESPEED] = 0.75;
+		contagionChance = 50;
+		applicableResistance = DISEASE_RES;
+		break;
+
+	case CHILLS:
+		name = "Chills";
+		cooldown = MONTH_LENGTH*3;
+		graphic = 207;
+		color = TCODColor(127,106,0);
+		statChanges[STRENGTH] = 0.5;
+		statChanges[MOVESPEED] = 0.75;
+		contagionChance = 50;
+		applicableResistance = DISEASE_RES;
+		break;
+
 	default: break;
 	}
 	cooldownDefault = cooldown;
@@ -294,6 +327,9 @@ bool StatusEffect::IsApplyableStatusEffect(StatusEffectType type) {
 	case TRIPPED:
 	case BRAVE:
 	case COLLYWOBBLES:
+	case DROOPS:
+	case RATTLES:
+	case CHILLS:
 		return true;
 	default: 
 		return false;
@@ -353,6 +389,12 @@ StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
 		return BRAVE;
 	} else if (boost::iequals(str, "collywobbles")) {
 		return COLLYWOBBLES;
+	} else if (boost::iequals(str, "droops")) {
+		return DROOPS;
+	} else if (boost::iequals(str, "rattles")) {
+		return RATTLES;
+	} else if (boost::iequals(str, "chills")) {
+		return CHILLS;
 	}
 	return HUNGER;
 }
@@ -385,6 +427,9 @@ std::string StatusEffect::StatusEffectTypeToString(StatusEffectType type) {
 	case TRIPPED: return "tripped";
 	case BRAVE: return "brave";
 	case COLLYWOBBLES: return "collywobbles";
+	case DROOPS: return "droops";
+	case RATTLES: return "rattles";
+	case CHILLS: return "chills";
 	default: return "";
 	}
 }
