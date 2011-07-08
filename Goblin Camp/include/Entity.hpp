@@ -67,8 +67,8 @@ public:
 	virtual void CancelJob(int=0);
 	virtual void SetFaction(int);
 	virtual int GetFaction() const;
-    
-    virtual Panel* GetContextMenu() {return 0;}
+	
+	virtual Panel* GetContextMenu() {return 0;}
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
 
 	int GetVelocity();
