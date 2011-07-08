@@ -782,6 +782,8 @@ item_type "Water" {
 	color = "0,100,250"
 	nutrition = 5.0
 	multiplier = 20
+	addStatusEffects=["Collywobbles", "Droops", "Rattles", "Chills"]
+	addEffectChances=[       2      ,     2   ,      2   ,     2   ]
 }
 
 
