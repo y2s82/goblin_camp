@@ -197,6 +197,12 @@ class NPC : public Entity {
 	void UpdateHealth();
 	boost::shared_ptr<Faction> factionPtr;
 
+	std::string GetDeathMsg();
+	std::string GetDeathMsgStrengthLoss();
+	std::string GetDeathMsgCombat(boost::weak_ptr<NPC> other, DamageType);
+	std::string GetDeathMsgThirst();
+	std::string GetDeathMsgHunger();
+
 public:
 	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
 
@@ -237,7 +243,7 @@ public:
 	void Expert(bool);
 
 	bool Dead() const;
-	void Kill();
+	void Kill(std::string deathMessage);
 	void PickupItem(boost::weak_ptr<Item>);
 	void DropItem(boost::weak_ptr<Item>);
 	void Hit(boost::weak_ptr<Entity>, bool careful = false);

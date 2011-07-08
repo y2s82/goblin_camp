@@ -369,10 +369,10 @@ void NPC::Update() {
 
 		if (thirst > THIRST_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleThirst();
-		} else if (thirst > THIRST_THRESHOLD * 2) Kill();
+		} else if (thirst > THIRST_THRESHOLD * 2) Kill(GetDeathMsgThirst());
 		if (hunger > HUNGER_THRESHOLD && Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0) {
 			HandleHunger();
-		} else if (hunger > 72000) Kill();
+		} else if (hunger > 72000) Kill(GetDeathMsgHunger());
 	}
 
 	if (needsSleep) {
@@ -1520,7 +1520,7 @@ void NPC::Expert(bool value) {expert = value;}
 Coordinate NPC::Position() const {return Coordinate(x,y);}
 
 bool NPC::Dead() const { return dead; }
-void NPC::Kill() {
+void NPC::Kill(std::string deathMessage) {
 	if (!dead) {//You can't be killed if you're already dead!
 		dead = true;
 		health = 0;
@@ -1548,8 +1548,7 @@ void NPC::Kill() {
 			inventory->RemoveItem(witem);
 		}
 
-		if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Announce::Inst()->AddMsg("An orc has died!", TCODColor::red, Position());
-		else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Announce::Inst()->AddMsg("A goblin has died!", TCODColor::red, Position());
+		if (deathMessage.length() > 0) Announce::Inst()->AddMsg(deathMessage, TCODColor::red, Position());
 		
 		Stats::Inst()->deaths[NPC::NPCTypeToString(type)] += 1;
 		Stats::Inst()->AddPoints(NPC::Presets[type].health);
@@ -2029,7 +2028,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 		}
 	}
 
-	if (health <= 0) Kill();
+	if (health <= 0) Kill(GetDeathMsgCombat(aggr, attack->Type()));
 
 	if (damage > 0) {
 		damageReceived += damage;
@@ -2638,7 +2637,8 @@ void NPC::ApplyEffects(boost::shared_ptr<Item> item) {
 }
 
 void NPC::UpdateHealth() {
-	if (health <= 0 || effectiveStats[STRENGTH] <= baseStats[STRENGTH]/10) {Kill(); return;}
+	if (health <= 0) {Kill(GetDeathMsg()); return;}
+	if (effectiveStats[STRENGTH] <= baseStats[STRENGTH]/10) {Kill(GetDeathMsgStrengthLoss()); return;}
 	if (health > maxHealth) health = maxHealth;
 
 	if (Random::Generate(UPDATES_PER_SECOND*10) == 0 && health < maxHealth) ++health;
@@ -2784,6 +2784,224 @@ void NPC::TransmitEffect(StatusEffect effect) {
 	if (Random::Generate(effectiveResistances[effect.applicableResistance]) == 0)
 		AddEffect(effect);
 }
+
+std::string NPC::GetDeathMsg() {
+	int choice = Random::Generate(5);
+	switch (choice) {
+	default:
+	case 0:
+		return name + " has died";
+
+	case 1:
+		return name + " has left the mortal realm";
+
+	case 2:
+		return name + " is no longer among us";
+
+	case 3:
+		return name + " is wormfood";
+
+	case 4:
+		return name + " lost his will to live";
+	}
+}
+
+std::string NPC::GetDeathMsgStrengthLoss() {
+	std::string effectName = "Unknown disease";
+	for (std::list<StatusEffect>::const_iterator statI = statusEffects.begin(); statI != statusEffects.end(); ++statI) {
+		if (statI->statChanges[STRENGTH] < 1) {
+			effectName = statI->name;
+			break;
+		}
+	}
+
+	int choice = Random::Generate(5);
+	switch (choice) {
+	default:
+	case 0:
+		return name + " has died from " + effectName;
+
+	case 1:
+		return name + " succumbed to " + effectName;
+
+	case 2:
+		return effectName + " claims another victim in " + name;
+
+	case 3:
+		return name + " is overcome by " + effectName;
+
+	case 4:
+		return effectName + " was too much for " + name;
+	}
+}
+
+std::string NPC::GetDeathMsgThirst() {
+	int choice = Random::Generate(2);
+	switch (choice) {
+	default:
+	case 0:
+		return name + " has died from thirst";
+
+	case 1:
+		return name + " died from dehydration";
+	}
+}
+
+std::string NPC::GetDeathMsgHunger() {
+	int choice = Random::Generate(2);
+	switch (choice) {
+	default:
+	case 0:
+		return name + " has died from hunger";
+
+	case 1:
+		return name + " was too weak to live";
+	}
+}
+
+std::string NPC::GetDeathMsgCombat(boost::weak_ptr<NPC> other, DamageType damage) {
+	int choice = Random::Generate(4);
+
+	if (boost::shared_ptr<NPC> attacker = other.lock()) {
+		std::string otherName = attacker->Name();
+
+		switch (damage) {
+		case DAMAGE_SLASH:
+			switch (choice) {
+			default:
+			case 0:
+				return otherName + " sliced " + name + " into ribbons";
+
+			case 1:
+				return otherName + " slashed " + name + " into pieces";
+
+			case 2:
+				return name + " was dissected by " + otherName;
+
+			case 3:
+				return otherName + " chopped " + name + " up";
+			}
+
+		case DAMAGE_BLUNT:
+			switch (choice) {
+			default:
+			case 0:
+				return otherName + " bludgeoned " + name + " to death";
+
+			case 1:
+				return otherName + " smashed " + name + " into pulp";
+
+			case 2:
+				return name + " was crushed by " + otherName;
+
+			case 3:
+				return otherName + " hammered " + name + " to death";
+			}
+
+		case DAMAGE_PIERCE:
+			switch (choice) {
+			default:
+			case 0:
+				return otherName + " pierced " + name + " straight through";
+
+			case 1:
+				return otherName + " punched holes through " + name;
+
+			case 2:
+				return name + " was made into a pincushion by " + otherName;
+			}
+
+		case DAMAGE_FIRE:
+			switch (choice) {
+			default:
+			case 0:
+				return otherName + " burnt " + name + " to ashes";
+
+			case 1:
+				return otherName + " fried " + name + " to a crisp";
+
+			case 2:
+				return name + " was barbecued by" + otherName;
+			}
+
+		default:
+			switch (choice) {
+			default:
+			case 0:
+				return otherName + " ended " + name + "'s life";
+
+			case 1:
+				return otherName + " was too much for " + name + " to handle";
+
+			case 2:
+				return otherName + " killed " + name;
+			}
+		}
+	}
+	
+	switch (damage) {
+	case DAMAGE_SLASH:
+		switch (choice) {
+		default:
+		case 0:
+			return  name + " was cut into ribbons";
+
+		case 1:
+			return  name + " got slashed into pieces";
+
+		case 2:
+			return name + " was dissected";
+
+		case 3:
+			return name + "was chopped up";
+		}
+
+	case DAMAGE_BLUNT:
+		switch (choice) {
+		default:
+		case 0:
+			return  name + " was bludgeoned to death";
+
+		case 1:
+			return name + " was smashed into pulp";
+
+		case 2:
+			return name + " was crushed";
+
+		case 3:
+			return name + " was hammered to death";
+		}
+
+	case DAMAGE_PIERCE:
+		switch (choice) {
+		default:
+		case 0:
+			return name + " got pierced straight through";
+
+		case 1:
+			return name + " got too many holes punched through";
+
+		case 2:
+			return name + " was made into a pincushion";
+		}
+
+	case DAMAGE_FIRE:
+		switch (choice) {
+		default:
+		case 0:
+			return name + " burnt into ashes";
+
+		case 1:
+			return name + " fried to a crisp";
+
+		case 2:
+			return name + " was barbecued";
+		}
+
+	default: return GetDeathMsg();
+	}
+}
+
 
 void NPC::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Container>();
