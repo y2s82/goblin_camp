@@ -44,7 +44,8 @@ centerX(220.0),
 	farmplots(0),
 	upperCorner(Coordinate()),
 	lowerCorner(Coordinate()),
-	autoTerritory(true)
+	autoTerritory(true),
+	diseaseModifier(0)
 {}
 
 Camp* Camp::Inst() {
@@ -196,6 +197,8 @@ void Camp::Reset() {
 void Camp::Update() {
 	UpdateTier();
 	UpdateWaterJobs();
+
+	diseaseModifier = std::pow((Game::Inst()->GoblinCount() + Game::Inst()->OrcCount() - 20) / 10, 2.0f);
 }
 
 void Camp::AddWaterZone(Coordinate from, Coordinate to) {
@@ -296,6 +299,10 @@ Coordinate Camp::GetRandomSpot() const {
 	return randomLocation;
 }
 
+int Camp::GetDiseaseModifier() {
+	return diseaseModifier;
+}
+
 void Camp::save(OutputArchive& ar, const unsigned int version) const {
 	ar.register_type<Coordinate>();
 	ar & centerX;
@@ -315,6 +322,7 @@ void Camp::save(OutputArchive& ar, const unsigned int version) const {
 	ar & menialWaterJobs;
 	ar & expertWaterJobs;
 	ar & spawningPool;
+	ar & diseaseModifier;
 }
 
 void Camp::load(InputArchive& ar, const unsigned int version) {
@@ -341,5 +349,8 @@ void Camp::load(InputArchive& ar, const unsigned int version) {
 	ar & expertWaterJobs;
 	if (version >= 1) {
 		ar & spawningPool;
+	}
+	if (version >= 2) {
+		ar & diseaseModifier;
 	}
 }
