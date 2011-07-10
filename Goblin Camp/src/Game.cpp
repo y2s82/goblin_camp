@@ -1741,7 +1741,7 @@ void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_pt
 }
 
 // Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
-std::vectory<int> Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
+std::vector<int> Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
 	int minX = std::min(corner1.X(), corner2.X());
