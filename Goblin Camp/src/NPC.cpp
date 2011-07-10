@@ -1485,6 +1485,15 @@ void NPC::findPath(Coordinate target) {
 	}
 }
 
+bool NPC::IsPathWalkable() {
+	for (int i = 0; i < path->size(); i++) {
+		int x,y;
+		path->get(i, &x, &y);
+		if (!Map::Inst()->IsWalkable(x, y, (void*)this)) return false;
+	}
+	return true;
+}
+
 void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
 unsigned int NPC::speed() const {return effectiveStats[MOVESPEED];}
 
