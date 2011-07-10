@@ -26,6 +26,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Camp.hpp"
 #include "StockManager.hpp"
 #include "data/Config.hpp"
+#include "Faction.hpp"
 
 Events::Events(Map* vmap) :
 map(vmap),
@@ -67,6 +68,10 @@ void Events::Update(bool safe) {
 	if (existingImmigrants.size() < Game::Inst()->OrcCount() / 7 && 
 		Random::Generate(UPDATES_PER_SECOND * 60 * 30) == 0) {
 			SpawnImmigrants();
+	}
+	
+	if (Random::Generate(UPDATES_PER_SECOND * 60 * 60 * 12) == 0) {
+		SpawnMigratingAnimals();
 	}
 }
 
@@ -209,7 +214,11 @@ void Events::SpawnMigratingAnimals() {
 		Coordinate a,b;
 		GenerateEdgeCoordinates(map, a, b);
 
-		Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
+		std::vector<int> migrants = Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
+		for(std::vector<int>::iterator mgrnt = migrants.begin(); mgrnt != migrants.end(); mgrnt++) {
+			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*mgrnt);
+			npc->SetFaction(Faction::StringToFactionType("Migrator"));
+		}
 		Announce::Inst()->AddMsg(msg, TCODColor::green, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 	}
 }

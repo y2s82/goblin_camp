@@ -1741,20 +1741,22 @@ void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_pt
 }
 
 // Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
-void Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
+std::vectory<int> Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
 	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
 	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
 	int minX = std::min(corner1.X(), corner2.X());
 	int minY = std::min(corner1.Y(), corner2.Y());
-
+	
+	std::vector<int> uids;
 	for (int npcs = 0; npcs < quantity; ++npcs) {
 		Coordinate location(
 			Random::Generate(minX, areaWidth + minX - 1),
 			Random::Generate(minY, areaLength + minY - 1)
 		);
 
-		Game::Inst()->CreateNPC(location, type);
+		uids.push_back(Game::Inst()->CreateNPC(location, type));
 	}
+	return uids;
 }
 
 int Game::DiceToInt(TCOD_dice_t dice) {
