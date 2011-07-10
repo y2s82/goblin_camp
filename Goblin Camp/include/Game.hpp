@@ -159,7 +159,7 @@ public:
 	static void SetSquadTargetCoordinate(Order, Coordinate, boost::shared_ptr<Squad>, bool autoClose = true);
 	static void SetSquadTargetEntity(Order, Coordinate, boost::shared_ptr<Squad>);
 	NPCType GetRandomNPCTypeByTag(std::string tag);
-	void CreateNPCs(int,NPCType,Coordinate,Coordinate);
+	std::vector<int> CreateNPCs(int,NPCType,Coordinate,Coordinate);
 	unsigned int PeacefulFaunaCount() const;
 	void PeacefulFaunaCount(int);
 	void Hungerize(Coordinate);

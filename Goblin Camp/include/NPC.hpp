@@ -230,6 +230,7 @@ public:
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
+        bool IsPathWalkable();
 	void StartJob(boost::shared_ptr<Job>);
 	void AddEffect(StatusEffectType);
 	void AddEffect(StatusEffect);
