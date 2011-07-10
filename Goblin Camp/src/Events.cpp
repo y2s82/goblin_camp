@@ -18,6 +18,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
+#if DEBUG
+#include "iostream"
+#endif
 #include "Random.hpp"
 #include "Announce.hpp"
 #include "Events.hpp"
@@ -70,7 +73,13 @@ void Events::Update(bool safe) {
 			SpawnImmigrants();
 	}
 	
-	if (Random::Generate(UPDATES_PER_SECOND * 60 * 60 * 12) == 0) {
+	Season cSeason = Game::Inst()->CurrentSeason();
+	if ((cSeason == EarlySpring ||
+		cSeason == Spring ||
+		cSeason == LateSpring ||
+		cSeason == EarlyFall ||
+		cSeason == Fall ||
+		cSeason == LateFall) && Random::Generate(UPDATES_PER_SECOND * 60 * 30) == 0) {
 		SpawnMigratingAnimals();
 	}
 }
@@ -207,18 +216,189 @@ void Events::SpawnMigratingAnimals() {
 	if (!migratingAnimals.empty()) {
 		NPCType monsterType = Random::ChooseElement(migratingAnimals);
 		int migrationSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+		if (migrationSpawnCount == 0) {
+			return;
+		}
+		
+		// Migrations are usually much bigger than your average group, so time number by 3
+		migrationSpawnCount *= 3;
+		
+		int tries = 0;
+		Coordinate a,b;
+		do {
+			GenerateEdgeCoordinates(map, a, b);
+		} while (Map::Inst()->IsWalkable(a.X(), a.Y()) && Map::Inst()->IsWalkable(b.X(), b.Y()));
+
+#if DEBUG
+		std::cout<< "Migration entry at " << a.X() << "x" << a.Y()<<"\n";
+#endif
+		
+		int tuid = Game::Inst()->CreateNPC(a, monsterType);
+		migrationSpawnCount--;
+#if DEBUG
+		std::cout<< "Migration spawning " << migrationSpawnCount<< " " << monsterType << "\n";
+#endif
+		
+		NPC *firstNPC = Game::Inst()->GetNPC(tuid).get();
+		int x, y;
+		int halfMapWidth, halfMapHeight;
+		halfMapWidth = Map::Inst()->Width() / 2;
+		halfMapHeight = Map::Inst()->Height() / 2;
+		
+		// On the left
+		if (a.X() < 5) {
+			while (tries < 20) {
+				// Try the right side first
+				x = Map::Inst()->Width() - 1;
+				y = halfMapHeight + Random::Generate(-halfMapHeight, halfMapHeight);
+				firstNPC->findPath(Coordinate(x, y));
+				if (firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try the bottom side
+				x = halfMapWidth + Random::Generate(-halfMapWidth, halfMapWidth);
+				y = 0;
+				firstNPC->findPath(Coordinate(x, y));
+				if(firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try top
+				x = halfMapWidth + Random::Generate(-halfMapWidth, halfMapWidth);
+				y = Map::Inst()->Height() - 1;
+				firstNPC->findPath(Coordinate(x, y));
+				if(firstNPC->IsPathWalkable()) break;
+				tries++;
+			}
+		// Right side
+		} else if (a.X() > Map::Inst()->Width() - 5) {
+			while (tries < 20) {
+				// Try the left side first
+				x = 0;
+				y = halfMapHeight + Random::Generate(-halfMapHeight, halfMapHeight);
+				firstNPC->findPath(Coordinate(x, y));
+				if (firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try the bottom side
+				x = halfMapWidth + Random::Generate(-halfMapWidth, halfMapWidth);
+				y = 0;
+				firstNPC->findPath(Coordinate(x, y));
+				if(firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try top
+				x = halfMapWidth + Random::Generate(-halfMapWidth, halfMapWidth);
+				y = Map::Inst()->Height() - 1;
+				firstNPC->findPath(Coordinate(x, y));
+				if(firstNPC->IsPathWalkable()) break;
+				tries++;
+			}
+		// Bottom side
+		} else if (a.Y() < 5) {
+			while (tries < 20) {
+				// Try the left side first
+				x = 0;
+				y = halfMapHeight + Random::Generate(-halfMapHeight, halfMapHeight);
+				firstNPC->findPath(Coordinate(x, y));
+				if (firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try the right side
+				x = Map::Inst()->Width() - 1;
+				y = halfMapHeight + Random::Generate(-halfMapHeight, halfMapHeight);
+				firstNPC->findPath(Coordinate(x, y));
+				if (firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try top
+				x = halfMapWidth + Random::Generate(-halfMapWidth, halfMapWidth);
+				y = Map::Inst()->Height() - 1;
+				firstNPC->findPath(Coordinate(x, y));
+				if(firstNPC->IsPathWalkable()) break;
+				tries++;
+			}
+		// Top
+		} else if (a.Y() > Map::Inst()->Height() - 5) {
+			while (tries < 20) {
+				// Try the left side first
+				x = 0;
+				y = halfMapHeight + Random::Generate(-halfMapHeight, halfMapHeight);
+				firstNPC->findPath(Coordinate(x, y));
+				if (firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try the right side
+				x = Map::Inst()->Width() - 1;
+				y = halfMapHeight + Random::Generate(-halfMapHeight, halfMapHeight);
+				firstNPC->findPath(Coordinate(x, y));
+				if (firstNPC->IsPathWalkable()) break;
+				tries++;
+				
+				// Try the bottom side
+				x = halfMapWidth + Random::Generate(-halfMapWidth, halfMapWidth);
+				y = 0;
+				firstNPC->findPath(Coordinate(x, y));
+				if(firstNPC->IsPathWalkable()) break;
+				tries++;
+			}
+		} else {
+#if DEBUG
+			std::cout << "Could not run migration, coordinates from GenerateEdgeCoordinates were not on edge\n";
+#endif
+			return;
+		}
+		
+		if (tries > 20) {
+#if DEBUG
+			std::cout << "Could not find a destination for a migration, tried "<<tries<<" times.\n";
+#endif
+			return;
+		}
+		
+#if DEBUG
+		std::cout << "Migration exit at " << x << "x" << y << "\n";
+#endif
+		
+		std::vector<NPC*> migrants;
+		std::vector<int> uids = Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
+		
+		for(std::vector<int>::iterator uidi = uids.begin(); uidi != uids.end(); uidi++) {
+			boost::shared_ptr<NPC> ptr = Game::Inst()->GetNPC(*uidi);
+			if (!ptr) continue;
+			migrants.push_back(ptr.get());
+		}
+		migrants.push_back(firstNPC);
+		if (migrants.empty()) {
+			return;
+		}
+		
+		// Create jobs for the migration
+		for(std::vector<NPC*>::iterator mgrnt = migrants.begin();
+			mgrnt != migrants.end(); mgrnt++) {
+			boost::shared_ptr<Job> migrateJob(new Job("Migrate"));
+			
+			// This is so they don't all disapear into one spot.
+			int fx, fy;
+			if (x < 5 || x > Map::Inst()->Width() - 5) {
+				fx = 0;
+				fy = y + Random::Generate(-5, 5);
+			} else {
+				fy = 0;
+				fx = x + Random::Generate(-5, 5);
+			}
+			
+			migrateJob->tasks.push_back(Task(MOVE, Coordinate(fx, fy)));
+			migrateJob->tasks.push_back(Task(FLEEMAP));
+			(*mgrnt)->StartJob(migrateJob);
+		}
 
 		std::string msg;
-		msg = (boost::format("A %s migration is occurring outside your camp.") % NPC::Presets[monsterType].name).str();
+		msg = (boost::format("A %s migration is occurring outside your %s.") % NPC::Presets[monsterType].name
+			% Camp::Inst()->GetName()).str();
 		
-		Coordinate a,b;
-		GenerateEdgeCoordinates(map, a, b);
-
-		std::vector<int> migrants = Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
-		for(std::vector<int>::iterator mgrnt = migrants.begin(); mgrnt != migrants.end(); mgrnt++) {
-			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*mgrnt);
-			npc->SetFaction(Faction::StringToFactionType("Migrator"));
-		}
 		Announce::Inst()->AddMsg(msg, TCODColor::green, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+#if DEBUG
+		std::cout << "Migration underway.\n";
+#endif
 	}
 }
