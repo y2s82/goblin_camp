@@ -248,6 +248,7 @@ public:
 	void CreateBlood(Coordinate,int);
 
 	void TriggerAttack();
+        void TriggerMigration();
 
 	void AddDelay(int delay, boost::function<void()>);
 

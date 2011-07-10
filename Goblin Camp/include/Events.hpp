@@ -30,6 +30,7 @@ private:
 	std::vector<int> hostileSpawningMonsters;
 	int timeSinceHostileSpawn;
 	std::vector<int> peacefulAnimals;
+	std::vector<int> migratingAnimals;
 	std::vector<int> immigrants;
 	std::vector<boost::weak_ptr<NPC> > existingImmigrants;
 public:
@@ -38,4 +39,5 @@ public:
 	void SpawnHostileMonsters();
 	void SpawnBenignFauna();
 	void SpawnImmigrants();
+        void SpawnMigratingAnimals();
 };

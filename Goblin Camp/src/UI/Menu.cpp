@@ -263,6 +263,7 @@ Menu* Menu::DevMenu() {
 		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2);
 		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R')));
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
+		devMenu->AddChoice(MenuChoice("Trigger migration", boost::bind(&Game::TriggerMigration, Game::Inst())));
 		
 		call = boost::bind(&Game::Damage, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'E')));

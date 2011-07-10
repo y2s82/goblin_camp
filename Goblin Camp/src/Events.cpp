@@ -31,6 +31,7 @@ Events::Events(Map* vmap) :
 map(vmap),
 	hostileSpawningMonsters(std::vector<int>()),
 	timeSinceHostileSpawn(0),
+        migratingAnimals(std::vector<int>()),
 	peacefulAnimals(std::vector<int>())
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
@@ -40,7 +41,9 @@ map(vmap),
 			peacefulAnimals.push_back(i);
 		if (NPC::Presets[i].tags.find("immigrant") != NPC::Presets[i].tags.end())
 			immigrants.push_back(i);
-	}
+                if (NPC::Presets[i].tags.find("migratory") != NPC::Presets[i].tags.end())
+			migratingAnimals.push_back(i);
+        }
 }
 
 void Events::Update(bool safe) {
@@ -192,5 +195,21 @@ void Events::SpawnImmigrants() {
 		}
 
 		Announce::Inst()->AddMsg(msg, TCODColor(0,150,255), Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+	}
+}
+
+void Events::SpawnMigratingAnimals() {
+	if (!migratingAnimals.empty()) {
+		NPCType monsterType = Random::ChooseElement(migratingAnimals);
+		int migrationSpawnCount = Game::DiceToInt(NPC::Presets[monsterType].group);
+
+		std::string msg;
+		msg = (boost::format("A %s migration is occurring outside your camp.") % NPC::Presets[monsterType].name).str();
+		
+		Coordinate a,b;
+		GenerateEdgeCoordinates(map, a, b);
+
+		Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
+		Announce::Inst()->AddMsg(msg, TCODColor::green, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 	}
 }

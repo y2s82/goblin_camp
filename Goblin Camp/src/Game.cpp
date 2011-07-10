@@ -2057,6 +2057,7 @@ void Game::RemoveNatureObject(Coordinate a, Coordinate b) {
 }
 
 void Game::TriggerAttack() { events->SpawnHostileMonsters(); }
+void Game::TriggerMigration() { events->SpawnMigratingAnimals(); }
 
 void Game::GatherItems(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
