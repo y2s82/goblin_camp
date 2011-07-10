@@ -1060,4 +1060,81 @@ npc_type "human soldier" {
 	spawnAsGroup="1d20+10"
 	faction = "Humans"
 }
-	
+
+npc_type "wildebeest" {
+	name="Wildebeest"
+	tier=1
+	tags=["localWildlife", "migratory"]
+	color="128,128,128"
+	graphic='w'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=150
+		dodge=1
+		strength=15
+		size=15
+	}		
+	resistances {
+		physical=25
+	}
+	attack "Head But" {
+		type="blunt"
+		damage="1d15"
+		cooldown=150
+	}
+	spawnAsGroup="5d5"
+	death="Meat"
+}
+
+npc_type "buffalo" {
+	name="Buffalo"
+	tier=3
+	tags=["localWildlife", "migratory"]
+	color="0,0,128"
+	graphic='B'
+	AI="PeacefulAnimal"
+	stats {
+		speed=10
+		health=150
+		dodge=3
+		strength=35
+		size=15
+	}
+	resistances {
+		physical=25
+	}
+	attack "Stomp" {
+		type="blunt"
+		damage="1d5+2"
+		cooldown=75
+	}
+	spawnAsGroup="3d3"
+	death="Meat"
+}
+
+npc_type "gazelle" {
+	name="Gazelle"
+	tier=3
+	tags=["localWildlife", "migratory"]
+	color="245,222,179"
+	graphic='G'
+	AI="PeacefulAnimal"
+	stats {
+		speed=30
+		health=100
+		dodge=5
+		strength=10
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Poke" {
+		type="piercing"
+		damage="1d15+3"
+		cooldown=50
+	}
+	spawnAsGroup="5d5+5"
+	death="Meat"
+}
