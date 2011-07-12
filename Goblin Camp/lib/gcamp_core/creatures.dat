@@ -1061,80 +1061,83 @@ npc_type "human soldier" {
 	faction = "Humans"
 }
 
-npc_type "wildebeest" {
-	name="Wildebeest"
+npc_type "mumak" {
+	name="Mumak"
+	plural="Mumakil"
 	tier=1
-	tags=["localWildlife", "migratory"]
+	tags=["localWildlife", "migratory", "calm"]
 	color="128,128,128"
-	graphic='w'
+	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
 		speed=15
 		health=150
 		dodge=1
-		strength=15
-		size=15
+		size=30
 	}		
 	resistances {
 		physical=25
 	}
-	attack "Head But" {
+	attack "Smash" {
 		type="blunt"
-		damage="1d15"
-		cooldown=150
+		damage="1d75+15"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
 	}
 	spawnAsGroup="5d5"
-	death="Meat"
+	death="Huge corpse"
 }
 
-npc_type "buffalo" {
-	name="Buffalo"
+npc_type "mastodon" {
+	name="Mastodon"
 	tier=3
-	tags=["localWildlife", "migratory"]
-	color="0,0,128"
-	graphic='B'
+	tags=["localWildlife", "migratory", "calm"]
+	color="100,100,100"
+	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
 		speed=10
 		health=150
 		dodge=3
-		strength=35
-		size=15
+		size=25
 	}
 	resistances {
 		physical=25
 	}
 	attack "Stomp" {
 		type="blunt"
-		damage="1d5+2"
+		damage="1d50+20"
 		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     50     ]
 	}
 	spawnAsGroup="3d3"
-	death="Meat"
+	death="Huge corpse"
 }
 
-npc_type "gazelle" {
-	name="Gazelle"
+npc_type "Baluchitherium" {
+	name="Baluchitheria"
 	tier=3
-	tags=["localWildlife", "migratory"]
-	color="245,222,179"
-	graphic='G'
+	tags=["localWildlife", "migratory", "calm"]
+	color="130,130,130"
+	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
-		speed=30
+		speed=15
 		health=100
 		dodge=5
 		strength=10
-		size=5
+		size=20
 	}
 	resistances {
 		physical=5
 	}
-	attack "Poke" {
+	attack "Gore" {
 		type="piercing"
-		damage="1d15+3"
+		damage="1d30+10"
 		cooldown=50
 	}
 	spawnAsGroup="5d5+5"
-	death="Meat"
+	death="Large corpse"
 }
