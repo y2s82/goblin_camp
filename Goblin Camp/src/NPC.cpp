@@ -209,7 +209,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 		}
 	}
 	taskBegun = false;
-	run = true;
+	run = NPC::Presets[type].tags.find("calm") == NPC::Presets[type].tags.end() ? true : false;
 
 	if (result != TASKSUCCESS) {
 		//If we're wielding a container (ie. a tool) spill it's contents
@@ -1841,6 +1841,7 @@ void NPC::AnimalReact(boost::shared_ptr<NPC> animal) {
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 			if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 				animal->AddEffect(PANIC);
+				animal->run = true;
 			}
 		}
 	}
