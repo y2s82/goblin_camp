@@ -35,7 +35,7 @@ Events::Events(Map* vmap) :
 map(vmap),
 	hostileSpawningMonsters(std::vector<int>()),
 	timeSinceHostileSpawn(0),
-        migratingAnimals(std::vector<int>()),
+		migratingAnimals(std::vector<int>()),
 	peacefulAnimals(std::vector<int>())
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
@@ -45,9 +45,9 @@ map(vmap),
 			peacefulAnimals.push_back(i);
 		if (NPC::Presets[i].tags.find("immigrant") != NPC::Presets[i].tags.end())
 			immigrants.push_back(i);
-                if (NPC::Presets[i].tags.find("migratory") != NPC::Presets[i].tags.end())
+				if (NPC::Presets[i].tags.find("migratory") != NPC::Presets[i].tags.end())
 			migratingAnimals.push_back(i);
-        }
+		}
 }
 
 void Events::Update(bool safe) {
@@ -227,7 +227,7 @@ void Events::SpawnMigratingAnimals() {
 		Coordinate a,b;
 		do {
 			GenerateEdgeCoordinates(map, a, b);
-		} while (Map::Inst()->IsWalkable(a.X(), a.Y()) && Map::Inst()->IsWalkable(b.X(), b.Y()));
+		} while (!Map::Inst()->IsWalkable(a.X(), a.Y()));
 
 #if DEBUG
 		std::cout<< "Migration entry at " << a.X() << "x" << a.Y()<<"\n";
@@ -387,7 +387,7 @@ void Events::SpawnMigratingAnimals() {
 				fx = x + Random::Generate(-5, 5);
 			}
 			
-			migrateJob->tasks.push_back(Task(MOVE, Coordinate(fx, fy)));
+			migrateJob->tasks.push_back(Task(MOVENEAR, Coordinate(fx, fy)));
 			migrateJob->tasks.push_back(Task(FLEEMAP));
 			(*mgrnt)->StartJob(migrateJob);
 		}
