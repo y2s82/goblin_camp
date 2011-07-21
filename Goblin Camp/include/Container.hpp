@@ -71,6 +71,7 @@ public:
 	int GetReservedSpace();
 	virtual void Position(Coordinate);
 	virtual Coordinate Position();
+	virtual void SetFaction(int);
 };
 
 BOOST_CLASS_VERSION(::Container, 0)
