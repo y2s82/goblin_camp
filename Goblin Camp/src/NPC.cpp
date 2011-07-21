@@ -1983,6 +1983,7 @@ void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
 						projectile->PutInContainer();
 						projectile->Position(Position());
 						projectile->CalculateFlightPath(targetEntity->Position(), 100, GetHeight());
+						projectile->SetFaction(PLAYERFACTION);
 					}
 				}
 				break;
