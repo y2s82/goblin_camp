@@ -111,12 +111,12 @@ void Container::AddListener(ContainerListener* listener) {
 
 void Container::RemoveListener(ContainerListener *listener) {
 	unsigned int n = 0;
-  	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++, ++n) {
-        if(*it == listener) {
-            listeners.erase(it);
+	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++, ++n) {
+		if(*it == listener) {
+			listeners.erase(it);
 			if (n < listenersAsUids.size()) listenersAsUids.erase(boost::next(listenersAsUids.begin(), n));
-            return;
-        }
+			return;
+		}
 	}
 }
 
@@ -125,7 +125,7 @@ void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 		if (itemi->lock()) capacityUsed += std::max(1, itemi->lock()->GetBulk());
 	}
-    tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (capacity + capacityUsed)).str(), TCODColor::white));
+	tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (capacity + capacityUsed)).str(), TCODColor::white));
 }
 
 void Container::TranslateContainerListeners() {
@@ -199,6 +199,15 @@ void Container::Position(Coordinate pos) {
 }
 
 Coordinate Container::Position() {return Item::Position();}
+
+void Container::SetFaction(int faction) {
+	for (std::set<boost::weak_ptr<Item> >::const_iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+		if (boost::shared_ptr<Item> item = itemi->lock()) {
+			item->SetFaction(faction);
+		}
+	}
+	Item::SetFaction(faction);
+}
 
 void Container::save(OutputArchive& ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Item>(*this);
