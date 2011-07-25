@@ -317,7 +317,7 @@ MenuResult Grid::Update(int x, int y, bool clicked, TCOD_key_t key) {
 	for(std::vector<Drawable *>::iterator it = contents.begin(); it != contents.end(); it++) {
 		Drawable *component = *it;
 		if(component->Visible()) {
-			MenuResult result = component->Update(x - _x - col * colWidth, y - _y, clicked, key);
+			MenuResult result = component->Update(x - _x - col * (colWidth-1), y - _y, clicked, key);
 			if(!(result & NOMENUHIT)) {
 				return result;
 			}
