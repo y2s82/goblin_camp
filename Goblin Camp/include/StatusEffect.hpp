@@ -37,6 +37,7 @@ enum Resistance {
 	COLD_RES,
 	FIRE_RES,
 	DISEASE_RES,
+	BLEEDING_RES,
 	RES_COUNT
 };
 

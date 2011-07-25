@@ -2043,7 +2043,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 	if (damage > 0) {
 		damageReceived += damage;
-		if (res == PHYSICAL_RES) {
+		if (res == PHYSICAL_RES && Random::Generate(99) > effectiveResistances[BLEEDING_RES]) {
 			Game::Inst()->CreateBlood(Coordinate(
 				Position().X() + Random::Generate(-1, 1),
 				Position().Y() + Random::Generate(-1, 1)),
@@ -2191,6 +2191,8 @@ class NPCListener : public ITCODParserListener {
 			NPC::Presets[npcIndex].resistances[FIRE_RES] = value.i;
 		} else if (boost::iequals(name,"poison")) {
 			NPC::Presets[npcIndex].resistances[POISON_RES] = value.i;
+		} else if (boost::iequals(name,"bleeding")) {
+			NPC::Presets[npcIndex].resistances[BLEEDING_RES] = value.i;
 		} else if (boost::iequals(name,"tags")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				std::string tag = (char*)TCOD_list_get(value.list,i);
@@ -2274,6 +2276,7 @@ void NPC::LoadPresets(std::string filename) {
 	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
 	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
 	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("bleeding", TCOD_TYPE_INT, false);
 
 	TCODParserStruct *statsStruct = parser.newStructure("stats");
 	statsStruct->addProperty("health", TCOD_TYPE_INT, true);
