@@ -1059,6 +1059,7 @@ npc_type "human soldier" {
 	equipOneOf=["Iron arrow"]
 	spawnAsGroup="1d20+10"
 	faction = "Humans"
+	death="Corpse"
 }
 
 npc_type "mumak" {
