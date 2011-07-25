@@ -377,6 +377,7 @@ npc_type "skeleton" {
 	resistances {
 		physical=15
 		magic=50
+		bleeding=100
 	}
 	spawnAsGroup="1d20"
 	attack "Swipe" {
@@ -621,6 +622,7 @@ npc_type "will o wisp" {
 	resistances {
 		physical=30
 		magic=30
+		bleeding=100
 	}
 	attack "Blind" {
 		type="magic"
@@ -645,6 +647,7 @@ npc_type "raw golem" {
 	resistances {
 		physical=15
 		poison=100
+		bleeding=100
 	}
 	attack "Smash" {
 		type="blunt"
@@ -674,6 +677,7 @@ npc_type "fired golem" {
 		physical=25
 		poison=100
 		fire=100
+		bleeding=100
 	}
 	attack "Smash" {
 		type="blunt"
@@ -731,6 +735,7 @@ npc_type "treeman" {
 	}
 	resistances {
 		physical=15
+		bleeding=100
 	}
 	spawnAsGroup="1d2"
 	attack "Smash" {
@@ -959,6 +964,7 @@ npc_type "fire elemental" {
 	resistances {
 		physical=50
 		fire=100
+		bleeding=100
 	}
 	spawnAsGroup="1d2"
 	attack "Burn" {

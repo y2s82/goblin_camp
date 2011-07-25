@@ -410,6 +410,8 @@ private:
 			Item::Presets[itemIndex].resistances[FIRE_RES] = value.i;
 		} else if (boost::iequals(name,"poison")) {
 			Item::Presets[itemIndex].resistances[POISON_RES] = value.i;
+		} else if (boost::iequals(name,"bleeding")) {
+			Item::Presets[itemIndex].resistances[BLEEDING_RES] = value.i;
 		} else if (boost::iequals(name,"bulk")) {
 			Item::Presets[itemIndex].bulk = value.i;
 		} else if (boost::iequals(name,"durability")) {
@@ -496,6 +498,7 @@ void Item::LoadPresets(std::string filename) {
 	resistancesStruct->addProperty("cold", TCOD_TYPE_INT, false);
 	resistancesStruct->addProperty("fire", TCOD_TYPE_INT, false);
 	resistancesStruct->addProperty("poison", TCOD_TYPE_INT, false);
+	resistancesStruct->addProperty("bleeding", TCOD_TYPE_INT, false);
 	itemTypeStruct->addStructure(resistancesStruct);
 
 	ItemListener itemListener = ItemListener();
