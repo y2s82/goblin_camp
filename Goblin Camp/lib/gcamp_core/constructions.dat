@@ -9,6 +9,7 @@ construction_type "Pile" {
 	maxCondition=10
 	description="Piles designate an area meant for piling stuff."
 	placementType=1
+	slowMovement=10
 }
 
 construction_type "Farm plot" {
@@ -255,7 +256,7 @@ construction_type "Rampart" {
 	category="Basics"
 	graphicLength=1
 	graphic=[178]
-	slowMovement=15
+	slowMovement=20
 	maxCondition=30
 	materials=["Earth", "Earth"]
 	placementType=2
