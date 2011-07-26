@@ -2035,7 +2035,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 
 	for (unsigned int effecti = 0; effecti < attack->StatusEffects()->size(); ++effecti) {
 		if (Random::Generate(99) < attack->StatusEffects()->at(effecti).second) {
-			AddEffect(attack->StatusEffects()->at(effecti).first);
+			TransmitEffect(attack->StatusEffects()->at(effecti).first);
 		}
 	}
 
