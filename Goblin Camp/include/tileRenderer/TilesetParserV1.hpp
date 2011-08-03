@@ -104,7 +104,7 @@ private:
 	static const char * uninitialisedTilesetError;
 	
 	void SetCursorSprites(CursorType type, TCOD_list_t cursors);
-	Sprite_ptr ReadConnectionMap(SpriteLayerType layer, TCOD_list_t indices);
+	Sprite_ptr ReadConnectionMap(TCOD_list_t indices);
 };
 
 class TileSetMetadataParserV1 : public ITCODParserListener {

@@ -31,8 +31,8 @@ public:
 	explicit OGLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole = 0);
 	~OGLTilesetRenderer();
 
-	Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
-	Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
+	Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
+	Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	
 	inline void DrawSprite(int screenX, int screenY, int tile) {
 		DrawSpriteCorner(screenX, screenY, tile, TopLeft);
