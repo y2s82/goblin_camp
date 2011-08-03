@@ -144,7 +144,7 @@ namespace {
 
 	"   vec2 address = vec2(rawCoord.x*termcoef.x,rawCoord.y*termcoef.y); \n"
 	"   vec4 tileInfo = texture2D(tiles, address); \n"
-	"   float inchar = tileInfo.r*256.0 + tileInfo.g * 256.0 *256.0 + tileInfo.b * 256.0 * 256.0 * 256.0; \n"
+	"   float inchar = tileInfo.r*255.0 + tileInfo.g * 256.0 * 255.0 + tileInfo.b * 65536.0 * 255.0; \n"
 	"   vec2 tchar = vec2(mod(floor(inchar),floor(tilew)),floor(inchar/tilew)); \n"  /* 1D index to 2D index map for character */
 
 	"   gl_FragColor = texture2D(tilesheet, vec2((tchar.x*tilecoef.x),(tchar.y*tilecoef.y))+pixPos.xy); \n"   /* magic func: finds pixel value in font file */
@@ -218,7 +218,7 @@ OGLTilesetRenderer::~OGLTilesetRenderer() {
 	TCODSystem::registerOGLRenderer(0);
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	if (tilesetTexture->Count() <= tile) {
 		return Sprite_ptr();
 	}
@@ -233,7 +233,7 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::
 	}
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
 	if (tiles.empty())
 		return Sprite_ptr();
 

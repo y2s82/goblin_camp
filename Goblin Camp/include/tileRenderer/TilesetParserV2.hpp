@@ -87,7 +87,7 @@ private:
 
 		AnimatedSpriteFactory() : sprites(), fps(15) {}
 
-		Sprite_ptr Build(SpriteLayerType layer, boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+		Sprite_ptr Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
 	};
 	AnimatedSpriteFactory animSpriteFactory;
 	ConstructionSpriteFactory constructionFactory;
