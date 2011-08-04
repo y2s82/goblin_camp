@@ -1759,11 +1759,15 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 
 		//Cowards panic if they see aggressive unfriendlies or their attacker
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
-			if ((!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction()) && npci->lock()->aggressive) || 
-				npci->lock() == npc->aggressor.lock()) {
+			boost::shared_ptr<NPC> otherNpc = npci->lock();
+			if ((!npc->factionPtr->IsFriendsWith(otherNpc->GetFaction()) && otherNpc->aggressive) || 
+				otherNpc == npc->aggressor.lock() ||
+				otherNpc->HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Enemy sighted");
 				npc->AddEffect(PANIC);
+				npc->threatLocation = otherNpc->Position();
+				return;
 			}
 		}
 	} else {
