@@ -670,6 +670,7 @@ void UI::ChooseTreeFelling() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_TreeFelling);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Fell trees");
 }
 
 void UI::ChoosePlantHarvest() {
@@ -679,6 +680,7 @@ void UI::ChoosePlantHarvest() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Harvest);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Harvest plants");
 }
 
 void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order) {
@@ -709,6 +711,7 @@ void UI::ChooseDesignateTree() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Tree);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Designate trees");
 }
 
 void UI::ChooseDismantle() {
@@ -718,6 +721,7 @@ void UI::ChooseDismantle() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Dismantle);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Dismantle");
 }
 
 void UI::ChooseUndesignate() {
@@ -727,6 +731,7 @@ void UI::ChooseUndesignate() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Undesignate);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Undesignate");
 }
 
 void UI::ChooseDesignateBog() {
@@ -736,6 +741,7 @@ void UI::ChooseDesignateBog() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Bog);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Designate bog");
 }
 
 
@@ -873,6 +879,7 @@ void UI::ChooseDig() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Dig);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Dig");
 }
 
 void UI::ChooseNaturify() {
@@ -892,6 +899,7 @@ void UI::ChooseChangeTerritory(bool add) {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(add ? Cursor_AddTerritory : Cursor_RemoveTerritory);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip(add ? "Expand" : "Shrink");
 }
 
 void UI::ChooseGatherItems() {
@@ -901,22 +909,31 @@ void UI::ChooseGatherItems() {
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Gather);
 	UI::Inst()->HideMenu();
+	UI::Inst()->SetExtraTooltip("Gather items");
 }
 
-void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
+void UI::ChooseNormalPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip) {
 	UI::Inst()->state(UIPLACEMENT);
 	UI::Inst()->SetCallback(callback);
 	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
+	if (optionalTooltip.length() > 0) {
+		UI::Inst()->HideMenu();
+		UI::Inst()->SetExtraTooltip(optionalTooltip);
+	}
 }
 
-void UI::ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
+void UI::ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip) {
 	UI::Inst()->state(UIRECTPLACEMENT);
 	UI::Inst()->SetRectCallback(rectCallback);
 	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
+	if (optionalTooltip.length() > 0) {
+		UI::Inst()->HideMenu();
+		UI::Inst()->SetExtraTooltip(optionalTooltip);
+	}
 }
 
 void UI::ChooseRectPlacementCursor(boost::function<void(Coordinate, Coordinate)> rectCallback, boost::function<bool(Coordinate, Coordinate)> placement, CursorType cursor) {
@@ -927,12 +944,16 @@ void UI::ChooseRectPlacementCursor(boost::function<void(Coordinate, Coordinate)>
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
 }
 
-void UI::ChooseABPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor) {
+void UI::ChooseABPlacement(boost::function<void(Coordinate)> callback, boost::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip) {
 	UI::Inst()->state(UIABPLACEMENT);
 	UI::Inst()->SetCallback(callback);
 	UI::Inst()->SetPlacementCallback(placement);
 	UI::Inst()->blueprint(Coordinate(1,1));
 	Game::Inst()->Renderer()->SetCursorMode(cursor);
+	if (optionalTooltip.length() > 0) {
+		UI::Inst()->HideMenu();
+		UI::Inst()->SetExtraTooltip(optionalTooltip);
+	}
 }
 
 void UI::SetExtraTooltip(std::string tooltip) {

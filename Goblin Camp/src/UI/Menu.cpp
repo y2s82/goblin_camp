@@ -224,16 +224,16 @@ Menu* Menu::OrdersMenu() {
 		ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
 		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
 		ordersMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseDig)));
-		ordersMenu->AddChoice(MenuChoice("Fill ditches", boost::bind(UI::ChooseRectPlacement, rectCall, checkDitch, 178)));
+		ordersMenu->AddChoice(MenuChoice("Fill ditches", boost::bind(UI::ChooseRectPlacement, rectCall, checkDitch, 178, "Fill ditches")));
 		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", boost::bind(UI::ChooseDesignateBog)));
 		ordersMenu->AddChoice(MenuChoice("Gather items", boost::bind(UI::ChooseGatherItems)));
 
 		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
 		rectCall = boost::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
-		ordersMenu->AddChoice(MenuChoice("Pour water", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W')));
+		ordersMenu->AddChoice(MenuChoice("Pour water", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W', "Pour water")));
 
 		boost::function<void(Coordinate)> call = boost::bind(&Game::StartFire, Game::Inst(), _1);
-		ordersMenu->AddChoice(MenuChoice("Start fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'F')));
+		ordersMenu->AddChoice(MenuChoice("Start fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'F', "Start fire")));
 
 		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
 	}
@@ -250,43 +250,43 @@ Menu* Menu::DevMenu() {
 
 		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
 		boost::function<void(Coordinate)> call = boost::bind(&Game::CreateFilth, Game::Inst(), _1, 100);
-		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~')));
+		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Filth")));
 		
 		call = boost::bind(&Game::CreateWater, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~')));
+		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Water")));
 		
 		call = boost::bind(&Map::Corrupt, Map::Inst(), _1, 500000);
-		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'C')));
+		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'C', "Corrupt")));
 
 		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
 
 		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2);
-		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R')));
+		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R', "Remove NatureObjects")));
 		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
 		devMenu->AddChoice(MenuChoice("Trigger migration", boost::bind(&Game::TriggerMigration, Game::Inst())));
 		
 		call = boost::bind(&Game::Damage, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'E')));
+		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'E', "Explode")));
 		
 		call = boost::bind(&Game::Hungerize, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Hungerize", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'H')));
+		devMenu->AddChoice(MenuChoice("Hungerize", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'H', "Hunger")));
 
 		call = boost::bind(&Game::Tire, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Tire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
+		devMenu->AddChoice(MenuChoice("Tire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Tire")));
 
 		call = boost::bind(&Game::CreateFire, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '!')));
+		devMenu->AddChoice(MenuChoice("Fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '!', "Fire")));
 
 		call = boost::bind(&Game::CreateDitch, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseABPlacement, call, checkTree, '_')));
+		devMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseABPlacement, call, checkTree, '_', "Dig")));
 
 		call = boost::bind(&Game::Thirstify, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Thirstify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
+		devMenu->AddChoice(MenuChoice("Thirstify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Thirst")));
 		call = boost::bind(&Game::Badsleepify, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Badsleepify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T')));
+		devMenu->AddChoice(MenuChoice("Badsleepify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Bad sleep")));
 
 		call = boost::bind(&Game::Diseasify, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Diseasify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'D')));
+		devMenu->AddChoice(MenuChoice("Diseasify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'D', "Disease")));
 	}
 	return devMenu;
 }
