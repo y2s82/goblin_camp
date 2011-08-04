@@ -57,7 +57,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 				dialog->AddComponent(new ScrollPanel(2, 6, 23, 34, 
 					new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
 					ConstructionDialog::DrawJob,
-					boost::bind(&Construction::CancelJob, cons, _1)),
+					boost::bind(&ConstructionDialog::CancelJob, dialog, _1)),
 					false));
 				dialog->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
 				ProductList *productList = new ProductList(cons);
@@ -105,6 +105,12 @@ void ConstructionDialog::Expand() {
 			Construction::Presets[construct.lock()->Type()].tileReqs);
 		UI::Inst()->CloseMenu();
 		UI::ChooseRectPlacementCursor(rectCall, placement, Cursor_Stockpile);
+	}
+}
+
+void ConstructionDialog::CancelJob(int job) {
+	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+		cons->CancelJob(job);
 	}
 }
 
