@@ -1762,7 +1762,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			boost::shared_ptr<NPC> otherNpc = npci->lock();
 			if ((!npc->factionPtr->IsFriendsWith(otherNpc->GetFaction()) && otherNpc->aggressive) || 
 				otherNpc == npc->aggressor.lock() ||
-				otherNpc->HasEffect(PANIC)) {
+				(otherNpc->HasEffect(PANIC) && Random::Generate(19) == 0)) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Enemy sighted");
 				npc->AddEffect(PANIC);
