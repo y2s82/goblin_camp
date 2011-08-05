@@ -24,38 +24,48 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "SpawningPool.hpp"
 
 TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
-	name(tileSetName),
 	tileWidth(tileW),
 	tileHeight(tileH),
+	name(tileSetName),
 	author(""),
-	description(""),
 	version(""),
+	description(""),
+
 	waterTile(),
 	iceTile(),
+	fireTile(),
 	minorFilth(),
 	majorFilth(),
+
 	nonTerritoryOverlay(),
 	territoryOverlay(),
 	markedOverlay(),
+
 	marker(),
 	blood(),
+
 	defaultUnderConstructionSprite(),
+
 	defaultNPCSprite(),
 	npcSprites(),
 	npcSpriteLookup(),
+
 	defaultNatureObjectSpriteSet(),
 	natureObjectSpriteSets(),
 	natureObjectSpriteLookup(),
+
+	defaultItemSprite(),
 	itemSprites(),
 	itemSpriteLookup(),
-	defaultItemSprite(),
+
+	defaultConstructionSprite(),
 	constructionSprites(),
 	constructionSpriteLookup(),
-	defaultConstructionSprite(),
+
 	defaultSpellSpriteSet(),
-	spellSpriteLookup(),
 	spellSpriteSets(),
-	fireTile(),
+	spellSpriteLookup(),
+
 	defaultTerrainTile()
 	{
 		for (int i = 0; i < terrainTiles.size(); ++i) {

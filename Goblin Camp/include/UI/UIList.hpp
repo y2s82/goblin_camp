@@ -41,8 +41,13 @@ public:
 		boost::function<void(int)> nonclick = 0, bool nselectable = false,
 		boost::function<void(T, Tooltip *)> ntooltip = 0
 	):
-		items(nitems), selectable(nselectable), selection(-1), draw(ndraw),
-		onclick(nonclick), getTooltip(ntooltip), Drawable(x, y, nwidth, nheight) {}
+		Drawable(x, y, nwidth, nheight),
+		items(nitems),
+		selectable(nselectable),
+		selection(-1),
+		draw(ndraw),
+		getTooltip(ntooltip),
+		onclick(nonclick) {}
 	void Draw(int, int, TCODConsole *);
 	void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
 	int TotalHeight();

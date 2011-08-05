@@ -163,14 +163,14 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
   fontCharW(0), fontCharH(0),
   fontTexW(0), fontTexH(0),
   consoleProgram(),
-  viewportProgram(),
   consoleTextures(),
   consoleTexW(0), consoleTexH(0),
   consoleData(),
   renderInProgress(false),
   viewportLayers(),
   renderQueue(),
-  viewportW(0), viewportH(0)
+  viewportW(0), viewportH(0),
+  viewportProgram()
 {
 	TCODSystem::registerOGLRenderer(this);
 
