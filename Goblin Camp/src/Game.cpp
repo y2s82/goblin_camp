@@ -693,8 +693,6 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
 }
 
-// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
-// first.
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
 	int nearestDistance = INT_MAX;
 	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
@@ -702,7 +700,12 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				int distance = Distance(item.lock()->Position(), target);
+				int distance;
+				if (flags & MOSTDECAYED) {
+					distance = item.lock()->GetDecay();
+				} else {
+					distance = Distance(item.lock()->Position(), target);
+				}
 				if(distance < nearestDistance) {
 					nearestDistance = distance;
 					nearest = item;
@@ -713,8 +716,6 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 	return nearest;
 }
 
-// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
-// first.
 boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
 	int nearestDistance = INT_MAX;
 	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
@@ -722,7 +723,12 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordina
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				int distance = Distance(item.lock()->Position(), target);
+				int distance;
+				if (flags & MOSTDECAYED) {
+					distance = item.lock()->GetDecay();
+				} else {
+					distance = Distance(item.lock()->Position(), target);
+				}
 				if(distance < nearestDistance) {
 					nearestDistance = distance;
 					nearest = item;

@@ -52,4 +52,5 @@ public:
 	void Dismantle();
 	static void DrawJob(ItemType, int, int, int, int, bool, TCODConsole *);
 	void Expand();
+	void CancelJob(int job);
 };
