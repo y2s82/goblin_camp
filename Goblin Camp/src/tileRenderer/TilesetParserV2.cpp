@@ -165,6 +165,7 @@ TileSetParserV2::TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactor
 	animSpriteFactory(),
 	statusEffectFactory(),
 	npcSpriteFactory(),
+	terrainSpriteFactory(),
 	itemSprite(),
 	corruptionOverride(),
 	corruptionOverlayOverride()
