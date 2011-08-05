@@ -42,11 +42,14 @@ boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::uno
 std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::GoodEffectAdders = std::multimap<StatusEffectType, ItemType>();
 
-Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
+Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) :
+	Entity(),
+
 	type(typeval),
 	flammable(false),
-	attemptedStore(false),
 	decayCounter(-1),
+
+	attemptedStore(false),
 	container(boost::weak_ptr<Item>()),
 	internal(false)
 {

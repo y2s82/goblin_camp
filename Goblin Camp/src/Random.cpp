@@ -73,7 +73,7 @@ namespace Random {
 		\param[in] offset     Result modifier.
 	*/
 	Dice::Dice(unsigned int faces, unsigned int dices, float multiplier, float offset) :
-		faces(std::max(1U, faces)), dices(std::max(1U, dices)), multiplier(multiplier), offset(offset)
+		dices(std::max(1U, dices)), faces(std::max(1U, faces)), multiplier(multiplier), offset(offset)
 	{
 	}
 	
@@ -83,7 +83,8 @@ namespace Random {
 		\param[in] dice TCOD_dice_t to convert.
 	*/
 	Dice::Dice(const TCOD_dice_t& dice) :
-		faces(std::max(1U, (unsigned)dice.nb_faces)), dices(std::max(1U, (unsigned)dice.nb_dices)), multiplier(dice.multiplier), offset(dice.addsub)
+		dices(std::max(1U, (unsigned)dice.nb_dices)), faces(std::max(1U, (unsigned)dice.nb_faces)),
+		multiplier(dice.multiplier), offset(dice.addsub)
 	{
 	}
 	

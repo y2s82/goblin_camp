@@ -34,9 +34,12 @@ private:
 public:
 	ScrollPanel(
 		int x, int y, int nwidth, int nheight, Scrollable *ncontents, bool ndrawFrame = true, int nstep = 1
-		):
-	contents(ncontents), scroll(0), scrollBar(0), drawFrame(ndrawFrame),
-		step(nstep), Drawable(x, y, nwidth, nheight) {}
+	):
+		Drawable(x, y, nwidth, nheight),
+		scroll(0), scrollBar(0),
+		step(nstep),
+		drawFrame(ndrawFrame),
+		contents(ncontents) {}
 	~ScrollPanel() { delete contents; }
 	void Draw(int, int, TCODConsole *);
 	MenuResult Update(int, int, bool, TCOD_key_t);

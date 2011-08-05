@@ -125,21 +125,28 @@ namespace {
 TileSetParserV1::TileSetParserV1(boost::shared_ptr<TilesetRenderer> spriteFactory) :
 	parser(),
 	spriteFactory(spriteFactory),
+
 	tileSet(),
 	success(true),
+
+	tileSetPath(),
+
 	tileSetName(),
 	tileWidth(-1),
 	tileHeight(-1),
 	currentTexture(),
+
+	fireSprites(),
+	fireFPS(15),
+
+	tempConstruction(spriteFactory),
+
+	tempSpell(spriteFactory),
+
 	currentSpriteSet(SS_NONE),
-	tileSetPath(),
 	npcSprite(),
 	natureObjectSpriteSet(),
 	itemSprite(),
-	tempConstruction(spriteFactory),
-	tempSpell(spriteFactory),
-	fireSprites(),
-	fireFPS(15),
 	corruptionOverride()
 {
 	SetupTilesetParser(parser);
@@ -573,8 +580,7 @@ SpellSpriteSet TileSetParserV1::TempSpell::Build(boost::shared_ptr<TileSetTextur
 
 
 TileSetMetadataParserV1::TileSetMetadataParserV1()
-	: metadata(),
-	  parser()
+	: parser(), metadata()
 {
 	SetupTilesetParser(parser);
 	

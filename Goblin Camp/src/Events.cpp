@@ -32,11 +32,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Faction.hpp"
 
 Events::Events(Map* vmap) :
-map(vmap),
+	map(vmap),
 	hostileSpawningMonsters(std::vector<int>()),
 	timeSinceHostileSpawn(0),
-		migratingAnimals(std::vector<int>()),
-	peacefulAnimals(std::vector<int>())
+	peacefulAnimals(std::vector<int>()),
+	migratingAnimals(std::vector<int>())
 {
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].tags.find("attacksrandomly") != NPC::Presets[i].tags.end())

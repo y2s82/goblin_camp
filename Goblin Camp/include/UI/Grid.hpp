@@ -31,7 +31,7 @@ private:
 	std::vector<Drawable *> contents;
 public:
 	Grid(std::vector<Drawable *> ncontents, int ncols, int x, int y, int nwidth, int nheight):
-		contents(ncontents), cols(ncols), Drawable(x, y, nwidth, nheight) {}
+		Drawable(x, y, nwidth, nheight), cols(ncols), contents(ncontents) {}
 	void AddComponent(Drawable *component);
 	void RemoveAll();
 	void Draw(int, int, TCODConsole *);

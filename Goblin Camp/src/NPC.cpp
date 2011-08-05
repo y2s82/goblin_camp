@@ -67,59 +67,71 @@ std::map<std::string, NPCType> NPC::NPCTypeNames = std::map<std::string, NPCType
 std::vector<NPCPreset> NPC::Presets = std::vector<NPCPreset>();
 
 NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
-	boost::function<void(boost::shared_ptr<NPC>)> react) : Entity(),
+	boost::function<void(boost::shared_ptr<NPC>)> react) :
+	Entity(),
+
 	type(0),
 	timeCount(0),
 	taskIndex(0),
 	orderIndex(0),
+
 	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
 	pathIsDangerous(false),
+
 	timer(0),
 	nextMove(0),
 	lastMoveResult(TASKCONTINUE),
 	run(true),
+
 	taskBegun(false),
 	jobBegun(false),
 	expert(false),
+
 	carried(boost::weak_ptr<Item>()),
 	mainHand(boost::weak_ptr<Item>()),
 	offHand(boost::weak_ptr<Item>()),
 	armor(boost::weak_ptr<Item>()),
-	thirst(0),
-	hunger(0),
-	weariness(0),
+
+	thirst(0), hunger(0), weariness(0),
 	thinkSpeed(UPDATES_PER_SECOND / 5), //Think 5 times a second
 	statusEffects(std::list<StatusEffect>()),
 	statusEffectIterator(statusEffects.end()),
 	statusGraphicCounter(0),
-	health(100),
-	maxHealth(100),
+	health(100), maxHealth(100),
 	foundItem(boost::weak_ptr<Item>()),
 	inventory(boost::shared_ptr<Container>(new Container(pos, 0, 30, -1))),
+
 	needsNutrition(false),
 	needsSleep(false),
 	hasHands(false),
 	isTunneler(false),
 	isFlying(false),
+
+	FindJob(findJob),
+	React(react),
+
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
 	squad(boost::weak_ptr<Squad>()),
+
 	attacks(std::list<Attack>()),
+
+	escaped(false),
+
 	addedTasksToCurrentJob(0),
+
 	hasMagicRangedAttacks(false),
+
 	threatLocation(Coordinate(-1,-1)),
 	seenFire(false),
+
 	traits(std::set<Trait>()),
-	damageDealt(0),
-	damageReceived(0),
-	statusEffectsChanged(false),
-	FindJob(findJob),
-	React(react),
-	escaped(false)
+	damageDealt(0), damageReceived(0),
+	statusEffectsChanged(false)
 {
 	while (!Map::Inst()->IsWalkable(pos.X(),pos.Y())) {
 		pos.X(pos.X()+1);
