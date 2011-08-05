@@ -68,14 +68,14 @@ TileSet::TileSet(std::string tileSetName, int tileW, int tileH) :
 
 	defaultTerrainTile()
 	{
-		for (int i = 0; i < terrainTiles.size(); ++i) {
+		for (size_t i = 0; i < terrainTiles.size(); ++i) {
 			terrainTiles[i] = TerrainSprite();
 		}
-		for (int i = 0; i < placeableCursors.size(); ++i) {
+		for (size_t i = 0; i < placeableCursors.size(); ++i) {
 			placeableCursors[i] = Sprite_ptr();
 			nonplaceableCursors[i] = Sprite_ptr();
 		}
-		for (int i = 0; i < defaultStatusEffects.size(); ++i) {
+		for (size_t i = 0; i < defaultStatusEffects.size(); ++i) {
 			defaultStatusEffects[i] = StatusEffectSprite();
 		}
 }
@@ -160,7 +160,7 @@ void TileSet::DrawTerritoryOverlay(int screenX, int screenY, bool owned, Sprite:
 
 void TileSet::DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) const {
 	int hint = npc->GetGraphicsHint();
-	if (hint == -1 || hint >= npcSprites.size()) {
+	if (hint == -1 || hint >= static_cast<int>(npcSprites.size())) {
 		defaultNPCSprite.Draw(screenX, screenY, npc);
 	} else {
 		npcSprites[hint].Draw(screenX, screenY, npc);
@@ -211,7 +211,7 @@ void TileSet::DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) cons
 
 void TileSet::DrawNatureObject(int screenX, int screenY, boost::shared_ptr<NatureObject> plant) const {
 	int hint = plant->GetGraphicsHint();
-	if (hint == -1 || hint >= natureObjectSpriteSets.size()) {
+	if (hint == -1 || hint >= static_cast<int>(natureObjectSpriteSets.size())) {
 		defaultNatureObjectSpriteSet.tile.Draw(screenX, screenY);
 	} else {
 		natureObjectSpriteSets[hint].tile.Draw(screenX, screenY);
@@ -220,7 +220,7 @@ void TileSet::DrawNatureObject(int screenX, int screenY, boost::shared_ptr<Natur
 
 void TileSet::DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) const {
 	int hint = item->GetGraphicsHint();
-	if (hint == -1 || hint >= itemSprites.size()) {
+	if (hint == -1 || hint >= static_cast<int>(itemSprites.size())) {
 		defaultItemSprite.tile.Draw(screenX, screenY);
 	} else {
 		itemSprites[hint].tile.Draw(screenX, screenY);
@@ -229,7 +229,7 @@ void TileSet::DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) c
 
 void TileSet::DrawOpenDoor(int screenX, int screenY, Door * door, const Coordinate& worldPos) const {
 	int hint = door->GetGraphicsHint();
-	if (hint == -1 || hint >= constructionSprites.size()) {
+	if (hint == -1 || hint >= static_cast<int>(constructionSprites.size())) {
 		defaultConstructionSprite.DrawOpen(screenX, screenY, worldPos - door->Position());
 	} else {
 		constructionSprites[hint].DrawOpen(screenX, screenY, worldPos - door->Position());
@@ -249,7 +249,8 @@ namespace {
 
 void TileSet::DrawBaseConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const {
 	int hint = construction->GetGraphicsHint();
-	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
+	const ConstructionSprite& spriteSet((hint == -1 || hint >= static_cast<int>(constructionSprites.size()))
+										? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = construction->Type();
 		spriteSet.Draw(screenX, screenY, boost::bind(&ConstructionConnectTo, type, worldPos, _1));
@@ -260,7 +261,8 @@ void TileSet::DrawBaseConstruction(int screenX, int screenY, Construction * cons
 
 void TileSet::DrawUnderConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const {
 	int hint = construction->GetGraphicsHint();
-	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
+	const ConstructionSprite& spriteSet((hint == -1 || hint >= static_cast<int>(constructionSprites.size()))
+										? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.HasUnderConstructionSprites()) {
 		if (spriteSet.IsConnectionMap()) {
 			ConstructionType type = construction->Type();
@@ -275,7 +277,8 @@ void TileSet::DrawUnderConstruction(int screenX, int screenY, Construction * con
 
 void TileSet::DrawUnreadyTrap(int screenX, int screenY, Construction * trap, const Coordinate& worldPos) const {
 	int hint = trap->GetGraphicsHint();
-	const ConstructionSprite& spriteSet((hint == -1 || hint >= constructionSprites.size()) ? defaultConstructionSprite : constructionSprites[hint]);
+	const ConstructionSprite& spriteSet((hint == -1 || hint >= static_cast<int>(constructionSprites.size()))
+										? defaultConstructionSprite : constructionSprites[hint]);
 	if (spriteSet.IsConnectionMap()) {
 		ConstructionType type = trap->Type();
 		spriteSet.DrawUnreadyTrap(screenX, screenY, boost::bind(&ConstructionConnectTo, type, worldPos, _1));
@@ -296,13 +299,13 @@ void TileSet::DrawStockpileContents(int screenX, int screenY, Stockpile * stockp
 void TileSet::DrawCursor(int screenX, int screenY, CursorType type, int cursorHint, bool placeable) const {
 	if (type == Cursor_Item_Mode)
 	{
-		if (cursorHint == -1 || cursorHint >= itemSprites.size()) {
+		if (cursorHint == -1 || cursorHint >= static_cast<int>(itemSprites.size())) {
 			defaultItemSprite.tile.Draw(screenX, screenY);
 		} else {
 			itemSprites[cursorHint].tile.Draw(screenX, screenY);
 		}
 	} else if (type == Cursor_NPC_Mode) {
-		if (cursorHint == -1 || cursorHint >= npcSprites.size()) {
+		if (cursorHint == -1 || cursorHint >= static_cast<int>(npcSprites.size())) {
 			defaultNPCSprite.Draw(screenX, screenY);
 		} else {
 			npcSprites[cursorHint].Draw(screenX, screenY);
@@ -539,7 +542,7 @@ void TileSet::AddNPCSprite(std::string name, const NPCSprite& sprite) {
 	if (found != npcSpriteLookup.end()) {
 		npcSprites[found->second] = sprite;
 	} else {
-		int index = npcSprites.size();
+		int index = static_cast<int>(npcSprites.size());
 		npcSprites.push_back(sprite);
 		npcSpriteLookup[name] = index;
 	}
@@ -554,7 +557,7 @@ void TileSet::AddNatureObjectSpriteSet(std::string name, const NatureObjectSprit
 	if (found != natureObjectSpriteLookup.end()) {
 		natureObjectSpriteSets[found->second] = sprite;
 	} else {
-		int index = natureObjectSpriteSets.size();
+		int index = static_cast<int>(natureObjectSpriteSets.size());
 		natureObjectSpriteSets.push_back(sprite);
 		natureObjectSpriteLookup[name] = index;
 	}
@@ -569,7 +572,7 @@ void TileSet::AddItemSprite(std::string name, const ItemSprite& sprite) {
 	if (found != itemSpriteLookup.end()) {
 		itemSprites[found->second] = sprite;
 	} else {
-		int index = itemSprites.size();
+		int index = static_cast<int>(itemSprites.size());
 		itemSprites.push_back(sprite);
 		itemSpriteLookup[name] = index;
 	}
@@ -584,7 +587,7 @@ void TileSet::AddConstructionSprite(std::string name, const ConstructionSprite& 
 	if (found != constructionSpriteLookup.end()) {
 		constructionSprites[found->second] = sprite;
 	} else {
-		int index = constructionSprites.size();
+		int index = static_cast<int>(constructionSprites.size());
 		constructionSprites.push_back(sprite);
 		constructionSpriteLookup[name] = index;
 	}
@@ -599,7 +602,7 @@ void TileSet::AddSpellSpriteSet(std::string name, const SpellSpriteSet& sprite) 
 	if (found != spellSpriteLookup.end()) {
 		spellSpriteSets[found->second] = sprite;
 	} else {
-		int index = spellSpriteSets.size();
+		int index = static_cast<int>(spellSpriteSets.size());
 		spellSpriteSets.push_back(sprite);
 		spellSpriteLookup[name] = index;
 	}

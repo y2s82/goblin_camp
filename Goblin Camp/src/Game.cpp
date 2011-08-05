@@ -359,25 +359,26 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		npc->isTunneler = true;
 	}
 
-	for (int equipIndex = 0; equipIndex < NPC::Presets[type].possibleEquipment.size(); ++equipIndex) {
+	for (size_t equipIndex = 0; equipIndex < NPC::Presets[type].possibleEquipment.size(); ++equipIndex) {
 		int itemType = Random::ChooseElement(NPC::Presets[type].possibleEquipment[equipIndex]);
-		if (itemType > 0 && itemType < Item::Presets.size()) {
-			if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("weapon")) != Item::Presets[itemType].categories.end()
+		if (itemType > 0 && itemType < static_cast<int>(Item::Presets.size())) {
+			std::set<ItemCategory> categories = Item::Presets[itemType].categories;
+			if (categories.find(Item::StringToItemCategory("weapon")) != categories.end()
 				&& !npc->Wielding().lock()) {
 					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
 					boost::shared_ptr<Item> item = itemList[itemUid];
 					npc->mainHand = item;
-			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("armor")) != Item::Presets[itemType].categories.end()
+			} else if (categories.find(Item::StringToItemCategory("armor")) != categories.end()
 				&& !npc->Wearing().lock()) {
 					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
 					boost::shared_ptr<Item> item = itemList[itemUid];
 					npc->armor = item;
-			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("quiver")) != Item::Presets[itemType].categories.end()
+			} else if (categories.find(Item::StringToItemCategory("quiver")) != categories.end()
 				&& !npc->quiver.lock()) {
 					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
 					boost::shared_ptr<Item> item = itemList[itemUid];
 					npc->quiver = boost::static_pointer_cast<Container>(item); //Quivers = containers
-			} else if (Item::Presets[itemType].categories.find(Item::StringToItemCategory("ammunition")) != Item::Presets[itemType].categories.end()
+			} else if (categories.find(Item::StringToItemCategory("ammunition")) != categories.end()
 				&& npc->quiver.lock() && npc->quiver.lock()->empty()) {
 					for (int i = 0; i < 20 && !npc->quiver.lock()->Full(); ++i) {
 						CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->quiver.lock());
@@ -579,7 +580,7 @@ boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
 
 int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction, 
 	std::vector<boost::weak_ptr<Item> > comps, boost::shared_ptr<Container> container) {
-		if (type >= 0 && type < Item::Presets.size()) {
+		if (type >= 0 && type < static_cast<signed int>(Item::Presets.size())) {
 			boost::shared_ptr<Item> newItem;
 			if (Item::Presets[type].organic) {
 				boost::shared_ptr<OrganicItem> orgItem;
@@ -942,7 +943,7 @@ void Game::Update() {
 				}
 			}
 		} else {
-			for (unsigned int i = 0; i < std::max((size_t)100, freeItems.size()/4); ++i) {
+			for (size_t i = 0; i < std::max(100u, freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
@@ -1008,7 +1009,7 @@ void Game::Update() {
 		}
 	}
 
-	for (std::size_t i = 1; i < Faction::factions.size(); ++i) {
+	for (size_t i = 1; i < Faction::factions.size(); ++i) {
 		Faction::factions[i]->Update();
 	}
 }
@@ -1703,7 +1704,7 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
 	if (boost::shared_ptr<NPC> npc = wnpc.lock()) {
 		npcList.erase(npc->uid);
 		int faction = npc->GetFaction();
-		if (faction >= 0 && faction < Faction::factions.size())
+		if (faction >= 0 && faction < static_cast<signed int>(Faction::factions.size()))
 			Faction::factions[faction]->RemoveMember(npc);
 	}
 }
@@ -1854,7 +1855,7 @@ void Game::Reset() {
 	fireList.clear();
 	spellList.clear();
 	gameOver = false;
-	for (int i = 0; i < Faction::factions.size(); ++i) {
+	for (size_t i = 0; i < Faction::factions.size(); ++i) {
 		Faction::factions[i]->Reset();
 	}
 
@@ -1863,7 +1864,7 @@ void Game::Reset() {
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 	std::vector<NPCType> npcList;
-	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
+	for (size_t i = 0; i < NPC::Presets.size(); ++i) {
 		if (NPC::Presets[i].tags.find(boost::to_lower_copy(tag)) != NPC::Presets[i].tags.end()) {
 			npcList.push_back(i);
 		}

@@ -68,7 +68,7 @@ void Events::Update(bool safe) {
 		else ++immi;
 	}
 
-	if (existingImmigrants.size() < Game::Inst()->OrcCount() / 7 && 
+	if (static_cast<int>(existingImmigrants.size()) < Game::Inst()->OrcCount() / 7 && 
 		Random::Generate(UPDATES_PER_SECOND * 60 * 30) == 0) {
 			SpawnImmigrants();
 	}

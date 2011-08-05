@@ -84,22 +84,25 @@ void NatureObject::Update() {}
 
 class NatureObjectListener : public ITCODParserListener {
 	int natureIndex;
+
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		natureIndex = -1;
-		for (int i = 0; i < NatureObject::Presets.size(); ++i) {
+		bool foundInPreset = false;
+
+		for (size_t i = 0; i < NatureObject::Presets.size(); ++i) {
 			if (boost::iequals(NatureObject::Presets[i].name, name)) {
-				natureIndex = i;
-				NatureObject::Presets[natureIndex] = NatureObjectPreset();
-				NatureObject::Presets[natureIndex].name = name;
+				natureIndex = static_cast<int>(i);
+				NatureObject::Presets[i] = NatureObjectPreset();
+				foundInPreset = true;
 				break;
 			}
 		}
 
-		if (natureIndex == -1) {
+		if (!foundInPreset) {
+			natureIndex = static_cast<int>(NatureObject::Presets.size());
 			NatureObject::Presets.push_back(NatureObjectPreset());
-			NatureObject::Presets.back().name = name;
-			natureIndex = NatureObject::Presets.size() - 1;
 		}
+
+		NatureObject::Presets[natureIndex].name = name;
 		return true;
 	}
 
@@ -208,9 +211,9 @@ void NatureObject::load(InputArchive& ar, const unsigned int version) {
 	ar & typeName;
 	bool failedToFindType = true;
 	type = 0; //Default to whatever is the first wildplant
-	for (int i = 0; i < NatureObject::Presets.size(); ++i) {
+	for (size_t i = 0; i < NatureObject::Presets.size(); ++i) {
 		if (boost::iequals(NatureObject::Presets[i].name, typeName)) {
-			type = i;
+			type = static_cast<int>(i);
 			failedToFindType = false;
 			break;
 		}
