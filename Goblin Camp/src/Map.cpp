@@ -654,7 +654,24 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 		}
 	}
 
-	//Calculate flow for all ground tiles
+        /* Calculate flow for all ground tiles
+
+           'flow' is used for propagation of filth over time, and
+           deplacement of objects in the river.
+
+           Flow is determined by the heightmap: each tile flows to its
+           lowest neighbor. When all neighbors have the same height,
+           we choose to flow towards the river, by picking a random
+           water tile and flowing toward it.
+
+           For algorithmic reason, we build a "cache" of the water
+           tiles list as a vector : picking a random water tile was
+           O(N) with the water list, causing noticeable delays during
+           map creation -- one minute or more -- while it is O(1) on
+           water arrays.
+         */
+        std::vector<boost::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
+
 	for (int y = 0; y < Height(); ++y) {
 		for (int x = 0; x < Width(); ++x) {
 			if (tileMap[x][y].flow == NODIRECTION) {
@@ -690,33 +707,34 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 						tileMap[x][y].flow = SOUTHEAST;
 				}
 
-				if (tileMap[x][y].flow == NODIRECTION) { //No slope here, so approximate towards river
-					boost::weak_ptr<WaterNode> randomWater;
-					if (Game::Inst()->waterList.size() > 0) randomWater = *boost::next(Game::Inst()->waterList.begin(), Random::ChooseIndex(Game::Inst()->waterList));
-					Coordinate coord(-1, -1);
-					if (randomWater.lock()) coord = randomWater.lock()->Position();
-					
-					if (coord != Coordinate(-1, -1)) {
-						if (coord.X() < x) {
-							if (coord.Y() < y)
-								tileMap[x][y].flow = NORTHWEST;
-							else if (coord.Y() == y)
-								tileMap[x][y].flow = WEST;
-							else 
-								tileMap[x][y].flow = SOUTHWEST;
-						} else if (coord.X() == x) {
-							if (coord.Y() < y)
-								tileMap[x][y].flow = NORTH;
-							else if (coord.Y() > y)
-								tileMap[x][y].flow = SOUTH;
-						} else {
-							if (coord.Y() < y)
-								tileMap[x][y].flow = NORTHEAST;
-							else if (coord.Y() == y)
-								tileMap[x][y].flow = EAST;
-							else
-								tileMap[x][y].flow = SOUTHEAST;
-						}
+				if (tileMap[x][y].flow == NODIRECTION && !waterArray.empty()) {
+                                        /* No slope here, so approximate towards river
+
+                                           (gasche) if there is no water, the tile will stay NODIRECTION. Is this
+                                           the expected behavior? Should we assert that there always are some
+                                           water tiles?
+                                        */
+					boost::weak_ptr<WaterNode> randomWater = Random::ChooseElement(waterArray);
+					Coordinate coord = randomWater.lock()->Position();
+					if (coord.X() < x) {
+						if (coord.Y() < y)
+							tileMap[x][y].flow = NORTHWEST;
+						else if (coord.Y() == y)
+							tileMap[x][y].flow = WEST;
+						else 
+							tileMap[x][y].flow = SOUTHWEST;
+					} else if (coord.X() == x) {
+						if (coord.Y() < y)
+							tileMap[x][y].flow = NORTH;
+						else if (coord.Y() > y)
+							tileMap[x][y].flow = SOUTH;
+					} else {
+						if (coord.Y() < y)
+							tileMap[x][y].flow = NORTHEAST;
+						else if (coord.Y() == y)
+							tileMap[x][y].flow = EAST;
+						else
+							tileMap[x][y].flow = SOUTHEAST;
 					}
 				}
 			}
