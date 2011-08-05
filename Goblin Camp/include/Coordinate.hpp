@@ -44,6 +44,8 @@ public:
 	
 	static Coordinate DirectionToCoordinate(Direction dir) {
 		static boost::array<Coordinate,9> coordsToDirs = 
+                    { // gcc complains unless there are two level of braces
+                      // see http://stackoverflow.com/questions/2687701/question-on-boost-array-initializer
 			{Coordinate(0,-1),  // North
 			 Coordinate(1,-1),  // North-east
 			 Coordinate(1,0),   // East
@@ -51,8 +53,9 @@ public:
 			 Coordinate(0,1),   // South
 			 Coordinate(-1,1),  // South-west
 			 Coordinate(-1,0),  // West
-			 Coordinate(-1,-1),  // North-west
-			 Coordinate(0,0)};  // No direction
+			 Coordinate(-1,-1), // North-west
+			 Coordinate(0,0)}   // No direction
+                    };
 		return coordsToDirs[dir];
 	}
 
