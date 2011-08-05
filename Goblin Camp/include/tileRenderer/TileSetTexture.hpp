@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/Corner.hpp"
 
 
-/*******************
+/*******************/
 // TileSetTexture
 //
 // Encapsulates a texture containing equally-sized
