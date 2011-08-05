@@ -29,6 +29,7 @@ class SpawningPool : public Construction {
 	bool dumpFilth, dumpCorpses;
 	Coordinate a, b;
 	unsigned int expansion, filth, corpses, spawns;
+	unsigned int expansionLeft, corruptionLeft, spawnsLeft;
 	boost::shared_ptr<Container> corpseContainer;
 	int jobCount;
 	int burn;
@@ -47,6 +48,7 @@ public:
 	void Burn();
 	virtual int Build();
 	boost::shared_ptr<Container>& GetContainer();
+	void Spawn();
 };
 
 BOOST_CLASS_VERSION(SpawningPool, 0)

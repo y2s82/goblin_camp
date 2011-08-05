@@ -36,6 +36,9 @@ SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construct
 	filth(0),
 	corpses(0),
 	spawns(0),
+	expansionLeft(0),
+	corruptionLeft(0),
+	spawnsLeft(0),
 	corpseContainer(boost::shared_ptr<Container>()),
 	jobCount(0),
 	burn(0)
@@ -62,7 +65,6 @@ void SpawningPool::Update() {
 	if (condition > 0) {
 
 		//Generate jobs
-
 		if (jobCount < 4) {
 			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 4) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
@@ -103,7 +105,7 @@ void SpawningPool::Update() {
 			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
 			filth += filthNode->Depth();
 			Stats::Inst()->AddPoints(filthNode->Depth());
-			Map::Inst()->Corrupt(x, y, filthNode->Depth() * std::min(100 * filth, (unsigned int)10000));
+			corruptionLeft += filthNode->Depth() * std::min(100 * filth, (unsigned int)10000);
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
@@ -116,57 +118,16 @@ void SpawningPool::Update() {
 			}
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
-			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(std::max(1U, corpses), (unsigned int)50));
+			for (int i = 0; i < Random::Generate(1, 2); ++i) 
+				corruptionLeft += 1000 * std::min(std::max(1U, corpses), (unsigned int)50);
 		}
 
 		if ((corpses*10) + filth > 10U) {
-			Coordinate spawnLocation(-1,-1);
-			for (int x = a.X(); x <= b.X(); ++x) {
-				for (int y = a.Y(); y <= b.Y(); ++y) {
-					if (Map::Inst()->GetConstruction(x,y) == uid) {
-						if (Map::Inst()->IsWalkable(x-1,y)) {
-							spawnLocation = Coordinate(x-1,y);
-							break;
-						} else if (Map::Inst()->IsWalkable(x+1,y)) {
-							spawnLocation = Coordinate(x+1,y);
-							break;
-						} else if (Map::Inst()->IsWalkable(x,y+1)) {
-							spawnLocation = Coordinate(x,y+1);
-							break;
-						} else if (Map::Inst()->IsWalkable(x,y-1)) {
-							spawnLocation = Coordinate(x,y-1);
-							break;
-						}
-					}
-				}
-			}
+			if (corpses > 0) --corpses;
+			else filth -= std::min(filth, 10U);
 
-			if (spawnLocation.X() != -1 && spawnLocation.Y() != -1) {
-				++spawns;
-
-				float goblinRatio = static_cast<float>(Game::Inst()->GoblinCount()) / Game::Inst()->OrcCount();
-				bool goblin = false;
-				bool orc = false;
-				if (goblinRatio < 2) goblin = true;
-				else if (goblinRatio > 4) orc = true;
-				else if (Random::Generate(2) < 2) goblin = true;
-				else orc = true;
-
-				if (corpses > 0) --corpses;
-				else filth -= std::min(filth, 10U);
-
-				if (goblin) {
-					Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
-					Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
-				}
-
-				if (orc) {
-					Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
-					Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
-				}
-
-				if (Random::Generate(std::min(expansion, 10U)) == 0) Expand();
-			}
+			++spawnsLeft;
+			++expansionLeft;
 		}
 	}
 	if (burn > 0) {
@@ -198,6 +159,24 @@ void SpawningPool::Update() {
 
 				if (Random::Generate(20) == 0) Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
 			}
+		}
+	}
+
+	if (corruptionLeft > 0) {
+		Map::Inst()->Corrupt(Position(), 10);
+		corruptionLeft -= 10;
+		if (Random::Generate(500) == 0)
+			Map::Inst()->Corrupt(Position(), 5000); //Random surges to make "tentacles" of corruption appear
+	}
+
+	if (Random::Generate(UPDATES_PER_SECOND*5) == 0) {
+		if (expansionLeft > 0) {
+			Expand(true);
+			--expansionLeft;
+		}
+		if (spawnsLeft > 0) {
+			Spawn();
+			--spawnsLeft;
 		}
 	}
 }
@@ -260,11 +239,11 @@ void SpawningPool::Expand(bool message) {
 		Map::Inst()->SetBuildable(location.X(), location.Y(), false);
 		Map::Inst()->SetTerritory(location.X(), location.Y(), true);
 
-		Map::Inst()->Corrupt(location.X(), location.Y(), 2000 * std::min(expansion, (unsigned int)100));
+		corruptionLeft += 2000 * std::min(expansion, (unsigned int)100);
 
 	} else {
 		if (message) Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
-		Map::Inst()->Corrupt(x, y, 4000 * std::min(expansion, (unsigned int)100));
+		corruptionLeft += 4000 * std::min(expansion, (unsigned int)100);
 	}
 
 }
@@ -312,6 +291,52 @@ int SpawningPool::Build() {
 }
 
 boost::shared_ptr<Container>& SpawningPool::GetContainer() { return corpseContainer; }
+
+void SpawningPool::Spawn() {
+	Coordinate spawnLocation(-1,-1);
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			if (Map::Inst()->GetConstruction(x,y) == uid) {
+				if (Map::Inst()->IsWalkable(x-1,y)) {
+					spawnLocation = Coordinate(x-1,y);
+					break;
+				} else if (Map::Inst()->IsWalkable(x+1,y)) {
+					spawnLocation = Coordinate(x+1,y);
+					break;
+				} else if (Map::Inst()->IsWalkable(x,y+1)) {
+					spawnLocation = Coordinate(x,y+1);
+					break;
+				} else if (Map::Inst()->IsWalkable(x,y-1)) {
+					spawnLocation = Coordinate(x,y-1);
+					break;
+				}
+			}
+		}
+	}
+
+	if (spawnLocation.X() != -1 && spawnLocation.Y() != -1) {
+		++spawns;
+
+		float goblinRatio = static_cast<float>(Game::Inst()->GoblinCount()) / Game::Inst()->OrcCount();
+		bool goblin = false;
+		bool orc = false;
+		if (goblinRatio < 2) goblin = true;
+		else if (goblinRatio > 4) orc = true;
+		else if (Random::Generate(2) < 2) goblin = true;
+		else orc = true;
+
+		if (goblin) {
+			Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("goblin"));
+			Announce::Inst()->AddMsg("A goblin crawls out of the spawning pool", TCODColor::green, spawnLocation);
+		}
+
+		if (orc) {
+			Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("orc"));
+			Announce::Inst()->AddMsg("An orc claws its way out of the spawning pool", TCODColor::green, spawnLocation);
+		}
+
+	}
+}
 
 void SpawningPool::save(OutputArchive& ar, const unsigned int version) const {
 	ar & boost::serialization::base_object<Construction>(*this);
