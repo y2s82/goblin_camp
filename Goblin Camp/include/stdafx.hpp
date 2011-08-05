@@ -51,6 +51,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/serialization/split_member.hpp>
 #		include <boost/archive/binary_iarchive.hpp>
 #		include <boost/archive/binary_oarchive.hpp>
+
 #		include <boost/serialization/map.hpp>
 #		include <boost/serialization/list.hpp>
 #		include <boost/serialization/set.hpp>
