@@ -989,8 +989,8 @@ CONTINUEEAT:
 				break;
 
 			case FLEEMAP:
-				if (x == 0 || x == Map::Inst()->Width()-1 ||
-					y == 0 || y == Map::Inst()->Height()-1) {
+				if (x == 0 || static_cast<int>(x) == Map::Inst()->Width()-1 ||
+					y == 0 || static_cast<int>(y) == Map::Inst()->Height()-1) {
 						//We are at the edge, escape!
 						Escape();
 						return;
@@ -1003,10 +1003,11 @@ CONTINUEEAT:
 					Coordinate target;
 					tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
 					if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
-						target = Coordinate(x, (y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1);
+						int target_y = (static_cast<int>(y) < Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1;
+						target = Coordinate(x, target_y);
 					} else {
-						target = Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
-							y);
+					    int target_x = (static_cast<int>(x) < Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1;
+				        target = Coordinate(target_x, y); 
 					}
 					if (Map::Inst()->IsWalkable(target.X(), target.Y(), static_cast<void*>(this)))
 						currentJob().lock()->tasks[taskIndex] = Task(MOVE, target);
@@ -2306,7 +2307,7 @@ void NPC::LoadPresets(std::string filename) {
 }
 
 std::string NPC::NPCTypeToString(NPCType type) {
-	if (type >= 0 && type < Presets.size())
+	if (type >= 0 && type < static_cast<int>(Presets.size()))
 		return Presets[type].typeName;
 	return "Nobody";
 }
@@ -2753,7 +2754,7 @@ void NPC::DumpContainer(Coordinate location) {
 void NPC::ValidateCurrentJob() {
 	if (!jobs.empty()) {
 		//Only check tasks from the current one onwards
-		for (int i = taskIndex; i < jobs.front()->tasks.size(); ++i) {
+		for (size_t i = taskIndex; i < jobs.front()->tasks.size(); ++i) {
 			switch (jobs.front()->tasks[i].action) {
 
 			case FELL:
@@ -2798,7 +2799,7 @@ int NPC::GetHeight() const {
 bool NPC::IsFlying() const { return isFlying; }
 
 void NPC::SetFaction(int newFaction) {
-	if (newFaction >= 0 && newFaction < Faction::factions.size()) {
+	if (newFaction >= 0 && newFaction < static_cast<int>(Faction::factions.size())) {
 		faction = newFaction;
 		factionPtr = Faction::factions[newFaction];
 	} else if (!Faction::factions.empty()) {

@@ -419,7 +419,7 @@ int MainMenu() {
 				lButtonDown = false;
 				int entry = static_cast<int>(floor(selected / 2.));
 
-				if (entry >= 0 && entry < entryCount && entries[entry].isActive()) {
+				if (entry >= 0 && entry < static_cast<int>(entryCount) && entries[entry].isActive()) {
 					if (entries[entry].function == NULL) {
 						exit = true;
 					} else {
@@ -467,7 +467,7 @@ void LoadMenu() {
 		TCODConsole::root->print(edgex + (width / 2), edgey + 1, "ESC to cancel.");
 		TCODConsole::root->setAlignment(TCOD_LEFT);
 
-		for (unsigned int i = 0; i < list.size(); ++i) {
+		for (int i = 0; i < static_cast<int>(list.size()); ++i) {
 			if (selected == i) {
 				TCODConsole::root->setDefaultForeground(TCODColor::black);
 				TCODConsole::root->setDefaultBackground(TCODColor::white);
@@ -507,7 +507,7 @@ void LoadMenu() {
 		if (!mouseStatus.lbutton && lButtonDown) {
 			lButtonDown = false;
 			
-			if (selected < (signed int)list.size() && selected >= 0) {
+			if (selected < static_cast<int>(list.size()) && selected >= 0) {
 				if (!Data::LoadGame(list[selected].filename)) {
 					TCODConsole::root->setDefaultForeground(TCODColor::white);
 					TCODConsole::root->setDefaultBackground(TCODColor::black);
@@ -745,7 +745,7 @@ void SettingsMenu() {
 
 			if (whereY > 1 && whereY < fullscreenY) {
 				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
-				if (whereFocus >= 0 && whereFocus < fieldCount) {
+				if (whereFocus >= 0 && whereFocus < static_cast<int>(fieldCount)) {
 					focus = &fields[whereFocus];
 				}
 			} else if (whereY == fullscreenY) {
@@ -762,7 +762,7 @@ void SettingsMenu() {
 				pauseOnDanger = !pauseOnDanger;
 			} else if (whereY > rendererY) {
 				int whereRenderer = whereY - rendererY - 1;
-				if (whereRenderer >= 0 && whereRenderer < rendererCount) {
+				if (whereRenderer >= 0 && whereRenderer < static_cast<int>(rendererCount)) {
 					renderer = renderers[whereRenderer].renderer;
 					useTileset = renderers[whereRenderer].useTileset;
 				}
@@ -801,7 +801,7 @@ void ModsMenu() {
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 	
 	const std::list<Mods::Metadata>& modList = Mods::GetLoaded();
-	const int subH = modList.size() * 9;
+	const int subH = static_cast<int>(modList.size()) * 9;
 	TCODConsole sub(w - 2, std::max(1, subH));
 
 	int currentY = 0;
@@ -874,7 +874,7 @@ void TilesetsMenu() {
 
 	const std::vector<TileSetMetadata> tilesetsList = Tilesets::LoadTilesetMetadata();
 	
-	const int subH = tilesetsList.size();
+	const int subH = static_cast<int>(tilesetsList.size());
 	TCODConsole sub(listWidth - 2, std::max(1, subH));
 
 	int currentY = 0;
@@ -897,10 +897,10 @@ void TilesetsMenu() {
 	if (tilesetDir.size() == 0) {
 		tilesetDir = "default";
 	}
-	for (int i = 0; i < tilesetsList.size(); ++i) {
+	for (size_t i = 0; i < tilesetsList.size(); ++i) {
 		if (boost::iequals(tilesetDir, tilesetsList.at(i).path.filename().string())) {
-			selection = i;
-			originalSelection = i;
+			selection = static_cast<int>(i);
+			originalSelection = static_cast<int>(i);
 			break;
 		}
 	}
@@ -934,7 +934,7 @@ void TilesetsMenu() {
 		TCODConsole::root->printFrame(listWidth, 0, screenWidth - listWidth, screenHeight, true, TCOD_BKGND_SET, "Details");
 
 		int currentY = 2;
-		if (selection < tilesetsList.size())
+		if (selection < static_cast<int>(tilesetsList.size()))
 		{
 			TCODConsole::root->print(listWidth + 3, 2,      "Name:    %s", tilesetsList.at(selection).name.c_str());
 			TCODConsole::root->print(listWidth + 3, 4,      "Size:    %dx%d", tilesetsList.at(selection).width, tilesetsList.at(selection).height);
@@ -964,7 +964,8 @@ void TilesetsMenu() {
 					scroll = std::max(0, std::min(subH - screenHeight + 3, scroll + 1));
 				}
 			}
-			else if (mouse.cx > 1 && mouse.cx < listWidth - 2 && mouse.cy > 1 && mouse.cy < screenHeight - 2 && mouse.cy - 2 + scroll < tilesetsList.size()) {
+			else if (mouse.cx > 1 && mouse.cx < listWidth - 2 && mouse.cy > 1 && mouse.cy < screenHeight - 2
+					 && mouse.cy - 2 + scroll < static_cast<int>(tilesetsList.size())) {
 				selection = scroll + mouse.cy - 2;
 			}
 
@@ -995,7 +996,7 @@ void KeysMenu() {
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 	
 	int w = 40;
-	const int h = keyMap.size() + 4;
+	const int h = static_cast<int>(keyMap.size()) + 4;
 	
 	BOOST_FOREACH(Config::KeyMap::value_type pair, keyMap) {
 		w = std::max(w, (int)pair.first.size() + 7); // 2 for borders, 5 for [ X ]
@@ -1027,7 +1028,7 @@ void KeysMenu() {
 		TCODConsole::root->printFrame(x, y, w, h, true, TCOD_BKGND_SET, "Keys");
 		TCODConsole::root->print(x + 1, y + 1, "ENTER to save changes, ESC to discard.");
 		
-		for (unsigned int idx = 0; idx < labels.size(); ++idx) {
+		for (int idx = 0; idx < static_cast<int>(labels.size()); ++idx) {
 			if (focus == idx) {
 				TCODConsole::root->setDefaultForeground(TCODColor::green);
 			}

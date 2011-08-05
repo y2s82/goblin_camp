@@ -94,8 +94,8 @@ template <typename IterT> Sprite::Sprite(IterT start, IterT end, bool connection
 		return;
 	}
 
-	if (frameCount > indices.size()) {
-		frameCount = indices.size();
+	if (frameCount > static_cast<int>(indices.size())) {
+		frameCount = static_cast<int>(indices.size());
 	}
 	int numTiles = indices.size() / frameCount;
 	if (numTiles == 0) { 

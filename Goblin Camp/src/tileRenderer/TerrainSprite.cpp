@@ -248,8 +248,9 @@ void TerrainSprite::DrawSnowLayer(int screenX, int screenY, Coordinate coords, c
 void TerrainSprite::DrawDetails(int screenX, int screenY, const std::vector<Sprite_ptr>& detailSprites, Coordinate coords, const PermutationTable& permTable) const {
 	if (detailsChance != 0 && !detailSprites.empty()) {
 		int detailChoice = permTable.Hash(permTable.Hash(coords.X() + detailPermOffset) + coords.Y()) % (detailsChance * detailSprites.size());
-		if (detailChoice < detailSprites.size()) {
-			detailSprites[detailChoice].Draw(screenX, screenY);
+		size_t detailIndex = static_cast<size_t>(detailChoice);
+		if (detailIndex < detailSprites.size()) {
+			detailSprites[detailIndex].Draw(screenX, screenY);
 		}
 	}
 }
