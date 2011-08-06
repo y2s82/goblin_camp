@@ -13,10 +13,32 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#pragma once
+
+/* #pragma once makes gcc complain "warning: #pragma once in main
+  file"; apparently there are weird issues with #pragma once which
+  make me fall back to the tried and true #ifndef hack
+
+  see: http://www.dreamincode.net/forums/topic/173122-g-%23pragma-once-warnings/
+*/
+//#pragma once
+#ifndef STDAFX_INCLUDED
+#define STDAFX_INCLUDED
 
 // precompiled header
 #if defined(BOOST_BUILD_PCH_ENABLED) && !defined(GC_SKIP_PCH)
+
+//we include python stuff first to avoid _C_POSIX_SOURCE redefinition warnings
+//see: http://bytes.com/topic/python/answers/30009-warning-_posix_c_source-redefined
+#if defined(_MSC_VER)
+#	pragma warning(push, 2)
+#endif
+#		include <boost/python/detail/wrap_python.hpp>
+#		include <boost/python.hpp>
+		namespace py = boost::python;
+#if defined(_MSC_VER)
+#	pragma warning(pop)
+#endif
+
 // STL
 #	include <vector>
 #	include <deque>
@@ -42,7 +64,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <cstring>
 #	include <cstdarg>
 // Boost
+#if defined(_MSC_VER)
 #	pragma warning(push, 2)
+#endif
+#		include <boost/python/detail/wrap_python.hpp>
+#		include <boost/python.hpp>
 #		include <boost/thread/thread.hpp>
 #		include <boost/multi_array.hpp>
 #		include <boost/shared_ptr.hpp>
@@ -85,10 +111,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/filesystem.hpp>
 #		include <boost/math/constants/constants.hpp>
 #		include <boost/tuple/tuple.hpp>
-#		include <boost/python/detail/wrap_python.hpp>
-#		include <boost/python.hpp>
-		namespace py = boost::python;
+#if defined(_MSC_VER)
 #	pragma warning(pop)
+#endif
 
 // Memory debugging.
 #if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
@@ -130,14 +155,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #endif
 
 // Deprecation settings.
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #	pragma warning(1: 4996 4995) // Ensure that deprecation warnings will be shown
 #	include <cstdlib>
 #	pragma deprecated(rand, srand)
 #endif
 
 // Intrinsics.
-#ifdef _MSC_VER
+#if defined(_MSC_VER)
 #	include <intrin.h>
 #endif
 
@@ -149,3 +174,4 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	define GC_ASSERT BOOST_ASSERT
 #endif
 
+#endif // global #ifndef STDAFX_INCLUDED

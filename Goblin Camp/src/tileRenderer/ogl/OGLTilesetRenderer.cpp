@@ -440,12 +440,13 @@ void OGLTilesetRenderer::RenderViewport() {
 	glClipPlane(GL_CLIP_PLANE1, eqn1);
 	glClipPlane(GL_CLIP_PLANE2, eqn2);
 	glClipPlane(GL_CLIP_PLANE3, eqn3);
-	
-	float texCoordTileW = 0.5f / tilesTextureW;
-	float texCoordTileH = 0.5f / tilesTextureH;
 
-	float offsetX = (float)mapOffsetX + startPixelX;
-	float offsetY = (float)mapOffsetY + startPixelY;
+	// currently unused
+	// float texCoordTileW = 0.5f / tilesTextureW;
+	// float texCoordTileH = 0.5f / tilesTextureH;
+
+	// float offsetX = (float)mapOffsetX + startPixelX;
+	// float offsetY = (float)mapOffsetY + startPixelY;
 
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
 		RenderGLSLViewport();
@@ -612,6 +613,7 @@ void OGLTilesetRenderer::RenderOGLViewport() {
 void OGLTilesetRenderer::RenderConsole() {
 	int consoleW = TCODConsole::root->getWidth();
 	int consoleH = TCODConsole::root->getHeight();
+	static_cast<void>(consoleH);
 	// Update console data
 	for (int x = 0; x < TCODConsole::root->getWidth(); ++x) {
 		for (int y = 0; y < TCODConsole::root->getHeight(); ++y) {
@@ -780,7 +782,7 @@ const bool operator==(const RawTileData& lhs, const RawTileData& rhs) {
 	return lhs.tile == rhs.tile && lhs.texture == rhs.texture;
 }
 
-boost::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = {1, 3, 4};
+boost::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = { {1, 3, 4} };
 
 bool OGLTilesetRenderer::InitialiseConsoleShaders() {
 	consoleProgram = CreateOGLShaderProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader);

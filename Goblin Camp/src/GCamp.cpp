@@ -389,7 +389,7 @@ int MainMenu() {
 
 			TCODConsole::root->print(edgex + width / 2, edgey + ((idx + 1) * 2), entry.label);
 
-			if (entry.shortcut != NULL && key.c == entry.shortcut && entry.isActive()) {
+			if (key.c == entry.shortcut && entry.isActive()) {
 				exit     = (entry.function == NULL);
 				function = entry.function;
 			}
@@ -933,7 +933,6 @@ void TilesetsMenu() {
 		// Right frame
 		TCODConsole::root->printFrame(listWidth, 0, screenWidth - listWidth, screenHeight, true, TCOD_BKGND_SET, "Details");
 
-		int currentY = 2;
 		if (selection < static_cast<int>(tilesetsList.size()))
 		{
 			TCODConsole::root->print(listWidth + 3, 2,      "Name:    %s", tilesetsList.at(selection).name.c_str());
