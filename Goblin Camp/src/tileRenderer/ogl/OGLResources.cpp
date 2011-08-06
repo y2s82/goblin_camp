@@ -90,7 +90,7 @@ boost::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertSha
 
 	GLuint programHandle = glCreateProgramObjectARB();
 	if (glGetError()) {
-		LOG("Failed to create OGL Program Object : '%s'");
+		LOG("Failed to create OGL Program Object");
 		return boost::shared_ptr<const unsigned int>();    
 	}
 
