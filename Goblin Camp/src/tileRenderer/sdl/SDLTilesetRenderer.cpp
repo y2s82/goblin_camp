@@ -88,16 +88,19 @@ void SDLTilesetRenderer::PostDrawMap() {
 }
 	
 void SDLTilesetRenderer::DrawSprite(int screenX, int screenY, boost::shared_ptr<TileSetTexture> texture, int tile) const {
-	texture->DrawTile(tile, mapSurface.get(), &CalcDest(screenX, screenY));
+	SDL_Rect dstRect = CalcDest(screenX, screenY);
+	texture->DrawTile(tile, mapSurface.get(), &dstRect);
 }
 
 void SDLTilesetRenderer::DrawSpriteCorner(int screenX, int screenY, boost::shared_ptr<TileSetTexture> texture, int tile, Corner corner) const {
-	texture->DrawTileCorner(tile, corner, mapSurface.get(), &CalcDest(screenX, screenY));
+	SDL_Rect dstRect = CalcDest(screenX, screenY);
+	texture->DrawTileCorner(tile, corner, mapSurface.get(), &dstRect);
 }
 
 
 void SDLTilesetRenderer::DrawNullTile(int screenX, int screenY) {
-	SDL_FillRect(mapSurface.get(), &CalcDest(screenX, screenY), 0);
+	SDL_Rect dstRect = CalcDest(screenX, screenY);
+	SDL_FillRect(mapSurface.get(), &dstRect, 0);
 }
 
 void SDLTilesetRenderer::SetTranslucentUI(bool translucent) {

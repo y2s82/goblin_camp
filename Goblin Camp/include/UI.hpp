@@ -34,7 +34,7 @@ enum UIState {
 	UICOUNT
 };
 
-static TCOD_key_t NO_KEY = {
+static const TCOD_key_t NO_KEY = {
 	TCODK_NONE, 0, false, false, false, false, false, false
 };
 

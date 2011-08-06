@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <string>
+#include <cassert>
 
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
@@ -96,6 +97,7 @@ void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > s
 void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squad> > squadi, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry(squadi.first, TCODColor::white));
 	tooltip->AddEntry(TooltipEntry((boost::format(" Priority: %d") % squadi.second->Priority()).str(), TCODColor::grey));
+
 	if(squadi.second->GetGeneralOrder() != NOORDER) {
 		std::string order;
 		switch (squadi.second->GetGeneralOrder()) {
@@ -108,6 +110,9 @@ void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squa
 		case FOLLOW:
 			order = "Follow";
 			break;
+		case NOORDER:
+			//unreachable as we tested '!= NOORDER'
+			assert(false);
 		}
 		tooltip->AddEntry(TooltipEntry((boost::format(" Orders: %s") % order).str(), TCODColor::grey));
 	}

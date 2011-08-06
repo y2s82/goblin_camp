@@ -385,6 +385,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 					}
 			} else {
 				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+				static_cast<void>(itemUid);
 			}
 		}
 	}
@@ -516,12 +517,9 @@ void Game::ResetRenderer() {
 	int width, height;
 	TCODSystem::getCurrentResolution(&width, &height);
 
-	bool useTileset = Config::GetCVar<bool>("useTileset");
-	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
-
 	renderer.reset();
 
-	if (useTileset) {
+	if (Config::GetCVar<bool>("useTileset")) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
 	

@@ -48,6 +48,7 @@ int TileSetTexture::Count() const
 	return tileCount;
 }
 
+// dstRect may be modified by BlitSurface; this is documented
 void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const
 {
 	if (tile < tileCount)
@@ -55,11 +56,11 @@ void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) c
 		int xCoord = tile % tileXDim;
 		int yCoord = tile / tileXDim;
 		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, tileWidth, tileHeight};
-		// Copy dstRect to prevent it being changed.
 		SDL_BlitSurface(tiles.get(),&srcRect, dst, dstRect);
 	}
 }
 
+// dstRect may be modified by BlitSurface; this is documented
 void TileSetTexture::DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, SDL_Rect * dstRect) const {
 	if (tile < tileCount) {
 		int xCoord = tile % tileXDim;
