@@ -1007,7 +1007,7 @@ CONTINUEEAT:
 			case SLEEP:
 				AddEffect(SLEEPING);
 				AddEffect(BADSLEEP);
-				weariness -= 50;
+				weariness -= 25;
 				if (weariness <= 0) {
 					if (boost::shared_ptr<Entity> entity = currentEntity().lock()) {
 						if (boost::static_pointer_cast<Construction>(entity)->HasTag(BED)) {
