@@ -291,8 +291,8 @@ Coordinate Camp::GetRandomSpot() const {
 		
 		if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
 			Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION) ||
-			!Map::Inst()->IsWalkable(randomLocation.X(), randomLocation.Y() ||
-			Map::Inst()->GetWater(randomLocation.X(), randomLocation.Y()).lock()))
+			!Map::Inst()->IsWalkable(randomLocation.X(), randomLocation.Y()) ||
+			Map::Inst()->GetWater(randomLocation.X(), randomLocation.Y()).lock())
 			randomLocation = Coordinate(-1,-1);
 	}
 
