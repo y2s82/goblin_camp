@@ -18,13 +18,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/ogl/OGLViewportLayer.hpp"
 
 ViewportLayer::ViewportLayer()
-: width(0), height(0), data()
+: data(), width(0), height(0)
 {}
 
 ViewportLayer::ViewportLayer(int width, int height)
-	: width(width),
-	  height(height),
-	  data(width * height * 4, 0)
+:
+	data(width * height * 4, 0),
+	width(width),
+	height(height)
 {}
 
 void ViewportLayer::Reset() {

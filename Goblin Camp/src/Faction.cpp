@@ -93,7 +93,7 @@ void Faction::TrapSet(Coordinate trapLocation, bool visible) {
 FactionType Faction::StringToFactionType(std::string name) {
 	if (!boost::iequals(name, "Faction name not found")) {
 		if (factionNames.find(name) == factionNames.end()) {
-			int index = factions.size();
+			int index = static_cast<int>(factions.size());
 			factions.push_back(boost::shared_ptr<Faction>(new Faction(name, index)));
 			factionNames[name] = factions.size() - 1;
 			factions.back()->MakeFriendsWith(factions.size()-1); //A faction is always friendly with itself
@@ -104,7 +104,7 @@ FactionType Faction::StringToFactionType(std::string name) {
 }
 
 std::string Faction::FactionTypeToString(FactionType faction) {
-	if (faction >= 0 && faction < factions.size()) {
+	if (faction >= 0 && faction < static_cast<int>(factions.size())) {
 		return factions[faction]->name;
 	}
 	return "Faction name not found";
@@ -130,7 +130,8 @@ void Faction::Update() {
 };
 
 FactionGoal Faction::GetCurrentGoal() const {
-	if (currentGoal < goals.size()) return goals[currentGoal];
+	size_t i = currentGoal;
+	if (i < goals.size()) return goals[i];
 	return FACTIONIDLE;
 }
 
@@ -188,7 +189,8 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 	}
 
 	if (!goals.empty()) {
-		if (currentGoal < 0 || currentGoal >= goals.size()) currentGoal = 0;
+		if (currentGoal < 0 || currentGoal >= static_cast<int>(goals.size()))
+			currentGoal = 0;
 		switch (goals[currentGoal]) {
 		case FACTIONDESTROY: 
 			{
@@ -211,7 +213,7 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 			break;
 
 		case FACTIONSTEAL:
-			if (currentGoal < goalSpecifiers.size() && goalSpecifiers[currentGoal] >= 0) {
+			if (currentGoal < static_cast<int>(goalSpecifiers.size()) && goalSpecifiers[currentGoal] >= 0) {
 				boost::shared_ptr<Job> stealJob(new Job("Steal "+Item::ItemCategoryToString(goalSpecifiers[currentGoal])));
 				boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(goalSpecifiers[currentGoal], npc->Position());
 				if (item.lock()) {
@@ -274,10 +276,10 @@ bool Faction::IsFriendsWith(FactionType otherFaction) {
 
 void Faction::InitAfterLoad() {
 	factionNames.clear();
-	for (int i = 0; i < factions.size(); ++i) {
-		factionNames.insert(std::make_pair(factions[i]->name, i));
+	for (size_t i = 0; i < factions.size(); ++i) {
+		factionNames.insert(std::make_pair(factions[i]->name, static_cast<int>(i)));
 	}
-	for (int i = 0; i < factions.size(); ++i) {
+	for (size_t i = 0; i < factions.size(); ++i) {
 		factions[i]->index = i;
 		factions[i]->MakeFriendsWith(i);
 		factions[i]->TranslateFriends();
@@ -291,7 +293,7 @@ void Faction::TranslateFriends() {
 }
 
 void Faction::TranslateMembers() {
-	for (int i = 0; i < factions.size(); ++i) {
+	for (size_t i = 0; i < factions.size(); ++i) {
 		for (std::list<int>::iterator uidi = factions[i]->membersAsUids.begin(); 
 			uidi != factions[i]->membersAsUids.end(); ++uidi) {
 				boost::weak_ptr<NPC> npc = Game::Inst()->GetNPC(*uidi);

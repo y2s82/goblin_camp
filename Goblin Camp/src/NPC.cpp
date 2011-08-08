@@ -67,59 +67,71 @@ std::map<std::string, NPCType> NPC::NPCTypeNames = std::map<std::string, NPCType
 std::vector<NPCPreset> NPC::Presets = std::vector<NPCPreset>();
 
 NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
-	boost::function<void(boost::shared_ptr<NPC>)> react) : Entity(),
+	boost::function<void(boost::shared_ptr<NPC>)> react) :
+	Entity(),
+
 	type(0),
 	timeCount(0),
 	taskIndex(0),
 	orderIndex(0),
+
 	pathIndex(0),
 	nopath(false),
 	findPathWorking(false),
 	pathIsDangerous(false),
+
 	timer(0),
 	nextMove(0),
 	lastMoveResult(TASKCONTINUE),
 	run(true),
+
 	taskBegun(false),
 	jobBegun(false),
 	expert(false),
+
 	carried(boost::weak_ptr<Item>()),
 	mainHand(boost::weak_ptr<Item>()),
 	offHand(boost::weak_ptr<Item>()),
 	armor(boost::weak_ptr<Item>()),
-	thirst(0),
-	hunger(0),
-	weariness(0),
+
+	thirst(0), hunger(0), weariness(0),
 	thinkSpeed(UPDATES_PER_SECOND / 5), //Think 5 times a second
 	statusEffects(std::list<StatusEffect>()),
 	statusEffectIterator(statusEffects.end()),
 	statusGraphicCounter(0),
-	health(100),
-	maxHealth(100),
+	health(100), maxHealth(100),
 	foundItem(boost::weak_ptr<Item>()),
 	inventory(boost::shared_ptr<Container>(new Container(pos, 0, 30, -1))),
+
 	needsNutrition(false),
 	needsSleep(false),
 	hasHands(false),
 	isTunneler(false),
 	isFlying(false),
+
+	FindJob(findJob),
+	React(react),
+
 	aggressive(false),
 	coward(false),
 	aggressor(boost::weak_ptr<NPC>()),
 	dead(false),
 	squad(boost::weak_ptr<Squad>()),
+
 	attacks(std::list<Attack>()),
+
+	escaped(false),
+
 	addedTasksToCurrentJob(0),
+
 	hasMagicRangedAttacks(false),
+
 	threatLocation(Coordinate(-1,-1)),
 	seenFire(false),
+
 	traits(std::set<Trait>()),
-	damageDealt(0),
-	damageReceived(0),
-	statusEffectsChanged(false),
-	FindJob(findJob),
-	React(react),
-	escaped(false)
+	damageDealt(0), damageReceived(0),
+	statusEffectsChanged(false)
 {
 	while (!Map::Inst()->IsWalkable(pos.X(),pos.Y())) {
 		pos.X(pos.X()+1);
@@ -977,8 +989,8 @@ CONTINUEEAT:
 				break;
 
 			case FLEEMAP:
-				if (x == 0 || x == Map::Inst()->Width()-1 ||
-					y == 0 || y == Map::Inst()->Height()-1) {
+				if (x == 0 || static_cast<int>(x) == Map::Inst()->Width()-1 ||
+					y == 0 || static_cast<int>(y) == Map::Inst()->Height()-1) {
 						//We are at the edge, escape!
 						Escape();
 						return;
@@ -991,10 +1003,11 @@ CONTINUEEAT:
 					Coordinate target;
 					tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
 					if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
-						target = Coordinate(x, (y < (unsigned int)Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1);
+						int target_y = (static_cast<int>(y) < Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1;
+						target = Coordinate(x, target_y);
 					} else {
-						target = Coordinate((x < (unsigned int)Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1, 
-							y);
+					    int target_x = (static_cast<int>(x) < Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1;
+				        target = Coordinate(target_x, y); 
 					}
 					if (Map::Inst()->IsWalkable(target.X(), target.Y(), static_cast<void*>(this)))
 						currentJob().lock()->tasks[taskIndex] = Task(MOVE, target);
@@ -2298,7 +2311,7 @@ void NPC::LoadPresets(std::string filename) {
 }
 
 std::string NPC::NPCTypeToString(NPCType type) {
-	if (type >= 0 && type < Presets.size())
+	if (type >= 0 && type < static_cast<int>(Presets.size()))
 		return Presets[type].typeName;
 	return "Nobody";
 }
@@ -2745,7 +2758,7 @@ void NPC::DumpContainer(Coordinate location) {
 void NPC::ValidateCurrentJob() {
 	if (!jobs.empty()) {
 		//Only check tasks from the current one onwards
-		for (int i = taskIndex; i < jobs.front()->tasks.size(); ++i) {
+		for (size_t i = taskIndex; i < jobs.front()->tasks.size(); ++i) {
 			switch (jobs.front()->tasks[i].action) {
 
 			case FELL:
@@ -2790,7 +2803,7 @@ int NPC::GetHeight() const {
 bool NPC::IsFlying() const { return isFlying; }
 
 void NPC::SetFaction(int newFaction) {
-	if (newFaction >= 0 && newFaction < Faction::factions.size()) {
+	if (newFaction >= 0 && newFaction < static_cast<int>(Faction::factions.size())) {
 		faction = newFaction;
 		factionPtr = Faction::factions[newFaction];
 	} else if (!Faction::factions.empty()) {
