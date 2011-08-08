@@ -73,6 +73,7 @@ private:
 	void DrawTopBar(TCODConsole*);
 	void HandleKeyboard();
 	void HandleMouse();
+	boost::weak_ptr<Entity> currentStrobeTarget;
 public:
 	static UI* Inst();
 	static void Reset();

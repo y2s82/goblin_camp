@@ -29,7 +29,7 @@ FlightPath::FlightPath(Coordinate c) : coord(c), height(-1) {}
 Entity::Entity() :
 	zone(0), reserved(0), name("NONAME"), faction(-1),
 	velocity(0), nextVelocityMove(0), velocityTarget(Coordinate(0,0)),
-	bulk(0)
+	bulk(0), strobe(0.0f)
 {
 	uid = uids++; //FIXME: Entity should keep track of freed uids
 }
@@ -112,6 +112,10 @@ void Entity::SetBulk(int amount) { bulk = amount; }
 int Entity::GetBulk() { return bulk; }
 void Entity::AddBulk(int amount) { bulk += amount; }
 void Entity::RemoveBulk(int amount) { bulk -= amount; }
+
+void Entity::Strobe() { strobe += 0.1; }
+void Entity::ResetStrobe() { strobe = 0; }
+bool Entity::CanStrobe() { return false; }
 
 void Entity::save(OutputArchive& ar, const unsigned int version) const {
 	ar & x;
