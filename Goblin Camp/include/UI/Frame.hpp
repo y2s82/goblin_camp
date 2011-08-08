@@ -30,7 +30,7 @@ private:
 	std::string title;
 public:
 	Frame(std::string ntitle, std::vector<Drawable *> ncomponents, int x, int y, int nwidth, int nheight):
-		title(ntitle), UIContainer(ncomponents, x, y, nwidth, nheight) {}
+		UIContainer(ncomponents, x, y, nwidth, nheight), title(ntitle) {}
 	void Draw(int, int, TCODConsole *);
 	void SetTitle(std::string ntitle) { title = ntitle; }
 };

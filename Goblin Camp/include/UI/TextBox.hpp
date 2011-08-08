@@ -33,8 +33,8 @@ private:
 public:
 	TextBox(int x, int y, int nwidth, std::string *nvalue):
 		Drawable(x, y, nwidth, 1), value(nvalue) {}
-    TextBox(int x, int y, int nwidth, boost::function<std::string()> ngetter, boost::function<void(std::string)> nsetter):
-		Drawable(x, y, nwidth, 1), getter(ngetter), setter(nsetter), value(0) {}
+	TextBox(int x, int y, int nwidth, boost::function<std::string()> ngetter, boost::function<void(std::string)> nsetter):
+		Drawable(x, y, nwidth, 1), value(0), getter(ngetter), setter(nsetter) {}
 	void Draw(int, int, TCODConsole *);
 	MenuResult Update(int, int, bool, TCOD_key_t);
 };

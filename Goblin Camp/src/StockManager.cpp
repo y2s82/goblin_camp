@@ -69,23 +69,24 @@ void StockManager::Init() {
 
 	//Figure out which items are producable, this is so that we won't show _all_ item types in the
 	//stock manager screen. Things such as trash and plant mid-growth types won't show this way
-	for (unsigned int item = 0; item < Item::Presets.size(); ++item) {
+	for (size_t itemIndex = 0; itemIndex < Item::Presets.size(); ++itemIndex) {
+		ItemType item = static_cast<ItemType>(itemIndex);
 
 		//Now figure out if this item is producable either from a workshop, or designations
 		bool producerFound = false;
 
 		//Bog iron is a hard coded special case, for now. TODO: Think about this
-		if (boost::iequals(Item::Presets[item].name, "Bog iron") ||
-			boost::iequals(Item::Presets[item].name, "Water")) {
+		if (boost::iequals(Item::Presets[itemIndex].name, "Bog iron") ||
+			boost::iequals(Item::Presets[itemIndex].name, "Water")) {
 				producables.insert(item);
-				if (boost::iequals(Item::Presets[item].name, "Bog iron"))
+				if (boost::iequals(Item::Presets[itemIndex].name, "Bog iron"))
 					fromEarth.insert(item);
 				producerFound = true;
 				UpdateQuantity(item, 0);
 		}
 
-		for (unsigned int cons = 0; cons < Construction::Presets.size(); ++cons) { //Look through all constructions
-			for (unsigned int prod = 0; prod < Construction::Presets[cons].products.size(); ++prod) { //Products
+		for (size_t cons = 0; cons < Construction::Presets.size(); ++cons) { //Look through all constructions
+			for (size_t prod = 0; prod < Construction::Presets[cons].products.size(); ++prod) { //Products
 				if (Construction::Presets[cons].products[prod] == item) {
 					//This construction has this itemtype as a product
 					producables.insert(item);
@@ -97,7 +98,7 @@ void StockManager::Init() {
 		}
 
 		if (!producerFound) {//Haven't found a producer, so check NatureObjects if a tree has this item as a component
-			for (unsigned int natObj = 0; natObj < NatureObject::Presets.size(); ++natObj) {
+			for (size_t natObj = 0; natObj < NatureObject::Presets.size(); ++natObj) {
 				if (NatureObject::Presets[natObj].tree) {
 					for (std::list<ItemType>::iterator compi = NatureObject::Presets[natObj].components.begin(); 
 						compi != NatureObject::Presets[natObj].components.end(); ++compi) {
@@ -111,20 +112,20 @@ void StockManager::Init() {
 			}
 
 			//Anything not in the Misc. category can be shown in the stock manager dialog
-			if (Item::Presets[item].categories.find(Item::StringToItemCategory("Misc.")) == Item::Presets[item].categories.end())
+			if (Item::Presets[itemIndex].categories.find(Item::StringToItemCategory("Misc.")) == Item::Presets[itemIndex].categories.end())
 				  producables.insert(item);
 		}
 
 		//Flag all inorganic materials for dumping (except seeds which are technically not organic)
-		if (!Item::Presets[item].organic &&
-			Item::Presets[item].categories.find(Item::StringToItemCategory("Seed")) == Item::Presets[item].categories.end())
+		if (!Item::Presets[itemIndex].organic &&
+			Item::Presets[itemIndex].categories.find(Item::StringToItemCategory("Seed")) == Item::Presets[itemIndex].categories.end())
 			dumpables.insert(item);
 	}
 }
 
 void StockManager::Update() {
 	//Check all ItemTypes
-	for (ItemType type = 0; type < Item::Presets.size(); ++type) {
+	for (ItemType type = 0; type < static_cast<int>(Item::Presets.size()); ++type) {
 		int difference = minimums[type] - typeQuantities[type];
 		if (producables.find(type) != producables.end()) {
 			if (minimums[type] > 0 && difference > 0) { //Only consider production if we have a positive minimum
@@ -284,7 +285,7 @@ void StockManager::Update() {
 void StockManager::UpdateQuantity(ItemType type, int quantity) {
 	//If we receive an update about a new type, it should be made available
 	//Constructions issue a 0 quantity update when they are built
-	if (type >= 0 && type < Item::Presets.size()) {
+	if (type >= 0 && type < static_cast<int>(Item::Presets.size())) {
 #ifdef DEBUG
 		std::cout<<"Quantity update "<<Item::ItemTypeToString(type)<<"\n";
 #endif

@@ -250,7 +250,7 @@ TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spr
 	std::vector<Sprite_ptr> sprites;
 	if (wang) {
 		int indicesPerSprite = spriteIndices.size() / (heightSplits.size() + 1);
-		for (int i = 0; i < heightSplits.size() + 1; ++i) {
+		for (int i = 0; i < static_cast<int>(heightSplits.size()) + 1; ++i) {
 			sprites.push_back(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_TerrainBase, currentTexture, spriteIndices.begin() + i * indicesPerSprite, spriteIndices.begin() + (i + 1) * indicesPerSprite, true));
 		}
 	} else {

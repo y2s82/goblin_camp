@@ -147,10 +147,9 @@ namespace {
 TileSetParserV2::TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactory) :
 	parser(),
 	spriteFactory(spriteFactory),
+	tileSet(),
 	readTexture(false),
 	extendingExisting(false),
-	tileSet(),
-	success(true),
 	currentParsingState(PS_NORMAL),
 	tileSetPath(),
 	currentTexture(),
@@ -161,8 +160,8 @@ TileSetParserV2::TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactor
 	markerFPS(15),
 	fireFrames(),
 	fireFPS(15),
-	constructionFactory(),
 	animSpriteFactory(),
+	constructionFactory(),
 	statusEffectFactory(),
 	npcSpriteFactory(),
 	itemSprite(),
@@ -708,8 +707,7 @@ Sprite_ptr TileSetParserV2::AnimatedSpriteFactory::Build(SpriteLayerType layer, 
 
 
 TileSetMetadataParserV2::TileSetMetadataParserV2()
-	: metadata(),
-	  parser()
+	: parser(), metadata()
 {
 	SetupTilesetParser(parser);
 	

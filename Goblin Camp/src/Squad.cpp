@@ -66,7 +66,7 @@ bool Squad::UpdateMembers() {
 
 Order Squad::GetOrder(int &orderIndex) {
 	++orderIndex;
-	if (orderIndex < 0 || orderIndex >= orders.size())
+	if (orderIndex < 0 || orderIndex >= static_cast<int>(orders.size()))
 		orderIndex = 0;
 	return orders.empty() ? NOORDER : orders[orderIndex];
 }
@@ -86,14 +86,14 @@ void Squad::ClearOrders() {
 }
 
 Coordinate Squad::TargetCoordinate(int index) {
-	if (index >= 0 && index < targetCoordinates.size()) {
+	if (index >= 0 && index < static_cast<int>(targetCoordinates.size())) {
 		return targetCoordinates[index];
 	} else return Coordinate(-1,-1);
 }
 void Squad::AddTargetCoordinate(Coordinate newTarget) {targetCoordinates.back() = newTarget;}
 
 boost::weak_ptr<Entity> Squad::TargetEntity(int index) {
-	if (index >= 0 && index < targetEntities.size()) {
+	if (index >= 0 && index < static_cast<int>(targetEntities.size())) {
 		return targetEntities[index];
 	} else return boost::weak_ptr<Entity>();
 }

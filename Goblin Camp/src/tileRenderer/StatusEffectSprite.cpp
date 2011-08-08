@@ -25,8 +25,8 @@ StatusEffectSprite::StatusEffectSprite()
 
 StatusEffectSprite::StatusEffectSprite(Sprite_ptr sprite, int flashRate, bool alwaysOn)
 	: sprite(sprite),
-	  flashRate(flashRate == 0 ? 0 : 1000/(flashRate + 1)),
-	  alwaysOn(alwaysOn)
+	  alwaysOn(alwaysOn),
+	  flashRate(flashRate == 0 ? 0 : 1000/(flashRate + 1))
 {}
 	
 StatusEffectSprite::~StatusEffectSprite() {}

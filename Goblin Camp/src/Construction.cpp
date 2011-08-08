@@ -858,7 +858,7 @@ void Construction::Update() {
 	if (!Construction::Presets[type].passiveStatusEffects.empty() && !Map::Inst()->NPCList(x,y)->empty()) {
 		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(x, y)->begin());
 		if (!npc->HasEffect(FLYING)) {
-			for (int i = 0; i < Construction::Presets[type].passiveStatusEffects.size(); ++i) {
+			for (size_t i = 0; i < Construction::Presets[type].passiveStatusEffects.size(); ++i) {
 				npc->AddEffect(Construction::Presets[type].passiveStatusEffects[i]);
 			}
 		}
@@ -964,8 +964,8 @@ ConstructionPreset::ConstructionPreset() :
 	tileReqs(std::set<TileType>()),
 	tier(0),
 	description(""),
-	graphicsHint(-1),
 	fallbackGraphicsSet(""),
+	graphicsHint(-1),
 	chimney(Coordinate(-1,-1)),
 	trapAttack(Attack()),
 	trapReloadItem(-1),
