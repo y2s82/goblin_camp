@@ -208,7 +208,7 @@ bool Game::LoadGame(const std::string& filename) {
 			throw std::runtime_error("Forward compatibility: reserved value #6 not 0x0000000000000000.");
 		}
 		
-		Game::Inst()->Reset();
+		Game::Reset();
 		Game::Inst()->LoadingScreen();
 		
 		// Read the payload

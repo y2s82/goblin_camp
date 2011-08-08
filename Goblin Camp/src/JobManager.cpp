@@ -246,16 +246,8 @@ void JobManager::RemoveJob(boost::weak_ptr<Job> wjob) {
 }
 
 void JobManager::Reset() {
-	for (int i = 0; i < PRIORITY_COUNT; ++i) {
-		availableList[i].clear();
-	}
-	waitingList.clear();
-	menialNPCsWaiting.clear();
-	expertNPCsWaiting.clear();
-	for (std::vector<std::vector<boost::weak_ptr<Job> > >::iterator iter = toolJobs.begin(); iter != toolJobs.end(); ++iter) {
-		iter->clear();
-	}
-	failList.clear();
+	delete instance;
+	instance = 0;
 }
 
 void JobManager::NPCWaiting(int uid) {

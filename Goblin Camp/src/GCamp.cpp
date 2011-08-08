@@ -82,7 +82,6 @@ int GCMain(std::vector<std::string>& args) {
 	Data::LoadConfig();
 	Data::LoadFont();
 	Mods::Load();
-	Game::Inst()->Init();
 	#ifdef MACOSX
 	Data::LoadFont();
 	#endif
@@ -172,9 +171,9 @@ void MainLoop() {
 }
 
 void StartNewGame() {
+	Game::Reset();
 	Game* game = Game::Inst();
 
-	game->Reset();
 	game->LoadingScreen();
 	
 	Script::Event::GameStart();

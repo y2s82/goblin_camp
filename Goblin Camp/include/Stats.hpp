@@ -57,7 +57,7 @@ public:
 	void ItemBurned(unsigned amount=1);
 	unsigned GetItemsBurned();
 
-	void Reset();
+	static void Reset();
 };
 
 BOOST_CLASS_VERSION(Stats, 0)

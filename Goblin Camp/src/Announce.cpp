@@ -163,9 +163,6 @@ Coordinate Announce::CurrentCoordinate() {
 }
 
 void Announce::Reset() {
-	messageQueue.clear();
-	history.clear();
-	timer = 0;
-	length = 0;
-	height = 0;
+	delete instance;
+	instance = 0;
 }

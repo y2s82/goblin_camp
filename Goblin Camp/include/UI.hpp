@@ -75,6 +75,7 @@ private:
 	void HandleMouse();
 public:
 	static UI* Inst();
+	static void Reset();
 	void Update();
 	void Draw(TCODConsole*);
 	void blueprint(Coordinate);

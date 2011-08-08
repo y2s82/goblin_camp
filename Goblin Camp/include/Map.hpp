@@ -53,7 +53,7 @@ public:
 	TCODHeightMap *heightMap;
 	static Map* Inst();
 	~Map();
-	void Reset(int,int);
+	static void Reset();
 	float getWalkCost(int, int, int, int, void *) const;
 	bool IsWalkable(int,int) const;
 	bool IsWalkable(int,int,void*) const;

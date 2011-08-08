@@ -31,7 +31,7 @@ class JobManager {
 	std::list<boost::shared_ptr<Job> > failList;
 public:
 	static JobManager* Inst();
-	void Reset();
+	static void Reset();
 	void AddJob(boost::shared_ptr<Job>);
 	void Draw(Coordinate, int from = 0, int width = 40 ,int height = 40, TCODConsole* = TCODConsole::root);
 	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);

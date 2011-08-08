@@ -60,7 +60,7 @@ public:
 	void DisableAutoTerritory();
 	void ToggleAutoTerritory();
 	bool IsAutoTerritoryEnabled();
-	void Reset();
+	static void Reset();
 	void Update();
 	void AddWaterZone(Coordinate from, Coordinate to);
 	void RemoveWaterZone(Coordinate from, Coordinate to);

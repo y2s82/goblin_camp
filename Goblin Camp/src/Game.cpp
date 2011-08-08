@@ -60,6 +60,7 @@ namespace py = boost::python;
 #include "UI/Label.hpp"
 #include "UI/Button.hpp"
 #include "UI/ScrollPanel.hpp"
+#include "UI/StockManagerDialog.hpp"
 
 #include "TCODMapRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -69,6 +70,7 @@ namespace py = boost::python;
 int Game::ItemTypeCount = 0;
 int Game::ItemCatCount = 0;
 
+bool Game::initializedOnce = false;
 Game* Game::instance = 0;
 
 Game::Game() :
@@ -87,8 +89,8 @@ screenWidth(0),
 	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
-	camX(0),
-	camY(0),
+	camX(180),
+	camY(180),
 	buffer(0)
 {
 	for(int i = 0; i < 12; i++) {
@@ -103,7 +105,11 @@ Game::~Game() {
 }
 
 Game* Game::Inst() {
-	if (!instance) instance = new Game();
+	if (!instance) {
+		instance = new Game();
+		instance->Init(!initializedOnce);
+		initializedOnce = true;
+	}
 	return instance;
 }
 
@@ -472,7 +478,7 @@ void Game::ErrorScreen() {
 	exit(255);
 }
 
-void Game::Init() {
+void Game::Init(bool firstTime) {
 	int width  = Config::GetCVar<int>("resolutionX");
 	int height = Config::GetCVar<int>("resolutionY");
 	bool fullscreen = Config::GetCVar<bool>("fullscreen");
@@ -494,14 +500,14 @@ void Game::Init() {
 
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
 	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
-	TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
+	if (firstTime) TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
 	TCODMouse::showCursor(true);
 	TCODConsole::setKeyboardRepeat(500, 10);
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	ResetRenderer();
 
-	LoadingScreen();
+	if (firstTime) LoadingScreen();
 
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	
@@ -1816,55 +1822,26 @@ boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, C
 }
 
 void Game::Reset() {
-	npcList.clear();
-	squadList.clear();
-	hostileSquadList.clear();
-
-	itemList.clear();
-	freeItems.clear();
-	flyingItems.clear();
-	stoppedItems.clear();
-	natureList.clear();
-	itemList.clear();
-
-	waterList.clear();
-	filthList.clear();
-	bloodList.clear();
-
-	Map::Inst()->Reset(-1,-1);
-	for (int x = 0; x < Map::Inst()->Width(); ++x) {
-		for (int y = 0; y < Map::Inst()->Height(); ++y) {
-			Map::Inst()->Reset(x,y);
-		}
-	}
-	staticConstructionList.clear();
-	dynamicConstructionList.clear();
-	JobManager::Inst()->Reset();
-	StockManager::Inst()->Reset();
-	time = 0;
-	age = 0;
-	orcCount = 0;
-	goblinCount = 0;
-	peacefulFaunaCount = 0;
-	paused = false;
-	toMainMenu = false;
-	running = false;
-	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
-	season = LateWinter;
-	camX = 180;
-	camY = 180;
-	safeMonths = 3;
-	Announce::Inst()->Reset();
-	Camp::Inst()->Reset();
-	renderer->PreparePrefabs();
-	fireList.clear();
-	spellList.clear();
-	gameOver = false;
+	Map::Reset();
+	JobManager::Reset();
+	StockManager::Reset();
+	Announce::Reset();
+	Camp::Reset();
 	for (int i = 0; i < Faction::factions.size(); ++i) {
 		Faction::factions[i]->Reset();
 	}
+	Stats::Reset();
 
-	Stats::Inst()->Reset();
+	delete StockManagerDialog::stocksDialog;
+	StockManagerDialog::stocksDialog = 0;
+
+	delete Menu::mainMenu;
+	Menu::mainMenu = 0;
+
+	UI::Reset();
+
+	delete instance;
+	instance = 0;
 }
 
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
