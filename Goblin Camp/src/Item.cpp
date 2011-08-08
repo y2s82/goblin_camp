@@ -42,11 +42,14 @@ boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::uno
 std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::GoodEffectAdders = std::multimap<StatusEffectType, ItemType>();
 
-Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) : Entity(),
+Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) :
+	Entity(),
+
 	type(typeval),
 	flammable(false),
-	attemptedStore(false),
 	decayCounter(-1),
+
+	attemptedStore(false),
 	container(boost::weak_ptr<Item>()),
 	internal(false)
 {
@@ -55,7 +58,7 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	x = pos.X();
 	y = pos.Y();
 
-	if (type >= 0 && type < Item::Presets.size()) {
+	if (type >= 0 && type < static_cast<int>(Item::Presets.size())) {
 		name = Item::Presets[type].name;
 		categories = Item::Presets[type].categories;
 		graphic = Item::Presets[type].graphic;
@@ -176,7 +179,7 @@ int Item::GetGraphic() {return graphic;}
 Attack Item::GetAttack() const {return attack;}
 
 std::string Item::ItemTypeToString(ItemType type) {
-	if (type >= 0 && type < Item::Presets.size())
+	if (type >= 0 && type < static_cast<int>(Item::Presets.size()))
 		return Item::Presets[type].name;
 	return "None";
 }
@@ -190,7 +193,7 @@ ItemType Item::StringToItemType(std::string str) {
 }
 
 std::string Item::ItemCategoryToString(ItemCategory category) {
-	if (category >= 0 && category < Item::Categories.size())
+	if (category >= 0 && category < static_cast<int>(Item::Categories.size()))
 		return Item::Categories[category].name;
 	return "None";
 }
@@ -702,11 +705,14 @@ void Item::load(InputArchive& ar, const unsigned int version) {
 		std::string categoryName;
 		ar & categoryName;
 		int categoryType = Item::StringToItemCategory(categoryName);
-		if (categoryType >= 0 && categoryType < Item::Categories.size()) categories.insert(categoryType);
+		if (categoryType >= 0 && categoryType < static_cast<int>(Item::Categories.size()))
+			categories.insert(categoryType);
 	}
-	if (categories.empty()) categories.insert(Item::StringToItemCategory("garbage"));
+	if (categories.empty())
+		categories.insert(Item::StringToItemCategory("garbage"));
 	ar & flammable;
-	if (failedToFindType) flammable = true; //Just so you can get rid of it
+	if (failedToFindType)
+		flammable = true; //Just so you can get rid of it
 	ar & attemptedStore;
 	ar & decayCounter;
 	ar & attack;

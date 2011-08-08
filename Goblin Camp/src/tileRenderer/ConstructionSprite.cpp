@@ -129,7 +129,12 @@ void ConstructionSprite::SetWidth(int val) {
 }
 
 bool ConstructionSprite::IsValid() const {
-	return sprites.size() > 0 && (sprites[0].IsConnectionMap() || (width > 0 && width <= sprites.size() && (sprites.size() / width) * width == sprites.size()));
+	int sprites_size = static_cast<int>(sprites.size());
+	return sprites_size > 0 &&
+		(sprites[0].IsConnectionMap() 
+		 || (width > 0
+			 && width <= sprites_size
+			 && (sprites_size / width) * width == sprites_size));
 }
 
 bool ConstructionSprite::IsConnectionMap() const {

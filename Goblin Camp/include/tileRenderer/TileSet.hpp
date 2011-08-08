@@ -127,10 +127,9 @@ private:
 	std::string version;
 	std::string description;
 
-	TerrainSprite defaultTerrainTile;
-	TileTypeSpriteArray terrainTiles;
 	Sprite_ptr waterTile;
 	Sprite_ptr iceTile;
+	Sprite_ptr fireTile;
 	Sprite_ptr minorFilth;
 	Sprite_ptr majorFilth;
 	
@@ -142,7 +141,6 @@ private:
 	Sprite_ptr blood;
 
 	Sprite_ptr defaultUnderConstructionSprite;
-	Sprite_ptr fireTile;
 	
 	NPCSprite defaultNPCSprite;
 	std::vector<NPCSprite> npcSprites;
@@ -163,6 +161,9 @@ private:
 	SpellSpriteSet defaultSpellSpriteSet;
 	std::vector<SpellSpriteSet> spellSpriteSets;
 	LookupMap spellSpriteLookup;
+
+	TerrainSprite defaultTerrainTile;
+	TileTypeSpriteArray terrainTiles;
 
 	CursorTypeSpriteArray placeableCursors;
 	CursorTypeSpriteArray nonplaceableCursors;

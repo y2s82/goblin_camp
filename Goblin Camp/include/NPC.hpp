@@ -116,18 +116,22 @@ class NPC : public Entity {
 	std::deque<boost::shared_ptr<Job> > jobs;
 	int taskIndex;
 	int orderIndex;
+
 	boost::mutex pathMutex;
 	TCODPath *path;
 	int pathIndex;
 	bool nopath;
 	bool findPathWorking;
 	bool pathIsDangerous;
+
 	int timer;
 	unsigned int nextMove;
 	TaskResult lastMoveResult;
 	bool run;
+
 	TCODColor _color, _bgcolor;
 	int _graphic;
+
 	bool taskBegun;
 	bool jobBegun;
 	bool expert;

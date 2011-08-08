@@ -455,7 +455,7 @@ unsigned int Map::AddMarker(MapMarker marker) {
 
 void Map::RemoveMarker(int markid) {
 	for (std::list<std::pair<unsigned int, MapMarker> >::iterator markeri = mapMarkers.begin(); markeri != mapMarkers.end(); ++markeri) {
-		if (markeri->first == markid) {
+		if (static_cast<int>(markeri->first) == markid) {
 			mapMarkers.erase(markeri);
 			return;
 		}
@@ -781,8 +781,8 @@ void Map::TileChanged(int x, int y) {
 }
 
 void Map::save(OutputArchive& ar, const unsigned int version) const {
-	for (int x = 0; x < tileMap.size(); ++x) {
-		for (int y = 0; y < tileMap[x].size(); ++y) {
+	for (size_t x = 0; x < tileMap.size(); ++x) {
+		for (size_t y = 0; y < tileMap[x].size(); ++y) {
 			ar & tileMap[x][y];
 		}
 	}
@@ -791,8 +791,8 @@ void Map::save(OutputArchive& ar, const unsigned int version) const {
 	ar & mapMarkers;
 	ar & markerids;
 	ar & weather;
-	for (int x = 0; x < tileMap.size(); ++x) {
-		for (int y = 0; y < tileMap[x].size(); ++y) {
+	for (size_t x = 0; x < tileMap.size(); ++x) {
+		for (size_t y = 0; y < tileMap[x].size(); ++y) {
 			float heightMapValue = heightMap->getValue(x, y);
 			ar & heightMapValue;
 		}
@@ -800,8 +800,8 @@ void Map::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void Map::load(InputArchive& ar, const unsigned int version) {
-	for (int x = 0; x < tileMap.size(); ++x) {
-		for (int y = 0; y < tileMap[x].size(); ++y) {
+	for (size_t x = 0; x < tileMap.size(); ++x) {
+		for (size_t y = 0; y < tileMap[x].size(); ++y) {
 			ar & tileMap[x][y];
 		}
 	}
@@ -817,8 +817,8 @@ void Map::load(InputArchive& ar, const unsigned int version) {
 		ar & weather;
 	}
 	if (version >= 2) {
-		for (int x = 0; x < tileMap.size(); ++x) {
-			for (int y = 0; y < tileMap[x].size(); ++y) {
+		for (size_t x = 0; x < tileMap.size(); ++x) {
+			for (size_t y = 0; y < tileMap[x].size(); ++y) {
 				float heightMapValue;
 				ar & heightMapValue;
 				heightMap->setValue(x, y, heightMapValue);

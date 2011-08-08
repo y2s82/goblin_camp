@@ -25,11 +25,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 TilesetRenderer::TilesetRenderer(int resolutionX, int resolutionY, TCODConsole * mapConsole) 
 : tcodConsole(mapConsole),
   permutationTable(10, 473U),
-  translucentUI(false),
-  screenWidth(resolutionX), 
-  screenHeight(resolutionY),
-  keyColor(TCODColor::magenta),
   tileSet(),
+  translucentUI(false),
   startPixelX(0),
   startPixelY(0),
   pixelW(0),
@@ -41,8 +38,11 @@ TilesetRenderer::TilesetRenderer(int resolutionX, int resolutionY, TCODConsole *
   tilesX(0),
   tilesY(0),
   cursorMode(Cursor_None),
-  cursorHint(-1) {
-   
+  cursorHint(-1),
+  screenWidth(resolutionX), 
+  screenHeight(resolutionY),
+  keyColor(TCODColor::magenta)
+{ 
 }
 
 TilesetRenderer::~TilesetRenderer() {}
