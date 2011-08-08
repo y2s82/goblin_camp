@@ -166,6 +166,7 @@ public:
 	int Repair();
 	virtual void SpawnRepairJob();
 	int GetMoveSpeedModifier();
+	virtual bool CanStrobe();
 
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	

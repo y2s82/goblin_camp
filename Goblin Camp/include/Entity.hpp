@@ -48,6 +48,7 @@ protected:
 	Coordinate velocityTarget;
 	std::list<FlightPath> flightPath;
 	int bulk;
+	float strobe;
 public:
 	Entity();
 	virtual ~Entity();
@@ -82,6 +83,10 @@ public:
 	int GetBulk();
 	void AddBulk(int);
 	void RemoveBulk(int);
+
+	void Strobe();
+	void ResetStrobe();
+	virtual bool CanStrobe();
 };
 
 BOOST_CLASS_VERSION(Entity, 0)

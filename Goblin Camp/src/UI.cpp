@@ -59,7 +59,8 @@ menuOpen(false),
 	draggingViewport(false),
 	draggingPlacement(false),
 	textMode(false),
-	inputString(std::string(""))
+	inputString(std::string("")),
+	currentStrobeTarget(boost::weak_ptr<Entity>())
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
@@ -527,22 +528,42 @@ void UI::Draw(TCODConsole* console) {
 
 	Tooltip *tooltip = Tooltip::Inst();
 	tooltip->Clear();
+
 	if (extraTooltip != "") tooltip->AddEntry(TooltipEntry(extraTooltip, TCODColor::white));
 	if (menuOpen) {
 		currentMenu->GetTooltip(mouseInput.cx, mouseInput.cy, tooltip);
 	}
+
 	sideBar.GetTooltip(mouseInput.cx, mouseInput.cy, tooltip, console);
+
 	if (_state == UINORMAL && (!menuOpen || (currentMenu->Update(mouseInput.cx, mouseInput.cy, false, NO_KEY) & NOMENUHIT)) 
 		&& (sideBar.Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
-		&& !underCursor.empty() && underCursor.begin()->lock()) {
+		&& !underCursor.empty()) {
+
+			if (boost::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) { strobeEntity->Strobe(); }
 			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-				if (ucit->lock()) {
+				if (boost::shared_ptr<Entity> entity = ucit->lock()) {
 					Coordinate mouseLoc = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
-					ucit->lock()->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
+					entity->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
+
+					if (entity->CanStrobe()) {
+						if (boost::shared_ptr<Entity> strobeTarget = currentStrobeTarget.lock()) {
+							if (entity != strobeTarget) {
+								strobeTarget->ResetStrobe();
+							}
+						}
+						currentStrobeTarget = entity;
+					}
+							
 				}
 			}
+	} else if (boost::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) {
+		strobeEntity->ResetStrobe();
+		currentStrobeTarget.reset();
 	}
+
+
 	tooltip->Draw(mouseInput.cx, mouseInput.cy, console);
 }
 
