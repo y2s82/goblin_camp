@@ -55,7 +55,7 @@ public:
 	~StockManager(void);
 
 	void Init();
-	void Reset();
+	static void Reset();
 	void Update();
 	void UpdateQuantity(ItemType, int);
 	int CategoryQuantity(ItemCategory);

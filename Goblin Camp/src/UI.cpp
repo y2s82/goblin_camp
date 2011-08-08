@@ -959,3 +959,8 @@ void UI::ChooseABPlacement(boost::function<void(Coordinate)> callback, boost::fu
 void UI::SetExtraTooltip(std::string tooltip) {
 	extraTooltip = tooltip;
 }
+
+void UI::Reset() {
+	delete instance;
+	instance = 0;
+}

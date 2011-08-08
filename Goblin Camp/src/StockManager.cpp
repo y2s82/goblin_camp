@@ -373,21 +373,8 @@ void StockManager::UpdateBogDesignations(Coordinate coord, bool add) {
 }
 
 void StockManager::Reset() {
-	categoryQuantities.clear();
-	typeQuantities.clear();
-	minimums.clear();
-	producables.clear();
-	dumpables.clear();
-	producers.clear();
-	workshops.clear();
-	fromTrees.clear();
-	fromEarth.clear();
-	designatedTrees.clear();
-	treeFellingJobs.clear();
-	designatedBog.clear();
-	bogIronJobs.clear();
-	barrelWaterJobs.clear();
-	Init();
+	delete instance;
+	instance = 0;
 }
 
 void StockManager::save(OutputArchive& ar, const unsigned int version) const {

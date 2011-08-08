@@ -95,6 +95,8 @@ class Game {
 	std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
 	std::map<int, boost::shared_ptr<NPC> > npcList;
 
+	static bool initializedOnce;
+
 public:
 	static Game* Inst();
 	~Game();
@@ -104,7 +106,7 @@ public:
 	static bool ToMainMenu();
 	void Running(bool);
 	bool Running();
-	void Reset();
+	static void Reset();
 	static void DoNothing();
 	static void Exit(bool confirm=true);
 
@@ -114,7 +116,7 @@ public:
 	int ScreenWidth() const;
 	int ScreenHeight() const;
 	void LoadConfig(std::string);
-	void Init();
+	void Init(bool firstTime);
 	void ResetRenderer();
 	void LoadingScreen();
 	void ErrorScreen();
