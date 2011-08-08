@@ -30,7 +30,7 @@ void MessageBox::ShowMessageBox(std::string text, boost::function<void()> firstA
 	do {
 		contents->AddComponent(new Label(text.substr(i, 50), 27, 2+(i/50)));
 		i += 50;
-	} while (i < text.length());
+	} while (i < static_cast<int>(text.length()));
 
 	if (secondButton == "") {
 		contents->AddComponent(new Button(firstButton, firstAction, 22, (i/50)+3, 15, firstButton.at(0), true));

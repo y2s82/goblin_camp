@@ -242,7 +242,7 @@ void Camp::UpdateWaterJobs() {
 	if (waterZones.size() > 0) {
 		//The amount and priority of water pouring jobs depends on if there's fire anywhere
 		if (Game::Inst()->fireList.size() > 0) {
-			for (int i = 0; menialWaterJobs.size() < Game::Inst()->GoblinCount() && i < 10; ++i) {
+			for (int i = 1; static_cast<int>(menialWaterJobs.size()) < Game::Inst()->GoblinCount() && i <= 10; ++i) {
 				boost::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, true));
 				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
@@ -252,7 +252,7 @@ void Camp::UpdateWaterJobs() {
 				}
 			}
 
-			for (int i = 0; expertWaterJobs.size() < Game::Inst()->OrcCount() && i < 10; ++i) {
+			for (int i = 1; static_cast<int>(expertWaterJobs.size()) < Game::Inst()->OrcCount() && i <= 10; ++i) {
 				boost::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, false));
 				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);

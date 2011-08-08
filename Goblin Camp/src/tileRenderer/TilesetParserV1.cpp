@@ -125,21 +125,28 @@ namespace {
 TileSetParserV1::TileSetParserV1(boost::shared_ptr<TilesetRenderer> spriteFactory) :
 	parser(),
 	spriteFactory(spriteFactory),
+
 	tileSet(),
 	success(true),
+
+	tileSetPath(),
+
 	tileSetName(),
 	tileWidth(-1),
 	tileHeight(-1),
 	currentTexture(),
+
+	fireSprites(),
+	fireFPS(15),
+
+	tempConstruction(spriteFactory),
+
+	tempSpell(spriteFactory),
+
 	currentSpriteSet(SS_NONE),
-	tileSetPath(),
 	npcSprite(),
 	natureObjectSpriteSet(),
 	itemSprite(),
-	tempConstruction(spriteFactory),
-	tempSpell(spriteFactory),
-	fireSprites(),
-	fireFPS(15),
 	corruptionOverride()
 {
 	SetupTilesetParser(parser);
@@ -529,11 +536,11 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 		if (mainSprites.size() > 0) {
 			if (mainSprites.size() == 16 || mainSprites.size() == 47) {
 				std::vector<int> orderedTiles;
-				for (int i = 12; i < 16; ++i)
+				for (size_t i = 12; i < 16; ++i)
 					orderedTiles.push_back(mainSprites.at(i));
-				for (int i = 0; i < 12; ++i)
+				for (size_t i = 0; i < 12; ++i)
 					orderedTiles.push_back(mainSprites.at(i));
-				for (int i = 16; i < mainSprites.size(); ++i)
+				for (size_t i = 16; i < mainSprites.size(); ++i)
 					orderedTiles.push_back(mainSprites.at(i));
 				spriteSet.AddSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Construction, currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
 			} else {
@@ -543,11 +550,11 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 		if (underConstructionSprites.size() > 0) {
 			if (underConstructionSprites.size() == 16 || underConstructionSprites.size() == 47) {
 				std::vector<int> orderedTiles;
-				for (int i = 12; i < 16; ++i)
+				for (size_t i = 12; i < 16; ++i)
 					orderedTiles.push_back(underConstructionSprites.at(i));
-				for (int i = 0; i < 12; ++i)
+				for (size_t i = 0; i < 12; ++i)
 					orderedTiles.push_back(underConstructionSprites.at(i));
-				for (int i = 16; i < underConstructionSprites.size(); ++i)
+				for (size_t i = 16; i < underConstructionSprites.size(); ++i)
 					orderedTiles.push_back(underConstructionSprites.at(i));
 				spriteSet.AddUnderConstructionSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Construction, currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
 			} else {
@@ -573,8 +580,7 @@ SpellSpriteSet TileSetParserV1::TempSpell::Build(boost::shared_ptr<TileSetTextur
 
 
 TileSetMetadataParserV1::TileSetMetadataParserV1()
-	: metadata(),
-	  parser()
+	: parser(), metadata()
 {
 	SetupTilesetParser(parser);
 	

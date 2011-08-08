@@ -153,7 +153,7 @@ int Spell::StringToSpellType (std::string spell) {
 }
 
 std::string Spell::SpellTypeToString(SpellType type) {
-	if (type >= 0 && type < Presets.size()) return Presets[type].name;
+	if (type >= 0 && type < static_cast<int>(Presets.size())) return Presets[type].name;
 	return "";
 }
 

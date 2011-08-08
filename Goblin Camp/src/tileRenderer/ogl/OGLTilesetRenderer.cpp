@@ -163,14 +163,14 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
   fontCharW(0), fontCharH(0),
   fontTexW(0), fontTexH(0),
   consoleProgram(),
-  viewportProgram(),
   consoleTextures(),
   consoleTexW(0), consoleTexH(0),
   consoleData(),
   renderInProgress(false),
   viewportLayers(),
   renderQueue(),
-  viewportW(0), viewportH(0)
+  viewportW(0), viewportH(0),
+  viewportProgram()
 {
 	TCODSystem::registerOGLRenderer(this);
 
@@ -227,7 +227,7 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::
 	if (existing != rawTiles.end()) {
 		return Sprite_ptr(new OGLSprite(this, existing - rawTiles.begin()));
 	} else {
-		int id = rawTiles.size();
+		int id = static_cast<int>(rawTiles.size());
 		rawTiles.push_back(rawTile);
 		return Sprite_ptr(new OGLSprite(this, id));
 	}
@@ -258,7 +258,7 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(SpriteLayerType spriteLayer, boost::
 void OGLTilesetRenderer::DrawSpriteCorner(int screenX, int screenY, int tile, Corner corner) {
 	int x = 2 * screenX + (corner & 0x1);
 	int y = 2 * screenY + ((corner & 0x2) >> 1);
-	for (int i = 0; i < viewportLayers.size(); ++i) {
+	for (size_t i = 0; i < viewportLayers.size(); ++i) {
 		if (!viewportLayers[i].IsTileSet(x,y)) {
 			viewportLayers[i].SetTile(x,y,tile);
 			return;
@@ -276,7 +276,7 @@ bool OGLTilesetRenderer::TilesetChanged() {
 	viewportH = CeilToInt::convert(boost::numeric_cast<float>(GetScreenHeight()) / tileSet->TileHeight()) + 2;
 
 	// Twice the viewport size, so we can have different corners
-	for (int i = 0; i < viewportLayers.size(); ++i) {
+	for (size_t i = 0; i < viewportLayers.size(); ++i) {
 		viewportLayers[i] = ViewportLayer(2 * viewportW, 2 * viewportH);
 	}
 
@@ -285,7 +285,7 @@ bool OGLTilesetRenderer::TilesetChanged() {
 	if (TCODSystem::getRenderer() == TCOD_RENDERER_GLSL) {
 		viewportTexW = MathEx::NextPowerOfTwo(2 * viewportW);
 		viewportTexH = MathEx::NextPowerOfTwo(2 * viewportH);
-		for (int i = 0; i < viewportTextures.size(); ++i) {
+		for (size_t i = 0; i < viewportTextures.size(); ++i) {
 			viewportTextures[i] = CreateOGLTexture();
 			glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
 
@@ -364,8 +364,8 @@ bool OGLTilesetRenderer::AssembleTextures() {
     glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 
 	int tile = 0;
-	for (int y = 0; y < tilesTextureH && tile < rawTiles.size(); ++y) {
-		for (int x = 0; x < tilesTextureW && tile < rawTiles.size(); ++x) {
+	for (int y = 0; y < static_cast<int>(tilesTextureH) && tile < static_cast<int>(rawTiles.size()); ++y) {
+		for (int x = 0; x < static_cast<int>(tilesTextureW) && tile < static_cast<int>(rawTiles.size()); ++x) {
 			SDL_Rect srcRect = {0,0, tileSet->TileWidth(), tileSet->TileHeight()};
 			SDL_SetAlpha(rawTiles[tile].texture->GetInternalSurface().get(), 0, SDL_ALPHA_OPAQUE);
 			rawTiles[tile].texture->DrawTile(rawTiles[tile].tile, tempSurface.get(), &srcRect);
@@ -396,7 +396,7 @@ void OGLTilesetRenderer::PreDrawMap(int viewportX, int viewportY, int viewportW,
 		glClearColor(0,0,0,255);
 		glClear(GL_COLOR_BUFFER_BIT);
 	}
-	for (int i = 0; i < viewportLayers.size(); ++i) {
+	for (size_t i = 0; i < viewportLayers.size(); ++i) {
 		viewportLayers[i].Reset();
 	}
 
@@ -462,7 +462,7 @@ void OGLTilesetRenderer::RenderViewport() {
 }
 
 void OGLTilesetRenderer::RenderGLSLViewport() {
-	for (int i = 0; i < viewportLayers.size(); ++i) {
+	for (size_t i = 0; i < viewportLayers.size(); ++i) {
 		glBindTexture(GL_TEXTURE_2D, *viewportTextures[i]);
 		glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 2 * viewportW, 2 * viewportH, GL_RGBA, GL_UNSIGNED_BYTE, *viewportLayers[i]);
 	}
@@ -483,7 +483,7 @@ void OGLTilesetRenderer::RenderGLSLViewport() {
 	glUniform1fARB(glGetUniformLocationARB(*viewportProgram,"tilew"), (GLfloat)tilesTextureW);
 	glUniform2fARB(glGetUniformLocationARB(*viewportProgram,"tilecoef"), 1.0f/tilesTextureW, 1.0f/tilesTextureH);
 
-	for (int i = 0; i < viewportTextures.size(); ++i) {
+	for (size_t i = 0; i < viewportTextures.size(); ++i) {
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_2D, *tilesTexture);
 		glUniform1iARB(glGetUniformLocationARB(*viewportProgram,"tilesheet"),0);
@@ -564,7 +564,7 @@ void OGLTilesetRenderer::RenderOGLViewport() {
 	glColor4f(1.0,1.0,1.0,1.0);
 	for (int x = 0; x < 2 * viewportW; ++x) {
 		for (int y = 0; y < 2 * viewportH; ++y) {
-			for (int i = 0; i < viewportLayers.size(); ++i) {
+			for (size_t i = 0; i < viewportLayers.size(); ++i) {
 				if (viewportLayers[i].IsTileSet(x, y) ) {
 					unsigned int srcX = 2 * (viewportLayers[i].GetTile(x,y) % tilesTextureW);
 					unsigned int srcY = 2 * (viewportLayers[i].GetTile(x,y) / tilesTextureH);

@@ -213,7 +213,7 @@ void ShowDevConsole() {
 		c->putChar(x + w - 2, y + 1,     TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
 		c->putChar(x + w - 2, y + h - 4, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
 		
-		for (unsigned i = 1; i < w - 1; ++i) {
+		for (int i = 1; i < w - 1; ++i) {
 			c->putChar(x + i, y + h - 3, TCOD_CHAR_HLINE, TCOD_BKGND_SET);
 		}
 		
