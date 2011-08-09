@@ -1774,8 +1774,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			boost::shared_ptr<NPC> otherNpc = npci->lock();
 			if ((!npc->factionPtr->IsFriendsWith(otherNpc->GetFaction()) && otherNpc->aggressive) || 
-				otherNpc == npc->aggressor.lock() ||
-				(otherNpc->HasEffect(PANIC) && Random::Generate(19) == 0)) {
+				otherNpc == npc->aggressor.lock()) {
 				JobManager::Inst()->NPCNotWaiting(npc->uid);
 				while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Enemy sighted");
 				npc->AddEffect(PANIC);
@@ -2812,8 +2811,10 @@ void NPC::SetFaction(int newFaction) {
 }
 
 void NPC::TransmitEffect(StatusEffect effect) {
-	if (Random::Generate(effectiveResistances[effect.applicableResistance]) == 0)
-		AddEffect(effect);
+	if (Random::Generate(effectiveResistances[effect.applicableResistance]) == 0) {
+		if (effect.type != PANIC || coward) //PANIC can only be transmitted to cowards
+			AddEffect(effect);
+	}
 }
 
 std::string NPC::GetDeathMsg() {

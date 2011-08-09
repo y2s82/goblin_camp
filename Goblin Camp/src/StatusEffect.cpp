@@ -61,6 +61,7 @@ graphic(g),
 		graphic = '!';
 		color = TCODColor::white;
 		cooldown = UPDATES_PER_SECOND * 5;
+		contagionChance = 75;
 		break;
 
 	case CONCUSSION:
