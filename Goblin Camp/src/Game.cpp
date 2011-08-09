@@ -73,6 +73,8 @@ int Game::ItemCatCount = 0;
 bool Game::initializedOnce = false;
 Game* Game::instance = 0;
 
+bool Game::devMode = false;
+
 Game::Game() :
 screenWidth(0),
 	screenHeight(0),
@@ -86,7 +88,6 @@ screenWidth(0),
 	toMainMenu(false),
 	running(false),
 	safeMonths(3),
-	devMode(false),
 	events(boost::shared_ptr<Events>()),
 	gameOver(false),
 	camX(180),
