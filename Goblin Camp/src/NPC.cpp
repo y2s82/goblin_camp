@@ -1367,7 +1367,7 @@ CONTINUEEAT:
 				if (Random::Generate(75) == 0) GoBerserk();
 			} else	if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
-				if (jobs.empty() && threatLocation.X() != 1 && threatLocation.Y() != -1) {
+				if (jobs.empty() && threatLocation.X() != -1 && threatLocation.Y() != -1) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
 					int dx = x - threatLocation.X();
