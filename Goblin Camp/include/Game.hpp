@@ -81,7 +81,7 @@ class Game {
 	bool toMainMenu, running;
 	int safeMonths;
 	bool refreshStockpiles;
-	bool devMode;
+	static bool devMode;
 	Coordinate marks[12];
 
 	boost::shared_ptr<Events> events;
