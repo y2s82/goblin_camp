@@ -2984,7 +2984,7 @@ std::string NPC::GetDeathMsgCombat(boost::weak_ptr<NPC> other, DamageType damage
 			return name + " was dissected";
 
 		case 3:
-			return name + "was chopped up";
+			return name + " was chopped up";
 		}
 
 	case DAMAGE_BLUNT:
