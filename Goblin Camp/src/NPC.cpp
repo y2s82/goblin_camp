@@ -1570,7 +1570,7 @@ void NPC::Kill(std::string deathMessage) {
 			inventory->RemoveItem(witem);
 		}
 
-		if (deathMessage.length() > 0) Announce::Inst()->AddMsg(deathMessage, TCODColor::red, Position());
+		if (deathMessage.length() > 0) Announce::Inst()->AddMsg(deathMessage, factionPtr->IsFriendsWith(PLAYERFACTION) ? TCODColor::red : TCODColor::brass, Position());
 		
 		Stats::Inst()->deaths[NPC::NPCTypeToString(type)] += 1;
 		Stats::Inst()->AddPoints(NPC::Presets[type].health);
