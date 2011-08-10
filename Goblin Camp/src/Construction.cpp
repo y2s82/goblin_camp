@@ -157,7 +157,7 @@ void Construction::Draw(Coordinate upleft, TCODConsole* console) {
 	int height = (graphic.size() - 1) / width;
 	if (screenx + width - 1 >= 0 && screenx < console->getWidth() && screeny + height - 1 >= 0 && screeny < console->getHeight()) {
 		for (int i = 1; i < (signed int)graphic.size(); ++i) {
-			if(screenx + i - 1 >= 0 && screeny >= 0) {
+			if(screenx + i - 1 >= 0 && screeny >= 0 && screenx + i - 1 < console->getWidth() && screeny < console->getHeight()) {
 				if (dismantle) console->setCharBackground(screenx+i-1, screeny, TCODColor::darkGrey);
 				else console->setCharBackground(screenx+i-1, screeny,  TCODColor((int)(50 - cos(strobe) * 50), (int)(50 - cos(strobe) * 50), (int)(50 - cos(strobe) * 50)));
 
