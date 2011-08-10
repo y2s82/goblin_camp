@@ -211,7 +211,55 @@ namespace Random {
 	short Generator::Sign() {
 		return GenerateBool() ? 1 : -1;
 	}
+
+	/**
+		Generates a random coordinate inside the rectangular area
+		delimited by (origin, extent), using uniform distribution
+		(origin+extent excluded).
+		
+		When given only one parameter, it is assumed that the origin is zero.
+	*/
+	Coordinate Generator::ChooseInExtent(const Coordinate& origin, const Coordinate& extent) {
+		Coordinate res = origin;
+		for (int d = 0; d < 2; ++d)
+			res[d] += Generator::Generate(extent[d]-1);
+		return res;
+	}
+
+	/** \copydoc Generator::ChooseInExtent */
+	Coordinate Generator::ChooseInExtent(const Coordinate& extent) {
+		return Generator::ChooseInExtent(zero, extent);
+	}
+
+	/**
+		Generates a random coordinate inside a rectangle of radius
+		R around the origin, that is, with each coordinate within +R
+		or -R of the origin. May return negative coordinates.
+
+		If no origin is given, assumes zero. This is typically used this way:
+		   position += ChooseInRadius(r);
+	*/
+	Coordinate Generator::ChooseInRadius(const Coordinate& origin, int radius) {
+		Coordinate res = origin;
+		for (int d = 0; d < 2; ++d)
+			res[d] += Generator::Generate(-radius, radius);
+		return res;
+	}
+	Coordinate Generator::ChooseInRadius(int radius) {
+		return Generator::ChooseInRadius(zero, radius);
+	}
 	
+	/**
+	   Generates a random coordinate inside a rectangle delimited by
+	   its low and high corners, both included.
+	 */
+	Coordinate Generator::ChooseInRectangle(const Coordinate& low, const Coordinate& high) {
+		Coordinate res;
+		for (int d = 0; d < 2; ++d)
+			res[d] = Generator::Generate(low[d], high[d]);
+		return res;
+	}
+
 	/**
 		Initialises the PRNG.
 	*/
@@ -245,7 +293,26 @@ namespace Random {
 	short Sign() {
 		return Globals::generator.Sign();
 	}
-	
+
+	/** \copydoc Generator::ChooseInExtent */
+	Coordinate ChooseInExtent(const Coordinate& zero, const Coordinate& extent) {
+		return Globals::generator.ChooseInExtent(zero, extent);
+	}
+	Coordinate ChooseInExtent(const Coordinate& extent) {
+		return Globals::generator.ChooseInExtent(extent);
+	}
+	/** \copydoc Generator::ChooseInRadius */
+	Coordinate ChooseInRadius(const Coordinate& origin, int radius) {
+		return Globals::generator.ChooseInRadius(origin, radius);
+	}
+	Coordinate ChooseInRadius(int radius) {
+		return Globals::generator.ChooseInRadius(radius);
+	}
+	/** \copydoc Generator::ChooseInRectangle */
+	Coordinate ChooseInRectangle(const Coordinate& low, const Coordinate& high) {
+		return Globals::generator.ChooseInRectangle(low, high);
+	}
+
 	/**
 		\fn T Sign(const T&)
 			Multiplies the expression by a random sign. XXX come up with a better name.
