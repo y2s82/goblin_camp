@@ -348,10 +348,6 @@ void Events::SpawnMigratingAnimals() {
 			return;
 		}
 		
-#if DEBUG
-		std::cout << "Migration exit at " << x << "x" << y << "\n";
-#endif
-		
 		std::vector<NPC*> migrants;
 		std::vector<int> uids = Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
 		
@@ -386,12 +382,9 @@ void Events::SpawnMigratingAnimals() {
 		}
 
 		std::string msg;
-		msg = (boost::format("A %s migration is occurring outside your %s.") % NPC::Presets[monsterType].name
+		msg = (boost::format("A %s migration is occurring outside your %s") % NPC::Presets[monsterType].name
 			% Camp::Inst()->GetName()).str();
 		
 		Announce::Inst()->AddMsg(msg, TCODColor::green, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
-#if DEBUG
-		std::cout << "Migration underway.\n";
-#endif
 	}
 }
