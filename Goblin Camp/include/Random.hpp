@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/random.hpp>
 #include <libtcod.hpp>
+#include <Coordinate.hpp>
 
 namespace Random {
 	typedef boost::rand48 GeneratorImpl;
@@ -43,6 +44,11 @@ namespace Random {
 		double Generate();
 		short Sign();
 		bool GenerateBool();
+		Coordinate ChooseInExtent(const Coordinate& origin, const Coordinate& extent);
+		Coordinate ChooseInExtent(const Coordinate& extent);
+		Coordinate ChooseInRadius(const Coordinate& center, int radius);
+		Coordinate ChooseInRadius(int radius);
+		Coordinate ChooseInRectangle(const Coordinate& low, const Coordinate& high);
 	private:
 		GeneratorImpl generator;
 		unsigned int seed;
@@ -74,4 +80,10 @@ namespace Random {
 	inline T Sign(const T& expr) {
 		return expr * Sign();
 	}
+
+	Coordinate ChooseInExtent(const Coordinate& origin, const Coordinate& extent);
+	Coordinate ChooseInExtent(const Coordinate& extent);
+	Coordinate ChooseInRadius(const Coordinate& center, const int radius);
+	Coordinate ChooseInRadius(int radius);
+	Coordinate ChooseInRectangle(const Coordinate& low, const Coordinate& high);
 }
