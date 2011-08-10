@@ -45,7 +45,7 @@ Events::Events(Map* vmap) :
 			peacefulAnimals.push_back(i);
 		if (NPC::Presets[i].tags.find("immigrant") != NPC::Presets[i].tags.end())
 			immigrants.push_back(i);
-				if (NPC::Presets[i].tags.find("migratory") != NPC::Presets[i].tags.end())
+		if (NPC::Presets[i].tags.find("migratory") != NPC::Presets[i].tags.end())
 			migratingAnimals.push_back(i);
 		}
 }
@@ -220,7 +220,7 @@ void Events::SpawnMigratingAnimals() {
 			return;
 		}
 		
-		// Migrations are usually much bigger than your average group, so time number by 3
+		// Migrations are usually much bigger than your average group
 		migrationSpawnCount *= 3;
 		
 		int tries = 0;
@@ -229,15 +229,8 @@ void Events::SpawnMigratingAnimals() {
 			GenerateEdgeCoordinates(map, a, b);
 		} while (!Map::Inst()->IsWalkable(a.X(), a.Y()));
 
-#if DEBUG
-		std::cout<< "Migration entry at " << a.X() << "x" << a.Y()<<"\n";
-#endif
-		
 		int tuid = Game::Inst()->CreateNPC(a, monsterType);
 		migrationSpawnCount--;
-#if DEBUG
-		std::cout<< "Migration spawning " << migrationSpawnCount<< " " << monsterType << "\n";
-#endif
 		
 		NPC *firstNPC = Game::Inst()->GetNPC(tuid).get();
 		int x, y;

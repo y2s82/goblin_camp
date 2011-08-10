@@ -1071,7 +1071,7 @@ npc_type "human soldier" {
 npc_type "mumak" {
 	name="Mumak"
 	plural="Mumakil"
-	tier=1
+	tier=3
 	tags=["localWildlife", "migratory", "calm"]
 	color="128,128,128"
 	graphic='q'
@@ -1092,8 +1092,9 @@ npc_type "mumak" {
 		statusEffects=["Concussion"]
 		effectChances=[     80     ]
 	}
-	spawnAsGroup="5d5"
+	spawnAsGroup="1d5"
 	death="Huge corpse"
+	faction = "Migrator"
 }
 
 npc_type "mastodon" {
@@ -1119,8 +1120,9 @@ npc_type "mastodon" {
 		statusEffects=["Concussion"]
 		effectChances=[     50     ]
 	}
-	spawnAsGroup="3d3"
+	spawnAsGroup="2d3"
 	death="Huge corpse"
+	faction = "Migrator"
 }
 
 npc_type "Baluchitherium" {
@@ -1145,6 +1147,7 @@ npc_type "Baluchitherium" {
 		damage="1d30+10"
 		cooldown=50
 	}
-	spawnAsGroup="5d5+5"
+	spawnAsGroup="1d5"
 	death="Large corpse"
+	faction = "Migrator"
 }
