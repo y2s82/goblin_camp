@@ -88,5 +88,6 @@ faction_type "Humans" {
 faction_type "Migrator" {
 	friends=["Peaceful animal"]
 	goals=["idle"]
+	coward
 	activeTime = 1.0
 }
