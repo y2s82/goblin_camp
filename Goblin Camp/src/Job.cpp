@@ -288,7 +288,7 @@ void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
 	//If a water item exists, is closer and contained then use that
 	bool waterContainerFound = false;
 	if (waterItem) {
-		int distanceToWater = INT_MAX;
+		int distanceToWater = std::numeric_limits<int>::max();
 		if (waterLocation != undefined) distanceToWater = Distance(location, waterLocation);
 		int distanceToItem = Distance(location, waterItem->Position());
 

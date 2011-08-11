@@ -253,7 +253,7 @@ ContinuePlaceStockpile:
 //Returns undefined if not found
 Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent, int faction) {
 	Coordinate closest = undefined;
-	int leastDistance = INT_MAX;
+	int leastDistance = std::numeric_limits<int>::max();
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
@@ -712,7 +712,7 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 // TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
 // first.
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
-	int nearestDistance = INT_MAX;
+	int nearestDistance = std::numeric_limits<int>::max();
 	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
@@ -732,7 +732,7 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 // TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
 // first.
 boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
-	int nearestDistance = INT_MAX;
+	int nearestDistance = std::numeric_limits<int>::max();
 	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
 	for (std::map<int, boost::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
@@ -786,7 +786,7 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	//If we still haven't found filth just choose the closest filth out of 30 at random
 	std::vector<boost::weak_ptr<FilthNode> > filthArray(filthList.begin(), filthList.end());
 	Coordinate closest = undefined;
-	int closest_distance = INT_MAX;
+	int closest_distance = std::numeric_limits<int>::max();
 	for (size_t i = 0; i < std::min(static_cast<size_t>(30), filthArray.size()); ++i) {
 		boost::weak_ptr<FilthNode> filth = Random::ChooseElement(filthArray);
 		boost::shared_ptr<FilthNode> candidate = filth.lock();
@@ -804,7 +804,7 @@ Coordinate Game::FindFilth(Coordinate pos) {
 //Findwater returns the coordinates to the closest Water* that has sufficient depth and is coastal
 Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest = undefined;
-	int closestDistance = INT_MAX;
+	int closestDistance = std::numeric_limits<int>::max();
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (boost::shared_ptr<WaterNode> water = wati->lock()) {
 			if (water->IsCoastal() && water->Depth() > DRINKABLE_WATER_DEPTH) {
@@ -1030,7 +1030,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			boost::shared_ptr<Stockpile> nearest = boost::shared_ptr<Stockpile>();
 			//first = primary distance, second = secondary
-			std::pair<int, int> nearestDistance = std::make_pair(INT_MAX, INT_MAX);
+			std::pair<int, int> nearestDistance = std::make_pair(std::numeric_limits<int>::max(), std::numeric_limits<int>::max());
 			ItemType itemType = item->Type();
 			bool useDemand = false;
 
@@ -1051,8 +1051,9 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 						//Found a stockpile that both allows the item, and has space
 						//Assuming that containers only have one specific category
 						ItemCategory category = *Item::Presets[item->Type()].specificCategories.begin();
-						int distance = useDemand ? (INT_MAX - 2) - sp->GetDemand(category) :
-							Distance(sp->Center(), item->Position());
+						int distance = useDemand
+							? (std::numeric_limits<int>::max() - 2) - sp->GetDemand(category)
+							: Distance(sp->Center(), item->Position());
 
 						if (distance < nearestDistance.first) {
 							nearestDistance.first = distance;
@@ -1874,7 +1875,7 @@ void Game::Dig(Coordinate a, Coordinate b) {
 
 Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target, int faction) {
 	Coordinate closest = Coordinate(-9999, -9999);
-	int leastDistance = INT_MAX;
+	int leastDistance = std::numeric_limits<int>::max();
 	for (int ix = target.X()-1; ix <= target.X()+1; ++ix) {
 		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
 			Coordinate p(ix,iy);

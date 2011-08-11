@@ -249,25 +249,6 @@ namespace Random {
 		return Generator::ChooseInRadius(zero, radius);
 	}
 
-	/** \copydoc Generator::ChooseInExtent */
-	Coordinate ChooseInExtent(const Coordinate& zero, const Coordinate& extent) {
-		return Globals::generator.ChooseInExtent(zero, extent);
-	}
-	Coordinate ChooseInExtent(const Coordinate& extent) {
-		return Globals::generator.ChooseInExtent(extent);
-	}
-	/** \copydoc Generator::ChooseInRadius */
-	Coordinate ChooseInRadius(const Coordinate& origin, int radius) {
-		return Globals::generator.ChooseInRadius(origin, radius);
-	}
-	Coordinate ChooseInRadius(int radius) {
-		return Globals::generator.ChooseInRadius(radius);
-	}
-	/** \copydoc Generator::ChooseInRectangle */
-	Coordinate ChooseInRectangle(const Coordinate& low, const Coordinate& high) {
-		return Globals::generator.ChooseInRectangle(low, high);
-	}
-
 	/**
 	   Generates a random coordinate inside a rectangle delimited by
 	   its low and high corners, both included.

@@ -577,7 +577,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 					if (touched.find(pos) == touched.end() && tile(pos).water) {
 							int distance = Distance(beginning, pos);
 							touched.insert(pos);
-							unfinished.push(std::pair<int, Coordinate>(INT_MAX - distance, pos));
+							unfinished.push(std::pair<int, Coordinate>(std::numeric_limits<int>::max() - distance, pos));
 							if (stage == 0 && distance > distance1) {
 								stage = 1;
 								favorA = false;
