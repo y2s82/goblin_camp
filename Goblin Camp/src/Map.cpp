@@ -746,7 +746,12 @@ void Map::UpdateCache() {
 }
 
 bool Map::IsDangerousCache(const Coordinate& p, int faction) const {
-	return Map::IsInside(p) && (cachedTile(p).fire || Faction::factions[faction]->IsTrapVisible(p));
+	if (Map::IsInside(p)) {
+		if (cachedTile(p).fire) return true;
+		if (faction >= 0 && faction < Faction::factions.size())
+			return Faction::factions[faction]->IsTrapVisible(p);
+	}
+	return false;
 }
 
 void Map::TileChanged(const Coordinate& p) {
@@ -761,7 +766,10 @@ void Map::save(OutputArchive& ar, const unsigned int version) const {
 			ar & tileMap[x][y];
 		}
 	}
-	ar & extent;
+	const int width = extent.X();
+	const int height = extent.Y();
+	ar & width;
+	ar & height;
 	ar & mapMarkers;
 	ar & markerids;
 	ar & weather;
@@ -779,7 +787,10 @@ void Map::load(InputArchive& ar, const unsigned int version) {
 			ar & tileMap[x][y];
 		}
 	}
-	ar & extent;
+	int width, height;
+	ar & width;
+	ar & height;
+	extent = Coordinate(width, height);
 	ar & mapMarkers;
 	ar & markerids;
 	if (version == 0) {

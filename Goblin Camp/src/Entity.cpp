@@ -117,7 +117,10 @@ void Entity::ResetStrobe() { strobe = 0; }
 bool Entity::CanStrobe() { return false; }
 
 void Entity::save(OutputArchive& ar, const unsigned int version) const {
-	ar & pos;
+	const int x = pos.X();
+	const int y = pos.Y();
+	ar & x;
+	ar & y;
 	ar & uid;
 	ar & zone;
 	ar & reserved;
@@ -131,7 +134,10 @@ void Entity::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void Entity::load(InputArchive& ar, const unsigned int version) {
-	ar & pos;
+	int x, y;
+	ar & x;
+	ar & y;
+	pos = Coordinate(x,y);
 	ar & uid;
 	ar & zone;
 	ar & reserved;

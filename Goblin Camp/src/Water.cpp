@@ -354,7 +354,10 @@ TCODColor WaterNode::GetColor()
 bool WaterNode::IsCoastal() { return coastal; }
 
 void WaterNode::save(OutputArchive& ar, const unsigned int version) const {
-	ar & pos;
+	const int x = pos.X();
+	const int y = pos.Y();
+	ar & x;
+	ar & y;
 	ar & depth;
 	ar & graphic;
 	ar & color.r;
@@ -367,7 +370,10 @@ void WaterNode::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void WaterNode::load(InputArchive& ar, const unsigned int version) {
-	ar & pos;
+	int x, y;
+	ar & x;
+	ar & y;
+	pos = Coordinate(x,y);
 	ar & depth;
 	ar & graphic;
 	ar & color.r;
