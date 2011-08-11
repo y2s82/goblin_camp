@@ -626,18 +626,10 @@ void NPC::Think() {
 				for (int i = 0; i < 2; ++i) {
 					tmp = 0;
 					while (tmp++ < 10) {
-						int tarX = Random::Generate(-5, 5) + currentTarget().X();
-						int tarY = Random::Generate(-5, 5) + currentTarget().Y();
-						if (tarX < 0) tarX = 0;
-						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
-						if (tarY < 0) tarY = 0;
-						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-						Coordinate tar(tarX,tarY);
+						Coordinate tar = Map::Inst()->Shrink(Random::ChooseInRadius(currentTarget(), 5));
 						if (Map::Inst()->IsWalkable(tar, (void *)this) && !Map::Inst()->IsUnbridgedWater(tar) 
 							&& !Map::Inst()->IsDangerous(tar, faction)) {
-							if (!checkLOS || (checkLOS && 
-								Map::Inst()->LineOfSight(tar, currentTarget())))
-							{
+							if (!checkLOS || Map::Inst()->LineOfSight(tar, currentTarget())) {
 								currentJob().lock()->tasks[taskIndex] = Task(MOVE, tar);
 								goto MOVENEARend;
 							}
@@ -2557,63 +2549,60 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 	threatLocation = Coordinate(-1,-1);
 	seenFire = false;
 	bool skipPosition = false; //We should skip checking this npc's position after the first time
-	int x = pos.X(), y = pos.Y();
-	for (int endx = std::max(x - LOS_DISTANCE, 0); endx <= std::min(x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
-		for (int endy = std::max(y - LOS_DISTANCE, 0); endy <= std::min(y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
-			if (endx == std::max(x - LOS_DISTANCE, 0) || endx == std::min(x + LOS_DISTANCE, Map::Inst()->Width()-1)
-				|| endy == std::max(y - LOS_DISTANCE, 0) || endy == std::min(y + LOS_DISTANCE, Map::Inst()->Height()-1))
-				{
-					int x = pos.X(), y = pos.Y();
-					int tx = x;
-					int ty = y;
-					int adjacent = 2; //We're adjacent for the first two iterations
-					TCODLine::init(tx, ty, endx, endy);
+	Coordinate low = Map::Inst()->Shrink(pos - LOS_DISTANCE);
+	Coordinate high = Map::Inst()->Shrink(pos + LOS_DISTANCE);
+	for (int endx = low.X(); endx < high.X(); endx += 2) {
+		for (int endy = low.Y(); endy < high.Y(); endy += 2) {
+			Coordinate end(endx, endy);
+			if (end.onRectangleEdges(low, high)) {
+				int adjacent = 2; //We're going outwards, the first two iterations are considered adjacent to the starting point
 
-					if (skipPosition) {
-						TCODLine::step(&tx, &ty);
-						--adjacent;
+				Coordinate p = pos;
+				TCODLine::init(p.X(), p.Y(), end.X(), end.Y());
+
+				if (skipPosition) {
+					TCODLine::step(p.Xptr(), p.Yptr());
+					--adjacent;
+				}
+				skipPosition = true;
+
+				do {
+					/*Check constructions before checking for lightblockage because we can see a wall
+					  even though we can't see through it*/
+					int constructUid = Map::Inst()->GetConstruction(p);
+					if (constructUid >= 0) {
+						nearConstructions.push_back(Game::Inst()->GetConstruction(constructUid));
 					}
-					skipPosition = true;
-
-					do {
-						Coordinate t(tx,ty); //tx,ty mutated at the end of the loop
-						/*Check constructions before checking for lightblockage because we can see a wall
-						even though we can't see through it*/
-						int constructUid = Map::Inst()->GetConstruction(t);
-						if (constructUid >= 0) {
-							nearConstructions.push_back(Game::Inst()->GetConstruction(constructUid));
-						}
-
-						//Stop moving along this line if our view is blocked
-						if (Map::Inst()->BlocksLight(t) && GetHeight() < ENTITYHEIGHT) break;
-
-						//Add all the npcs on this tile, or only hostiles if that boolean is set
-						for (std::set<int>::iterator npci = Map::Inst()->NPCList(t)->begin(); npci != Map::Inst()->NPCList(t)->end(); ++npci) {
-							if (*npci != uid) {
-								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*npci);
-								if (!factionPtr->IsFriendsWith(npc->GetFaction())) threatLocation = t;
-								if (!onlyHostiles || 
-									(onlyHostiles && !factionPtr->IsFriendsWith(npc->GetFaction()))) {
-										nearNpcs.push_back(npc);
-										if (adjacent-- > 0)
-											adjacentNpcs.push_back(npc);
-								}
+					
+					//Stop moving along this line if our view is blocked
+					if (Map::Inst()->BlocksLight(p) && GetHeight() < ENTITYHEIGHT) break;
+					
+					//Add all the npcs on this tile, or only hostiles if that boolean is set
+					for (std::set<int>::iterator npci = Map::Inst()->NPCList(p)->begin(); npci != Map::Inst()->NPCList(p)->end(); ++npci) {
+						if (*npci != uid) {
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*npci);
+							if (!factionPtr->IsFriendsWith(npc->GetFaction())) threatLocation = Coordinate(p);
+							if (!onlyHostiles ||!factionPtr->IsFriendsWith(npc->GetFaction())) {
+								nearNpcs.push_back(npc);
+								if (adjacent-- > 0)
+									adjacentNpcs.push_back(npc);
 							}
 						}
+					}
 					
-						//Only care about fire if we're not flying and/or not effectively immune
-						if (!HasEffect(FLYING) && Map::Inst()->GetFire(t).lock()) {
-							if (effectiveResistances[FIRE_RES] < 90) {
-								threatLocation = t;
-								seenFire = true;
-							}
+					//Only care about fire if we're not flying and/or not effectively immune
+					if (!HasEffect(FLYING) && Map::Inst()->GetFire(p).lock()) {
+						if (effectiveResistances[FIRE_RES] < 90) {
+							threatLocation = p;
+							seenFire = true;
 						}
+					}
 					
-						/*Stop if we already see many npcs, otherwise this can start to bog down in
-						high traffic places*/
-						if (adjacent <= 0 && nearNpcs.size() > 16) break;
-
-					} while(!TCODLine::step(&tx, &ty));
+					/*Stop if we already see many npcs, otherwise this can start to bog down in
+					  high traffic places*/
+					if (adjacent <= 0 && nearNpcs.size() > 16) break;
+					
+				} while (!TCODLine::step(p.Xptr(), p.Yptr()));
 			}
 		}
 	}
