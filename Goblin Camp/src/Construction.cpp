@@ -776,35 +776,27 @@ boost::weak_ptr<Container> Construction::Storage() const {
 }
 
 void Construction::UpdateWallGraphic(bool recurse, bool self) {
-	int x(pos.X()), y(pos.Y());
-	bool n = false,s = false,e = false,w = false;
+	Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
+	Coordinate posDir[4];
+	int consId[4];
+	bool wod[4];
 
-	if (Map::Inst()->GetConstruction(Coordinate(x - 1, y)) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x - 1, y))).lock();
-		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
-			w = true;
-		}
-	}
-	if (Map::Inst()->GetConstruction(Coordinate(x + 1, y)) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x + 1, y))).lock();
-		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
-			e = true;
-		}
-	}
-	if (Map::Inst()->GetConstruction(Coordinate(x, y-1)) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x, y-1))).lock();
-		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
-			n = true;
-		}
-	}
-	if (Map::Inst()->GetConstruction(Coordinate(x, y+1)) > -1) {
-		boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x, y+1))).lock();
-		if (cons && cons->Condition() > 0 && !cons->dismantle && (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR])) {
-			s = true;
+	for (int i = 0; i < 4; ++i) {
+		posDir[i] = pos + Coordinate::DirectionToCoordinate(dirs[i]);
+		consId[i] = Map::Inst()->GetConstruction(posDir[i]);
+		wod[i] = false;
+		if (consId[i] > -1) {
+			boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(consId[i]).lock();
+			if (cons && cons->Condition() > 0 && !cons->dismantle
+				&& (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR]))
+			{
+				wod[i] = true;
+			}
 		}
 	}
 
 	if (self && Construction::Presets[type].tags[WALL]) {
+		bool w = wod[0], e = wod[1], n = wod[2], s = wod[3];
 		if (n&&s&&e&&w) graphic[1] = 197;
 		else if (n&&s&&e) graphic[1] = 195;
 		else if (n&&s&&w) graphic[1] = 180;
@@ -821,16 +813,10 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 		else graphic[1] = 197;
 	}
 
-	if (recurse) {
-		if (w)
-			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x - 1, y))).lock()->UpdateWallGraphic(false);
-		if (e)
-			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x + 1, y))).lock()->UpdateWallGraphic(false);
-		if (n)
-			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x, y - 1))).lock()->UpdateWallGraphic(false);
-		if (s)
-			Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(Coordinate(x, y + 1))).lock()->UpdateWallGraphic(false);
-	}
+	if (recurse)
+		for (int i = 0; i < 4; ++i)
+			if (wod[i])
+				Game::Inst()->GetConstruction(consId[i]).lock()->UpdateWallGraphic(false);
 }
 
 bool Construction::HasTag(ConstructionTag tag) const { return Construction::Presets[type].tags[tag]; }
