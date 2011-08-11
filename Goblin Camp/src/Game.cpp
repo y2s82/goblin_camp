@@ -250,19 +250,18 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
-			for (int ix = construct->X()-1; ix <= construct->X() + Construction::Blueprint(construct->Type()).X(); ++ix) {
-				for (int iy = construct->Y()-1; iy <= construct->Y() + Construction::Blueprint(construct->Type()).Y(); ++iy) {
-					if (ix == construct->X()-1 || ix == construct->X() + Construction::Blueprint(construct->Type()).X() ||
-						iy == construct->Y()-1 || iy == construct->Y() + Construction::Blueprint(construct->Type()).Y())
-					{
-						Coordinate p(ix,iy);
-						if (Map::Inst()->IsWalkable(p)) {
-							int distance = Distance(pos, p);
-							if (faction >= 0 && Map::Inst()->IsDangerous(p, faction)) distance += 100;
-							if (distance < leastDistance) {
-								closest = p;
-								leastDistance = distance;
-							}
+			//note on weird (origin,extent) coordinates: we want the *outer* bordure of (position,blueprint)
+			Coordinate origin = construct->Position()-1,
+			           extent = Construction::Blueprint(construct->Type()) + 2;
+			for (int ix = origin.X(); ix < (origin+extent).X(); ++ix) {
+				for (int iy = origin.Y(); iy < (origin+extent).Y(); ++iy) {
+					Coordinate p(ix,iy);
+					if (p.onExtentEdges(origin, extent) && Map::Inst()->IsWalkable(p)) {
+						int distance = Distance(pos, p);
+						if (faction >= 0 && Map::Inst()->IsDangerous(p, faction)) distance += 100;
+						if (distance < leastDistance) {
+							closest = p;
+							leastDistance = distance;
 						}
 					}
 				}
@@ -747,19 +746,12 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordina
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
 void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = std::max(abs(corner1.X()-corner2.X()),1);
-	int areaLength = std::max(abs(corner1.Y()-corner2.Y()),1);
-	int minX = std::min(corner1.X(), corner2.X());
-	int minY = std::min(corner1.Y(), corner2.Y());
-
+	Coordinate low = Coordinate::min(corner1, corner2);
+	Coordinate high = Coordinate::max(corner1, corner2);
 	for (int items = 0, count = 0; items < quantity && count < quantity*10; ++count) {
-		Coordinate location(
-			Random::Generate(minX, areaWidth + minX - 1),
-			Random::Generate(minY, areaLength + minY - 1)
-		);
-
-		if (Map::Inst()->IsWalkable(location)) {
-			Game::Inst()->CreateItem(location, type, true);
+		Coordinate p = Random::ChooseInRectangle(low, high);
+		if (Map::Inst()->IsWalkable(p)) {
+			Game::Inst()->CreateItem(p, type, true);
 			++items;
 		}
 	}
@@ -767,7 +759,6 @@ void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordina
 
 Coordinate Game::FindFilth(Coordinate pos) {
 	if (filthList.size() == 0) return undefined;
-	std::priority_queue<std::pair<int, int> > potentialFilth;
 
 	//First check the vicinity of the given position
 	if (pos.X() >= 0) {
@@ -787,18 +778,22 @@ Coordinate Game::FindFilth(Coordinate pos) {
 			return candidate;
 	}
 
-	//If we still haven't found filth just choose the closest filth out of 30
-	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
-		unsigned filth = Random::ChooseIndex(filthList);
-		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
-			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
-			if (potentialFilth.top().first < 10) break; //Near enough
+	//If we still haven't found filth just choose the closest filth out of 30 at random
+	std::vector<boost::weak_ptr<FilthNode> > filthArray(filthList.begin(), filthList.end());
+	Coordinate closest = undefined;
+	int closest_distance = INT_MAX;
+	for (size_t i = 0; i < std::min(static_cast<size_t>(30), filthArray.size()); ++i) {
+		boost::weak_ptr<FilthNode> filth = Random::ChooseElement(filthArray);
+		boost::shared_ptr<FilthNode> candidate = filth.lock();
+		if (candidate) {
+			int distance = Distance(pos, candidate->Position());
+			if (candidate->Depth() > 0 && Map::Inst()->IsWalkable(candidate->Position()) && distance < closest_distance) {
+				closest = candidate->Position();
+				closest_distance = distance;
+			}
 		}
 	}
-	if (potentialFilth.size() > 0)
-		return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
-	else
-		return undefined;
+	return closest;
 }
 
 //Findwater returns the coordinates to the closest Water* that has sufficient depth and is coastal
@@ -1235,54 +1230,28 @@ void Game::GenerateMap(uint32 seed) {
 	int infinityCheck = 0;
 	while (hills < map->Width()/66 && infinityCheck < 1000) {
 		Coordinate candidate = Random::ChooseInExtent(map->Extent());
-		int x(candidate.X()), y(candidate.Y());
-		int riverDistance;
-		int distance;
-		int lineX, lineY;
+		int riverDistance = 70;
 
-		riverDistance = 70;
-
+		//We draw four lines from our potential hill site and measure the least distance to a river
+		Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
 		for (int i = 0; i < 4; ++i) {
-
-			//We draw four lines from our potential hill site and measure the least distance to a river
-			switch (i) {
-			case 0:
-				lineX = x - 70;
-				lineY = y;
-				break;
-
-			case 1:
-				lineX = x + 70;
-				lineY = y;
-				break;
-
-			case 2:
-				lineX = x;
-				lineY = y - 70;
-				break;
-
-			case 3:
-				lineX = x;
-				lineY = y + 70;
-				break;
+			int distance = 70;
+			Coordinate line = candidate + Coordinate::DirectionToCoordinate(dirs[i]) * distance;
+			for (TCODLine::init(line.X(), line.Y(), candidate.X(), candidate.Y()); !TCODLine::step(line.Xptr(), line.Yptr()); --distance) {
+				if (map->IsInside(line) && map->heightMap->getValue(line.X(), line.Y()) < map->GetWaterlevel())
+					if (distance < riverDistance)
+						riverDistance = distance;
 			}
-
-			distance = 70;
-			TCODLine::init(lineX, lineY, x, y);
-			do {
-				if (map->IsInside(Coordinate(lineX,lineY))) {
-					if (map->heightMap->getValue(lineX, lineY) < map->GetWaterlevel()) {
-						if (distance < riverDistance) riverDistance = distance;
-					}
-				}
-				--distance;
-			} while (!TCODLine::step(&lineX, &lineY));
 		}
 
 		if (riverDistance > 35) {
-			map->heightMap->addHill((float)x, (float)y, (float)random.Generate(15,35), (float)random.Generate(1,3));
-			map->heightMap->addHill((float)x+random.Generate(-7,7), (float)y+random.Generate(-7,7), (float)random.Generate(15,25), (float)random.Generate(1,3));
-			map->heightMap->addHill((float)x+random.Generate(-7,7), (float)y+random.Generate(-7,7), (float)random.Generate(15,25), (float)random.Generate(1,3));
+			Coordinate centers[3] = { candidate, random.ChooseInRadius(candidate,7), random.ChooseInRadius(candidate,7) };
+			int heights[3] = { 35, 25, 25 };
+			for (int i = 0; i < 3; ++i) {
+				int height = random.Generate(15, heights[i]);
+				int radius = random.Generate(1,3);
+				map->heightMap->addHill(static_cast<float>(centers[i].X()), static_cast<float>(centers[i].Y()), static_cast<float>(height), static_cast<float>(radius));
+			}
 			++hills;
 		}
 
@@ -1340,39 +1309,16 @@ void Game::GenerateMap(uint32 seed) {
 	infinityCheck = 0;
 	while (infinityCheck < 1000) {
 		Coordinate candidate = random.ChooseInRectangle(zero+30, map->Extent()-30);
-		int x(candidate.X()), y(candidate.Y());
-		int lineX, lineY;
-		int riverDistance;
-		riverDistance = 70;
+		int riverDistance = 70;
+		Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
 		for (int i = 0; i < 4; ++i) {
-			switch (i) {
-			case 0:
-				lineX = x - 70;
-				lineY = y;
-				break;
-			case 1:
-				lineX = x + 70;
-				lineY = y;
-				break;
-			case 2:
-				lineX = x;
-				lineY = y - 70;
-				break;
-			case 3:
-				lineX = x;
-				lineY = y + 70;
-				break;
-			}
 			int distance = 70;
-			TCODLine::init(lineX, lineY, x, y);
-			do {
-				if (map->IsInside(Coordinate(lineX,lineY))) {
-					if (map->heightMap->getValue(lineX, lineY) < map->GetWaterlevel()) {
-						if (distance < riverDistance) riverDistance = distance;
-					}
-				}
-				--distance;
-			} while (!TCODLine::step(&lineX, &lineY));
+			Coordinate line = candidate + Coordinate::DirectionToCoordinate(dirs[i]) * distance;
+			for (TCODLine::init(line.X(), line.Y(), candidate.X(), candidate.Y()); !TCODLine::step(line.Xptr(), line.Yptr()); --distance) {
+				if (map->IsInside(line) && map->heightMap->getValue(line.X(), line.Y()) < map->GetWaterlevel())
+					if (distance < riverDistance)
+						riverDistance = distance;
+			}
 		}
 		if (riverDistance > 30) {
 			int lowOffset = random.Generate(-5, 5);
@@ -1382,7 +1328,7 @@ void Game::GenerateMap(uint32 seed) {
 				lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
 				highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
-					map->ResetType(Coordinate(x+xOffset, y+yOffset), TILEBOG);
+					map->ResetType(candidate+Coordinate(xOffset,yOffset), TILEBOG);
 				}
 			}
 			break; //Only generate one bog
@@ -1757,20 +1703,11 @@ void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_pt
 
 // Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
 std::vector<int> Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
-	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
-	int minX = std::min(corner1.X(), corner2.X());
-	int minY = std::min(corner1.Y(), corner2.Y());
-	
+	Coordinate low = Coordinate::min(corner1, corner2);
+	Coordinate high = Coordinate::max(corner1, corner2);
 	std::vector<int> uids;
-	for (int npcs = 0; npcs < quantity; ++npcs) {
-		Coordinate location(
-			Random::Generate(minX, areaWidth + minX - 1),
-			Random::Generate(minY, areaLength + minY - 1)
-		);
-
-		uids.push_back(Game::Inst()->CreateNPC(location, type));
-	}
+	for (int npcs = 0; npcs < quantity; ++npcs)
+		uids.push_back(Game::Inst()->CreateNPC(Random::ChooseInRectangle(low,high), type));
 	return uids;
 }
 
@@ -2006,7 +1943,6 @@ void Game::CreateNatureObject(Coordinate pos) {
 			std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
 
 		if (Random::Generate(99) < rarity) {
-
 			for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
 				Coordinate a = Map::Inst()->Shrink(Random::ChooseInRadius(pos, NatureObject::Presets[chosen].cluster));
 				if (Map::Inst()->IsWalkable(a) && (Map::Inst()->GetType(a) == TILEGRASS || Map::Inst()->GetType(a) == TILESNOW)
@@ -2046,7 +1982,6 @@ void Game::CreateNatureObject(Coordinate pos, std::string name) {
 			Map::Inst()->SetBuildable(pos,false);
 			Map::Inst()->SetBlocksLight(pos,!NatureObject::Presets[natObj->Type()].walkable);
 		}
-
 	}
 }
 
