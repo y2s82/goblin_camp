@@ -365,7 +365,7 @@ void StockManager::UpdateTreeDesignations(boost::weak_ptr<NatureObject> nObj, bo
 
 void StockManager::UpdateBogDesignations(Coordinate coord, bool add) {
 	if (add) {
-		if (Map::Inst()->GetType(coord.X(), coord.Y()) == TILEBOG) {
+		if (Map::Inst()->GetType(coord) == TILEBOG) {
 			designatedBog.insert(coord);
 		}
 	} else if (!add && designatedBog.find(coord) != designatedBog.end()) {

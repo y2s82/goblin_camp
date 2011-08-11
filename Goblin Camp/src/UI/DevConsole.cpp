@@ -60,9 +60,14 @@ struct DevConsole {
 		
 		PycString_IMPORT;
 		newStdIn  = PycStringIO->NewInput(PyString_FromString(""));
-		oldStdOut = PySys_GetObject("stdout");
-		oldStdErr = PySys_GetObject("stderr");
-		oldStdIn  = PySys_GetObject("stdin");
+		
+		/* const_cast are workarounds against the fact that PySys_{Get,Set}Object expects
+		   a char * instead of const char *
+		   see: http://mail.python.org/pipermail/python-dev/2011-February/108140.html
+		*/
+		oldStdOut = PySys_GetObject(const_cast<char *>("stdout"));
+		oldStdErr = PySys_GetObject(const_cast<char *>("stderr"));
+		oldStdIn  = PySys_GetObject(const_cast<char *>("stdin"));
 	}
 	
 	std::string GetStreamValue() {
@@ -73,15 +78,15 @@ struct DevConsole {
 	void RedirectStreams() {
 		newStdOut = PycStringIO->NewOutput(2048);
 		
-		PySys_SetObject("stdout", newStdOut);
-		PySys_SetObject("stderr", newStdOut);
-		PySys_SetObject("stdin",  newStdIn);
+		PySys_SetObject(const_cast<char *>("stdout"), newStdOut);
+		PySys_SetObject(const_cast<char *>("stderr"), newStdOut);
+		PySys_SetObject(const_cast<char *>("stdin"),  newStdIn);
 	}
 	
 	void RestoreStreams() {
-		PySys_SetObject("stdout", oldStdOut);
-		PySys_SetObject("stderr", oldStdErr);
-		PySys_SetObject("stdin",  oldStdIn);
+		PySys_SetObject(const_cast<char *>("stdout"), oldStdOut);
+		PySys_SetObject(const_cast<char *>("stderr"), oldStdErr);
+		PySys_SetObject(const_cast<char *>("stdin"),  oldStdIn);
 		
 		Py_DECREF(newStdOut);
 	}

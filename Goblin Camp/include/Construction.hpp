@@ -100,7 +100,12 @@ class Construction : public Entity {
 	friend class Game;
 	friend class ConstructionListener;
 protected:
-	Construction(ConstructionType = 0, Coordinate = Coordinate(0,0));
+	//note: optional constructors do not make sense, but they are
+	//required by the Boost::serialization library. More precisely, it
+	//would be possible to define {save,load}_construct_data method,
+	//but I'm unsure how to do it without incurring a version change.
+	//TODO investigate
+	Construction(ConstructionType = 0, const Coordinate& = zero);
 
 	int condition, maxCondition;
 	std::vector<int> graphic;
@@ -152,7 +157,7 @@ public:
 	virtual boost::weak_ptr<Container> Storage() const;
 	bool HasTag(ConstructionTag) const;
 	virtual void Update();
-	virtual void Dismantle(Coordinate location=Coordinate(-1,-1));
+	virtual void Dismantle(const Coordinate& p);
 	bool DismantlingOrdered();
 	bool CheckMaterialsPresent();
 	void ReserveComponents(bool);

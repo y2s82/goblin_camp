@@ -118,7 +118,7 @@ namespace {
 				break;
 			}
 			++counter;
-		} while ((Map::Inst()->IsUnbridgedWater(a.X(), a.Y()) || Map::Inst()->IsUnbridgedWater(b.X(), b.Y())) && counter < 100);
+		} while ((Map::Inst()->IsUnbridgedWater(a) || Map::Inst()->IsUnbridgedWater(b)) && counter < 100);
 	}
 }
 
@@ -146,7 +146,7 @@ void Events::SpawnHostileMonsters() {
 		else msg = (boost::format("A %s has been sighted outside your %s!")
 			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
 
-		Coordinate a,b;
+		Coordinate a, b;
 		GenerateEdgeCoordinates(map, a, b);
 
 		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
@@ -170,11 +170,9 @@ void Events::SpawnBenignFauna() {
 			unsigned type = Random::ChooseIndex(possibleFauna);
 			Coordinate target;
 			do {
-				target.X(Random::Generate(map->Width() - 1));
-				target.Y(Random::Generate(map->Height() - 1));
-			} while (!map->IsWalkable(target.X(), target.Y()) || Distance(Camp::Inst()->Center(), target) < 100
-				|| (map->GetType(target.X(), target.Y()) != TILEGRASS && map->GetType(target.X(), target.Y()) != TILESNOW
-				&& map->GetType(target.X(), target.Y()) != TILEMUD));
+				target = Random::ChooseInExtent(map->Extent());
+			} while (!map->IsWalkable(target) || Distance(Camp::Inst()->Center(), target) < 100
+					 || (map->GetType(target) != TILEGRASS && map->GetType(target) != TILESNOW && map->GetType(target) != TILEMUD));
 			Game::Inst()->CreateNPC(target, possibleFauna[type]);
 		}
 	}
@@ -203,12 +201,11 @@ void Events::SpawnImmigrants() {
 		GenerateEdgeCoordinates(map, a, b);
 
 		for (int i = 0; i < spawnCount; ++i) {
-			int npcUid = Game::Inst()->CreateNPC(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())),
-				monsterType);
+			int npcUid = Game::Inst()->CreateNPC(Random::ChooseInRectangle(a, b), monsterType);
 			existingImmigrants.push_back(Game::Inst()->GetNPC(npcUid));
 		}
 
-		Announce::Inst()->AddMsg(msg, TCODColor(0,150,255), Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+		Announce::Inst()->AddMsg(msg, TCODColor(0,150,255), (a + b) / 2);
 	}
 }
 
@@ -220,17 +217,24 @@ void Events::SpawnMigratingAnimals() {
 			return;
 		}
 		
-		// Migrations are usually much bigger than your average group
+		// Migrations are usually much bigger than your average group, so time number by 3
 		migrationSpawnCount *= 3;
 		
 		int tries = 0;
 		Coordinate a,b;
 		do {
 			GenerateEdgeCoordinates(map, a, b);
-		} while (!Map::Inst()->IsWalkable(a.X(), a.Y()));
+		} while (!Map::Inst()->IsWalkable(a));
 
+#if DEBUG
+		std::cout<< "Migration entry at " << a.X() << "x" << a.Y()<<"\n";
+#endif
+		
 		int tuid = Game::Inst()->CreateNPC(a, monsterType);
 		migrationSpawnCount--;
+#if DEBUG
+		std::cout<< "Migration spawning " << migrationSpawnCount<< " " << monsterType << "\n";
+#endif
 		
 		NPC *firstNPC = Game::Inst()->GetNPC(tuid).get();
 		int x, y;
@@ -348,6 +352,10 @@ void Events::SpawnMigratingAnimals() {
 			return;
 		}
 		
+#if DEBUG
+		std::cout << "Migration exit at " << x << "x" << y << "\n";
+#endif
+		
 		std::vector<NPC*> migrants;
 		std::vector<int> uids = Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
 		
@@ -382,9 +390,12 @@ void Events::SpawnMigratingAnimals() {
 		}
 
 		std::string msg;
-		msg = (boost::format("A %s migration is occurring outside your %s") % NPC::Presets[monsterType].name
+		msg = (boost::format("A %s migration is occurring outside your %s.") % NPC::Presets[monsterType].name
 			% Camp::Inst()->GetName()).str();
 		
-		Announce::Inst()->AddMsg(msg, TCODColor::green, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
+		Announce::Inst()->AddMsg(msg, TCODColor::green, (a+b)/2);
+#if DEBUG
+		std::cout << "Migration underway.\n";
+#endif
 	}
 }

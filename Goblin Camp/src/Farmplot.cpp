@@ -48,7 +48,8 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->GetConstruction(x,y) == uid) {
+			Coordinate p(x,y);
+			if (Map::Inst()->GetConstruction(p) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
@@ -56,8 +57,8 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 						console->setCharForeground(screenx, screeny, TCODColor::darkAmber);
 						console->setChar(screenx,	screeny, (graphic[1]));
 
-						if (!containers[Coordinate(x,y)]->empty()) {
-							boost::weak_ptr<Item> item = containers[Coordinate(x,y)]->GetFirstItem();
+						if (!containers[p]->empty()) {
+							boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
 							if (item.lock()) {
 								console->putCharEx(screenx, screeny, item.lock()->GetGraphic(), item.lock()->Color(), TCODColor::black);
 							}
@@ -168,8 +169,8 @@ void FarmPlot::AcceptVisitor(ConstructionVisitor& visitor) {
 bool FarmPlot::Full(ItemType type) {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-			if (Map::Inst()->GetConstruction(ix,iy) == uid) {
-				Coordinate location(ix,iy);
+			Coordinate p(ix,iy);
+			if (Map::Inst()->GetConstruction(p) == uid) {
 				//If the stockpile has hit the limit then it's full for this itemtype
 				if (type != 1) {
 					for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
@@ -179,10 +180,10 @@ bool FarmPlot::Full(ItemType type) {
 				}
 
 				//If theres a free space then it obviously is not full
-				if (containers[location]->empty() && !reserved[location]) return false;
+				if (containers[p]->empty() && !reserved[p]) return false;
 
 				//Check if a container exists for this ItemCategory that isn't full
-				boost::weak_ptr<Item> item = containers[location]->GetFirstItem();
+				boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
 				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
 					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 
@@ -205,8 +206,9 @@ Coordinate FarmPlot::FreePosition() {
 		//If that fails still iterate through each position because a free position _should_ exist
 		for (int ix = a.X(); ix <= b.X(); ++ix) {
 			for (int iy = a.Y(); iy <= b.Y(); ++iy) {
-				if (Map::Inst()->GetConstruction(ix,iy) == uid) {
-					if (containers[Coordinate(ix,iy)]->empty() && !reserved[Coordinate(ix,iy)]) return Coordinate(ix,iy);
+				Coordinate p(ix,iy);
+				if (Map::Inst()->GetConstruction(p) == uid) {
+					if (containers[p]->empty() && !reserved[p]) return p;
 				}
 			}
 		}

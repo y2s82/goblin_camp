@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 namespace Script {
 	void ExposeAPI();
 	void AppendListener(PyObject*);
-	void InvokeListeners(char*, char*, ...);
-	void InvokeListeners(char*, PyObject* = NULL);
+	void InvokeListeners(const char*, const char*, ...);
+	void InvokeListeners(const char*, PyObject* = NULL);
 	void ReleaseListeners();
 }

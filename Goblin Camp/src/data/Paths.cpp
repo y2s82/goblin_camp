@@ -199,9 +199,11 @@ namespace Paths {
 		}
 	}
 	
+#if defined(_MSC_VER)
 	#pragma warning(push)
 	// "warning C4715: 'Data::GetPath' : not all control paths return a value"
 	#pragma warning(disable : 4715)
+#endif
 	
 	/**
 		Retrieves reference to a given path. Exists to hide implementation details of path storage.
@@ -231,5 +233,7 @@ namespace Paths {
 		assert(false);
 	}
 	
+#if defined(_MSC_VER)
 	#pragma warning(pop)
+#endif
 }

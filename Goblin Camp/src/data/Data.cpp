@@ -116,7 +116,7 @@ namespace {
 	void DoSave(std::string file, bool& result) {
 		LOG_FUNC("Saving game to " << file, "DoSave");
 		
-		if (result = Game::Inst()->SaveGame(file)) {
+		if ((result = Game::Inst()->SaveGame(file))) {
 			Script::Event::GameSaved(file);
 		}
 	}

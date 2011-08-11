@@ -19,18 +19,17 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 
 #include "data/Serialization.hpp"
-
-class Coordinate;
+#include "Coordinate.hpp"
 
 class FilthNode : public boost::enable_shared_from_this<FilthNode> {
 	GC_SERIALIZABLE_CLASS
 	
-	int x, y;
+	Coordinate pos;
 	int depth;
 	int graphic;
 	TCODColor color;
 public:
-	FilthNode(int x=0, int y=0, int depth=0);
+	FilthNode(const Coordinate& pos = zero, int depth = 0);
 	~FilthNode();
 
 	void Update();

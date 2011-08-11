@@ -18,19 +18,18 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
 
+#include "Coordinate.hpp"
 #include "data/Serialization.hpp"
-
-class Coordinate;
 
 class BloodNode : public boost::enable_shared_from_this<BloodNode> {
 	GC_SERIALIZABLE_CLASS
 	
-	int x, y;
+	Coordinate pos;
 	int depth;
 	int graphic;
 	TCODColor color;
 public:
-	BloodNode(int x=0, int y=0, int depth=0);
+	BloodNode(const Coordinate& pos = zero, int depth = 0);
 	~BloodNode();
 
 	void Update();

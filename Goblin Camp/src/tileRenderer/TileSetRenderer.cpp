@@ -55,29 +55,25 @@ namespace {
 		{
 			return true;
 		}
-		return map->GetType(coord.X(), coord.Y()) == type;
+		return map->GetType(coord) == type;
 	}
 
 	bool GrassConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
+		if (!map->IsInside(coord))
 			return true;
-		}
-		TileType type = map->GetType(coord.X(), coord.Y());
+		TileType type = map->GetType(coord);
 		return type == TILEGRASS || type == TILESNOW;
 	}
 
 	bool SnowConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
+		if (!map->IsInside(coord))
 			return true;
-		}
-		if (map->GetType(coord.X(), coord.Y()) == TILESNOW)
+		if (map->GetType(coord) == TILESNOW)
 			return true;
 		int natNum = -1;
-		if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+		if ((natNum = map->GetNatureObject(coord)) >= 0) {
 			return Game::Inst()->natureList[natNum]->IsIce();
 		}
 		return false;
@@ -85,32 +81,27 @@ namespace {
 
 	bool CorruptionConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
+		if (!map->IsInside(coord))
 			return true;
-		}
-		return map->GetCorruption(coord.X(), coord.Y()) >= 100;
+		return map->GetCorruption(coord) >= 100;
 	}
 
 	bool BurntConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height())
-		{
+		if (!map->IsInside(coord))
 			return true;
-		}
-		return map->GetType(coord.X(), coord.Y()) == TILEGRASS && map->Burnt(coord.X(), coord.Y()) >= 10;
+		return map->GetType(coord) == TILEGRASS && map->Burnt(coord) >= 10;
 	}
 
 	int WaterConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
 		int natNum = -1;
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+		if (!map->IsInside(coord))
 			return 2;
-		}
-		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord).lock()) {
 			return (water->Depth() > 0) ? 1 : 0;
 		}
-		else if ((natNum = map->GetNatureObject(coord.X(), coord.Y())) >= 0) {
+		else if ((natNum = map->GetNatureObject(coord)) >= 0) {
 			return (Game::Inst()->natureList[natNum]->IsIce()) ? 2 : 0;
 		}
 		return 0;
@@ -118,10 +109,9 @@ namespace {
 
 	bool WaterNoIceConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (coord.X() < 0 || coord.Y() < 0 || coord.X() >= map->Width() || coord.Y() >= map->Height()) {
+		if (!map->IsInside(coord))
 			return true;
-		}
-		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord.X(), coord.Y()).lock()) {
+		else if (boost::shared_ptr<WaterNode> water = map->GetWater(coord).lock()) {
 			return (water->Depth() > 0);
 		}
 		return false;
@@ -129,7 +119,7 @@ namespace {
 
 	int FilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
+		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord).lock()) {
 			return (filth->Depth() > 4) ? 2 : 1;
 		}
 		return 0;
@@ -137,7 +127,7 @@ namespace {
 
 	bool MajorFilthConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord.X(), coord.Y()).lock()) {
+		if (boost::shared_ptr<FilthNode> filth = map->GetFilth(coord).lock()) {
 			return filth->Depth() > 4;
 		}
 		return false;
@@ -145,7 +135,7 @@ namespace {
 
 	bool BloodConnectionTest(Map* map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord.X(), coord.Y()).lock()) {
+		if (boost::shared_ptr<BloodNode> blood = map->GetBlood(coord).lock()) {
 			return blood->Depth() > 0;
 		}
 		return false;
@@ -153,12 +143,12 @@ namespace {
 	
 	bool TerritoryConnectionTest(Map* map, Coordinate origin, bool owned, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		return map->IsTerritory(coord.X(),coord.Y()) == owned;
+		return map->IsTerritory(coord) == owned;
 	}
 	
 	bool GroundMarkedConnectionTest(Map * map, Coordinate origin, Direction dir) {
 		Coordinate coord = origin + Coordinate::DirectionToCoordinate(dir);
-		return map->GroundMarked(coord.X(), coord.Y());
+		return map->GroundMarked(coord);
 	}
 }
 
@@ -239,18 +229,18 @@ void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int vi
 			Coordinate pos(x + startTileX, y + startTileY);
 			
 			// Draw Terrain
-			if (pos.X() >= 0 && pos.X() < map->Width() && pos.Y() >= 0 && pos.Y() < map->Height()) {
+			if (map->IsInside(pos)) {
 				DrawTerrain(x, y, pos);			
 				
 				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
-					if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(pos.X(),pos.Y()))).lock()) {
+					if (boost::shared_ptr<Construction> construction = (Game::Inst()->GetConstruction(map->GetConstruction(pos))).lock()) {
 						DrawConstructionVisitor visitor(this, tileSet.get(), x, y, pos);
 						construction->AcceptVisitor(visitor);
 					} else  {
 						DrawFilth(x, y, pos);
 					}
 
-					int natNum = map->GetNatureObject(pos.X(), pos.Y());
+					int natNum = map->GetNatureObject(pos);
 					if (natNum >= 0) {
 						boost::shared_ptr<NatureObject> natureObj = Game::Inst()->natureList[natNum];
 						if (natureObj->Marked()) {
@@ -285,14 +275,12 @@ void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int vi
 	if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
 		for (int y = 0; y < tilesY; ++y) {
 			for (int x = 0; x <= tilesX; ++x) {
-				int tileX = x + startTileX;
-				int tileY = y + startTileY;
-
+				Coordinate tile(x+startTileX, y+startTileY);
 				// Corruption
-				if (map->GetCorruption(tileX, tileY) >= 100) {
-					TileType type = map->GetType(tileX, tileY);
+				if (map->GetCorruption(tile) >= 100) {
+					TileType type = map->GetType(tile);
 					const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
-					terrainSprite.DrawCorruptionOverlay(x, y, boost::bind(&CorruptionConnectionTest, map, Coordinate(tileX, tileY), _1));
+					terrainSprite.DrawCorruptionOverlay(x, y, boost::bind(&CorruptionConnectionTest, map, tile, _1));
 				}
 			}
 		}
@@ -337,15 +325,14 @@ void TilesetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end,
 	}
 }
 
+//TODO factorize all those DrawFoo
 void TilesetRenderer::DrawItems() const {
 	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
 		if (!itemi->second->ContainedIn().lock()) {
 			Coordinate itemPos = itemi->second->Position();
-			if (itemPos.X() >= startTileX && itemPos.X() < startTileX + tilesX
-				&& itemPos.Y() >= startTileY && itemPos.Y() < startTileY + tilesY)
-			{
-				tileSet->DrawItem(itemPos.X() - startTileX, itemPos.Y() - startTileY, itemi->second);
-			}
+			Coordinate start(startTileX,startTileY), extent(tilesX,tilesY);
+			if (itemPos.insideExtent(start, extent))
+				tileSet->DrawItem((itemPos-start).X(), (itemPos-start).Y(), itemi->second);
 		}
 	}
 }
@@ -353,22 +340,18 @@ void TilesetRenderer::DrawItems() const {
 void TilesetRenderer::DrawNPCs() const {
 	for (std::map<int,boost::shared_ptr<NPC> >::iterator npci = Game::Inst()->npcList.begin(); npci != Game::Inst()->npcList.end(); ++npci) {
 		Coordinate npcPos = npci->second->Position();
-		if (npcPos.X() >= startTileX && npcPos.X() < startTileX + tilesX
-				&& npcPos.Y() >= startTileY && npcPos.Y() < startTileY + tilesY)
-		{
-			tileSet->DrawNPC(npcPos.X() - startTileX, npcPos.Y() - startTileY, npci->second);
-		}
+		Coordinate start(startTileX,startTileY), extent(tilesX,tilesY);
+		if (npcPos.insideExtent(start, extent))
+			tileSet->DrawNPC((npcPos-start).X(), (npcPos-start).Y(), npci->second);
 	}
 }
 
 void TilesetRenderer::DrawSpells() const {
 	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
 		Coordinate spellPos = (*spelli)->Position();
-		if (spellPos.X() >= startTileX && spellPos.X() < startTileX + tilesX
-				&& spellPos.Y() >= startTileY && spellPos.Y() < startTileY + tilesY)
-		{
-			tileSet->DrawSpell(spellPos.X() - startTileX, spellPos.Y() - startTileY, *spelli);
-		}
+		Coordinate start(startTileX,startTileY), extent(tilesX,tilesY);
+		if (spellPos.insideExtent(start, extent))
+			tileSet->DrawSpell((spellPos-start).X(), (spellPos-start).Y(), *spelli);
 	}
 }
 
@@ -376,31 +359,27 @@ void TilesetRenderer::DrawFires() const {
 	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (boost::shared_ptr<FireNode> fire = firei->lock())
 		{
-			Coordinate firePos = fire->GetPosition();
-			if (firePos.X() >= startTileX && firePos.X() < startTileX + tilesX
-					&& firePos.Y() >= startTileY && firePos.Y() < startTileY + tilesY)
-			{
-				tileSet->DrawFire(firePos.X() - startTileX, firePos.Y() - startTileY, fire);
-			}
+			Coordinate firePos = fire->Position();
+			Coordinate start(startTileX,startTileY), extent(tilesX,tilesY);
+			if (firePos.insideExtent(start, extent))
+				tileSet->DrawFire((firePos-start).X(), (firePos-start).Y(), fire);
 		}
 	}
 }
 
 void TilesetRenderer::DrawMarkers() const {
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
-		int markerX = markeri->second.X();
-		int markerY = markeri->second.Y();
-		if (markerX >= startTileX && markerX < startTileX + tilesX
-			&& markerY >= startTileY && markerY < startTileY + tilesY) {
-				tileSet->DrawMarker(markerX - startTileX, markerY - startTileY);
-		}
+		Coordinate markerPos = markeri->second.Position();
+		Coordinate start(startTileX,startTileY), extent(tilesX,tilesY);
+		if (markerPos.insideExtent(start, extent))
+			tileSet->DrawMarker((markerPos-start).X(), (markerPos-start).Y());
 	}
 }
 
 void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) const {
-	TileType type(map->GetType(pos.X(), pos.Y()));
+	TileType type(map->GetType(pos));
 	const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
-	bool corrupted = map->GetCorruption(pos.X(), pos.Y()) >= 100;
+	bool corrupted = map->GetCorruption(pos) >= 100;
 	if (type == TILESNOW) {
 		if (corrupted) {
 			terrainSprite.DrawSnowedAndCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
@@ -408,7 +387,7 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 			terrainSprite.DrawSnowed(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1));
 		}
 	} else if (type == TILEGRASS) {
-		bool burnt = type == TILEGRASS && map->Burnt(pos.X(), pos.Y()) >= 10;
+		bool burnt = type == TILEGRASS && map->Burnt(pos) >= 10;
 		if (corrupted) {
 			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else if (burnt) {
@@ -426,39 +405,39 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 	
 	// Water
 	if (tileSet->IsIceSupported()) {
-		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos.X(),pos.Y());
+		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
 		if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
 				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
 			}
 		}
 		int natNum = -1;
-		if ((natNum = map->GetNatureObject(pos.X(), pos.Y())) >= 0) {
+		if ((natNum = map->GetNatureObject(pos)) >= 0) {
 			if (Game::Inst()->natureList[natNum]->IsIce()) {
 				tileSet->DrawIce(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
 			}
 		}
 	} else {
-		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos.X(),pos.Y());
+		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
 		if (boost::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
 				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterNoIceConnectionTest, map, pos, _1));
 			}
 		}
 	}
-	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(pos.X(), pos.Y()).lock()) {
+	if (boost::shared_ptr<BloodNode> blood = map->GetBlood(pos).lock()) {
 		if (blood->Depth() > 0) {
 			tileSet->DrawBlood(screenX, screenY, boost::bind(&BloodConnectionTest, map, pos, _1));
 		}
 	}
-	if (map->GroundMarked(pos.X(), pos.Y())) {
+	if (map->GroundMarked(pos)) {
 		tileSet->DrawMarkedOverlay(screenX, screenY, boost::bind(&GroundMarkedConnectionTest, map, pos, _1));
 	}
 	
 }
 
 void TilesetRenderer::DrawFilth(int screenX, int screenY, Coordinate pos) const {
-	if (boost::shared_ptr<FilthNode> filth = map->GetFilth(pos.X(), pos.Y()).lock()) {
+	if (boost::shared_ptr<FilthNode> filth = map->GetFilth(pos).lock()) {
 		if (filth->Depth() > 4) {
 			tileSet->DrawFilthMajor(screenX, screenY, boost::bind(&FilthConnectionTest, map, pos, _1));
 		} else if (filth->Depth() > 0) {
@@ -468,7 +447,7 @@ void TilesetRenderer::DrawFilth(int screenX, int screenY, Coordinate pos) const 
 }
 
 void TilesetRenderer::DrawTerritoryOverlay(int screenX, int screenY, Coordinate pos) const {
-	bool isOwned(map->IsTerritory(pos.X(),pos.Y()));
+	bool isOwned(map->IsTerritory(pos));
 	tileSet->DrawTerritoryOverlay(screenX, screenY, isOwned, boost::bind(&TerritoryConnectionTest, map, pos, isOwned, _1));
 }
 

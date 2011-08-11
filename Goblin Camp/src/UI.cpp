@@ -636,7 +636,9 @@ void UI::DrawTopBar(TCODConsole* console) {
 	console->setDefaultForeground(TCODColor::white);
 }
 
-void UI::blueprint(Coordinate newBlue) { _blueprint = newBlue; }
+void UI::blueprint(const Coordinate& newBlue) {
+	_blueprint = newBlue;
+}
 void UI::state(UIState newState) { _state = newState; }
 
 void UI::ChangeMenu(Panel* menu) {
@@ -766,12 +768,12 @@ void UI::ChooseDesignateBog() {
 }
 
 
-boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
+boost::weak_ptr<Entity> UI::GetEntity(const Coordinate& pos) {
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
+		std::set<int> *npcList = Map::Inst()->NPCList(pos);
 		if (!npcList->empty()) return Game::Inst()->GetNPC((*npcList->begin()));
 
-		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
+		std::set<int> *itemList = Map::Inst()->ItemList(pos);
 		if (!itemList->empty()) {
 			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
 			if (itemi != Game::Inst()->freeItems.end()) {
@@ -779,39 +781,39 @@ boost::weak_ptr<Entity> UI::GetEntity(Coordinate pos) {
 			}
 		}
 
-		int entity = Map::Inst()->GetNatureObject(pos.X(), pos.Y());
+		int entity = Map::Inst()->GetNatureObject(pos);
 		if (entity > -1) return (Game::Inst()->natureList[entity]);
 
-		entity = Map::Inst()->GetConstruction(pos.X(), pos.Y());
+		entity = Map::Inst()->GetConstruction(pos);
 		if (entity > -1) return Game::Inst()->GetConstruction(entity);
 	}
 	return boost::weak_ptr<Entity>();
 }
 
-void UI::HandleUnderCursor(Coordinate pos, std::list<boost::weak_ptr<Entity> >* result) {
+void UI::HandleUnderCursor(const Coordinate& pos, std::list<boost::weak_ptr<Entity> >* result) {
 	result->clear();
 
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		std::set<int> *npcList = Map::Inst()->NPCList(pos.X(), pos.Y());
+	if (Map::Inst()->IsInside(pos)) {
+		std::set<int> *npcList = Map::Inst()->NPCList(pos);
 		if (!npcList->empty()) {
 			for (std::set<int>::iterator npci = npcList->begin(); npci != npcList->end(); ++npci) {
 				result->push_back(Game::Inst()->GetNPC(*npci));
 			}
 		}
 
-		std::set<int> *itemList = Map::Inst()->ItemList(pos.X(), pos.Y());
+		std::set<int> *itemList = Map::Inst()->ItemList(pos);
 		if (!itemList->empty()) {
 			for (std::set<int>::iterator itemi = itemList->begin(); itemi != itemList->end(); ++itemi) {
 				result->push_back(Game::Inst()->itemList[*itemi]);
 			}
 		}
 
-		int entity = Map::Inst()->GetNatureObject(pos.X(), pos.Y());
+		int entity = Map::Inst()->GetNatureObject(pos);
 		if (entity > -1) {
 			result->push_back(Game::Inst()->natureList[entity]);
 		}
 
-		entity = Map::Inst()->GetConstruction(pos.X(), pos.Y());
+		entity = Map::Inst()->GetConstruction(pos);
 		if (entity > -1) {
 			result->push_back(Game::Inst()->GetConstruction(entity));
 		}
@@ -905,7 +907,7 @@ void UI::ChooseDig() {
 
 void UI::ChooseNaturify() {
 	for (int i = 0; i < 10000; ++i) {
-		Map::Inst()->Naturify(Random::Generate(Map::Inst()->Width() - 1), Random::Generate(Map::Inst()->Height() - 1));
+		Map::Inst()->Naturify(Random::ChooseInExtent(Map::Inst()->Extent()));
 	}
 }
 

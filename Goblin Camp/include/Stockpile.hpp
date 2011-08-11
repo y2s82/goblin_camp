@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
+#include "Coordinate.hpp"
 #include "Construction.hpp"
 #include "Container.hpp"
 #include "data/Serialization.hpp"
@@ -72,10 +73,12 @@ public:
 	void AdjustLimit(ItemCategory, int);
 	int GetLimit(ItemCategory);
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
-	virtual void Dismantle(Coordinate pos=Coordinate(-1,-1));
+	virtual void Dismantle(const Coordinate& pos = undefined);
 	int GetDemand(ItemCategory);
 	int GetAmount(ItemCategory);
 	void Reorganize();
+private:
+	void Erase(const Coordinate&);
 };
 
 //1 = v0.2

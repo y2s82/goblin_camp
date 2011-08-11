@@ -21,7 +21,9 @@ that would fix that problem, but I unfortunately have very limited time
 and I couldn't come up with a coherent answer just by googling. */
 #include "stdafx.hpp"
 
+#if defined(_MSC_VER)
 #pragma warning(push, 2) //Boost::serialization generates a few very long warnings
+#endif
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
@@ -231,4 +233,6 @@ bool Game::LoadGame(const std::string& filename) {
 	}
 }
 
+#if defined(_MSC_VER)
 #pragma warning(pop)
+#endif

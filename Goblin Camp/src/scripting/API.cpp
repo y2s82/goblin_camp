@@ -76,7 +76,7 @@ namespace Script {
 		Globals::listeners.push_back(oListener);
 	}
 	
-	void InvokeListeners(char *method, PyObject *args) {
+	void InvokeListeners(const char *method, PyObject *args) {
 		BOOST_FOREACH(py::object listener, Globals::listeners) {
 			if (!PyObject_HasAttrString(listener.ptr(), method)) {
 				continue;
@@ -93,7 +93,7 @@ namespace Script {
 		}
 	}
 	
-	void InvokeListeners(char *method, char *format, ...) {
+	void InvokeListeners(const char *method, const char *format, ...) {
 		va_list argList;
 		va_start(argList, format);
 		

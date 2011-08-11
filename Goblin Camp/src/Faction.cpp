@@ -138,18 +138,17 @@ FactionGoal Faction::GetCurrentGoal() const {
 namespace {
 	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job, boost::shared_ptr<NPC> npc) {
 		boost::shared_ptr<Construction> construction;
-		TCODLine::init(npc->Position().X(), npc->Position().Y(), Camp::Inst()->Center().X(), Camp::Inst()->Center().Y());
-		int x = npc->Position().X();
-		int y = npc->Position().Y();
+		Coordinate p = npc->Position();
+		TCODLine::init(p.X(), p.Y(), Camp::Inst()->Center().X(), Camp::Inst()->Center().Y());
 		do {
-			int constructionID = Map::Inst()->GetConstruction(x,y);
+			int constructionID = Map::Inst()->GetConstruction(p);
 			if (constructionID >= 0) {
 				construction = Game::Inst()->GetConstruction(constructionID).lock();
 				if (construction && (construction->HasTag(PERMANENT) || 
 					(!construction->HasTag(WORKSHOP) && !construction->HasTag(WALL))))
 					construction.reset();
 			}
-		} while (!TCODLine::step(&x, &y) && !construction);
+		} while (!TCODLine::step(p.Xptr(), p.Yptr()) && !construction);
 		if (construction) {
 			job->tasks.push_back(Task(MOVEADJACENT, construction->Position(), construction));
 			job->tasks.push_back(Task(KILL, construction->Position(), construction));
@@ -231,21 +230,19 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 			{
 				boost::shared_ptr<Job> patrolJob(new Job("Patrol"));
 				patrolJob->internal = true;
-				int limit = 0;
-				Coordinate location(-1,-1);
+				Coordinate location = undefined;
 				if (IsFriendsWith(PLAYERFACTION)) {
 					location = Camp::Inst()->GetRandomSpot();
 				} else {
-					do {
-						int x = Random::Generate(Map::Inst()->Width());
-						int y = Random::Generate(Map::Inst()->Height());
-						if (!Map::Inst()->IsTerritory(x,y)) location = Coordinate(x,y);
-						++limit;
-					} while (location.X() < 0 && limit < 100);
+					for (int limit = 0; limit < 100 && location == undefined; ++limit) {
+						Coordinate candidate = Random::ChooseInExtent(Map::Inst()->Extent());
+						if (!Map::Inst()->IsTerritory(candidate))
+							location = candidate;
+					}
 				}
-				if (location.X() >= 0 && location.Y() >= 0) {
+				if (location != undefined) {
 					patrolJob->tasks.push_back(Task(MOVENEAR, location));
-					patrolJob->tasks.push_back(Task(WAIT, Random::Generate(5,20)));
+					patrolJob->tasks.push_back(Task(WAIT, Coordinate(Random::Generate(5,20), 0)));
 					npc->StartJob(patrolJob);
 					return true;
 				}

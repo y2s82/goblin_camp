@@ -42,7 +42,7 @@ boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::uno
 std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::GoodEffectAdders = std::multimap<StatusEffectType, ItemType>();
 
-Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) :
+Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) :
 	Entity(),
 
 	type(typeval),
@@ -54,10 +54,9 @@ Item::Item(Coordinate pos, ItemType typeval, int owner, std::vector<boost::weak_
 	internal(false)
 {
 	SetFaction(owner);
-	//Remember that the components are destroyed after this constructor!
-	x = pos.X();
-	y = pos.Y();
+	pos = startPos;
 
+	//Remember that the components are destroyed after this constructor!
 	if (type >= 0 && type < static_cast<int>(Item::Presets.size())) {
 		name = Item::Presets[type].name;
 		categories = Item::Presets[type].categories;
@@ -129,10 +128,10 @@ int Item::GetGraphicsHint() const {
 }
 
 void Item::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenx = x - upleft.X();
-	int screeny = y - upleft.Y();
+	int screenx = (pos - upleft).X();
+	int screeny = (pos - upleft).Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
+		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(pos));
 	}
 }
 
@@ -141,11 +140,11 @@ bool Item::IsCategory(ItemCategory category) { return (categories.find(category)
 TCODColor Item::Color() {return color;}
 void Item::Color(TCODColor col) {color = col;}
 
-void Item::Position(Coordinate pos) {
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		if (!internal && !container.lock()) Map::Inst()->ItemList(x,y)->erase(uid);
-		x = pos.X(); y = pos.Y();
-		if (!internal && !container.lock()) Map::Inst()->ItemList(x,y)->insert(uid);
+void Item::Position(const Coordinate& p) {
+	if (Map::Inst()->IsInside(p)) {
+		if (!internal && !container.lock()) Map::Inst()->ItemList(pos)->erase(uid);
+		pos = p;
+		if (!internal && !container.lock()) Map::Inst()->ItemList(pos)->insert(uid);
 	}
 }
 Coordinate Item::Position() {
@@ -555,12 +554,14 @@ void Item::SetVelocity(int speed) {
 	} else {
 		//The item has moved before but has now stopped
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
-		if (!Map::Inst()->IsWalkable(x, y)) {
+		if (!Map::Inst()->IsWalkable(pos)) {
 			for (int radius = 1; radius < 10; ++radius) {
-				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
-					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->IsWalkable(xi, yi)) {
-							Position(Coordinate(xi, yi));
+				//TODO consider using something more believable here; the item would jump over 9 walls?
+				for (int ix = pos.X() - radius; ix <= pos.X() + radius; ++ix) {
+					for (int iy = pos.Y() - radius; iy <= pos.Y() + radius; ++iy) {
+						Coordinate p(ix,iy);
+						if (Map::Inst()->IsWalkable(p)) {
+							Position(p);
 							return;
 						}
 					}
@@ -578,24 +579,22 @@ void Item::UpdateVelocity() {
 			if (flightPath.size() > 0) {
 
 				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
-					int tx = flightPath.back().coord.X();
-					int ty = flightPath.back().coord.Y();
+					Coordinate t = flightPath.back().coord;
 
-					if (Map::Inst()->BlocksWater(tx,ty) || !Map::Inst()->IsWalkable(tx,ty)) { //We've hit an obstacle
+					if (Map::Inst()->BlocksWater(t) || !Map::Inst()->IsWalkable(t)) { //We've hit an obstacle
 						Attack attack = GetAttack();
-						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
-							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
+						if (Map::Inst()->GetConstruction(t) > -1) {
+							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(t)).lock()) {
 								construct->Damage(&attack);
 							}
 						}
 						Impact(velocity);
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0) { //Hit a creature
-						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
-
+					if (Map::Inst()->NPCList(t)->size() > 0) { //Hit a creature
+						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(t)->size())) {
 							Attack attack = GetAttack();
-							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(tx,ty)->begin());
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(t)->begin());
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);

@@ -34,7 +34,7 @@ class SpawningPool : public Construction {
 	int jobCount;
 	int burn;
 public:
-	SpawningPool(ConstructionType = 0, Coordinate = Coordinate(0,0));
+	SpawningPool(ConstructionType = 0, const Coordinate& = zero);
 	Panel* GetContextMenu();
 	static bool DumpFilth(SpawningPool*);
 	static void ToggleDumpFilth(SpawningPool*);
@@ -49,6 +49,8 @@ public:
 	virtual int Build();
 	boost::shared_ptr<Container>& GetContainer();
 	void Spawn();
+private:
+	Coordinate SpawnLocation();
 };
 
 BOOST_CLASS_VERSION(SpawningPool, 0)

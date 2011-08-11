@@ -92,19 +92,18 @@ void Weather::Update() {
 		TileType tile = currentTemperature > 0 ? TILEGRASS : TILESNOW;
 		if (!changeAll) {
 			for (int i = 0; i < tileChangeRate; ++i) {
-				int rx = Random::Generate(map->Width()-1);
-				int ry = Random::Generate(map->Height()-1);
-				if (map->GetType(rx,ry) == TILEGRASS || map->GetType(rx,ry) == TILESNOW) {
-					map->ChangeType(rx, ry, static_cast<TileType>(tile), map->heightMap->getValue(rx,ry));
+				Coordinate r = Random::ChooseInExtent(map->Extent());
+				if (map->GetType(r) == TILEGRASS || map->GetType(r) == TILESNOW) {
+					map->ChangeType(r, static_cast<TileType>(tile), map->heightMap->getValue(r.X(), r.Y()));
 				}
 				if (currentTemperature < 0) {
-					if (map->GetWater(rx, ry).lock() && map->GetWater(rx, ry).lock()->IsCoastal()) {
-						Game::Inst()->CreateNatureObject(Coordinate(rx, ry), "Ice");
+					if (map->GetWater(r).lock() && map->GetWater(r).lock()->IsCoastal()) {
+						Game::Inst()->CreateNatureObject(Coordinate(r), "Ice");
 					}
 				} else if (currentTemperature > 0) {
-					if (map->GetNatureObject(rx, ry) >= 0) {
-						if (Game::Inst()->natureList[map->GetNatureObject(rx,ry)]->IsIce()) {
-							Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(rx,ry)]);
+					if (map->GetNatureObject(r) >= 0) {
+						if (Game::Inst()->natureList[map->GetNatureObject(r)]->IsIce()) {
+							Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(r)]);
 						}
 					}
 				}
@@ -113,18 +112,19 @@ void Weather::Update() {
 		} else {
 			for (int i = 0; i < tileChangeRate; ++i) {
 				for (int x = 0; x < 500; ++x) {
-					if (map->GetType(x,changePosition) == TILEGRASS || map->GetType(x,changePosition) == TILESNOW) {
-						map->ChangeType(x, changePosition, static_cast<TileType>(tile), map->heightMap->getValue(x,changePosition));
+					Coordinate p(x, changePosition);
+					if (map->GetType(p) == TILEGRASS || map->GetType(p) == TILESNOW) {
+						map->ChangeType(p, static_cast<TileType>(tile), map->heightMap->getValue(p.X(),p.Y()));
 					}
 
 					if (currentTemperature < 0) {
-						if (map->GetWater(x,changePosition).lock() && map->GetWater(x,changePosition).lock()->IsCoastal()) {
-							Game::Inst()->CreateNatureObject(Coordinate(x,changePosition), "Ice");
+						if (map->GetWater(p).lock() && map->GetWater(p).lock()->IsCoastal()) {
+							Game::Inst()->CreateNatureObject(p, "Ice");
 						}
 					} else if (currentTemperature > 0) {
-						if (map->GetNatureObject(x,changePosition) >= 0) {
-							if (Game::Inst()->natureList[map->GetNatureObject(x,changePosition)]->IsIce()) {
-								Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(x,changePosition)]);
+						if (map->GetNatureObject(p) >= 0) {
+							if (Game::Inst()->natureList[map->GetNatureObject(p)]->IsIce()) {
+								Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(p)]);
 							}
 						}
 					}

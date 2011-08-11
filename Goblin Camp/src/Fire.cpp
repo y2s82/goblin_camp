@@ -28,12 +28,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Job.hpp"
 #include "Stats.hpp"
 
-FireNode::FireNode(int vx, int vy, int vtemp) : x(vx), y(vy),
-	temperature(vtemp) {
-		color.r = Random::Generate(225, 255);
-		color.g = Random::Generate(0, 250);
-		color.b = 0;
-		graphic = Random::Generate(176,178);
+FireNode::FireNode(const Coordinate& pos, int vtemp) : pos(pos), temperature(vtemp) {
+	color.r = Random::Generate(225, 255);
+	color.g = Random::Generate(0, 250);
+	color.b = 0;
+	graphic = Random::Generate(176,178);
 }
 
 FireNode::~FireNode() {
@@ -42,7 +41,7 @@ FireNode::~FireNode() {
 	}
 }
 
-Coordinate FireNode::GetPosition() { return Coordinate(x,y); }
+Coordinate FireNode::Position() { return pos; }
 
 void FireNode::AddHeat(int value) { temperature += value; }
 
@@ -51,8 +50,8 @@ int FireNode::GetHeat() { return temperature; }
 void FireNode::SetHeat(int value) { temperature = value; }
 
 void FireNode::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenX = x - upleft.X();
-	int screenY = y - upleft.Y();
+	int screenX = (pos - upleft).X();
+	int screenY = (pos - upleft).Y();
 
 	if (screenX >= 0 && screenX < console->getWidth() &&
 		screenY >= 0 && screenY < console->getHeight()) {
@@ -67,11 +66,11 @@ void FireNode::Update() {
 
 	if (temperature > 800) temperature = 800;
 
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x, y).lock();
-	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(x, y)) {
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
+	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(pos)) {
 		temperature = 0;
 		water->Depth(water->Depth()-1);
-		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("steam"));
+		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("steam"));
 
 		Coordinate direction;
 		Direction wind = Map::Inst()->GetWindDirection();
@@ -79,21 +78,21 @@ void FireNode::Update() {
 		if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(-7, -1));
 		if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(-7, -1));
 		if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(1, 7));
-		direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
-		steam->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
+		direction += Random::ChooseInRadius(1);
+		steam->CalculateFlightPath(pos + direction, 5, 1);
 	} else if (temperature > 0) {
 		if (Random::Generate(10) == 0) { 
 			--temperature;
-			Map::Inst()->Burn(x, y);
+			Map::Inst()->Burn(pos);
 		}
 
-		if (Map::Inst()->GetType(x, y) != TILEGRASS) --temperature;
-		if (Map::Inst()->Burnt(x, y) >= 10) --temperature;
+		if (Map::Inst()->GetType(pos) != TILEGRASS) --temperature;
+		if (Map::Inst()->Burnt(pos) >= 10) --temperature;
 
 		int inverseSparkChance = 150 - std::max(0, ((temperature - 50) / 8));
 
 		if (Random::Generate(inverseSparkChance) == 0) {
-			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("spark"));
+			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("spark"));
 			int distance = Random::Generate(0, 15);
 			if (distance < 12) {
 				distance = 1;
@@ -109,32 +108,32 @@ void FireNode::Update() {
 			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(-distance);
 			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(-distance);
 			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(distance);
-			if (Random::Generate(9) < 8) direction = direction + Coordinate(Random::Generate(-1, 1), Random::Generate(-1, 1));
-			else direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
+			if (Random::Generate(9) < 8) direction += Random::ChooseInRadius(1);
+			else direction += Random::ChooseInRadius(3);
 
-			spark->CalculateFlightPath(Coordinate(x,y) + direction, 50, 1);
+			spark->CalculateFlightPath(pos + direction, 50, 1);
 		}
 
 		if (Random::Generate(60) == 0) {
-			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Coordinate(x,y), Spell::StringToSpellType("smoke"));
+			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("smoke"));
 			Coordinate direction;
 			Direction wind = Map::Inst()->GetWindDirection();
 			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(25, 75));
 			if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(-75, -25));
 			if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(-75, -25));
 			if (wind == WEST || wind == SOUTHWEST || wind == NORTHWEST) direction.X(Random::Generate(25, 75));
-			direction = direction + Coordinate(Random::Generate(-3, 3), Random::Generate(-3, 3));
-			smoke->CalculateFlightPath(Coordinate(x,y) + direction, 5, 1);
+			direction += Random::ChooseInRadius(3);
+			smoke->CalculateFlightPath(pos + direction, 5, 1);
 		}
 
 		if (temperature > 1 && Random::Generate(9) < 4) {
 			//Burn npcs on the ground
-			for (std::set<int>::iterator npci = Map::Inst()->NPCList(x,y)->begin(); npci != Map::Inst()->NPCList(x,y)->end(); ++npci) {
+			for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos)->begin(); npci != Map::Inst()->NPCList(pos)->end(); ++npci) {
 				if (!Game::Inst()->GetNPC(*npci)->HasEffect(FLYING) && Random::Generate(10) == 0) Game::Inst()->GetNPC(*npci)->AddEffect(BURNING);
 			}
 
 			//Burn items
-			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(x,y)->begin(); itemi != Map::Inst()->ItemList(x,y)->end(); ++itemi) {
+			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(pos)->begin(); itemi != Map::Inst()->ItemList(pos)->end(); ++itemi) {
 				boost::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
 				if (item && item->IsFlammable()) {
 					Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
@@ -146,7 +145,7 @@ void FireNode::Update() {
 			}
 
 			//Burn constructions
-			int cons = Map::Inst()->GetConstruction(x,y);
+			int cons = Map::Inst()->GetConstruction(pos);
 			if (cons >= 0) {
 				boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
 				if (construct) {
@@ -166,7 +165,7 @@ void FireNode::Update() {
 					} else if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 						/*Stockpiles are a special case. Not being an actual building, fire won't touch them.
 						Instead fire should be able to burn the items stored in the stockpile*/
-						boost::shared_ptr<Container> container = boost::static_pointer_cast<Stockpile>(construct)->Storage(Coordinate(x,y)).lock();
+						boost::shared_ptr<Container> container = boost::static_pointer_cast<Stockpile>(construct)->Storage(pos).lock();
 						if (container) {
 							boost::shared_ptr<Item> item = container->GetFirstItem().lock();
 							if (item && item->IsFlammable()) {
@@ -185,23 +184,23 @@ void FireNode::Update() {
 			}
 
 			//Burn plantlife
-			int natureObject = Map::Inst()->GetNatureObject(x, y);
+			int natureObject = Map::Inst()->GetNatureObject(pos);
 			if (natureObject >= 0 && 
 				!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
 					bool tree = Game::Inst()->natureList[natureObject]->Tree();
 					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
 					if (tree && Random::Generate(4) == 0) {
-						Game::Inst()->CreateNatureObject(Coordinate(x,y), "Scorched tree");
+						Game::Inst()->CreateNatureObject(pos, "Scorched tree");
 					}
 					temperature += tree ? 500 : 100;
 			}
 
 			//Create pour water job here if in player territory
-			if (Map::Inst()->IsTerritory(x,y) && !waterJob.lock()) {
+			if (Map::Inst()->IsTerritory(pos) && !waterJob.lock()) {
 				boost::shared_ptr<Job> pourWaterJob(new Job("Douse flames", VERYHIGH));
-				Job::CreatePourWaterJob(pourWaterJob, GetPosition());
+				Job::CreatePourWaterJob(pourWaterJob, pos);
 				if (pourWaterJob) {
-					pourWaterJob->MarkGround(GetPosition());
+					pourWaterJob->MarkGround(pos);
 					waterJob = pourWaterJob;
 					JobManager::Inst()->AddJob(pourWaterJob);
 				}
@@ -211,8 +210,7 @@ void FireNode::Update() {
 }
 
 void FireNode::save(OutputArchive& ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
@@ -221,8 +219,7 @@ void FireNode::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void FireNode::load(InputArchive& ar, const unsigned int version) {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;

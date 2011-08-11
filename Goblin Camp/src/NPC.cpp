@@ -126,16 +126,15 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 
 	hasMagicRangedAttacks(false),
 
-	threatLocation(Coordinate(-1,-1)),
+	threatLocation(undefined),
 	seenFire(false),
 
 	traits(std::set<Trait>()),
 	damageDealt(0), damageReceived(0),
 	statusEffectsChanged(false)
 {
-	while (!Map::Inst()->IsWalkable(pos.X(),pos.Y())) {
-		pos.X(pos.X()+1);
-		pos.Y(pos.Y()+1);
+	while (!Map::Inst()->IsWalkable(pos)) {
+		pos += Random::ChooseInRadius(1);
 	}
 	inventory->SetInternal();
 	Position(pos,true);
@@ -144,7 +143,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 	hunger = hunger - (HUNGER_THRESHOLD / 2) + Random::Generate(HUNGER_THRESHOLD - 1);
 	weariness = weariness - (WEARY_THRESHOLD / 2) + Random::Generate(WEARY_THRESHOLD - 1);
 
-	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
+	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), static_cast<void*>(this));
 
 	for (int i = 0; i < STAT_COUNT; ++i) {baseStats[i] = 0; effectiveStats[i] = 0;}
 	for (int i = 0; i < RES_COUNT; ++i) {baseResistances[i] = 0; effectiveResistances[i] = 0;}
@@ -153,7 +152,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(boost::shared_ptr<NPC>)> findJob,
 NPC::~NPC() {
 	pathMutex.lock(); /* In case a pathing thread is active we need to wait until we can lock the pathMutex,
 					  because it signals that the thread has finished */
-	Map::Inst()->NPCList(x, y)->erase(uid);
+	Map::Inst()->NPCList(pos)->erase(uid);
 	if (squad.lock()) squad.lock()->Leave(uid);
 
 	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) Game::Inst()->OrcCount(-1);
@@ -163,16 +162,15 @@ NPC::~NPC() {
 	delete path;
 }
 
-void NPC::Position(Coordinate pos, bool firstTime) {
-	Map::Inst()->MoveTo(pos.X(), pos.Y(), uid);
+void NPC::Position(const Coordinate& p, bool firstTime) {
+	Map::Inst()->MoveTo(p, uid);
 	if (!firstTime)
-		Map::Inst()->MoveFrom(x, y, uid);
-	x = pos.X();
-	y = pos.Y();
+		Map::Inst()->MoveFrom(pos, uid);
+	pos = p;
 	inventory->Position(pos);
 }
 
-void NPC::Position(Coordinate pos) { Position(pos, false); }
+void NPC::Position(const Coordinate& pos) { Position(pos, false); }
 
 Task* NPC::currentTask() const { return jobs.empty() ? 0 : &(jobs.front()->tasks[taskIndex]); }
 Task* NPC::nextTask() const { 
@@ -248,7 +246,7 @@ void NPC::HandleThirst() {
 		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"), Position());
 		Coordinate waterCoordinate;
 		if (!item.lock()) {waterCoordinate = Game::Inst()->FindWater(Position());}
-		if (item.lock() || waterCoordinate.X() != -1) { //Found something to drink
+		if (item.lock() || waterCoordinate != undefined) { //Found something to drink
 			boost::shared_ptr<Job> newJob(new Job("Drink", MED, 0, !expert));
 			newJob->internal = true;
 
@@ -349,7 +347,7 @@ void NPC::HandleWeariness() {
 }
 
 void NPC::Update() {
-	if (Map::Inst()->NPCList(x,y)->size() > 1) _bgcolor = TCODColor::darkGrey;
+	if (Map::Inst()->NPCList(pos)->size() > 1) _bgcolor = TCODColor::darkGrey;
 	else _bgcolor = TCODColor::black;
 
 	UpdateStatusEffects();
@@ -367,7 +365,7 @@ void NPC::Update() {
 				bulk += itemi->lock()->GetBulk();
 		}
 	}
-	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(x,y));
+	if (!HasEffect(FLYING) && effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-Map::Inst()->GetMoveModifier(pos));
 	if (effectiveStats[MOVESPEED] > 0) effectiveStats[MOVESPEED] = std::max(1, effectiveStats[MOVESPEED]-bulk);
 
 	if (needsNutrition) {
@@ -397,16 +395,16 @@ void NPC::Update() {
 	}
 
 	if (!HasEffect(FLYING)) {
-		if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(x,y).lock()) {
-			boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(x,y)).lock();
+		if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock()) {
+			boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(pos)).lock();
 			if (water->Depth() > WALKABLE_WATER_DEPTH && (!construct || !construct->HasTag(BRIDGE) || !construct->Built())) {
 				AddEffect(SWIM);
 				RemoveEffect(BURNING);
 			} else { RemoveEffect(SWIM); }
 		} else { RemoveEffect(SWIM); }
 
-		if (Map::Inst()->GetNatureObject(x,y) >= 0 && 
-			Game::Inst()->natureList[Map::Inst()->GetNatureObject(x,y)]->IsIce() &&
+		if (Map::Inst()->GetNatureObject(pos) >= 0 && 
+			Game::Inst()->natureList[Map::Inst()->GetNatureObject(pos)]->IsIce() &&
 			Random::Generate(UPDATES_PER_SECOND*5) == 0) AddEffect(TRIPPED);
 	}
 
@@ -424,7 +422,7 @@ void NPC::Update() {
 	if (HasEffect(BURNING)) {
 		if (Random::Generate(UPDATES_PER_SECOND * 3) == 0) {
 			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(Position(), Spell::StringToSpellType("spark"));
-			spark->CalculateFlightPath(Position()+Coordinate(Random::Generate(-1,1),Random::Generate(-1,1)), 50, GetHeight());
+			spark->CalculateFlightPath(Random::ChooseInRadius(Position(), 1), 50, GetHeight());
 		}
 		if (effectiveResistances[FIRE_RES] < 90 && !HasEffect(RAGE) && (jobs.empty() || jobs.front()->name != "Jump into water")) {
 			if (Random::Generate(UPDATES_PER_SECOND) == 0) {
@@ -433,7 +431,7 @@ void NPC::Update() {
 				boost::shared_ptr<Job> jumpJob(new Job("Jump into water"));
 				jumpJob->internal = true;
 				Coordinate waterPos = Game::Inst()->FindWater(Position());
-				if (waterPos.X() != -1) {
+				if (waterPos != undefined) {
 					jumpJob->tasks.push_back(Task(MOVE, waterPos));
 					jobs.push_back(jumpJob);
 				}
@@ -558,6 +556,8 @@ void NPC::UpdateStatusEffects() {
 	}
 }
 
+
+//TODO split that monster into smaller chunks
 void NPC::Think() {
 	Coordinate tmpCoord;
 	int tmp;
@@ -582,7 +582,7 @@ void NPC::Think() {
 				if (currentTask() && currentTask()->action == KILL) Hit(enemy, currentTask()->flags != 0);
 				else Hit(enemy);
 			}
-			if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(x,y,enemy->X(),enemy->Y())) {
+			if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos,enemy->Position())) {
 				aggressor.reset();
 				TaskFinished(TASKFAILFATAL, "Target lost");
 			}
@@ -597,11 +597,11 @@ void NPC::Think() {
 		if (!jobs.empty()) {
 			switch(currentTask()->action) {
 			case MOVE:
-				if (!Map::Inst()->IsWalkable(currentTarget().X(), currentTarget().Y(), (void*)this)) {
+				if (!Map::Inst()->IsWalkable(currentTarget(), static_cast<void*>(this))) {
 					TaskFinished(TASKFAILFATAL, "(MOVE)Target unwalkable");
 					break;
 				}
-				if ((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y()) {
+				if (pos == currentTarget()) {
 					TaskFinished(TASKSUCCESS);
 					break;
 				}
@@ -610,7 +610,7 @@ void NPC::Think() {
 				if (lastMoveResult == TASKFAILFATAL || lastMoveResult == TASKFAILNONFATAL) {
 					TaskFinished(lastMoveResult, std::string("(MOVE)Could not find path to target")); break;
 				} else if (lastMoveResult == PATHEMPTY) {
-					if (!((signed int)x == currentTarget().X() && (signed int)y == currentTarget().Y())) {
+					if (pos != currentTarget()) {
 						TaskFinished(TASKFAILFATAL, std::string("(MOVE)No path to target")); break;
 					}
 				}
@@ -626,17 +626,11 @@ void NPC::Think() {
 				for (int i = 0; i < 2; ++i) {
 					tmp = 0;
 					while (tmp++ < 10) {
-						int tarX = Random::Generate(-5, 5) + currentTarget().X();
-						int tarY = Random::Generate(-5, 5) + currentTarget().Y();
-						if (tarX < 0) tarX = 0;
-						if (tarX >= Map::Inst()->Width()) tarX = Map::Inst()->Width()-1;
-						if (tarY < 0) tarY = 0;
-						if (tarY >= Map::Inst()->Height()) tarY = Map::Inst()->Height()-1;
-						if (Map::Inst()->IsWalkable(tarX, tarY, (void *)this) && !Map::Inst()->IsUnbridgedWater(tarX, tarY) 
-							&& !Map::Inst()->IsDangerous(tarX, tarY, faction)) {
-							if (!checkLOS || (checkLOS && 
-								Map::Inst()->LineOfSight(tarX, tarY, currentTarget().X(), currentTarget().Y()))) {
-								currentJob().lock()->tasks[taskIndex] = Task(MOVE, Coordinate(tarX, tarY));
+						Coordinate tar = Map::Inst()->Shrink(Random::ChooseInRadius(currentTarget(), 5));
+						if (Map::Inst()->IsWalkable(tar, (void *)this) && !Map::Inst()->IsUnbridgedWater(tar) 
+							&& !Map::Inst()->IsDangerous(tar, faction)) {
+							if (!checkLOS || Map::Inst()->LineOfSight(tar, currentTarget())) {
+								currentJob().lock()->tasks[taskIndex] = Task(MOVE, tar);
 								goto MOVENEARend;
 							}
 						}
@@ -664,7 +658,7 @@ MOVENEARend:
 				if (!taskBegun) {
 					if (currentEntity().lock()) tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentEntity(), GetFaction());
 					else tmpCoord = Game::Inst()->FindClosestAdjacent(Position(), currentTarget(), GetFaction());
-					if (tmpCoord.X() >= 0) {
+					if (tmpCoord != undefined) {
 						findPath(tmpCoord);
 					} else { TaskFinished(TASKFAILFATAL, std::string("(MOVEADJACENT)No walkable adjacent tiles")); break; }
 					taskBegun = true;
@@ -677,6 +671,7 @@ MOVENEARend:
 				break;
 
 			case WAIT:
+				//TODO remove that WAIT hack
 				if (++timer > currentTarget().X()) { timer = 0; TaskFinished(TASKSUCCESS); }
 				break;
 
@@ -755,9 +750,8 @@ MOVENEARend:
 					Game::Inst()->RemoveItem(carried);
 					carried = boost::weak_ptr<Item>();
 				} else if (timer == 0) { //Drink from a water tile
-					if (std::abs((signed int)x - currentTarget().X()) <= 1 &&
-						std::abs((signed int)y - currentTarget().Y()) <= 1) {
-							if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(currentTarget().X(), currentTarget().Y()).lock()) {
+					if (Game::Adjacent(pos, currentTarget())) {
+							if (boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(currentTarget()).lock()) {
 								if (water->Depth() > DRINKABLE_WATER_DEPTH) {
 									thirst -= (int)(THIRST_THRESHOLD / 10);
 									AddEffect(DRINKING);
@@ -803,11 +797,12 @@ MOVENEARend:
 
 					Game::Inst()->RemoveItem(carried);
 				} else if (timer == 0) { //Look in all adjacent tiles for anything edible
-					for (int ix = (int)x - 1; ix <= (int)x + 1; ++ix) {
-						for (int iy = (int)y - 1; iy <= (int)y + 1; ++iy) {
-							if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
-								for (std::set<int>::iterator itemi = Map::Inst()->ItemList(ix, iy)->begin();
-									itemi != Map::Inst()->ItemList(ix, iy)->end(); ++itemi) {
+					for (int ix = pos.X() - 1; ix <= pos.X() + 1; ++ix) {
+						for (int iy = pos.Y() - 1; iy <= pos.Y() + 1; ++iy) {
+							Coordinate p(ix,iy);
+							if (Map::Inst()->IsInside(p)) {
+								for (std::set<int>::iterator itemi = Map::Inst()->ItemList(p)->begin();
+									itemi != Map::Inst()->ItemList(p)->end(); ++itemi) {
 										boost::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
 										if (item && (item->IsCategory(Item::StringToItemCategory("food")) ||
 											item->IsCategory(Item::StringToItemCategory("corpse") ))) {
@@ -989,8 +984,7 @@ CONTINUEEAT:
 				break;
 
 			case FLEEMAP:
-				if (x == 0 || static_cast<int>(x) == Map::Inst()->Width()-1 ||
-					y == 0 || static_cast<int>(y) == Map::Inst()->Height()-1) {
+				if (pos.onExtentEdges(zero, Map::Inst()->Extent())) {
 						//We are at the edge, escape!
 						Escape();
 						return;
@@ -1001,15 +995,15 @@ CONTINUEEAT:
 				//which might not be.
 				{
 					Coordinate target;
-					tmp = std::abs((signed int)x - Map::Inst()->Width() / 2);
-					if (tmp < std::abs((signed int)y - Map::Inst()->Height() / 2)) {
-						int target_y = (static_cast<int>(y) < Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1;
-						target = Coordinate(x, target_y);
+					tmp = std::abs(pos.X() - Map::Inst()->Width() / 2);
+					if (tmp < std::abs(pos.Y() - Map::Inst()->Height() / 2)) {
+						int target_y = (pos.Y() < Map::Inst()->Height() / 2) ? 0 : Map::Inst()->Height()-1;
+						target = Coordinate(pos.X(), target_y);
 					} else {
-					    int target_x = (static_cast<int>(x) < Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1;
-				        target = Coordinate(target_x, y); 
+					    int target_x = (pos.X() < Map::Inst()->Width() / 2) ? 0 : Map::Inst()->Width()-1;
+				        target = Coordinate(target_x, pos.Y()); 
 					}
-					if (Map::Inst()->IsWalkable(target.X(), target.Y(), static_cast<void*>(this)))
+					if (Map::Inst()->IsWalkable(target, static_cast<void*>(this)))
 						currentJob().lock()->tasks[taskIndex] = Task(MOVE, target);
 					else
 						currentJob().lock()->tasks[taskIndex] = Task(MOVENEAR, target);
@@ -1092,7 +1086,7 @@ CONTINUEEAT:
 				break;
 
 			case BOGIRON:
-				if (Map::Inst()->GetType(x, y) == TILEBOG) {
+				if (Map::Inst()->GetType(pos) == TILEBOG) {
 					AddEffect(WORKING);
 					if (Random::Generate(UPDATES_PER_SECOND * 15 - 1) == 0) {
 						bool stockpile = false;
@@ -1178,8 +1172,7 @@ CONTINUEEAT:
 						break;
 					}
 					
-					boost::weak_ptr<WaterNode> wnode = Map::Inst()->GetWater(currentTarget().X(), 
-						currentTarget().Y());
+					boost::weak_ptr<WaterNode> wnode = Map::Inst()->GetWater(currentTarget());
 					if (wnode.lock() && wnode.lock()->Depth() > 0 && cont->ContainsFilth() == 0) {
 						int waterAmount = std::min(50, wnode.lock()->Depth());
 						wnode.lock()->Depth(wnode.lock()->Depth()-waterAmount);
@@ -1188,8 +1181,7 @@ CONTINUEEAT:
 						break;
 					}
 
-					boost::weak_ptr<FilthNode> fnode = Map::Inst()->GetFilth(currentTarget().X(),
-						currentTarget().Y());
+					boost::weak_ptr<FilthNode> fnode = Map::Inst()->GetFilth(currentTarget());
 					if (fnode.lock() && fnode.lock()->Depth() > 0 && cont->ContainsWater() == 0) {
 						int filthAmount = std::min(3, fnode.lock()->Depth());
 						fnode.lock()->Depth(fnode.lock()->Depth()-filthAmount);
@@ -1228,8 +1220,7 @@ CONTINUEEAT:
 						}
 						TaskFinished(TASKSUCCESS);
 						break;
-					} else if (currentTarget().X() >= 0 && currentTarget().Y() >= 0 && 
-						currentTarget().X() < Map::Inst()->Width() && currentTarget().Y() < Map::Inst()->Height()) {
+					} else if (Map::Inst()->IsInside(currentTarget())) {
 							if (sourceContainer->ContainsWater() > 0) {
 								Game::Inst()->CreateWater(currentTarget(), sourceContainer->ContainsWater());
 								sourceContainer->RemoveWater(sourceContainer->ContainsWater());
@@ -1255,8 +1246,8 @@ CONTINUEEAT:
 					AddEffect(WORKING);
 					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					if (++timer >= 50) {
-						Map::Inst()->SetLow(currentTarget().X(), currentTarget().Y(), true);
-						Map::Inst()->ChangeType(currentTarget().X(), currentTarget().Y(), TILEDITCH);
+						Map::Inst()->SetLow(currentTarget(), true);
+						Map::Inst()->ChangeType(currentTarget(), TILEDITCH);
 						int amount = 0;
 						int chance = Random::Generate(9);
 						if (chance < 4) amount = 1;
@@ -1326,7 +1317,7 @@ CONTINUEEAT:
 
 			case FILLDITCH:
 				if (carried.lock() && carried.lock()->IsCategory(Item::StringToItemCategory("earth"))) {
-					if (Map::Inst()->GetType(currentTarget().X(), currentTarget().Y()) != TILEDITCH) {
+					if (Map::Inst()->GetType(currentTarget()) != TILEDITCH) {
 						TaskFinished(TASKFAILFATAL, "(FILLDITCH)Target not a ditch");
 						break;
 					}
@@ -1342,7 +1333,7 @@ CONTINUEEAT:
 							Game::Inst()->RemoveItem(carried);
 							carried.reset();
 
-							Map::Inst()->ChangeType(currentTarget().X(), currentTarget().Y(), TILEMUD);
+							Map::Inst()->ChangeType(currentTarget(), TILEMUD);
 
 							TaskFinished(TASKSUCCESS);
 							break;
@@ -1367,19 +1358,21 @@ CONTINUEEAT:
 				if (Random::Generate(75) == 0) GoBerserk();
 			} else	if (HasEffect(PANIC)) {
 				JobManager::Inst()->NPCNotWaiting(uid);
-				if (jobs.empty() && threatLocation.X() != -1 && threatLocation.Y() != -1) {
+				if (jobs.empty() && threatLocation != undefined) {
 					boost::shared_ptr<Job> fleeJob(new Job("Flee"));
 					fleeJob->internal = true;
+					int x = pos.X(), y = pos.Y();
 					int dx = x - threatLocation.X();
 					int dy = y - threatLocation.Y();
-					if (Map::Inst()->IsWalkable(x + dx, y + dy, (void *)this)) {
-						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y+dy)));
+					Coordinate t1(x+dx,y+dy),t2(x+dx,y),t3(x,y+dy);
+					if (Map::Inst()->IsWalkable(t1, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, t1));
 						jobs.push_back(fleeJob);
-					} else if (Map::Inst()->IsWalkable(x + dx, y, (void *)this)) {
-						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x+dx,y)));
+					} else if (Map::Inst()->IsWalkable(t2, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, t2));
 						jobs.push_back(fleeJob);
-					} else if (Map::Inst()->IsWalkable(x, y + dy, (void *)this)) {
-						fleeJob->tasks.push_back(Task(MOVE, Coordinate(x,y+dy)));
+					} else if (Map::Inst()->IsWalkable(t3, (void *)this)) {
+						fleeJob->tasks.push_back(Task(MOVE, t3));
 						jobs.push_back(fleeJob);
 					}
 				}
@@ -1393,9 +1386,9 @@ CONTINUEEAT:
 					} else {
 						Coordinate randomLocation = Camp::Inst()->GetRandomSpot();
 						idleJob->tasks.push_back(Task(MOVENEAR, 
-							randomLocation.X() != -1 ? randomLocation : Camp::Inst()->Center()));
+							randomLocation != undefined ? randomLocation : Camp::Inst()->Center()));
 					}
-					if (Map::Inst()->IsTerritory(x,y)) run = false;
+					if (Map::Inst()->IsTerritory(pos)) run = false;
 				} else {
 					idleJob->tasks.push_back(Task(MOVENEAR, Position()));
 					run = false;
@@ -1427,7 +1420,6 @@ void NPC::StartJob(boost::shared_ptr<Job> job) {
 }
 
 TaskResult NPC::Move(TaskResult oldResult) {
-	int moveX,moveY;
 	if (run)
 		nextMove += effectiveStats[MOVESPEED];
 	else {
@@ -1440,28 +1432,30 @@ TaskResult NPC::Move(TaskResult oldResult) {
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
 			if (pathIndex < path->size() && pathIndex >= 0) {
-				path->get(pathIndex, &moveX, &moveY); //Get next move
+				//Get next move
+				Coordinate move;
+				path->get(pathIndex, move.Xptr(), move.Yptr());
 
-				if (pathIndex != path->size()-1 && Map::Inst()->NPCList(moveX, moveY)->size() > 0) {
+				if (pathIndex != path->size()-1 && Map::Inst()->NPCList(move)->size() > 0) {
 					//Our next move target has an npc on it, and it isn't our target
-					int nextX, nextY;
-					path->get(pathIndex+1, &nextX, &nextY);
+					Coordinate next;
+					path->get(pathIndex+1, next.Xptr(), next.Yptr());
 					/*Find a new target that is adjacent to our current, next, and the next after targets
 					Effectively this makes the npc try and move around another npc, instead of walking onto
 					the same tile and slowing down*/
-					Map::Inst()->FindEquivalentMoveTarget(x, y, moveX, moveY, nextX, nextY, (void*)this);
+					Map::Inst()->FindEquivalentMoveTarget(pos, move, next, static_cast<void*>(this));
 				}
 
 				//If we're about to step on a dangerous tile that we didn't plan to, repath
-				if (!pathIsDangerous && Map::Inst()->IsDangerous(moveX, moveY, faction)) return TASKFAILNONFATAL;
+				if (!pathIsDangerous && Map::Inst()->IsDangerous(move, faction)) return TASKFAILNONFATAL;
 
-				if (Map::Inst()->IsWalkable(moveX, moveY, (void*)this)) { //If the tile is walkable, move there
-					Position(Coordinate(moveX,moveY));
-					Map::Inst()->WalkOver(moveX, moveY);
+				if (Map::Inst()->IsWalkable(move, static_cast<void*>(this))) { //If the tile is walkable, move there
+					Position(move);
+					Map::Inst()->WalkOver(move);
 					++pathIndex;
 				} else { //Encountered an obstacle. Fail if the npc can't tunnel
-					if (IsTunneler() && Map::Inst()->GetConstruction(moveX, moveY) >= 0) {
-						Hit(Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(moveX, moveY)));
+					if (IsTunneler() && Map::Inst()->GetConstruction(move) >= 0) {
+						Hit(Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(move)));
 						return TASKCONTINUE;
 					}
 					return TASKFAILNONFATAL;
@@ -1483,26 +1477,26 @@ void NPC::findPath(Coordinate target) {
 	pathIndex = 0;
 	
 	delete path;
-	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), (void*)this);
+	path = new TCODPath(Map::Inst()->Width(), Map::Inst()->Height(), Map::Inst(), static_cast<void*>(this));
 
 	threadCountMutex.lock();
 	if (pathingThreadCount < 12) {
 		++pathingThreadCount;
 		threadCountMutex.unlock();
 		pathMutex.unlock();
-		boost::thread pathThread(boost::bind(tFindPath, path, x, y, target.X(), target.Y(), this, true));
+		boost::thread pathThread(boost::bind(tFindPath, path, pos.X(), pos.Y(), target.X(), target.Y(), this, true));
 	} else {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
-		tFindPath(path, x, y, target.X(), target.Y(), this, false);
+		tFindPath(path, pos.X(), pos.Y(), target.X(), target.Y(), this, false);
 	}
 }
 
 bool NPC::IsPathWalkable() {
 	for (int i = 0; i < path->size(); i++) {
-		int x,y;
-		path->get(i, &x, &y);
-		if (!Map::Inst()->IsWalkable(x, y, (void*)this)) return false;
+		Coordinate p;
+		path->get(i, p.Xptr(), p.Yptr());
+		if (!Map::Inst()->IsWalkable(p, static_cast<void*>(this))) return false;
 	}
 	return true;
 }
@@ -1511,8 +1505,8 @@ void NPC::speed(unsigned int value) {baseStats[MOVESPEED]=value;}
 unsigned int NPC::speed() const {return effectiveStats[MOVESPEED];}
 
 void NPC::Draw(Coordinate upleft, TCODConsole *console) {
-	int screenx = x - upleft.X();
-	int screeny = y - upleft.Y();
+	int screenx = (pos - upleft).X();
+	int screeny = (pos - upleft).Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		if (statusGraphicCounter < 5 || statusEffectIterator == statusEffects.end()) {
 			console->putCharEx(screenx, screeny, _graphic, _color, _bgcolor);
@@ -1539,7 +1533,7 @@ int NPC::GetGraphicsHint() const { return NPC::Presets[type].graphicsHint; }
 bool NPC::Expert() const {return expert;}
 void NPC::Expert(bool value) {expert = value;}
 
-Coordinate NPC::Position() const {return Coordinate(x,y);}
+Coordinate NPC::Position() const {return pos;}
 
 bool NPC::Dead() const { return dead; }
 void NPC::Kill(std::string deathMessage) {
@@ -1570,7 +1564,7 @@ void NPC::Kill(std::string deathMessage) {
 			inventory->RemoveItem(witem);
 		}
 
-		if (deathMessage.length() > 0) Announce::Inst()->AddMsg(deathMessage, factionPtr->IsFriendsWith(PLAYERFACTION) ? TCODColor::red : TCODColor::brass, Position());
+		if (deathMessage.length() > 0) Announce::Inst()->AddMsg(deathMessage, (factionPtr->IsFriendsWith(PLAYERFACTION) ? TCODColor::red : TCODColor::brass), Position());
 		
 		Stats::Inst()->deaths[NPC::NPCTypeToString(type)] += 1;
 		Stats::Inst()->AddPoints(NPC::Presets[type].health);
@@ -1596,7 +1590,7 @@ void NPC::DropItem(boost::weak_ptr<Item> witem) {
 }
 
 Coordinate NPC::currentTarget() const {
-	if (currentTask()->target == Coordinate(-1,-1) && foundItem.lock()) {
+	if (currentTask()->target == undefined && foundItem.lock()) {
 		return foundItem.lock()->Position();
 	}
 	return currentTask()->target;
@@ -1614,10 +1608,11 @@ void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool th
 	boost::shared_lock<boost::shared_mutex> readCacheLock(Map::Inst()->cacheMutex);
 	npc->nopath = !path->compute(x0, y0, x1, y1);
 
+	//TODO factorize with path walkability test
 	for (int i = 0; i < path->size(); ++i) {
-		int pathX, pathY;
-		path->get(i, &pathX, &pathY);
-		if (Map::Inst()->IsDangerousCache(pathX, pathY, npc->faction)) {
+		Coordinate p;
+		path->get(i, p.Xptr(), p.Yptr());
+		if (Map::Inst()->IsDangerousCache(p, npc->faction)) {
 			npc->pathIsDangerous = true;
 			break;//One dangerous tile = whole path considered dangerous
 		}
@@ -1693,18 +1688,20 @@ bool NPC::GetSquadJob(boost::shared_ptr<NPC> npc) {
 
 		switch (squad->GetOrder(npc->orderIndex)) { //GetOrder handles incrementing orderIndex
 		case GUARD:
-			if (squad->TargetCoordinate(npc->orderIndex).X() >= 0) {
+			if (squad->TargetCoordinate(npc->orderIndex) != undefined) {
 				if (squad->Weapon() == Item::StringToItemCategory("Ranged weapon")) {
-					Coordinate position = Map::Inst()->FindRangedAdvantage(squad->TargetCoordinate(npc->orderIndex));
-					if (position.X() >= 0) {
-						newJob->tasks.push_back(Task(MOVE, position));
-						newJob->tasks.push_back(Task(WAIT, Coordinate(5*15)));
+					Coordinate p = Map::Inst()->FindRangedAdvantage(squad->TargetCoordinate(npc->orderIndex));
+					if (p != undefined) {
+						newJob->tasks.push_back(Task(MOVE, p));
+						//TODO remove WAIT hack
+						newJob->tasks.push_back(Task(WAIT, Coordinate(5*15, 0)));
 					}
 				}
 
 				if (newJob->tasks.empty()) {
 					newJob->tasks.push_back(Task(MOVENEAR, squad->TargetCoordinate(npc->orderIndex)));
 					//WAIT waits Coordinate.x / 5 seconds
+					//TODO remove WAIT hack
 					newJob->tasks.push_back(Task(WAIT, Coordinate(5*5, 0)));
 				}
 
@@ -1763,7 +1760,7 @@ void NPC::PlayerNPCReact(boost::shared_ptr<NPC> npc) {
 			while (!npc->jobs.empty()) npc->TaskFinished(TASKFAILNONFATAL, "(FAIL)Chickenheart");
 			boost::shared_ptr<Job> runAroundLikeAHeadlessChickenJob(new Job("Aaaaaaaah!!"));
 			for (int i = 0; i < 30; ++i)
-				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, npc->Position() + Coordinate(Random::Generate(-2, 2), Random::Generate(-2, 2))));
+				runAroundLikeAHeadlessChickenJob->tasks.push_back(Task(MOVE, Random::ChooseInRadius(npc->Position(), 2)));
 			runAroundLikeAHeadlessChickenJob->internal = true;
 			npc->jobs.push_back(runAroundLikeAHeadlessChickenJob);
 			npc->AddEffect(PANIC);
@@ -1968,8 +1965,8 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
 					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
 						Coordinate tar;
-						tar.X((npc->Position().X() - x) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
-						tar.Y((npc->Position().Y() - y) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
+						tar.X((npc->Position().X() - Position().X()) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
+						tar.Y((npc->Position().Y() - Position().Y()) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
 						npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
 						npc->pathIndex = -1;
 					}
@@ -2413,14 +2410,13 @@ void NPC::UpdateVelocity() {
 			nextVelocityMove -= 100;
 			if (flightPath.size() > 0) {
 				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
-					int tx = flightPath.back().coord.X();
-					int ty = flightPath.back().coord.Y();
-					if (Map::Inst()->BlocksWater(tx,ty)) { //We've hit an obstacle
+					Coordinate t = flightPath.back().coord;
+					if (Map::Inst()->BlocksWater(t)) { //We've hit an obstacle
 						health -= velocity/5;
 						AddEffect(CONCUSSION);
 
-						if (Map::Inst()->GetConstruction(tx,ty) > -1) {
-							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
+						if (Map::Inst()->GetConstruction(t) > -1) {
+							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(t)).lock()) {
 								Attack attack;
 								attack.Type(DAMAGE_BLUNT);
 								TCOD_dice_t damage;
@@ -2436,7 +2432,7 @@ void NPC::UpdateVelocity() {
 						flightPath.clear();
 						return;
 					}
-					if (Map::Inst()->NPCList(tx,ty)->size() > 0 && Random::Generate(9) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+					if (Map::Inst()->NPCList(t)->size() > 0 && Random::Generate(9) < (signed int)(2 + Map::Inst()->NPCList(t)->size())) {
 						health -= velocity/5;
 						AddEffect(CONCUSSION);
 						SetVelocity(0);
@@ -2455,12 +2451,13 @@ void NPC::UpdateVelocity() {
 			} else SetVelocity(0);
 		}
 	} else { //We're not hurtling through air so let's tumble around if we're stuck on unwalkable terrain
-		if (!Map::Inst()->IsWalkable(x, y, (void*)this)) {
+		if (!Map::Inst()->IsWalkable(pos, static_cast<void*>(this))) {
 			for (int radius = 1; radius < 10; ++radius) {
-				for (unsigned int xi = x - radius; xi <= x + radius; ++xi) {
-					for (unsigned int yi = y - radius; yi <= y + radius; ++yi) {
-						if (Map::Inst()->IsWalkable(xi, yi, (void*)this)) {
-							Position(Coordinate(xi, yi));
+				for (int ix = pos.X() - radius; ix <= pos.X() + radius; ++ix) {
+					for (int iy = pos.Y() - radius; iy <= pos.Y() + radius; ++iy) {
+						Coordinate p(ix, iy);
+						if (Map::Inst()->IsWalkable(p, static_cast<void*>(this))) {
+							Position(p);
 							return;
 						}
 					}
@@ -2532,65 +2529,83 @@ void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
 bool NPC::IsTunneler() const { return isTunneler; }
 
 void NPC::ScanSurroundings(bool onlyHostiles) {
+	/* The algorithm performs in the following, slightly wrong, way:
+
+	   - for each point B at the border of the rectangle at LOS_DISTANCE of the current position C
+	     - for each point P on a line from C to B (from the inside, outwards)
+		   - if there is a non-friend NPC on P, update the threat location
+
+	   This means that, depending on the order of traversal of the rectangle border, the final
+	   threatLocation may not be the closest non-friend NPC: on each line, the threat location was
+	   set to the farthest non-friend NPC.
+
+	   But that's ok, as 'gencontain' explains: « It's not like it matters that much anyway. What's
+	   important is that a cowardly npc runs away from some threat that it sees, not that they
+	   prioritize threats accurately. A goblin seeing a threat further away and running blindly into
+	   a closer one sounds like something a goblin would do. »
+
+	   If you're not happy with that, just go play chess!
+	*/
 	adjacentNpcs.clear();
 	nearNpcs.clear();
 	nearConstructions.clear();
 	threatLocation = Coordinate(-1,-1);
 	seenFire = false;
 	bool skipPosition = false; //We should skip checking this npc's position after the first time
-	for (int endx = std::max((signed int)x - LOS_DISTANCE, 0); endx <= std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1); endx += 2) {
-		for (int endy = std::max((signed int)y - LOS_DISTANCE, 0); endy <= std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1); endy += 2) {
-			if (endx == std::max((signed int)x - LOS_DISTANCE, 0) || endx == std::min((signed int)x + LOS_DISTANCE, Map::Inst()->Width()-1)
-				|| endy == std::max((signed int)y - LOS_DISTANCE, 0) || endy == std::min((signed int)y + LOS_DISTANCE, Map::Inst()->Height()-1)) {
-					int tx = x;
-					int ty = y;
-					int adjacent = 2; //We're adjacent for the first two iterations
-					TCODLine::init(tx, ty, endx, endy);
+	Coordinate low = Map::Inst()->Shrink(pos - LOS_DISTANCE);
+	Coordinate high = Map::Inst()->Shrink(pos + LOS_DISTANCE);
+	for (int endx = low.X(); endx < high.X(); endx += 2) {
+		for (int endy = low.Y(); endy < high.Y(); endy += 2) {
+			Coordinate end(endx, endy);
+			if (end.onRectangleEdges(low, high)) {
+				int adjacent = 2; //We're going outwards, the first two iterations are considered adjacent to the starting point
 
-					if (skipPosition) {
-						TCODLine::step(&tx, &ty);
-						--adjacent;
+				Coordinate p = pos;
+				TCODLine::init(p.X(), p.Y(), end.X(), end.Y());
+
+				if (skipPosition) {
+					TCODLine::step(p.Xptr(), p.Yptr());
+					--adjacent;
+				}
+				skipPosition = true;
+
+				do {
+					/*Check constructions before checking for lightblockage because we can see a wall
+					  even though we can't see through it*/
+					int constructUid = Map::Inst()->GetConstruction(p);
+					if (constructUid >= 0) {
+						nearConstructions.push_back(Game::Inst()->GetConstruction(constructUid));
 					}
-					skipPosition = true;
-
-					do {
-						/*Check constructions before checking for lightblockage because we can see a wall
-						even though we can't see through it*/
-						int constructUid = Map::Inst()->GetConstruction(tx,ty);
-						if (constructUid >= 0) {
-							nearConstructions.push_back(Game::Inst()->GetConstruction(constructUid));
-						}
-
-						//Stop moving along this line if our view is blocked
-						if (Map::Inst()->BlocksLight(tx,ty) && GetHeight() < ENTITYHEIGHT) break;
-
-						//Add all the npcs on this tile, or only hostiles if that boolean is set
-						for (std::set<int>::iterator npci = Map::Inst()->NPCList(tx,ty)->begin(); npci != Map::Inst()->NPCList(tx,ty)->end(); ++npci) {
-							if (*npci != uid) {
-								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*npci);
-								if (!factionPtr->IsFriendsWith(npc->GetFaction())) threatLocation = Coordinate(tx,ty);
-								if (!onlyHostiles || 
-									(onlyHostiles && !factionPtr->IsFriendsWith(npc->GetFaction()))) {
-										nearNpcs.push_back(npc);
-										if (adjacent-- > 0)
-											adjacentNpcs.push_back(npc);
-								}
+					
+					//Stop moving along this line if our view is blocked
+					if (Map::Inst()->BlocksLight(p) && GetHeight() < ENTITYHEIGHT) break;
+					
+					//Add all the npcs on this tile, or only hostiles if that boolean is set
+					for (std::set<int>::iterator npci = Map::Inst()->NPCList(p)->begin(); npci != Map::Inst()->NPCList(p)->end(); ++npci) {
+						if (*npci != uid) {
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*npci);
+							if (!factionPtr->IsFriendsWith(npc->GetFaction())) threatLocation = Coordinate(p);
+							if (!onlyHostiles ||!factionPtr->IsFriendsWith(npc->GetFaction())) {
+								nearNpcs.push_back(npc);
+								if (adjacent-- > 0)
+									adjacentNpcs.push_back(npc);
 							}
 						}
-
-						//Only care about fire if we're not flying and/or not effectively immune
-						if (!HasEffect(FLYING) && Map::Inst()->GetFire(tx,ty).lock()) {
-							if (effectiveResistances[FIRE_RES] < 90) {
-								threatLocation = Coordinate(tx,ty);
-								seenFire = true;
-							}
+					}
+					
+					//Only care about fire if we're not flying and/or not effectively immune
+					if (!HasEffect(FLYING) && Map::Inst()->GetFire(p).lock()) {
+						if (effectiveResistances[FIRE_RES] < 90) {
+							threatLocation = p;
+							seenFire = true;
 						}
-
-						/*Stop if we already see many npcs, otherwise this can start to bog down in
-						high traffic places*/
-						if (adjacent <= 0 && nearNpcs.size() > 16) break;
-
-					} while(!TCODLine::step(&tx, &ty));
+					}
+					
+					/*Stop if we already see many npcs, otherwise this can start to bog down in
+					  high traffic places*/
+					if (adjacent <= 0 && nearNpcs.size() > 16) break;
+					
+				} while (!TCODLine::step(p.Xptr(), p.Yptr()));
 			}
 		}
 	}
@@ -2626,12 +2641,12 @@ void NPC::GoBerserk() {
 		inventory->RemoveItem(carriedItem);
 		carriedItem->PutInContainer();
 		carriedItem->Position(Position());
-		Coordinate target(-1,-1);
+		Coordinate target = undefined;
 		if (!nearNpcs.empty()) {
 			boost::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
 			if (creature) target = creature->Position();
 		}
-		if (target.X() == -1) target = Coordinate(Random::Generate(x-7, x+7), Random::Generate(y-7, y+7));
+		if (target == undefined) target = Random::ChooseInRadius(Position(), 7);
 		carriedItem->CalculateFlightPath(target, 50, GetHeight());
 	}
 	carried.reset();
@@ -2729,7 +2744,7 @@ void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
 	}
 }
 
-void NPC::DumpContainer(Coordinate location) {
+void NPC::DumpContainer(Coordinate p) {
 	boost::shared_ptr<Container> sourceContainer;
 	if (carried.lock() && (carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
 		carried.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
@@ -2740,15 +2755,14 @@ void NPC::DumpContainer(Coordinate location) {
 	}
 
 	if (sourceContainer) {
-		if (location.X() >= 0 && location.Y() >= 0 && 
-			location.X() < Map::Inst()->Width() && location.Y() < Map::Inst()->Height()) {
-				if (sourceContainer->ContainsWater() > 0) {
-					Game::Inst()->CreateWater(location, sourceContainer->ContainsWater());
-					sourceContainer->RemoveWater(sourceContainer->ContainsWater());
-				} else {
-					Game::Inst()->CreateFilth(location, sourceContainer->ContainsFilth());
-					sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
-				}
+		if (Map::Inst()->IsInside(p)) {
+			if (sourceContainer->ContainsWater() > 0) {
+				Game::Inst()->CreateWater(p, sourceContainer->ContainsWater());
+				sourceContainer->RemoveWater(sourceContainer->ContainsWater());
+			} else {
+				Game::Inst()->CreateFilth(p, sourceContainer->ContainsFilth());
+				sourceContainer->RemoveFilth(sourceContainer->ContainsFilth());
+			}
 		}
 	}
 }
@@ -2773,7 +2787,7 @@ void NPC::ValidateCurrentJob() {
 
 			case POUR:
 				if (!boost::iequals(jobs.front()->name, "Dump filth")) { //Filth dumping is the one time we want to pour liquid onto an unmarked tile
-					if (!jobs.front()->tasks[i].entity.lock() && !Map::Inst()->GroundMarked(jobs.front()->tasks[i].target.X(), jobs.front()->tasks[i].target.Y())) {
+					if (!jobs.front()->tasks[i].entity.lock() && !Map::Inst()->GroundMarked(jobs.front()->tasks[i].target)) {
 						TaskFinished(TASKFAILFATAL, "(POUR)Target does not exist");
 						return;
 					}
@@ -2817,6 +2831,7 @@ void NPC::TransmitEffect(StatusEffect effect) {
 	}
 }
 
+//TODO all those messages should be data-driven
 std::string NPC::GetDeathMsg() {
 	int choice = Random::Generate(5);
 	switch (choice) {
