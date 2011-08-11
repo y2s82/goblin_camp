@@ -822,6 +822,9 @@ void Map::load(InputArchive& ar, const unsigned int version) {
 				float heightMapValue;
 				ar & heightMapValue;
 				heightMap->setValue(x, y, heightMapValue);
+
+				//Mark every tile as changed so the cached map gets completely updated on load
+				changedTiles.insert(Coordinate(x,y));
 			}
 		}
 	}
