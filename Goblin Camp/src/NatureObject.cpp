@@ -1,4 +1,3 @@
-
 /* Copyright 2010-2011 Ilkka Halila
 This file is part of Goblin Camp.
 
