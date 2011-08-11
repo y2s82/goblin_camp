@@ -58,6 +58,35 @@ void SpawningPool::ToggleDumpFilth(SpawningPool* sp) { sp->dumpFilth = !sp->dump
 bool SpawningPool::DumpCorpses(SpawningPool* sp) { return sp->dumpCorpses; }
 void SpawningPool::ToggleDumpCorpses(SpawningPool* sp) { sp->dumpCorpses = !sp->dumpCorpses; }
 
+Coordinate SpawningPool::SpawnLocation()
+{
+	Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
+	std::random_shuffle(dirs,dirs+4); //shuffle to avoid predictability
+
+	for (int i = 3; i > 0; i--) {
+		int j = Random::Generate(i); //upto i
+		if (j < i) {
+			Direction tmp = dirs[j];
+			dirs[j] = dirs[i];
+			dirs[i] = tmp;
+		}
+	}
+
+	for (int x = a.X(); x <= b.X(); ++x) {
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			Coordinate p(x,y);
+			if (Map::Inst()->GetConstruction(p) == uid) {				
+				for (int i = 0; i < 4; ++i) {
+					Coordinate candidate = p + Coordinate::DirectionToCoordinate(dirs[i]);
+					if (Map::Inst()->IsWalkable(candidate))
+						return candidate;
+				}
+			}
+		}
+	}
+	return undefined;
+}
+
 void SpawningPool::Update() {
 	if (condition > 0) {
 
@@ -73,7 +102,7 @@ void SpawningPool::Update() {
 					filthDumpJob->tasks.push_back(Task(MOVEADJACENT, filthLocation));
 					filthDumpJob->tasks.push_back(Task(FILL, filthLocation));
 
-					if (filthLocation.X() != -1 && filthLocation.Y() != -1) {
+					if (filthLocation != undefined) {
 						filthDumpJob->tasks.push_back(Task(MOVEADJACENT, Position()));
 						filthDumpJob->tasks.push_back(Task(POUR, Position()));
 						filthDumpJob->tasks.push_back(Task(STOCKPILEITEM));
@@ -120,28 +149,8 @@ void SpawningPool::Update() {
 		}
 
 		if ((corpses*10) + filth > 10U) {
-			Coordinate spawnLocation = undefined;
-			for (int x = a.X(); x <= b.X(); ++x) {
-				for (int y = a.Y(); y <= b.Y(); ++y) {
-					if (Map::Inst()->GetConstruction(Coordinate(x,y)) == uid) {
-						if (Map::Inst()->IsWalkable(Coordinate(x-1,y))) {
-							spawnLocation = Coordinate(x-1,y);
-							break;
-						} else if (Map::Inst()->IsWalkable(Coordinate(x+1,y))) {
-							spawnLocation = Coordinate(x+1,y);
-							break;
-						} else if (Map::Inst()->IsWalkable(Coordinate(x,y+1))) {
-							spawnLocation = Coordinate(x,y+1);
-							break;
-						} else if (Map::Inst()->IsWalkable(Coordinate(x,y-1))) {
-							spawnLocation = Coordinate(x,y-1);
-							break;
-						}
-					}
-				}
-			}
-
-			if (spawnLocation.X() != -1 && spawnLocation.Y() != -1) {
+			Coordinate spawnLocation = SpawningPool::SpawnLocation();
+			if (spawnLocation != undefined) {
 				++spawns;
 
 				float goblinRatio = static_cast<float>(Game::Inst()->GoblinCount()) / Game::Inst()->OrcCount();
@@ -175,42 +184,25 @@ void SpawningPool::Update() {
 			Expand(false);
 			Game::Inst()->CreateFire(Random::ChooseInRectangle(a,b));
 			if (Random::Generate(9) == 0) {
-				Coordinate spawnLocation = undefined;
-				for (int x = a.X(); x <= b.X(); ++x) {
-					for (int y = a.Y(); y <= b.Y(); ++y) {
-						if (Map::Inst()->GetConstruction(Coordinate(x,y)) == uid) {
-							if (Map::Inst()->IsWalkable(Coordinate(x-1,y))) {
-								spawnLocation = Coordinate(x-1,y);
-								break;
-							} else if (Map::Inst()->IsWalkable(Coordinate(x+1,y))) {
-								spawnLocation = Coordinate(x+1,y);
-								break;
-							} else if (Map::Inst()->IsWalkable(Coordinate(x,y+1))) {
-								spawnLocation = Coordinate(x,y+1);
-								break;
-							} else if (Map::Inst()->IsWalkable(Coordinate(x,y-1))) {
-								spawnLocation = Coordinate(x,y-1);
-								break;
-							}
-						}
-					}
-				}
-
-				if (Random::Generate(20) == 0) Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
+				Coordinate spawnLocation = SpawningPool::SpawnLocation();
+				if (spawnLocation != undefined && Random::Generate(20) == 0)
+					Game::Inst()->CreateNPC(spawnLocation, NPC::StringToNPCType("fire elemental"));
 			}
 		}
 	}
 }
 
 void SpawningPool::Expand(bool message) {
+	Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
+	std::random_shuffle(dirs,dirs+4); //shuffle to avoid predictability
 	Coordinate location = undefined;
-	for (int i = 0; i < 10; ++i) {
-		location = Coordinate((a.X()-1) + Random::Generate(((b.X()-a.X())+3)), (a.Y()-1) + Random::Generate(((b.Y()-a.Y())+3)));
-		if (Map::Inst()->GetConstruction(location) != uid) {
-			if (Map::Inst()->GetConstruction(Coordinate(location.X()-1, location.Y())) == uid) break;
-			if (Map::Inst()->GetConstruction(Coordinate(location.X()+1, location.Y())) == uid) break;
-			if (Map::Inst()->GetConstruction(Coordinate(location.X(), location.Y()-1)) == uid) break;
-			if (Map::Inst()->GetConstruction(Coordinate(location.X(), location.Y()+1)) == uid) break;
+	for (int i = 0; location == undefined && i < 10; ++i) {
+		Coordinate candidate = Random::ChooseInRectangle(a-1, b+1);
+		//TODO factorize with IsAdjacent(p,uid) in StockPile; could go in Construction
+		if (Map::Inst()->GetConstruction(candidate) != uid) {
+			for (i = 0; i < 4; ++i)
+				if (Map::Inst()->GetConstruction(candidate + Coordinate::DirectionToCoordinate(dirs[i])) == uid)
+					location = candidate;
 		}
 		location = undefined;
 	}
@@ -218,10 +210,8 @@ void SpawningPool::Expand(bool message) {
 	if (location != undefined) {
 		++expansion;
 		if (message) Announce::Inst()->AddMsg("The spawning pool expands", TCODColor::darkGreen, location);
-		if (location.X() < a.X()) a.X(location.X());
-		if (location.Y() < a.Y()) a.Y(location.Y());
-		if (location.X() > b.X()) b.X(location.X());
-		if (location.Y() > b.Y()) b.Y(location.Y());
+		a = Coordinate::min(a, location);
+		b = Coordinate::max(b, location);
 
 		//Swallow nature objects
 		if (Map::Inst()->GetNatureObject(location) >= 0) {
