@@ -50,7 +50,7 @@ private:
 public:
 	static Announce* Inst();
 	void Reset();
-	void AddMsg(std::string, TCODColor = TCODColor::white, Coordinate = Coordinate(-1, -1));
+	void AddMsg(std::string, TCODColor = TCODColor::white, const Coordinate& = undefined);
 	void Update();
 	MenuResult Update(int, int, bool);
 	void Draw(TCODConsole*);

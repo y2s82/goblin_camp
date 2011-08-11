@@ -17,17 +17,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
-
+#include "Coordinate.hpp"
 #include "data/Serialization.hpp"
-
-class Coordinate;
 
 #define RIVERDEPTH 5000
 
 class WaterNode : public boost::enable_shared_from_this<WaterNode> {
 	GC_SERIALIZABLE_CLASS
 	
-	int x, y;
+	Coordinate pos;
 	int depth;
 	int graphic;
 	TCODColor color;
@@ -37,8 +35,15 @@ class WaterNode : public boost::enable_shared_from_this<WaterNode> {
 	int filth;
 	bool coastal;
 public:
-	WaterNode(int x=0,int y=0,int depth=0,int time=0);
+	WaterNode(const Coordinate& pos = undefined, int depth = 0, int time = 0);
 	~WaterNode();
+
+	Coordinate Position();
+	void Position(const Coordinate&);
+	int X();
+	int Y();
+	void X(int);
+	void Y(int);
 
 	void Update();
 	void MakeInert();
@@ -46,7 +51,6 @@ public:
 	int Depth();
 	void Depth(int);
 	void UpdateGraphic();
-	Coordinate Position();
 	void AddFilth(int);
 	int GetFilth();
 	int GetGraphic();

@@ -80,28 +80,28 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	TCODConsole minimap(viewportW, viewportH);
 	for (int y = upleft.Y(); y < upleft.Y() + minimap.getHeight(); ++y) {
 		for (int x = upleft.X(); x < upleft.X() + minimap.getWidth(); ++x) {
-			if (x >= 0 && x < map->Width() && y >= 0 && y < map->Height()) {
-
-				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->GetGraphic(x,y), map->GetForeColor(x,y), map->GetBackColor(x,y));
+			Coordinate xy(x,y);
+			if (map->IsInside(xy)) {
+				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->GetGraphic(xy), map->GetForeColor(xy), map->GetBackColor(xy));
 
 				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
-					boost::weak_ptr<WaterNode> wwater = map->GetWater(x,y);
+					boost::weak_ptr<WaterNode> wwater = map->GetWater(xy);
 					if (boost::shared_ptr<WaterNode> water = wwater.lock()) {
 						if (water->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water->GetGraphic(), water->GetColor(), TCODColor::black);
 					}
-					boost::weak_ptr<FilthNode> wfilth = map->GetFilth(x,y);
+					boost::weak_ptr<FilthNode> wfilth = map->GetFilth(xy);
 					if (boost::shared_ptr<FilthNode> filth = wfilth.lock()) {
 						if (filth->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
 					}
-					int natNum = map->GetNatureObject(x,y);
+					int natNum = map->GetNatureObject(xy);
 					if (natNum >= 0) {
 						Game::Inst()->natureList[natNum]->Draw(upleft,&minimap);
 					}
 				}
 				if (map->GetOverlayFlags() & TERRITORY_OVERLAY) {
-					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(x,y) ? TCODColor(45,85,0) : TCODColor(80,0,0));
+					minimap.setCharBackground(x-screenDeltaX,y-screenDeltaY, map->IsTerritory(xy) ? TCODColor(45,85,0) : TCODColor(80,0,0));
 				}
 			}
 			else {

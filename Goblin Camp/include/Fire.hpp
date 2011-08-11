@@ -18,27 +18,27 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/enable_shared_from_this.hpp>
 #include <libtcod.hpp>
 
-#include "Coordinate.hpp"
 #include "data/Serialization.hpp"
+#include "Coordinate.hpp"
 
 class Job;
 
 class FireNode : public boost::enable_shared_from_this<FireNode> {
 	GC_SERIALIZABLE_CLASS
 	
-	int x, y;
+	Coordinate pos;
 	int graphic;
 	TCODColor color;
 	int temperature;
 	boost::weak_ptr<Job> waterJob;
 
 public:
-	FireNode(int x=0,int y=0,int temperature=0);
+	FireNode(const Coordinate& = zero, int temperature = 0);
 	~FireNode();
 
 	void Update();
 	void Draw(Coordinate, TCODConsole*);
-	Coordinate GetPosition();
+	Coordinate Position();
 	void AddHeat(int);
 	int GetHeat();
 	void SetHeat(int);

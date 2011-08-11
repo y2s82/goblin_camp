@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Entity.hpp"
 #include "Attack.hpp"
 #include "data/Serialization.hpp"
+#include "Coordinate.hpp"
 
 typedef int SpellType;
 
@@ -52,7 +53,7 @@ class Spell : public Entity {
 	
 	static boost::unordered_map<std::string, SpellType> spellTypeNames;
 public:
-	Spell(Coordinate=Coordinate(0,0),int=0);
+	Spell(const Coordinate& = undefined, int = 0);
 	~Spell();
 
 	static std::vector<SpellPreset> Presets;

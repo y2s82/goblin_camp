@@ -25,13 +25,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "Entity.hpp"
 #include "Attack.hpp"
+#include "Coordinate.hpp"
 
 #include "data/Serialization.hpp"
 
 typedef int ItemCategory;
 typedef int ItemType;
-
-class Coordinate;
 
 class ItemCat {
 public:
@@ -104,7 +103,7 @@ protected:
 	int condition;
 	TCODColor color;
 	int graphic;
-	Item(Coordinate = Coordinate(0,0), ItemType = -1, int owner = -1,
+	Item(const Coordinate& = zero, ItemType = -1, int owner = -1,
 		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
 	boost::weak_ptr<Item> container;
 	bool internal;
@@ -130,12 +129,13 @@ public:
 
 	virtual ~Item();
 
+	virtual void Position(const Coordinate&);
+	virtual Coordinate Position();
+
 	int GetGraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
 	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
 	boost::weak_ptr<Item> ContainedIn();
-	virtual void Position(Coordinate);
-	virtual Coordinate Position();
 	ItemType Type();
 	int GetGraphic();
 	TCODColor Color();

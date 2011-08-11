@@ -145,7 +145,6 @@ void MainLoop() {
 	int targetMilli = 1000 / (UPDATES_PER_SECOND);
 	int startMilli = TCODSystem::getElapsedMilli();
 	while (game->Running()) {
-
 		if (Game::ToMainMenu()) {
 			Game::ToMainMenu(false);
 			return;
@@ -184,13 +183,8 @@ void StartNewGame() {
 
 	std::priority_queue<std::pair<int, Coordinate> > spawnCenterCandidates;
 
-	for (unsigned int i = 0; i < 20; ++i) {
-		std::pair<int,Coordinate> candidate(0, 
-			Coordinate(
-				Random::Generate(100, Map::Inst()->Width()  - 101),
-				Random::Generate(100, Map::Inst()->Height() - 101)
-			)
-		);
+	for (int tries = 0; tries < 20; ++tries) {
+		std::pair<int,Coordinate> candidate(0, Random::ChooseInExtent(zero+100, Map::Inst()->Extent() - 100));
 
 		int riverDistance = 1000, hillDistance = 1000;
 		int lineX, lineY;
@@ -217,11 +211,12 @@ void StartNewGame() {
 			int distance = 200;
 			TCODLine::init(lineX, lineY, candidate.second.X(), candidate.second.Y());
 			do {
-				if (lineX >= 0 && lineX < Map::Inst()->Width() && lineY >= 0 && lineY < Map::Inst()->Height()) {
-					if (Map::Inst()->GetType(lineX, lineY) == TILEDITCH || Map::Inst()->GetType(lineX, lineY) == TILERIVERBED) {
+				Coordinate line(lineX,lineY);
+				if (Map::Inst()->IsInside(line)) {
+					if (Map::Inst()->GetType(line) == TILEDITCH || Map::Inst()->GetType(line) == TILERIVERBED) {
 						if (distance < riverDistance) riverDistance = distance;
 						if (distance < 25) riverDistance = 2000;
-					} else if (Map::Inst()->GetType(lineX, lineY) == TILEROCK) {
+					} else if (Map::Inst()->GetType(line) == TILEROCK) {
 						if (distance < hillDistance) hillDistance = distance;
 					}
 				}
@@ -230,56 +225,54 @@ void StartNewGame() {
 		}
 
 		candidate.first = -hillDistance - riverDistance;
-		if (Map::Inst()->GetType(candidate.second.X(), candidate.second.Y()) != TILEGRASS) candidate.first -= 10000;
+		if (Map::Inst()->GetType(candidate.second) != TILEGRASS) candidate.first -= 10000;
 		spawnCenterCandidates.push(candidate);
 	}
 
-	Coordinate spawnTopCorner(spawnCenterCandidates.top().second.X()-20,spawnCenterCandidates.top().second.Y()-20);
-	Coordinate spawnBottomCorner(spawnCenterCandidates.top().second.X()+20,spawnCenterCandidates.top().second.Y()+20);
+	Coordinate spawnTopCorner = spawnCenterCandidates.top().second - 20;
+	Coordinate spawnBottomCorner = spawnCenterCandidates.top().second + 20;
 
 	//Clear starting area
 	for (int x = spawnTopCorner.X(); x < spawnBottomCorner.X(); ++x) {
 		for (int y = spawnTopCorner.Y(); y < spawnBottomCorner.Y(); ++y) {
-			if (Map::Inst()->GetNatureObject(x,y) >= 0 && Random::Generate(2) < 2) {
-				game->RemoveNatureObject(game->natureList[Map::Inst()->GetNatureObject(x,y)]);
+			Coordinate p(x,y);
+			if (Map::Inst()->GetNatureObject(p) >= 0 && Random::Generate(2) < 2) {
+				game->RemoveNatureObject(game->natureList[Map::Inst()->GetNatureObject(p)]);
 			}
 		}
 	}
 
-	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner+Coordinate(15,15), spawnBottomCorner-Coordinate(15,15));
-	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner+Coordinate(15,15), spawnBottomCorner-Coordinate(15,15));
+	//we use Top+15, Bottom-15 to restrict the spawning zone of goblin&orc to the very center, instead of spilled over the whole camp
+	game->CreateNPCs(15, NPC::StringToNPCType("goblin"), spawnTopCorner+15, spawnBottomCorner-15);
+	game->CreateNPCs(6, NPC::StringToNPCType("orc"), spawnTopCorner+15, spawnBottomCorner-15);
 
 	game->CreateItems(30, Item::StringToItemType("Bloodberry seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(5, Item::StringToItemType("Blueleaf seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(30, Item::StringToItemType("Nightbloom seed"), spawnTopCorner, spawnBottomCorner);
 	game->CreateItems(20, Item::StringToItemType("Bread"), spawnTopCorner, spawnBottomCorner);
 
-	Coordinate corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
-		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
-	Coordinate corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
-		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
-	while (!Map::Inst()->IsWalkable(corpseLoc1.X(), corpseLoc1.Y()) || !Map::Inst()->IsWalkable(corpseLoc2.X(), corpseLoc2.Y())) {
-		if (!Map::Inst()->IsWalkable(corpseLoc1.X(), corpseLoc1.Y())) corpseLoc1 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
-		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
-		if (!Map::Inst()->IsWalkable(corpseLoc2.X(), corpseLoc2.Y())) corpseLoc2 = Coordinate(spawnTopCorner.X() + Random::Generate(spawnBottomCorner.X() - spawnTopCorner.X() - 1),
-		spawnTopCorner.Y() + Random::Generate(spawnBottomCorner.Y() - spawnTopCorner.Y() - 1));
+	//we place two corpses on the map
+	Coordinate corpseLoc[2];
+	
+	//find suitable location
+	for (int c = 0; c < 2; ++c) {
+		Coordinate p;
+		do {
+			p = Random::ChooseInRectangle(spawnTopCorner, spawnBottomCorner);
+		} while(!Map::Inst()->IsWalkable(p));
+		corpseLoc[c] = p;
 	}
 
-	{
-		game->CreateItem(corpseLoc1, Item::StringToItemType("stone axe"));
-		game->CreateItem(corpseLoc2, Item::StringToItemType("stone axe"));
-		game->CreateItem(corpseLoc1, Item::StringToItemType("shovel"));
-		game->CreateItem(corpseLoc2, Item::StringToItemType("shovel"));
-		int corpseuid = game->CreateItem(corpseLoc1, Item::StringToItemType("corpse"));
+	//initialize corpses
+	for (int c = 0; c < 2; ++c) {
+		game->CreateItem(corpseLoc[c], Item::StringToItemType("stone axe"));
+		game->CreateItem(corpseLoc[c], Item::StringToItemType("shovel"));
+		int corpseuid = game->CreateItem(corpseLoc[c], Item::StringToItemType("corpse"));
 		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
 		corpse->Name("Corpse(Human woodsman)");
 		corpse->Color(TCODColor::white);
-		corpseuid = game->CreateItem(corpseLoc2, Item::StringToItemType("corpse"));
-		corpse = game->itemList[corpseuid];
-		corpse->Name("Corpse(Human woodsman)");
-		corpse->Color(TCODColor::white);
-		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc1.X() - 1 + Random::Generate(2), corpseLoc1.Y() - 1 + Random::Generate(2)));
-		for (int i = 0; i < 6; ++i) game->CreateBlood(Coordinate(corpseLoc2.X() - 1 + Random::Generate(2), corpseLoc2.Y() - 1 + Random::Generate(2)));
+		for (int i = 0; i < 6; ++i)
+			game->CreateBlood(Random::ChooseInRadius(corpseLoc[c], 2));
 	}
 
 	Camp::Inst()->SetCenter(spawnCenterCandidates.top().second);
@@ -528,6 +521,7 @@ void LoadMenu() {
 					TCODConsole::waitForKeypress(true);
 					return;
 				}
+
 				MainLoop();
 				break;
 			}

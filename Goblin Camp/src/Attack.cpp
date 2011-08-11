@@ -85,6 +85,7 @@ DamageType Attack::StringToDamageType(std::string type) {
 }
 
 std::string Attack::DamageTypeToString(DamageType type) {
+	//TODO (easy) use switch
 	if (type == DAMAGE_SLASH) {
 		return "slashing";
 	} else if (type == DAMAGE_PIERCE) {

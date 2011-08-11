@@ -36,12 +36,10 @@ name(vname),
 	graphicsHint(-1)
 {}
 
-Spell::Spell(Coordinate pos, int vtype) : Entity(),
+Spell::Spell(const Coordinate& pos, int vtype) : Entity(),
 	type(vtype), dead(false), immaterial(false)
 {
-	x = pos.X();
-	y = pos.Y();
-
+	Position(pos);
 	color = Spell::Presets[type].color;
 
 	//TODO: I don't like making special cases like this, perhaps a flag instead?
@@ -60,10 +58,10 @@ Spell::Spell(Coordinate pos, int vtype) : Entity(),
 Spell::~Spell() {}
 
 void Spell::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenx = x - upleft.X();
-	int screeny = y - upleft.Y();
+	int screenx = (pos - upleft).X();
+	int screeny = (pos - upleft).Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
+		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(pos));
 	}
 }
 
@@ -93,13 +91,12 @@ void Spell::UpdateVelocity() {
 			if (flightPath.size() > 0) {
 
 				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
-					int tx = flightPath.back().coord.X();
-					int ty = flightPath.back().coord.Y();
+					Coordinate t = flightPath.back().coord;
 
 					if (!immaterial) {
-						if (Map::Inst()->BlocksWater(tx,ty) || !Map::Inst()->IsWalkable(tx,ty)) { //We've hit an obstacle
-							if (Map::Inst()->GetConstruction(tx,ty) > -1) {
-								if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(tx,ty)).lock()) {
+						if (Map::Inst()->BlocksWater(t) || !Map::Inst()->IsWalkable(t)) { //We've hit an obstacle
+							if (Map::Inst()->GetConstruction(t) > -1) {
+								if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(t)).lock()) {
 									for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 										construct->Damage(&*attacki);
 									}
@@ -116,10 +113,10 @@ void Spell::UpdateVelocity() {
 							Impact(velocity);
 							return;
 						}
-						if (Map::Inst()->NPCList(tx,ty)->size() > 0) { //Hit a creature
-							if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(tx,ty)->size())) {
+						if (Map::Inst()->NPCList(t)->size() > 0) { //Hit a creature
+							if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(t)->size())) {
 
-								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(tx,ty)->begin());
+								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(t)->begin());
 								for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 									npc->Damage(&*attacki);
 								}

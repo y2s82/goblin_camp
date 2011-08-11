@@ -38,7 +38,7 @@ class Entity: public boost::enable_shared_from_this<Entity> {
 	GC_SERIALIZABLE_CLASS
 	
 protected:
-	unsigned int x, y;
+	Coordinate pos;
 	int uid;
 	int zone;
 	bool reserved;
@@ -51,13 +51,13 @@ protected:
 public:
 	Entity();
 	virtual ~Entity();
-	int X();
-	int Y();
-	int Uid();
-	static int uids;
+	virtual int X();
+	virtual int Y();
 	virtual Coordinate Position() const;
 	virtual Coordinate Center() const;
-	virtual void Position(Coordinate);
+	virtual void Position(const Coordinate& );
+	int Uid();
+	static int uids;
 	void Zone(int);
 	int Zone();
 	virtual void Reserve(bool);

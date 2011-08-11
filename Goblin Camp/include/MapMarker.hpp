@@ -31,7 +31,7 @@ class MapMarker {
 	TCODColor origColor, color;
 	int duration;
 	int graphic;
-	int x, y;
+	int x, y; //TODO switch to Coordinate
 	float counter;
 public:
 	MapMarker(MarkerType=FLASHINGMARKER, int graphic='?', Coordinate position=Coordinate(0,0), 
@@ -39,6 +39,7 @@ public:
 	bool Update();
 	int X() const;
 	int Y() const;
+	Coordinate Position() const;
 	int Graphic() const;
 	TCODColor Color() const;
 };

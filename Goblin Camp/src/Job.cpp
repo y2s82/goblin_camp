@@ -15,6 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#ifdef DEBUG
+#include<iostream>
+#endif
+
 #include <string>
 #include <libtcod.hpp>
 #include <boost/algorithm/string.hpp>
@@ -67,20 +71,23 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	paused(false),
 	waitingForRemoval(false),
 	reservedEntities(std::list<boost::weak_ptr<Entity> >()),
-	reservedSpot(boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(boost::weak_ptr<Stockpile>(), Coordinate(0,0), -1)),
+	reservedSpot(boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(boost::weak_ptr<Stockpile>(), zero, -1)),
 	attempts(0),
 	attemptMax(5),
 	connectedEntity(boost::weak_ptr<Entity>()),
 	reservedContainer(boost::weak_ptr<Container>()),
 	reservedSpace(0),
 	tool(-1),
-	markedGround(Coordinate(-1,-1)),
+	markedGround(undefined),
 	obeyTerritory(true),
 	fireAllowed(false),
 	name(value),
 	tasks(std::vector<Task>()),
 	internal(false)
 {
+#ifdef DEBUG
+	std::cout << "New Job: " << value << std::endl;
+#endif
 }
 
 Job::~Job() {
@@ -91,9 +98,8 @@ Job::~Job() {
 	if (reservedContainer.lock()) {
 		reservedContainer.lock()->ReserveSpace(false, reservedSpace);
 	}
-	if (markedGround.X() >= 0 && markedGround.X() < Map::Inst()->Width() &&
-		markedGround.Y() >= 0 && markedGround.Y() < Map::Inst()->Height()) {
-			Map::Inst()->Unmark(markedGround.X(), markedGround.Y());
+	if (Map::Inst()->IsInside(markedGround)) {
+			Map::Inst()->Unmark(markedGround);
 	}
 	for (std::list<int>::iterator marki = mapMarkers.begin(); marki != mapMarkers.end(); ++marki) {
 		Map::Inst()->RemoveMarker(*marki);
@@ -225,10 +231,9 @@ void Job::SetRequiredTool(ItemCategory item) { tool = item; }
 ItemCategory Job::GetRequiredTool() { return tool; }
 
 void Job::MarkGround(Coordinate ground) {
-	if (ground.X() >= 0 && ground.X() < Map::Inst()->Width() &&
-		ground.Y() >= 0 && ground.Y() < Map::Inst()->Height()) {
+	if (Map::Inst()->IsInside(ground)) {
 			markedGround = ground;
-			Map::Inst()->Mark(ground.X(), ground.Y());
+			Map::Inst()->Mark(ground);
 	}
 }
 
@@ -238,15 +243,15 @@ bool Job::OutsideTerritory() {
 	if (obeyTerritory) {
 		for (std::vector<Task>::iterator task = tasks.begin(); task != tasks.end(); ++task) {
 			Coordinate coord = task->target;
-			if (coord.X() < 0 || coord.X() >= Map::Inst()->Width() || coord.Y() < 0 || coord.Y() >= Map::Inst()->Height()) {
+			if (!Map::Inst()->IsInside(coord)) {
 				if (task->entity.lock()) {
 					coord = task->entity.lock()->Position();
 				}
 			}
 
-			if (coord.X() >= 0 && coord.X() < Map::Inst()->Width() && coord.Y() >= 0 && coord.Y() < Map::Inst()->Height()) {
-				if (!Map::Inst()->IsTerritory(coord.X(), coord.Y())) return true;
-			}
+			if (Map::Inst()->IsInside(coord))
+				if (!Map::Inst()->IsTerritory(coord))
+					return true;
 		}
 	}
 	return false;
@@ -261,14 +266,14 @@ bool Job::InvalidFireAllowance() {
 	if (!fireAllowed) {
 		for (std::vector<Task>::iterator task = tasks.begin(); task != tasks.end(); ++task) {
 			Coordinate coord = task->target;
-			if (coord.X() < 0 || coord.X() >= Map::Inst()->Width() || coord.Y() < 0 || coord.Y() >= Map::Inst()->Height()) {
+			if (!Map::Inst()->IsInside(coord)) {
 				if (task->entity.lock()) {
 					coord = task->entity.lock()->Position();
 				}
 			}
 
-			if (coord.X() >= 0 && coord.X() < Map::Inst()->Width() && coord.Y() >= 0 && coord.Y() < Map::Inst()->Height()) {
-				if (Map::Inst()->GetFire(coord.X(), coord.Y()).lock()) return true;
+			if (Map::Inst()->IsInside(coord)) {
+				if (Map::Inst()->GetFire(coord).lock()) return true;
 			}
 		}
 	}
@@ -287,7 +292,7 @@ void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
 	bool waterContainerFound = false;
 	if (waterItem) {
 		int distanceToWater = INT_MAX;
-		if (waterLocation.X() != -1) distanceToWater = Distance(location, waterLocation);
+		if (waterLocation != undefined) distanceToWater = Distance(location, waterLocation);
 		int distanceToItem = Distance(location, waterItem->Position());
 
 		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
@@ -305,13 +310,13 @@ void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
 		}
 	}
 
-	if (!waterContainerFound && waterLocation.X() != -1) {
+	if (!waterContainerFound && waterLocation != undefined) {
 		job->SetRequiredTool(Item::StringToItemCategory("Bucket"));
 		job->tasks.push_back(Task(MOVEADJACENT, waterLocation));
 		job->tasks.push_back(Task(FILL, waterLocation));
 	}
 
-	if (waterContainerFound || waterLocation.X() != -1) {
+	if (waterContainerFound || waterLocation != undefined) {
 		job->tasks.push_back(Task(MOVEADJACENT, location));
 		job->tasks.push_back(Task(POUR, location));
 		if (waterContainerFound) job->tasks.push_back(Task(STOCKPILEITEM));
