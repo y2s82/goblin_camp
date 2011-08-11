@@ -48,9 +48,9 @@ SquadsDialog* SquadsDialog::SquadDialog() {
 		squadDialog->rightFrame->AddComponent(new Label("Name (required)", 12, 2));
 		squadDialog->rightFrame->AddComponent(new TextBox(1, 3, 22, &(squadDialog->squadName)));
 		squadDialog->rightFrame->AddComponent(new Label("Members", 12, 5));
-		squadDialog->rightFrame->AddComponent(new Spinner(1, 6, 22, &(squadDialog->squadMembers), 1, INT_MAX));
+		squadDialog->rightFrame->AddComponent(new Spinner(1, 6, 22, &(squadDialog->squadMembers), 1, std::numeric_limits<int>::max()));
 		squadDialog->rightFrame->AddComponent(new Label("Priority", 12, 8));
-		squadDialog->rightFrame->AddComponent(new Spinner(1, 9, 22, &(squadDialog->squadPriority), 0, INT_MAX));
+		squadDialog->rightFrame->AddComponent(new Spinner(1, 9, 22, &(squadDialog->squadPriority), 0, std::numeric_limits<int>::max()));
 		Button *create = new Button("Create", boost::bind(&SquadsDialog::CreateSquad, squadDialog), 2, 11, 10);
 		create->SetVisible(boost::bind(&SquadsDialog::SquadSelected, squadDialog, false));
 		Button *modify = new Button("Modify", boost::bind(&SquadsDialog::ModifySquad, squadDialog), 2, 11, 10);

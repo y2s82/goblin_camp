@@ -71,11 +71,6 @@ public:
 		return coordsToDirs[dir];
 	}
 
-	inline void assign (int *xout, int *yout) const {
-		*xout = x;
-		*yout = y;
-	}
-
 	/* specific and generic accessors
 	   
 	   Coordinate provides both specific accessors p.X(), p.Y() and

@@ -86,7 +86,7 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 			if(foundPath) {
 				break;
 			}
-			int delta = INT_MAX;
+			int delta = std::numeric_limits<int>::max();
 			for(int y = 0; y < n; y++) {
 				if(!T[y]) {
 					delta = std::min(delta, slack[y]);

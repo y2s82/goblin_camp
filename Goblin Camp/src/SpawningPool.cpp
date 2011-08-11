@@ -66,15 +66,6 @@ Coordinate SpawningPool::SpawnLocation()
 	Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
 	std::random_shuffle(dirs,dirs+4); //shuffle to avoid predictability
 
-	for (int i = 3; i > 0; i--) {
-		int j = Random::Generate(i); //upto i
-		if (j < i) {
-			Direction tmp = dirs[j];
-			dirs[j] = dirs[i];
-			dirs[i] = tmp;
-		}
-	}
-
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			Coordinate p(x,y);
