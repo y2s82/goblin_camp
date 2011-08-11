@@ -51,7 +51,10 @@ void FilthNode::Depth(int val) {
 Coordinate FilthNode::Position() {return pos;}
 
 void FilthNode::save(OutputArchive& ar, const unsigned int version) const {
-	ar & pos;
+	const int x = pos.X();
+	const int y = pos.Y();
+	ar & x;
+	ar & y;
 	ar & depth;
 	ar & graphic;
 	ar & color.r;
@@ -60,7 +63,10 @@ void FilthNode::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void FilthNode::load(InputArchive& ar, const unsigned int version) {
-	ar & pos;
+	int x, y;
+	ar & x;
+	ar & y;
+	pos = Coordinate(x,y);
 	ar & depth;
 	ar & graphic;
 	ar & color.r;

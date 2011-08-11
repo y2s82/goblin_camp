@@ -210,7 +210,10 @@ void FireNode::Update() {
 }
 
 void FireNode::save(OutputArchive& ar, const unsigned int version) const {
-	ar & pos;
+	const int x = pos.X();
+	const int y = pos.Y();
+	ar & x;
+	ar & y;
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
@@ -219,7 +222,10 @@ void FireNode::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void FireNode::load(InputArchive& ar, const unsigned int version) {
-	ar & pos;
+	int x, y;
+	ar & x;
+	ar & y;
+	pos = Coordinate(x,y);
 	ar & color.r;
 	ar & color.g;
 	ar & color.b;
