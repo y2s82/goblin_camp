@@ -239,7 +239,7 @@ void TileSet::DrawOpenDoor(int screenX, int screenY, Door * door, const Coordina
 namespace {
 	bool ConstructionConnectTo(ConstructionType type, Coordinate origin, Direction dir) {
 		Coordinate pos = origin + Coordinate::DirectionToCoordinate(dir);
-		boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(pos.X(), pos.Y()));
+		boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(pos));
 		if (boost::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
 			return otherConstruct->Type() == type;
 		}

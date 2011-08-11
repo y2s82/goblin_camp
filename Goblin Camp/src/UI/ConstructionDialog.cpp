@@ -94,7 +94,7 @@ void ConstructionDialog::Rename() {
 void ConstructionDialog::Dismantle() {
 	if (construct.lock()) {
 		UI::Inst()->CloseMenu();
-		construct.lock()->Dismantle();
+		construct.lock()->Dismantle(undefined);
 	}
 }
 

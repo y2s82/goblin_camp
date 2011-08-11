@@ -23,9 +23,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/sdl/SDLTilesetRenderer.hpp"
 
 /****************/
-/* SDLSprite
-/* Description of a single tile that can be drawn. 
-/* Supports animation and connection maps in addition to just single tiles.
+// SDLSprite
+// Description of a single tile that can be drawn. 
+// Supports animation and connection maps in addition to just single tiles.
 /****************/
 class SDLSprite : public Sprite
 {

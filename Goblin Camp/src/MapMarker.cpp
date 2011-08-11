@@ -42,6 +42,10 @@ int MapMarker::Y() const {
 	return y;
 }
 
+Coordinate MapMarker::Position() const {
+	return Coordinate(x,y);
+}
+
 int MapMarker::Graphic() const {
 	return graphic;
 }

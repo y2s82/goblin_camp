@@ -326,6 +326,11 @@ bool TileSetParserV2::parserFlag(TCODParser *parser,const char *name) {
 			} else if (boost::iequals(name, "snowWangTileset")) {
 				terrainSpriteFactory.SetSnowWang(true);
 			}
+		case PS_NORMAL:
+		case PS_NATURE:
+		case PS_SPELL:
+			parser->error("unsupported flag '%s'", name);
+			success = false;
 		}
 	}
 	return success;

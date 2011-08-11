@@ -34,7 +34,7 @@ enum UIState {
 	UICOUNT
 };
 
-static TCOD_key_t NO_KEY = {
+static const TCOD_key_t NO_KEY = {
 	TCODK_NONE, 0, false, false, false, false, false, false
 };
 
@@ -68,7 +68,7 @@ private:
 	int inputStringLimit;
 	std::string extraTooltip;
 
-	boost::weak_ptr<Entity> GetEntity(Coordinate);
+	boost::weak_ptr<Entity> GetEntity(const Coordinate&);
 	int DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut);
 	void DrawTopBar(TCODConsole*);
 	void HandleKeyboard();
@@ -79,7 +79,7 @@ public:
 	static void Reset();
 	void Update();
 	void Draw(TCODConsole*);
-	void blueprint(Coordinate);
+	void blueprint(const Coordinate&);
 	void state(UIState);
 	static void ChangeMenu(Panel*);
 	static void ChooseConstruct(ConstructionType, UIState);
@@ -119,7 +119,7 @@ public:
 	void HideMenu();
 	void CloseMenu();
 	bool ShiftPressed();
-	void HandleUnderCursor(Coordinate, std::list<boost::weak_ptr<Entity> >*);
+	void HandleUnderCursor(const Coordinate&, std::list<boost::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
 	void SetExtraTooltip(std::string);
 };

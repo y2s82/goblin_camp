@@ -191,10 +191,11 @@ void Camp::Update() {
 void Camp::AddWaterZone(Coordinate from, Coordinate to) {
 	for (int x = from.X(); x <= to.X(); ++x) {
 		for (int y = from.Y(); y <= to.Y(); ++y) {
-			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
-				if (!Map::Inst()->GroundMarked(x, y)) {
-					waterZones.insert(Coordinate(x,y));
-					Map::Inst()->Mark(x,y);
+			Coordinate p(x,y);
+			if (Map::Inst()->IsInside(p)) {
+				if (!Map::Inst()->GroundMarked(p)) {
+					waterZones.insert(Coordinate(p));
+					Map::Inst()->Mark(p);
 				}
 			}
 		}
@@ -204,10 +205,11 @@ void Camp::AddWaterZone(Coordinate from, Coordinate to) {
 void Camp::RemoveWaterZone(Coordinate from, Coordinate to) {
 	for (int x = from.X(); x <= to.X(); ++x) {
 		for (int y = from.Y(); y <= to.Y(); ++y) {
-			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
-				if (waterZones.find(Coordinate(x,y)) != waterZones.end()) {
-					waterZones.erase(Coordinate(x,y));
-					Map::Inst()->Unmark(x,y);
+			Coordinate p(x,y);
+			if (Map::Inst()->IsInside(p)) {
+				if (waterZones.find(Coordinate(p)) != waterZones.end()) {
+					waterZones.erase(Coordinate(p));
+					Map::Inst()->Unmark(p);
 				}
 			}
 		}
@@ -267,23 +269,16 @@ Coordinate Camp::GetUprTerritoryCorner() const { return upperCorner; }
 Coordinate Camp::GetLowTerritoryCorner() const { return lowerCorner; }
 
 Coordinate Camp::GetRandomSpot() const {
-	Coordinate randomLocation(-1,-1);
-	int tries = 0;
-	
-	while (tries < 20 && randomLocation.X() == -1) {
-		++tries;
-
-		randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
-		randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
-		
-		if (!Map::Inst()->IsTerritory(randomLocation.X(), randomLocation.Y()) ||
-			Map::Inst()->IsDangerous(randomLocation.X(), randomLocation.Y(), PLAYERFACTION) ||
-			!Map::Inst()->IsWalkable(randomLocation.X(), randomLocation.Y() ||
-			Map::Inst()->GetWater(randomLocation.X(), randomLocation.Y()).lock()))
-			randomLocation = Coordinate(-1,-1);
+	for (int tries = 0; tries < 20; ++tries) {
+		Coordinate randomLocation = Random::ChooseInRectangle(upperCorner, lowerCorner);		
+		if (Map::Inst()->IsTerritory(randomLocation) &&
+			!Map::Inst()->IsDangerous(randomLocation, PLAYERFACTION) &&
+			Map::Inst()->IsWalkable(randomLocation) &&
+			!Map::Inst()->GetWater(randomLocation).lock())
+			return randomLocation;
 	}
 
-	return randomLocation;
+	return undefined;
 }
 
 int Camp::GetDiseaseModifier() {

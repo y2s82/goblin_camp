@@ -68,7 +68,7 @@ namespace {
 boost::shared_ptr<const unsigned int> CreateOGLTexture() {
 	GLuint handle = 0;
     glGenTextures(1, &handle);
-    if( GLenum err=glGetError() ) {
+    if( glGetError() ) {
 		LOG("Failed to create OGL Texture");
 		return boost::shared_ptr<const unsigned int>();    
 	} else {
@@ -89,7 +89,7 @@ boost::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertSha
 	}
 
 	GLuint programHandle = glCreateProgramObjectARB();
-	if (GLenum err = glGetError()) {
+	if (glGetError()) {
 		LOG("Failed to create OGL Program Object");
 		return boost::shared_ptr<const unsigned int>();    
 	}

@@ -64,8 +64,8 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 }
 
 NatureObject::~NatureObject() {
-	if (!NatureObject::Presets[type].walkable) Map::Inst()->SetWalkable(x, y, true);
-	Map::Inst()->SetBuildable(x, y, true);
+	if (!NatureObject::Presets[type].walkable) Map::Inst()->SetWalkable(pos, true);
+	Map::Inst()->SetBuildable(pos, true);
 }
 
 int NatureObject::GetGraphicsHint() const {
@@ -73,8 +73,8 @@ int NatureObject::GetGraphicsHint() const {
 }
 
 void NatureObject::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenx = x - upleft.X();
-	int screeny = y - upleft.Y();
+	int screenx = (pos - upleft).X();
+	int screeny = (pos - upleft).Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		console->putCharEx(screenx, screeny, graphic, color, marked ? TCODColor::white : TCODColor::black);
 	}
@@ -234,16 +234,16 @@ void NatureObject::load(InputArchive& ar, const unsigned int version) {
 
 Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
 	ice = true;
-	Map::Inst()->SetBlocksWater(x,y,true);
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	Map::Inst()->SetBlocksWater(pos,true);
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water) {
 		frozenWater = water;
-		Game::Inst()->RemoveWater(water->Position());
+		Game::Inst()->RemoveWater(pos);
 	}
 }
 
 Ice::~Ice() {
-	Map::Inst()->SetBlocksWater(x,y,false);
+	Map::Inst()->SetBlocksWater(pos,false);
 	if (frozenWater) {
 		Game::Inst()->CreateWaterFromNode(frozenWater);
 		if (Random::Generate(4) == 0) {

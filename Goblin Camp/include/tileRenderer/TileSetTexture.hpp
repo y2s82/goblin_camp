@@ -35,8 +35,19 @@ public:
 	~TileSetTexture();
 
 	int Count() const;
+
+	/* Be aware that DrawTile and DrawTileCorner both propagate
+	   SDL_BlitSurface semantics of modifying the dstRect reference to
+	   store the final blit rectangle:
+
+	     http://sdl.beuc.net/sdl.wiki/SDL_BlitSurface
+	  
+	   Client code should be careful to do a value copy of the
+	   SDL_Rect if they don't want modifications to be propagated.
+	 */
 	void DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const;
 	void DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, SDL_Rect * dstRect) const;
+
 	boost::shared_ptr<SDL_Surface> GetInternalSurface();
 
 private:

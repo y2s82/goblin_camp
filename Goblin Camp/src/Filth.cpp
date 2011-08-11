@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Coordinate.hpp"
 
-FilthNode::FilthNode(int nx, int ny, int ndep) : x(nx), y(ny)
+FilthNode::FilthNode(const Coordinate& pos, int ndep) : pos(pos)
 {
 	color.b = 0;
 	Depth(ndep);
@@ -45,14 +45,13 @@ int FilthNode::Depth() {return depth;}
 void FilthNode::Depth(int val) {
 	depth=val;
 	int add = Random::Generate(60);
-	color.r = 170 - std::min(Map::Inst()->GetCorruption(x, y), 40) + add;
-	color.g = 150 - std::min(Map::Inst()->GetCorruption(x, y), 80) + add;
+	color.r = 170 - std::min(Map::Inst()->GetCorruption(pos), 40) + add;
+	color.g = 150 - std::min(Map::Inst()->GetCorruption(pos), 80) + add;
 }
-Coordinate FilthNode::Position() {return Coordinate(x,y);}
+Coordinate FilthNode::Position() {return pos;}
 
 void FilthNode::save(OutputArchive& ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & depth;
 	ar & graphic;
 	ar & color.r;
@@ -61,8 +60,7 @@ void FilthNode::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void FilthNode::load(InputArchive& ar, const unsigned int version) {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & depth;
 	ar & graphic;
 	ar & color.r;

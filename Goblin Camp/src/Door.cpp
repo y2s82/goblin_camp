@@ -25,14 +25,14 @@ Door::Door(ConstructionType type, Coordinate target) : Construction(type, target
 }
 
 void Door::Update() {
-	if (!Map::Inst()->NPCList(x, y)->empty()) {
+	if (!Map::Inst()->NPCList(pos)->empty()) {
 		graphic[1] = 254;
 		time = (UPDATES_PER_SECOND / 2);
-		Map::Inst()->SetBlocksLight(x, y, false);
+		Map::Inst()->SetBlocksLight(pos, false);
 	} else {
 		if (time == 0) {
 			graphic[1] = closedGraphic;
-			Map::Inst()->SetBlocksLight(x, y, true);
+			Map::Inst()->SetBlocksLight(pos, true);
 		} else --time;
 	}
 }

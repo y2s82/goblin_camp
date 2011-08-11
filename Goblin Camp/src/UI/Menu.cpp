@@ -86,7 +86,7 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 	console->setDefaultBackground(TCODColor::black);
 }
 
-MenuResult Menu::Update(int x, int y, bool clicked, TCOD_key_t key) {
+MenuResult Menu::Update(int x, int y, bool clicked, const TCOD_key_t key) {
 	if (key.c >= '0' && key.c <= '9') {
 		selected(boost::lexical_cast<int>((char)key.c)-1);
 		Callback(boost::lexical_cast<int>((char)key.c)-1);

@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #ifdef DEBUG
 #include <iostream>
+#include <cassert>
 #endif
 
 #include <boost/serialization/map.hpp>
@@ -95,7 +96,7 @@ screenWidth(0),
 	buffer(0)
 {
 	for(int i = 0; i < 12; i++) {
-		marks[i] = Coordinate(-1, -1);
+		marks[i] = undefined;
 	}
 }
 
@@ -118,7 +119,9 @@ Game* Game::Inst() {
 bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType> tileReqs) {
 	for (int x = target.X(); x < target.X() + size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + size.Y(); ++y) {
-			if (x < 0 || y < 0 || x >= Map::Inst()->Width() || y >= Map::Inst()->Height() || !Map::Inst()->IsBuildable(x,y) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->GetType(x,y)) == tileReqs.end()) ) return false;
+			Coordinate p(x,y);
+			if (!Map::Inst()->IsInside(p) || !Map::Inst()->IsBuildable(p) || (!tileReqs.empty() && tileReqs.find(Map::Inst()->GetType(p)) == tileReqs.end()))
+				return false;
 		}
 	}
 	return true;
@@ -177,9 +180,10 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
-			Map::Inst()->SetBuildable(x,y,false);
-			Map::Inst()->SetConstruction(x,y,newCons->Uid());
-			if (!Construction::Presets[construct].tags[TRAP]) Map::Inst()->SetTerritory(x,y,true);
+			Coordinate p(x,y);
+			Map::Inst()->SetBuildable(p,false);
+			Map::Inst()->SetConstruction(p,newCons->Uid());
+			if (!Construction::Presets[construct].tags[TRAP]) Map::Inst()->SetTerritory(p,true);
 		}
 	}
 
@@ -217,8 +221,9 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 	//Find a tile from a to b that is buildable
 	for (int y = a.Y(); y <= b.Y(); ++y) {
 		for (int x = a.X(); x <= b.X(); ++x) {
-			if (Map::Inst()->IsBuildable(x,y)) {
-				a = Coordinate(x,y);
+			Coordinate p(x, y);
+			if (Map::Inst()->IsBuildable(p)) {
+				a = p;
 				goto ContinuePlaceStockpile;
 			}
 		}
@@ -227,9 +232,9 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 
 ContinuePlaceStockpile:
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
-	Map::Inst()->SetBuildable(a.X(), a.Y(), false);
-	Map::Inst()->SetConstruction(a.X(), a.Y(), newSp->Uid());
-	Map::Inst()->SetTerritory(a.X(), a.Y(), true);
+	Map::Inst()->SetBuildable(a, false);
+	Map::Inst()->SetConstruction(a, newSp->Uid());
+	Map::Inst()->SetTerritory(a, true);
 	newSp->Expand(a,b);
 	if (Construction::Presets[stockpile].dynamic) {
 		Game::Inst()->dynamicConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newSp->Uid(),static_cast<boost::shared_ptr<Construction> >(newSp)));
@@ -245,25 +250,26 @@ ContinuePlaceStockpile:
 	return newSp->Uid();
 }
 
-//Returns Coordinate(<0,<0) if not found
+//Returns undefined if not found
 Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent, int faction) {
-	Coordinate closest(-1, -1);
-	int leastDistance = -1;
+	Coordinate closest = undefined;
+	int leastDistance = INT_MAX;
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
 			boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
-			for (int ix = construct->X()-1; ix <= construct->X() + Construction::Blueprint(construct->Type()).X(); ++ix) {
-				for (int iy = construct->Y()-1; iy <= construct->Y() + Construction::Blueprint(construct->Type()).Y(); ++iy) {
-					if (ix == construct->X()-1 || ix == construct->X() + Construction::Blueprint(construct->Type()).X() ||
-						iy == construct->Y()-1 || iy == construct->Y() + Construction::Blueprint(construct->Type()).Y()) {
-							if (Map::Inst()->IsWalkable(ix,iy)) {
-								int distance = Distance(pos.X(), pos.Y(), ix, iy);
-								if (faction >= 0 && Map::Inst()->IsDangerous(ix, iy, faction)) distance += 100;
-								if (leastDistance == -1 || distance < leastDistance) {
-									closest = Coordinate(ix,iy);
-									leastDistance = distance;
-								}
-							}
+			//note on weird (origin,extent) coordinates: we want the *outer* bordure of (position,blueprint)
+			Coordinate origin = construct->Position()-1,
+			           extent = Construction::Blueprint(construct->Type()) + 2;
+			for (int ix = origin.X(); ix < (origin+extent).X(); ++ix) {
+				for (int iy = origin.Y(); iy < (origin+extent).Y(); ++iy) {
+					Coordinate p(ix,iy);
+					if (p.onExtentEdges(origin, extent) && Map::Inst()->IsWalkable(p)) {
+						int distance = Distance(pos, p);
+						if (faction >= 0 && Map::Inst()->IsDangerous(p, faction)) distance += 100;
+						if (distance < leastDistance) {
+							closest = p;
+							leastDistance = distance;
+						}
 					}
 				}
 			}
@@ -299,13 +305,16 @@ bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
 }
 
 int Game::CreateNPC(Coordinate target, NPCType type) {
-	int tries = 0;
-	int radius = 1;
-	Coordinate originalTarget = target;
-	while (!Map::Inst()->IsWalkable(target.X(), target.Y()) && tries < 20) {
-		target.X(originalTarget.X() + Random::Generate(-radius, radius));
-		target.Y(originalTarget.Y() + Random::Generate(-radius, radius));
-		if (++tries % 3 == 0) ++radius;
+
+	if (!Map::Inst()->IsWalkable(target)) {
+		for (int tries = 0; tries < 20; ++tries) {
+			Coordinate candidate = Random::ChooseInRadius(target, 1 + tries/3);
+			if (Map::Inst()->IsWalkable(candidate)) {
+				target = candidate;
+			}
+		}
+		//TODO find a walkwable target even if those tries fail
+		assert(Map::Inst()->IsWalkable(target));
 	}
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
@@ -392,6 +401,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 					}
 			} else {
 				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+				static_cast<void>(itemUid);
 			}
 		}
 	}
@@ -422,12 +432,13 @@ void Game::BumpEntity(int uid) {
 	}
 
 	if (entity) {
-		if (!Map::Inst()->IsWalkable(entity->Position().X(), entity->Position().Y())) {
+		if (!Map::Inst()->IsWalkable(entity->Position())) {
 			for (int radius = 1; radius < 10; ++radius) {
-				for (int xi = entity->Position().X() - radius; xi <= entity->Position().X() + radius; ++xi) {
-					for (int yi = entity->Position().Y() - radius; yi <= entity->Position().Y() + radius; ++yi) {
-						if (Map::Inst()->IsWalkable(xi, yi)) {
-							entity->Position(Coordinate(xi, yi));
+				for (int ix = entity->Position().X() - radius; ix <= entity->Position().X() + radius; ++ix) {
+					for (int iy = entity->Position().Y() - radius; iy <= entity->Position().Y() + radius; ++iy) {
+						Coordinate p(ix,iy);
+						if (Map::Inst()->IsWalkable(p)) {
+							entity->Position(p);
 							return;
 						}
 					}
@@ -523,12 +534,9 @@ void Game::ResetRenderer() {
 	int width, height;
 	TCODSystem::getCurrentResolution(&width, &height);
 
-	bool useTileset = Config::GetCVar<bool>("useTileset");
-	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
-
 	renderer.reset();
 
-	if (useTileset) {
+	if (Config::GetCVar<bool>("useTileset")) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
 	
@@ -565,12 +573,13 @@ void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
 void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int construction = Map::Inst()->GetConstruction(x,y);
+			Coordinate p(x,y);
+			int construction = Map::Inst()->GetConstruction(p);
 			if (construction >= 0) {
 				if (instance->GetConstruction(construction).lock()) {
-					instance->GetConstruction(construction).lock()->Dismantle(Coordinate(x,y));
+					instance->GetConstruction(construction).lock()->Dismantle(p);
 				} else {
-					Map::Inst()->SetConstruction(x,y,-1);
+					Map::Inst()->SetConstruction(p,-1);
 				}
 			}
 		}
@@ -609,7 +618,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 
 			if (!container) {
 				freeItems.insert(newItem);
-				Map::Inst()->ItemList(newItem->X(), newItem->Y())->insert(newItem->Uid());
+				Map::Inst()->ItemList(newItem->Position())->insert(newItem->Uid());
 			} else {
 				container->AddItem(newItem);
 			}
@@ -629,7 +638,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 
 void Game::RemoveItem(boost::weak_ptr<Item> witem) {
 	if (boost::shared_ptr<Item> item = witem.lock()) {
-		Map::Inst()->ItemList(item->x, item->y)->erase(item->uid);
+		Map::Inst()->ItemList(item->Position())->erase(item->uid);
 		if (freeItems.find(witem) != freeItems.end()) freeItems.erase(witem);
 		if (boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item->container.lock())) {
 			if (container) {
@@ -648,11 +657,11 @@ boost::weak_ptr<Item> Game::GetItem(int uid) {
 void Game::ItemContained(boost::weak_ptr<Item> item, bool con) {
 	if (!con) {
 		freeItems.insert(item);
-		Map::Inst()->ItemList(item.lock()->X(), item.lock()->Y())->insert(item.lock()->Uid());
+		Map::Inst()->ItemList(item.lock()->Position())->insert(item.lock()->Uid());
 	}
 	else {
 		freeItems.erase(item);
-		Map::Inst()->ItemList(item.lock()->X(), item.lock()->Y())->erase(item.lock()->Uid());
+		Map::Inst()->ItemList(item.lock()->Position())->erase(item.lock()->Uid());
 	}
 }
 
@@ -661,15 +670,14 @@ void Game::CreateWater(Coordinate pos) {
 }
 
 void Game::CreateWater(Coordinate pos, int amount, int time) {
-
 	//If there is filth here mix it with the water
-	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X(), pos.Y()).lock();
+	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos).lock();
 
-	boost::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos.X(), pos.Y()));
+	boost::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos));
 	if (!water.lock()) {
-		boost::shared_ptr<WaterNode> newWater(new WaterNode(pos.X(), pos.Y(), amount, time));
+		boost::shared_ptr<WaterNode> newWater(new WaterNode(pos, amount, time));
 		waterList.push_back(boost::weak_ptr<WaterNode>(newWater));
-		Map::Inst()->SetWater(pos.X(), pos.Y(), newWater);
+		Map::Inst()->SetWater(pos, newWater);
 		if (filth) newWater->AddFilth(filth->Depth());
 	} else {
 		water.lock()->Depth(water.lock()->Depth()+amount);
@@ -681,11 +689,11 @@ void Game::CreateWater(Coordinate pos, int amount, int time) {
 
 void Game::CreateWaterFromNode(boost::shared_ptr<WaterNode> water) {
 	if (water) {
-		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(water->Position().X(), water->Position().Y()).lock();
-		boost::weak_ptr<WaterNode> existingWater(Map::Inst()->GetWater(water->Position().X(), water->Position().Y()));
+		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(water->Position()).lock();
+		boost::weak_ptr<WaterNode> existingWater(Map::Inst()->GetWater(water->Position()));
 		if (!existingWater.lock()) {
 			waterList.push_back(water);
-			Map::Inst()->SetWater(water->Position().X(), water->Position().Y(), water);
+			Map::Inst()->SetWater(water->Position(), water);
 			if (filth) water->AddFilth(filth->Depth());
 		} else {
 			boost::shared_ptr<WaterNode> originalWater = existingWater.lock();
@@ -698,9 +706,11 @@ void Game::CreateWaterFromNode(boost::shared_ptr<WaterNode> water) {
 }
 
 int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
-	return Distance(npcList[uid]->X(), npcList[uid]->Y(), pos.X(), pos.Y());
+	return Distance(npcList[uid]->Position(), pos);
 }
 
+// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
+// first.
 boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
 	int nearestDistance = INT_MAX;
 	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
@@ -708,12 +718,7 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				int distance;
-				if (flags & MOSTDECAYED) {
-					distance = item.lock()->GetDecay();
-				} else {
-					distance = Distance(item.lock()->Position(), target);
-				}
+				int distance = (flags & MOSTDECAYED ? item.lock()->GetDecay() : Distance(item.lock()->Position(), target));
 				if(distance < nearestDistance) {
 					nearestDistance = distance;
 					nearest = item;
@@ -724,6 +729,8 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 	return nearest;
 }
 
+// TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
+// first.
 boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
 	int nearestDistance = INT_MAX;
 	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
@@ -731,12 +738,7 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordina
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
 			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
-				int distance;
-				if (flags & MOSTDECAYED) {
-					distance = item.lock()->GetDecay();
-				} else {
-					distance = Distance(item.lock()->Position(), target);
-				}
+				int distance = (flags & MOSTDECAYED ? item.lock()->GetDecay() : Distance(item.lock()->Position(), target));
 				if(distance < nearestDistance) {
 					nearestDistance = distance;
 					nearest = item;
@@ -749,70 +751,66 @@ boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordina
 
 // Spawns items distributed randomly within the rectangle defined by corner1 & corner2
 void Game::CreateItems(int quantity, ItemType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = std::max(abs(corner1.X()-corner2.X()),1);
-	int areaLength = std::max(abs(corner1.Y()-corner2.Y()),1);
-	int minX = std::min(corner1.X(), corner2.X());
-	int minY = std::min(corner1.Y(), corner2.Y());
-
+	Coordinate low = Coordinate::min(corner1, corner2);
+	Coordinate high = Coordinate::max(corner1, corner2);
 	for (int items = 0, count = 0; items < quantity && count < quantity*10; ++count) {
-		Coordinate location(
-			Random::Generate(minX, areaWidth + minX - 1),
-			Random::Generate(minY, areaLength + minY - 1)
-		);
-
-		if (Map::Inst()->IsWalkable(location.X(), location.Y())) {
-			Game::Inst()->CreateItem(location, type, true);
+		Coordinate p = Random::ChooseInRectangle(low, high);
+		if (Map::Inst()->IsWalkable(p)) {
+			Game::Inst()->CreateItem(p, type, true);
 			++items;
 		}
 	}
 }
 
 Coordinate Game::FindFilth(Coordinate pos) {
-	if (filthList.size() == 0) return Coordinate(-1,-1);
-	std::priority_queue<std::pair<int, int> > potentialFilth;
+	if (filthList.size() == 0) return undefined;
 
 	//First check the vicinity of the given position
 	if (pos.X() >= 0) {
 		for (int i = 0; i < 10; ++i) {
-			boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X() + Random::Generate(-5, 5),
-				pos.Y() + Random::Generate(-5, 5)).lock();
-			if (filth && filth->Depth() > 0 && 
-				Map::Inst()->IsWalkable(filth->Position().X(), filth->Position().Y())) return filth->Position();
+			Coordinate candidate = Random::ChooseInRadius(pos, 5);
+			boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(candidate).lock();
+			if (filth && filth->Depth() > 0 && Map::Inst()->IsWalkable(candidate))
+				return candidate;
 		}
 	}
 	
 	//Then around the camp center (a pretty good place to find filth most of the time)
 	for (int i = 0; i < 10; ++i) {
-		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(Camp::Inst()->Center().X() + Random::Generate(-5, 5),
-			Camp::Inst()->Center().Y() + Random::Generate(-5, 5)).lock();
-		if (filth && filth->Depth() > 0 && 
-			Map::Inst()->IsWalkable(filth->Position().X(), filth->Position().Y())) return filth->Position();
+		Coordinate candidate = Random::ChooseInRadius(Camp::Inst()->Center(), 5);
+		boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(candidate).lock();
+		if (filth && filth->Depth() > 0 && Map::Inst()->IsWalkable(candidate))
+			return candidate;
 	}
 
-	//If we still haven't found filth just choose the closest filth out of 30
-	for (size_t i = 0; i < std::min((size_t)30, filthList.size()); ++i) {
-		unsigned filth = Random::ChooseIndex(filthList);
-		if (boost::next(filthList.begin(), filth)->lock()->Depth() > 0) {
-			potentialFilth.push(std::pair<int,int>(Distance(pos, boost::next(filthList.begin(), filth)->lock()->Position()), filth));
-			if (potentialFilth.top().first < 10) break; //Near enough
+	//If we still haven't found filth just choose the closest filth out of 30 at random
+	std::vector<boost::weak_ptr<FilthNode> > filthArray(filthList.begin(), filthList.end());
+	Coordinate closest = undefined;
+	int closest_distance = INT_MAX;
+	for (size_t i = 0; i < std::min(static_cast<size_t>(30), filthArray.size()); ++i) {
+		boost::weak_ptr<FilthNode> filth = Random::ChooseElement(filthArray);
+		boost::shared_ptr<FilthNode> candidate = filth.lock();
+		if (candidate) {
+			int distance = Distance(pos, candidate->Position());
+			if (candidate->Depth() > 0 && Map::Inst()->IsWalkable(candidate->Position()) && distance < closest_distance) {
+				closest = candidate->Position();
+				closest_distance = distance;
+			}
 		}
 	}
-	if (potentialFilth.size() > 0)
-		return boost::next(filthList.begin(), potentialFilth.top().second)->lock()->Position();
-	else
-		return Coordinate(-1,-1);
+	return closest;
 }
 
 //Findwater returns the coordinates to the closest Water* that has sufficient depth and is coastal
 Coordinate Game::FindWater(Coordinate pos) {
-	Coordinate closest(-1,-1);
+	Coordinate closest = undefined;
 	int closestDistance = INT_MAX;
 	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (boost::shared_ptr<WaterNode> water = wati->lock()) {
 			if (water->IsCoastal() && water->Depth() > DRINKABLE_WATER_DEPTH) {
 				int waterDistance = Distance(water->Position(), pos);
 				//Favor water inside territory
-				if (Map::Inst()->IsTerritory(water->Position().X(), water->Position().Y())) waterDistance /= 4;
+				if (Map::Inst()->IsTerritory(water->Position())) waterDistance /= 4;
 				if (waterDistance < closestDistance) { 
 					closest = water->Position();
 					closestDistance = waterDistance;
@@ -1005,7 +1003,7 @@ void Game::Update() {
 		if (boost::shared_ptr<FireNode> fire = fireit->lock()) {
 			if (Random::GenerateBool()) fire->Update();
 			if (fire->GetHeat() <= 0) {
-				Map::Inst()->SetFire(fire->GetPosition().X(), fire->GetPosition().Y(), boost::shared_ptr<FireNode>());
+				Map::Inst()->SetFire(fire->Position(), boost::shared_ptr<FireNode>());
 				fireit = fireList.erase(fireit);
 			} else { ++fireit; }
 		} else {
@@ -1082,8 +1080,7 @@ boost::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool ret
 					else priority = HIGH;
 				}
 
-				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", 
-					priority));
+				boost::shared_ptr<Job> stockJob(new Job("Store " + Item::ItemTypeToString(item->Type()) + " in stockpile", priority));
 				stockJob->Attempts(1);
 				stockJob->ConnectToEntity(nearest);
 				Coordinate target = Coordinate(-1,-1);
@@ -1237,55 +1234,29 @@ void Game::GenerateMap(uint32 seed) {
 	//in case no suitable hill sites are found
 	int infinityCheck = 0;
 	while (hills < map->Width()/66 && infinityCheck < 1000) {
-		int x = random.Generate(map->Width()  - 1);
-		int y = random.Generate(map->Height() - 1);
-		int riverDistance;
-		int distance;
-		int lineX, lineY;
+		Coordinate candidate = Random::ChooseInExtent(map->Extent());
+		int riverDistance = 70;
 
-		riverDistance = 70;
-
+		//We draw four lines from our potential hill site and measure the least distance to a river
+		Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
 		for (int i = 0; i < 4; ++i) {
-
-			//We draw four lines from our potential hill site and measure the least distance to a river
-			switch (i) {
-			case 0:
-				lineX = x - 70;
-				lineY = y;
-				break;
-
-			case 1:
-				lineX = x + 70;
-				lineY = y;
-				break;
-
-			case 2:
-				lineX = x;
-				lineY = y - 70;
-				break;
-
-			case 3:
-				lineX = x;
-				lineY = y + 70;
-				break;
+			int distance = 70;
+			Coordinate line = candidate + Coordinate::DirectionToCoordinate(dirs[i]) * distance;
+			for (TCODLine::init(line.X(), line.Y(), candidate.X(), candidate.Y()); !TCODLine::step(line.Xptr(), line.Yptr()); --distance) {
+				if (map->IsInside(line) && map->heightMap->getValue(line.X(), line.Y()) < map->GetWaterlevel())
+					if (distance < riverDistance)
+						riverDistance = distance;
 			}
-
-			distance = 70;
-			TCODLine::init(lineX, lineY, x, y);
-			do {
-				if (lineX >= 0 && lineX < map->Width() && lineY >= 0 && lineY < map->Height()) {
-					if (map->heightMap->getValue(lineX, lineY) < map->GetWaterlevel()) {
-						if (distance < riverDistance) riverDistance = distance;
-					}
-				}
-				--distance;
-			} while (!TCODLine::step(&lineX, &lineY));
 		}
 
 		if (riverDistance > 35) {
-			map->heightMap->addHill((float)x, (float)y, (float)random.Generate(15,35), (float)random.Generate(1,3));
-			map->heightMap->addHill((float)x+random.Generate(-7,7), (float)y+random.Generate(-7,7), (float)random.Generate(15,25), (float)random.Generate(1,3));
-			map->heightMap->addHill((float)x+random.Generate(-7,7), (float)y+random.Generate(-7,7), (float)random.Generate(15,25), (float)random.Generate(1,3));
+			Coordinate centers[3] = { candidate, random.ChooseInRadius(candidate,7), random.ChooseInRadius(candidate,7) };
+			int heights[3] = { 35, 25, 25 };
+			for (int i = 0; i < 3; ++i) {
+				int height = random.Generate(15, heights[i]);
+				int radius = random.Generate(1,3);
+				map->heightMap->addHill(static_cast<float>(centers[i].X()), static_cast<float>(centers[i].Y()), static_cast<float>(height), static_cast<float>(radius));
+			}
 			++hills;
 		}
 
@@ -1307,33 +1278,34 @@ void Game::GenerateMap(uint32 seed) {
 	//Now take the heightmap values and translate them into tiles
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
-			float height = map->heightMap->getValue(x,y);
+			Coordinate p(x,y);
+			float height = map->heightMap->getValue(x, y);
 			if (height < map->GetWaterlevel()) {
 				bool tileChosen = false;
 				for (int ix = x - 3; ix <= x + 3; ++ix) {
-					if (ix >= 0 && ix < map->Width() && 
-						map->heightMap->getValue(ix,y) >= map->GetWaterlevel()) {
-							map->ResetType(x,y,TILEDITCH);
+					Coordinate ip(ix, y);
+					if (map->IsInside(ip) && map->heightMap->getValue(ix, y) >= map->GetWaterlevel()) {
+							map->ResetType(p,TILEDITCH);
 							tileChosen = true;
 							break;
 					}
 				}
 				if (!tileChosen) {
 					for (int iy = y - 3; iy <= y + 3; ++iy) {
-						if (iy >= 0 && iy < map->Height() &&
-							map->heightMap->getValue(x,iy) >= map->GetWaterlevel()) {
-								map->ResetType(x,y,TILEDITCH);
+						Coordinate ip(x,iy);
+						if (map->IsInside(ip) &&map->heightMap->getValue(x, iy) >= map->GetWaterlevel()) {
+								map->ResetType(p,TILEDITCH);
 								tileChosen = true;
 								break;
 						}
 					}
 				}
-				if (!tileChosen) map->ResetType(x,y,TILERIVERBED);
-				CreateWater(Coordinate(x,y), RIVERDEPTH);
+				if (!tileChosen) map->ResetType(p,TILERIVERBED);
+				CreateWater(p, RIVERDEPTH);
 			} else if (height < 4.5f) {
-				map->ResetType(x,y,TILEGRASS);
+				map->ResetType(p,TILEGRASS);
 			} else {
-				map->ResetType(x,y,TILEROCK);
+				map->ResetType(p,TILEROCK);
 			}
 		}
 	}
@@ -1341,41 +1313,17 @@ void Game::GenerateMap(uint32 seed) {
 	//Create a bog
 	infinityCheck = 0;
 	while (infinityCheck < 1000) {
-		int x = random.Generate(30, map->Width()  - 30);
-		int y = random.Generate(30, map->Height() - 30);
-		int riverDistance;
-		int distance;
-		int lineX, lineY;
-		riverDistance = 70;
+		Coordinate candidate = random.ChooseInRectangle(zero+30, map->Extent()-30);
+		int riverDistance = 70;
+		Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
 		for (int i = 0; i < 4; ++i) {
-			switch (i) {
-			case 0:
-				lineX = x - 70;
-				lineY = y;
-				break;
-			case 1:
-				lineX = x + 70;
-				lineY = y;
-				break;
-			case 2:
-				lineX = x;
-				lineY = y - 70;
-				break;
-			case 3:
-				lineX = x;
-				lineY = y + 70;
-				break;
+			int distance = 70;
+			Coordinate line = candidate + Coordinate::DirectionToCoordinate(dirs[i]) * distance;
+			for (TCODLine::init(line.X(), line.Y(), candidate.X(), candidate.Y()); !TCODLine::step(line.Xptr(), line.Yptr()); --distance) {
+				if (map->IsInside(line) && map->heightMap->getValue(line.X(), line.Y()) < map->GetWaterlevel())
+					if (distance < riverDistance)
+						riverDistance = distance;
 			}
-			distance = 70;
-			TCODLine::init(lineX, lineY, x, y);
-			do {
-				if (lineX >= 0 && lineX < map->Width() && lineY >= 0 && lineY < map->Height()) {
-					if (map->heightMap->getValue(lineX, lineY) < map->GetWaterlevel()) {
-						if (distance < riverDistance) riverDistance = distance;
-					}
-				}
-				--distance;
-			} while (!TCODLine::step(&lineX, &lineY));
 		}
 		if (riverDistance > 30) {
 			int lowOffset = random.Generate(-5, 5);
@@ -1385,7 +1333,7 @@ void Game::GenerateMap(uint32 seed) {
 				lowOffset = std::min(std::max(random.Generate(-1, 1) + lowOffset, -5), 5);
 				highOffset = std::min(std::max(random.Generate(-1, 1) + highOffset, -5), 5);
 				for (int yOffset = -range-lowOffset; yOffset < range+highOffset; ++yOffset) {
-					map->ResetType(x+xOffset, y+yOffset, TILEBOG);
+					map->ResetType(candidate+Coordinate(xOffset,yOffset), TILEBOG);
 				}
 			}
 			break; //Only generate one bog
@@ -1395,7 +1343,7 @@ void Game::GenerateMap(uint32 seed) {
 
 	for (int x = 0; x < map->Width(); ++x) {
 		for (int y = 0; y < map->Height(); ++y) {
-			map->Naturify(x,y);
+			map->Naturify(Coordinate(x,y));
 		}
 	}
 
@@ -1413,7 +1361,7 @@ bool Game::CheckTree(Coordinate, Coordinate) {
 void Game::FellTree(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->GetNatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(Coordinate(x,y));
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Tree() && !natObj->Marked()) {
@@ -1435,7 +1383,7 @@ void Game::FellTree(Coordinate a, Coordinate b) {
 void Game::DesignateTree(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->GetNatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(Coordinate(x,y));
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Tree() && !natObj->Marked()) {
@@ -1451,7 +1399,7 @@ void Game::DesignateTree(Coordinate a, Coordinate b) {
 void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int natUid = Map::Inst()->GetNatureObject(x,y);
+			int natUid = Map::Inst()->GetNatureObject(Coordinate(x,y));
 			if (natUid >= 0) {
 				boost::shared_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj && natObj->Harvestable() && !natObj->Marked()) {
@@ -1473,7 +1421,7 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 
 void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 	if (natObj.lock()) {
-		Map::Inst()->SetNatureObject(natObj.lock()->X(), natObj.lock()->Y(), -1);
+		Map::Inst()->SetNatureObject(natObj.lock()->Position(), -1);
 		natureList.erase(natObj.lock()->Uid());
 	}
 }
@@ -1481,7 +1429,7 @@ void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
 bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
 	for (int x = target.X(); x < target.X()+size.X(); ++x) {
 		for (int y = target.Y(); y < target.Y()+size.Y(); ++y) {
-			if (Map::Inst()->GetType(x,y) == type) return true;
+			if (Map::Inst()->GetType(Coordinate(x,y)) == type) return true;
 		}
 	}
 	return false;
@@ -1490,9 +1438,10 @@ bool Game::CheckTileType(TileType type, Coordinate target, Coordinate size) {
 void Game::DesignateBog(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->GetType(x,y) == TILEBOG) {
-				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), true);
-				Map::Inst()->Mark(x,y);
+			Coordinate p(x, y);
+			if (Map::Inst()->GetType(p) == TILEBOG) {
+				StockManager::Inst()->UpdateBogDesignations(p, true);
+				Map::Inst()->Mark(p);
 			}
 		}
 	}
@@ -1500,8 +1449,9 @@ void Game::DesignateBog(Coordinate a, Coordinate b) {
 
 void Game::Undesignate(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
-		for (int y = a.Y(); y <= b.Y(); ++y) {	
-			int natUid = Map::Inst()->GetNatureObject(x,y);
+		for (int y = a.Y(); y <= b.Y(); ++y) {
+			Coordinate p(x,y);
+			int natUid = Map::Inst()->GetNatureObject(p);
 			if (natUid >= 0) {
 				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj.lock() && natObj.lock()->Tree() && natObj.lock()->Marked()) {
@@ -1510,13 +1460,13 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 					StockManager::Inst()->UpdateTreeDesignations(natObj, false);
 				}
 			}
-			if (Map::Inst()->GetType(x,y) == TILEBOG) {
-				StockManager::Inst()->UpdateBogDesignations(Coordinate(x,y), false);
-				Map::Inst()->Unmark(x,y);
+			if (Map::Inst()->GetType(p) == TILEBOG) {
+				StockManager::Inst()->UpdateBogDesignations(p, false);
+				Map::Inst()->Unmark(p);
 			}
-			if (Map::Inst()->GroundMarked(x,y)) { 
-				JobManager::Inst()->RemoveJob(DIG, Coordinate(x,y)); //A dig job may exist for this tile
-				Camp::Inst()->RemoveWaterZone(Coordinate(x,y), Coordinate(x,y)); //May be marked for water
+			if (Map::Inst()->GroundMarked(p)) { 
+				JobManager::Inst()->RemoveJob(DIG, p); //A dig job may exist for this tile
+				Camp::Inst()->RemoveWaterZone(p, p); //May be marked for water
 			}
 		}
 	}
@@ -1570,7 +1520,7 @@ void Game::DecayItems() {
 		if (boost::shared_ptr<BloodNode> blood = bli->lock()) {
 			blood->Depth(blood->Depth()-50);
 			if (blood->Depth() <= 0) {
-				Map::Inst()->SetBlood(blood->Position().X(), blood->Position().Y(), boost::shared_ptr<BloodNode>());
+				Map::Inst()->SetBlood(blood->Position(), boost::shared_ptr<BloodNode>());
 				bli = bloodList.erase(bli);
 			} else ++bli;
 		} else {
@@ -1585,33 +1535,34 @@ void Game::CreateFilth(Coordinate pos) {
 
 void Game::CreateFilth(Coordinate pos, int amount) {
 	Stats::Inst()->FilthCreated(amount);
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
+	if (Map::Inst()->IsInside(pos)) {
 		int loops = -1;
 		while (amount > 0 && loops < 1000) {
 			++loops;
-			boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+			boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 
 			if (water) { //If water exists here just add the filth there, no need for filthnodes
 				water->AddFilth(amount);
 				return;
 			}
 
-			boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos.X(), pos.Y()));
+			boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos));
 			if (!filth.lock()) { //No existing filth node so create one
-				boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos.X(), pos.Y(), std::min(5, amount)));
+				boost::shared_ptr<FilthNode> newFilth(new FilthNode(pos, std::min(5, amount)));
 				amount -= 5;
 				filthList.push_back(boost::weak_ptr<FilthNode>(newFilth));
-				Map::Inst()->SetFilth(pos.X(), pos.Y(), newFilth);
+				Map::Inst()->SetFilth(pos, newFilth);
 			} else {
 				int originalDepth = filth.lock()->Depth();
 				filth.lock()->Depth(std::min(5, filth.lock()->Depth() + amount));
 				amount -= (5 - originalDepth);
 			}
 			//If theres still remaining filth, it'll spill over according to flow
+			//TODO factorize with Coordinate abstractions
 			if (amount > 0) {
 				Coordinate flowTo = pos;
 				int diff = std::max(1, loops / 100);
-				switch (Map::Inst()->GetFlow(pos.X(), pos.Y())) {
+				switch (Map::Inst()->GetFlow(pos)) {
 				case NORTH:
 					flowTo.Y(flowTo.Y() - diff);
 					flowTo.X(flowTo.X() + Random::Generate(-diff, diff));
@@ -1681,11 +1632,10 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 				pos = flowTo;
 				
 				//If the filth flows off-map just stop creating more
-				if (flowTo.X() < 0 || flowTo.X() >= Map::Inst()->Width() ||
-					flowTo.Y() < 0 || flowTo.Y() >= Map::Inst()->Height()) {
-						Stats::Inst()->FilthFlowsOffEdge(amount);
-						return;
-				 }
+				if (!Map::Inst()->IsInside(flowTo)) {
+					Stats::Inst()->FilthFlowsOffEdge(amount);
+					return;
+				}
 			}
 		}
 	}
@@ -1696,12 +1646,14 @@ void Game::CreateBlood(Coordinate pos) {
 }
 
 void Game::CreateBlood(Coordinate pos, int amount) {
-	boost::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos.X(), pos.Y()));
+	boost::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos));
 	if (!blood.lock()) {
-		boost::shared_ptr<BloodNode> newBlood(new BloodNode(pos.X(), pos.Y(), amount));
+		boost::shared_ptr<BloodNode> newBlood(new BloodNode(pos, amount));
 		bloodList.push_back(boost::weak_ptr<BloodNode>(newBlood));
-		Map::Inst()->SetBlood(pos.X(), pos.Y(), newBlood);
-	} else {blood.lock()->Depth(blood.lock()->Depth()+amount);}
+		Map::Inst()->SetBlood(pos, newBlood);
+	} else {
+		blood.lock()->Depth(blood.lock()->Depth()+amount);
+	}
 }
 
 void Game::Pause() {
@@ -1743,8 +1695,8 @@ void Game::SetSquadTargetCoordinate(Order order, Coordinate target, boost::share
 	Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', target, UPDATES_PER_SECOND*5, TCODColor::azure));
 }
 void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_ptr<Squad> squad) {
-	if (target.X() >= 0 && target.X() < Map::Inst()->Width() && target.Y() >= 0 && target.Y() < Map::Inst()->Height()) {
-		std::set<int> *npcList = Map::Inst()->NPCList(target.X(), target.Y());
+	if (Map::Inst()->IsInside(target)) {
+		std::set<int> *npcList = Map::Inst()->NPCList(target);
 		if (!npcList->empty()) {
 			squad->AddOrder(order);
 			squad->AddTargetEntity(Game::Inst()->npcList[*npcList->begin()]);
@@ -1756,20 +1708,11 @@ void Game::SetSquadTargetEntity(Order order, Coordinate target, boost::shared_pt
 
 // Spawns NPCs distributed randomly within the rectangle defined by corner1 & corner2
 std::vector<int> Game::CreateNPCs(int quantity, NPCType type, Coordinate corner1, Coordinate corner2) {
-	int areaWidth = std::max(abs(corner1.X()-corner2.X()), 1);
-	int areaLength = std::max(abs(corner1.Y()-corner2.Y()), 1);
-	int minX = std::min(corner1.X(), corner2.X());
-	int minY = std::min(corner1.Y(), corner2.Y());
-	
+	Coordinate low = Coordinate::min(corner1, corner2);
+	Coordinate high = Coordinate::max(corner1, corner2);
 	std::vector<int> uids;
-	for (int npcs = 0; npcs < quantity; ++npcs) {
-		Coordinate location(
-			Random::Generate(minX, areaWidth + minX - 1),
-			Random::Generate(minY, areaLength + minY - 1)
-		);
-
-		uids.push_back(Game::Inst()->CreateNPC(location, type));
-	}
+	for (int npcs = 0; npcs < quantity; ++npcs)
+		uids.push_back(Game::Inst()->CreateNPC(Random::ChooseInRectangle(low,high), type));
 	return uids;
 }
 
@@ -1829,7 +1772,7 @@ void Game::Reset() {
 	StockManager::Reset();
 	Announce::Reset();
 	Camp::Reset();
-	for (int i = 0; i < Faction::factions.size(); ++i) {
+	for (size_t i = 0; i < Faction::factions.size(); ++i) {
 		Faction::factions[i]->Reset();
 	}
 	Stats::Reset();
@@ -1909,19 +1852,20 @@ void Game::Dig(Coordinate a, Coordinate b) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			/*TODO: Relying on GroundMarked() is iffy, it doesn't necessarily mean that that
 			spot is reserved for digging. */
+			Coordinate p(x,y);
 			std::set<TileType> allowedTypes;
 			allowedTypes.insert(TILEGRASS);
 			allowedTypes.insert(TILEMUD);
 			allowedTypes.insert(TILEBOG);
 			allowedTypes.insert(TILESNOW);
-			if (CheckPlacement(Coordinate(x,y), Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(x,y) && !Map::Inst()->IsLow(x,y)) {
+			if (CheckPlacement(p, Coordinate(1,1), allowedTypes) && !Map::Inst()->GroundMarked(p) && !Map::Inst()->IsLow(p)) {
 				boost::shared_ptr<Job> digJob(new Job("Dig"));
 				digJob->SetRequiredTool(Item::StringToItemCategory("Shovel"));
-				digJob->MarkGround(Coordinate(x,y));
+				digJob->MarkGround(p);
 				digJob->Attempts(50);
 				digJob->DisregardTerritory();
-				digJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
-				digJob->tasks.push_back(Task(DIG, Coordinate(x,y)));
+				digJob->tasks.push_back(Task(MOVEADJACENT, p));
+				digJob->tasks.push_back(Task(DIG, p));
 				JobManager::Inst()->AddJob(digJob);
 			}
 		}
@@ -1930,19 +1874,17 @@ void Game::Dig(Coordinate a, Coordinate b) {
 
 Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target, int faction) {
 	Coordinate closest = Coordinate(-9999, -9999);
-	int leastDistance = -1;
+	int leastDistance = INT_MAX;
 	for (int ix = target.X()-1; ix <= target.X()+1; ++ix) {
 		for (int iy = target.Y()-1; iy <= target.Y()+1; ++iy) {
-			if (ix == target.X()-1 || ix == target.X()+1 ||
-				iy == target.Y()-1 || iy == target.Y()+1) {
-					if (Map::Inst()->IsWalkable(ix,iy)) {
-						int distance = Distance(from.X(), from.Y(), ix, iy);
-						if (faction >= 0 && Map::Inst()->IsDangerous(ix, iy, faction)) distance += 100;
-						if (leastDistance == -1 || distance < leastDistance) {
-							closest = Coordinate(ix,iy);
-							leastDistance = distance;
-						}
-					}
+			Coordinate p(ix,iy);
+			if (p.onRectangleEdges(target - 1, target + 1) && Map::Inst()->IsWalkable(p)) {
+				int distance = Distance(from, p);
+				if (faction >= 0 && Map::Inst()->IsDangerous(p, faction)) distance += 100;
+				if (distance < leastDistance) {
+					closest = p;
+					leastDistance = distance;
+				}
 			}
 		}
 	}
@@ -1950,20 +1892,17 @@ Coordinate Game::FindClosestAdjacent(Coordinate from, Coordinate target, int fac
 }
 
 bool Game::Adjacent(Coordinate a, Coordinate b) {
-	if (std::abs(a.X() - b.X()) < 2 && std::abs(a.Y() - b.Y()) < 2) return true;
-	return false;
+	return (std::abs(a.X() - b.X()) < 2 && std::abs(a.Y() - b.Y()) < 2);
 }
 
-void Game::CreateNatureObject(Coordinate location) {
-	if (Map::Inst()->IsWalkable(location.X(),location.Y()) && 
-		(Map::Inst()->GetType(location.X(),location.Y()) == TILEGRASS || Map::Inst()->GetType(location.X(),location.Y()) == TILESNOW)
-		&& Random::Generate(4) < 2) {
+void Game::CreateNatureObject(Coordinate pos) {
+	if (Map::Inst()->IsWalkable(pos) && (Map::Inst()->GetType(pos) == TILEGRASS || Map::Inst()->GetType(pos) == TILESNOW) && Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
-		float height = Map::Inst()->heightMap->getValue(location.X(),location.Y());
+		float height = Map::Inst()->heightMap->getValue(pos.X(),pos.Y());
 
 		//Populate the priority queue with all possible plants and give each one a random
 		//value based on their rarity
-		bool evil = Map::Inst()->GetCorruption(location.X(), location.Y()) >= 100;
+		bool evil = Map::Inst()->GetCorruption(pos) >= 100;
 		for (unsigned int i = 0; i < NatureObject::Presets.size(); ++i) {
 			if (NatureObject::Presets[i].minHeight <= height &&
 				NatureObject::Presets[i].maxHeight >= height &&
@@ -1980,29 +1919,24 @@ void Game::CreateNatureObject(Coordinate location) {
 			std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
 
 		if (Random::Generate(99) < rarity) {
-
 			for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
-				int ax = location.X() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
-				int ay = location.Y() + Random::Generate(NatureObject::Presets[chosen].cluster - 1) - (NatureObject::Presets[chosen].cluster/2);
-				if (ax < 0) ax = 0; if (ax >= Map::Inst()->Width()) ax = Map::Inst()->Width()-1;
-				if (ay < 0) ay = 0; if (ay >= Map::Inst()->Height()) ay = Map::Inst()->Height()-1;
-				if (Map::Inst()->IsWalkable(ax,ay) && (Map::Inst()->GetType(ax,ay) == TILEGRASS || 
-					Map::Inst()->GetType(ax,ay) == TILESNOW) &&
-					Map::Inst()->GetNatureObject(ax,ay) < 0 &&
-					Map::Inst()->GetConstruction(ax, ay) < 0) {
-						boost::shared_ptr<NatureObject> natObj(new NatureObject(Coordinate(ax,ay), chosen));
-						natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-						Map::Inst()->SetNatureObject(ax,ay,natObj->Uid());
-						Map::Inst()->SetWalkable(ax,ay,NatureObject::Presets[natObj->Type()].walkable);
-						Map::Inst()->SetBuildable(ax,ay,false);
-						Map::Inst()->SetBlocksLight(ax,ay,!NatureObject::Presets[natObj->Type()].walkable);
+				Coordinate a = Map::Inst()->Shrink(Random::ChooseInRadius(pos, NatureObject::Presets[chosen].cluster));
+				if (Map::Inst()->IsWalkable(a) && (Map::Inst()->GetType(a) == TILEGRASS || Map::Inst()->GetType(a) == TILESNOW)
+					&& Map::Inst()->GetNatureObject(a) < 0 && Map::Inst()->GetConstruction(a) < 0)
+				{
+					boost::shared_ptr<NatureObject> natObj(new NatureObject(a, chosen));
+					natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
+					Map::Inst()->SetNatureObject(a,natObj->Uid());
+					Map::Inst()->SetWalkable(a,NatureObject::Presets[natObj->Type()].walkable);
+					Map::Inst()->SetBuildable(a,false);
+					Map::Inst()->SetBlocksLight(a,!NatureObject::Presets[natObj->Type()].walkable);
 				}
 			}
 		}
 	}
 }
 
-void Game::CreateNatureObject(Coordinate location, std::string name) {
+void Game::CreateNatureObject(Coordinate pos, std::string name) {
 	unsigned int natureObjectIndex = 0;
 	for (std::vector<NatureObjectPreset>::iterator preseti = NatureObject::Presets.begin(); preseti != NatureObject::Presets.end();
 		++preseti) {
@@ -2012,31 +1946,28 @@ void Game::CreateNatureObject(Coordinate location, std::string name) {
 
 	if (natureObjectIndex < NatureObject::Presets.size() && 
 		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
-		if (location.X() >= 0 && location.X() < Map::Inst()->Width() && 
-			location.Y() >= 0 && location.Y() < Map::Inst()->Height() &&
-			Map::Inst()->GetNatureObject(location.X(),location.Y()) < 0 &&
-			Map::Inst()->GetConstruction(location.X(), location.Y()) < 0) {
-				boost::shared_ptr<NatureObject> natObj;
-				if (boost::iequals(NatureObject::Presets[natureObjectIndex].name, "Ice"))
-					natObj.reset(new Ice(Coordinate(location.X(),location.Y()), natureObjectIndex));
-				else
-					natObj.reset(new NatureObject(Coordinate(location.X(),location.Y()), natureObjectIndex));
-				natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
-				Map::Inst()->SetNatureObject(location.X(),location.Y(),natObj->Uid());
-				Map::Inst()->SetWalkable(location.X(),location.Y(),NatureObject::Presets[natObj->Type()].walkable);
-				Map::Inst()->SetBuildable(location.X(),location.Y(),false);
-				Map::Inst()->SetBlocksLight(location.X(),location.Y(),!NatureObject::Presets[natObj->Type()].walkable);
+		if (Map::Inst()->IsInside(pos) && Map::Inst()->GetNatureObject(pos) < 0 && Map::Inst()->GetConstruction(pos) < 0) {
+			boost::shared_ptr<NatureObject> natObj;
+			if (boost::iequals(NatureObject::Presets[natureObjectIndex].name, "Ice"))
+				natObj.reset(new Ice(pos , natureObjectIndex));
+			else
+				natObj.reset(new NatureObject(pos, natureObjectIndex));
+			natureList.insert(std::pair<int, boost::shared_ptr<NatureObject> >(natObj->Uid(), natObj));
+			Map::Inst()->SetNatureObject(pos,natObj->Uid());
+			Map::Inst()->SetWalkable(pos,NatureObject::Presets[natObj->Type()].walkable);
+			Map::Inst()->SetBuildable(pos,false);
+			Map::Inst()->SetBlocksLight(pos,!NatureObject::Presets[natObj->Type()].walkable);
 		}
-
 	}
 }
 
 void Game::RemoveNatureObject(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			int uid = Map::Inst()->GetNatureObject(x,y);
+			Coordinate p(x,y);
+			int uid = Map::Inst()->GetNatureObject(p);
 			if (uid >= 0) {
-				Map::Inst()->SetNatureObject(x,y,-1);
+				Map::Inst()->SetNatureObject(p,-1);
 				natureList.erase(uid);
 			}
 		}
@@ -2049,9 +1980,10 @@ void Game::TriggerMigration() { events->SpawnMigratingAnimals(); }
 void Game::GatherItems(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
-				for (std::set<int>::iterator itemuid = Map::Inst()->ItemList(x,y)->begin(); 
-					itemuid != Map::Inst()->ItemList(x,y)->end(); ++itemuid) {
+			Coordinate p(x,y);
+			if (Map::Inst()->IsInside(p)) {
+				for (std::set<int>::iterator itemuid = Map::Inst()->ItemList(p)->begin(); 
+					itemuid != Map::Inst()->ItemList(p)->end(); ++itemuid) {
 						StockpileItem(GetItem(*itemuid), false, true);
 				}
 			}
@@ -2060,7 +1992,7 @@ void Game::GatherItems(Coordinate a, Coordinate b) {
 }
 
 void Game::RemoveFilth(Coordinate pos) {
-	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos.X(), pos.Y()).lock();
+	boost::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos).lock();
 	if (filth) {
 		for (std::list<boost::weak_ptr<FilthNode> >::iterator filthi = filthList.begin(); filthi != filthList.end(); ++filthi) {
 			if (filthi->lock() == filth) {
@@ -2068,12 +2000,12 @@ void Game::RemoveFilth(Coordinate pos) {
 				break;
 			}
 		}
-		Map::Inst()->SetFilth(pos.X(), pos.Y(), boost::shared_ptr<FilthNode>());
+		Map::Inst()->SetFilth(pos, boost::shared_ptr<FilthNode>());
 	}
 }
 
 void Game::RemoveWater(Coordinate pos) {
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos.X(), pos.Y()).lock();
+	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water) {
 		for (std::list<boost::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
 			if (wateri->lock() == water) {
@@ -2082,7 +2014,7 @@ void Game::RemoveWater(Coordinate pos) {
 			}
 		}
 		int filth = water->GetFilth();
-		Map::Inst()->SetWater(pos.X(), pos.Y(), boost::shared_ptr<WaterNode>());
+		Map::Inst()->SetWater(pos, boost::shared_ptr<WaterNode>());
 		if (filth > 0) CreateFilth(pos, filth);
 	}
 }
@@ -2096,41 +2028,14 @@ void Game::Damage(Coordinate pos) {
 	dice.addsub = 1000;
 	attack.AddDamage(dice);
 	
-	boost::shared_ptr<Construction> construction = GetConstruction(Map::Inst()->GetConstruction(pos.X(), pos.Y())).lock();
+	boost::shared_ptr<Construction> construction = GetConstruction(Map::Inst()->GetConstruction(pos)).lock();
 	if (construction) {
 		construction->Damage(&attack);
 	}
-	for (std::set<int>::iterator npcuid = Map::Inst()->NPCList(pos.X(), pos.Y())->begin(); 
-		npcuid != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npcuid) {
+	for (std::set<int>::iterator npcuid = Map::Inst()->NPCList(pos)->begin(); npcuid != Map::Inst()->NPCList(pos)->end(); ++npcuid) {
 			boost::shared_ptr<NPC> npc;
 			if (npcList.find(*npcuid) != npcList.end()) npc = npcList[*npcuid];
 			if (npc) npc->Damage(&attack);
-	}
-}
-
-void Game::Hungerize(Coordinate pos) {
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
-			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
-				boost::shared_ptr<NPC> npc;
-				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
-				if (npc) {
-					npc->hunger = 50000;
-				}
-		}
-	}
-}
-
-void Game::Tire(Coordinate pos) {
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
-			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
-				boost::shared_ptr<NPC> npc;
-				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
-				if (npc) {
-					npc->weariness = (int)(WEARY_THRESHOLD-1);
-				}
-		}
 	}
 }
 
@@ -2153,11 +2058,11 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
 	}
 
-	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos.X(), pos.Y()));
+	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos));
 	if (!fire.lock()) { //No existing firenode
-		boost::shared_ptr<FireNode> newFire(new FireNode(pos.X(), pos.Y(), temperature));
+		boost::shared_ptr<FireNode> newFire(new FireNode(pos, temperature));
 		fireList.push_back(boost::weak_ptr<FireNode>(newFire));
-		Map::Inst()->SetFire(pos.X(), pos.Y(), newFire);
+		Map::Inst()->SetFire(pos, newFire);
 	} else {
 		boost::shared_ptr<FireNode> existingFire = fire.lock();
 		if (existingFire) existingFire->AddHeat(temperature);
@@ -2172,8 +2077,8 @@ boost::shared_ptr<Spell> Game::CreateSpell(Coordinate pos, int type) {
 
 void Game::CreateDitch(Coordinate pos) {
 	RemoveNatureObject(pos, pos);
-	Map::Inst()->SetLow(pos.X(), pos.Y(), true);
-	Map::Inst()->ChangeType(pos.X(), pos.Y(), TILEDITCH);
+	Map::Inst()->SetLow(pos, true);
+	Map::Inst()->ChangeType(pos, TILEDITCH);
 }
 
 void Game::StartFire(Coordinate pos) {
@@ -2202,10 +2107,35 @@ void Game::UpdateFarmPlotSeedAllowances(ItemType type) {
 	}
 }
 
+//TODO factorize all that NPC stuff
+void Game::Hungerize(Coordinate pos) {
+	if (Map::Inst()->IsInside(pos)) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos)->begin(); npci != Map::Inst()->NPCList(pos)->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->hunger = 50000;
+				}
+		}
+	}
+}
+
+void Game::Tire(Coordinate pos) {
+	if (Map::Inst()->IsInside(pos)) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos)->begin(); npci != Map::Inst()->NPCList(pos)->end(); ++npci) {
+				boost::shared_ptr<NPC> npc;
+				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
+				if (npc) {
+					npc->weariness = (int)(WEARY_THRESHOLD-1);
+				}
+		}
+	}
+}
+
 void Game::Thirstify(Coordinate pos) {
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
-			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+	if (Map::Inst()->IsInside(pos)) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos)->begin();
+			npci != Map::Inst()->NPCList(pos)->end(); ++npci) {
 				boost::shared_ptr<NPC> npc;
 				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
 				if (npc) {
@@ -2215,9 +2145,9 @@ void Game::Thirstify(Coordinate pos) {
 	}
 }
 void Game::Badsleepify(Coordinate pos) {
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
-			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+	if (Map::Inst()->IsInside(pos)) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos)->begin();
+			npci != Map::Inst()->NPCList(pos)->end(); ++npci) {
 				boost::shared_ptr<NPC> npc;
 				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
 				if (npc) {
@@ -2228,9 +2158,9 @@ void Game::Badsleepify(Coordinate pos) {
 }
 
 void Game::Diseasify(Coordinate pos) {
-	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
-		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos.X(), pos.Y())->begin();
-			npci != Map::Inst()->NPCList(pos.X(), pos.Y())->end(); ++npci) {
+	if (Map::Inst()->IsInside(pos)) {
+		for (std::set<int>::iterator npci = Map::Inst()->NPCList(pos)->begin();
+			npci != Map::Inst()->NPCList(pos)->end(); ++npci) {
 				boost::shared_ptr<NPC> npc;
 				if (npcList.find(*npci) != npcList.end()) npc = npcList[*npci];
 				if (npc) {
@@ -2243,20 +2173,20 @@ void Game::Diseasify(Coordinate pos) {
 void Game::FillDitch(Coordinate a, Coordinate b) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (x >= 0 && x < Map::Inst()->Width() && y >= 0 && y < Map::Inst()->Height()) {
-				if (Map::Inst()->GetType(x, y) == TILEDITCH) {
+			Coordinate p(x,y);
+			if (Map::Inst()->IsInside(p)) {
+				if (Map::Inst()->GetType(p) == TILEDITCH) {
 					boost::shared_ptr<Job> ditchFillJob(new Job("Fill ditch"));
 					ditchFillJob->DisregardTerritory();
 					ditchFillJob->Attempts(2);
 					ditchFillJob->SetRequiredTool(Item::StringToItemCategory("shovel"));
-					ditchFillJob->MarkGround(Coordinate(x,y));
-					ditchFillJob->tasks.push_back(Task(FIND, Coordinate(x,y), boost::weak_ptr<Entity>(),
-						Item::StringToItemCategory("earth")));
+					ditchFillJob->MarkGround(p);
+					ditchFillJob->tasks.push_back(Task(FIND, p, boost::weak_ptr<Entity>(), Item::StringToItemCategory("earth")));
 					ditchFillJob->tasks.push_back(Task(MOVE));
 					ditchFillJob->tasks.push_back(Task(TAKE));
 					ditchFillJob->tasks.push_back(Task(FORGET));
-					ditchFillJob->tasks.push_back(Task(MOVEADJACENT, Coordinate(x,y)));
-					ditchFillJob->tasks.push_back(Task(FILLDITCH, Coordinate(x,y)));
+					ditchFillJob->tasks.push_back(Task(MOVEADJACENT, p));
+					ditchFillJob->tasks.push_back(Task(FILLDITCH, p));
 					JobManager::Inst()->AddJob(ditchFillJob);
 				}
 			}

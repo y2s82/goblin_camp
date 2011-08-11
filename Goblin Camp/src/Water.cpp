@@ -30,8 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Coordinate.hpp"
 #include "Stats.hpp"
 
-WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
-	x(vx), y(vy), depth(vdepth),
+WaterNode::WaterNode(const Coordinate& pos, int vdepth, int time) :
+	pos(pos), depth(vdepth),
 	graphic('?'), color(TCODColor(0,128,255)),
 	inertCounter(0), inert(false),
 	timeFromRiverBed(time),
@@ -43,6 +43,25 @@ WaterNode::WaterNode(int vx, int vy, int vdepth, int time) :
 
 WaterNode::~WaterNode() {}
 
+Coordinate WaterNode::Position() {
+	return pos;
+}
+void WaterNode::Position(const Coordinate& p) {
+	pos = p;
+}
+
+int WaterNode::X() {
+	return pos.X();
+}
+void WaterNode::X(int x) {
+	pos.X(x);
+}
+int WaterNode::Y() {
+	return pos.Y();
+}
+void WaterNode::Y(int y) {
+	pos.Y(y);
+}
 void WaterNode::Update() {
 	double divided;
 
@@ -52,7 +71,7 @@ void WaterNode::Update() {
 
 	if (!inert || inertCounter > (UPDATES_PER_SECOND*1)) {
 
-		if (Map::Inst()->GetType(x,y) == TILERIVERBED) {
+		if (Map::Inst()->GetType(pos) == TILERIVERBED) {
 			timeFromRiverBed = 1000;
 			if (depth < RIVERDEPTH) depth = RIVERDEPTH;
 		}
@@ -70,11 +89,12 @@ void WaterNode::Update() {
 
 			//Check if any of the surrounding tiles are low, this only matters if this tile is not low
 			bool onlyLowTiles = false;
-			if (!Map::Inst()->IsLow(x,y)) {
-				for (int ix = x-1; ix <= x+1; ++ix) {
-					for (int iy = y-1; iy <= y+1; ++iy) {
-						if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
-							if ((ix != x || iy != y) && Map::Inst()->IsLow(ix,iy)) { 
+			if (!Map::Inst()->IsLow(pos)) {
+				for (int ix = pos.X()-1; ix <= pos.X()+1; ++ix) {
+					for (int iy = pos.Y()-1; iy <= pos.Y()+1; ++iy) {
+						Coordinate p(ix,iy);
+						if (Map::Inst()->IsInside(p)) {
+							if (p != pos && Map::Inst()->IsLow(p)) { 
 								onlyLowTiles = true;
 								break;
 							}
@@ -86,23 +106,26 @@ void WaterNode::Update() {
 			}
 
 			coastal = false; //Have to always check if this water is coastal, terrain can change
-			for (int ix = x-1; ix <= x+1; ++ix) {
-				for (int iy = y-1; iy <= y+1; ++iy) {
-					if (ix >= 0 && ix < Map::Inst()->Width() && iy >= 0 && iy < Map::Inst()->Height()) {
+			for (int ix = pos.X()-1; ix <= pos.X()+1; ++ix) {
+				for (int iy = pos.Y()-1; iy <= pos.Y()+1; ++iy) {
+					Coordinate p(ix,iy);
+					if (Map::Inst()->IsInside(p)) {
 						if (!coastal) {
-							TileType tile = Map::Inst()->GetType(ix,iy);
+							TileType tile = Map::Inst()->GetType(p);
 							if (tile != TILENONE && tile != TILEDITCH && tile != TILERIVERBED) coastal = true;
-							if (Map::Inst()->GetNatureObject(ix,iy) >= 0) coastal = true;
+							if (Map::Inst()->GetNatureObject(p) >= 0) coastal = true;
 						}
 						/*Choose the surrounding tiles that:
 						Are the same height or low
 						or in case of [onlyLowTiles] are low
 						depth > RIVERDEPTH*3 at which point it can overflow upwards*/
-						if (((!onlyLowTiles && Map::Inst()->IsLow(x,y) == Map::Inst()->IsLow(ix,iy)) || depth > RIVERDEPTH*3 || Map::Inst()->IsLow(ix,iy)) && !Map::Inst()->BlocksWater(ix,iy)) {
+						if (((!onlyLowTiles && Map::Inst()->IsLow(pos) == Map::Inst()->IsLow(p))
+							  || depth > RIVERDEPTH*3 || Map::Inst()->IsLow(p))
+							&& !Map::Inst()->BlocksWater(p)) {
 							//If we're choosing only low tiles, then this tile should be ignored completely
-							if (!onlyLowTiles || (ix != x || iy != y)) {
-								waterList.push_back(Map::Inst()->GetWater(ix,iy));
-								coordList.push_back(Coordinate(ix,iy));
+							if (!onlyLowTiles || p != pos) {
+								waterList.push_back(Map::Inst()->GetWater(p));
+								coordList.push_back(p);
 								if (waterList.back().lock()) depthSum += waterList.back().lock()->depth;
 							}
 						}
@@ -114,14 +137,13 @@ void WaterNode::Update() {
 			divided = ((double)depthSum/waterList.size());
 
 			boost::shared_ptr<Item> item;
-			if (!Map::Inst()->ItemList(x,y)->empty())
-				item = Game::Inst()->GetItem(*Map::Inst()->ItemList(x,y)->begin()).lock();
+			if (!Map::Inst()->ItemList(pos)->empty())
+				item = Game::Inst()->GetItem(*Map::Inst()->ItemList(pos)->begin()).lock();
 
 			//Filth and items flow off the map
-			Direction flow = Map::Inst()->GetFlow(x,y);
-			Coordinate flowTarget = Coordinate::DirectionToCoordinate(flow) + Coordinate(x,y);
-			if (flowTarget.X() < 0 || flowTarget.X() >= Map::Inst()->Width() ||
-				flowTarget.Y() < 0 || flowTarget.Y() >= Map::Inst()->Height()) {
+			Direction flow = Map::Inst()->GetFlow(pos);
+			Coordinate flowTarget = Coordinate::DirectionToCoordinate(flow) + pos;
+			if (!(Map::Inst()->IsInside(flowTarget))) {
 					if (filth > 0) {
 						Stats::Inst()->FilthFlowsOffEdge(std::min(filth, 10));
 						filth -= std::min(filth, 10);
@@ -142,6 +164,8 @@ void WaterNode::Update() {
 					//So much filth it'll go anywhere
 					if (filth > 10 && Random::Generate(3) == 0) { filth -= 5; water->filth += 5; }
 					//Filth and items go with the flow
+					//TODO factorize
+					int x = pos.X(), y = pos.Y();
 					switch (flow) {
 					case NORTH:
 						if (coordList[i].Y() < y) {
@@ -267,12 +291,12 @@ void WaterNode::Update() {
 
 		} else {
 			int soakage = 500;
-			TileType type = Map::Inst()->GetType(x,y);
+			TileType type = Map::Inst()->GetType(pos);
 			if (type == TILEGRASS) soakage = 10;
 			else if (type == TILEBOG) soakage = 0;
 			if (Random::Generate(soakage) == 0) {
 				depth = 0;
-				Game::Inst()->RemoveWater(Coordinate(x,y)); //Water has evaporated
+				Game::Inst()->RemoveWater(pos); //Water has evaporated
 			}
 		}
 	}
@@ -284,7 +308,7 @@ int WaterNode::Depth() {return depth;}
 
 void WaterNode::Depth(int newDepth) {
 	//20 because water can't add more cost to pathing calculations
-	if (depth <= 20 && newDepth <= 20 && depth != newDepth) Map::Inst()->TileChanged(x, y);
+	if (depth <= 20 && newDepth <= 20 && depth != newDepth) Map::Inst()->TileChanged(pos);
 	depth = newDepth;
 	UpdateGraphic();
 }
@@ -314,8 +338,6 @@ void WaterNode::UpdateGraphic() {
 	if (Random::Generate(9999) == 0 && color.g < 225) color.g += Random::Generate(24);
 }
 
-Coordinate WaterNode::Position() {return Coordinate(x,y);}
-
 void WaterNode::AddFilth(int newFilth) { filth += newFilth; }
 int WaterNode::GetFilth() { return filth; }
 
@@ -332,8 +354,7 @@ TCODColor WaterNode::GetColor()
 bool WaterNode::IsCoastal() { return coastal; }
 
 void WaterNode::save(OutputArchive& ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & depth;
 	ar & graphic;
 	ar & color.r;
@@ -346,8 +367,7 @@ void WaterNode::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void WaterNode::load(InputArchive& ar, const unsigned int version) {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & depth;
 	ar & graphic;
 	ar & color.r;

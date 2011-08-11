@@ -1,5 +1,10 @@
 syntax: glob
 
+*.hpp.gch
+build/tmp
+build/bin-*
+build/installer-*
+build/dist
 *.suo
 *.user
 *.FileListAbsolute.txt
