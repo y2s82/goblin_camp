@@ -69,7 +69,7 @@ public:
 	int ContainsFilth();
 	void Draw(Coordinate, TCODConsole*);
 	int GetReservedSpace();
-	virtual void Position(Coordinate);
+	virtual void Position(const Coordinate&);
 	virtual Coordinate Position();
 	virtual void SetFaction(int);
 };

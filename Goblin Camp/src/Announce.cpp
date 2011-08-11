@@ -51,7 +51,7 @@ timer(0),
 	height(0)
 {}
 
-void Announce::AddMsg(std::string msg, TCODColor color, Coordinate coordinate) {
+void Announce::AddMsg(std::string msg, TCODColor color, const Coordinate& coordinate) {
 	msg = msg.substr(0,ANNOUNCE_MAX_LENGTH);
 	if (!messageQueue.empty() && messageQueue.back()->msg == msg && messageQueue.back()->target == coordinate) {
 		messageQueue.back()->counter++;

@@ -211,14 +211,14 @@ public:
 	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
 
 	~NPC();
+	virtual Coordinate Position() const;
+	virtual void Position(const Coordinate&);
+	void Position(const Coordinate&, bool firstTime);
 	SkillSet Skills;
 	void Think();
 	void Update();
 	void Draw(Coordinate, TCODConsole*);
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
-	void Position(Coordinate,bool);
-	virtual void Position(Coordinate);
-	virtual Coordinate Position() const;
 	void speed(unsigned int);
 	unsigned int speed() const;
 	void color(TCODColor,TCODColor=TCODColor::black);

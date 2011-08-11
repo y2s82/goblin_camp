@@ -38,14 +38,27 @@ class Map : public ITCODPathCallback {
 	
 	Map();
 	static Map* instance;
-	boost::multi_array<Tile, 2> tileMap;
-	boost::multi_array<CacheTile, 2> cachedTileMap;
-	int width, height;
+	mutable boost::multi_array<Tile, 2> tileMap;
+	mutable boost::multi_array<CacheTile, 2> cachedTileMap;
+	Coordinate extent; //X->width, Y->height
 	float waterlevel;
 	int overlayFlags;
 	std::list< std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
 	boost::unordered_set<Coordinate> changedTiles;
+
+	inline const Tile& tile(const Coordinate& p) const {
+		return tileMap[p.X()][p.Y()];
+	}
+	inline const CacheTile& cachedTile(const Coordinate& p) const {
+		return cachedTileMap[p.X()][p.Y()];
+	}
+	inline Tile& tile(const Coordinate& p) {
+		return tileMap[p.X()][p.Y()];
+	}
+	inline CacheTile& cachedTile(const Coordinate& p) {
+		return cachedTileMap[p.X()][p.Y()];
+	}
 	
 public:
 	typedef std::list<std::pair<unsigned int, MapMarker> >::const_iterator MarkerIterator;
@@ -53,71 +66,79 @@ public:
 	TCODHeightMap *heightMap;
 	static Map* Inst();
 	~Map();
-	void Reset(int,int);
+	void Reset(const Coordinate&);
+
+	float getWalkCost(const Coordinate&, const Coordinate&, void *) const;
 	float getWalkCost(int, int, int, int, void *) const;
-	bool IsWalkable(int,int) const;
-	bool IsWalkable(int,int,void*) const;
-	void SetWalkable(int,int,bool);
+	//we must keep the int-version of getWalkCost as an override of ITCODPathCallback, otherwise Map is virtual
+
+	bool IsWalkable(const Coordinate&) const;
+	bool IsWalkable(const Coordinate&,void*) const;
+	void SetWalkable(const Coordinate&,bool);
+	
+	Coordinate Extent();
 	int Width();
 	int Height();
-	bool IsBuildable(int,int) const;
-	void SetBuildable(int,int,bool);
-	TileType GetType(int,int);
-	void ResetType(int,int,TileType,float tileHeight = 0.0);  //ResetType() resets all tile variables to defaults
-	void ChangeType(int,int,TileType,float tileHeight = 0.0); //ChangeType() preserves information such as buildability
-	void MoveTo(int,int,int);
-	void MoveFrom(int,int,int);
-	void SetConstruction(int,int,int);
-	int GetConstruction(int,int) const;
-	boost::weak_ptr<WaterNode> GetWater(int,int);
-	void SetWater(int,int,boost::shared_ptr<WaterNode>);
-	bool IsLow(int,int) const;
-	void SetLow(int,int,bool);
-	bool BlocksWater(int,int) const;
-	void SetBlocksWater(int,int,bool);
-	std::set<int>* NPCList(int,int);
-	int GetGraphic(int,int) const;
-	TCODColor GetForeColor(int,int) const;
-	void ForeColor(int,int,TCODColor);
-	TCODColor GetBackColor(int,int) const;
-	void SetNatureObject(int,int,int);
-	int GetNatureObject(int,int) const;
-	std::set<int>* ItemList(int,int);
-	boost::weak_ptr<FilthNode> GetFilth(int,int);
-	void SetFilth(int,int,boost::shared_ptr<FilthNode>);
-	boost::weak_ptr<BloodNode> GetBlood(int,int);
-	void SetBlood(int,int,boost::shared_ptr<BloodNode>);
-	boost::weak_ptr<FireNode> GetFire(int,int);
-	void SetFire(int,int,boost::shared_ptr<FireNode>);
-	bool BlocksLight(int, int) const;
-	void SetBlocksLight(int, int, bool);
-	bool LineOfSight(Coordinate, Coordinate);
-	bool LineOfSight(int, int, int, int);
-	void Mark(int,int);
-	void Unmark(int,int);
-	bool GroundMarked(int,int);
-	int GetMoveModifier(int,int);
+
+	bool IsInside(const Coordinate&) const;
+	Coordinate Shrink(const Coordinate&) const;
+
+	bool IsBuildable(const Coordinate&) const;
+	void SetBuildable(const Coordinate&,bool);
+	TileType GetType(const Coordinate&);
+	void ResetType(const Coordinate&,TileType,float tileHeight = 0.0);  //ResetType() resets all tile variables to defaults
+	void ChangeType(const Coordinate&,TileType,float tileHeight = 0.0); //ChangeType() preserves information such as buildability
+	void MoveTo(const Coordinate&,int);
+	void MoveFrom(const Coordinate&,int);
+	void SetConstruction(const Coordinate&,int);
+	int GetConstruction(const Coordinate&) const;
+	boost::weak_ptr<WaterNode> GetWater(const Coordinate&);
+	void SetWater(const Coordinate&,boost::shared_ptr<WaterNode>);
+	bool IsLow(const Coordinate&) const;
+	void SetLow(const Coordinate&,bool);
+	bool BlocksWater(const Coordinate&) const;
+	void SetBlocksWater(const Coordinate&,bool);
+	std::set<int>* NPCList(const Coordinate&);
+	int GetGraphic(const Coordinate&) const;
+	TCODColor GetForeColor(const Coordinate&) const;
+	void ForeColor(const Coordinate&,TCODColor);
+	TCODColor GetBackColor(const Coordinate&) const;
+	void SetNatureObject(const Coordinate&,int);
+	int GetNatureObject(const Coordinate&) const;
+	std::set<int>* ItemList(const Coordinate&);
+	boost::weak_ptr<FilthNode> GetFilth(const Coordinate&);
+	void SetFilth(const Coordinate&,boost::shared_ptr<FilthNode>);
+	boost::weak_ptr<BloodNode> GetBlood(const Coordinate&);
+	void SetBlood(const Coordinate&,boost::shared_ptr<BloodNode>);
+	boost::weak_ptr<FireNode> GetFire(const Coordinate&);
+	void SetFire(const Coordinate&,boost::shared_ptr<FireNode>);
+	bool BlocksLight(const Coordinate&) const;
+	void SetBlocksLight(const Coordinate&, bool);
+	bool LineOfSight(const Coordinate&, const Coordinate&);
+	void Mark(const Coordinate&);
+	void Unmark(const Coordinate&);
+	bool GroundMarked(const Coordinate&);
+	int GetMoveModifier(const Coordinate&);
 	float GetWaterlevel();
-	void WalkOver(int,int);
-	void Naturify(int,int);
-	void Corrupt(int x, int y, int magnitude=200);
-	void Corrupt(Coordinate, int magnitude=200);
-	int GetCorruption(int x, int y);
-	bool IsTerritory(int x, int y);
-	void SetTerritory(int x, int y, bool);
-	void SetTerritoryRectangle(Coordinate a, Coordinate b, bool);
+	void WalkOver(const Coordinate&);
+	void Naturify(const Coordinate&);
+	void Corrupt(const Coordinate&, int magnitude=200);
+	int GetCorruption(const Coordinate&);
+	bool IsTerritory(const Coordinate&);
+	void SetTerritory(const Coordinate&, bool);
+	void SetTerritoryRectangle(const Coordinate &high, const Coordinate &low, bool);
 	int GetOverlayFlags();
 	void AddOverlay(int flags);
 	void RemoveOverlay(int flags);
 	void ToggleOverlay(int flags);
-	void FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &moveY, int nextX, int nextY, void* npc);
-	bool IsUnbridgedWater(int x, int y);
+	void FindEquivalentMoveTarget(const Coordinate& current, Coordinate& move, const Coordinate& next, void* npc); //mutates 'move'
+	bool IsUnbridgedWater(const Coordinate&);
 	void UpdateMarkers();
 	unsigned int AddMarker(MapMarker);
 	void RemoveMarker(int);
-	TCODColor GetColor(int,int);
-	void Burn(int x, int y, int magnitude=1);
-	int Burnt(int x, int y);
+	TCODColor GetColor(const Coordinate&);
+	void Burn(const Coordinate&, int magnitude=1);
+	int Burnt(const Coordinate&);
 
 	MarkerIterator MarkerBegin();
 	MarkerIterator MarkerEnd();
@@ -127,20 +148,20 @@ public:
 	void ShiftWind();
 	std::string GetWindAbbreviation();
 
-	void CalculateFlow(int px[4], int py[4]);
-	Direction GetFlow(int x, int y);
+	void CalculateFlow(int px[4], int py[4]); //TODO use Coordinate
+	Direction GetFlow(const Coordinate&);
 
-	bool IsDangerous(int x, int y, int faction) const;
-	bool IsDangerousCache(int x, int y, int faction) const;
-	int GetTerrainMoveCost(int x, int y) const;
+	bool IsDangerous(const Coordinate&, int faction) const;
+	bool IsDangerousCache(const Coordinate&, int faction) const;
+	int GetTerrainMoveCost(const Coordinate&) const;
 	boost::shared_ptr<Weather> weather;
 	void Update();
 	
-	Coordinate FindRangedAdvantage(Coordinate);
+	Coordinate FindRangedAdvantage(const Coordinate&);
 
 	mutable boost::shared_mutex cacheMutex;
 	void UpdateCache();
-	void TileChanged(int x, int y);
+	void TileChanged(const Coordinate&);
 };
 
 BOOST_CLASS_VERSION(Map, 2)

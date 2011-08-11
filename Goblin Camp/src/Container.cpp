@@ -178,19 +178,19 @@ void Container::RemoveFilth(int amount) {
 int Container::ContainsFilth() { return filth; }
 
 void Container::Draw(Coordinate upleft, TCODConsole* console) {
-	int screenx = x - upleft.X();
-	int screeny = y - upleft.Y();
+	int screenx = (pos - upleft).X();
+	int screeny = (pos - upleft).Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
 		if (!items.empty() && items.begin()->lock())
 			console->putCharEx(screenx, screeny, items.begin()->lock()->GetGraphic(), items.begin()->lock()->Color(), color);
 		else
-			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(x,y));
+			console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(pos));
 	}
 }
 
 int Container::GetReservedSpace() { return reservedSpace; }
 
-void Container::Position(Coordinate pos) {
+void Container::Position(const Coordinate& pos) {
 	Item::Position(pos);
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 		boost::shared_ptr<Item> item = itemi->lock();

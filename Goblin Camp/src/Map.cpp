@@ -33,20 +33,22 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Weather.hpp"
 #include "GCamp.hpp"
 
+static const int HARDCODED_WIDTH = 500;
+static const int HARDCODED_HEIGHT = 500;
+
 Map::Map() :
 overlayFlags(0), markerids(0) {
-	tileMap.resize(boost::extents[500][500]);
-	cachedTileMap.resize(boost::extents[500][500]);
-	for (int i = 0; i < (signed int)tileMap.size(); ++i) {
-		for (int e = 0; e < (signed int)tileMap[0].size(); ++e) {
+	tileMap.resize(boost::extents[HARDCODED_WIDTH][HARDCODED_HEIGHT]);
+	cachedTileMap.resize(boost::extents[HARDCODED_WIDTH][HARDCODED_HEIGHT]);
+	heightMap = new TCODHeightMap(HARDCODED_WIDTH,HARDCODED_HEIGHT);
+	extent = Coordinate(HARDCODED_WIDTH, HARDCODED_HEIGHT);
+	for (int i = 0; i < HARDCODED_WIDTH; ++i) {
+		for (int e = 0; e < HARDCODED_HEIGHT; ++e) {
 			tileMap[i][e].ResetType(TILEGRASS);
 			cachedTileMap[i][e].x = i;
 			cachedTileMap[i][e].y = e;
 		}
 	}
-	width = tileMap.size();
-	height = tileMap[0].size();
-	heightMap = new TCODHeightMap(500,500);
 	waterlevel = -0.8f;
 	weather = boost::shared_ptr<Weather>(new Weather(this));
 };
@@ -62,230 +64,241 @@ Map* Map::Inst() {
 	return instance;
 }
 
-float Map::getWalkCost(int x0, int y0, int x1, int y1, void* ptr) const {
+Coordinate Map::Extent() { return extent; }
+int Map::Width() { return extent.X(); }
+int Map::Height() { return extent.Y(); }
+
+bool Map::IsInside(const Coordinate& p) const
+{
+	return p.insideExtent(zero, extent);
+}
+Coordinate Map::Shrink(const Coordinate& p) const
+{
+	return p.shrinkExtent(zero, extent);
+}
+
+float Map::getWalkCost(const Coordinate& from, const Coordinate& to, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->IsFlying()) return 1.0f;
-	return (float)cachedTileMap[x1][y1].GetMoveCost(ptr);
+	return (float)cachedTile(to).GetMoveCost(ptr);
+}
+float Map::getWalkCost(int fx, int fy, int tx, int ty, void* ptr) const {
+	return Map::getWalkCost(Coordinate(fx,fy),Coordinate(tx,ty),ptr);
 }
 
 //Simple version that doesn't take npc information into account
-bool Map::IsWalkable(int x, int y) const {
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsWalkable();
-	return false;
+bool Map::IsWalkable(const Coordinate& p) const {
+	return (Map::IsInside(p) && tile(p).IsWalkable());
 }
 
-bool Map::IsWalkable(int x, int y, void* ptr) const {
+bool Map::IsWalkable(const Coordinate& p, void* ptr) const {
 	if (static_cast<NPC*>(ptr)->HasEffect(FLYING)) return true;
 	if (!static_cast<NPC*>(ptr)->HasHands()) {
-		if (GetConstruction(x,y) >= 0) {
-			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(GetConstruction(x,y)).lock()) {
+		int constructionId = GetConstruction(p);
+		if (constructionId >= 0) {
+			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(constructionId).lock()) {
 				if (cons->HasTag(DOOR) && !boost::static_pointer_cast<Door>(cons)->Open()) {
 					return false;
 				}
 			}
 		}
 	}
-	return IsWalkable(x,y);
+	return IsWalkable(p);
 }
 
-void Map::SetWalkable(int x,int y, bool value) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetWalkable(value);
-		changedTiles.insert(Coordinate(x,y));
+void Map::SetWalkable(const Coordinate &p, bool value) {
+	if (Map::IsInside(p)) {
+		tile(p).SetWalkable(value);
+		changedTiles.insert(p);
 	}
 }
 
-int Map::Width() { return width; }
-int Map::Height() { return height; }
-bool Map::IsBuildable(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsBuildable(); 
-	return false;
+bool Map::IsBuildable(const Coordinate& p) const { 
+	return Map::IsInside(p) && tile(p).IsBuildable();
 }
-void Map::SetBuildable(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBuildable(value); 
+
+void Map::SetBuildable(const Coordinate& p, bool value) { 
+	if (Map::IsInside(p))
+		tile(p).SetBuildable(value);
 }
-TileType Map::GetType(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetType(); 
+
+TileType Map::GetType(const Coordinate& p) { 
+	if (Map::IsInside(p)) return tile(p).GetType(); 
 	return TILENONE;
 }
-void Map::ResetType(int x, int y, TileType ntype, float tileHeight) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].ResetType(ntype, tileHeight);
-		changedTiles.insert(Coordinate(x,y));
+
+void Map::ResetType(const Coordinate& p, TileType ntype, float tileHeight) { 
+	if (Map::IsInside(p)) {
+		tile(p).ResetType(ntype, tileHeight);
+		changedTiles.insert(p);
+	}
+}
+void Map::ChangeType(const Coordinate& p, TileType ntype, float tileHeight) { 
+	if (Map::IsInside(p)) {
+		tile(p).ChangeType(ntype, tileHeight);
+		changedTiles.insert(p);
 	}
 }
 
-void Map::ChangeType(int x, int y, TileType ntype, float tileHeight) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].ChangeType(ntype, tileHeight);
-		changedTiles.insert(Coordinate(x,y));
-	}
-}
-
-void Map::MoveTo(int x, int y, int uid) {
-	if (x >= 0 && x < Width() && y >= 0 && y < Height()) {
-		tileMap[x][y].MoveTo(uid);
+void Map::MoveTo(const Coordinate& p, int uid) {
+	if (Map::IsInside(p)) {
+		tile(p).MoveTo(uid);
 	} 
 }
-void Map::MoveFrom(int x, int y, int uid) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].MoveFrom(uid); 
+
+void Map::MoveFrom(const Coordinate& p, int uid) { 
+	if (Map::IsInside(p)) tile(p).MoveFrom(uid); 
 }
 
-void Map::SetConstruction(int x, int y, int uid) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetConstruction(uid);
-		changedTiles.insert(Coordinate(x,y));
+void Map::SetConstruction(const Coordinate& p, int uid) { 
+	if (Map::IsInside(p)) {
+		tile(p).SetConstruction(uid);
+		changedTiles.insert(p);
 	}
 }
-int Map::GetConstruction(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetConstruction(); 
+int Map::GetConstruction(const Coordinate& p) const { 
+	if (Map::IsInside(p)) return tile(p).GetConstruction(); 
 	return -1;
 }
 
-boost::weak_ptr<WaterNode> Map::GetWater(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetWater();
+boost::weak_ptr<WaterNode> Map::GetWater(const Coordinate& p) { 
+	if (Map::IsInside(p)) return tile(p).GetWater();
 	return boost::weak_ptr<WaterNode>();
 }
-void Map::SetWater(int x, int y, boost::shared_ptr<WaterNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetWater(value);
-		changedTiles.insert(Coordinate(x,y));
+void Map::SetWater(const Coordinate& p, boost::shared_ptr<WaterNode> value) { 
+	if (Map::IsInside(p)) {
+		tile(p).SetWater(value);
+		changedTiles.insert(p);
 	}
 }
 
-bool Map::IsLow(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].IsLow();
-	return false;
+bool Map::IsLow(const Coordinate& p) const { 
+	return Map::IsInside(p) && tile(p).IsLow();
 }
-void Map::SetLow(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetLow(value); 
+void Map::SetLow(const Coordinate& p, bool value) { 
+	if (Map::IsInside(p)) tile(p).SetLow(value); 
 }
 
-bool Map::BlocksWater(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksWater(); 
-	return true;
+bool Map::BlocksWater(const Coordinate& p) const { 
+	return !Map::IsInside(p) || tile(p).BlocksWater(); 
 }
-void Map::SetBlocksWater(int x, int y, bool value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetBlocksWater(value);
+void Map::SetBlocksWater(const Coordinate& p, bool value) { 
+	if (Map::IsInside(p)) {
+		tile(p).SetBlocksWater(value);
 	}
 }
 
-std::set<int>* Map::NPCList(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].npcList; 
+std::set<int>* Map::NPCList(const Coordinate& p) { 
+	if (Map::IsInside(p)) return &tile(p).npcList; 
 	return &tileMap[0][0].npcList;
 }
-std::set<int>* Map::ItemList(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return &tileMap[x][y].itemList;
+std::set<int>* Map::ItemList(const Coordinate& p) { 
+	if (Map::IsInside(p)) return &tile(p).itemList;
 	return &tileMap[0][0].itemList;
 }
 
-int Map::GetGraphic(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetGraphic(); 
+int Map::GetGraphic(const Coordinate& p) const { 
+	if (Map::IsInside(p)) return tile(p).GetGraphic(); 
 	return '?';
 }
-TCODColor Map::GetForeColor(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor(); 
+TCODColor Map::GetForeColor(const Coordinate& p) const { 
+	if (Map::IsInside(p)) return tile(p).GetForeColor(); 
 	return TCODColor::pink;
 }
 
-void Map::ForeColor(int x, int y, TCODColor color) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].originalForeColor = color;
-		tileMap[x][y].foreColor = color;
+void Map::ForeColor(const Coordinate& p, TCODColor color) {
+	if (Map::IsInside(p)) {
+		tile(p).originalForeColor = color;
+		tile(p).foreColor = color;
 	}
 }
 
-TCODColor Map::GetBackColor(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetBackColor(); 
+TCODColor Map::GetBackColor(const Coordinate& p) const { 
+	if (Map::IsInside(p)) return tile(p).GetBackColor(); 
 	return TCODColor::yellow;
 }
 
-void Map::SetNatureObject(int x, int y, int val) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetNatureObject(val);
+void Map::SetNatureObject(const Coordinate& p, int val) { 
+	if (Map::IsInside(p)) {
+		tile(p).SetNatureObject(val);
 	}
 }
-int Map::GetNatureObject(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetNatureObject(); 
+int Map::GetNatureObject(const Coordinate& p) const { 
+	if (Map::IsInside(p)) return tile(p).GetNatureObject(); 
 	return -1;
 }
 
-boost::weak_ptr<FilthNode> Map::GetFilth(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetFilth(); 
+boost::weak_ptr<FilthNode> Map::GetFilth(const Coordinate& p) { 
+	if (Map::IsInside(p)) return tile(p).GetFilth(); 
 	return boost::weak_ptr<FilthNode>();
 }
-void Map::SetFilth(int x, int y, boost::shared_ptr<FilthNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetFilth(value);
-		changedTiles.insert(Coordinate(x,y));
+void Map::SetFilth(const Coordinate& p, boost::shared_ptr<FilthNode> value) { 
+	if (Map::IsInside(p)) {
+		tile(p).SetFilth(value);
+		changedTiles.insert(p);
 	}
 }
 
-boost::weak_ptr<BloodNode> Map::GetBlood(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetBlood(); 
+boost::weak_ptr<BloodNode> Map::GetBlood(const Coordinate& p) { 
+	if (Map::IsInside(p)) return tile(p).GetBlood(); 
 	return boost::weak_ptr<BloodNode>();
 }
-void Map::SetBlood(int x, int y, boost::shared_ptr<BloodNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlood(value); 
+void Map::SetBlood(const Coordinate& p, boost::shared_ptr<BloodNode> value) { 
+	if (Map::IsInside(p)) tile(p).SetBlood(value); 
 }
 
-boost::weak_ptr<FireNode> Map::GetFire(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetFire(); 
+boost::weak_ptr<FireNode> Map::GetFire(const Coordinate& p) { 
+	if (Map::IsInside(p)) return tile(p).GetFire(); 
 	return boost::weak_ptr<FireNode>();
 }
-void Map::SetFire(int x, int y, boost::shared_ptr<FireNode> value) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].SetFire(value);
-		changedTiles.insert(Coordinate(x,y));
+void Map::SetFire(const Coordinate& p, boost::shared_ptr<FireNode> value) { 
+	if (Map::IsInside(p)) {
+		tile(p).SetFire(value);
+		changedTiles.insert(p);
 	}
 }
 
-bool Map::BlocksLight(int x, int y) const { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].BlocksLight(); 
+bool Map::BlocksLight(const Coordinate& p) const { 
+	if (Map::IsInside(p)) return tile(p).BlocksLight(); 
 	return true;
 }
-void Map::SetBlocksLight(int x, int y, bool val) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].SetBlocksLight(val); 
+void Map::SetBlocksLight(const Coordinate& p, bool val) { 
+	if (Map::IsInside(p)) tile(p).SetBlocksLight(val); 
 }
 
-bool Map::LineOfSight(Coordinate a, Coordinate b) {
-	return LineOfSight(a.X(), a.Y(), b.X(), b.Y());
-}
-
-bool Map::LineOfSight(int ax, int ay, int bx, int by) {
-	TCODLine::init(ax, ay, bx, by);
-	int x = ax;
-	int y = ay;
+bool Map::LineOfSight(const Coordinate& a, const Coordinate& b) {
+	TCODLine::init(a.X(), a.Y(), b.X(), b.Y());
+	int x = a.X();
+	int y = a.Y();
 	do {
-		if (BlocksLight(x,y)) return false;
-	} while(!TCODLine::step(&x, &y) && !(x == bx && y == by));
+		if (BlocksLight(Coordinate(x,y))) return false;
+	} while(!TCODLine::step(&x, &y) && !(x == b.X() && y == b.Y()));
 	return true;
 }
 
-void Map::Reset(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].ResetType(TILEGRASS);
-		tileMap[x][y].SetWalkable(true);
-		tileMap[x][y].SetBuildable(true);
-		tileMap[x][y].SetConstruction(-1);
-		tileMap[x][y].SetWater(boost::shared_ptr<WaterNode>());
-		tileMap[x][y].SetLow(false);
-		tileMap[x][y].SetBlocksWater(false);
-		tileMap[x][y].SetBlocksLight(false);
-		tileMap[x][y].SetNatureObject(-1);
-		tileMap[x][y].itemList.clear();
-		tileMap[x][y].npcList.clear();
-		tileMap[x][y].SetFilth(boost::shared_ptr<FilthNode>());
-		tileMap[x][y].SetBlood(boost::shared_ptr<BloodNode>());
-		tileMap[x][y].marked = false;
-		tileMap[x][y].walkedOver = 0;
-		tileMap[x][y].corruption = 0;
-		tileMap[x][y].territory = false;
-		tileMap[x][y].burnt = 0;
-		tileMap[x][y].moveCost = 1;
-		tileMap[x][y].flow = NODIRECTION;
-		changedTiles.insert(Coordinate(x,y));
-		heightMap->setValue(x,y,0.5f);
+void Map::Reset(const Coordinate& p) {
+	if (Map::IsInside(p)) {
+		tile(p).ResetType(TILEGRASS);
+		tile(p).SetWalkable(true);
+		tile(p).SetBuildable(true);
+		tile(p).SetConstruction(-1);
+		tile(p).SetWater(boost::shared_ptr<WaterNode>());
+		tile(p).SetLow(false);
+		tile(p).SetBlocksWater(false);
+		tile(p).SetBlocksLight(false);
+		tile(p).SetNatureObject(-1);
+		tile(p).itemList.clear();
+		tile(p).npcList.clear();
+		tile(p).SetFilth(boost::shared_ptr<FilthNode>());
+		tile(p).SetBlood(boost::shared_ptr<BloodNode>());
+		tile(p).marked = false;
+		tile(p).walkedOver = 0;
+		tile(p).corruption = 0;
+		tile(p).territory = false;
+		tile(p).burnt = 0;
+		tile(p).moveCost = 1;
+		tile(p).flow = NODIRECTION;
+		changedTiles.insert(p);
+		heightMap->setValue(p.X(),p.Y(),0.5f);
 	} else {
 		waterlevel = -0.8f;
 		overlayFlags = 0;
@@ -295,23 +308,23 @@ void Map::Reset(int x, int y) {
 	}
 }
 
-void Map::Mark(int x, int y) { tileMap[x][y].Mark(); }
-void Map::Unmark(int x, int y) { tileMap[x][y].Unmark(); }
+void Map::Mark(const Coordinate& p) { tile(p).Mark(); }
+void Map::Unmark(const Coordinate& p) { tile(p).Unmark(); }
 
-int Map::GetMoveModifier(int x, int y) {
+int Map::GetMoveModifier(const Coordinate& p) {
 	int modifier = 0;
 
 	boost::shared_ptr<Construction> construction;
-	if (tileMap[x][y].construction >= 0) construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
+	if (tile(p).construction >= 0) construction = Game::Inst()->GetConstruction(tile(p).construction).lock();
 	bool bridge = false;
 	if (construction) bridge = (construction->Built() && construction->HasTag(BRIDGE));
 
-	if (tileMap[x][y].GetType() == TILEBOG && !bridge) modifier += 10;
-	else if (tileMap[x][y].GetType() == TILEDITCH && !bridge) modifier += 4;
-	else if (tileMap[x][y].GetType() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
+	if (tile(p).GetType() == TILEBOG && !bridge) modifier += 10;
+	else if (tile(p).GetType() == TILEDITCH && !bridge) modifier += 4;
+	else if (tile(p).GetType() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
 		modifier += 6;
 	}
-	if (boost::shared_ptr<WaterNode> water = tileMap[x][y].GetWater().lock()) { //Water adds 'depth' without a bridge
+	if (boost::shared_ptr<WaterNode> water = tile(p).GetWater().lock()) { //Water adds 'depth' without a bridge
 		if (!bridge) modifier += water->Depth();
 	}
 
@@ -319,18 +332,20 @@ int Map::GetMoveModifier(int x, int y) {
 	if (construction && !bridge) modifier += construction->GetMoveSpeedModifier();
 
 	//Other critters slow down movement
-	if (tileMap[x][y].npcList.size() > 0) modifier += 2 + Random::Generate(tileMap[x][y].npcList.size() - 1);
+	if (tile(p).npcList.size() > 0) modifier += 2 + Random::Generate(tile(p).npcList.size() - 1);
 
 	return modifier;
 }
 
 float Map::GetWaterlevel() { return waterlevel; }
 
-bool Map::GroundMarked(int x, int y) { return tileMap[x][y].marked; }
+bool Map::GroundMarked(const Coordinate& p) { return tile(p).marked; }
 
-void Map::WalkOver(int x, int y) { if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].WalkOver(); }
-void Map::Corrupt(int x, int y, int magnitude) {
+void Map::WalkOver(const Coordinate& p) { if (Map::IsInside(p)) tile(p).WalkOver(); }
+
+void Map::Corrupt(const Coordinate& pos, int magnitude) {
 	int loops = 0;
+	int x = pos.X(), y = pos.Y();
 	while (magnitude > 0 && loops < 2000) {
 		++loops;
 
@@ -366,12 +381,14 @@ void Map::Corrupt(int x, int y, int magnitude) {
 	}
 }
 
-void Map::Naturify(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		if (tileMap[x][y].walkedOver > 0) --tileMap[x][y].walkedOver;
-		if (tileMap[x][y].burnt > 0) tileMap[x][y].Burn(-1);
-		if (tileMap[x][y].walkedOver == 0 && tileMap[x][y].natureObject < 0 && tileMap[x][y].construction < 0) {
+void Map::Naturify(const Coordinate& p) {
+	if (Map::IsInside(p)) {
+		if (tile(p).walkedOver > 0) --tile(p).walkedOver;
+		if (tile(p).burnt > 0) tile(p).Burn(-1);
+		if (tile(p).walkedOver == 0 && tile(p).natureObject < 0 && tile(p).construction < 0) {
 			int natureObjects = 0;
+			int width = extent.X(), height = extent.Y();
+			int x = p.X(), y = p.Y();
 			int beginx = std::max(0, x-2);
 			int endx = std::min(width-2, x+2);
 			int beginy = std::max(0, y-2);
@@ -388,26 +405,23 @@ void Map::Naturify(int x, int y) {
 	}
 }
 
-void Map::Corrupt(Coordinate location, int magnitude) { Corrupt(location.X(), location.Y(), magnitude); }
-
-int Map::GetCorruption(int x, int y) { 
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].corruption;
+int Map::GetCorruption(const Coordinate& p) { 
+	if (Map::IsInside(p)) return tile(p).corruption;
 	return 0;
 }
 
-bool Map::IsTerritory(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].territory;
-	return false;
+bool Map::IsTerritory(const Coordinate& p) {
+	return Map::IsInside(p) && tile(p).territory;
 }
 
-void Map::SetTerritory(int x, int y, bool value) {
-	if (x >= 0 && x < width && y >= 0 && y < height) tileMap[x][y].territory = value;
+void Map::SetTerritory(const Coordinate& p, bool value) {
+	if (Map::IsInside(p)) tile(p).territory = value;
 }
 
-void Map::SetTerritoryRectangle(Coordinate a, Coordinate b, bool value) {
+void Map::SetTerritoryRectangle(const Coordinate& a, const Coordinate& b, bool value) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			SetTerritory(x, y, value);
+			SetTerritory(Coordinate(x,y), value);
 		}
 	}
 }
@@ -419,7 +433,13 @@ void Map::RemoveOverlay(int flags) { overlayFlags = overlayFlags & ~flags; }
 
 void Map::ToggleOverlay(int flags) { overlayFlags ^= flags; }
 
-void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &moveY, int nextX, int nextY, void* npc) {
+void Map::FindEquivalentMoveTarget(const Coordinate& current, Coordinate& move, const Coordinate& next, void* npc) {
+	int currentX, currentY, moveX, moveY, nextX, nextY;
+	current.assign(&currentX, &currentY);
+	//we will re-set move at the end
+	current.assign(&moveX, &moveY);
+	next.assign(&nextX, &nextY);
+
 	//We need to find a tile that is walkable, and adjacent to all 3 given tiles but not the same as moveX or moveY
 
 	//Find the edges
@@ -439,24 +459,22 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	++down;
 
 	if (left < 0) left = 0;
-	if (right >= width) right = width-1;
+	if (right >= Width()) right = Width()-1;
 	if (up < 0) up = 0;
-	if (down >= height) down = height-1;
+	if (down >= Height()) down = Height()-1;
 
-	Coordinate current(currentX, currentY);
-	Coordinate move(moveX, moveY);
-	Coordinate next(nextX, nextY);
+	Coordinate currentSafe(currentX, currentY), nextSafe(nextX, nextY);
 
 	//Find a suitable target
 	for (int x = left; x <= right; ++x) {
 		for (int y = up; y <= down; ++y) {
 			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
-				if (IsWalkable(x, y, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(x,y) &&
-					!IsDangerous(x, y, static_cast<NPC*>(npc)->GetFaction())) {
-					Coordinate xy(x,y);
-					if (Game::Adjacent(xy, current) && Game::Adjacent(xy, move) && Game::Adjacent(xy, next)) {
-						moveX = x;
-						moveY = y;
+				Coordinate xy(x,y);
+				if (Map::IsWalkable(xy, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(xy) &&
+					!IsDangerous(xy, static_cast<NPC*>(npc)->GetFaction())) {
+					if (Game::Adjacent(xy, currentSafe) && Game::Adjacent(xy, move) && Game::Adjacent(xy, nextSafe)) {
+						move.X(x);
+						move.Y(y);
 						return;
 					}
 				}
@@ -465,10 +483,10 @@ void Map::FindEquivalentMoveTarget(int currentX, int currentY, int &moveX, int &
 	}
 }
 
-bool Map::IsUnbridgedWater(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		if (boost::shared_ptr<WaterNode> water = tileMap[x][y].water) {
-			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tileMap[x][y].construction).lock();
+bool Map::IsUnbridgedWater(const Coordinate& p) {
+	if (Map::IsInside(p)) {
+		if (boost::shared_ptr<WaterNode> water = tile(p).water) {
+			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tile(p).construction).lock();
 			if (water->Depth() > 0 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
 		}
 	}
@@ -498,20 +516,20 @@ void Map::UpdateMarkers() {
 	}
 }
 
-TCODColor Map::GetColor(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) return tileMap[x][y].GetForeColor();
+TCODColor Map::GetColor(const Coordinate& p) {
+	if (Map::IsInside(p)) return tile(p).GetForeColor();
 	return TCODColor::white;
 }
 
-void Map::Burn(int x, int y, int magnitude) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		tileMap[x][y].Burn(magnitude);
+void Map::Burn(const Coordinate& p, int magnitude) {
+	if (Map::IsInside(p)) {
+		tile(p).Burn(magnitude);
 	}
 }
 
-int Map::Burnt(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		return tileMap[x][y].burnt;
+int Map::Burnt(const Coordinate& p) {
+	if (Map::IsInside(p)) {
+		return tile(p).burnt;
 	}
 	return 0;
 }
@@ -624,12 +642,12 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 		for (int y = current.Y()-1; y <= current.Y()+1; ++y) {
 			for (int x = current.X()-1; x <= current.X()+1; ++x) {
-				if (x >= 0 && x < Width() &&
-					y >= 0 && y < Height()) {
-						if (touched.find(Coordinate(x,y)) == touched.end() && tileMap[x][y].water) {
-							int distance = Distance(beginning, Coordinate(x,y));
-							touched.insert(Coordinate(x,y));
-							unfinished.push(std::pair<int, Coordinate>(INT_MAX - distance, Coordinate(x,y)));
+				Coordinate pos(x,y);
+				if (IsInside(pos)) {
+					if (touched.find(pos) == touched.end() && tile(pos).water) {
+							int distance = Distance(beginning, pos);
+							touched.insert(pos);
+							unfinished.push(std::pair<int, Coordinate>(INT_MAX - distance, pos));
 							if (stage == 0 && distance > distance1) {
 								stage = 1;
 								favorA = false;
@@ -639,7 +657,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 								else if (std::abs(px[1] - px[2]) - std::abs(py[1] - py[2]) < 15)
 									favorB = true;
 							}
-							if (stage == 1 && Distance(Coordinate(x,y), Coordinate(px[1], py[1])) > distance2) {
+							if (stage == 1 && Distance(pos, Coordinate(px[1], py[1])) > distance2) {
 								stage = 2;
 								favorA = false;
 								favorB = false;
@@ -674,13 +692,15 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 	for (int y = 0; y < Height(); ++y) {
 		for (int x = 0; x < Width(); ++x) {
-			if (tileMap[x][y].flow == NODIRECTION) {
+			Coordinate pos(x,y);
+			if (tile(pos).flow == NODIRECTION) {
 				Coordinate lowest(x,y);
 				for (int iy = y-1; iy <= y+1; ++iy) {
 					for (int ix = x-1; ix <= x+1; ++ix) {
-						if (iy >= 0 && iy < Height() && ix >= 0 && ix < Width()) {
+						Coordinate candidate(ix,iy);
+						if (IsInside(candidate)) {
 							if (heightMap->getValue(ix, iy) < heightMap->getValue(lowest.X(), lowest.Y())) {
-								lowest = Coordinate(ix, iy);
+								lowest = candidate;
 							}
 						}
 					}
@@ -742,40 +762,39 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 	}
 }
 
-Direction Map::GetFlow(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height)
-		return tileMap[x][y].flow;
+Direction Map::GetFlow(const Coordinate& p) {
+	if (Map::IsInside(p))
+		return tile(p).flow;
 	return NODIRECTION;
 }
 
-bool Map::IsDangerous(int x, int y, int faction) const {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		if (tileMap[x][y].fire) return true;
-		return Faction::factions[faction]->IsTrapVisible(Coordinate(x,y));
+bool Map::IsDangerous(const Coordinate& p, int faction) const {
+	if (Map::IsInside(p)) {
+		if (tile(p).fire) return true;
+		return Faction::factions[faction]->IsTrapVisible(p);
 	}
 	return false;
 }
 
-int Map::GetTerrainMoveCost(int x, int y) const {
-	if (x >= 0 && x < width && y >= 0 && y < height)
-		return tileMap[x][y].GetTerrainMoveCost();
+int Map::GetTerrainMoveCost(const Coordinate& p) const {
+	if (Map::IsInside(p))
+		return tile(p).GetTerrainMoveCost();
 	return 0;
 }
 
 void Map::Update() {
-	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0) Naturify(Random::Generate(Width() - 1), Random::Generate(Height() - 1));
+	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0) Naturify(Random::ChooseInExtent(Extent()));
 	UpdateMarkers();
 	weather->Update();
 	UpdateCache();
 }
 
 //Finds a tile close to 'center' that will give an advantage to a creature with a ranged weapon
-Coordinate Map::FindRangedAdvantage(Coordinate center) {
+Coordinate Map::FindRangedAdvantage(const Coordinate& center) {
 	std::vector<Coordinate> potentialPositions;
 	for (int x = center.X() - 5; x <= center.X() + 5; ++x) {
 		for (int y = center.Y() - 5; y <= center.Y() + 5; ++y) {
-			if (x >= 0 && x < width && y >= 0 && y < height) {
-
+			if (IsInside(Coordinate(x,y))) {
 				if (tileMap[x][y].construction >= 0 &&
 					!tileMap[x][y].fire &&
 					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() &&
@@ -794,22 +813,18 @@ Coordinate Map::FindRangedAdvantage(Coordinate center) {
 void Map::UpdateCache() {
 	boost::unique_lock<boost::shared_mutex> writeLock(cacheMutex);
 	for (boost::unordered_set<Coordinate>::iterator tilei = changedTiles.begin(); tilei != changedTiles.end();) {
-			cachedTileMap[tilei->X()][tilei->Y()] = tileMap[tilei->X()][tilei->Y()];
-			tilei = changedTiles.erase(tilei);
+		cachedTile(*tilei) = tile(*tilei);
+		tilei = changedTiles.erase(tilei);
 	}
 }
 
-bool Map::IsDangerousCache(int x, int y, int faction) const {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		if (cachedTileMap[x][y].fire) return true;
-		return Faction::factions[faction]->IsTrapVisible(Coordinate(x,y));
-	}
-	return false;
+bool Map::IsDangerousCache(const Coordinate& p, int faction) const {
+	return Map::IsInside(p) && (cachedTile(p).fire || Faction::factions[faction]->IsTrapVisible(p));
 }
 
-void Map::TileChanged(int x, int y) {
-	if (x >= 0 && x < width && y >= 0 && y < height) {
-		changedTiles.insert(Coordinate(x,y));
+void Map::TileChanged(const Coordinate& p) {
+	if (Map::IsInside(p)) {
+		changedTiles.insert(p);
 	}
 }
 
@@ -819,8 +834,7 @@ void Map::save(OutputArchive& ar, const unsigned int version) const {
 			ar & tileMap[x][y];
 		}
 	}
-	ar & width;
-	ar & height;
+	ar & extent;
 	ar & mapMarkers;
 	ar & markerids;
 	ar & weather;
@@ -838,8 +852,7 @@ void Map::load(InputArchive& ar, const unsigned int version) {
 			ar & tileMap[x][y];
 		}
 	}
-	ar & width;
-	ar & height;
+	ar & extent;
 	ar & mapMarkers;
 	ar & markerids;
 	if (version == 0) {

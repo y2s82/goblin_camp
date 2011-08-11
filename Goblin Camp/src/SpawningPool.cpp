@@ -27,7 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stats.hpp"
 #include "Camp.hpp"
 
-SpawningPool::SpawningPool(ConstructionType type, Coordinate target) : Construction(type, target),
+SpawningPool::SpawningPool(ConstructionType type, const Coordinate& target) : Construction(type, target),
 	dumpFilth(false),
 	dumpCorpses(false),
 	a(target),
@@ -99,11 +99,11 @@ void SpawningPool::Update() {
 		}
 
 		//Spawn / Expand
-		if (Map::Inst()->GetFilth(x, y).lock() && Map::Inst()->GetFilth(x, y).lock()->Depth() > 0) {
-			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(x,y).lock();
+		if (Map::Inst()->GetFilth(pos).lock() && Map::Inst()->GetFilth(pos).lock()->Depth() > 0) {
+			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(pos).lock();
 			filth += filthNode->Depth();
 			Stats::Inst()->AddPoints(filthNode->Depth());
-			Map::Inst()->Corrupt(x, y, filthNode->Depth() * std::min(100 * filth, (unsigned int)10000));
+			Map::Inst()->Corrupt(pos, filthNode->Depth() * std::min(100 * filth, (unsigned int)10000));
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
@@ -116,24 +116,24 @@ void SpawningPool::Update() {
 			}
 			corpseContainer->RemoveItem(corpse);
 			Game::Inst()->RemoveItem(corpse);
-			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(x, y, 1000 * std::min(std::max(1U, corpses), (unsigned int)50));
+			for (int i = 0; i < Random::Generate(1, 2); ++i) Map::Inst()->Corrupt(pos, 1000 * std::min(std::max(1U, corpses), (unsigned int)50));
 		}
 
 		if ((corpses*10) + filth > 10U) {
-			Coordinate spawnLocation(-1,-1);
+			Coordinate spawnLocation = undefined;
 			for (int x = a.X(); x <= b.X(); ++x) {
 				for (int y = a.Y(); y <= b.Y(); ++y) {
-					if (Map::Inst()->GetConstruction(x,y) == uid) {
-						if (Map::Inst()->IsWalkable(x-1,y)) {
+					if (Map::Inst()->GetConstruction(Coordinate(x,y)) == uid) {
+						if (Map::Inst()->IsWalkable(Coordinate(x-1,y))) {
 							spawnLocation = Coordinate(x-1,y);
 							break;
-						} else if (Map::Inst()->IsWalkable(x+1,y)) {
+						} else if (Map::Inst()->IsWalkable(Coordinate(x+1,y))) {
 							spawnLocation = Coordinate(x+1,y);
 							break;
-						} else if (Map::Inst()->IsWalkable(x,y+1)) {
+						} else if (Map::Inst()->IsWalkable(Coordinate(x,y+1))) {
 							spawnLocation = Coordinate(x,y+1);
 							break;
-						} else if (Map::Inst()->IsWalkable(x,y-1)) {
+						} else if (Map::Inst()->IsWalkable(Coordinate(x,y-1))) {
 							spawnLocation = Coordinate(x,y-1);
 							break;
 						}
@@ -173,22 +173,22 @@ void SpawningPool::Update() {
 		if (Random::Generate(2) == 0) --burn;
 		if (burn > 5000) {
 			Expand(false);
-			Game::Inst()->CreateFire(Coordinate(Random::Generate(a.X(), b.X()), Random::Generate(a.Y(), b.Y())));
+			Game::Inst()->CreateFire(Random::ChooseInRectangle(a,b));
 			if (Random::Generate(9) == 0) {
-				Coordinate spawnLocation(-1,-1);
+				Coordinate spawnLocation = undefined;
 				for (int x = a.X(); x <= b.X(); ++x) {
 					for (int y = a.Y(); y <= b.Y(); ++y) {
-						if (Map::Inst()->GetConstruction(x,y) == uid) {
-							if (Map::Inst()->IsWalkable(x-1,y)) {
+						if (Map::Inst()->GetConstruction(Coordinate(x,y)) == uid) {
+							if (Map::Inst()->IsWalkable(Coordinate(x-1,y))) {
 								spawnLocation = Coordinate(x-1,y);
 								break;
-							} else if (Map::Inst()->IsWalkable(x+1,y)) {
+							} else if (Map::Inst()->IsWalkable(Coordinate(x+1,y))) {
 								spawnLocation = Coordinate(x+1,y);
 								break;
-							} else if (Map::Inst()->IsWalkable(x,y+1)) {
+							} else if (Map::Inst()->IsWalkable(Coordinate(x,y+1))) {
 								spawnLocation = Coordinate(x,y+1);
 								break;
-							} else if (Map::Inst()->IsWalkable(x,y-1)) {
+							} else if (Map::Inst()->IsWalkable(Coordinate(x,y-1))) {
 								spawnLocation = Coordinate(x,y-1);
 								break;
 							}
@@ -203,19 +203,19 @@ void SpawningPool::Update() {
 }
 
 void SpawningPool::Expand(bool message) {
-	Coordinate location(-1,-1);
+	Coordinate location = undefined;
 	for (int i = 0; i < 10; ++i) {
 		location = Coordinate((a.X()-1) + Random::Generate(((b.X()-a.X())+3)), (a.Y()-1) + Random::Generate(((b.Y()-a.Y())+3)));
-		if (Map::Inst()->GetConstruction(location.X(), location.Y()) != uid) {
-			if (Map::Inst()->GetConstruction(location.X()-1, location.Y()) == uid) break;
-			if (Map::Inst()->GetConstruction(location.X()+1, location.Y()) == uid) break;
-			if (Map::Inst()->GetConstruction(location.X(), location.Y()-1) == uid) break;
-			if (Map::Inst()->GetConstruction(location.X(), location.Y()+1) == uid) break;
+		if (Map::Inst()->GetConstruction(location) != uid) {
+			if (Map::Inst()->GetConstruction(Coordinate(location.X()-1, location.Y())) == uid) break;
+			if (Map::Inst()->GetConstruction(Coordinate(location.X()+1, location.Y())) == uid) break;
+			if (Map::Inst()->GetConstruction(Coordinate(location.X(), location.Y()-1)) == uid) break;
+			if (Map::Inst()->GetConstruction(Coordinate(location.X(), location.Y()+1)) == uid) break;
 		}
-		location = Coordinate(-1,-1);
+		location = undefined;
 	}
 
-	if (location.X() != -1 && location.Y() != -1) {
+	if (location != undefined) {
 		++expansion;
 		if (message) Announce::Inst()->AddMsg("The spawning pool expands", TCODColor::darkGreen, location);
 		if (location.X() < a.X()) a.X(location.X());
@@ -224,12 +224,12 @@ void SpawningPool::Expand(bool message) {
 		if (location.Y() > b.Y()) b.Y(location.Y());
 
 		//Swallow nature objects
-		if (Map::Inst()->GetNatureObject(location.X(), location.Y()) >= 0) {
-			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->GetNatureObject(location.X(), location.Y())]);
+		if (Map::Inst()->GetNatureObject(location) >= 0) {
+			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->GetNatureObject(location)]);
 		}
 		//Destroy buildings
-		if (Map::Inst()->GetConstruction(location.X(), location.Y()) >= 0) {
-			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location.X(), location.Y())).lock()) {
+		if (Map::Inst()->GetConstruction(location) >= 0) {
+			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location)).lock()) {
 				if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 					construct->Dismantle(location);
 				} else {
@@ -248,23 +248,23 @@ void SpawningPool::Expand(bool message) {
 
 		//Swallow items
 		std::list<int> itemUids;
-		for (std::set<int>::iterator itemi = Map::Inst()->ItemList(location.X(), location.Y())->begin();
-			itemi != Map::Inst()->ItemList(location.X(), location.Y())->end(); ++itemi) {
+		for (std::set<int>::iterator itemi = Map::Inst()->ItemList(location)->begin();
+			itemi != Map::Inst()->ItemList(location)->end(); ++itemi) {
 				itemUids.push_back(*itemi);
 		}
 		for (std::list<int>::iterator itemi = itemUids.begin(); itemi != itemUids.end(); ++itemi) {
 			Game::Inst()->RemoveItem(Game::Inst()->GetItem(*itemi));
 		}
 
-		Map::Inst()->SetConstruction(location.X(), location.Y(), uid);
-		Map::Inst()->SetBuildable(location.X(), location.Y(), false);
-		Map::Inst()->SetTerritory(location.X(), location.Y(), true);
+		Map::Inst()->SetConstruction(location, uid);
+		Map::Inst()->SetBuildable(location, false);
+		Map::Inst()->SetTerritory(location, true);
 
-		Map::Inst()->Corrupt(location.X(), location.Y(), 2000 * std::min(expansion, (unsigned int)100));
+		Map::Inst()->Corrupt(location, 2000 * std::min(expansion, (unsigned int)100));
 
 	} else {
 		if (message) Announce::Inst()->AddMsg("The spawning pool bubbles ominously", TCODColor::darkGreen, Position());
-		Map::Inst()->Corrupt(x, y, 4000 * std::min(expansion, (unsigned int)100));
+		Map::Inst()->Corrupt(Position(), 4000 * std::min(expansion, (unsigned int)100));
 	}
 
 }
@@ -274,7 +274,8 @@ void SpawningPool::Draw(Coordinate upleft, TCODConsole* console) {
 
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
-			if (Map::Inst()->GetConstruction(x,y) == uid) {
+			Coordinate p(x,y);
+			if (Map::Inst()->GetConstruction(p) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
@@ -307,7 +308,7 @@ int SpawningPool::Build() {
 	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != boost::static_pointer_cast<SpawningPool>(shared_from_this())) {
 		Camp::Inst()->spawningPool = boost::static_pointer_cast<SpawningPool>(shared_from_this());
 	}
-	Map::Inst()->Corrupt(x, y, 100);
+	Map::Inst()->Corrupt(Position(), 100);
 	return Construction::Build();
 }
 

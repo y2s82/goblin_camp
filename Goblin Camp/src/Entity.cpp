@@ -39,11 +39,11 @@ Entity::~Entity() {
 
 int Entity::uids = 0;
 
-int Entity::X() {return x;}
-int Entity::Y() {return y;}
-Coordinate Entity::Position() const {return Coordinate(x,y);}
+int Entity::X() {return pos.X();}
+int Entity::Y() {return pos.Y();}
+Coordinate Entity::Position() const {return pos;}
 Coordinate Entity::Center() const {return Position();}
-void Entity::Position(Coordinate pos) {x = pos.X(); y = pos.Y();}
+void Entity::Position(const Coordinate& p) {pos = p;}
 int Entity::Uid() {return uid;}
 
 void Entity::Zone(int value) {zone = value;}
@@ -74,17 +74,16 @@ int Entity::GetHeight() const { return flightPath.size() ? flightPath.back().hei
 
 void Entity::CalculateFlightPath(Coordinate target, int speed, int initialHeight) {
 #ifdef DEBUG
-	std::cout<<"Calculating flightpath for "<<name<<" from "<<x<<","<<y<<" to "<<target.X()<<","<<target.Y()<<" at v:"<<speed<<"\n";
+	std::cout<<"Calculating flightpath for "<<name<<" from "<< pos.X() <<","<< pos.Y() <<" to "<< target.X() <<","<< target.Y() <<" at v:"<<speed<<"\n";
 #endif
 	velocityTarget = target;
 	flightPath.clear();
-	TCODLine::init(target.X(), target.Y(), x, y);
-	int px = target.X();
-	int py = target.Y();
+	TCODLine::init(target.X(), target.Y(), pos.X(), pos.Y());
+	Coordinate p = target;
 	do {
-		if (px >= 0 && px < Map::Inst()->Width() && py >= 0 && py < Map::Inst()->Height())
-			flightPath.push_back(FlightPath(Coordinate(px,py)));
-	} while (!TCODLine::step(&px, &py));
+		if (Map::Inst()->IsInside(p))
+			flightPath.push_back(FlightPath(p));
+	} while (!TCODLine::step(p.Xptr(), p.Yptr()));
 
 	if (flightPath.size() > 0) {
 		int h = 0;
@@ -114,8 +113,7 @@ void Entity::AddBulk(int amount) { bulk += amount; }
 void Entity::RemoveBulk(int amount) { bulk -= amount; }
 
 void Entity::save(OutputArchive& ar, const unsigned int version) const {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & uid;
 	ar & zone;
 	ar & reserved;
@@ -129,8 +127,7 @@ void Entity::save(OutputArchive& ar, const unsigned int version) const {
 }
 
 void Entity::load(InputArchive& ar, const unsigned int version) {
-	ar & x;
-	ar & y;
+	ar & pos;
 	ar & uid;
 	ar & zone;
 	ar & reserved;
