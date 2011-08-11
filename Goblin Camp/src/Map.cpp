@@ -267,11 +267,10 @@ void Map::SetBlocksLight(const Coordinate& p, bool val) {
 
 bool Map::LineOfSight(const Coordinate& a, const Coordinate& b) {
 	TCODLine::init(a.X(), a.Y(), b.X(), b.Y());
-	int x = a.X();
-	int y = a.Y();
+	Coordinate p = a;
 	do {
-		if (BlocksLight(Coordinate(x,y))) return false;
-	} while(!TCODLine::step(&x, &y) && !(x == b.X() && y == b.Y()));
+		if (BlocksLight(p)) return false;
+	} while(!TCODLine::step(p.Xptr(), p.Yptr()) && p != b);
 	return true;
 }
 
@@ -344,40 +343,29 @@ bool Map::GroundMarked(const Coordinate& p) { return tile(p).marked; }
 void Map::WalkOver(const Coordinate& p) { if (Map::IsInside(p)) tile(p).WalkOver(); }
 
 void Map::Corrupt(const Coordinate& pos, int magnitude) {
-	int loops = 0;
-	int x = pos.X(), y = pos.Y();
-	while (magnitude > 0 && loops < 2000) {
-		++loops;
-
-		if (x < 0) x = 0;
-		if (x >= Width()) x = Width()-1;
-		if (y < 0) y = 0;
-		if (y >= Height()) y = Height()-1;
-
-		if (tileMap[x][y].corruption < 300) {
-			int difference = 300 - tileMap[x][y].corruption;
+	Coordinate p = pos;
+	for (int loops = 0; magnitude > 0 && loops < 2000; ++loops, p = Shrink(Random::ChooseInRadius(p,1))) {
+		if (tile(p).corruption < 300) {
+			int difference = 300 - tile(p).corruption;
 			if (magnitude - difference <= 0) {
-				tileMap[x][y].Corrupt(magnitude);
+				tile(p).Corrupt(magnitude);
 				magnitude = 0;
 			} else {
-				tileMap[x][y].Corrupt(difference);
+				tile(p).Corrupt(difference);
 				magnitude -= difference;
 			}
 
-			if (tileMap[x][y].corruption >= 100) {
-				if (tileMap[x][y].natureObject >= 0 && 
-					!NatureObject::Presets[Game::Inst()->natureList[tileMap[x][y].natureObject]->Type()].evil &&
-					!boost::iequals(Game::Inst()->natureList[tileMap[x][y].natureObject]->Name(),"Withering tree") &&
-					!Game::Inst()->natureList[tileMap[x][y].natureObject]->IsIce()) {
-						bool createTree = Game::Inst()->natureList[tileMap[x][y].natureObject]->Tree();
-						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tileMap[x][y].natureObject]);
-						if (createTree && Random::Generate(6) < 1) Game::Inst()->CreateNatureObject(Coordinate(x,y), "Withering tree");
+			if (tile(p).corruption >= 100) {
+				if (tile(p).natureObject >= 0 && 
+					!NatureObject::Presets[Game::Inst()->natureList[tile(p).natureObject]->Type()].evil &&
+					!boost::iequals(Game::Inst()->natureList[tile(p).natureObject]->Name(),"Withering tree") &&
+					!Game::Inst()->natureList[tile(p).natureObject]->IsIce()) {
+						bool createTree = Game::Inst()->natureList[tile(p).natureObject]->Tree();
+						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tile(p).natureObject]);
+						if (createTree && Random::Generate(6) < 1) Game::Inst()->CreateNatureObject(p, "Withering tree");
 				}
 			}
 		}
-
-		x += Random::Generate(-1, 1);
-		y += Random::Generate(-1, 1);
 	}
 }
 
@@ -387,19 +375,15 @@ void Map::Naturify(const Coordinate& p) {
 		if (tile(p).burnt > 0) tile(p).Burn(-1);
 		if (tile(p).walkedOver == 0 && tile(p).natureObject < 0 && tile(p).construction < 0) {
 			int natureObjects = 0;
-			int width = extent.X(), height = extent.Y();
-			int x = p.X(), y = p.Y();
-			int beginx = std::max(0, x-2);
-			int endx = std::min(width-2, x+2);
-			int beginy = std::max(0, y-2);
-			int endy = std::min(height-2, y+2);
-			for (int ix = beginx; ix <= endx; ++ix) {
-				for (int iy = beginy; iy <= endy; ++iy) {
+			Coordinate begin = Map::Shrink(p - 2);
+			Coordinate end  = Map::Shrink(p + 2);
+			for (int ix = begin.X(); ix <= end.X(); ++ix) {
+				for (int iy = begin.Y(); iy <= end.Y(); ++iy) {
 					if (tileMap[ix][iy].natureObject >= 0) ++natureObjects;
 				}
 			}
-			if (natureObjects < (tileMap[x][y].corruption < 100 ? 5 : 1)) { //Corrupted areas have less flora
-				Game::Inst()->CreateNatureObject(Coordinate(x,y));
+			if (natureObjects < (tile(p).corruption < 100 ? 5 : 1)) { //Corrupted areas have less flora
+				Game::Inst()->CreateNatureObject(p);
 			}
 		} 
 	}
@@ -434,47 +418,21 @@ void Map::RemoveOverlay(int flags) { overlayFlags = overlayFlags & ~flags; }
 void Map::ToggleOverlay(int flags) { overlayFlags ^= flags; }
 
 void Map::FindEquivalentMoveTarget(const Coordinate& current, Coordinate& move, const Coordinate& next, void* npc) {
-	int currentX, currentY, moveX, moveY, nextX, nextY;
-	current.assign(&currentX, &currentY);
-	//we will re-set move at the end
-	current.assign(&moveX, &moveY);
-	next.assign(&nextX, &nextY);
+	//We need to find a tile that is walkable, and adjacent to all 3 given tiles but not the same as move
 
-	//We need to find a tile that is walkable, and adjacent to all 3 given tiles but not the same as moveX or moveY
-
-	//Find the edges
-	int left = currentX < moveX ? currentX : moveX;
-	left = left < nextX ? left : nextX;
-	int right = currentX > moveX ? currentX : moveX;
-	right = right > nextX ? right : nextX;
-
-	int up = currentY < moveY ? currentY : moveY;
-	up = up < nextY ? up : nextY;
-	int down = currentY > moveY ? currentY : moveY;
-	down = down > nextY ? down : nextY;
-
-	--left;
-	++right;
-	--up;
-	++down;
-
-	if (left < 0) left = 0;
-	if (right >= Width()) right = Width()-1;
-	if (up < 0) up = 0;
-	if (down >= Height()) down = Height()-1;
-
-	Coordinate currentSafe(currentX, currentY), nextSafe(nextX, nextY);
+	//Find the edges of a (low,high) bounding box for current, move and next
+	Coordinate low = Map::Shrink(Coordinate::min(Coordinate::min(current, move), next) - 1);
+	Coordinate high = Map::Shrink(Coordinate::max(Coordinate::max(current, move), next) + 1);
 
 	//Find a suitable target
-	for (int x = left; x <= right; ++x) {
-		for (int y = up; y <= down; ++y) {
-			if (x != moveX || y != moveY) { //Only consider tiles not == moveX,moveY
-				Coordinate xy(x,y);
-				if (Map::IsWalkable(xy, npc) && tileMap[x][y].npcList.size() == 0 && !IsUnbridgedWater(xy) &&
-					!IsDangerous(xy, static_cast<NPC*>(npc)->GetFaction())) {
-					if (Game::Adjacent(xy, currentSafe) && Game::Adjacent(xy, move) && Game::Adjacent(xy, nextSafe)) {
-						move.X(x);
-						move.Y(y);
+	for (int x = low.X(); x <= high.X(); ++x) {
+		for (int y = low.Y(); y <= high.Y(); ++y) {
+			Coordinate p(x, y);
+			if (p != move) {
+				if (IsWalkable(p, npc) && tile(p).npcList.size() == 0 && !IsUnbridgedWater(p) &&
+					!IsDangerous(p, static_cast<NPC*>(npc)->GetFaction())) {
+					if (Game::Adjacent(p, current) && Game::Adjacent(p, move) && Game::Adjacent(p, next)) {
+						move = p;
 						return;
 					}
 				}
@@ -688,7 +646,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
            map creation -- one minute or more -- while it is O(1) on
            water arrays.
          */
-        std::vector<boost::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
+	std::vector<boost::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
 
 	for (int y = 0; y < Height(); ++y) {
 		for (int x = 0; x < Width(); ++x) {
@@ -708,53 +666,53 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 				if (lowest.X() < x) {
 					if (lowest.Y() < y)
-						tileMap[x][y].flow = NORTHWEST;
+						tile(pos).flow = NORTHWEST;
 					else if (lowest.Y() == y)
-						tileMap[x][y].flow = WEST;
+						tile(pos).flow = WEST;
 					else 
-						tileMap[x][y].flow = SOUTHWEST;
+						tile(pos).flow = SOUTHWEST;
 				} else if (lowest.X() == x) {
 					if (lowest.Y() < y)
-						tileMap[x][y].flow = NORTH;
+						tile(pos).flow = NORTH;
 					else if (lowest.Y() > y)
-						tileMap[x][y].flow = SOUTH;
+						tile(pos).flow = SOUTH;
 				} else {
 					if (lowest.Y() < y)
-						tileMap[x][y].flow = NORTHEAST;
+						tile(pos).flow = NORTHEAST;
 					else if (lowest.Y() == y)
-						tileMap[x][y].flow = EAST;
+						tile(pos).flow = EAST;
 					else
-						tileMap[x][y].flow = SOUTHEAST;
+						tile(pos).flow = SOUTHEAST;
 				}
 
-				if (tileMap[x][y].flow == NODIRECTION && !waterArray.empty()) {
-                                        /* No slope here, so approximate towards river
-
-                                           (gasche) if there is no water, the tile will stay NODIRECTION. Is this
-                                           the expected behavior? Should we assert that there always are some
-                                           water tiles?
-                                        */
+				if (tile(pos).flow == NODIRECTION && !waterArray.empty()) {
+					/* No slope here, so approximate towards river
+					   
+					   (gasche) if there is no water, the tile will stay NODIRECTION. Is this
+					   the expected behavior? Should we assert that there always are some
+					   water tiles?
+					*/
 					boost::weak_ptr<WaterNode> randomWater = Random::ChooseElement(waterArray);
 					Coordinate coord = randomWater.lock()->Position();
 					if (coord.X() < x) {
 						if (coord.Y() < y)
-							tileMap[x][y].flow = NORTHWEST;
+							tile(pos).flow = NORTHWEST;
 						else if (coord.Y() == y)
-							tileMap[x][y].flow = WEST;
+							tile(pos).flow = WEST;
 						else 
-							tileMap[x][y].flow = SOUTHWEST;
+							tile(pos).flow = SOUTHWEST;
 					} else if (coord.X() == x) {
 						if (coord.Y() < y)
-							tileMap[x][y].flow = NORTH;
+							tile(pos).flow = NORTH;
 						else if (coord.Y() > y)
-							tileMap[x][y].flow = SOUTH;
+							tile(pos).flow = SOUTH;
 					} else {
 						if (coord.Y() < y)
-							tileMap[x][y].flow = NORTHEAST;
+							tile(pos).flow = NORTHEAST;
 						else if (coord.Y() == y)
-							tileMap[x][y].flow = EAST;
+							tile(pos).flow = EAST;
 						else
-							tileMap[x][y].flow = SOUTHEAST;
+							tile(pos).flow = SOUTHEAST;
 					}
 				}
 			}
@@ -783,7 +741,8 @@ int Map::GetTerrainMoveCost(const Coordinate& p) const {
 }
 
 void Map::Update() {
-	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0) Naturify(Random::ChooseInExtent(Extent()));
+	if (Random::Generate(UPDATES_PER_SECOND * 1) == 0)
+		Naturify(Random::ChooseInExtent(Extent()));
 	UpdateMarkers();
 	weather->Update();
 	UpdateCache();
@@ -794,14 +753,15 @@ Coordinate Map::FindRangedAdvantage(const Coordinate& center) {
 	std::vector<Coordinate> potentialPositions;
 	for (int x = center.X() - 5; x <= center.X() + 5; ++x) {
 		for (int y = center.Y() - 5; y <= center.Y() + 5; ++y) {
-			if (IsInside(Coordinate(x,y))) {
-				if (tileMap[x][y].construction >= 0 &&
-					!tileMap[x][y].fire &&
-					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock() &&
-					Game::Inst()->GetConstruction(tileMap[x][y].construction).lock()->HasTag(RANGEDADVANTAGE) &&
-					tileMap[x][y].npcList.empty()) {
-						potentialPositions.push_back(Coordinate(x,y));
-				}
+			Coordinate p(x,y);
+			if (Map::IsInside(p)
+				&& tile(p).construction >= 0
+				&& !tile(p).fire
+				&& Game::Inst()->GetConstruction(tile(p).construction).lock()
+				&& Game::Inst()->GetConstruction(tile(p).construction).lock()->HasTag(RANGEDADVANTAGE)
+				&& tile(p).npcList.empty())
+			{
+				potentialPositions.push_back(p);
 			}
 		}
 	}
