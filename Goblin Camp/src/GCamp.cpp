@@ -187,41 +187,22 @@ void StartNewGame() {
 		std::pair<int,Coordinate> candidate(0, Random::ChooseInExtent(zero+100, Map::Inst()->Extent() - 100));
 
 		int riverDistance = 1000, hillDistance = 1000;
-		int lineX, lineY;
-
 		for (int i = 0; i < 4; ++i) {
-			switch (i) {
-			case 0:
-				lineX = candidate.second.X() - 200;
-				lineY = candidate.second.Y();
-				break;
-			case 1:
-				lineX = candidate.second.X() + 200;
-				lineY = candidate.second.Y();
-				break;
-			case 2:
-				lineX = candidate.second.X();
-				lineY = candidate.second.Y() - 200;
-				break;
-			case 3:
-				lineX = candidate.second.X();
-				lineY = candidate.second.Y() + 200;
-				break;
-			}
+			Direction dirs[4] = { WEST, EAST, NORTH, SOUTH };
 			int distance = 200;
-			TCODLine::init(lineX, lineY, candidate.second.X(), candidate.second.Y());
+			Coordinate p = candidate.second + Coordinate::DirectionToCoordinate(dirs[i]) * distance;
+			TCODLine::init(p.X(), p.Y(), candidate.second.X(), candidate.second.Y());
 			do {
-				Coordinate line(lineX,lineY);
-				if (Map::Inst()->IsInside(line)) {
-					if (Map::Inst()->GetType(line) == TILEDITCH || Map::Inst()->GetType(line) == TILERIVERBED) {
+				if (Map::Inst()->IsInside(p)) {
+					if (Map::Inst()->GetType(p) == TILEDITCH || Map::Inst()->GetType(p) == TILERIVERBED) {
 						if (distance < riverDistance) riverDistance = distance;
 						if (distance < 25) riverDistance = 2000;
-					} else if (Map::Inst()->GetType(line) == TILEROCK) {
+					} else if (Map::Inst()->GetType(p) == TILEROCK) {
 						if (distance < hillDistance) hillDistance = distance;
 					}
 				}
 				--distance;
-			} while (!TCODLine::step(&lineX, &lineY));
+			} while (!TCODLine::step(p.Xptr(), p.Yptr()));
 		}
 
 		candidate.first = -hillDistance - riverDistance;
