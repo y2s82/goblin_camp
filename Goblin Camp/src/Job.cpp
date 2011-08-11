@@ -85,9 +85,6 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	tasks(std::vector<Task>()),
 	internal(false)
 {
-#ifdef DEBUG
-	std::cout << "New Job: " << value << std::endl;
-#endif
 }
 
 Job::~Job() {
