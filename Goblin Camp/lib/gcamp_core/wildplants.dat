@@ -24,7 +24,7 @@ plant_type "Wild Bloodberry bush" {
 	components=["Bloodberry"]
 	rarity=16
 	condition=10
-	cluster=5
+	cluster=7
 	harvestable
 	walkable
 	minheight=0.0
@@ -35,10 +35,10 @@ plant_type "Wild Blueleaf" {
 	graphic=216
 	color="50,0,200"
 	components=["Blueleaf boll"]
-	rarity=15
+	rarity=10
 	condition=10
 	harvestable
-	minheight=-0.5
+	minheight=-0.1
 	maxheight=0.5
 }
 

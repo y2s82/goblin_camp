@@ -1896,7 +1896,7 @@ bool Game::Adjacent(Coordinate a, Coordinate b) {
 	return (std::abs(a.X() - b.X()) < 2 && std::abs(a.Y() - b.Y()) < 2);
 }
 
-void Game::CreateNatureObject(Coordinate pos) {
+void Game::CreateNatureObject(Coordinate pos, int surroundingNatureObjects) {
 	if (Map::Inst()->IsWalkable(pos) && (Map::Inst()->GetType(pos) == TILEGRASS || Map::Inst()->GetType(pos) == TILESNOW) && Random::Generate(4) < 2) {
 		std::priority_queue<std::pair<int, int> > natureObjectQueue;
 		float height = Map::Inst()->heightMap->getValue(pos.X(),pos.Y());
@@ -1907,7 +1907,8 @@ void Game::CreateNatureObject(Coordinate pos) {
 		for (unsigned int i = 0; i < NatureObject::Presets.size(); ++i) {
 			if (NatureObject::Presets[i].minHeight <= height &&
 				NatureObject::Presets[i].maxHeight >= height &&
-				NatureObject::Presets[i].evil == evil)
+				NatureObject::Presets[i].evil == evil &&
+				(NatureObject::Presets[i].tree == (surroundingNatureObjects < 4) || evil))
 				natureObjectQueue.push(std::make_pair(Random::Generate(NatureObject::Presets[i].rarity - 1) + Random::Generate(2), i));
 		}
 
@@ -1919,9 +1920,9 @@ void Game::CreateNatureObject(Coordinate pos) {
 		if (std::abs(height - NatureObject::Presets[chosen].minHeight) <= 0.005f ||
 			std::abs(height - NatureObject::Presets[chosen].maxHeight) <= 0.05f) rarity /= 2;
 
-		if (Random::Generate(99) < rarity) {
+		if (Random::Generate(50) < rarity) {
 			for (int clus = 0; clus < NatureObject::Presets[chosen].cluster; ++clus) {
-				Coordinate a = Map::Inst()->Shrink(Random::ChooseInRadius(pos, NatureObject::Presets[chosen].cluster));
+				Coordinate a = Map::Inst()->Shrink(Random::ChooseInRadius(pos, clus));
 				if (Map::Inst()->IsWalkable(a) && (Map::Inst()->GetType(a) == TILEGRASS || Map::Inst()->GetType(a) == TILESNOW)
 					&& Map::Inst()->GetNatureObject(a) < 0 && Map::Inst()->GetConstruction(a) < 0)
 				{

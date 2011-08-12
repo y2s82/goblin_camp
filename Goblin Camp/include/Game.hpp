@@ -229,7 +229,7 @@ public:
 	static void FillDitch(Coordinate, Coordinate);
 	Coordinate FindClosestAdjacent(Coordinate, Coordinate, int faction = -1);
 	static bool Adjacent(Coordinate, Coordinate);
-	void CreateNatureObject(Coordinate);
+	void CreateNatureObject(Coordinate, int surroundingNatureObjects);
 	void CreateNatureObject(Coordinate, std::string);
 	void CreateDitch(Coordinate);
 
