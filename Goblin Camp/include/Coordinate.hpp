@@ -56,8 +56,8 @@ public:
 
 	static Coordinate DirectionToCoordinate(Direction dir) {
 		static boost::array<Coordinate,9> coordsToDirs = 
-                    { // gcc complains unless there are two level of braces
-                      // see http://stackoverflow.com/questions/2687701/question-on-boost-array-initializer
+		{ // gcc complains unless there are two level of braces
+		  // see http://stackoverflow.com/questions/2687701/question-on-boost-array-initializer
 			{Coordinate(0,-1),  // North
 			 Coordinate(1,-1),  // North-east
 			 Coordinate(1,0),   // East
@@ -67,7 +67,7 @@ public:
 			 Coordinate(-1,0),  // West
 			 Coordinate(-1,-1), // North-west
 			 Coordinate(0,0)}   // No direction
-                    };
+		};
 		return coordsToDirs[dir];
 	}
 
@@ -84,13 +84,13 @@ public:
 	   dimension-generic code, that is code which access both X and
 	   Y in the same way. For example:
 
-	       randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
-	       randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
+		   randomLocation.X(Random::Generate(upperCorner.X(), lowerCorner.X()));
+		   randomLocation.Y(Random::Generate(upperCorner.Y(), lowerCorner.Y()));
 
 	   can be profitably turned into:
 
-	       for (int d = 0; d < 2; ++d)
-               randomLocation[d] =  Random::Generate(upperCorner[d], lowerCorder[d]);
+		   for (int d = 0; d < 2; ++d)
+			   randomLocation[d] =  Random::Generate(upperCorner[d], lowerCorder[d]);
 
 	   This latter form will avoid all kinds of copy-paste bugs.
 	*/
@@ -184,20 +184,20 @@ public:
 	/* The inside, onEdges and shrink functions are declined in two varieties:
 
 	   - the "rectangle" version takes a couple of corners (low, high) (with the
-         coordinates of (low) all smaller than those of (high)), which the set
-         of points whose coordinates are between (low,high), with (high)
-         *included* in the rectangle.
+		 coordinates of (low) all smaller than those of (high)), which the set
+		 of points whose coordinates are between (low,high), with (high)
+		 *included* in the rectangle.
 
-       - the "extent" version takes an origin and an extent, that is a couple
-         (width, height) of *positive* integers, which delimits the dimension of
-         the rectangle. The (origin+extent) point is *excluded* from the
-         rectangle.
+	   - the "extent" version takes an origin and an extent, that is a couple
+		 (width, height) of *positive* integers, which delimits the dimension of
+		 the rectangle. The (origin+extent) point is *excluded* from the
+		 rectangle.
 
-       One may convert between both representations: the extent (origin,extent)
-       is the rectangle (low=origin, high=origin+extent-1), and conversely the
-       rectangle (low,high) has extent (low,high-low+1).
+	   One may convert between both representations: the extent (origin,extent)
+	   is the rectangle (low=origin, high=origin+extent-1), and conversely the
+	   rectangle (low,high) has extent (low,high-low+1).
 
-       Both representations are convenient in different situations.
+	   Both representations are convenient in different situations.
 	 */
 
 	inline bool insideRectangle(const Coordinate& low, const Coordinate& high) const {
