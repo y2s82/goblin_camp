@@ -55,7 +55,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
 					screeny < console->getHeight()) {
 						console->setCharForeground(screenx, screeny, TCODColor::darkAmber);
-						console->setChar(screenx,	screeny, (graphic[1]));
+						console->setChar(screenx, screeny, (graphic[1]));
 
 						if (!containers[p]->empty()) {
 							boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
@@ -63,6 +63,10 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 								console->putCharEx(screenx, screeny, item.lock()->GetGraphic(), item.lock()->Color(), TCODColor::black);
 							}
 						}
+
+						int gray = static_cast<int>(50 - cos(strobe) * 50);
+						console->setCharBackground(screenx, screeny, TCODColor(gray, gray, gray));
+
 				}
 			}
 		}

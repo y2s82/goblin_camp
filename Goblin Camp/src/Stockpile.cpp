@@ -331,8 +331,8 @@ void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
 					screeny < console->getHeight()) {
 						if (dismantle) console->setCharBackground(screenx,screeny, TCODColor::darkGrey);
 						else {
-						  int gray = static_cast<int>(50 - cos(strobe) * 50);
-						  console->setCharBackground(screenx, screeny, TCODColor(gray, gray, gray));
+							int gray = static_cast<int>(50 - cos(strobe) * 50);
+							console->setCharBackground(screenx, screeny, TCODColor(gray, gray, gray));
 						}
 
 						console->setCharForeground(screenx, screeny, colors[p]);
