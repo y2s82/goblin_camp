@@ -354,8 +354,8 @@ void Map::Naturify(const Coordinate& p) {
 					if (tileMap[ix][iy].natureObject >= 0) ++natureObjects;
 				}
 			}
-			if (natureObjects < (tile(p).corruption < 100 ? 5 : 1)) { //Corrupted areas have less flora
-				Game::Inst()->CreateNatureObject(p);
+			if (natureObjects < (tile(p).corruption < 100 ? 6 : 1)) { //Corrupted areas have less flora
+				Game::Inst()->CreateNatureObject(p, natureObjects);
 			}
 		} 
 	}
