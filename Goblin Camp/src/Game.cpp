@@ -1647,14 +1647,104 @@ void Game::CreateBlood(Coordinate pos) {
 }
 
 void Game::CreateBlood(Coordinate pos, int amount) {
-	boost::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos));
-	if (!blood.lock()) {
-		boost::shared_ptr<BloodNode> newBlood(new BloodNode(pos, amount));
-		bloodList.push_back(boost::weak_ptr<BloodNode>(newBlood));
-		Map::Inst()->SetBlood(pos, newBlood);
-	} else {
-		blood.lock()->Depth(blood.lock()->Depth()+amount);
+	if (Map::Inst()->IsInside(pos)) {
+		int loops = -1;
+		while (amount > 0 && loops < 1000) {
+			++loops;
+
+			boost::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos));
+			if (!blood.lock()) { //No existing BloodNode so create one
+				boost::shared_ptr<BloodNode> newBlood(new BloodNode(pos, std::min(255, amount)));
+				amount -= 255;
+				bloodList.push_back(boost::weak_ptr<BloodNode>(newBlood));
+				Map::Inst()->SetBlood(pos, newBlood);
+			} else {
+				int originalDepth = blood.lock()->Depth();
+				blood.lock()->Depth(std::min(255, blood.lock()->Depth() + amount));
+				amount -= (255 - originalDepth);
+			}
+			//If theres still remaining blood, it'll spill over according to flow
+			//TODO factorize with Coordinate abstractions
+			if (amount > 0) {
+				Coordinate flowTo = pos;
+				int diff = std::max(1, loops / 100);
+				switch (Map::Inst()->GetFlow(pos)) {
+				case NORTH:
+					flowTo.Y(flowTo.Y() - diff);
+					flowTo.X(flowTo.X() + Random::Generate(-diff, diff));
+					break;
+
+				case NORTHEAST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() - diff);
+						flowTo.X(flowTo.X() + Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(-diff, 0));
+						flowTo.X(flowTo.X() + diff);
+					}
+					break;
+
+				case NORTHWEST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() - diff);
+						flowTo.X(flowTo.X() - Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(-diff, 0));
+						flowTo.X(flowTo.X() - diff);
+					}
+					break;
+
+				case SOUTH:
+					flowTo.Y(flowTo.Y() + diff);
+					flowTo.X(flowTo.X() + Random::Generate(-diff, diff));
+					break;
+
+				case SOUTHEAST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() + diff);
+						flowTo.X(flowTo.X() + Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(0, diff));
+						flowTo.X(flowTo.X() + diff);
+					}
+					break;
+
+				case SOUTHWEST:
+					if (Random::GenerateBool()) {
+						flowTo.Y(flowTo.Y() + diff);
+						flowTo.X(flowTo.X() + Random::Generate(0, diff));
+					} else {
+						flowTo.Y(flowTo.Y() + Random::Generate(0, diff));
+						flowTo.X(flowTo.X() + diff);
+					}
+					break;
+
+				case WEST:
+					flowTo.Y(flowTo.Y() + Random::Generate(-diff, diff));
+					flowTo.X(flowTo.X() - diff);
+					break;
+
+				case EAST:
+					flowTo.Y(flowTo.Y() + Random::Generate(-diff, diff));
+					flowTo.X(flowTo.X() + diff);
+					break;
+
+				default: break;
+				}
+
+				while (flowTo == pos) {
+						flowTo = Coordinate(pos.X() + Random::Generate(-diff, diff), pos.Y() + Random::Generate(-diff, diff));
+				}
+				pos = flowTo;
+				
+				//If the blood flows off-map just stop creating more
+				if (!Map::Inst()->IsInside(flowTo)) {
+					return;
+				}
+			}
+		}
 	}
+
 }
 
 void Game::Pause() {
