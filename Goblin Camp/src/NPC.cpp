@@ -576,15 +576,22 @@ void NPC::Think() {
 	while (timeCount > UPDATES_PER_SECOND) {
 		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
 
-		if (boost::shared_ptr<NPC> enemy = aggressor.lock()) {
-			JobManager::Inst()->NPCNotWaiting(uid);
-			if (Game::Adjacent(Position(), enemy)) {
-				if (currentTask() && currentTask()->action == KILL) Hit(enemy, currentTask()->flags != 0);
-				else Hit(enemy);
+		{
+			boost::shared_ptr<NPC> enemy = aggressor.lock();
+			for (std::list<boost::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
+				if (boost::shared_ptr<NPC> adjacentNpc = npci->lock()) {
+					if (!factionPtr->IsFriendsWith(adjacentNpc->GetFaction()) || adjacentNpc == enemy) {
+						if (currentTask() && currentTask()->action == KILL) Hit(adjacentNpc, currentTask()->flags != 0);
+						else Hit(adjacentNpc);
+					}
+				}
 			}
-			if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos,enemy->Position())) {
-				aggressor.reset();
-				TaskFinished(TASKFAILFATAL, "Target lost");
+
+			if (enemy) {
+				if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos, enemy->Position())) {
+					aggressor.reset();
+					TaskFinished(TASKFAILFATAL, "Target lost");
+				}
 			}
 		}
 
@@ -2593,9 +2600,9 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 						if (*npci != uid) {
 							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*npci);
 							if (!factionPtr->IsFriendsWith(npc->GetFaction())) threatLocation = Coordinate(p);
-							if (!onlyHostiles ||!factionPtr->IsFriendsWith(npc->GetFaction())) {
+							if (!onlyHostiles || !factionPtr->IsFriendsWith(npc->GetFaction())) {
 								nearNpcs.push_back(npc);
-								if (adjacent-- > 0)
+								if (adjacent > 0)
 									adjacentNpcs.push_back(npc);
 							}
 						}
@@ -2613,6 +2620,7 @@ void NPC::ScanSurroundings(bool onlyHostiles) {
 					  high traffic places*/
 					if (adjacent <= 0 && nearNpcs.size() > 16) break;
 					
+					--adjacent;
 				} while (!TCODLine::step(p.Xptr(), p.Yptr()));
 			}
 		}
