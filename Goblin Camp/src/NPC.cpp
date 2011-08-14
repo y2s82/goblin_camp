@@ -580,16 +580,16 @@ void NPC::Think() {
 			boost::shared_ptr<NPC> enemy = aggressor.lock();
 			for (std::list<boost::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
 				if (boost::shared_ptr<NPC> adjacentNpc = npci->lock()) {
-					if (!factionPtr->IsFriendsWith(adjacentNpc->GetFaction()) || adjacentNpc == enemy) {
+					if ((!coward && !factionPtr->IsFriendsWith(adjacentNpc->GetFaction())) || adjacentNpc == enemy) {
 						if (currentTask() && currentTask()->action == KILL) Hit(adjacentNpc, currentTask()->flags != 0);
 						else Hit(adjacentNpc);
 					}
 				}
 			}
 
-			if (enemy) {
-				if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos, enemy->Position())) {
-					aggressor.reset();
+			if (currentTask() && currentTask()->action == KILL) {
+				if (boost::shared_ptr<Entity> target = currentTask()->entity.lock()) {
+				if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos, target->Position())) {
 					TaskFinished(TASKFAILFATAL, "Target lost");
 				}
 			}
