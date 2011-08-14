@@ -2445,14 +2445,25 @@ void Game::load(InputArchive& ar, const unsigned int version) {
 	ar & camX;
 	ar & camY;
 
-	if (version < 1) { /* Earlier versions didn't use factions for more than storing trap data, 
-	                   so transfer that and use the new defualts otherwise */
-		std::vector<boost::shared_ptr<Faction> > oldFactionData;
-		ar & oldFactionData;
-		oldFactionData[0]->TransferTrapInfo(Faction::factions[PLAYERFACTION]);
-	} else {
-		ar & Faction::factions;
-		Faction::InitAfterLoad(); //Initialize names and default friends, before loading npcs
+	//Save games may not have all of the current factions saved, which is why we need to store
+	//a list of current factions here, and make sure they all exist after loading
+	{
+		std::list<std::string> factionNames;
+		for (size_t i = 0; i < Faction::factions.size(); ++i) {
+			factionNames.push_back(Faction::FactionTypeToString(i));
+		}
+		if (version < 1) { /* Earlier versions didn't use factions for more than storing trap data, 
+						   so transfer that and use the new defaults otherwise */
+			std::vector<boost::shared_ptr<Faction> > oldFactionData;
+			ar & oldFactionData;
+			oldFactionData[0]->TransferTrapInfo(Faction::factions[PLAYERFACTION]);
+		} else {
+			ar & Faction::factions;
+			Faction::InitAfterLoad(); //Initialize names and default friends, before loading npcs
+		}
+		for (std::list<std::string>::const_iterator factionName = factionNames.begin(); factionName != factionNames.end(); ++factionName) {
+			Faction::StringToFactionType(*factionName);
+		}
 	}
 	
 	ar & npcList;

@@ -589,8 +589,9 @@ void NPC::Think() {
 
 			if (currentTask() && currentTask()->action == KILL) {
 				if (boost::shared_ptr<Entity> target = currentTask()->entity.lock()) {
-				if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos, target->Position())) {
-					TaskFinished(TASKFAILFATAL, "Target lost");
+					if (Random::Generate(4) == 0 && !Map::Inst()->LineOfSight(pos, target->Position())) {
+						TaskFinished(TASKFAILFATAL, "Target lost");
+					}
 				}
 			}
 		}
