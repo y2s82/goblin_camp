@@ -2060,7 +2060,15 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 			Game::Inst()->CreateBlood(Coordinate(
 				Position().X() + Random::Generate(-1, 1),
 				Position().Y() + Random::Generate(-1, 1)),
-				Random::Generate(50, 50+damage*10));
+				Random::Generate(75, 75+damage*20));
+			if (Random::Generate(10) == 0 && attack->Type() == DAMAGE_SLASH || attack->Type() == DAMAGE_PIERCE) {
+				int gibId = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Gib"), false, -1);
+				boost::shared_ptr<Item> gib = Game::Inst()->GetItem(gibId).lock();
+				if (gib) {
+					Coordinate target = Random::ChooseInRadius(Position(), 3);
+					gib->CalculateFlightPath(target, Random::Generate(10, 35));
+				}
+			}
 
 			if (damage >= maxHealth / 3 && attack->Type() == DAMAGE_BLUNT && Random::Generate(10) == 0) {
 				AddTrait(CRACKEDSKULL);
