@@ -139,6 +139,7 @@ Menu* Menu::MainMenu() {
 				}
 				constructionCategoryMenus.clear();
 			}
+			menuTier = Camp::Inst()->GetTier();
 		}
 		mainMenu = new Menu(std::vector<MenuChoice>());
 		if (Game::Inst()->DevMode()) mainMenu->AddChoice(MenuChoice("Dev", boost::bind(UI::ChangeMenu, Menu::DevMenu())));
@@ -156,7 +157,6 @@ Menu* Menu::MainMenu() {
 		mainMenu->AddChoice(MenuChoice("Stats", boost::bind(&Game::DisplayStats, Game::Inst())));
 		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
 		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));
-		menuTier = Camp::Inst()->GetTier();
 	}
 	return mainMenu;
 }
