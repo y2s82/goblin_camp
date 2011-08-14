@@ -1978,3 +1978,11 @@ item_type "Iron foothold trap" {
 	constructedin = "Blacksmith"
 	bulk = 3
 }
+
+item_type "Gib" {
+	category = ["Garbage"]
+	graphic = 213
+	color = "185,20,30"
+	decaySpeed = 1
+	durability = 10
+}
