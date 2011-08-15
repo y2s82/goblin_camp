@@ -1971,10 +1971,10 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 					if (mainHand.lock() && Random::Generate(9) == 0) DecreaseItemCondition(mainHand);
 				}
 				if (npc && !careful && effectiveStats[STRENGTH] >= npc->effectiveStats[NPCSIZE]) {
-					if (attack.Type() == DAMAGE_BLUNT || Random::GenerateBool()) {
+					if (attack.Type() == DAMAGE_BLUNT || Random::Generate(4) == 0) {
 						Coordinate tar;
-						tar.X((npc->Position().X() - Position().X()) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
-						tar.Y((npc->Position().Y() - Position().Y()) * std::max(effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE], 1));
+						tar.X((npc->Position().X() - Position().X()) * std::max((effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE])/2, 1));
+						tar.Y((npc->Position().Y() - Position().Y()) * std::max((effectiveStats[STRENGTH] - npc->effectiveStats[NPCSIZE])/2, 1));
 						npc->CalculateFlightPath(npc->Position()+tar, Random::Generate(25, 19 + 25));
 						npc->pathIndex = -1;
 					}
