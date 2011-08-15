@@ -418,7 +418,7 @@ class ConstructionListener : public ITCODParserListener {
 			} else { //New construction
 				Construction::Presets.push_back(ConstructionPreset());
 				Construction::Presets.back().name = name;
-				Construction::constructionNames.insert(std::make_pair(strName, Construction::Presets.size() - 1));
+				Construction::constructionNames.insert(std::make_pair(strName, static_cast<ConstructionType>(Construction::Presets.size() - 1)));
 				Construction::AllowedAmount.push_back(-1);
 				constructionIndex = Construction::Presets.size() - 1;
 			}

@@ -185,7 +185,7 @@ void Camp::Update() {
 	UpdateTier();
 	UpdateWaterJobs();
 
-	diseaseModifier = std::pow((Game::Inst()->GoblinCount() + Game::Inst()->OrcCount() - 20) / 10, 2.0f);
+	diseaseModifier = static_cast<int>(std::pow(static_cast<float>((Game::Inst()->GoblinCount() + Game::Inst()->OrcCount() - 20) / 10), 2.0f));
 }
 
 void Camp::AddWaterZone(Coordinate from, Coordinate to) {

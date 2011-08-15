@@ -954,7 +954,7 @@ void Game::Update() {
 				}
 			}
 		} else {
-			for (size_t i = 0; i < std::max(100u, freeItems.size()/4); ++i) {
+			for (size_t i = 0; i < std::max(static_cast<size_t>(100), freeItems.size()/4); ++i) {
 				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (boost::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 

@@ -112,7 +112,7 @@ int Entity::GetBulk() { return bulk; }
 void Entity::AddBulk(int amount) { bulk += amount; }
 void Entity::RemoveBulk(int amount) { bulk -= amount; }
 
-void Entity::Strobe() { strobe += 0.1; }
+void Entity::Strobe() { strobe += 0.1f; }
 void Entity::ResetStrobe() { strobe = 0; }
 bool Entity::CanStrobe() { return false; }
 
