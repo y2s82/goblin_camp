@@ -90,7 +90,7 @@ void StockManager::Init() {
 				if (Construction::Presets[cons].products[prod] == item) {
 					//This construction has this itemtype as a product
 					producables.insert(item);
-					producers.insert(std::pair<ItemType, ConstructionType>(item, cons));
+					producers.insert(std::pair<ItemType, ConstructionType>(item, static_cast<ConstructionType>(cons)));
 					producerFound = true;
 					break;
 				}
