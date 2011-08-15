@@ -64,7 +64,10 @@ NatureObject::NatureObject(Coordinate pos, NatureObjectType typeVal) : Entity(),
 }
 
 NatureObject::~NatureObject() {
-	if (!NatureObject::Presets[type].walkable) Map::Inst()->SetWalkable(pos, true);
+	if (!NatureObject::Presets[type].walkable) {
+		Map::Inst()->SetWalkable(pos, true);
+		Map::Inst()->SetBlocksLight(pos, false);
+	}
 	Map::Inst()->SetBuildable(pos, true);
 }
 
