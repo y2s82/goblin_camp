@@ -1126,7 +1126,8 @@ npc_type "mastodon" {
 }
 
 npc_type "Baluchitherium" {
-	name="Baluchitheria"
+	name="Baluchitherium"
+	plural="Baluchitheria"
 	tier=3
 	tags=["localWildlife", "migratory", "calm"]
 	color="130,130,130"
