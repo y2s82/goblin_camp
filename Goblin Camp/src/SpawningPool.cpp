@@ -194,7 +194,6 @@ void SpawningPool::Expand(bool message) {
 				if (Map::Inst()->GetConstruction(candidate + Coordinate::DirectionToCoordinate(dirs[i])) == uid)
 					location = candidate;
 		}
-		location = undefined;
 	}
 
 	if (location != undefined) {
