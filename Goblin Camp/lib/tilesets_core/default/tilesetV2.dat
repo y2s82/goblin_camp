@@ -1,0 +1,579 @@
+tileset "Default Tileset" {
+	tileWidth=16
+	tileHeight=16
+	description="Test tileset with various tiles sourced from Goblin Camp Forum, as well as crawl-tiles"
+	author="onionknight, hutze, apostrophest, Crawl Stone Soup artists"
+	version="0.15"
+
+	texture "terrain.png"
+	{
+		terrain_sprite {
+			sprites=[0]
+		}
+
+		terrain_sprite "grass" {
+		/*sprites=[48,49,50,51,
+		         64,65,66,67,
+				 80,81,82,83,
+				 96,97,98,99]
+		wangTileset*/
+			sprites=[
+			// Height < -1.0
+				20,
+			// Height < -0.5
+				21,
+			// Height < 0.0
+				22,
+			// Height < 0.25
+				23,
+			// Height < 0.5
+				24,
+			// Height < 1.0
+				25,
+			// Height < 2.0
+				26,
+			// Height < 4.0
+				27,
+			// Height >= 4.0
+				28
+			]
+			heightSplits=[-1.0, -0.5, 0.0, 0.25, 0.5, 1.0, 2.0, 4.0]
+			snowSprites=[152]
+			edgeSprites=[16,17,18,19]
+			snowEdgeSprites=[148,149,150,151]
+
+			details=[192,193,194,195,208,209,210,211]
+			snowedDetails=[196,197,198,199,212,213,214,215]
+			detailsChance=0.0625
+
+			burntOverlay=[32,33,34,35,36]
+			corruption=[128,129,130,131,
+						144,145,146,147,
+						160,161,162,163,
+						176,177,178,179]
+		}
+
+		terrain_sprite "ditch" {
+			sprites=[1]
+		}
+
+		terrain_sprite "riverbed" {
+			sprites=[2]
+		}
+
+		terrain_sprite "bog" {
+			sprites=[3]
+		}
+
+		terrain_sprite "rock" {
+			sprites=[126]
+		}
+
+		terrain_sprite "mud" {
+			sprites=[5]
+		}
+	}
+
+	texture "tileset.png"
+	{
+		// Terrain modifiers
+		waterAndIce=[84,85,86,87,88,
+		             100,101,102,103,104,105,106,
+					 116,117,118,119,120,121,122]
+		filth=[164,165,166,167,168,
+		       180,181,182,183,184,185,186,
+			   196,197,198,199,200,169,170]
+		marker=[14]
+		blood=[16]
+
+		// Overlays
+		nonTerritory=[13]
+		territory=[6,7,8,9,10]
+		marked=[75,91,107,123,139]
+
+		// Tile Highlights (when placing or selecting)
+		defaultTileHighlight=[10,13]
+		constructionTileHighlight=[10,13]
+		stockpileTileHighlight=[10,13]
+		treeFellingTileHighlight=[10,13]
+		harvestTileHighlight=[10,13]
+		orderTileHighlight=[10,13]
+		treeTileHighlight=[10,13]
+		dismantleTileHighlight=[10,13]
+		undesignateTileHighlight=[10,13]
+		bogTileHighlight=[10,13]
+		digTileHighlight=[10,13]
+		addTerritoryTileHighlight=[10]
+		removeTerritoryTileHighlight=[13]
+		gatherTileHighlight=[10,13]
+
+		defaultUnderconstruction=18
+		fire=[68,69]
+		fireFPS=10
+
+		creature_sprite {
+			sprites=[21]
+		}
+
+		plant_sprite {
+			sprites=[29]
+		}
+
+		item_sprite {
+			sprites=[20]
+		}
+		
+		spell_sprite {
+		    sprites=[71,73]
+			fps=30
+		}
+
+		construction_sprite {
+			sprites=[19]
+		}
+
+		status_effect_sprite "hunger" {
+			sprites=[46]
+		}
+
+		status_effect_sprite "thirst" {
+			sprites=[47]
+		}
+
+		status_effect_sprite "panic" {
+			sprites=[48]
+			flashRate=5
+		}
+
+		status_effect_sprite "concussion" {
+			sprites=[49]
+		}
+
+		status_effect_sprite "drowsy" {
+			sprites=[50]
+		}
+
+		status_effect_sprite "sleeping" {
+			sprites=[51]
+		}
+
+		status_effect_sprite "poison" {
+			sprites=[52]
+		}
+
+		status_effect_sprite "bleeding" {
+			sprites=[53]
+		}
+
+		status_effect_sprite "sluggish" {
+			sprites=[54]
+			flashRate=1
+		}
+
+		status_effect_sprite "rage" {
+			sprites=[55]
+			flashRate=3
+		}
+
+		status_effect_sprite "eating" {
+			sprites=[56]
+		}
+
+		status_effect_sprite "drinking" {
+			sprites=[57]
+		}
+
+		status_effect_sprite "swimming" {
+			sprites=[58]
+			flashRate=0
+			alwaysOn
+		}
+
+		status_effect_sprite "burning" {
+			sprites=[68,69]
+			fps=10
+			flashRate=0
+			alwaysOn
+		}
+
+		creature_sprite "goblin" {
+			sprites=[23]
+		}
+
+		creature_sprite "orc" {
+			sprites=[24]
+		}		
+
+		creature_sprite "soldier ant" {
+			sprites=[59]
+		}
+		
+		creature_sprite "starving wolf" {
+			sprites=[60]
+		}
+		
+		creature_sprite "giant snail" {
+			sprites=[207]
+		}
+		
+		creature_sprite "rabid albino rat" {
+			sprites=[217]
+		}
+		
+		creature_sprite "snake" {
+			sprites=[218]
+		}
+		
+		creature_sprite "killer bee" {
+			sprites=[220]
+		}
+		
+		creature_sprite "harpy" {
+			sprites=[221]
+		}
+		
+		creature_sprite "kobold" {
+			sprites=[222]
+		}
+		
+		creature_sprite "ogre" {
+			sprites=[223]
+		}
+		
+		creature_sprite "troll" {
+			sprites=[233]
+		}
+		
+		creature_sprite "skeleton" {
+			sprites=[234]
+		}
+		
+		creature_sprite "minotaur" {
+			sprites=[235]
+		}
+		
+		creature_sprite "cyclops" {
+			sprites=[236]
+		}
+		
+		creature_sprite "giant" {
+			sprites=[237]
+		}
+		
+		creature_sprite "griffon" {
+			sprites=[238]
+		}
+		
+		creature_sprite "will o wisp" {
+			sprites=[239]
+		}
+		
+		creature_sprite "imp" {
+			sprites=[249]
+		}
+		
+		creature_sprite "salamander" {
+			sprites=[250]
+		}
+		
+		creature_sprite "fire elemental" {
+			sprites=[251]
+		}
+		
+		creature_sprite "treeman" {
+			sprites=[29]
+		}
+		
+		plant_sprite "Pine"{
+			sprites=[29]
+		}
+
+		plant_sprite "Wild Bloodberry bush" {
+			sprites=[22]
+		}
+
+		plant_sprite "Wild Blueleaf" {
+			sprites=[28]
+		}
+
+		plant_sprite "Dandelion" {
+			sprites=[28]
+		}
+
+		plant_sprite "Red Poppy" {
+			sprites=[28]
+		}
+
+		plant_sprite "Alpine aster" {
+			sprites=[30]
+		}
+
+		plant_sprite "Blue Skullcap" {
+			sprites=[28]
+		}
+
+		plant_sprite "Willow" {
+			sprites=[28]
+		}
+
+		plant_sprite "Birch" {
+			sprites=[29]
+		}
+
+		plant_sprite "Spruce" {
+			sprites=[29]
+		}
+
+		plant_sprite "Silvervine" {
+			sprites=[156]
+		}
+
+		plant_sprite "Thornbush" {
+			sprites=[155]
+		}
+
+		plant_sprite "Withering tree" {
+			sprites=[31]
+		}
+
+		plant_sprite "Redhollow" {
+			sprites=[30]
+		}
+
+		plant_sprite "Darkroot" {
+			sprites=[31]
+		}
+
+		item_sprite {
+			sprites=[20]
+		}
+
+		item_sprite "Log" {
+			sprites=[38] 
+		}
+
+		item_sprite "Plank" {
+			sprites=[37]
+		}
+
+		item_sprite "Stone" {
+			sprites=[32]
+		}
+
+		item_sprite "Firewood" {
+			sprites=[36]
+		}
+
+		item_sprite "Rough stone" {
+			sprites=[32]
+		}
+
+		item_sprite "Berry" {
+			sprites=[35]
+		}
+
+		item_sprite "Bread" {
+			sprites=[189]
+		}
+
+		item_sprite "Crate" {
+			sprites=[40]
+		}
+
+		item_sprite "Barrel" {
+			sprites=[41]
+		}
+
+		item_sprite "Bucket" {
+			sprites=[74]
+			drawWhenWielded
+		}
+
+		item_sprite "Sack" {
+			sprites=[20]
+		}
+
+		item_sprite "Door" {
+			sprites=[39]
+		}
+
+		item_sprite "Bed" {
+			sprites=[42]
+		}
+
+		item_sprite "Clay" {
+			sprites=[34]
+		}
+
+		item_sprite "Seed" {
+			sprites=[61]
+		}
+		
+		item_sprite "Nightbloom" {
+			sprites=[158]
+		}
+		
+		item_sprite "Dried fruit" {
+			sprites=[159]
+		}
+		
+		item_sprite "Meat" {
+			sprites=[174]
+		}
+		
+		item_sprite "Berry wine" {
+			sprites=[174]
+		}
+		
+		item_sprite "Chillwine" {
+			sprites=[175]
+		}
+		
+		item_sprite "Healing tonic" {
+			sprites=[187]
+		}
+		
+		item_sprite "Poison antidote" {
+			sprites=[188]
+		}
+		
+		item_sprite "Wooden club" {
+			sprites=[190]
+		}
+		
+		item_sprite "Stone maul" {
+			sprites=[191]
+		}
+		
+		item_sprite "Stone axe" {
+			sprites=[201]
+		}
+		
+		item_sprite "Stone spear" {
+			sprites=[202]
+		}
+		
+		item_sprite "Bone dagger" {
+			sprites=[203]
+		}
+		
+		item_sprite "Wooden arrow" {
+			sprites=[204]
+		}
+		
+		item_sprite "Stone-tipped arrow" {
+			sprites=[205]
+		}
+		
+		item_sprite "Wooden bow" {
+			sprites=[206]
+		}
+		
+		construction_sprite "Farm plot" {
+			sprites=[43]
+		}
+
+		construction_sprite "Totem Pole" {
+			sprites=[43,43,43,
+					 43,44,43,
+					 43,43,43]
+			underconstructionSprites=[18]
+			width=3
+		}
+
+		construction_sprite "Door" {
+			sprites=[39]
+			openSprite=45
+		}
+
+		construction_sprite "Palisade" {
+			connectionMap
+			sprites=[64,65,66,67,
+			         80,81,82,83,
+					 96,97,98,99,
+					 112,113,114,115]
+		}
+
+		construction_sprite "Stockpile" {
+			sprites=[232]
+		}
+		
+		construction_sprite "Saw pit" {
+			sprites=[242,242,242,
+					 242,242,242,
+					 242,242,242]
+			underconstructionSprites=[18]
+			width=3
+		}
+		
+		construction_sprite "Spawning pool" {
+			sprites=[224,225,240,241,240,225]
+			frameCount=6
+			fps=3
+			underconstructionSprites=[226]
+		}
+		
+		construction_sprite "Carpenter" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstructionSprites=[18]
+			width=3
+		}
+		construction_sprite "Weaver" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstructionSprites=[18]
+			width=3
+		}
+		construction_sprite "Basket Weaver" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstructionSprites=[18]
+			width=3
+		}
+		construction_sprite "Kitchen" {
+			sprites=[230,229,231,
+					 228,243,245,
+					 246,244,247]
+			underconstructionSprites=[18]
+			width=3
+		}
+		
+		construction_sprite "Bed" {
+			sprites=[42]
+		}
+
+		construction_sprite "Spiked pit" {
+			sprites=[26]
+			unreadyTrapSprites=[25]
+		}
+		
+		spell_sprite "smoke" {
+			sprites=[63]
+		}
+
+		spell_sprite "spark" {
+		    sprites=[62]
+		}
+
+		spell_sprite "steam" {
+			sprites=[72]
+		}
+	}
+
+	texture "orcTiles.png"
+	{
+		creature_sprite "orc" {
+			sprites=[5,6,7,8,9]
+			weaponOverlays=[1,2,3,4]
+			paperdoll
+			weaponTypes=["Blunt weapon", "Slashing weapon", "Piercing weapon", "Ranged weapon"]
+			armorTypes=["Padded clothing", "Light armor", "Medium armor", "Heavy armor"]
+		}	
+	}
+}
+
+
