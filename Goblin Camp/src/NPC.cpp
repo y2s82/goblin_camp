@@ -2818,6 +2818,14 @@ void NPC::ValidateCurrentJob() {
 				}
 				break;
 
+			case DIG: {
+				Season season = Game::Inst()->CurrentSeason();
+				if (season == EarlyWinter || season == Winter || season == LateWinter) {
+					TaskFinished(TASKFAILFATAL, "(DIG)Cannot dig in winter");
+					return;
+				}
+				}break;
+
 			default: break; //Non-validatable tasks
 			}
 		}
