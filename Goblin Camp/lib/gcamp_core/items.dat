@@ -14,11 +14,6 @@ category_type "Plank" {
 	flammable
 }
 
-category_type "Wicker" {
-    parent="Wood"
-	flammable
-}
-
 category_type "Fuel" {
 	flammable
 }
@@ -36,21 +31,6 @@ category_type "Firewood" {
 category_type "Oil" {
 	parent="Fuel"
 	flammable
-}
-
-category_type "Stone" {
-}
-
-category_type "Rough stone" {
-	parent="Stone"
-}
-
-category_type "Dressed stone" {
-	parent="Stone"
-}
-
-category_type "Sharpened stone" {
-	parent="Stone"
 }
 
 category_type "Food" {
@@ -110,27 +90,61 @@ category_type "Tincture" {
 	parent="Drink"
 }
 
-category_type "Plant" {
+category_type "Textiles" {
 	flammable
 }
 
 category_type "Fiber" {
-	parent="Plant"
+	parent="Textiles"
 	flammable
 }
 
 category_type "Cloth" {
-	parent="Plant"
+	parent="Textiles"
+	flammable
+}
+
+category_type "Rope" {
+	parent="Textiles"
+	flammable
+}
+
+category_type "Organic material" {
+}
+
+category_type "Bone" {
+	parent="Organic material"
+}
+
+category_type "Chitin" {
+	parent="Organic material"
+}
+
+category_type "Bark" {
+	parent="Organic material"
+	flammable
+}
+
+category_type "Fibrous material" {
+	parent="Organic material"
+	flammable
+}
+
+category_type "Wicker" {
+	parent="Organic material"
+	flammable
+}
+
+category_type "Plant products" {
+}
+
+category_type "Powdered bark" {
+	parent="Plant products"
 	flammable
 }
 
 category_type "Flour" {
-	parent="Plant"
-	flammable
-}
-
-category_type "Powdered bark" {
-	parent="Plant"
+	parent="Plant products"
 	flammable
 }
 
@@ -193,21 +207,27 @@ category_type "Statue" {
 	parent="Furniture"
 }
 
-category_type "Rope" {
-	flammable
+category_type "Building materials" {
 }
 
-category_type "Leather" {
-	flammable
+category_type "Rough stone" {
+	parent="Building materials"
 }
 
-category_type "Hardened leather" {
+category_type "Dressed stone" {
+	parent="Building materials"
 }
 
 category_type "Clay" {
+	parent="Building materials"
 }
 
 category_type "Brick" {
+	parent="Building materials"
+}
+
+category_type "Earth" {
+	parent="Building materials"
 }
 
 category_type "Metal" {
@@ -225,7 +245,28 @@ category_type "Metal bar" {
 	parent="Metal"
 }
 
+category_type "Leatherworking" {
+}
+
+category_type "Hide" {
+	parent="Leatherworking"
+	flammable
+}
+
+category_type "Leather" {
+	parent="Leatherworking"
+	flammable
+}
+
+category_type "Hardened leather" {
+	parent="Leatherworking"
+}
+
 category_type "Weapon component" {
+}
+
+category_type "Sharpened stone" {
+	parent="Weapon component"
 }
 
 category_type "Axe head" {
@@ -376,34 +417,11 @@ category_type "Branch" {
 category_type "Garbage" {
 }
 
-category_type "Bone" {
-	parent="Garbage"
+category_type "Plant" {
+	flammable
 }
 
 category_type "Corpse" {
-	parent="Garbage"
-	flammable
-}
-
-category_type "Fibrous material" {
-	parent="Garbage"
-	flammable
-}
-
-category_type "Hide" {
-	parent="Garbage"
-	flammable
-}
-
-category_type "Earth" {
-	parent="Garbage"
-}
-
-category_type "Chitin" {
-	parent="Garbage"
-}
-
-category_type "Bark" {
 	parent="Garbage"
 	flammable
 }
@@ -1970,7 +1988,7 @@ item_type "Ice" {
 	decaySpeed = 1
 }
 
-item_type "Iron foothold trap" {
+item_type "Iron leghold trap" {
 	category = ["Leghold trap"]
 	graphic = 209
 	color = "155,128,128"
