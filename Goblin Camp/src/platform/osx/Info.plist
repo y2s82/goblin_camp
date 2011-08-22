@@ -9,12 +9,14 @@
     <key>CFBundleIdentifier</key>
     <string>com.goblincamp</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>0.15</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleSignature</key>
     <string>gcmp</string>
     <key>CFBundleExecutable</key>
     <string>goblin-camp</string>
+    <key>CFBundleIconFile</key>
+    <string>GoblinCamp.icns</string>
 </dict>
 </plist>
