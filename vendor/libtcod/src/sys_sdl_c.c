@@ -688,6 +688,9 @@ void TCOD_sys_set_renderer(TCOD_renderer_t renderer) {
 bool TCOD_sys_init(int w,int h, char_t *buf, char_t *oldbuf, bool fullscreen) {
 	FILE *f;
 	if ( ! has_startup ) TCOD_sys_startup();
+	#ifdef MACOSX
+	NSApplicationLoad();
+	#endif
 	/* check if there is a user (player) config file */
 	f = fopen("./libtcod.cfg","r");
 	if ( f ) {

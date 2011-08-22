@@ -13,7 +13,7 @@ alias platform-deps
       [ path.glob-tree $(HERE)/src/platform/unix : *.cpp ]
     :
     :
-    : <framework>CoreFoundation <framework>Carbon
+    : <framework>CoreFoundation <framework>Carbon <framework>AppKit
 ;
 
 ###############################################################################
