@@ -37,7 +37,7 @@ alias platform-deps
 
 rule get-dist-osx-base ( properties * ) {
     local dir = [ get-dist-base $(properties) ] ;
-    return $(dir)/Goblin Camp.app/Contents ;
+    return "$(dir)/Goblin Camp.app/Contents" ;
 }
 
 rule get-dist-bin ( properties * ) {

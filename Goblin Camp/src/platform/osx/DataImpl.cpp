@@ -57,7 +57,7 @@ namespace PathsImpl {
 		CFRelease(execURL);
 		CFRelease(resURL);
 		
-		execDir = fs::path(std::string(exec));
+		execDir = exec.parent_path();
 		dataDir = fs::path(std::string(resPath) + "/");
 	}
 }

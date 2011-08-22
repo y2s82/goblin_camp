@@ -61,19 +61,23 @@ rule use-project ( ) {
 }
 
 local rule define-targets ( ) {
-    local name = ;
-    
-    if $(.options) {
-        name = [ $(.options).get <name> ] ;
-        local suffix = [ $(.options).get <suffix> ] ;
+    if [ os.name ] = MACOSX {
+        alias python : : : : <framework>Python ;
+    } else {
+        local name = ;
         
-        if $(suffix) {
-            name = $(name)$(suffix) ;
+        if $(.options) {
+            name = [ $(.options).get <name> ] ;
+            local suffix = [ $(.options).get <suffix> ] ;
+            
+            if $(suffix) {
+                name = $(name)$(suffix) ;
+            }
         }
+        
+        name ?= python27 ;
+        
+        ECHO ** Using Python: $(name) ;
+        lib python : : <name>$(name) ;
     }
-    
-    name ?= python27 ;
-    
-    ECHO ** Using Python: $(name) ;
-    lib python : : <name>$(name) ;
 }

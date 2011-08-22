@@ -24,10 +24,6 @@ project libtcod
 
 sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
 
-if [ os.name ] = MACOSX {
-    sources += $(HERE)/src/macsupport.m ;
-}
-
 lib tcod
     : $(sources)
     : <use>/libpng <use>/zlib <use>/sdl

@@ -43,7 +43,7 @@ rule use-project ( ) {
 }
 
 local rule define-targets ( ) {
-    if [ os.name ] != NT {
+    if [ os.name ] = LINUX {
         local name = ;
         
         if $(.options) {
@@ -52,7 +52,9 @@ local rule define-targets ( ) {
         
         name ?= GL ;
         ECHO ** Using OpenGL: $(name) ;
-        lib GL : : <name>$(name) ;
+        lib GL : : <name>$(name) <link>shared ;
+    } else if [ os.name ] = MACOSX {
+        alias GL : : : : <framework>OpenGL ;
     } else {
         alias GL ;
     }

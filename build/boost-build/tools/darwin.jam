@@ -482,7 +482,7 @@ flags darwin.link OPTIONS <optimization>space : -Wl,-dead_strip -no_dead_strip_i
 flags darwin.compile OPTIONS <link>shared : -dynamic ;
 
 # Misc options.
-flags darwin.compile OPTIONS : -no-cpp-precomp -gdwarf-2 ;
+flags darwin.compile OPTIONS : -gdwarf-2 ;
 
 # Add the framework names to use.
 flags darwin.link FRAMEWORK <framework> ;

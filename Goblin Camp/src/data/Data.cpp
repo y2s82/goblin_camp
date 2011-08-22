@@ -95,16 +95,7 @@ namespace {
 	std::string SanitizeFilename(const std::string& filename) {
 		std::string sanitized;
 		
-		std::remove_copy_if(
-			filename.begin(), filename.end(),
-			std::back_inserter(sanitized),
-			boost::bind(
-				static_cast<const char*(*)(const char*, int)>(&strchr),
-				"\\/:*?\"<>|", _1
-			)
-		);
-		
-		return sanitized;
+		return filename;
 	}
 	
 	/**

@@ -6,6 +6,7 @@
 import property-set ;
 import project ;
 import modules ;
+import os ;
 
 rule init ( options * ) {
     modules.poke $(__name__) : .options : [ property-set.create $(options) ] ;
@@ -39,14 +40,18 @@ rule use-project ( ) {
 }
 
 local rule define-targets ( ) {
-    local name = ;
-    
-    if $(.options) {
-        name = [ $(.options).get <name> ] ;
+    if [ os.name ] = MACOSX {
+        alias libpng : : : : <framework>libpng ;
+    } else {
+        local name = ;
+        
+        if $(.options) {
+            name = [ $(.options).get <name> ] ;
+        }
+        
+        name ?= libpng ;
+        
+        ECHO ** Using libpng: $(name) ;
+        lib png : : <name>$(name) ;
     }
-    
-    name ?= libpng ;
-    
-    ECHO ** Using libpng: $(name) ;
-    lib png : : <name>$(name) ;
 }
