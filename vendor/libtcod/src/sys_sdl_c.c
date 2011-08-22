@@ -591,7 +591,7 @@ void CustomSDLMain();
 void TCOD_sys_startup() {
 	if (has_startup) return;
 #ifdef TCOD_MACOSX
-	CustomSDLMain();
+	//CustomSDLMain();
 #endif
 	if (SDL_Init(SDL_INIT_TIMER|SDL_INIT_VIDEO) < 0 ) TCOD_fatal_nopar("SDL : cannot initialize");
 #ifndef	TCOD_WINDOWS
