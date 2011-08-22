@@ -1,0 +1,27 @@
+###############################################################################
+##### libμserialize
+## Microframework for serialising basic C++ types. Previously used in private
+## part of data/Serialization.cpp, moved here to support patcher-base without
+## duplicating anything. It currently doesn't do anything fancy, and probably
+## won't work on big endian streams (do we even care about them?).
+###############################################################################
+
+import modules ;
+path-constant HERE : . ;
+
+project libuserialize
+    : usage-requirements
+      <include>$(HERE)
+      <use>/boost
+;
+
+###############################################################################
+##### Targets
+###############################################################################
+
+if --with-tests in [ modules.peek : ARGV ] {
+    exe userialize-test : $(HERE)/uSerializeTest.cpp /boost ;
+}
+
+# This does what it says: if there are no targets in the project, it gets ignored.
+alias propagate-includes ;

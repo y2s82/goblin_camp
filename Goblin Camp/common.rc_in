@@ -1,0 +1,49 @@
+#include <winresrc.h>
+
+LANGUAGE LANG_ENGLISH, SUBLANG_DEFAULT
+
+/* This is needed because RC's preprocessor is not a full C preprocessor. */
+%GC_RCH_DEFINITIONS%
+
+#ifndef INTERNAL_FILENAME
+#	define INTERNAL_FILENAME ORIGINAL_FILENAME
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+	FILEVERSION    %GC_RC_VERSION_INT%
+	PRODUCTVERSION %GC_RC_VERSION_INT%
+	FILEOS         VOS_NT
+	FILETYPE       VFT_APP
+	FILEFLAGSMASK  VS_FFI_FILEFLAGSMASK
+#if defined(DEBUG)
+	FILEFLAGS      (VS_FF_DEBUG | VS_FF_PRERELEASE | VS_FF_PRIVATEBUILD)
+#elif defined(WITH_REVID)
+	FILEFLAGS      (VS_FF_PRERELEASE | VS_FF_PRIVATEBUILD)
+#endif
+BEGIN
+	BLOCK "StringFileInfo"
+	BEGIN
+		BLOCK "040904b0"
+		BEGIN
+			VALUE "CompanyName",      "Ilkka Halila"
+			VALUE "FileDescription",  FILE_DESCRIPTION
+			VALUE "FileVersion",      "%GC_RC_VERSION%"
+			VALUE "InternalName",     INTERNAL_FILENAME
+			VALUE "LegalCopyright",   "Copyright (C) 2010-2011 Ilkka Halila"
+			VALUE "OriginalFilename", ORIGINAL_FILENAME
+			VALUE "ProductName",      "Goblin Camp"
+			VALUE "ProductVersion",   "%GC_RC_VERSION%"
+		#if defined(DEBUG) || defined(WITH_REVID)
+			VALUE "PrivateBuild",     "Built from Mercurial revision %GC_HG_REV%"
+		#endif
+		END
+	END
+	BLOCK "VarFileInfo"
+	BEGIN
+		VALUE "Translation", 0x0409, 1200
+	END
+END
+
+#ifndef NO_GC_ICON
+	101 ICON "GoblinCamp.ico"
+#endif
