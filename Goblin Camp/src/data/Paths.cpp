@@ -146,11 +146,21 @@ namespace Paths {
 		
 		This has to be called before anything else, especially anything
 		that uses logging.
+		
+		\returns Whether portable mode has been activated through binDir/goblin-camp.portable
 	*/
-	inline void Bootstrap() {
+	inline bool Bootstrap() {
 		using namespace Globals;
 		
-		PathsImpl::FindPersonalDirectory(personalDir);
+		PathsImpl::FindExecutableDirectory(exec, execDir, dataDir);
+		
+		bool portableMode = fs::exists(execDir / "goblin-camp.portable");
+		
+		if (!portableMode) {
+			PathsImpl::FindPersonalDirectory(personalDir);
+		} else {
+			personalDir = dataDir / "user-data";
+		}
 		
 		savesDir    = personalDir / "saves";
 		screensDir  = personalDir / "screenshots";
@@ -160,19 +170,21 @@ namespace Paths {
 		config      = personalDir / "config.py";
 		font        = personalDir / "terminal.png";
 		
-		PathsImpl::FindExecutableDirectory(exec, execDir, dataDir);
-
 		coreTilesetsDir = dataDir / "lib" / "tilesets_core";
 		
 		fs::create_directory(personalDir);
 		Logger::OpenLogFile((personalDir / "goblin-camp.log").string());
+		
+		return portableMode;
 	}
 	
 	/**
 		Calls Paths::Bootstrap and then tries to create user directory structure.
 	*/
 	void Init() {
-		Bootstrap();
+		if (Bootstrap()) {
+			LOG("Portable mode active.");
+		}
 		
 		LOG("Personal directory: " << Globals::personalDir);
 		LOG("Saves directory: " << Globals::savesDir);
