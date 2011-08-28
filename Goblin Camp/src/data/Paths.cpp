@@ -235,7 +235,7 @@ namespace Paths {
 			case Config:        return Globals::config;
 			case ExecutableDir: return Globals::execDir;
 			case CoreTilesets:  return Globals::coreTilesetsDir;
-			case Tilesets:		return Globals::tilesetsDir;
+			case Tilesets:      return Globals::tilesetsDir;
 		}
 		
 		// If control reaches here, then someone added new value to the enum,
@@ -243,6 +243,7 @@ namespace Paths {
 		// every value' warning. So, crash and burn.
 		LOG("Impossible code path, crashing.");
 		assert(false);
+		return fs::path();
 	}
 	
 #if defined(_MSC_VER)

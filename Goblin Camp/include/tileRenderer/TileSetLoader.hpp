@@ -46,4 +46,4 @@ namespace TileSetLoader
 	boost::shared_ptr<TileSet> LoadTileSet(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::filesystem::path path);
 	TileSetMetadata LoadTileSetMetadata(boost::filesystem::path path);
 	std::list<TilesetModMetadata> LoadTilesetModMetadata(boost::filesystem::path path);
-};
+}

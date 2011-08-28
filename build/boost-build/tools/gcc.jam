@@ -309,7 +309,7 @@ toolset.flags gcc.compile OPTIONS <inlining>on   : -Wno-inline ;
 toolset.flags gcc.compile OPTIONS <inlining>full : -finline-functions -Wno-inline ;
 
 toolset.flags gcc.compile OPTIONS <warnings>off : -w ;
-toolset.flags gcc.compile OPTIONS <warnings>on  : -Wall -Wno-unused -Wno-strict-aliasing -Wno-pragmas -Wno-unknown-pragmas -Wno-sign-compare -Wno-write-strings -pedantic ;
+toolset.flags gcc.compile OPTIONS <warnings>on  : -Wall -Wno-unused -Wno-strict-aliasing -Wno-pragmas -Wno-unknown-pragmas -Wno-sign-compare -Wno-write-strings -pedantic -Wno-long-long -Wno-overlength-strings ;
 toolset.flags gcc.compile OPTIONS <warnings>all : -Wall -pedantic ;
 toolset.flags gcc.compile OPTIONS <warnings-as-errors>on : -Werror ;
 
