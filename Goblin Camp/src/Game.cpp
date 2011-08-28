@@ -26,7 +26,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/vector.hpp>
-
+#include <boost/thread.hpp>
+#include <boost/date_time/posix_time/posix_time_duration.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
@@ -464,28 +465,94 @@ void Game::Exit(bool confirm) {
 	}
 }
 
-int Game::ScreenWidth() const {	return screenWidth; }
+int Game::ScreenWidth() const { return screenWidth; }
 int Game::ScreenHeight() const { return screenHeight; }
 
-void Game::LoadingScreen() {
-	TCODConsole::root->setDefaultForeground(TCODColor::white);
-	TCODConsole::root->setDefaultBackground(TCODColor::black);
-	TCODConsole::root->setAlignment(TCOD_CENTER);
-	TCODConsole::root->clear();
-	TCODConsole::root->print(screenWidth / 2, screenHeight / 2, "Loading...");
-	TCODConsole::root->flush();
+namespace {
+	std::string loading[] = {
+		"\\ Loading...",
+		"| Loading...",
+		"/ Loading...",
+		"- Loading..."
+	};
+	
+	std::string saving[] = {
+		"\\ Saving...",
+		"| Saving...",
+		"/ Saving...",
+		"- Saving..."
+	};
+	
+	const unsigned loadingSize = sizeof loading / sizeof loading[0];
+	const unsigned savingSize  = sizeof saving  / sizeof saving[0];
+	
+	void DrawProgressScreen(int x, int y, int spin, bool isLoading) {
+		boost::lock_guard<boost::mutex> lock(Game::loadingScreenMutex);
+		
+		SDL_PumpEvents();
+		
+		std::string loadingMsg = (isLoading ? loading : saving)[spin % (isLoading ? loadingSize : savingSize)];
+		
+		TCODConsole::root->setDefaultForeground(TCODColor::white);
+		TCODConsole::root->setDefaultBackground(TCODColor::black);
+		TCODConsole::root->setAlignment(TCOD_CENTER);
+		TCODConsole::root->clear();
+		TCODConsole::root->print(x, y, loadingMsg.c_str());
+		TCODConsole::root->flush();
+	}
+}
+
+boost::mutex Game::loadingScreenMutex;
+
+void Game::ProgressScreen(boost::function<void(void)> blockingCall, bool isLoading) {
+	// this runs blocking call in a separate thread while spinning on the main one
+	// so that the process doesn't appear to be dead
+	//
+	// thread safety notice: blockingCall MUST NOT access TCODConsole::root without
+	// locking Game::loadingScreenMutex first!
+	//
+	// XXX heavily experimental
+	boost::promise<void> promise;
+	boost::unique_future<void> future(promise.get_future());
+	
+	// make copies before launching the thread
+	int x = Game::Inst()->screenWidth  / 2;
+	int y = Game::Inst()->screenHeight / 2;
+	
+	DrawProgressScreen(x, y, 0, isLoading);
+	
+	boost::thread thread([&]() {
+		try {
+			blockingCall();
+			promise.set_value();
+		} catch (const std::exception& e) {
+			promise.set_exception(boost::copy_exception(e));
+		}
+	});
+	
+	int spin = 0;
+	do {
+		DrawProgressScreen(x, y, ++spin, isLoading);
+	} while (!future.timed_wait(boost::posix_time::millisec(500)));
+	
+	if (future.has_exception()) {
+		future.get();
+	}
 }
 
 void Game::ErrorScreen() {
+	boost::lock_guard<boost::mutex> lock(loadingScreenMutex);
+	
+	Game *game = Game::Inst();
 	TCODConsole::root->setDefaultForeground(TCODColor::white);
 	TCODConsole::root->setDefaultBackground(TCODColor::black);
 	TCODConsole::root->setAlignment(TCOD_CENTER);
 	TCODConsole::root->clear();
 	TCODConsole::root->print(
-		screenWidth / 2, screenHeight / 2,
-		"There was an error loading the data files, refer to the logfile for more information."
+		game->screenWidth / 2, game->screenHeight / 2,
+		"A critical error occurred, refer to the logfile for more information."
 	);
-	TCODConsole::root->print(screenWidth / 2, screenHeight / 2 + 1, "Press any key to exit the game.");
+	TCODConsole::root->print(game->screenWidth / 2, game->screenHeight / 2 + 1, "Press any key to exit the game.");
 	TCODConsole::root->flush();
 	TCODConsole::waitForKeypress(true);
 	exit(255);
@@ -519,8 +586,6 @@ void Game::Init(bool firstTime) {
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	ResetRenderer();
-
-	if (firstTime) LoadingScreen();
 
 	events = boost::shared_ptr<Events>(new Events(Map::Inst()));
 	
@@ -886,16 +951,17 @@ void Game::Update() {
 	//updates all its neighbours. Also, by updating only every 50th one, the load on the cpu is less, but you need to
 	//remember that Update gets called 25 times a second, and given the nature of rand() this means that each waternode
 	//will be updated once every 2 seconds. It turns out that from the player's viewpoint this is just fine
-	{
-		std::list<boost::weak_ptr<WaterNode> >::iterator nextWati = ++waterList.begin();
-		for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end();) {
-			if (boost::shared_ptr<WaterNode> water = wati->lock()) {
-				if (Random::Generate(49) == 0) water->Update();
-			} else waterList.erase(wati);
-			wati = nextWati;
-			++nextWati;
+	
+	// nextWati removed because list<> complained about invalidated iterators -pl
+	for (auto watIt = waterList.begin(); watIt != waterList.end(); ) {
+		if (auto water = watIt->lock()) {
+			if (Random::Generate(49) == 0) water->Update();
+			++watIt;
+		} else {
+			watIt = waterList.erase(watIt);
 		}
 	}
+	
 	//Updating the last 10 waternodes each time means that recently created water moves faster.
 	//This has the effect of making water rush to new places such as a moat very quickly, which is the
 	//expected behaviour of water.
