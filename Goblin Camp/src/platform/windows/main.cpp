@@ -27,7 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iterator>
 
 int GCMain(std::vector<std::string>&);
-void InstallExceptionHandler();
+void GCInstallExceptionHandler();
 void GCCommandLine(std::vector<std::string>&);
 
 #if !defined(DEBUG) || defined(GC_REDIRECT_STREAMS)
@@ -40,7 +40,7 @@ void GCCommandLine(std::vector<std::string>&);
 #endif
 
 int GC_MAIN_FUNCTION() {
-	InstallExceptionHandler();
+	GCInstallExceptionHandler();
 	
 	#ifdef GC_REDIRECT_STREAMS
 		HANDLE newStdOut, newStdErr;
