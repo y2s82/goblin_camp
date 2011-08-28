@@ -94,14 +94,14 @@ namespace {
 	*/
 	std::string SanitizeFilename(const std::string& filename) {
 		std::string sanitized;
+		std::string invalid = "\\/:*?\"<>|";
 		
 		std::remove_copy_if(
 			filename.begin(), filename.end(),
 			std::back_inserter(sanitized),
-			boost::bind(
-				static_cast<const char*(*)(const char*, int)>(&strchr),
-				"\\/:*?\"<>|", _1
-			)
+			[&invalid](char x) -> bool {
+				return invalid.find(x) != std::string::npos;
+			}
 		);
 		
 		return sanitized;
