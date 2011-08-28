@@ -55,7 +55,12 @@ void TileSetTexture::DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) c
 	{
 		int xCoord = tile % tileXDim;
 		int yCoord = tile / tileXDim;
-		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, tileWidth, tileHeight};
+		SDL_Rect srcRect = {
+			static_cast<Sint16>(xCoord * tileWidth),
+			static_cast<Sint16>(yCoord * tileHeight),
+			static_cast<Uint16>(tileWidth),
+			static_cast<Uint16>(tileHeight)
+		};
 		SDL_BlitSurface(tiles.get(),&srcRect, dst, dstRect);
 	}
 }
@@ -67,7 +72,12 @@ void TileSetTexture::DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, 
 		int yCoord = tile / tileXDim;
 		int halfWidth = tileWidth >> 1;
 		int halfHeight = tileHeight >> 1;
-		SDL_Rect srcRect={xCoord * tileWidth, yCoord * tileHeight, halfWidth, halfHeight};
+		SDL_Rect srcRect = {
+			static_cast<Sint16>(xCoord * tileWidth),
+			static_cast<Sint16>(yCoord * tileHeight),
+			static_cast<Uint16>(halfWidth),
+			static_cast<Uint16>(halfHeight)
+		};
 		
 		dstRect->h = halfHeight;
 		if (corner & 0x1) {
