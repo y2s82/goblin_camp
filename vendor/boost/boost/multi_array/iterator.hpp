@@ -53,7 +53,11 @@ class array_iterator
     iterator_facade<
         array_iterator<T,TPtr,NumDims,Reference>
       , typename associated_types<T,NumDims>::value_type
+#if defined(_MSC_VER) && defined(_HAS_ITERATOR_DEBUGGING)
+      , std::random_access_iterator_tag // workaround XXX test if it doesn't break anything
+#else
       , boost::random_access_traversal_tag
+#endif
       , Reference
     >
     , private
@@ -71,7 +75,11 @@ class array_iterator
   typedef iterator_facade<
         array_iterator<T,TPtr,NumDims,Reference>
       , typename detail::multi_array::associated_types<T,NumDims>::value_type
+#if defined(_MSC_VER) && defined(_HAS_ITERATOR_DEBUGGING)
+      , std::random_access_iterator_tag // workaround XXX test if it doesn't break anything
+#else
       , boost::random_access_traversal_tag
+#endif
       , Reference
     > facade_type;
 
