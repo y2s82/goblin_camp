@@ -2,6 +2,7 @@
 ##### Goblin Camp build system.
 ## See docs/build-readme.html for usage help.
 ###############################################################################
+# vim: set expandtab :
 
 import modules ;
 import version ;
@@ -13,8 +14,8 @@ import build-system ;
 ## to Jamroot's directory.
 ###############################################################################
 
-path-constant GC_ROOT    : .    ;
-constant      GC_VERSION : 0.15 ;
+path-constant GC_ROOT    : .   ;
+constant      GC_VERSION : 0.2 ;
 
 ###############################################################################
 ##### Setup
@@ -29,7 +30,7 @@ V = $(GC_VERSION) ;
 ECHO "*******************************************" ;
 ECHO "****    Goblin Camp build system v3    ****" ;
 ECHO "*******************************************" ;
-ECHO "****     Building Goblin Camp $(V)     ****" ;
+ECHO "****     Building Goblin Camp $(V)      ****" ;
 ECHO "*******************************************" ;
 ECHO "** Running bjam:" [ version.jam ] ;
 ECHO "** Using Boost.Build:" [ version.boost-build ] ;
@@ -65,7 +66,8 @@ build-system.set-post-build-hook $(__name__).post-build ;
 
 project
     : requirements
-      <debug-symbols>on
+      <toolset>msvc,<variant>release:<debug-symbols>on
+      <variant>debug:<debug-symbols>on
       <threading>multi
       <define>GC_BOOST_BUILD
       #####
@@ -86,8 +88,10 @@ project
       <os>NT,<toolset>msvc:<define>_CRT_SECURE_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>_CRT_NONSTDC_NO_DEPRECATE
       <os>NT,<toolset>msvc:<define>STRICT
-      <os>NT,<toolset>msvc:<define>_HAS_ITERATOR_DEBUGGING=0
-      <os>NT,<toolset>msvc:<define>_SECURE_SCL=0
+      <os>NT,<toolset>msvc,<variant>debug:<define>_HAS_ITERATOR_DEBUGGING=1
+      <os>NT,<toolset>msvc,<variant>debug:<define>_SECURE_SCL=1
+      <os>NT,<toolset>msvc,<variant>release:<define>_HAS_ITERATOR_DEBUGGING=0
+      <os>NT,<toolset>msvc,<variant>release:<define>_SECURE_SCL=0
       <os>NT,<toolset>msvc:"<linkflags>/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:LIBCMTD"
       <os>NT,<toolset>msvc:"<cflags>/bigobj"
       #####
@@ -104,11 +108,39 @@ project
 
 ###############################################################################
 ##### Projects
-## This sets up Jamfiles and triggers the build.
+## This sets up child projects.
 ###############################################################################
 
-for local P in [ glob $(GC_ROOT)/vendor/* ] {
-    use-project $(P:B) : $(P) ;
+for local P in boost python-modules libtcod {
+    use-project $(P) : $(GC_ROOT)/vendor/$(P) ;
 }
+
+###############################################################################
+##### Dependency checks
+## Checks whether dependencies are present and compilable.
+###############################################################################
+
+#
+## Check Python version.
+# This is not ideal, because it assumes the interpter is the same as the library.
+# But I can't get it to work otherwise, so... better than nothing, right?
+PYTHON = [ modules.peek : PYTHON ] ;
+pyVer  = [ SHELL "$(PYTHON) -c \"import sys; print(str(sys.version_info[0]) + ' ' + str(sys.version_info[1]) + ' ' + str(sys.version_info[2]))\"" ] ;
+pyVer  = [ MATCH "([0-9]+) ([0-9]+) ([0-9]+)" : $(pyVer) ] ;
+
+if $(pyVer[1]) != 2 {
+    ECHO !! Build system requires Python 2 at the moment, Python 3 is not supported. ;
+    EXIT ;
+}
+
+if $(pyVer[2]) < 6 || ( $(pyVer[2]) = 6 && $(pyVer[3]) < 6 ) {
+    ECHO !! Build system requires at least Python 2.6.6 to run properly. ;
+    EXIT ;
+}
+
+###############################################################################
+##### Build request
+## Triggers the main build.
+###############################################################################
 
 build-project "Goblin Camp" ;
