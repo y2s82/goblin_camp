@@ -29,15 +29,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 //we include python stuff first to avoid _C_POSIX_SOURCE redefinition warnings
 //see: http://bytes.com/topic/python/answers/30009-warning-_posix_c_source-redefined
-#if defined(_MSC_VER)
-#	pragma warning(push, 2)
-#endif
-#		include <boost/python/detail/wrap_python.hpp>
-#		include <boost/python.hpp>
-		namespace py = boost::python;
-#if defined(_MSC_VER)
-#	pragma warning(pop)
-#endif
+#	if defined(_MSC_VER)
+#		pragma warning(push, 2)
+#	endif
+#	include <boost/python/detail/wrap_python.hpp>
+#	include <boost/python.hpp>
+	namespace py = boost::python;
+#	if defined(_MSC_VER)
+#		pragma warning(pop)
+#	endif
 
 // STL
 #	include <vector>
@@ -64,9 +64,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <cstring>
 #	include <cstdarg>
 // Boost
-#if defined(_MSC_VER)
-#	pragma warning(push, 2)
-#endif
+#	if defined(_MSC_VER)
+#		pragma warning(push, 2)
+#	endif
 #		include <boost/python/detail/wrap_python.hpp>
 #		include <boost/python.hpp>
 #		include <boost/thread/thread.hpp>
@@ -111,35 +111,25 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/filesystem.hpp>
 #		include <boost/math/constants/constants.hpp>
 #		include <boost/tuple/tuple.hpp>
-#if defined(_MSC_VER)
-#	pragma warning(pop)
-#endif
+#	if defined(_MSC_VER)
+#		pragma warning(pop)
+#	endif
 
 // Memory debugging.
 #if defined(WINDOWS) && defined(DEBUG) && defined(CHK_MEMORY_LEAKS)
-#   include <boost/iostreams/detail/optional.hpp> // Include this before DBG_NEW defined
-#   define _CRTDBG_MAP_ALLOC
+#	include <boost/iostreams/detail/optional.hpp> // Include this before DBG_NEW defined
+#	define _CRTDBG_MAP_ALLOC
 #	ifndef DBG_NEW
-#		define DBG_NEW new ( _NORMAL_BLOCK , __FILE__ , __LINE__ )
+#		define DBG_NEW new (_NORMAL_BLOCK , __FILE__ , __LINE__)
 #		define new DBG_NEW
 #	endif
 #endif
-		
+
 // libtcod
 #	include <libtcod.hpp>
 // SDL
 #	include <SDL.h>
 #	include <SDL_image.h>
-#endif
-
-// Use with care.
-#if defined(_MSC_VER) && defined(DEBUG)
-	void GCDebugInduceCrash();
-#	define GC_DEBUG_INDUCE_CRASH() GCDebugInduceCrash()
-#	define GC_DEBUG_BREAKPOINT()   __asm { int 3 }
-#else
-#	define GC_DEBUG_INDUCE_CRASH()
-#	define GC_DEBUG_BREAKPOINT()
 #endif
 
 // Annotations.
@@ -158,7 +148,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #if defined(_MSC_VER)
 #	pragma warning(1: 4996 4995) // Ensure that deprecation warnings will be shown
 #	include <cstdlib>
-#	pragma deprecated(rand, srand)
+#	pragma deprecated(rand)
 #endif
 
 // Intrinsics.
@@ -166,12 +156,25 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	include <intrin.h>
 #endif
 
-// Assert.
+// Use with care.
 #if defined(_MSC_VER) && defined(DEBUG)
-	bool GCAssert(const char*, const char*, const char*, int);
-#	define GC_ASSERT(Exp) do { if (!(Exp) && GCAssert(#Exp, __FUNCTION__, __FILE__, __LINE__)) GC_DEBUG_BREAKPOINT(); } while (0)
+	void GCDebugInduceCrash();
+#	define GC_DEBUG_INDUCE_CRASH() GCDebugInduceCrash()
+#	define GC_DEBUG_BREAKPOINT()   __debugbreak()
 #else
-#	define GC_ASSERT BOOST_ASSERT
+#	define GC_DEBUG_INDUCE_CRASH()
+#	define GC_DEBUG_BREAKPOINT()
+#endif
+
+// Assert.
+#include <boost/assert.hpp>
+#define GC_ASSERT(Exp) GC_ASSERT_M(Exp, NULL)
+#if defined(_MSC_VER) && defined(DEBUG)
+	bool GCAssert(const char*, const char*, const char*, const char*, int);
+#	define GC_ASSERT_M(Exp, Msg) \
+		do { if (!(Exp) && GCAssert((Msg), #Exp, __FUNCTION__, __FILE__, __LINE__)) GC_DEBUG_BREAKPOINT(); } while (0)
+#else
+#	define GC_ASSERT_M(Exp, _) BOOST_ASSERT(Exp)
 #endif
 
 #endif // global #ifndef STDAFX_INCLUDED
