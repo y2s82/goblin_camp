@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <cstdio>
 #include <fcntl.h>
+#include <io.h>
 #include <crtdbg.h>
 #include <windows.h>
 
