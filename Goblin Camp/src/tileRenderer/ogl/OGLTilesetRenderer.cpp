@@ -366,7 +366,11 @@ bool OGLTilesetRenderer::AssembleTextures() {
 	int tile = 0;
 	for (int y = 0; y < static_cast<int>(tilesTextureH) && tile < static_cast<int>(rawTiles.size()); ++y) {
 		for (int x = 0; x < static_cast<int>(tilesTextureW) && tile < static_cast<int>(rawTiles.size()); ++x) {
-			SDL_Rect srcRect = {0,0, tileSet->TileWidth(), tileSet->TileHeight()};
+			SDL_Rect srcRect = {
+				0, 0,
+				static_cast<Uint16>(tileSet->TileWidth()),
+				static_cast<Uint16>(tileSet->TileHeight())
+			};
 			SDL_SetAlpha(rawTiles[tile].texture->GetInternalSurface().get(), 0, SDL_ALPHA_OPAQUE);
 			rawTiles[tile].texture->DrawTile(rawTiles[tile].tile, tempSurface.get(), &srcRect);
 
