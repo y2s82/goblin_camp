@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/multi_array.hpp>
 #include <boost/shared_ptr.hpp>
 #include <boost/weak_ptr.hpp>
+#include <boost/thread/mutex.hpp>
 
 #include <libtcod.hpp>
 
@@ -118,8 +119,17 @@ public:
 	void LoadConfig(std::string);
 	void Init(bool firstTime);
 	void ResetRenderer();
-	void LoadingScreen();
-	void ErrorScreen();
+	
+	static boost::mutex loadingScreenMutex;
+	static void ProgressScreen(boost::function<void(void)>, bool isLoading);
+	static void LoadingScreen(boost::function<void(void)> fn) {
+		ProgressScreen(fn, true);
+	}
+	static void SavingScreen(boost::function<void(void)> fn) {
+		ProgressScreen(fn, false);
+	}
+	
+	static void ErrorScreen();
 	void GenerateMap(uint32 seed = 0);
 
 	void Update();
@@ -139,7 +149,10 @@ public:
 
 	TCODConsole* buffer;
 	void FlipBuffer();
-	void Draw(TCODConsole * console = Game::Inst()->buffer, float focusX = Game::Inst()->camX, float focusY = Game::Inst()->camY, bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1);
+	void Draw(
+		TCODConsole * console = Game::Inst()->buffer, float focusX = Game::Inst()->camX, float focusY = Game::Inst()->camY,
+		bool drawUI = true, int posX = 0, int posY = 0, int xSize = -1, int ySize = -1
+	);
 
 	static int DiceToInt(TCOD_dice_t);
 

@@ -21,9 +21,7 @@ that would fix that problem, but I unfortunately have very limited time
 and I couldn't come up with a coherent answer just by googling. */
 #include "stdafx.hpp"
 
-#if defined(_MSC_VER)
 #pragma warning(push, 2) //Boost::serialization generates a few very long warnings
-#endif
 
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
@@ -105,8 +103,51 @@ const boost::uint8_t fileFormatConst = 0x01;
 //
 
 namespace {
+	// XXX implement the archives
+	template <size_t N> struct Type { };
+
+	#define DEFINE_TYPE(T) template <> struct Type<sizeof(T)> { typedef T uint; }
+	DEFINE_TYPE(boost::uint8_t);
+	DEFINE_TYPE(boost::uint16_t);
+	DEFINE_TYPE(boost::uint32_t);
+	DEFINE_TYPE(boost::uint64_t);
+	#undef DEFINE_TYPE
+	
 	template <typename T>
-	void WritePayload(T& ofs) {
+	T ReadUInt(std::istream& stream) {
+		typedef typename Type<sizeof(T) / 2>::uint U;
+		const boost::uint32_t bits = sizeof(U) * 8;
+		
+		U a = 0, b = 0;
+		a = ReadUInt<U>(stream);
+		b = ReadUInt<U>(stream);
+		
+		return (static_cast<T>(a) << bits) | static_cast<T>(b);
+	}
+	
+	template <>
+	boost::uint8_t ReadUInt<boost::uint8_t>(std::istream& stream) {
+		return static_cast<boost::uint8_t>(stream.get());
+	}
+	
+	template <typename T>
+	void WriteUInt(std::ostream& stream, T value) {
+		typedef typename Type<sizeof(T) / 2>::uint U;
+		const boost::uint32_t bits = sizeof(U) * 8;
+		
+		// All types here are unsigned.
+		const U max = static_cast<U>(-1);
+		
+		WriteUInt<U>(stream, (value >> bits) & max);
+		WriteUInt<U>(stream, value & max);
+	}
+	
+	template <>
+	void WriteUInt<boost::uint8_t>(std::ostream& stream, boost::uint8_t value) {
+		stream.put(static_cast<char>(value));
+	}
+	
+	void WritePayload(io::filtering_ostream& ofs) {
 		boost::archive::binary_oarchive oarch(ofs);
 		oarch << Entity::uids;
 		oarch << *Game::Inst();
@@ -116,8 +157,7 @@ namespace {
 		oarch << *Map::Inst();
 	}
 	
-	template <typename T>
-	void ReadPayload(T& ifs) {
+	void ReadPayload(io::filtering_istream& ifs) {
 		boost::archive::binary_iarchive iarch(ifs);
 		iarch >> Entity::uids;
 		iarch >> *Game::Inst();
@@ -128,40 +168,35 @@ namespace {
 	}
 }
 
-#include "uSerialize.hpp"
-using Serializer::WriteUInt;
-using Serializer::ReadUInt;
-
 bool Game::SaveGame(const std::string& filename) {
 	try {
-		std::ofstream ofs(filename.c_str(), std::ios::binary);
+		std::ofstream rawStream(filename.c_str(), std::ios::binary);
+		io::filtering_ostream stream;
 		
 		// Write the file header
-		WriteUInt<boost::uint32_t>(ofs, saveMagicConst);
-		WriteUInt<boost::uint8_t> (ofs, fileFormatConst);
+		WriteUInt<boost::uint32_t>(rawStream, saveMagicConst);
+		WriteUInt<boost::uint8_t> (rawStream, fileFormatConst);
 		
 		bool compress = Config::GetCVar<bool>("compressSaves");
 		// compression flag
-		WriteUInt<boost::uint8_t>(ofs, (compress ? 0x01 : 0x00));
+		WriteUInt<boost::uint8_t>(rawStream, (compress ? 0x01 : 0x00));
 		
 		// reserved
-		WriteUInt<boost::uint8_t> (ofs, 0x00U);
-		WriteUInt<boost::uint16_t>(ofs, 0x00U);
-		WriteUInt<boost::uint32_t>(ofs, 0x00UL);
-		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
-		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
-		WriteUInt<boost::uint64_t>(ofs, 0x00ULL);
+		WriteUInt<boost::uint8_t> (rawStream, 0x00U);
+		WriteUInt<boost::uint16_t>(rawStream, 0x00U);
+		WriteUInt<boost::uint32_t>(rawStream, 0x00UL);
+		WriteUInt<boost::uint64_t>(rawStream, 0x00ULL);
+		WriteUInt<boost::uint64_t>(rawStream, 0x00ULL);
+		WriteUInt<boost::uint64_t>(rawStream, 0x00ULL);
 		
 		// Write the payload
 		if (compress) {
-			io::filtering_ostream cfs;
 			io::zlib_params params(6); // level
-			cfs.push(io::zlib_compressor(params));
-			cfs.push(ofs);
-			WritePayload(cfs);
-		} else {
-			WritePayload(ofs);
+			stream.push(io::zlib_compressor(params));
 		}
+		
+		stream.push(rawStream);
+		Game::SavingScreen(boost::bind(&WritePayload, boost::ref(stream)));
 		
 		return true;
 	} catch (const std::exception& e) {
@@ -172,60 +207,57 @@ bool Game::SaveGame(const std::string& filename) {
 
 bool Game::LoadGame(const std::string& filename) {
 	try {
-		std::ifstream ifs(filename.c_str(), std::ios::binary);
+		std::ifstream rawStream(filename.c_str(), std::ios::binary);
+		io::filtering_istream stream;
 		
 		// Read and verify the file header
-		if (ReadUInt<boost::uint32_t>(ifs) != saveMagicConst) {
+		if (ReadUInt<boost::uint32_t>(rawStream) != saveMagicConst) {
 			throw std::runtime_error("Invalid magic value.");
 		}
 		
-		if (ReadUInt<boost::uint8_t>(ifs) != fileFormatConst) {
+		if (ReadUInt<boost::uint8_t>(rawStream) != fileFormatConst) {
 			throw std::runtime_error("Invalid file format value.");
 		}
 		
 		// compression
-		boost::uint8_t compressed = ReadUInt<boost::uint8_t>(ifs);
+		boost::uint8_t compressed = ReadUInt<boost::uint8_t>(rawStream);
 		
 		if (compressed > 1) {
 			throw std::runtime_error("Invalid compression algorithm.");
 		}
 		
 		// reserved values
-		if (ReadUInt<boost::uint8_t>(ifs) != 0) {
+		if (ReadUInt<boost::uint8_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #1 not 0x00.");
 		}
-		if (ReadUInt<boost::uint16_t>(ifs) != 0) {
+		if (ReadUInt<boost::uint16_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #2 not 0x0000.");
 		}
-		if (ReadUInt<boost::uint32_t>(ifs) != 0) {
+		if (ReadUInt<boost::uint32_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #3 not 0x00000000.");
 		}
-		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+		if (ReadUInt<boost::uint64_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #4 not 0x0000000000000000.");
 		}
-		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+		if (ReadUInt<boost::uint64_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #5 not 0x0000000000000000.");
 		}
-		if (ReadUInt<boost::uint64_t>(ifs) != 0) {
+		if (ReadUInt<boost::uint64_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #6 not 0x0000000000000000.");
 		}
 		
-		Game::Reset();
-		Game::Inst()->LoadingScreen();
+		Game::Inst()->Reset();
 		
 		// Read the payload
 		if (compressed) {
-			io::filtering_istream cfs;
-			cfs.push(io::zlib_decompressor());
-			cfs.push(ifs);
-			ReadPayload(cfs);
-		} else {
-			ReadPayload(ifs);
+			stream.push(io::zlib_decompressor());
 		}
 		
+		stream.push(rawStream);
+		Game::LoadingScreen(boost::bind(&ReadPayload, boost::ref(stream)));
 		Game::Inst()->TranslateContainerListeners();
 		Game::Inst()->Pause();
-
+		
 		return true;
 	} catch (const std::exception& e) {
 		LOG("std::exception while trying to load the game: " << e.what());
@@ -233,6 +265,4 @@ bool Game::LoadGame(const std::string& filename) {
 	}
 }
 
-#if defined(_MSC_VER)
 #pragma warning(pop)
-#endif
