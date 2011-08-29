@@ -129,7 +129,7 @@ void Faction::Update() {
 	if (active && maxActiveTime >= 0) {
 		++activeTime;
 	}
-};
+}
 
 FactionGoal Faction::GetCurrentGoal() const {
 	size_t i = currentGoal;

@@ -51,7 +51,7 @@ overlayFlags(0), markerids(0) {
 	}
 	waterlevel = -0.8f;
 	weather = boost::shared_ptr<Weather>(new Weather(this));
-};
+}
 
 Map::~Map() {
 	delete heightMap;

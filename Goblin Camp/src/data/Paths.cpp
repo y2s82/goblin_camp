@@ -243,7 +243,9 @@ namespace Paths {
 		// every value' warning. So, crash and burn.
 		LOG("Impossible code path, crashing.");
 		assert(false);
-		return fs::path();
+#if defined(__GNUC__)
+		__builtin_unreachable(); // to silence the warning
+#endif
 	}
 	
 #if defined(_MSC_VER)
