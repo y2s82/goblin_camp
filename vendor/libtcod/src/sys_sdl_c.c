@@ -152,7 +152,6 @@ void TCOD_sys_register_SDL_renderer(SDL_renderer_t renderer, bool provideSurface
 	if (renderer) {	
 		int w, h;
 		SDL_Surface * temp;
-		// Width and height to next power of two
 		w = screen->w;
 		w--;
 		w = (w >> 1) | w;
