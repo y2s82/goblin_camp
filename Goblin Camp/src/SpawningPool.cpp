@@ -49,7 +49,7 @@ SpawningPool::SpawningPool(ConstructionType type, const Coordinate& target) : Co
 		boost::bind(&SpawningPool::DumpFilth, this), 2, 2, 12));
 	container->AddComponent(new ToggleButton("Dump corpses", boost::bind(&SpawningPool::ToggleDumpCorpses, this), 
 		boost::bind(&SpawningPool::DumpCorpses, this), 1, 6, 14));
-	corpseContainer = boost::shared_ptr<Container>(new Container(target));
+	corpseContainer = boost::shared_ptr<Container>(new Container(target, 0, 1000, -1));
 }
 
 Panel* SpawningPool::GetContextMenu() {
@@ -142,12 +142,12 @@ void SpawningPool::Update() {
 				corruptionLeft += 1000 * std::min(std::max(1U, corpses), 50U);
 		}
 
-		if ((corpses*10) + filth > 10U) {
-			if (corpses > 0) --corpses;
-			else filth -= std::min(filth, 10U);
-
-			++spawnsLeft;
-			++expansionLeft;
+		if ((corpses*10) + filth >= 30U) {
+			unsigned int newSpawns = (corpses * 10U + filth) / 30U;
+			spawnsLeft += newSpawns;
+			expansionLeft += newSpawns;
+			corpses = 0;
+			filth = 0;
 		}
 	}
 	if (burn > 0) {

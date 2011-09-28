@@ -459,7 +459,7 @@ void NPC::UpdateStatusEffects() {
 		effectiveResistances[i] = baseResistances[i];
 	}
 	
-	if (factionPtr->IsFriendsWith(PLAYERFACTION)) effectiveResistances[DISEASE_RES] -= Camp::Inst()->GetDiseaseModifier();
+	if (factionPtr->IsFriendsWith(PLAYERFACTION)) effectiveResistances[DISEASE_RES] = std::max(0, effectiveResistances[DISEASE_RES] - Camp::Inst()->GetDiseaseModifier());
 
 	++statusGraphicCounter;
 	for (std::list<StatusEffect>::iterator statusEffectI = statusEffects.begin(); statusEffectI != statusEffects.end();) {
@@ -2817,6 +2817,14 @@ void NPC::ValidateCurrentJob() {
 					return;
 				}
 				break;
+
+			case DIG: {
+				Season season = Game::Inst()->CurrentSeason();
+				if (season == EarlyWinter || season == Winter || season == LateWinter) {
+					TaskFinished(TASKFAILFATAL, "(DIG)Cannot dig in winter");
+					return;
+				}
+				}break;
 
 			default: break; //Non-validatable tasks
 			}
