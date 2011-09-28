@@ -15,10 +15,21 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include <SDL.h>
+#include <SDL_opengl.h>
 #include "tileRenderer/ogl/OGLFunctionExt.hpp"
 
+// XXX this code is not fully conformant — void* (as returned by SDL_GL_GetProcAddress)
+// is not guaranteed to be able to hold a function pointer by C++.
+
+#ifdef __GNUC__
+#	if __GNUC_MINOR__ > 5
+#		pragma GCC diagnostic push
+#	endif
+#	pragma GCC diagnostic ignored "-pedantic"
+#endif
+
 namespace OGLFunctionExtension {
-	
 	GLhandleARB glCreateShaderObjectARB(GLenum shaderType) {
 		static PFNGLCREATESHADEROBJECTARBPROC function((PFNGLCREATESHADEROBJECTARBPROC)SDL_GL_GetProcAddress("glCreateShaderObjectARB"));
 		return function(shaderType);
@@ -89,11 +100,14 @@ namespace OGLFunctionExtension {
 		function(handle);
 	}
 
-	#ifdef WINDOWS 
+	#ifdef WINDOWS
 		void glActiveTexture(GLenum texture) {
 			static PFNGLACTIVETEXTUREPROC function((PFNGLACTIVETEXTUREPROC)SDL_GL_GetProcAddress("glActiveTexture"));
 			function(texture);
 		}
 	#endif
-
 }
+
+#if defined(__GNUC__) && __GNUC_MINOR__ > 5
+#	pragma GCC diagnostic pop
+#endif

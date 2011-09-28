@@ -94,8 +94,21 @@ namespace {
 	*/
 	std::string SanitizeFilename(const std::string& filename) {
 		std::string sanitized;
+		std::string invalid = "\\/:*?\"<>|";
 		
 		return filename;
+/* TODO: Check why the Mac side of things apparently needed a non-sanitizing filename-sanitizer
+		std::remove_copy_if(
+			filename.begin(), filename.end(),
+			std::back_inserter(sanitized),
+
+			[&invalid](char x) -> bool {
+				return invalid.find(x) != std::string::npos;
+			}
+		);
+		
+		return sanitized;
+*/
 	}
 	
 	/**

@@ -35,7 +35,7 @@
 #include "libtcod.h"
 #include "libtcod_int.h"
 
-#define png_infopp_NULL (png_infop)NULL
+#define png_infopp_NULL (png_infop*)NULL
 #define int_p_NULL (int*)NULL
 
 bool TCOD_sys_check_png(const char *filename) {

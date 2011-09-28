@@ -81,7 +81,9 @@ int GCMain(std::vector<std::string>& args) {
 	TCOD_sys_startup();
 	Data::LoadConfig();
 	Data::LoadFont();
-	Mods::Load();
+	
+	Game::LoadingScreen(&Mods::Load);
+	
 	#ifdef MACOSX
 	Data::LoadFont();
 	#endif
@@ -173,10 +175,6 @@ void StartNewGame() {
 	Game::Reset();
 	Game* game = Game::Inst();
 
-	game->LoadingScreen();
-	
-	Script::Event::GameStart();
-
 	game->GenerateMap(time(0));
 	game->SetSeason(EarlySpring);
 
@@ -264,8 +262,6 @@ void StartNewGame() {
 
 	for (int i = 0; i < 10; ++i)
 		Game::Inst()->events->SpawnBenignFauna();
-
-	MainLoop();
 }
 
 // XXX: This really needs serious refactoring.
@@ -294,12 +290,19 @@ namespace {
 }
 
 void ConfirmStartNewGame() {
+	boost::function<void(void)> run(boost::bind(&Game::LoadingScreen, &StartNewGame));
+	
 	if (Game::Inst()->Running()) {
-		MessageBox::ShowMessageBox("A game is already running, are you sure you want  to start a new one?",
-			&StartNewGame, "Yes", NULL, "No");
+		MessageBox::ShowMessageBox(
+			"A game is already running, are you sure you want  to start a new one?",
+			run, "Yes", NULL, "No"
+		);
 	} else {
-		StartNewGame();
+		run();
 	}
+	
+	Script::Event::GameStart();
+	MainLoop();
 }
 
 int MainMenu() {
@@ -524,11 +527,6 @@ void SaveMenu() {
 
 		if (key.vk == TCODK_ESCAPE) return;
 		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
-			TCODConsole::root->clear();
-			TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-5,
-				Game::Inst()->ScreenHeight()/2-3, 10, 2, true, TCOD_BKGND_SET, "SAVING");
-			TCODConsole::root->flush();
-			
 			savesCount = -1;
 			if (!Data::SaveGame(saveName)) {
 				TCODConsole::root->setDefaultForeground(TCODColor::white);

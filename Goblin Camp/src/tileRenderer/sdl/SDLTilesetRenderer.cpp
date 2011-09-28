@@ -135,8 +135,12 @@ void SDLTilesetRenderer::render(void *surf, void*sdl_screen) {
 	int screenHeight = GetScreenHeight();
 	TCODColor keyColor = GetKeyColor();
 
-	SDL_Rect srcRect={0,0,screenWidth,screenHeight};
-	SDL_Rect dstRect={0,0,screenWidth,screenHeight};
+	SDL_Rect srcRect = {
+		0, 0,
+		static_cast<Uint16>(screenWidth),
+		static_cast<Uint16>(screenHeight)
+	};
+	SDL_Rect dstRect = srcRect;
 	
 	if (translucentUI) {
 		Uint32 keyColorVal = SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255);

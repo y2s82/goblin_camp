@@ -236,7 +236,7 @@ inline int Distance(const Coordinate& p, const Coordinate& q) {
 	for (int d = 0; d < 2; ++d)
 		distance += abs(q[d] - p[d]);
 	return distance;
-};
+}
 
 inline int Distance(const int& x0, const int& y0, const int& x1, const int& y1) {
 	//note: this reimplementation is not terribly efficient, but will go away soon anyway

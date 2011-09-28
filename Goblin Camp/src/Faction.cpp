@@ -18,7 +18,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/vector.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "Faction.hpp"
 #include "NPC.hpp"
@@ -127,7 +129,7 @@ void Faction::Update() {
 	if (active && maxActiveTime >= 0) {
 		++activeTime;
 	}
-};
+}
 
 FactionGoal Faction::GetCurrentGoal() const {
 	size_t i = currentGoal;
