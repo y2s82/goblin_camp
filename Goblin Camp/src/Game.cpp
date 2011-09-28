@@ -1874,6 +1874,9 @@ void Game::Reset() {
 	delete Menu::mainMenu;
 	Menu::mainMenu = 0;
 
+	delete Menu::territoryMenu;
+	Menu::territoryMenu = 0;
+
 	UI::Reset();
 
 	delete instance;
