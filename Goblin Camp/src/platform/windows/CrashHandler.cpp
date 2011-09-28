@@ -188,6 +188,6 @@ namespace {
 	}
 }
 
-void InstallExceptionHandler() {
+void GCInstallExceptionHandler() {
 	SetUnhandledExceptionFilter(ExceptionHandler);
 }

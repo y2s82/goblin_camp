@@ -198,7 +198,7 @@ typedef enum {
 	TCOD_CHAR_POW1 = 251,
 	TCOD_CHAR_POW3 = 252,
 	TCOD_CHAR_POW2 = 253,
-	TCOD_CHAR_BULLET_SQUARE = 254,
+	TCOD_CHAR_BULLET_SQUARE = 254
 	/* diacritics */
 } TCOD_chars_t;
 
@@ -233,7 +233,7 @@ typedef enum {
 
 typedef enum {
 	TCOD_KEY_PRESSED=1,
-	TCOD_KEY_RELEASED=2,
+	TCOD_KEY_RELEASED=2
 } TCOD_key_status_t;
 
 /* custom font flags */
@@ -242,20 +242,20 @@ typedef enum {
 	TCOD_FONT_LAYOUT_ASCII_INROW=2,
 	TCOD_FONT_TYPE_GREYSCALE=4,
 	TCOD_FONT_TYPE_GRAYSCALE=4,
-	TCOD_FONT_LAYOUT_TCOD=8,
+	TCOD_FONT_LAYOUT_TCOD=8
 } TCOD_font_flags_t;
 
 typedef enum {
 	TCOD_RENDERER_GLSL,
 	TCOD_RENDERER_OPENGL,
 	TCOD_RENDERER_SDL,
-	TCOD_NB_RENDERERS,
+	TCOD_NB_RENDERERS
 } TCOD_renderer_t;
 
 typedef enum {
-	TCOD_LEFT, 
-	TCOD_RIGHT, 
-	TCOD_CENTER 
+	TCOD_LEFT,
+	TCOD_RIGHT,
+	TCOD_CENTER
 } TCOD_alignment_t;
 
 #endif /* _TCOD_CONSOLE_TYPES_H */

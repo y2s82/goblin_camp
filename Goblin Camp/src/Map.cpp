@@ -51,7 +51,7 @@ overlayFlags(0), markerids(0) {
 	}
 	waterlevel = -0.8f;
 	weather = boost::shared_ptr<Weather>(new Weather(this));
-};
+}
 
 Map::~Map() {
 	delete heightMap;
@@ -529,7 +529,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 	unfinished.push(std::pair<int, Coordinate>(0, beginning));
 	touched.insert(beginning);
 
-	Direction flowDirectionA, flowDirectionB;
+	Direction flowDirectionA = startDirectionA, flowDirectionB = startDirectionB;
 	int stage = 0;
 	bool favorA = false;
 	bool favorB = false;
