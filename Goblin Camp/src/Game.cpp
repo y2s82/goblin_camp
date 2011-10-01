@@ -955,8 +955,11 @@ void Game::Update() {
 	// nextWati removed because list<> complained about invalidated iterators -pl
 	for (auto watIt = waterList.begin(); watIt != waterList.end(); ) {
 		if (auto water = watIt->lock()) {
-			if (Random::Generate(49) == 0) water->Update();
-			++watIt;
+			if (Random::Generate(49) == 0 && water->Update()) {
+				watIt = waterList.erase(watIt);
+			} else {
+				++watIt;
+			}
 		} else {
 			watIt = waterList.erase(watIt);
 		}
