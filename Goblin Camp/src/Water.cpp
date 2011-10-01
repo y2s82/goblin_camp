@@ -62,7 +62,9 @@ int WaterNode::Y() {
 void WaterNode::Y(int y) {
 	pos.Y(y);
 }
-void WaterNode::Update() {
+
+//Returns true if this WaterNode should be destroyed
+bool WaterNode::Update() {
 	double divided;
 
 	if (inert) {
@@ -296,9 +298,10 @@ void WaterNode::Update() {
 			else if (type == TILEBOG) soakage = 0;
 			if (Random::Generate(soakage) == 0) {
 				depth = 0;
-				Game::Inst()->RemoveWater(pos); //Water has evaporated
+				return true; //Water has evaporated
 			}
 		}
+		return false;
 	}
 }
 

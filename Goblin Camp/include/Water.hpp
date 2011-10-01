@@ -45,7 +45,7 @@ public:
 	void X(int);
 	void Y(int);
 
-	void Update();
+	bool Update();
 	void MakeInert();
 	void DeInert();
 	int Depth();
