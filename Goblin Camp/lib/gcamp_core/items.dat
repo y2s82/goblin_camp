@@ -592,7 +592,7 @@ item_type "Blueleaf seed" {
 }
 
 item_type "Blueleaf sapling" {
-	category = ["Plant"]
+	category = ["Misc."]
 	graphic = 222
 	color = "127,146,255"
 	growth = "Blueleaf tree"
@@ -601,7 +601,7 @@ item_type "Blueleaf sapling" {
 }
 
 item_type "Blueleaf tree" {
-	category = ["Plant"]
+	category = ["Misc."]
 	graphic = 216
 	color = "0,0,255"
 	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
