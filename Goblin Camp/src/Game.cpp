@@ -1948,6 +1948,14 @@ void Game::Reset() {
 
 	UI::Reset();
 
+	//TODO: ugly
+	instance->itemList.clear(); //Destroy current items, that way ~Construction() won't have items to try and stockpile
+	instance->staticConstructionList.clear();
+	instance->dynamicConstructionList.clear();
+	instance->npcList.clear();
+	instance->natureList.clear(); //Ice decays into ice objects and water, so clear this before items and water
+	instance->itemList.clear(); //Items may create water, so destroy this before water
+
 	delete instance;
 	instance = 0;
 }
