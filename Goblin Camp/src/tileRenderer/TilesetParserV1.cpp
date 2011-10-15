@@ -176,9 +176,9 @@ boost::shared_ptr<TileSet> TileSetParserV1::Run(boost::filesystem::path dataFile
 void TileSetParserV1::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
 	int size = TCOD_list_size(cursors);
 	if (size == 1) {
-		tileSet->SetCursorSprites(type, spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, (intptr_t)TCOD_list_get(cursors, 0)));
+		tileSet->SetCursorSprites(type, spriteFactory->CreateSprite(currentTexture, (intptr_t)TCOD_list_get(cursors, 0)));
 	} else if (size > 1) {
-		tileSet->SetCursorSprites(type, spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, (intptr_t)TCOD_list_get(cursors, 0)), spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, (intptr_t)TCOD_list_get(cursors, 1)));
+		tileSet->SetCursorSprites(type, spriteFactory->CreateSprite(currentTexture, (intptr_t)TCOD_list_get(cursors, 0)), spriteFactory->CreateSprite( currentTexture, (intptr_t)TCOD_list_get(cursors, 1)));
 	}
 }
 
@@ -254,7 +254,7 @@ bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
 	return success;
 }
 
-Sprite_ptr TileSetParserV1::ReadConnectionMap(SpriteLayerType layer, TCOD_list_t tiles) {
+Sprite_ptr TileSetParserV1::ReadConnectionMap(TCOD_list_t tiles) {
 	int size = TCOD_list_size(tiles);
 	if (size == 47 || size == 16) {
 		std::vector<int> orderedTiles;
@@ -264,9 +264,9 @@ Sprite_ptr TileSetParserV1::ReadConnectionMap(SpriteLayerType layer, TCOD_list_t
 			orderedTiles.push_back((intptr_t)TCOD_list_get(tiles, i));
 		for (int i = 16; i < size; ++i)
 			orderedTiles.push_back((intptr_t)TCOD_list_get(tiles, i));
-		return spriteFactory->CreateSprite(layer, currentTexture, orderedTiles, true);
+		return spriteFactory->CreateSprite(currentTexture, orderedTiles, true);
 	} else {
-		return TilesetRenderer::CreateSprite(spriteFactory, layer, currentTexture, (intptr_t*)TCOD_list_begin(tiles), (intptr_t*)TCOD_list_end(tiles), true);
+		return TilesetRenderer::CreateSprite(spriteFactory, currentTexture, (intptr_t*)TCOD_list_begin(tiles), (intptr_t*)TCOD_list_end(tiles), true);
 	}
 }
 
@@ -277,43 +277,43 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 		case SS_NONE:
 			// Terrain
 			if (boost::iequals(name, "unknown_terrain")) {
-				tileSet->SetTerrain(TILENONE, TerrainSprite(spriteFactory->CreateSprite(SPRITELAYER_TerrainBase, currentTexture, value.i)));
+				tileSet->SetTerrain(TILENONE, TerrainSprite(spriteFactory->CreateSprite(currentTexture, value.i)));
 			} else if (boost::iequals(name, "grass_terrain")) {
-				tileSet->SetTerrain(TILEGRASS, TerrainSprite(ReadConnectionMap(SPRITELAYER_TerrainBase, value.list)));
+				tileSet->SetTerrain(TILEGRASS, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "ditch_terrain")) {
-				tileSet->SetTerrain(TILEDITCH, TerrainSprite(ReadConnectionMap(SPRITELAYER_TerrainBase, value.list)));
+				tileSet->SetTerrain(TILEDITCH, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "riverbed_terrain")) {
-				tileSet->SetTerrain(TILERIVERBED, TerrainSprite(ReadConnectionMap(SPRITELAYER_TerrainBase, value.list)));
+				tileSet->SetTerrain(TILERIVERBED, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "bog_terrain")) {
-				tileSet->SetTerrain(TILEBOG, TerrainSprite(ReadConnectionMap(SPRITELAYER_TerrainBase, value.list)));
+				tileSet->SetTerrain(TILEBOG, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "rock_terrain")) {
-				tileSet->SetTerrain(TILEROCK, TerrainSprite(ReadConnectionMap(SPRITELAYER_TerrainBase, value.list)));
+				tileSet->SetTerrain(TILEROCK, TerrainSprite(ReadConnectionMap(value.list)));
 			} else if (boost::iequals(name, "mud_terrain")) {
-				tileSet->SetTerrain(TILEMUD, TerrainSprite(ReadConnectionMap(SPRITELAYER_TerrainBase, value.list)));
+				tileSet->SetTerrain(TILEMUD, TerrainSprite(ReadConnectionMap(value.list)));
 			} 
 			
 			// Terrain Modifiers
 			else if (boost::iequals(name, "water")) {
-				tileSet->SetWaterAndIce(ReadConnectionMap(SPRITELAYER_Water, value.list));
+				tileSet->SetWaterAndIce(ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "minor_filth")) {
-				tileSet->SetFilthMinor(spriteFactory->CreateSprite(SPRITELAYER_Filth, currentTexture, value.i));
+				tileSet->SetFilthMinor(spriteFactory->CreateSprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "major_filth")) {
-				tileSet->SetFilthMajor(ReadConnectionMap(SPRITELAYER_Filth, value.list));
+				tileSet->SetFilthMajor(ReadConnectionMap(value.list));
 			} else if (boost::iequals(name, "marker")) {
-				tileSet->SetMarker(spriteFactory->CreateSprite(SPRITELAYER_TileHighlight, currentTexture, value.i));
+				tileSet->SetMarker(spriteFactory->CreateSprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "blood")) {
-				tileSet->SetBlood(ReadConnectionMap(SPRITELAYER_Blood, value.list));
+				tileSet->SetBlood(ReadConnectionMap(value.list));
 			} 
 			
 			// Overlays
 			else if (boost::iequals(name, "non_territory")) {
-				tileSet->SetNonTerritoryOverlay(spriteFactory->CreateSprite(SPRITELAYER_Territory, currentTexture, value.i));
+				tileSet->SetNonTerritoryOverlay(spriteFactory->CreateSprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "territory")) {
-				tileSet->SetTerritoryOverlay(spriteFactory->CreateSprite(SPRITELAYER_Territory, currentTexture, value.i));
+				tileSet->SetTerritoryOverlay(spriteFactory->CreateSprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "marked")) {
-				tileSet->SetMarkedOverlay(spriteFactory->CreateSprite(SPRITELAYER_Marked, currentTexture, value.i));
+				tileSet->SetMarkedOverlay(spriteFactory->CreateSprite(currentTexture, value.i));
 			} else if (boost::iequals(name, "corruption")) {
-				corruptionOverride = ReadConnectionMap(SPRITELAYER_TerrainOverlay, value.list);
+				corruptionOverride = ReadConnectionMap(value.list);
 			}
 
 			// Cursors
@@ -349,37 +349,37 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			
 			// Status Effects
 			else if (boost::iequals(name, "default_hungry")) {
-				tileSet->SetStatusSprite(HUNGER, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(HUNGER, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_thirsty")) {
-				tileSet->SetStatusSprite(THIRST, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(THIRST, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_panic")) {
-				tileSet->SetStatusSprite(PANIC, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(PANIC, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_concussion")) {
-				tileSet->SetStatusSprite(CONCUSSION, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(CONCUSSION, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_drowsy")) {
-				tileSet->SetStatusSprite(DROWSY, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(DROWSY, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_asleep")) {
-				tileSet->SetStatusSprite(SLEEPING, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(SLEEPING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_poison")) {
-				tileSet->SetStatusSprite(POISON, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(POISON, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_bleeding")) {
-				tileSet->SetStatusSprite(BLEEDING, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(BLEEDING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_sluggish")) {
-				tileSet->SetStatusSprite(BADSLEEP, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(BADSLEEP, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_rage")) {
-				tileSet->SetStatusSprite(RAGE, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(RAGE, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_eating")) {
-				tileSet->SetStatusSprite(EATING, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(EATING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_drinking")) {
-				tileSet->SetStatusSprite(DRINKING, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 1, false));
+				tileSet->SetStatusSprite(DRINKING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
 			} else if (boost::iequals(name, "default_swimming")) {
-				tileSet->SetStatusSprite(SWIM, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 0, true));
+				tileSet->SetStatusSprite(SWIM, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 0, true));
 			} else if (boost::iequals(name, "default_burning")) {
-				tileSet->SetStatusSprite(BURNING, StatusEffectSprite(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, value.i), 0, true));
+				tileSet->SetStatusSprite(BURNING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 0, true));
 			}
 			
 			else if (boost::iequals(name, "default_underconstruction")) {
-				tileSet->SetDefaultUnderConstructionSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, value.i));
+				tileSet->SetDefaultUnderConstructionSprite(spriteFactory->CreateSprite(currentTexture, value.i));
 			}
 
 			else if (boost::iequals(name, "fireFPS")) {
@@ -393,17 +393,17 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			break;
 		case SS_NPC:
 			if (boost::iequals(name, "sprite")) {
-				npcSprite = NPCSprite(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, value.i));
+				npcSprite = NPCSprite(spriteFactory->CreateSprite(currentTexture, value.i));
 			}
 			break;
 		case SS_ITEM:
 			if (boost::iequals(name, "sprite")) {
-				itemSprite.tile = spriteFactory->CreateSprite(SPRITELAYER_Item, currentTexture, value.i);
+				itemSprite.tile = spriteFactory->CreateSprite(currentTexture, value.i);
 			}
 			break;
 		case SS_NATURE:
 			if (boost::iequals(name, "sprite")) {
-				natureObjectSpriteSet.tile = spriteFactory->CreateSprite(SPRITELAYER_Nature, currentTexture, value.i);
+				natureObjectSpriteSet.tile = spriteFactory->CreateSprite(currentTexture, value.i);
 			}
 			break;
 		case SS_CONSTRUCTION:
@@ -416,7 +416,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 					tempConstruction.underConstructionSprites.push_back((intptr_t)TCOD_list_get(value.list, i));
 			} 
 			else if (boost::iequals(name, "openSprite")) {
-				tempConstruction.openDoor = spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, value.i);
+				tempConstruction.openDoor = spriteFactory->CreateSprite(currentTexture, value.i);
 			} else if (boost::iequals(name, "width")) {
 				tempConstruction.width = value.i;
 			}
@@ -479,7 +479,7 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 	}
 	else if (boost::iequals(str->getName(), "tile_texture_data")) {
 		if (fireSprites.size() > 0) {
-			tileSet->SetFireSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Fire, currentTexture, fireSprites.begin(), fireSprites.end(), false, fireFPS));
+			tileSet->SetFireSprite(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, fireSprites.begin(), fireSprites.end(), false, fireFPS));
 		}
 		currentTexture = boost::shared_ptr<TileSetTexture>();
 	} else if (boost::iequals(str->getName(), "creature_sprite_data")) {
@@ -549,9 +549,9 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 					orderedTiles.push_back(mainSprites.at(i));
 				for (size_t i = 16; i < mainSprites.size(); ++i)
 					orderedTiles.push_back(mainSprites.at(i));
-				spriteSet.AddSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Construction, currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
+				spriteSet.AddSprite(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
 			} else {
-				spriteSet.AddSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Construction, currentTexture, mainSprites.begin(), mainSprites.end(), true));
+				spriteSet.AddSprite(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, mainSprites.begin(), mainSprites.end(), true));
 			}
 		}
 		if (underConstructionSprites.size() > 0) {
@@ -563,17 +563,17 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 					orderedTiles.push_back(underConstructionSprites.at(i));
 				for (size_t i = 16; i < underConstructionSprites.size(); ++i)
 					orderedTiles.push_back(underConstructionSprites.at(i));
-				spriteSet.AddUnderConstructionSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Construction, currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
+				spriteSet.AddUnderConstructionSprite(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, orderedTiles.begin(), orderedTiles.end(), true));
 			} else {
-				spriteSet.AddUnderConstructionSprite(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Construction, currentTexture, underConstructionSprites.begin(), underConstructionSprites.end(), true));
+				spriteSet.AddUnderConstructionSprite(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, underConstructionSprites.begin(), underConstructionSprites.end(), true));
 			}
 		}
 	} else {
 		for (std::vector<int>::iterator iter = mainSprites.begin(); iter != mainSprites.end(); ++iter) {
-			spriteSet.AddSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, *iter));
+			spriteSet.AddSprite(spriteFactory->CreateSprite(currentTexture, *iter));
 		}
 		for (std::vector<int>::iterator iter = underConstructionSprites.begin(); iter != underConstructionSprites.end(); ++iter) {
-			spriteSet.AddUnderConstructionSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, *iter));
+			spriteSet.AddUnderConstructionSprite(spriteFactory->CreateSprite(currentTexture, *iter));
 		}
 		spriteSet.SetWidth(width);
 	}
@@ -582,7 +582,7 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 }
 
 SpellSpriteSet TileSetParserV1::TempSpell::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
-	return SpellSpriteSet(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_Spell, currentTexture, sprites.begin(), sprites.end(), false, fps));
+	return SpellSpriteSet(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, sprites.begin(), sprites.end(), false, fps));
 }
 
 

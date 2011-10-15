@@ -47,13 +47,13 @@ ConstructionSprite ConstructionSpriteFactory::Build(boost::shared_ptr<TilesetRen
 	ConstructionSprite spriteSet = ConstructionSprite();
 	if (connectionMapped) {
 		if (spriteIndices.size() > 0) {
-			spriteSet.AddSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, spriteIndices, true, frameRate, frameCount));
+			spriteSet.AddSprite(spriteFactory->CreateSprite(currentTexture, spriteIndices, true, frameRate, frameCount));
 		}
 		if (underConstructionSpriteIndices.size() > 0) {
-			spriteSet.AddUnderConstructionSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, underConstructionSpriteIndices, true));
+			spriteSet.AddUnderConstructionSprite(spriteFactory->CreateSprite(currentTexture, underConstructionSpriteIndices, true));
 		}
 		if (unreadyTrapSpriteIndices.size() > 0) {
-			spriteSet.AddUnreadyTrapSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, unreadyTrapSpriteIndices, true));
+			spriteSet.AddUnreadyTrapSprite(spriteFactory->CreateSprite(currentTexture, unreadyTrapSpriteIndices, true));
 		}
 	} else {
 		int numSprites = spriteIndices.size() / frameCount;
@@ -63,14 +63,14 @@ ConstructionSprite ConstructionSpriteFactory::Build(boost::shared_ptr<TilesetRen
 			for (int frame = 0; frame < frameCount; ++frame) {
 				frames.push_back(spriteIndices.at(sprite + frame * numSprites));
 			}
-			spriteSet.AddSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, frames, false, frameRate));
+			spriteSet.AddSprite(spriteFactory->CreateSprite(currentTexture, frames, false, frameRate));
 		}
 		
 		for (std::vector<int>::iterator iter = underConstructionSpriteIndices.begin(); iter != underConstructionSpriteIndices.end(); ++iter) {
-			spriteSet.AddUnderConstructionSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, *iter));
+			spriteSet.AddUnderConstructionSprite(spriteFactory->CreateSprite(currentTexture, *iter));
 		}
 		for (std::vector<int>::iterator iter = unreadyTrapSpriteIndices.begin(); iter != unreadyTrapSpriteIndices.end(); ++iter) {
-			spriteSet.AddUnreadyTrapSprite(spriteFactory->CreateSprite(SPRITELAYER_Construction, currentTexture, *iter));
+			spriteSet.AddUnreadyTrapSprite(spriteFactory->CreateSprite(currentTexture, *iter));
 		}
 		spriteSet.SetWidth(width);
 	}
@@ -127,11 +127,11 @@ NPCSprite NPCSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFacto
 		if (frames.size() == (weaponTypes.size() + 1) * (armourTypes.size() + 1)) {
 			std::vector<Sprite_ptr> sprites;
 			for (std::vector<int>::iterator iter = frames.begin(); iter != frames.end(); ++iter)
-				sprites.push_back(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, *iter));
+				sprites.push_back(spriteFactory->CreateSprite(currentTexture, *iter));
 
 			return NPCSprite(sprites, weaponTypes, armourTypes);
 		} else if (frames.size() > 0) {
-			return NPCSprite(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, frames[0]));
+			return NPCSprite(spriteFactory->CreateSprite(currentTexture, frames[0]));
 		} else {
 			return NPCSprite();
 		}
@@ -139,20 +139,20 @@ NPCSprite NPCSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFacto
 		if (frames.size() == armourTypes.size() + 1 && weaponOverlayIndices.size() == weaponTypes.size()) {
 			std::vector<Sprite_ptr> sprites;
 			for (std::vector<int>::iterator iter = frames.begin(); iter != frames.end(); ++iter)
-				sprites.push_back(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, *iter));
+				sprites.push_back(spriteFactory->CreateSprite(currentTexture, *iter));
 
 			std::vector<Sprite_ptr> weaponOverlays;
 			for (std::vector<int>::iterator iter = weaponOverlayIndices.begin(); iter != weaponOverlayIndices.end(); ++iter)
-				weaponOverlays.push_back(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, *iter));
+				weaponOverlays.push_back(spriteFactory->CreateSprite(currentTexture, *iter));
 
 			return NPCSprite(sprites, weaponOverlays, weaponTypes, armourTypes);
 		} else if (frames.size() > 0) {
-			return NPCSprite(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, frames[0]));
+			return NPCSprite(spriteFactory->CreateSprite(currentTexture, frames[0]));
 		} else {
 			return NPCSprite();
 		}
 	} else {
-		return NPCSprite(spriteFactory->CreateSprite(SPRITELAYER_NPC, currentTexture, frames, false, frameRate));
+		return NPCSprite(spriteFactory->CreateSprite(currentTexture, frames, false, frameRate));
 	}
 }
 
@@ -201,7 +201,7 @@ void StatusEffectSpriteFactory::Reset() {
 }
 
 StatusEffectSprite StatusEffectSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
-	StatusEffectSprite result(spriteFactory->CreateSprite(SPRITELAYER_StatusEffect, currentTexture, frames, false, fps), flashRate, alwaysOn);
+	StatusEffectSprite result(spriteFactory->CreateSprite(currentTexture, frames, false, fps), flashRate, alwaysOn);
 	Reset();
 	return result;
 }
@@ -251,20 +251,20 @@ TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spr
 	if (wang) {
 		int indicesPerSprite = spriteIndices.size() / (heightSplits.size() + 1);
 		for (int i = 0; i < static_cast<int>(heightSplits.size()) + 1; ++i) {
-			sprites.push_back(TilesetRenderer::CreateSprite(spriteFactory, SPRITELAYER_TerrainBase, currentTexture, spriteIndices.begin() + i * indicesPerSprite, spriteIndices.begin() + (i + 1) * indicesPerSprite, true));
+			sprites.push_back(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, spriteIndices.begin() + i * indicesPerSprite, spriteIndices.begin() + (i + 1) * indicesPerSprite, true));
 		}
 	} else {
 		for (std::vector<int>::iterator iter = spriteIndices.begin(); iter != spriteIndices.end(); ++iter) {
-			sprites.push_back(spriteFactory->CreateSprite(SPRITELAYER_TerrainBase, currentTexture, *iter));
+			sprites.push_back(spriteFactory->CreateSprite(currentTexture, *iter));
 		}
 	}
 	
 	std::vector<Sprite_ptr> snowSprites;
 	if (snowWang) {
-		snowSprites.push_back(spriteFactory->CreateSprite(SPRITELAYER_TerrainSnow, currentTexture, snowSpriteIndices, true));
+		snowSprites.push_back(spriteFactory->CreateSprite(currentTexture, snowSpriteIndices, true));
 	} else {
 		for (std::vector<int>::iterator iter = snowSpriteIndices.begin(); iter != snowSpriteIndices.end(); ++iter) {
-			snowSprites.push_back(spriteFactory->CreateSprite(SPRITELAYER_TerrainSnow, currentTexture, *iter));
+			snowSprites.push_back(spriteFactory->CreateSprite(currentTexture, *iter));
 		}
 	}
 
@@ -278,7 +278,7 @@ TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spr
 		} else if (edgeIndices.size() == 18) {
 			edgeIndices.insert(edgeIndices.begin() + 4, currentTexture->Count());
 		}
-		edgeSprite = spriteFactory->CreateSprite(SPRITELAYER_TerrainEdge, currentTexture, edgeIndices, true);
+		edgeSprite = spriteFactory->CreateSprite(currentTexture, edgeIndices, true);
 	}
 	
 	// Add extra sprite to snowSprite to complete connection map
@@ -293,7 +293,7 @@ TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spr
 				snowEdgeIndices.insert(snowEdgeIndices.begin() + 4, snowSpriteIndices.at(0));
 			}
 		} 
-		snowEdgeSprite = spriteFactory->CreateSprite(SPRITELAYER_TerrainSnow, currentTexture, snowEdgeIndices, true);
+		snowEdgeSprite = spriteFactory->CreateSprite(currentTexture, snowEdgeIndices, true);
 	}
 	return TerrainSprite(sprites, snowSprites, heightSplits, edgeSprite, snowEdgeSprite, details, burntDetails, snowedDetails, corruptedDetails, detailsChance, corruption, corruptionOverlay, burntOverlay);
 }

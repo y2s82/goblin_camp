@@ -29,6 +29,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Random.hpp"
 #include "Announce.hpp"
 
+#include <boost/serialization/vector.hpp>
+
 std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<boost::shared_ptr<Faction> > Faction::factions = std::vector<boost::shared_ptr<Faction> >();
 
