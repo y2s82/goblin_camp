@@ -21,31 +21,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSet.hpp"
 #include "tileRenderer/PermutationTable.hpp"
 
-enum SpriteLayerType
-{
-	SPRITELAYER_TerrainBase,
-	SPRITELAYER_TerrainEdge,
-	SPRITELAYER_TerrainSnow,
-	SPRITELAYER_TerrainOverlay,
-	SPRITELAYER_TerrainDetail,
-	SPRITELAYER_Water,
-	SPRITELAYER_Ice,
-	SPRITELAYER_Filth,
-	SPRITELAYER_Blood,
-	SPRITELAYER_Construction, 
-	SPRITELAYER_Marked,
-	SPRITELAYER_Nature,
-	SPRITELAYER_NPC,
-	SPRITELAYER_Item,
-	SPRITELAYER_Fire,
-	SPRITELAYER_Spell,
-	SPRITELAYER_CorruptionOverlay,
-	SPRITELAYER_Territory,
-	SPRITELAYER_StatusEffect,
-	SPRITELAYER_TileHighlight,
-	NUM_SPRITELAYERS
-};
-
 class TilesetRenderer : public MapRenderer
 {
 	friend class DrawConstructionVisitor;
@@ -53,9 +28,9 @@ public:
 	explicit TilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole = 0);
 	virtual ~TilesetRenderer() = 0;
 
-	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) = 0;
-	virtual Sprite_ptr CreateSprite(SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1) = 0;
-	template <typename IterT> static Sprite_ptr CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
+	virtual Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) = 0;
+	virtual Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1) = 0;
+	template <typename IterT> static Sprite_ptr CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
 
 	bool SetTileset(boost::shared_ptr<TileSet> tileSet);
 
@@ -116,9 +91,9 @@ private:
 	TCODColor keyColor;
 };
 
-template <typename IterT> Sprite_ptr TilesetRenderer::CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, SpriteLayerType spriteLayer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frameCount) {
+template <typename IterT> Sprite_ptr TilesetRenderer::CreateSprite(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frameCount) {
 	std::vector<int> tiles(start, end);
-	return spriteFactory->CreateSprite(spriteLayer, tilesetTexture, tiles, connectionMap, frameRate, frameCount);
+	return spriteFactory->CreateSprite(tilesetTexture, tiles, connectionMap, frameRate, frameCount);
 }
 
 boost::shared_ptr<TilesetRenderer> CreateTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName);
