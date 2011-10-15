@@ -114,13 +114,17 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
 		InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
 		//TODO: Make this consistent
-    for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
-      if (!itemi->second) {
-        Game::Inst()->itemList.erase(itemi);
-      } else if (!itemi->second->ContainedIn().lock()) {
-        itemi->second->Draw(upleft, &minimap);
-      }
-    }
+		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end();) {
+			if (!itemi->second) {
+				std::map<int,boost::shared_ptr<Item> >::iterator tmp = itemi;
+				++itemi;
+				Game::Inst()->itemList.erase(tmp);
+				continue;
+			} else if (!itemi->second->ContainedIn().lock()) {
+				itemi->second->Draw(upleft, &minimap);
+			}
+			++itemi;
+		}
 	}
 
 	for (Map::MarkerIterator markeri = map->MarkerBegin(); markeri != map->MarkerEnd(); ++markeri) {
