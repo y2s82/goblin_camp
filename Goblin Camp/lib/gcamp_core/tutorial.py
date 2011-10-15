@@ -22,7 +22,7 @@ import gcamp.events
 class Tutorial (gcamp.events.EventListener):
 	def __init__(self):
 		self.stage = -1
-		self.stockpiles = 0
+		self.piles = 0
 		self.planks = 0
 	
 	def onGameStart(self):
@@ -36,36 +36,30 @@ class Tutorial (gcamp.events.EventListener):
 				gcamp.config.setCVar("tutorial", '0')
 				gcamp.ui.messageBox(
 						"Welcome to the Goblin Camp tutorial!              "
-						"You're best off by first building 3 stockpiles:   "
+						"You're best off by first building a pile:         "
 						"                                                  "
 						"        -Right-click to open the menu             "
-						"        -choose Build->Basics->Stockpile          "
+						"        -choose Build->Basics->Pile               "
 						"                                                  "
-						"Then just either click once for each corner of    "
-						"the area, or click and drag the area.             ")
+						"Then just choose a suitable spot for it and click.")
 			gcamp.delay(100, startMessage)
 
 	def onBuildingCreated(self, construct, x, y):
-		if self.stage == 0 and construct.getTypeString().lower() == "stockpile":
-			self.stockpiles = self.stockpiles + 1
-		if self.stage == 0 and self.stockpiles >= 3:
-			def stockpileMessage1():
+		if self.stage == 0 and construct.getTypeString().lower() == "pile":
+			self.piles = self.piles + 1
+		if self.stage == 0 and self.piles >= 1:
+			def pileMessage1():
 				gcamp.ui.messageBox(
-				"Good work! Now you need to set the proper         "
-				"allowances for each stockpile. Left-click on each "
-				"one and allow Wood in one, Food and Seeds in      "
-				"another and Tools in the third. Your goblins      "
-				"should get to work storing all the items.         "
-				"                                                  "
-				"Remember to build new stockpiles and/or change    "
-				"the allowances as you start producing different   "
-				"items.                                            ")
-				gcamp.ui.announce("Stockpile allowances: 1. Wood,  2. Food + Seed,  3. Tool")
-				gcamp.ui.announce("Remember to build more stockpiles / allow other things as needed!")
+				"Good work! Your goblins will store everything in  "
+				"the pile, and it will automatically grow as stuff "
+				"is stored in it. It is a good idea to build  more "
+				"piles, as moving through a pile is difficult and  "
+				"a large pile will really slow things down.        ")
+				gcamp.ui.announce("Remember to build more piles as needed!")
 				
-			gcamp.delay(125, stockpileMessage1)
+			gcamp.delay(125, pileMessage1)
 
-			def stockpileMessage2():
+			def pileMessage2():
 				gcamp.ui.messageBox( 
 						"Next you should do two things:                    "
 						"                                                  "
@@ -86,7 +80,7 @@ class Tutorial (gcamp.events.EventListener):
 						"part of an items name or category, allowing you   "
 						"to quickly find what you need.                    ")
 				gcamp.ui.announce("Designate trees and increase the wood log minimum")
-			gcamp.delay(1000, stockpileMessage2)
+			gcamp.delay(1000, pileMessage2)
 			self.stage = 10
 			
 		elif self.stage == 20 and construct.getTypeString().lower() == "saw pit":
@@ -152,8 +146,9 @@ class Tutorial (gcamp.events.EventListener):
 							"advance through tiers and gain access to more     "
 							"advanced buildings.                               "
 							"                                                  "
-							"Also don't forget about defenses. Build a         "
-							"palisade, traps, and  establish some guard squads!"))
+							"Also don't forget about defenses. Dig some        "
+							"ramparts, build traps, and establish some guard   "
+							"squads!                                           "))
 
 				self.stage = 40
 
