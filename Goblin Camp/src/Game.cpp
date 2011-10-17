@@ -1931,8 +1931,13 @@ void Game::Reset() {
 	instance->npcList.clear();
 	instance->natureList.clear(); //Ice decays into ice objects and water, so clear this before items and water
 	instance->itemList.clear(); //Destroy current items, that way ~Construction() won't have items to try and stockpile
-	instance->staticConstructionList.clear();
-	instance->dynamicConstructionList.clear();
+	
+	while (!instance->staticConstructionList.empty()) {
+		instance->staticConstructionList.erase(instance->staticConstructionList.begin());
+	}
+	while (!instance->dynamicConstructionList.empty()) {
+		instance->dynamicConstructionList.erase(instance->dynamicConstructionList.begin());
+	}
 
 	Map::Reset();
 	JobManager::Reset();
