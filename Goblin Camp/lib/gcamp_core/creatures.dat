@@ -206,8 +206,8 @@ npc_type "killer bee" {
 	}
 	attack "Sting" {
 		type="piercing"
-		damage="1d5"
-		cooldown=15
+		damage="1d4"
+		cooldown=20
 		statusEffects=["poison"]
 		effectChances=[   10   ]
 	}
