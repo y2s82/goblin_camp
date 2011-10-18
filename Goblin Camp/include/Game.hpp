@@ -227,7 +227,7 @@ public:
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
 	void CreateWaterFromNode(boost::shared_ptr<WaterNode>);
-	void RemoveWater(Coordinate);
+	void RemoveWater(Coordinate, bool removeFromList = true);
 	Coordinate FindWater(Coordinate);
 	Coordinate FindFilth(Coordinate);
 	static bool CheckTree(Coordinate, Coordinate);
