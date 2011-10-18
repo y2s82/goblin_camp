@@ -956,6 +956,7 @@ void Game::Update() {
 	for (auto watIt = waterList.begin(); watIt != waterList.end(); ) {
 		if (auto water = watIt->lock()) {
 			if (Random::Generate(49) == 0 && water->Update()) {
+				RemoveWater(water->Position(), false);
 				watIt = waterList.erase(watIt);
 			} else {
 				++watIt;
@@ -2180,13 +2181,15 @@ void Game::RemoveFilth(Coordinate pos) {
 	}
 }
 
-void Game::RemoveWater(Coordinate pos) {
+void Game::RemoveWater(Coordinate pos, bool removeFromList) {
 	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water) {
-		for (std::list<boost::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
-			if (wateri->lock() == water) {
-				waterList.erase(wateri);
-				break;
+		if (removeFromList) {
+			for (std::list<boost::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
+				if (wateri->lock() == water) {
+					waterList.erase(wateri);
+					break;
+				}
 			}
 		}
 		int filth = water->GetFilth();
