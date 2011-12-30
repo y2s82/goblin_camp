@@ -9,6 +9,31 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.2 --
+
+Version 0.2 comes with a pretty major change to stockpiles. They are now called piles, and instead
+of having any categories that are (dis)allowed everything gets stored in them. Moving through them is
+slow, so it's a good idea to make more than one of them. Containers will get moved from pile to pile
+depending on where they are needed the most, so all you need to do is create the containers and they'll
+be automatically used.
+
+Also introduced in this version is diseases, which will act as a natural limit to the size of your
+settlement unless you do something to counteract the diseases.
+
+*Piles
+*Diseases
+*Migratory animals
+*The spawning pool now expands and spreads corruption in a smooth way instead of just erupting with corruption
+*Cowardly creatures may panic if they come in contact with another panicking creature
+*Death messages
+*Constructions under the mouse cursor strobe to make it easier to figure out where everything is
+*Portable mode. Just create a file called 'goblin-camp.portable' in the directory where you have
+Goblin Camp in and it'll store everything it needs in that directory instead of using your operating
+system's defaults.
+*Skeletons no longer bleed
+
+
+
 -- Version 0.15 --
 
 v0.15 has a slew of new features, among them seasonal changes (ice!), battlements, new invader ai, 
@@ -244,23 +269,23 @@ http://www.goblincamp.com/forum/
 
 -- How to Play --
 
-A good way to start is to place a stockpile by choosing it from the menu 
-Constructions -> Basics -> Stockpile. Then left-click the stockpile to open it 
-in the sidebar, and shift-click on Wood to allow all wood items in the 
-stockpile. Allow the food category as well so that the bread you started out 
-with gets stored. If you plan on making crates for planks, allow those too.
+A good way to start is to create a pile by choosing it from the menu 
+Constructions -> Basics -> Pile. Goblins will gather up all the items lying
+around and store them in the pile.
 
 Next designate trees for cutting by choosing Orders -> Designate trees, you can
 pretty much drag the selection over as big an area as you feel like. The trees 
 will only be cut down as needed. Open up the Stock Manager and raise the wood 
 log minimum, maybe to 50 or so.
 
-Now that the trees are being cut down, either allow the plant category in the 
-same stockpile, or make a separate one.
+Now that the trees are being cut down, it might be a good idea to create another
+pile, as only have one will be really inefficient in the long run. Fetching items
+from the middle of a pile is slow.
+
 Designate a farm plot, and allow whichever seed types you want there. 
 Once spring begins, your goblins should plant all the seeds they have in the 
-fields, as long as they are in a stockpile to begin with. For items to be usable
-they must be stored in a stockpile.
+fields, as long as they are in a pile to begin with. For items to be usable
+they must be stored in a pile.
 
 You'll need planks for various things, so now you should build a saw pit. 
 You can then raise the minimums for planks. You'll need a carpenter's workshop
