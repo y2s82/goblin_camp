@@ -91,18 +91,18 @@ public:
 };
 
 
-StockManagerDialog::StockManagerDialog(): Dialog(0, "Stock Manager", 68, 80), filter("")
+StockManagerDialog::StockManagerDialog(): Dialog(0, "Stock Manager", 68, 75), filter("")
 {
-	contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 68, 80);
+	contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 68, 75);
 
 	static_cast<UIContainer*>(contents)->AddComponent(new Label("Filter", 34, 1));
 	static_cast<UIContainer*>(contents)->AddComponent(new TextBox(1, 2, 66, &filter));
 
-	Grid *grid = new Grid(std::vector<Drawable *>(), 4, 0, 0, 68, 76);
+	Grid *grid = new Grid(std::vector<Drawable *>(), 4, 0, 0, 68, 71);
 	for (std::set<ItemType>::iterator it = StockManager::Inst()->Producables()->begin(); it != StockManager::Inst()->Producables()->end(); it++) {
 		grid->AddComponent(new StockPanel(*it, this));
 	}
-	static_cast<UIContainer*>(contents)->AddComponent(new ScrollPanel(0, 3, 68, 77, grid, false, 4));
+	static_cast<UIContainer*>(contents)->AddComponent(new ScrollPanel(0, 3, 68, 72, grid, false, 4));
 }
 
 Dialog* StockManagerDialog::StocksDialog() {
