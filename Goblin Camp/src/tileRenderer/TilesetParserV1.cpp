@@ -242,6 +242,7 @@ bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
 			if (boost::iequals(name, "connection_map")) {
 				tempConstruction.connectionMapped = true;
 			}
+			break;
 		case SS_NONE:
 		case SS_NPC:
 		case SS_ITEM:
@@ -249,6 +250,7 @@ bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
 		case SS_SPELL:
 			parser->error("unsupported flag '%s'", name);
 			success = false;
+			break;
 		}
 	}
 	return success;
