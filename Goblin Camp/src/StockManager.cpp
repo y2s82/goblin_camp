@@ -161,6 +161,8 @@ void StockManager::Update() {
 									std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> >(fellJob, *treei));
 								treei = designatedTrees.erase(treei);
 							}
+						// Fix MSVC iterator end overflow
+						if ( treei == designatedTrees.end() ) break; // Break out of for loop
 					}
 				} else if (fromEarth.find(type) != fromEarth.end()) {
 					difference -= bogIronJobs.size();

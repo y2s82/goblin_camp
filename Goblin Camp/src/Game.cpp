@@ -1529,6 +1529,8 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 					//TODO: Implement proper map marker system and change this to use that
 					natObj.lock()->Unmark();
 					StockManager::Inst()->UpdateTreeDesignations(natObj, false);
+					// Might be designated as "Fell Trees" with jobs pending.
+					JobManager::Inst()->RemoveJob(FELL, p);
 				}
 			}
 			if (Map::Inst()->GetType(p) == TILEBOG) {
