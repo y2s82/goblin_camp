@@ -1532,7 +1532,13 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 					// Might be designated as "Fell Trees" with jobs pending.
 					JobManager::Inst()->RemoveJob(FELL, p);
 				}
+				// Need to be able to undesignate harvesting wild plants too.
+				if (natObj.lock() && natObj.lock()->Harvestable() && natObj.lock()->Marked()) {
+					natObj.lock()->Unmark();
+					JobManager::Inst()->RemoveJob(HARVESTWILDPLANT, p);
+				}
 			}
+
 			if (Map::Inst()->GetType(p) == TILEBOG) {
 				StockManager::Inst()->UpdateBogDesignations(p, false);
 				Map::Inst()->Unmark(p);
