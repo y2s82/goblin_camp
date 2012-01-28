@@ -62,10 +62,12 @@ void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
 		&& !memberFound;) {
 		if (membi->lock()) {
 			if (member.lock() && member.lock() == membi->lock()) {
-				members.erase(membi);
+				// Saving the iterator from doom
+				membi = members.erase(membi);
 				memberFound = true;
 			}
-			++membi;
+			// Careful with iterator
+			if ( !members.empty() && membi != members.end() ) ++membi;
 		} else membi = members.erase(membi);
 	}
 	if (active && members.empty()) active = false;

@@ -98,8 +98,9 @@ void Entity::CalculateFlightPath(Coordinate target, int speed, int initialHeight
 			begIt->height = h;
 			endIt->height = std::max(initialHeight, h);
 			h += hAdd;
-			++begIt;
-			--endIt;
+			// Preventing iterator problems
+			if (begIt != flightPath.end()) ++begIt;
+			if (endIt != flightPath.begin()) --endIt;
 			if (begIt == flightPath.end() || endIt == flightPath.end()) break;
 		}
 		flightPath.pop_back(); //Last coordinate is the entity's coordinate
