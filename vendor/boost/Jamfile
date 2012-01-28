@@ -1,0 +1,55 @@
+###############################################################################
+##### Boost project
+###############################################################################
+
+import path ;
+import os ;
+
+path-constant HERE : . ;
+
+###############################################################################
+##### Project and targets
+## We're linking Boost statically, except for Boost.Python on NT.
+## Boost.Thread is linked with WinAPI thread support for Windows, and
+## pthreads for other OSes.
+###############################################################################
+
+common-reqs =
+    <define>BOOST_FILESYSTEM_VERSION=3
+    <define>BOOST_ALL_NO_LIB
+    <include>$(HERE)
+;
+
+project boost
+    : requirements
+      <link>static
+      <define>DATE_TIME_INLINE
+      <define>BOOST_PYTHON_SOURCE
+      <define>BOOST_THREAD_BUILD_LIB=1
+      <warnings>off
+      $(common-reqs)
+    : usage-requirements
+      <os>NT:<define>BOOST_PYTHON_DYN_LINK
+      <define>BOOST_THREAD_USE_LIB=1
+      <define>BOOST_SYSTEM_NO_DEPRECATED=1
+      $(common-reqs)
+;
+
+python-sources = [ path.glob-tree $(HERE)/libs/python : *.cpp ] ;
+thread-sources = [ glob $(HERE)/libs/thread/*.cpp ] ;
+
+if [ os.name ] = NT {
+    lib gc-boost-python : $(python-sources) /python : <link>shared ;
+    thread-sources += [ glob $(HERE)/libs/thread/win32/*.cpp ] ;
+} else {
+    lib gc-boost-python : $(python-sources) : <use>/python ;
+    thread-sources += [ glob $(HERE)/libs/thread/pthread/*.cpp ] ;
+}
+
+for local L in date_time filesystem random serialization system {
+    lib $(L) : [ glob $(HERE)/libs/$(L)/*.cpp ] ;
+}
+
+lib iostreams : [ glob $(HERE)/libs/iostreams/*.cpp ] : <use>/zlib ;
+
+lib thread : $(thread-sources) ;

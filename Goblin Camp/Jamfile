@@ -1,0 +1,173 @@
+###############################################################################
+##### Goblin Camp main project
+## This file contains definition and main targets of the Goblin Camp project.
+###############################################################################
+
+import path ;
+import os ;
+import property-set ;
+import project ;
+
+###############################################################################
+##### Rules and constants
+## get-dist-base and get-dist-gccore rules are used to determine where
+## files should be placed after the build. Note that get-dist-gccore depends
+## on get-dist-data, which is platform-specific (see below). HERE is a path
+## constant that's always pointing to the directory containing this Jamfile.
+###############################################################################
+
+local rule get-dist-base ( properties * ) {
+    local dir     = $(GC_ROOT)/build ;
+    local propset = [ property-set.create $(properties) ] ;
+    local variant = [ $(propset).get <variant> ] ;
+    local arch    = x86 ;
+    
+    if <address-model>64 in $(properties) {
+        arch = x64 ;
+    }
+    
+    dir = $(dir)/bin-$(variant)-$(arch) ;
+    
+    return <location>$(dir) ;
+}
+
+rule get-dist-gccore ( properties * ) {
+    dir = [ get-dist-data $(properties) ] ;
+    return $(dir)/lib/gcamp_core ;
+}
+
+path-constant HERE : . ;
+
+###############################################################################
+##### Project
+## This sets requirements common to all targets in this project.
+###############################################################################
+
+project "Goblin Camp"
+    : requirements
+      <include>$(HERE)
+      <include>$(HERE)/include
+;
+
+###############################################################################
+##### Platform specifics
+## Jamfile.$(PLATFORM) resolves to Jamfile.NT, Jamfile.LINUX or Jamfile.MACOSX
+## depending on which platform we're running. Note that cross-compiling
+## is not really supported. Platform Jamfile is supposed to define at least:
+##   - platform-deps target that pulls all sources and libraries required
+##     by that platform
+##   - get-dist-bin and get-dist-data rules that should call get-dist-base
+##     and modify it to suit platform requirements as to where binaries
+##     and data files should be located
+## Platform Jamfiles are also free to define additional targets to
+## copy/compile required files.
+###############################################################################
+
+version = $(HERE)/src/Version.cpp_in ;
+
+PLATFORM = [ os.name ] ;
+include $(HERE)/Jamfile.$(PLATFORM) ;
+
+###############################################################################
+##### Versioning support
+## To determine full current version up to two things are used:
+##   - GC_VERSION constant, defined in Jamroot
+##   - `hg id` of the working directory
+## Mercurial ID is never included in release builds, unless --with-revid is
+## passed as command-line argument to bjam (this is used in weekly builds).
+## Using --with-revid (or building debug variant) will mark the executable
+## as VS_FF_PRERELEASE and VS_FF_PRIVATEBUILD on Windows (and with debug
+## additionally as VS_FF_DEBUG).
+##
+## Note that version targets are always rebuilt, which means goblin-camp.exe
+## is always relinked, which may take time with release builds, due to LTCG.
+###############################################################################
+
+version-reqs = ;
+if --with-revid in [ modules.peek : ARGV ] {
+    version-reqs = <define>WITH_REVID ;
+}
+
+make mod.dat
+    : $(HERE)/lib/gcamp_core/mod.dat_in
+    : @gc-version.generate
+    : $(version-reqs)
+;
+
+make VERSION.txt
+    : $(HERE)/VERSION.txt_in
+    : @gc-version.generate
+;
+
+alias version
+    : $(version) mod.dat VERSION.txt
+    :
+    :
+    : $(version-reqs)
+;
+
+always version ;
+
+###############################################################################
+##### common-deps
+## This alias pulls all our required dependencies, all other targets probably
+## should depend on it.
+###############################################################################
+
+alias common-deps : /boost /sdl /libpng /zlib /libtcod /python /opengl ;
+
+###############################################################################
+##### stdafx.hpp
+## Precompiled header target.
+###############################################################################
+
+if --skip-pch in [ modules.peek : ARGV ] {
+    alias stdafx.hpp : common-deps : : <define>GC_SKIP_PCH ;
+} else {
+    cpp-pch stdafx.hpp
+        : $(HERE)/include/stdafx.hpp
+          common-deps
+    ;
+}
+
+###############################################################################
+##### goblin-camp
+## Main game executable.
+###############################################################################
+
+exe goblin-camp
+    : [ path.glob-tree $(HERE)/src : *.cpp : platform ]
+      stdafx.hpp
+      common-deps
+      platform-deps
+      version
+      /python-modules
+    : $(additional-reqs:E=)
+;
+
+###############################################################################
+##### install targets
+###############################################################################
+
+install dist-bin
+    : goblin-camp
+    : <install-dependencies>on <install-type>SHARED_LIB <toolset>msvc:<install-type>PDB <install-type>EXE
+      <conditional>@get-dist-bin
+;
+
+install dist-data
+    : [ path.glob $(HERE) : *.txt *.png ]
+      [ path.glob-tree $(HERE)/lib : *.py *.zip *.dat *.png ]
+    : <conditional>@get-dist-data
+      <install-source-root>$(HERE)
+;
+
+install dist-version
+    : VERSION.txt
+    : <conditional>@get-dist-data
+;
+
+install dist-mod
+    : mod.dat
+    : <conditional>@get-dist-gccore
+;

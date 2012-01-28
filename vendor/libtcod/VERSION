@@ -1,0 +1,19 @@
+Path: .
+URL: http://doryen.eptalys.net/svn-libtcod/trunk
+Repository Root: http://doryen.eptalys.net/svn-libtcod
+Repository UUID: bcd56eb9-48f1-4f39-aea9-fe547a4d2130
+Revision: 522
+Node Kind: directory
+Schedule: normal
+Last Changed Author: mingos
+Last Changed Rev: 522
+Last Changed Date: 2010-12-18 18:03:03 +0100 (So, 18 gru 2010)
+
+-----------------------------
+This is a modified version of above revision. Most notable changes include:
+	- sys_sfml_c and GUI part removed completely
+	- parser modified to make it compatible with our data files again (new keywords struct, color, etc. have been suffixed with _t to avoid collisions)
+	- removed most of the sys functions, thread functions, and DLL init code
+	- forced static linkage
+	- renamed TCOD_dice_t::nb_rolls back to nb_dices
+        - custom rendering modified to render to a buffer and then provide both the buffer and screen to the custom renderer (kind of brittle at the moment, will need to be cleaned up at some point)

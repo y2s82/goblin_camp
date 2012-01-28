@@ -1,0 +1,26 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("%SOLUTION_UUID%") = "goblin-camp", "goblin-camp.vcxproj", "%PROJECT_UUID%"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+		Debug|x64 = Debug|x64
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		%PROJECT_UUID%.Debug|Win32.ActiveCfg = Debug|Win32
+		%PROJECT_UUID%.Debug|Win32.Build.0 = Debug|Win32
+		%PROJECT_UUID%.Release|Win32.ActiveCfg = Release|Win32
+		%PROJECT_UUID%.Release|Win32.Build.0 = Release|Win32
+		%PROJECT_UUID%.Debug|x64.ActiveCfg = Debug|x64
+		%PROJECT_UUID%.Debug|x64.Build.0 = Debug|x64
+		%PROJECT_UUID%.Release|x64.ActiveCfg = Release|x64
+		%PROJECT_UUID%.Release|x64.Build.0 = Release|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

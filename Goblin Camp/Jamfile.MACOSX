@@ -1,0 +1,61 @@
+###############################################################################
+##### Goblin Camp project: OSX-specific Jamfile
+###############################################################################
+
+###############################################################################
+##### Platform dependencies
+## On OSX, we link to CoreFoundation framework, and use the same main.cpp as
+## on Linux.
+###############################################################################
+
+alias platform-deps
+    : [ path.glob-tree $(HERE)/src/platform/osx  : *.cpp ]
+      [ path.glob-tree $(HERE)/src/platform/unix : *.cpp ]
+    :
+    :
+    : <framework>CoreFoundation <framework>Carbon <framework>AppKit
+;
+
+###############################################################################
+##### Dist rules
+## On OSX, dist is creating a bundle directory structure, and copy two
+## additional files: GoblinCamp.icns and Info.plist.
+## This is based purely on the documentation provided by Apple:
+## http://developer.apple.com/library/mac/documentation/CoreFoundation/Conceptual/CFBundles/BundleTypes/BundleTypes.html#//apple_ref/doc/uid/10000123i-CH101-SW19
+## — any developers with OSX experience are welcome to correct any mistakes.
+##
+## bin-<variant>-<arch>
+##   - Goblin Camp.app
+##      - Contents
+##         - Info.plist
+##         - MacOS
+##            - goblin-camp
+##         - Resources
+##            - GoblinCamp.icns
+##            - <data files>
+###############################################################################
+
+rule get-dist-osx-base ( properties * ) {
+    local dir = [ get-dist-base $(properties) ] ;
+    return "$(dir)/Goblin Camp.app/Contents" ;
+}
+
+rule get-dist-bin ( properties * ) {
+    local dir = [ get-dist-osx-base $(properties) ] ;
+    return $(dir)/MacOS ;
+}
+
+rule get-dist-data ( properties * ) {
+    local dir = [ get-dist-osx-base $(properties) ] ;
+    return $(dir)/Resources ;
+}
+
+install dist-osx-plist
+    : $(HERE)/src/platform/osx/Info.plist
+    : <conditional>@get-dist-osx-base
+;
+
+install dist-osx-icns
+    : $(HERE)/src/platform/osx/GoblinCamp.icns
+    : <conditional>@get-dist-data
+;
