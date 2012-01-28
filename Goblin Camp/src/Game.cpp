@@ -1836,11 +1836,17 @@ void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
 }
 
 int Game::FindMilitaryRecruit() {
+	// Holder for orc with most/full health
+	boost::shared_ptr<NPC> strongest;
 	for (std::map<int, boost::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
-		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == PLAYERFACTION && !npci->second->squad.lock()) {
-			return npci->second->uid;
+		if (npci->second->type == NPC::StringToNPCType("orc") && npci->second->faction == PLAYERFACTION ) {
+			// Find the orc with the most/full health to prevent near-dead orcs from getting put in the squad
+			if (!npci->second->squad.lock() && ( !strongest || npci->second->health > strongest->health )) {
+				strongest = (*npci).second;
+			}
 		}
 	}
+	if(strongest) return strongest->uid;
 	return -1;
 }
 
