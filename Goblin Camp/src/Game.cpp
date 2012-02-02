@@ -890,6 +890,7 @@ void Game::Update() {
 	++time;
 
 	if (time >= MONTH_LENGTH) {
+	  time -= MONTH_LENGTH; // Decrement time now to avoid autosaving issues.
 		Stats::Inst()->AddPoints(10U);
 
 		if (safeMonths > 0) --safeMonths;
@@ -944,7 +945,6 @@ void Game::Update() {
 
 		default: break;
 		}
-		time -= MONTH_LENGTH;
 	}
 
 	//This actually only updates every 50th waternode. This is due to 2 things: updating one water tile actually also
