@@ -183,6 +183,7 @@ public:
 	void Badsleepify(Coordinate);
 	void Diseasify(Coordinate);
 	boost::shared_ptr<NPC> GetNPC(int) const;
+	void ProvideMapToNPCs();
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());

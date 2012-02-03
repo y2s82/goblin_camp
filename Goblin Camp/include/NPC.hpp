@@ -207,6 +207,8 @@ class NPC : public Entity {
 	std::string GetDeathMsgThirst();
 	std::string GetDeathMsgHunger();
 
+	Map* map;
+
 public:
 	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
 
@@ -234,7 +236,7 @@ public:
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
-		bool IsPathWalkable();
+	bool IsPathWalkable();
 	void StartJob(boost::shared_ptr<Job>);
 	void AddEffect(StatusEffectType);
 	void AddEffect(StatusEffect);
@@ -303,6 +305,8 @@ public:
 	virtual void SetFaction(int);
 
 	void TransmitEffect(StatusEffect);
+
+	void SetMap(Map* map);
 };
 
 BOOST_CLASS_VERSION(NPC, 1)

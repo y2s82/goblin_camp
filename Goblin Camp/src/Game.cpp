@@ -319,6 +319,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	}
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
+	npc->SetMap(Map::Inst());
 	npc->type = type;
 	npc->SetFaction(NPC::Presets[type].faction);
 	npc->InitializeAIFunctions();
@@ -2464,6 +2465,12 @@ void Game::RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<
 				}
 			}
 		}
+	}
+}
+
+void Game::ProvideMapToNPCs() {
+	for (std::map<int, boost::shared_ptr<NPC> >::const_iterator npcIterator = npcList.begin(); npcIterator != npcList.end(); ++npcIterator) {
+		npcIterator->second->SetMap(Map::Inst());
 	}
 }
 
