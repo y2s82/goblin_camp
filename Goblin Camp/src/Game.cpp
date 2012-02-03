@@ -178,6 +178,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	} else {
 		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
 	}
+	newCons->SetMap(Map::Inst());
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
@@ -233,6 +234,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 
 ContinuePlaceStockpile:
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
+	newSp->SetMap(Map::Inst());
 	Map::Inst()->SetBuildable(a, false);
 	Map::Inst()->SetConstruction(a, newSp->Uid());
 	Map::Inst()->SetTerritory(a, true);
@@ -2468,9 +2470,15 @@ void Game::RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<
 	}
 }
 
-void Game::ProvideMapToNPCs() {
+void Game::ProvideMap() {
 	for (std::map<int, boost::shared_ptr<NPC> >::const_iterator npcIterator = npcList.begin(); npcIterator != npcList.end(); ++npcIterator) {
 		npcIterator->second->SetMap(Map::Inst());
+	}
+	for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consIterator = staticConstructionList.begin(); consIterator != staticConstructionList.end(); ++consIterator) {
+		consIterator->second->SetMap(Map::Inst());
+	}
+	for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consIterator = dynamicConstructionList.begin(); consIterator != dynamicConstructionList.end(); ++consIterator) {
+		consIterator->second->SetMap(Map::Inst());
 	}
 }
 

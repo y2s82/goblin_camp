@@ -77,6 +77,7 @@ public:
 	int GetDemand(ItemCategory);
 	int GetAmount(ItemCategory);
 	void Reorganize();
+	virtual void SetMap(Map* map);
 private:
 	void Erase(const Coordinate&);
 };

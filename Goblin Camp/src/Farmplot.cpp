@@ -49,7 +49,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			Coordinate p(x,y);
-			if (Map::Inst()->GetConstruction(p) == uid) {
+			if (map->GetConstruction(p) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
@@ -174,7 +174,7 @@ bool FarmPlot::Full(ItemType type) {
 	for (int ix = a.X(); ix <= b.X(); ++ix) {
 		for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 			Coordinate p(ix,iy);
-			if (Map::Inst()->GetConstruction(p) == uid) {
+			if (map->GetConstruction(p) == uid) {
 				//If the stockpile has hit the limit then it's full for this itemtype
 				if (type != 1) {
 					for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin();
@@ -211,7 +211,7 @@ Coordinate FarmPlot::FreePosition() {
 		for (int ix = a.X(); ix <= b.X(); ++ix) {
 			for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 				Coordinate p(ix,iy);
-				if (Map::Inst()->GetConstruction(p) == uid) {
+				if (map->GetConstruction(p) == uid) {
 					if (containers[p]->empty() && !reserved[p]) return p;
 				}
 			}
