@@ -69,10 +69,10 @@ Coordinate SpawningPool::SpawnLocation()
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			Coordinate p(x,y);
-			if (Map::Inst()->GetConstruction(p) == uid) {				
+			if (map->GetConstruction(p) == uid) {				
 				for (int i = 0; i < 4; ++i) {
 					Coordinate candidate = p + Coordinate::DirectionToCoordinate(dirs[i]);
-					if (Map::Inst()->IsWalkable(candidate))
+					if (map->IsWalkable(candidate))
 						return candidate;
 				}
 			}
@@ -121,8 +121,8 @@ void SpawningPool::Update() {
 		}
 
 		//Spawn / Expand
-		if (Map::Inst()->GetFilth(pos).lock() && Map::Inst()->GetFilth(pos).lock()->Depth() > 0) {
-			boost::shared_ptr<FilthNode> filthNode = Map::Inst()->GetFilth(pos).lock();
+		if (map->GetFilth(pos).lock() && map->GetFilth(pos).lock()->Depth() > 0) {
+			boost::shared_ptr<FilthNode> filthNode = map->GetFilth(pos).lock();
 			filth += filthNode->Depth();
 			Stats::Inst()->AddPoints(filthNode->Depth());
 			corruptionLeft += filthNode->Depth() * std::min(100 * filth, 10000U);
@@ -164,10 +164,10 @@ void SpawningPool::Update() {
 	}
 
 	if (corruptionLeft > 0) {
-		Map::Inst()->Corrupt(Position(), 10);
+		map->Corrupt(Position(), 10);
 		corruptionLeft -= 10;
 		if (Random::Generate(500) == 0)
-			Map::Inst()->Corrupt(Position(), 5000); //Random surges to make "tentacles" of corruption appear
+			map->Corrupt(Position(), 5000); //Random surges to make "tentacles" of corruption appear
 	}
 
 	if (Random::Generate(UPDATES_PER_SECOND*5) == 0) {
@@ -189,9 +189,9 @@ void SpawningPool::Expand(bool message) {
 	for (int i = 0; location == undefined && i < 10; ++i) {
 		Coordinate candidate = Random::ChooseInRectangle(a-1, b+1);
 		//TODO factorize with IsAdjacent(p,uid) in StockPile; could go in Construction
-		if (Map::Inst()->GetConstruction(candidate) != uid) {
+		if (map->GetConstruction(candidate) != uid) {
 			for (i = 0; i < 4; ++i)
-				if (Map::Inst()->GetConstruction(candidate + Coordinate::DirectionToCoordinate(dirs[i])) == uid)
+				if (map->GetConstruction(candidate + Coordinate::DirectionToCoordinate(dirs[i])) == uid)
 					location = candidate;
 		}
 	}
@@ -203,12 +203,12 @@ void SpawningPool::Expand(bool message) {
 		b = Coordinate::max(b, location);
 
 		//Swallow nature objects
-		if (Map::Inst()->GetNatureObject(location) >= 0) {
-			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[Map::Inst()->GetNatureObject(location)]);
+		if (map->GetNatureObject(location) >= 0) {
+			Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[map->GetNatureObject(location)]);
 		}
 		//Destroy buildings
-		if (Map::Inst()->GetConstruction(location) >= 0) {
-			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(location)).lock()) {
+		if (map->GetConstruction(location) >= 0) {
+			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(location)).lock()) {
 				if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 					construct->Dismantle(location);
 				} else {
@@ -227,17 +227,17 @@ void SpawningPool::Expand(bool message) {
 
 		//Swallow items
 		std::list<int> itemUids;
-		for (std::set<int>::iterator itemi = Map::Inst()->ItemList(location)->begin();
-			itemi != Map::Inst()->ItemList(location)->end(); ++itemi) {
+		for (std::set<int>::iterator itemi = map->ItemList(location)->begin();
+			itemi != map->ItemList(location)->end(); ++itemi) {
 				itemUids.push_back(*itemi);
 		}
 		for (std::list<int>::iterator itemi = itemUids.begin(); itemi != itemUids.end(); ++itemi) {
 			Game::Inst()->RemoveItem(Game::Inst()->GetItem(*itemi));
 		}
 
-		Map::Inst()->SetConstruction(location, uid);
-		Map::Inst()->SetBuildable(location, false);
-		Map::Inst()->SetTerritory(location, true);
+		map->SetConstruction(location, uid);
+		map->SetBuildable(location, false);
+		map->SetTerritory(location, true);
 
 		corruptionLeft += 2000 * std::min(expansion, (unsigned int)100);
 
@@ -254,7 +254,7 @@ void SpawningPool::Draw(Coordinate upleft, TCODConsole* console) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			Coordinate p(x,y);
-			if (Map::Inst()->GetConstruction(p) == uid) {
+			if (map->GetConstruction(p) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
@@ -287,7 +287,7 @@ int SpawningPool::Build() {
 	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != boost::static_pointer_cast<SpawningPool>(shared_from_this())) {
 		Camp::Inst()->spawningPool = boost::static_pointer_cast<SpawningPool>(shared_from_this());
 	}
-	Map::Inst()->Corrupt(Position(), 100);
+	map->Corrupt(Position(), 100);
 	return Construction::Build();
 }
 

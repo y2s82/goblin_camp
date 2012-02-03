@@ -108,11 +108,11 @@ Construction::~Construction() {
 	for (int ix = pos.X(); ix < end.X(); ++ix) {
 		for (int iy = pos.Y(); iy < end.Y(); ++iy) {
 			Coordinate p(ix, iy);
-			Map::Inst()->SetBuildable(p,true);
-			Map::Inst()->SetWalkable(p,true);
-			Map::Inst()->SetConstruction(p,-1);
-			Map::Inst()->SetBlocksLight(p,false);
-			Map::Inst()->SetBlocksWater(p,false);
+			map->SetBuildable(p,true);
+			map->SetWalkable(p,true);
+			map->SetConstruction(p,-1);
+			map->SetBlocksLight(p,false);
+			map->SetBlocksWater(p,false);
 		}
 	}
 	
@@ -139,6 +139,9 @@ Construction::~Construction() {
 	}
 }
 
+void Construction::SetMap(Map* map) {
+	this->map = map;
+}
 
 void Construction::Condition(int value) {condition = value;}
 int Construction::Condition() const {return condition;}
@@ -211,9 +214,9 @@ int Construction::Build() {
 		for (int ix = pos.X(); ix < end.X(); ++ix) {
 			for (int iy = pos.Y(); iy < end.Y(); ++iy) {
 				Coordinate p(ix,iy);
-				Map::Inst()->SetWalkable(p, walkable);
-				Map::Inst()->SetBlocksWater(p, !walkable);
-				Map::Inst()->SetBlocksLight(p, Construction::Presets[type].blocksLight);
+				map->SetWalkable(p, walkable);
+				map->SetBlocksWater(p, !walkable);
+				map->SetBlocksLight(p, Construction::Presets[type].blocksLight);
 			}
 		}
 
@@ -299,7 +302,7 @@ int Construction::Use() {
 			if (Random::Generate(9) == 0) {
 				boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Position()+Construction::Presets[type].chimney, Spell::StringToSpellType("smoke"));
 				Coordinate direction;
-				Direction wind = Map::Inst()->GetWindDirection();
+				Direction wind = map->GetWindDirection();
 				if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(25, 75));
 				if (wind == SOUTH || wind == SOUTHEAST || wind == SOUTHWEST) direction.Y(Random::Generate(-75, -25));
 				if (wind == EAST || wind == NORTHEAST || wind == SOUTHEAST) direction.X(Random::Generate(-75, -25));
@@ -785,7 +788,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 
 	for (int i = 0; i < 4; ++i) {
 		posDir[i] = pos + Coordinate::DirectionToCoordinate(dirs[i]);
-		consId[i] = Map::Inst()->GetConstruction(posDir[i]);
+		consId[i] = map->GetConstruction(posDir[i]);
 		wod[i] = false;
 		if (consId[i] > -1) {
 			boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(consId[i]).lock();
@@ -845,8 +848,8 @@ void Construction::Update() {
 		}
 	}
 
-	if (!Construction::Presets[type].passiveStatusEffects.empty() && !Map::Inst()->NPCList(pos)->empty()) {
-		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(pos)->begin());
+	if (!Construction::Presets[type].passiveStatusEffects.empty() && !map->NPCList(pos)->empty()) {
+		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(pos)->begin());
 		if (!npc->HasEffect(FLYING)) {
 			for (size_t i = 0; i < Construction::Presets[type].passiveStatusEffects.size(); ++i) {
 				npc->AddEffect(Construction::Presets[type].passiveStatusEffects[i]);
