@@ -159,6 +159,7 @@ NPC::~NPC() {
 
 void NPC::SetMap(Map* map) {
 	this->map = map;
+	inventory->SetMap(map);
 	while (!map->IsWalkable(pos)) {
 		pos += Random::ChooseInRadius(1);
 	}

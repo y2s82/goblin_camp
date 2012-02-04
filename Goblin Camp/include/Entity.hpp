@@ -28,6 +28,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #define ENTITYHEIGHT 5
 
+class Map;
+
 struct FlightPath {
 	FlightPath(Coordinate);
 	Coordinate coord;
@@ -49,6 +51,7 @@ protected:
 	std::list<FlightPath> flightPath;
 	int bulk;
 	float strobe;
+	Map* map;
 public:
 	Entity();
 	virtual ~Entity();
@@ -87,6 +90,8 @@ public:
 	void Strobe();
 	void ResetStrobe();
 	virtual bool CanStrobe();
+
+	virtual void SetMap(Map* map);
 };
 
 BOOST_CLASS_VERSION(Entity, 0)

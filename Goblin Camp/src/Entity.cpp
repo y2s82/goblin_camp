@@ -116,6 +116,8 @@ void Entity::Strobe() { strobe += 0.1f; }
 void Entity::ResetStrobe() { strobe = 0; }
 bool Entity::CanStrobe() { return false; }
 
+void Entity::SetMap(Map* map) { this->map = map; }
+
 void Entity::save(OutputArchive& ar, const unsigned int version) const {
 	const int x = pos.X();
 	const int y = pos.Y();

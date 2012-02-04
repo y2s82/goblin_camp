@@ -106,6 +106,7 @@ class NPC : public Entity {
 	
 	friend class Game;
 	friend class NPCListener;
+	friend class Faction;
 	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 	
 	NPC(Coordinate = Coordinate(0,0),
@@ -306,7 +307,7 @@ public:
 
 	void TransmitEffect(StatusEffect);
 
-	void SetMap(Map* map);
+	virtual void SetMap(Map* map);
 };
 
 BOOST_CLASS_VERSION(NPC, 1)

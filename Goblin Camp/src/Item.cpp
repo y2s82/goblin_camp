@@ -131,7 +131,7 @@ void Item::Draw(Coordinate upleft, TCODConsole* console) {
 	int screenx = (pos - upleft).X();
 	int screeny = (pos - upleft).Y();
 	if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 && screeny < console->getHeight()) {
-		console->putCharEx(screenx, screeny, graphic, color, Map::Inst()->GetBackColor(pos));
+		console->putCharEx(screenx, screeny, graphic, color, map->GetBackColor(pos));
 	}
 }
 
@@ -141,10 +141,10 @@ TCODColor Item::Color() {return color;}
 void Item::Color(TCODColor col) {color = col;}
 
 void Item::Position(const Coordinate& p) {
-	if (Map::Inst()->IsInside(p)) {
-		if (!internal && !container.lock()) Map::Inst()->ItemList(pos)->erase(uid);
+	if (map->IsInside(p)) {
+		if (!internal && !container.lock()) map->ItemList(pos)->erase(uid);
 		pos = p;
-		if (!internal && !container.lock()) Map::Inst()->ItemList(pos)->insert(uid);
+		if (!internal && !container.lock()) map->ItemList(pos)->insert(uid);
 	}
 }
 Coordinate Item::Position() {
@@ -554,13 +554,13 @@ void Item::SetVelocity(int speed) {
 	} else {
 		//The item has moved before but has now stopped
 		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
-		if (!Map::Inst()->IsWalkable(pos)) {
+		if (!map->IsWalkable(pos)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				//TODO consider using something more believable here; the item would jump over 9 walls?
 				for (int ix = pos.X() - radius; ix <= pos.X() + radius; ++ix) {
 					for (int iy = pos.Y() - radius; iy <= pos.Y() + radius; ++iy) {
 						Coordinate p(ix,iy);
-						if (Map::Inst()->IsWalkable(p)) {
+						if (map->IsWalkable(p)) {
 							Position(p);
 							return;
 						}
@@ -581,20 +581,20 @@ void Item::UpdateVelocity() {
 				if (flightPath.back().height < ENTITYHEIGHT) { //We're flying low enough to hit things
 					Coordinate t = flightPath.back().coord;
 
-					if (Map::Inst()->BlocksWater(t) || !Map::Inst()->IsWalkable(t)) { //We've hit an obstacle
+					if (map->BlocksWater(t) || !map->IsWalkable(t)) { //We've hit an obstacle
 						Attack attack = GetAttack();
-						if (Map::Inst()->GetConstruction(t) > -1) {
-							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(t)).lock()) {
+						if (map->GetConstruction(t) > -1) {
+							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(t)).lock()) {
 								construct->Damage(&attack);
 							}
 						}
 						Impact(velocity);
 						return;
 					}
-					if (Map::Inst()->NPCList(t)->size() > 0) { //Hit a creature
-						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(t)->size())) {
+					if (map->NPCList(t)->size() > 0) { //Hit a creature
+						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + map->NPCList(t)->size())) {
 							Attack attack = GetAttack();
-							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(t)->begin());
+							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(t)->begin());
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);
