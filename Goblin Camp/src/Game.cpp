@@ -683,7 +683,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			} else {
 				newItem.reset(new Item(pos, type, ownerFaction, comps));
 			}
-
+			newItem->SetMap(Map::Inst());
 			if (!container) {
 				freeItems.insert(newItem);
 				Map::Inst()->ItemList(newItem->Position())->insert(newItem->Uid());
@@ -2471,6 +2471,9 @@ void Game::RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<
 }
 
 void Game::ProvideMap() {
+	for (std::map<int,boost::shared_ptr<Item> >::const_iterator itemIterator = itemList.begin(); itemIterator != itemList.end(); ++itemIterator) {
+		itemIterator->second->SetMap(Map::Inst());
+	}
 	for (std::map<int, boost::shared_ptr<NPC> >::const_iterator npcIterator = npcList.begin(); npcIterator != npcList.end(); ++npcIterator) {
 		npcIterator->second->SetMap(Map::Inst());
 	}
