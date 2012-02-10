@@ -178,6 +178,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	} else {
 		Game::Inst()->staticConstructionList.insert(std::pair<int,boost::shared_ptr<Construction> >(newCons->Uid(), newCons));
 	}
+	newCons->SetMap(Map::Inst());
 	Coordinate blueprint = Construction::Blueprint(construct);
 	for (int x = target.X(); x < target.X() + blueprint.X(); ++x) {
 		for (int y = target.Y(); y < target.Y() + blueprint.Y(); ++y) {
@@ -233,6 +234,7 @@ int Game::PlaceStockpile(Coordinate a, Coordinate b, ConstructionType stockpile,
 
 ContinuePlaceStockpile:
 	boost::shared_ptr<Stockpile> newSp( (Construction::Presets[stockpile].tags[FARMPLOT]) ? new FarmPlot(stockpile, symbol, a) : new Stockpile(stockpile, symbol, a) );
+	newSp->SetMap(Map::Inst());
 	Map::Inst()->SetBuildable(a, false);
 	Map::Inst()->SetConstruction(a, newSp->Uid());
 	Map::Inst()->SetTerritory(a, true);
@@ -319,6 +321,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 	}
 
 	boost::shared_ptr<NPC> npc(new NPC(target));
+	npc->SetMap(Map::Inst());
 	npc->type = type;
 	npc->SetFaction(NPC::Presets[type].faction);
 	npc->InitializeAIFunctions();
@@ -680,7 +683,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			} else {
 				newItem.reset(new Item(pos, type, ownerFaction, comps));
 			}
-
+			newItem->SetMap(Map::Inst());
 			if (!container) {
 				if ( newItem != 0 ) { // No null pointers in freeItems please..
 					freeItems.insert(newItem);
@@ -2499,6 +2502,21 @@ void Game::RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<
 				}
 			}
 		}
+	}
+}
+
+void Game::ProvideMap() {
+	for (std::map<int,boost::shared_ptr<Item> >::const_iterator itemIterator = itemList.begin(); itemIterator != itemList.end(); ++itemIterator) {
+		itemIterator->second->SetMap(Map::Inst());
+	}
+	for (std::map<int, boost::shared_ptr<NPC> >::const_iterator npcIterator = npcList.begin(); npcIterator != npcList.end(); ++npcIterator) {
+		npcIterator->second->SetMap(Map::Inst());
+	}
+	for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consIterator = staticConstructionList.begin(); consIterator != staticConstructionList.end(); ++consIterator) {
+		consIterator->second->SetMap(Map::Inst());
+	}
+	for (std::map<int, boost::shared_ptr<Construction> >::const_iterator consIterator = dynamicConstructionList.begin(); consIterator != dynamicConstructionList.end(); ++consIterator) {
+		consIterator->second->SetMap(Map::Inst());
 	}
 }
 

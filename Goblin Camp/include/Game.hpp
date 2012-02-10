@@ -278,6 +278,7 @@ public:
 	int GetAge();
 
 	void DisplayStats();
+	void ProvideMap();
 };
 
 BOOST_CLASS_VERSION(Game, 1)

@@ -43,7 +43,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	Container *container = new Container(target, -1, 1000, -1);
 	container->AddListener(this);
 	containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(target, boost::shared_ptr<Container>(container)));
-	colors.insert(std::pair<Coordinate, TCODColor>(target, TCODColor::lerp(color, Map::Inst()->GetColor(target), 0.75f)));
+
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,true));
@@ -76,13 +76,18 @@ Stockpile::~Stockpile() {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			Coordinate p(x,y);
-			if (Map::Inst()->GetConstruction(p) == uid) {
-				Map::Inst()->SetBuildable(p,true);
-				Map::Inst()->SetWalkable(p,true);
-				Map::Inst()->SetConstruction(p,-1);
+			if (map->GetConstruction(p) == uid) {
+				map->SetBuildable(p,true);
+				map->SetWalkable(p,true);
+				map->SetConstruction(p,-1);
 			}
 		}
 	}
+}
+
+void Stockpile::SetMap(Map* map) {
+	Construction::SetMap(map);
+	colors.insert(std::pair<Coordinate, TCODColor>(pos, TCODColor::lerp(color, map->GetColor(pos), 0.75f)));
 }
 
 int Stockpile::Build() {return 1;}
@@ -290,14 +295,14 @@ int Stockpile::Expand(Coordinate from, Coordinate to) {
 		for (int ix = from.X(); ix <= to.X(); ++ix) {
 			for (int iy = from.Y(); iy <= to.Y(); ++iy) {
 				Coordinate p(ix,iy);
-				if (Map::Inst()->GetConstruction(p) == -1 && Map::Inst()->IsBuildable(p)
-					&& Construction::Presets[type].tileReqs.find(Map::Inst()->GetType(p)) != Construction::Presets[type].tileReqs.end()
+				if (map->GetConstruction(p) == -1 && map->IsBuildable(p)
+					&& Construction::Presets[type].tileReqs.find(map->GetType(p)) != Construction::Presets[type].tileReqs.end()
 					&& IsAdjacentTo(p,uid))
 				{
 					//Current tile is walkable, buildable, and adjacent to the current stockpile
-					Map::Inst()->SetConstruction(p,uid);
-					Map::Inst()->SetBuildable(p,false);
-					Map::Inst()->SetTerritory(p,true);
+					map->SetConstruction(p,uid);
+					map->SetBuildable(p,false);
+					map->SetTerritory(p,true);
 					
 					//Update corner values to contain p
 					a = Coordinate::min(a, p);
@@ -309,7 +314,7 @@ int Stockpile::Expand(Coordinate from, Coordinate to) {
 					containers.insert(std::pair<Coordinate,boost::shared_ptr<Container> >(p, container));
 					
 					//Update color
-					colors.insert(std::pair<Coordinate, TCODColor>(p, TCODColor::lerp(color, Map::Inst()->GetColor(p), 0.75f)));
+					colors.insert(std::pair<Coordinate, TCODColor>(p, TCODColor::lerp(color, map->GetColor(p), 0.75f)));
 					++expansion;
 				}
 			}
@@ -324,7 +329,7 @@ void Stockpile::Draw(Coordinate upleft, TCODConsole* console) {
 	for (int x = a.X(); x <= b.X(); ++x) {
 		for (int y = a.Y(); y <= b.Y(); ++y) {
 			Coordinate p(x,y);
-			if (Map::Inst()->GetConstruction(p) == uid) {
+			if (map->GetConstruction(p) == uid) {
 				screenx = x - upleft.X();
 				screeny = y - upleft.Y();
 				if (screenx >= 0 && screenx < console->getWidth() && screeny >= 0 &&
@@ -389,7 +394,7 @@ bool Stockpile::Full(ItemType itemType) {
 	for (int ix = a.X() - 1; ix <= b.X() + 1; ++ix) {
 		for (int iy = a.Y() - 1; iy <= b.Y() + 1; ++iy) {
 			Coordinate p(ix,iy);
-			if (Map::Inst()->GetConstruction(p) == uid) {
+			if (map->GetConstruction(p) == uid) {
 				//If theres a free space then it obviously is not full
 				if (containers[p]->empty() && !reserved[p]) return false;
 
@@ -400,8 +405,8 @@ bool Stockpile::Full(ItemType itemType) {
 					if (type != -1 && container->IsCategory(Item::Presets[itemType].fitsin) && 
 						container->Capacity() >= Item::Presets[itemType].bulk) return false;
 				}
-			} else if (Map::Inst()->IsBuildable(p)
-					   && Construction::Presets[type].tileReqs.find(Map::Inst()->GetType(p)) != Construction::Presets[type].tileReqs.end()
+			} else if (map->IsBuildable(p)
+					   && Construction::Presets[type].tileReqs.find(map->GetType(p)) != Construction::Presets[type].tileReqs.end()
 					   && IsAdjacentTo(p,uid))
 				return false;
 		}
@@ -422,7 +427,7 @@ Coordinate Stockpile::FreePosition() {
 		for (int ix = a.X(); ix <= b.X(); ++ix) {
 			for (int iy = a.Y(); iy <= b.Y(); ++iy) {
 				Coordinate p(ix,iy);
-				if (Map::Inst()->GetConstruction(p) == uid) {
+				if (map->GetConstruction(p) == uid) {
 					if (containers[p]->empty() && !reserved[p])
 						return p;
 				}
@@ -435,8 +440,8 @@ Coordinate Stockpile::FreePosition() {
 	for (int ix = a.X() - 1; ix <= b.X() + 1; ++ix) {
 		for (int iy = a.Y() - 1; iy <= b.Y() + 1; ++iy) {
 			Coordinate p(ix,iy), adj;
-			if (Map::Inst()->IsBuildable(p)
-				&& Construction::Presets[type].tileReqs.find(Map::Inst()->GetType(p)) != Construction::Presets[type].tileReqs.end()
+			if (map->IsBuildable(p)
+				&& Construction::Presets[type].tileReqs.find(map->GetType(p)) != Construction::Presets[type].tileReqs.end()
 				&& FindAdjacentTo(p, uid, &adj))
 			{
 				candidates.push_back(std::make_pair(p, adj));
@@ -668,9 +673,9 @@ void Stockpile::AcceptVisitor(ConstructionVisitor& visitor) {
 
 void Stockpile::Erase(const Coordinate& p) {
 	assert (p != undefined);
-	if (Map::Inst()->GetConstruction(p) == uid) {
-		Map::Inst()->SetConstruction(p, -1);
-		Map::Inst()->SetBuildable(p, true);
+	if (map->GetConstruction(p) == uid) {
+		map->SetConstruction(p, -1);
+		map->SetBuildable(p, true);
 		reserved.erase(p);
 		containers.erase(p);
 		colors.erase(p);

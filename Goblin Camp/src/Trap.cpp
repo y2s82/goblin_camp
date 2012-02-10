@@ -31,8 +31,8 @@ ready(true){
 
 void Trap::Update() {
 	if (built) {
-		if (ready && !Map::Inst()->NPCList(pos)->empty()) {
-			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(pos)->begin());
+		if (ready && !map->NPCList(pos)->empty()) {
+			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(pos)->begin());
 			if (npc && !npc->HasEffect(FLYING)) {
 				ready = false;
 				graphic[1] = 62;
@@ -44,7 +44,7 @@ void Trap::Update() {
 }
 
 int Trap::GetMoveCostModifier(bool visible) {
-	return visible ? 100 : -(Map::Inst()->GetTerrainMoveCost(pos)-1); //-1 because a movecost of 0 = unwalkable
+	return visible ? 100 : -(map->GetTerrainMoveCost(pos)-1); //-1 because a movecost of 0 = unwalkable
 }
 
 int Trap::Use() {
