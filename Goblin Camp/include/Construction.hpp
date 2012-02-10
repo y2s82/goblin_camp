@@ -128,6 +128,7 @@ protected:
 	bool flammable;
 	int smoke;
 	boost::weak_ptr<Job> repairJob;
+	Map* map;
 public:
 	virtual ~Construction();
 
@@ -174,6 +175,8 @@ public:
 	virtual bool CanStrobe();
 
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
+
+	virtual void SetMap(Map* map);
 	
 	static boost::unordered_map<std::string, ConstructionType> constructionNames;
 	static ConstructionType StringToConstructionType(std::string);

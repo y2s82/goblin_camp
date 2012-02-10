@@ -256,6 +256,7 @@ bool Game::LoadGame(const std::string& filename) {
 		stream.push(rawStream);
 		Game::LoadingScreen(boost::bind(&ReadPayload, boost::ref(stream)));
 		Game::Inst()->TranslateContainerListeners();
+		Game::Inst()->ProvideMap();
 		Game::Inst()->Pause();
 		
 		return true;

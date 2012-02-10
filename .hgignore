@@ -74,3 +74,4 @@ userdata
 *.vcxproj
 relre:depend
 relre:goblin-camp.std(?:out|err)$
+Goblin Camp/linker.props

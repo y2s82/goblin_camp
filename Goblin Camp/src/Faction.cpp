@@ -142,12 +142,12 @@ FactionGoal Faction::GetCurrentGoal() const {
 }
 
 namespace {
-	inline bool GenerateDestroyJob(boost::shared_ptr<Job> job, boost::shared_ptr<NPC> npc) {
+	inline bool GenerateDestroyJob(Map* map, boost::shared_ptr<Job> job, boost::shared_ptr<NPC> npc) {
 		boost::shared_ptr<Construction> construction;
 		Coordinate p = npc->Position();
 		TCODLine::init(p.X(), p.Y(), Camp::Inst()->Center().X(), Camp::Inst()->Center().Y());
 		do {
-			int constructionID = Map::Inst()->GetConstruction(p);
+			int constructionID = map->GetConstruction(p);
 			if (constructionID >= 0) {
 				construction = Game::Inst()->GetConstruction(constructionID).lock();
 				if (construction && (construction->HasTag(PERMANENT) || 
@@ -200,7 +200,7 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 		case FACTIONDESTROY: 
 			{
 				boost::shared_ptr<Job> destroyJob(new Job("Destroy building"));
-				if (GenerateDestroyJob(destroyJob, npc) || GenerateKillJob(destroyJob)) {
+				if (GenerateDestroyJob(npc->map, destroyJob, npc) || GenerateKillJob(destroyJob)) {
 					npc->StartJob(destroyJob);
 					return true;
 				}
@@ -241,8 +241,8 @@ bool Faction::FindJob(boost::shared_ptr<NPC> npc) {
 					location = Camp::Inst()->GetRandomSpot();
 				} else {
 					for (int limit = 0; limit < 100 && location == undefined; ++limit) {
-						Coordinate candidate = Random::ChooseInExtent(Map::Inst()->Extent());
-						if (!Map::Inst()->IsTerritory(candidate))
+						Coordinate candidate = Random::ChooseInExtent(npc->map->Extent());
+						if (!npc->map->IsTerritory(candidate))
 							location = candidate;
 					}
 				}

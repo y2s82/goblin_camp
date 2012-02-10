@@ -106,6 +106,7 @@ class NPC : public Entity {
 	
 	friend class Game;
 	friend class NPCListener;
+	friend class Faction;
 	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 	
 	NPC(Coordinate = Coordinate(0,0),
@@ -207,6 +208,8 @@ class NPC : public Entity {
 	std::string GetDeathMsgThirst();
 	std::string GetDeathMsgHunger();
 
+	Map* map;
+
 public:
 	typedef std::list<StatusEffect>::iterator StatusEffectIterator;
 
@@ -234,7 +237,7 @@ public:
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
-		bool IsPathWalkable();
+	bool IsPathWalkable();
 	void StartJob(boost::shared_ptr<Job>);
 	void AddEffect(StatusEffectType);
 	void AddEffect(StatusEffect);
@@ -303,6 +306,8 @@ public:
 	virtual void SetFaction(int);
 
 	void TransmitEffect(StatusEffect);
+
+	virtual void SetMap(Map* map);
 };
 
 BOOST_CLASS_VERSION(NPC, 1)
