@@ -682,12 +682,26 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			}
 
 			if (!container) {
-				freeItems.insert(newItem);
-				Map::Inst()->ItemList(newItem->Position())->insert(newItem->Uid());
+				if ( newItem != 0 ) { // No null pointers in freeItems please..
+					freeItems.insert(newItem);
+					Map::Inst()->ItemList(newItem->Position())->insert(newItem->Uid());
+				} else {
+					return -1;
+				}
 			} else {
-				container->AddItem(newItem);
+				if ( newItem != 0 ) { // No null pointers in the container...
+					container->AddItem(newItem);
+				} else {
+					return -1;
+				}
 			}
-			itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
+
+			if ( newItem != 0 ) { // No null pointers in itemList... I'm being overly cautious here.
+				itemList.insert(std::pair<int,boost::shared_ptr<Item> >(newItem->Uid(), newItem));
+			} else {
+				return -1;
+			}
+
 			if (store) StockpileItem(newItem, false, true);
 
 			Script::Event::ItemCreated(newItem, pos.X(), pos.Y());
@@ -1572,7 +1586,13 @@ std::string Game::SeasonToString(Season season) {
 void Game::DecayItems() {
 	std::list<int> eraseList;
 	std::list<std::pair<ItemType, Coordinate> > creationList;
-	for (std::map<int,boost::shared_ptr<Item> >::iterator itemit = itemList.begin(); itemit != itemList.end(); ++itemit) {
+	for (std::map<int,boost::shared_ptr<Item> >::iterator itemit = itemList.begin(); itemit != itemList.end(); ) {
+
+		if (itemit->second == 0) { // Now, how did we get a null pointer in here..
+			itemit = itemList.erase(itemit); // Get it out of the list!
+			if ( itemit == itemList.end() ) break;
+		}
+
 		if (itemit->second->decayCounter > 0) {
 			if (--itemit->second->decayCounter == 0) {
 				for (std::vector<ItemType>::iterator decaylisti = Item::Presets[itemit->second->type].decayList.begin(); decaylisti != Item::Presets[itemit->second->type].decayList.end(); ++decaylisti) {
@@ -1581,6 +1601,7 @@ void Game::DecayItems() {
 				eraseList.push_back(itemit->first);
 			}
 		}
+		++itemit;
 	}
 
 	for (std::list<int>::iterator delit = eraseList.begin(); delit != eraseList.end(); ++delit) {
