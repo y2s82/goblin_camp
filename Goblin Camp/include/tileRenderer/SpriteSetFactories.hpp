@@ -174,11 +174,14 @@ template <typename IterT> void TerrainSpriteFactory::SetSnowSpriteIndices(IterT 
 	}
 }
 
+
 template <typename IterT> void TerrainSpriteFactory::SetHeightSplits(IterT iter, IterT end) {
-	for (; iter != end; ++iter) {
-		heightSplits.push_back(*iter);
-	}
+   for (; iter != end; ++iter) {
+     heightSplits.push_back( *reinterpret_cast<float*>(iter));
+   }
 }
+
+
 
 template <typename IterT> void TerrainSpriteFactory::SetEdgeSpriteIndices(IterT iter, IterT end) {
 	for (; iter != end; ++iter) {

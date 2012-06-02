@@ -328,6 +328,12 @@ void TilesetRenderer::DrawCursor(const Coordinate& start, const Coordinate& end,
 //TODO factorize all those DrawFoo
 void TilesetRenderer::DrawItems() const {
 	for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end(); ++itemi) {
+      if (itemi->second == 0) { // should not be here. but it happens. null pointer
+          itemi = Game::Inst()->itemList.erase(itemi); // delete this shit
+          if ( itemi == Game::Inst()->itemList.end() )break;
+          continue;
+      }
+
 		if (!itemi->second->ContainedIn().lock()) {
 			Coordinate itemPos = itemi->second->Position();
 			Coordinate start(startTileX,startTileY), extent(tilesX,tilesY);

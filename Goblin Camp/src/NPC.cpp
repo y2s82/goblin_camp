@@ -154,6 +154,7 @@ NPC::~NPC() {
 	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) Game::Inst()->GoblinCount(-1);
 	else if (NPC::Presets[type].tags.find("localwildlife") != NPC::Presets[type].tags.end()) Game::Inst()->PeacefulFaunaCount(-1);
 
+    pathMutex.unlock();
 	delete path;
 }
 
