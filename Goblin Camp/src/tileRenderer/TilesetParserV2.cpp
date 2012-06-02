@@ -450,7 +450,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 			} else if (boost::iequals(name, "snowSprites")) {
 				terrainSpriteFactory.SetSnowSpriteIndices((intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list));
 			} else if (boost::iequals(name, "heightSplits")) {
-				terrainSpriteFactory.SetHeightSplits((float*)TCOD_list_begin(value.list), (float*)TCOD_list_end(value.list));
+				terrainSpriteFactory.SetHeightSplits((intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list));
 			} else if (boost::iequals(name, "edgeSprites")) {
 				terrainSpriteFactory.SetEdgeSpriteIndices((intptr_t*)TCOD_list_begin(value.list), (intptr_t*)TCOD_list_end(value.list));
 			} else if (boost::iequals(name, "snowEdgeSprites")) {
