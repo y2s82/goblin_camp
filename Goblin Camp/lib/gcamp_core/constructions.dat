@@ -75,7 +75,7 @@ construction_type "Bone fence" {
 	maxCondition=10
 	materials=["Bone", "Bone", "Bone", "Bone"]
 	placementType=2
-	description="A rudimenary fence"
+	description="A rudimentary fence"
 }
 
 construction_type "Palisade" {
