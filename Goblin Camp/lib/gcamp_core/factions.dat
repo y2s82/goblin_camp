@@ -14,19 +14,19 @@ faction_type "Hostile monster" {
 }
 
 faction_type "Giants" {
-	friends=["Humans"]
+	friends = ["Humans"]
 	goals = ["destroy"]
 	aggressive
 }
 
 faction_type "Wolves" {
-	goals =        ["steal"]
+	goals = ["steal"]
 	goalSpecifiers=["food"]
 }
 
 faction_type "Trolls" {
 	goals = ["patrol"]
-	friends=["Player"]
+	friends = ["Player"]
 	aggressive
 	activeTime = -1.0
 }
@@ -42,8 +42,8 @@ faction_type "Ants" {
 }
 
 faction_type "Kobolds" {
-	goals =        ["steal",  "steal", "steal"]
-	goalSpecifiers=["weapon", "metal", "food"]
+	goals = ["steal",  "steal", "steal"]
+	goalSpecifiers = ["weapon", "metal", "food"]
 }
 
 faction_type "Undead" {
@@ -90,4 +90,10 @@ faction_type "Migrator" {
 	goals=["idle"]
 	coward
 	activeTime = 1.0
+}
+
+faction_type "Birds" {
+	friends=["Peaceful animal"]
+	goals = ["steal"]
+	goalSpecifiers=["food"]
 }

@@ -11,7 +11,7 @@ plant_type "Pine" {
 	tree
 	graphic=6
 	color="0,200,14"
-	components=["Pine bark", "Pine bark", "Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
 	minheight=-0.07
@@ -89,7 +89,7 @@ plant_type "Willow" {
 	tree
 	graphic=5
 	color="140,198,14"
-	components=["Willow bark", "Wicker", "Wicker", "Wicker", "Wicker", "Wicker"]
+	components=["Wicker", "Wicker", "Wicker", "Wicker", "Wicker"]
 	rarity=300
 	condition=100
 	minheight=-5.0
@@ -100,7 +100,7 @@ plant_type "Birch" {
 	tree
 	graphic=215
 	color="224,224,224"
-	components=["Birch bark", "Birch bark", "Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=30
 	condition=150
 	minheight=-0.07
@@ -111,7 +111,7 @@ plant_type "Spruce" {
 	tree
 	graphic=6
 	color="0,136,14"
-	components=["Tree bark", "Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
 	rarity=50
 	condition=150
 	minheight=-0.07
@@ -347,4 +347,16 @@ plant_type "Wild radish" {
 	walkable
 	minheight=1
 	maxheight=3
+}
+
+plant_type "Silverthorn" {
+	graphic=42
+	color="143,188,143"
+	components=["Thornberry"]
+	rarity=100
+	condition=50
+	cluster=3
+	harvestable
+	minheight=-1
+	maxheight=-0.01
 }
