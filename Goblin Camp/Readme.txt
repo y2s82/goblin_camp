@@ -9,6 +9,12 @@ Goblin Camp is open source, the full source is available at:
 http://bitbucket.org/genericcontainer/goblin-camp
 Code contributions are welcome!
 
+-- Version 0.21 --
+
+A bugfix release, mostly with fixes and improvements from contributors: a bunch of fixes from 
+xkeitarox, and a rendering patch from quantummy. Also some new content and improvements to the
+old stuff from giaotanj.
+
 -- Version 0.2 --
 
 Version 0.2 comes with a pretty major change to stockpiles. They are now called piles, and instead
