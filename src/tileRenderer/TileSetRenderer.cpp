@@ -492,4 +492,5 @@ boost::shared_ptr<TilesetRenderer> CreateTilesetRenderer(int width, int height, 
     } /* else {
 	 return CreateOGLTilesetRenderer(width, height, console, tilesetName);
 	 } */  // FIXME
+    // FIXME: what happens when neither of the above is available?
 }
