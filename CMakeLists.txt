@@ -31,4 +31,5 @@ add_subdirectory (src)
 #install (FILES "${GOBLICAMP_BINARY_DIR}/version.hpp"
 #         DESTINATION include)
 
-install (DIRECTORY lib DESTINATION lib)
+SET (CMAKE_INSTALL_PREFIX "./pkg/usr")
+install (DIRECTORY lib DESTINATION share)
