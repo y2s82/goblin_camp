@@ -1,0 +1,99 @@
+faction_type "Player" {
+	friends=["Trolls"]
+}
+
+faction_type "Peaceful animal" {
+	goals = ["idle"]
+	coward
+	activeTime = -1.0
+}
+
+faction_type "Hostile monster" {
+	goals = ["kill"]
+	aggressive
+}
+
+faction_type "Giants" {
+	friends = ["Humans"]
+	goals = ["destroy"]
+	aggressive
+}
+
+faction_type "Wolves" {
+	goals = ["steal"]
+	goalSpecifiers=["food"]
+}
+
+faction_type "Trolls" {
+	goals = ["patrol"]
+	friends = ["Player"]
+	aggressive
+	activeTime = -1.0
+}
+
+faction_type "Bees" {
+	goals = ["kill"]
+	aggressive
+}
+
+faction_type "Ants" {
+	goals = ["kill"]
+	aggressive
+}
+
+faction_type "Kobolds" {
+	goals = ["steal",  "steal", "steal"]
+	goalSpecifiers = ["weapon", "metal", "food"]
+}
+
+faction_type "Undead" {
+	goals = ["kill"]
+	aggressive
+	activeTime = 1.0
+}
+
+faction_type "Minotaurs" {
+	goals = ["destroy"]
+	aggressive
+}
+
+faction_type "Golems" {
+	goals = ["destroy"]
+	aggressive
+}
+
+faction_type "Elementals" {
+	goals = ["destroy"]
+	aggressive
+}
+
+faction_type "Rats" {
+	goals =        ["steal"]
+	goalSpecifiers=["food"]
+}
+
+faction_type "Elven scouts" {
+	friends=["Peaceful animal"]
+	goals = ["patrol"]
+	aggressive
+}
+
+faction_type "Humans" {
+	friends=["Giants", "Peaceful animal"]
+	goals=["kill"]
+	aggressive
+	activeTime = 1.0
+}
+
+faction_type "Migrator" {
+	friends=["Peaceful animal"]
+	goals=["idle"]
+	coward
+	activeTime = 1.0
+}
+
+faction_type "Birds" {
+	friends=["Peaceful animal"]
+	goals = ["steal"]
+	goalSpecifiers=["food"]
+}

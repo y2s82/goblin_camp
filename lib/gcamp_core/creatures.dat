@@ -1,0 +1,1320 @@
+npc_type "orc" {
+	tags = ["friendly", "hasHands"]
+	expert
+	needsNutrition
+	needsSleep
+	generateName
+	name="orc"
+	color="0,150,255"
+	graphic='o'
+	AI="PlayerNPC"
+	stats {
+		speed=17
+		health=200
+		dodge=5
+		size=10
+	}
+	resistances {
+		physical=10
+		magic=5
+		poison=10
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d10+5"
+		cooldown=25
+	}
+	death="Corpse"
+	faction="Player"
+}
+
+npc_type "goblin" {
+	tags = ["friendly", "hasHands", "coward"]
+	needsNutrition
+	needsSleep
+	generateName
+	name="goblin"
+	color="128,128,128"
+	graphic='g'
+	AI="PlayerNPC"
+	stats {
+		dodge=15
+		health=50
+		speed=22
+		size=5
+	}
+	resistances {
+		physical=5
+		poison=10
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d5"
+		cooldown=25
+	}
+	death="Corpse"
+	faction="Player"
+}
+
+npc_type "troll" {
+	name="Troll"
+	tier=3
+	tags=["hasHands", "immigrant"]
+	color="128,128,128"
+	graphic='T'
+	AI="HostileAnimal"
+	needsNutrition
+	needsSleep
+	stats {
+		speed=15
+		health=300
+		dodge=5
+		size=15
+	}
+	resistances {
+		physical=15
+	}
+	spawnAsGroup="1d2"
+	attack "Clobber" {
+		type="blunt"
+		damage="1d30+15"
+		cooldown=40
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="1d30+5"
+		cooldown=40
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
+	}
+	death="Corpse"
+	faction="Trolls"
+}
+
+npc_type "evil treeman" {
+	name="Evil Treeman"
+	tier=6
+	plural="Evil Treemen"
+	tags=["hasHands", "immigrant"]
+	color="200,30,30"
+	graphic=6
+	AI="HostileAnimal"
+	stats {
+		speed=1
+		health=800
+		dodge=2
+		size=35
+	}
+	resistances {
+		physical=15
+		bleeding=100
+	}
+	spawnAsGroup="1d2"
+	attack "Smash" {
+		type="blunt"
+		damage="1d100+10"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
+	}
+	stats {
+	    strength=25
+	}
+	death="Wood log"
+	faction="Trolls"
+}
+
+npc_type "giant snail" {
+	name="Giant Snail"
+	tags=["localWildlife"]
+	color="219,199,109"
+	graphic='b'
+	AI="PeacefulAnimal"
+	stats {
+		speed=4
+		health=50
+		dodge=1
+		strength=5
+		size=10
+	}		
+	resistances {
+		physical=25
+	}
+	attack "Slime" {
+		type="poison"
+		damage="1d2"
+		cooldown=75
+	}
+	spawnAsGroup="1d3"
+	death="Arthropod corpse"
+}
+
+npc_type "snake" {
+	name="Snake"
+	tags=["localWildlife", "angers"]
+	color="0,0,250"
+	graphic='S'
+	AI="PeacefulAnimal"
+	stats {
+		speed=10
+		health=25
+		dodge=7
+		size=3
+	}
+	resistances {
+		physical=7
+		poison=90
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d2+2"
+		cooldown=50
+		statusEffects=["poison"]
+	}
+	death="Small corpse"
+}
+
+npc_type "unicorn" {
+	name="Unicorn"
+	tags=["localWildlife", "angers"]
+	color="250,250,250"
+	graphic='u'
+	AI="PeacefulAnimal"
+	stats {
+		speed=25
+		health=200
+		dodge=5
+	    size=14
+	}
+	resistances {
+		physical=5
+		magic=75
+	}
+	attack "Charge" {
+		type="piercing"
+		damage="2d40"
+		cooldown=100
+	}
+	attack "Kick" {
+		type="blunt"
+		damage="1d40+20"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     50     ]
+	}
+	spawnAsGroup="1d2"
+	death="Corpse"
+}
+
+npc_type "will o wisp" { 
+	name="Will o' the wisp"
+	tags=["localWildlife", "flying"]
+	color="255,255,90"
+	graphic='*'
+	AI="PeacefulAnimal"
+	stats {
+		speed=10
+		health=5
+		dodge=0
+		size=1
+	}
+	resistances {
+		physical=30
+		magic=30
+		bleeding=100
+	}
+	attack "Blind" {
+		type="magic"
+		damage="4d1"
+		cooldown=75
+	}
+	spawnAsGroup="1d3"
+}
+
+npc_type "wild boar" {
+	name="Wild Boar"
+	tags=["localWildlife", "angers"]
+	color="128,64,0"
+	graphic='q'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=80
+		dodge=5
+		size=7
+	}
+	resistances {
+		physical=10
+	}
+	attack "Charge" {
+		type="piercing"
+		damage="2d20+10"
+		cooldown=100
+	}
+	attack "Bite" {
+		type="slashing"
+		damage="5d4+6"
+		cooldown=50
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
+	}
+	death="Corpse"
+}
+
+npc_type "netch" {
+	name="Netch"
+	plural="Netches"
+	tags=["localWildlife", "angers", "flying"]
+	color="255,159,64"
+	graphic=78
+	AI="PeacefulAnimal"
+	stats {
+		speed=5
+		health=500
+		dodge=5
+		size=25
+	}
+	resistances {
+		physical=15
+		poison=100
+	}
+	spawnAsGroup="1d2"
+	attack "Poison" {
+		type="poison"
+		damage="2d10+20"
+		cooldown=60
+	}
+	death="Hide"
+}
+
+npc_type "treeman" {
+	name="Treeman"
+	plural="Treemen"
+	tags=["localWildlife", "angers", "hasHands", "tunneler"]
+	color="0,200,14"
+	graphic=6
+	AI="PeacefulAnimal"
+	stats {
+		speed=1
+		health=800
+		dodge=2
+		size=35
+	}
+	resistances {
+		physical=15
+		bleeding=100
+	}
+	spawnAsGroup="1d2"
+	attack "Smash" {
+		type="blunt"
+		damage="1d100+10"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
+	}
+	stats {
+	    strength=25
+	}
+	death="Wood log"
+}
+
+npc_type "elven scout" {
+	tags = ["hasHands", "localWildlife"]
+	tier = 4
+	name = "Elven scout"
+	color = "000,255,000"
+	graphic='@'
+	AI="HostileAnimal"
+	stats {
+		speed=19
+		health=100
+		dodge=25
+		size=7
+	}
+	resistances {
+		poison=50
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d5+5"
+		cooldown=25
+	}
+	death="Corpse"
+	equipOneOf=["Leather armor"]
+	equipOneOf=["Quiver"]
+	equipOneOf=["Wooden bow"]
+	equipOneOf=["Wooden arrow"]
+	faction = "Elven scouts"
+}
+
+npc_type "rabid albino rat" {
+	name="Rabid Albino Rat"
+	tier=0
+	tags = ["attacksRandomly"]
+	color="255,255,255"
+	graphic='r'
+	AI="HungryAnimal"
+	stats {
+		speed=17
+		health=25
+		dodge=20
+		size=3
+	}
+	resistances {
+		physical=3
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="2d7"
+		cooldown=40
+	}
+	spawnAsGroup="1d10+5"
+	death="Small corpse"
+	faction="Rats"
+}
+
+npc_type "hungry bird" {
+	name="Hungry bird"
+	tier=0
+	tags=["attacksRandomly", "flying"]
+	color="0,0,255"
+	graphic='B'
+	AI="HungryAnimal"
+	stats {
+		speed=20
+		health=10
+		dodge=50
+		size=2
+	}
+	resistances {
+		physical=5
+	}
+	attack "Beak" {
+		type="piercing"
+		damage="1d4"
+		cooldown=30
+	}
+	spawnAsGroup="1d10+10"
+	death="Filth"
+	faction="Birds"
+}
+
+npc_type "starving wolf" {
+	name="Starving Wolf"
+	tier=1
+	plural="Starving Wolves"
+	tags = ["attacksRandomly"]
+	color="219,219,219"
+	graphic='d'
+	AI="HungryAnimal"
+	stats {
+		speed=24
+		health=75
+		dodge=10
+		size=7
+	}
+	resistances {
+		physical=5
+		cold=15
+	}
+	attack "Bite" {
+		type="slashing"
+		damage="5d4+6"
+		cooldown=50
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
+	}
+	spawnAsGroup="1d4+3"
+	death="Corpse"
+	faction="Wolves"
+}
+
+npc_type "killer bee" {
+	name="Killer Bee"
+	tier=1
+	tags=["attacksRandomly", "flying"]
+	color="255,255,0"
+	graphic='a'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=10
+		dodge=50
+		size=2
+	}
+	resistances {
+		physical=1
+	}
+	attack "Sting" {
+		type="piercing"
+		damage="1d4"
+		cooldown=20
+		statusEffects=["poison"]
+		effectChances=[   10   ]
+	}
+	spawnAsGroup="1d20+10"
+	death="Filth"
+	faction="Bees"
+}
+
+npc_type "kobold barbarian" {
+	name="Kobold barbarian"
+	tier=2
+	tags=["attacksRandomly", "hasHands"]
+	color="128,128,0"
+	graphic='k'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=40
+		dodge=10
+		size=5
+	}
+	resistances {
+		physical=3
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d4+1"
+		cooldown=20
+	}
+	equipOneOf=["Wooden club", "nothing", "nothing"]
+	spawnAsGroup="1d3+1"
+	death="Corpse"
+	faction="Kobolds"
+}
+
+npc_type "harpy" {
+	name="Harpy"
+	tier=3
+	plural="Harpies"
+	tags=["attacksRandomly", "flying"]
+	color="128,128,0"
+	graphic='B'
+	AI="HostileAnimal"
+	stats {
+		speed=12
+		health=150
+		dodge=3
+		size=8
+	}
+	resistances {
+		physical=5
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="2d7"
+		cooldown=10
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
+	}
+	spawnAsGroup="1d4+1"
+	death="Corpse"
+}
+
+npc_type "skeleton" {
+	name="Skeleton"
+	tier=3
+	tags=["attacksRandomly", "hasHands"]
+	color="250,250,250"
+	graphic='Z'
+	AI="HostileAnimal"
+	stats {
+		health=75
+		speed=5
+		dodge=0
+		size=7
+		strength=10
+	}
+	resistances {
+		physical=15
+		magic=50
+		bleeding=100
+	}
+	spawnAsGroup="1d20"
+	attack "Swipe" {
+		type="slashing"
+		damage="1d24"
+		cooldown=75
+	}
+	death="Bones"
+	faction="Undead"
+}
+
+npc_type "bandersnatch" { 
+	name="Bandersnatch"
+	tier=3
+	plural="Bandersnatches"
+	tags=["attacksRandomly"]
+	color="15,15,150"
+	graphic='t'
+	AI="HungryAnimal"
+	stats {
+		speed=25
+		health=50
+		dodge=15
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d12+4"
+		cooldown=25
+	}
+	spawnAsGroup="1d10"
+	death="Corpse"
+}
+
+npc_type "ogre" {
+	name="Ogre"
+	tier=4
+	tags=["attacksRandomly", "hasHands"]
+	color="192,192,192"
+	graphic='O'
+	AI="HostileAnimal"
+	stats {
+		speed=12
+		health=425
+		dodge=3
+		size=20
+	}
+	resistances {
+		physical=12
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="1d60+5"
+		cooldown=60
+		statusEffects=["Concussion"]
+		effectChances=[     75     ]
+	}
+	death="Large corpse"
+}
+
+npc_type "griffon" {
+	name="Griffon"
+	tier=4
+	tags=["attacksRandomly", "flying"]
+	color="240,240,240"
+	graphic='B'
+	AI="HostileAnimal"
+	stats {
+		speed=20
+		health=175
+		dodge=10
+		size=15
+	}
+	resistances {
+		physical=12
+	}
+	spawnAsGroup="1d3"
+	attack "Claw" {
+		type="slashing"
+		damage="2d20+6"
+		cooldown=30
+	}
+	death="Corpse"
+}
+
+npc_type "werewolf" {
+	name="Werewolf"
+	tier = 4
+	plural="Werewolves"
+	tags = ["attacksRandomly", "hasHands"]
+	color="255,0,0"
+	graphic='@'
+	AI="HostileAnimal"
+	stats {
+		speed=20
+		health=350
+		dodge=5
+		size=10
+	}
+	resistances {
+		physical=10
+		magic=10
+		poison=50
+	}
+	attack "bite" {
+		type="slashing"
+		damage="5d4+6"
+		cooldown=30
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+	}
+	spawnAsGroup="1d2"
+	death="Corpse"
+	faction="Wolves"
+}
+
+npc_type "minotaur" {
+	name="Minotaur"
+	tier=4
+	tags=["attacksRandomly", "hasHands"]
+	color="128,128,0"
+	graphic='H'
+	AI="HungryAnimal"
+	stats {
+		speed=20
+		health=350
+		dodge=3
+		size=13
+		strength=17
+	}
+	resistances {
+		physical=10
+	}
+	spawnAsGroup="1d2"
+	attack "Charge" {
+		type="blunt"
+		damage="2d20+15"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="2d20+10"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	attack "Kick" {
+		type="blunt"
+		damage="3d10"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     33     ]
+	}
+	death="Corpse"
+	faction="Minotaurs"
+}
+
+npc_type "raptor" {
+	name="Raptor"
+	tier=4
+	tags=["attacksRandomly", "hasHands"]
+	color="128,128,0"
+	graphic='S'
+	AI="HostileAnimal"
+	stats {
+		speed=30
+		health=75
+		dodge=15
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d20+4"
+		cooldown=25
+	}
+	spawnAsGroup="1d6+4"
+	death="Corpse"
+}
+
+npc_type "feral vampire" {
+	name="Feral vampire"
+	tier = 5
+	tags = ["attacksRandomly", "hasHands"]
+	color="41,209,54"
+	graphic='V'
+	AI="HostileAnimal"
+	stats {
+		speed=25
+		health=400
+		dodge=10
+		size=10
+	}
+	resistances {
+		physical=10
+		magic=10
+		poison=100
+		cold=25
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="2d20+10"
+		cooldown=40
+		statusEffects=["Bleeding"]
+		effectChances=[    75    ]
+	}
+	spawnAsGroup="1d4"
+	death="Corpse"
+	faction="Undead"
+}
+
+npc_type "giant" {
+	name="Giant"
+	tier=5
+	tags=["attacksRandomly", "hasHands"]
+	color="0,128,128"
+	graphic='H'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=700
+		dodge=3
+		size=35
+	}
+	resistances {
+		physical=10
+	}
+	spawnAsGroup="1d2"
+	attack "Smash" {
+		type="blunt"
+		damage="1d100+10"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
+	}
+	stats {
+	    strength=25
+	}
+	death="Huge corpse"
+	faction="Giants"
+}
+
+npc_type "cyclops" {
+	name="Cyclops"
+	tier=6
+	plural="Cyclopses"
+	tags=["attacksRandomly", "hasHands"]
+	color="230,0,0"
+	graphic='H'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=780
+		dodge=0
+		size=40
+	}
+	resistances {
+		physical=15
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="1d75+35"
+		cooldown=100
+		statusEffects=["Concussion"]
+	}
+	death="Huge corpse"
+	faction="Giants"
+	spawnAsGroup="1d6"
+}
+
+npc_type "jabberwock" {
+	name="Jabberwock"
+	tier=6
+	plural="Jabberwocky"
+	tags=["attacksRandomly"]
+	color="255,100,0"
+	graphic='J'
+	AI="HungryAnimal"
+	stats {
+		speed=12
+		health=375
+		dodge=5
+		size=15
+	}
+	resistances {
+		physical=80
+		poison=50
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="2d25"
+		cooldown=40
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d100"
+		cooldown=110
+	}
+	death="Corpse"
+}
+
+npc_type "manticore" {
+	name="Manticore"
+	tier=6
+	tags=["attacksRandomly", "flying"]
+	color="220,204,5"
+	graphic='B'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=500
+		dodge=10
+		size=20
+	}
+	resistances {
+		physical=10
+	}
+	attack "Stinger" {
+		type="piercing"
+		damage="1d50+25"
+		cooldown=120
+		statusEffects=["Poison"]
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="2d20+10"
+		cooldown=30
+	}
+	spawnAsGroup="1d2"
+	death="Large corpse"
+}
+
+npc_type "human soldier" {
+	tags = ["hasHands", "attacksRandomly"]
+	tier = 6
+	name = "Human soldier"
+	color = "255,255,255"
+	graphic='@'
+	AI="HostileAnimal"
+	stats {
+		speed=16
+		health=150
+		dodge=10
+		size=8
+	}
+	resistances {
+		physical=5
+		magic=10
+	}
+	attack "attack" {
+		type="wielded"
+		damage="1d10+2"
+		cooldown=25
+	}
+	equipOneOf=["Brigandine", "Mail hauberk", "Plate armor"]
+	equipOneOf=["Quiver"]
+	equipOneOf=["Wooden bow", "Iron spear", "Iron war hammer", "Iron axe", "Iron sword"]
+	equipOneOf=["Iron arrow"]
+	spawnAsGroup="1d20+10"
+	faction = "Humans"
+	death="Corpse"
+}
+
+npc_type "soldier ant" {
+	name="Soldier Ant"
+	color="0,0,255"
+	graphic='a'
+	AI="HostileAnimal"
+	stats {
+		speed=18
+		health=45
+		dodge=5
+		size=5
+		strength=15
+	}
+	resistances {
+		physical=30
+	}
+	attack "Bite" {
+		type="slashing"
+		damage="1d5+5"
+		cooldown=15
+	}
+	spawnAsGroup="1d7+3"
+	tags=["underground", "tunneler"]
+	death="Arthropod corpse"
+	faction="Ants"
+}
+
+npc_type "kobold raider" {
+	name="Kobold raider"
+	tags=["underground", "hasHands"]
+	color="234,0,0"
+	graphic='k'
+	AI="HostileAnimal"
+	stats {
+			speed=15
+			health=40
+			dodge=10
+			size=5
+	}
+	resistances {
+			physical=10
+	}
+	attack "attack" {
+			type="wielded"
+			damage="1d6+1"
+			cooldown=20
+	}
+	equipOneOf=["Wooden club", "nothing", "nothing"]
+	spawnAsGroup="1d6+2"
+	death="Corpse"
+	faction="Kobolds"
+}
+
+npc_type "giant bat" {
+	name="Giant bat"
+	tags=["underground", "flying"]
+	color="255,0,0"
+	graphic='B'
+	AI="HostileAnimal"
+	stats {
+		speed=10
+		health=50
+		dodge=5
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d6+3"
+		cooldown=25
+	}
+	spawnAsGroup="1d4+2"
+	death="Small corpse"
+}
+
+npc_type "cave worm" {
+	name="Cave worm"
+	tags=["claypit"]
+	color = "220,60,20"
+	graphic='S'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=50
+		dodge=10
+		size=5
+	}
+	resistances {
+		physical=5
+		magic=20
+	}
+	attack "Bite" {
+		type="piercing"
+		damage="1d10+5"
+		cooldown=25
+	}
+	spawnAsGroup="1d6+3"
+	death="Filth"
+}
+
+npc_type "raw golem" {
+	name="Raw golem"
+	tags=["claypit", "hasHands"]
+	color="220,80,70"
+	graphic='G'
+	AI="HostileAnimal"
+	stats {
+		speed=10
+		health=600
+		dodge=3
+		size=20
+	}
+	resistances {
+		physical=15
+		poison=100
+		bleeding=100
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="1d60+5"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     70     ]
+	}
+	death="Red clay"
+	faction="Golems"
+}
+
+npc_type "fired golem" {
+	name="Fired golem"
+	tags=["claypit", "hasHands"]
+	color="120,22,11"
+	graphic='G'
+	AI="HostileAnimal"
+	stats {
+		speed=6
+		health=900
+		dodge=1
+		size=20
+	}
+	resistances {
+		physical=25
+		poison=100
+		fire=100
+		bleeding=100
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="1d80+40"
+		cooldown=120
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
+	}
+	death="Red clay"
+	faction="Golems"
+}
+
+npc_type "angry bee" {
+	name="Angry bee"
+	tags=["flying", "bees"]
+	color="255,255,0"
+	graphic='a'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=10
+		dodge=50
+		size=2
+	}
+	resistances {
+		physical=1
+	}
+	attack "Sting" {
+		type="piercing"
+		damage="1d5"
+		cooldown=15
+		statusEffects=["poison"]
+		effectChances=[   10   ]
+	}
+	spawnAsGroup="1d9+3"
+	death="Filth"
+	faction="Bees"
+}
+
+//hackety hack hack
+
+npc_type "honey bee" {
+	name="Honey bee"
+	tags=["flying", "bees"]
+	color="255,255,0"
+	graphic='a'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=0
+		dodge=50
+		size=2
+	}
+	resistances {
+		physical=1
+	}
+	attack "Sting" {
+		type="piercing"
+		damage="1d5"
+		cooldown=15
+		statusEffects=["poison"]
+		effectChances=[   10   ]
+	}
+	spawnAsGroup="1d5"
+	death="Honeycomb"
+	faction="Bees"
+}
+
+npc_type "imp" {
+	name="Imp"
+	plural="Imps"
+	tags=["fire", "hasHands"]
+	color="224,73,87"
+	graphic='i'
+	AI="HostileAnimal"
+	stats {
+		speed=18
+		health=100
+		dodge=15
+		size=8
+	}
+	resistances {
+		physical=5
+		fire=50
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="1d5+5"
+		cooldown=50
+	}
+	attack "Fireball" {
+		cooldown=125
+		projectile="fireball"
+	}
+	spawnAsGroup="1d4"
+	death="Corpse"
+}
+
+npc_type "salamander" { 
+	name="Salamander"
+	color="255,140,0"
+	graphic='S'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=200
+		dodge=3
+		size=10
+		strength=15
+	}
+	resistances {
+		physical=10
+		fire=100
+	}
+	attack "Fiery bite" {
+		type="fire"
+		damage="2d10"
+		cooldown=50
+	}
+	spawnAsGroup="1d2"
+	death="Corpse"
+}
+
+npc_type "fire elemental" {
+	name="Fire Elemental"
+	color = "255,0,0"
+	graphic='E'
+	AI="HostileAnimal"
+	stats {
+		speed=15
+		health=300
+		dodge=3
+		size=35
+	}
+	resistances {
+		physical=50
+		fire=100
+		bleeding=100
+	}
+	spawnAsGroup="1d2"
+	attack "Burn" {
+		type="fire"
+		damage="1d100+10"
+		cooldown=80
+	}
+	attack "Fireball" {
+		cooldown=50
+		projectile="large fireball"
+	}
+	stats {
+	    strength=25
+	}
+	faction="Elementals"
+}
+
+npc_type "mumak" {
+	name="Mumak"
+	plural="Mumakil"
+	tier=3
+	tags=["localWildlife", "migratory", "calm"]
+	color="128,128,128"
+	graphic='q'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=150
+		dodge=1
+		size=30
+	}		
+	resistances {
+		physical=25
+	}
+	attack "Smash" {
+		type="blunt"
+		damage="1d75+15"
+		cooldown=80
+		statusEffects=["Concussion"]
+		effectChances=[     80     ]
+	}
+	spawnAsGroup="1d5"
+	death="Huge corpse"
+	faction = "Migrator"
+}
+
+npc_type "mastodon" {
+	name="Mastodon"
+	tier=3
+	tags=["localWildlife", "migratory", "calm"]
+	color="100,100,100"
+	graphic='q'
+	AI="PeacefulAnimal"
+	stats {
+		speed=10
+		health=150
+		dodge=3
+		size=25
+	}
+	resistances {
+		physical=25
+	}
+	attack "Stomp" {
+		type="blunt"
+		damage="1d50+20"
+		cooldown=75
+		statusEffects=["Concussion"]
+		effectChances=[     50     ]
+	}
+	spawnAsGroup="2d3"
+	death="Huge corpse"
+	faction = "Migrator"
+}
+
+npc_type "Baluchitherium" {
+	name="Baluchitherium"
+	plural="Baluchitheria"
+	tier=3
+	tags=["localWildlife", "migratory", "calm"]
+	color="130,130,130"
+	graphic='q'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=100
+		dodge=5
+		strength=10
+		size=20
+	}
+	resistances {
+		physical=5
+	}
+	attack "Gore" {
+		type="piercing"
+		damage="1d30+10"
+		cooldown=50
+	}
+	spawnAsGroup="1d5"
+	death="Large corpse"
+	faction = "Migrator"
+}
+
+npc_type "Firebird" {
+	name="firebird"
+	tier=2
+	tags=["localWildlife", "migratory", "flying"]
+	color="178,34,34"
+	graphic='B'
+	AI="PeacefulAnimal"
+	stats {
+		speed=15
+		health=50
+		dodge=35
+		strength=5
+		size=5
+	}
+	resistances {
+		physical=5
+	}
+	attack "Claw" {
+		type="slashing"
+		damage="2d10+5"
+		cooldown=15
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
+	}
+	spawnAsGroup="2d3+2"
+	death="Small corpse"
+	faction = "Migrator"
+}

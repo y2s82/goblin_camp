@@ -1,0 +1,2159 @@
+/* Item category definitions. */
+
+category_type "Wood" {
+	flammable
+}
+
+category_type "Log" {
+	parent="Wood"
+	flammable
+}
+
+category_type "Plank" {
+	parent="Wood"
+	flammable
+}
+
+category_type "Fuel" {
+	flammable
+}
+
+category_type "Charcoal" {
+	parent="Fuel"
+	flammable
+}
+
+category_type "Firewood" {
+	parent="Fuel"
+	flammable
+}
+
+category_type "Oil" {
+	parent="Fuel"
+	flammable
+}
+
+category_type "Food" {
+	flammable
+}
+
+category_type "Meat" {
+	parent="Food"
+	flammable
+}
+
+category_type "Prepared food" {
+	parent="Food"
+	flammable
+}
+
+category_type "Preserved food" {
+	parent="Food"
+	flammable
+}
+
+category_type "Berry" {
+	parent="Food"
+	flammable
+}
+
+category_type "Fruit" {
+	parent="Food"
+	flammable
+}
+
+category_type "Leaf" {
+	parent="Food"
+}
+
+category_type "Nut" {
+	parent="Food"
+}
+
+category_type "Vegetable" {
+	parent="Food"
+}
+
+category_type "Honey" {
+	parent="Food"
+}
+
+category_type "Drink" {
+}
+
+category_type "Water" {
+	parent="Drink"
+}
+
+category_type "Wine" {
+	parent="Drink"
+	flammable
+}
+
+category_type "Tincture" {
+	parent="Drink"
+}
+
+category_type "Textiles" {
+	flammable
+}
+
+category_type "Fiber" {
+	parent="Textiles"
+	flammable
+}
+
+category_type "Cloth" {
+	parent="Textiles"
+	flammable
+}
+
+category_type "Rope" {
+	parent="Textiles"
+	flammable
+}
+
+category_type "Organic material" {
+}
+
+category_type "Bone" {
+	parent="Organic material"
+}
+
+category_type "Chitin" {
+	parent="Organic material"
+}
+
+category_type "Bark" {
+	parent="Organic material"
+	flammable
+}
+
+category_type "Fibrous material" {
+	parent="Organic material"
+	flammable
+}
+
+category_type "Wicker" {
+	parent="Organic material"
+	flammable
+}
+
+category_type "Honeycomb" {
+	parent="Organic material"
+}
+
+category_type "Plant products" {
+}
+
+category_type "Powdered bark" {
+	parent="Plant products"
+	flammable
+}
+
+category_type "Flour" {
+	parent="Plant products"
+	flammable
+}
+
+category_type "Seed" {
+}
+
+category_type "Food seed" {
+	parent="Seed"
+}
+
+category_type "Fiber seed" {
+	parent="Seed"
+}
+
+category_type "Alchemy seed" {
+	parent="Seed"
+}
+
+category_type "Container" {
+}
+
+category_type "Crate" {
+	parent="Container"
+	flammable
+}
+
+category_type "Barrel" {
+	parent="Container"
+	flammable
+}
+
+category_type "Sack" {
+	parent="Container"
+	flammable
+}
+
+category_type "Basket" {
+	parent="Container"
+	flammable
+}
+
+category_type "Jar" {
+	parent="Container"
+}
+
+category_type "Furniture" {
+}
+
+category_type "Door" {
+	parent="Furniture"
+	flammable
+}
+
+category_type "Bed" {
+	parent="Furniture"
+	flammable
+}
+
+category_type "Statue" {
+	parent="Furniture"
+}
+
+category_type "Building materials" {
+}
+
+category_type "Rough stone" {
+	parent="Building materials"
+}
+
+category_type "Dressed stone" {
+	parent="Building materials"
+}
+
+category_type "Clay" {
+	parent="Building materials"
+}
+
+category_type "Brick" {
+	parent="Building materials"
+}
+
+category_type "Earth" {
+	parent="Building materials"
+}
+
+category_type "Metal" {
+}
+
+category_type "Metal ore" {
+	parent="Metal"
+}
+
+category_type "Impure metal" {
+	parent="Metal"
+}
+
+category_type "Metal bar" {
+	parent="Metal"
+}
+
+category_type "Leatherworking" {
+}
+
+category_type "Hide" {
+	parent="Leatherworking"
+	flammable
+}
+
+category_type "Leather" {
+	parent="Leatherworking"
+	flammable
+}
+
+category_type "Hardened leather" {
+	parent="Leatherworking"
+	flammable
+}
+
+category_type "Weapon component" {
+}
+
+category_type "Sharpened stone" {
+	parent="Weapon component"
+}
+
+category_type "Axe head" {
+	parent="Weapon component"
+}
+
+category_type "Blade" {
+	parent="Weapon component"
+}
+
+category_type "Hilt" {
+	parent="Weapon component"
+}
+
+category_type "Metal spearhead" {
+	parent="Weapon component"
+}
+
+category_type "Metal arrow head" {
+	parent="Weapon component"
+}
+
+category_type "Armor component" {
+}
+
+category_type "Sheet metal" {
+	parent="Armor component"
+}
+
+category_type "Chitin plate" {
+	parent="Armor component"
+}
+
+category_type "Bone plate" {
+	parent="Armor component"
+}
+
+category_type "Metal wire" {
+	parent="Armor component"
+}
+
+category_type "Weapon" {
+}
+
+category_type "Blunt weapon" {
+	parent="Weapon"
+}
+
+category_type "Slashing weapon" {
+	parent="Weapon"
+}
+
+category_type "Piercing weapon" {
+	parent="Weapon"
+}
+
+category_type "Ranged weapon" {
+	parent="Weapon"
+}
+
+category_type "Quiver" {
+	flammable
+}
+
+category_type "Ammunition" {
+}
+
+category_type "Arrow" {
+	parent="Ammunition"
+}
+
+category_type "Armor" {
+}
+
+category_type "Padded clothing" {
+	parent="Armor"
+}
+
+category_type "Light armor" {
+	parent="Armor"
+}
+
+category_type "Medium armor" {
+	parent="Armor"
+}
+
+category_type "Heavy armor" {
+	parent="Armor"
+}
+
+category_type "Tool" {
+}
+
+category_type "Shovel" {
+	parent="Tool"
+}
+
+category_type "Axe" {
+	parent="Tool"
+}
+
+category_type "Bucket" {
+	parent="Tool"
+}
+
+category_type "Anvil" {
+	parent="Tool"
+}
+
+category_type "Trap" {
+}
+
+category_type "Leghold trap" {
+	parent="Trap"
+}
+
+category_type "Alchemy" {
+}
+
+category_type "Tonic" {
+	parent="Alchemy"
+}
+
+category_type "Poison" {
+	parent="Alchemy"
+}
+
+category_type "Root" {
+	parent="Alchemy"
+	flammable
+}
+
+category_type "Vine" {
+	parent="Alchemy"
+	flammable
+}
+
+category_type "Shoot" {
+	parent="Alchemy"
+	flammable
+}
+
+category_type "Branch" {
+	parent="Alchemy"
+	flammable
+}
+
+category_type "Garbage" {
+}
+
+category_type "Plant" {
+	flammable
+}
+
+category_type "Corpse" {
+	parent="Garbage"
+	flammable
+}
+
+category_type "Misc." {
+	parent="Garbage"
+	flammable
+}
+
+/* Item types begin here */
+
+
+/* Wood */
+
+item_type "Wood log" {
+	category = ["Log"]
+	fruits = [ "Tree bark" ]
+	graphic = 22
+	color = "153,87,38"
+	multiplier = 5
+	bulk = 3
+}
+
+item_type "Wood plank" {
+	category = ["Plank"]
+	graphic = 124
+	color = "255,73,7"
+	components = ["Log"]
+	fitsin = "Crate"
+	multiplier = 5
+	constructedin = "Saw pit"
+}
+
+/* Container */
+
+item_type "Crate" {
+	category = ["Crate"]
+	containerSize = 10
+	graphic = 230
+	color = "255,186,0"
+	components = [ "Plank", "Plank", "Plank" ]
+	constructedin = "Carpenter"
+	bulk = 5
+}
+
+item_type "Wooden barrel" {
+	category = ["Barrel"]
+	containerSize = 20
+	graphic = 155
+	color = "255,73,7"
+	components = [ "Plank", "Plank", "Plank" ]
+	constructedin = "Carpenter"
+	bulk = 5
+}
+
+item_type "Wicker basket" {
+	category = ["Basket"]
+	containerSize = 20
+	graphic = 157
+	color = "153,87,38"
+	components = [ "Wicker", "Wicker" ]
+	constructedin = "Basket weaver"
+}
+
+item_type "Cloth sack" {
+	category = ["Sack"]
+	containerSize = 50
+	graphic = 208
+	color = "255,255,255"
+	components = [ "Cloth", "Cloth" ]
+	constructedin = "Weaver"
+}
+
+item_type "Clay jar" {
+	category = ["Jar"]
+	containerSize = 10
+	graphic = 147
+	color = "220,60,20"
+	components = ["Clay", "Firewood"]
+	constructedin = "Clay kiln"
+}
+
+/* Drink */
+
+item_type "Water" {
+	category = ["Water"]
+	graphic = 33
+	color = "0,100,250"
+	nutrition = 5.0
+	multiplier = 20
+	fitsin = "Barrel"
+	addStatusEffects=["Collywobbles", "Droops", "Rattles", "Chills"]
+	addEffectChances=[       2      ,     2   ,      2   ,     2   ]
+}
+
+
+item_type "Berry wine" {
+	category = ["Wine"]
+	graphic = 33
+	color = "127,0,0"
+	components = [ "Berry", "Berry", "Berry", "Berry", "Berry", "Water" ]
+	containIn = "Barrel"
+	nutrition = 6.0
+	multiplier = 10
+	constructedin = "Winery"
+	fitsin = "Barrel"
+	addStatusEffects=["Invigorated", "Drunk", "Sluggish"]
+	addEffectChances=[     75,          5,        5     ]
+}
+
+item_type "Chillwine" {
+	category = [ "Tincture" ]
+	graphic = 33
+	color = "221,234,234"
+	components = [ "Wine", "Wine", "Wine", "Wine", "Wine", "Wine", "Wine", "Wine", "Water",
+					"Leaf", "Leaf", "Leaf", "Leaf", "Leaf", "Leaf", "Leaf", "Leaf"]
+	containIn = "Barrel"
+	nutrition = 7.0
+	multiplier = 10
+	constructedin = "Winery"
+	fitsin = "Barrel"
+	addStatusEffects=["Invigorated", "Drunk"]
+	addEffectChances=[     75,          5   ]
+	removeStatusEffects=["Drowsy"]
+}
+
+item_type "Mead" {
+	category = ["Wine"]
+	graphic = 33
+	color = "127,0,0"
+	components = [ "Honey", "Honey", "Water", "Water" ]
+	containIn = "Barrel"
+	nutrition = 5.0
+	multiplier = 10
+	constructedin = "Winery"
+	fitsin = "Barrel"
+	addStatusEffects=["Invigorated", "Drunk", "Sluggish"]
+	addEffectChances=[     75,          5,        5     ]
+}
+
+/* Fuel */
+
+item_type "Firewood" {
+	category = ["Firewood"]
+	graphic = 246
+	color = "200, 75, 30"
+	components = ["Log"]
+	fitsin = "Crate"
+	multiplier = 5
+	constructedin = "Saw pit"
+}
+
+item_type "Wood charcoal" {
+	category = ["Charcoal"]
+	graphic = 176
+	color = "106, 106, 106"
+	components = ["Log"]
+	multiplier = 5
+	constructedin = "Charcoal pit"
+	fitsin = "Sack"
+}
+
+item_type "Hognut oil" {
+	category = [ "Oil" ]
+	graphic = 33
+	color = "153,87,38"
+	components = [ "Nut", "Nut", "Nut", "Nut", "Nut" ]
+	containIn = "Barrel"
+	multiplier = 10
+	constructedin = "Oil press"
+	fitsin = "Barrel"
+}	
+
+item_type "Vegetable oil" {
+	category = [ "Oil" ]
+	graphic = 33
+	color = "153,87,38"
+	components = [ "Vegetable", "Vegetable", "Vegetable", "Vegetable", "Vegetable" ]
+	containIn = "Barrel"
+	multiplier = 10
+	constructedin = "Oil press"
+	fitsin = "Barrel"
+}
+
+/* Food */
+
+item_type "Bloodberry" {
+	category = [ "Berry" ]
+	graphic = 248
+	color = "255,0,0"
+	nutrition = 2.2
+	fruits = [ "Bloodberry seed" ]
+	decay = [ "Bloodberry seed", "Filth" ]
+	decaySpeed = 5
+	fitsin = "Basket"
+}
+
+item_type "Thornberry" {
+	category = [ "Berry" ]
+	graphic = 248
+	color = "255,160,0"
+	nutrition = 2.8
+	fruits = [ "Silverthorn seed" ]
+	decay = [ "Silverthorn seed", "Filth" ]
+	decaySpeed = 5
+	fitsin = "Basket"
+}
+
+item_type "Nightbloom" {
+	category = [ "Fruit" ]
+	graphic = 248
+	color = "190,255,200"
+	nutrition = 2.0
+	fruits = [ "Nightbloom seed" ]
+	decay = [ "Nightbloom seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Lichfruit" {
+	category = [ "Fruit" ]
+	graphic = 248
+	color = "255,255,0"
+	nutrition = 3.0
+	fruits = [ "Lichfruit seed" ]
+	decay = [ "Lichfruit seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Radish" {
+	category = [ "Vegetable" ]
+	graphic = 248
+	color="237,21,85"
+	nutrition = 2.5
+	fruits = [ "Radish seed" ]
+	decay = [ "Radish seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Ghost cabbage" {
+	category = [ "Vegetable" ]
+	graphic = 248
+	color="183,177,174"
+	nutrition = 3.0
+	fruits = [ "Ghost cabbage seed" ]
+	decay = [ "Ghost cabbage seed", "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+item_type "Hognut" {
+	category = [ "Nut" ]
+	graphic = 248
+	color = "153,87,38"
+	nutrition = 2.5
+	fruits = [ "Hognut seed" ]
+	decay = [ "Hognut seed", "Filth" ]
+	decaySpeed = 12
+	fitsin = "Basket"
+}
+
+item_type "Chillweed leaf" {
+	category = [ "Leaf" ]
+	graphic = 248
+	color = "221,234,234"
+	nutrition = 1
+	decay = [ "Filth" ]
+	decaySpeed = 9
+	fitsin = "Sack"
+	removeStatusEffects=["Sluggish"]
+}
+
+item_type "Honey" {
+	category = ["Honey"]
+	graphic = 34
+	color = "218,165,32"
+	components = ["Honeycomb", "Jar"]
+	fitsin = "Basket"
+	nutrition = 2.5
+	decaySpeed = 18
+	decay = ["Filth", "Debris"]
+	constructedin = "Kitchen"
+}
+
+item_type "Meat" {
+	category = ["Meat"]
+	graphic = 37
+	color = "198,0,0"
+	components = ["Corpse"]
+	decay = [ "Filth" ]
+	decaySpeed = 5
+	nutrition = 6.0
+	constructedin = "Butcher"
+}
+
+item_type "Bone stew" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "102,204,0"
+	components = ["Bone", "Water", "Meat", "Firewood"]
+	nutrition = 11.0
+	constructedin = "Kitchen"
+	decaySpeed = 8
+	decay = ["Filth"]
+}
+
+item_type "Bread" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "127,89,63"
+	components = ["Flour", "Flour", "Flour", "Seed", "Seed", "Firewood", "Water"]
+	nutrition = 6.0
+	constructedin = "Bakery"
+	decaySpeed = 12
+	decay = ["Filth"]
+}
+
+item_type "Pie" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "255,0,220"
+	components = ["Berry", "Berry", "Berry", "Flour", "Flour", "Firewood", "Water"]
+	nutrition = 10.0
+	constructedin = "Bakery"
+	decaySpeed = 12
+	decay = ["Filth"]
+}
+
+item_type "Bark bread" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "107,66,38"
+	components = ["Powdered bark", "Powdered bark", "Flour", "Firewood", "Water"]
+	nutrition = 3.0
+	constructedin = "Bakery"
+	decaySpeed = 12
+	decay = ["Filth"]
+}
+
+item_type "Meat pie" {
+	category = ["Prepared food"]
+	graphic = 37
+	color = "127,0,0"
+	components = ["Meat", "Flour", "Flour", "Firewood", "Water"]
+	nutrition = 11
+	constructedin = "Bakery"
+	decaySpeed = 12
+	decay = ["Filth"]
+}
+
+item_type "Dried fruit" {
+	category = ["Preserved food"]
+	graphic = 42
+	color = "190,195,130"
+	components = ["Fruit","Fruit","Fruit"]
+	fitsin = "Basket"
+	nutrition = 2.0
+	decaySpeed = 15
+	decay = ["Filth"]
+	constructedin = "Kitchen"
+	multiplier = 3
+}
+
+item_type "Jerked meat" {
+	category = ["Preserved food"]
+	graphic = 37
+	color = "92,51,23"
+	components = ["Meat"]
+	fitsin = "Basket"
+	nutrition = 5.0
+	decaySpeed = 18
+	decay = ["Filth"]
+	constructedin = "Kitchen"
+}
+
+item_type "Jam" {
+	category = ["Preserved food"]
+	graphic = 34
+	color = "255,0,0"
+	components = ["Berry", "Berry", "Honey", "Firewood", "Jar"]
+	nutrition = 7.0
+	decaySpeed = 18
+	decay = ["Filth", "Debris"]
+	constructedin = "Kitchen"
+}
+
+/* Textiles */
+
+item_type "Blueleaf boll" {
+	category = [ "Fiber" ]
+	graphic = 249
+	color = "0,0,255"
+	fruits = [ "Blueleaf seed" ]
+	decay = [ "Blueleaf seed", "Filth" ]
+	decaySpeed = 12
+	fitsin = "Crate"
+}
+
+item_type "Lichfruit leaf" {
+	category = [ "Fiber" ]
+	graphic = 216
+	color = "255,255,0"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+	fitsin = "Crate"
+}
+
+item_type "Cloth" {
+	category = ["Cloth"]
+	graphic = 21
+	color = "255,255,255"
+	components = ["Fiber", "Fiber"]
+	constructedin = "Weaver"
+	fitsin = "Crate"
+}
+
+item_type "Rope" {
+	category = ["Rope"]
+	graphic = 167
+	color = "255,255,255"
+	components = ["Fiber", "Fiber"]
+	constructedin = "Weaver"
+	fitsin = "Crate"
+}
+
+/* Plant products */
+
+item_type "Flour" {
+	category = ["Flour"]
+	graphic = 44
+	color = "255,233,177"
+	components = ["Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed",
+               "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed", "Seed"]
+	containIn = "Sack"
+	constructedin = "Mill"
+	multiplier = 10
+	fitsin = "Sack"
+}
+
+item_type "Bark powder" {
+	category = ["Powdered bark"]
+	graphic = 44
+	color = "255,233,177"
+	components = ["Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark", "Bark"]
+	containIn = "Sack"
+	constructedin = "Mill"
+	multiplier = 10
+	fitsin = "Sack"
+}
+
+/* Organic material */
+
+item_type "Wicker" {
+    category = ["Wicker"]
+    graphic = 42
+    color = "127,106,0"
+    fitsin = "Crate"
+	multiplier = 5
+	decay = ["Dead plant"]
+	decaySpeed = 5
+}
+
+item_type "Dead plant" {
+	category = ["Fibrous material"]
+	graphic = 207
+	color = "127,89,63"
+	decay = ["Filth"]
+	decaySpeed = 2
+}
+
+item_type "Hair" {
+	category = ["Fibrous material"]
+	graphic = 207
+	color = "127,25,25"
+	decay = ["Filth"]
+	decaySpeed = 3
+}
+
+item_type "Bones" {
+	category = ["Bone"]
+	graphic = 47
+	color = "192,192,192"
+	decay = [ "Filth" ]
+	decaySpeed = 18
+	fitsin = "Crate"
+}
+
+item_type "Chitin fragment" {
+	category = ["Chitin"]
+	graphic = 235
+	color = "100,100,175"
+	decay = ["Filth"]
+	decaySpeed = 8
+	fitsin = "Crate"
+}
+
+item_type "Tree bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="139,90,43"
+	fitsin = "Crate"
+	decaySpeed = 4
+	decay = ["Filth"]
+}
+
+item_type "Birch bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="255,250,240"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
+}
+
+item_type "Pine bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="139,90,43"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
+}
+
+item_type "Willow bark" {
+	category = ["Bark"]
+	graphic = 59
+	color ="85,107,47"
+	fitsin = "Crate"
+	decaySpeed = 5
+	decay = ["Filth"]
+}
+
+item_type "Honeycomb" {
+	category = [ "Honeycomb" ]
+	graphic = 176
+	color = "238,221,130"
+	decay = [ "Filth" ]
+	decaySpeed = 6
+	fitsin = "Basket"
+}
+
+/* Seed */
+
+item_type "Bloodberry seed" {
+	category = ["Food seed"]
+	graphic = 250
+	color = "175,128,128"
+	growth = "Young Bloodberry shrub"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Blueleaf seed" {
+	category = ["Fiber seed"]
+	graphic = 250
+	color = "128,128,175"
+	growth = "Blueleaf sapling"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Nightbloom seed" {
+	category = ["Food seed"]
+	graphic = 250
+	color = "190,255,70"
+	growth = "Nightbloom sapling"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Chillweed seed" {
+	category = [ "Alchemy seed" ]
+	graphic = 250
+	color = "221,234,234"
+	growth = "Young chillweed"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Hognut seed" {
+	category = ["Food seed"]
+	graphic = 250
+	color = "153,87,38"
+	growth = "Young hognut bush"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Mandrake seed" {
+	category = [ "Alchemy seed" ]
+	graphic = 250
+	color = "127,50,0"
+	growth = "Young Mandrake"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Lichfruit seed" {
+	category = [ "Food seed" ]
+	graphic = 250
+	color = "255,255,0"
+	growth = "Lichfruit sapling"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Ghost cabbage seed" {
+	category = [ "Food seed" ]
+	graphic = 250
+	color="183,177,174"
+	growth = "Ghost cabbage shoot"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Radish seed" {
+	category = [ "Food seed" ]
+	graphic = 250
+	color="237,21,85"
+	growth = "Radish plant"
+	fitsin = "Sack"
+	bulk=0
+}
+
+item_type "Marshmerrow seed" {
+	category = ["Alchemy seed"]
+	graphic = 250
+	color = "0,136,14"
+	growth = "Young marshmerrow"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+item_type "Dreamvine seed" {
+	category = [ "Alchemy seed" ]
+	graphic=250
+	color="77,234,81"
+	growth="Young dreamvine"
+	fitsin= "Sack"
+	bulk=0
+}
+
+item_type "Marubium seed" {
+	category = [ "Alchemy seed" ]
+	graphic = 250
+	color="0,240,240"
+	growth = "Young marubium"
+	fitsin="Sack"
+	bulk=0
+}
+
+item_type "Silverthorn seed" {
+	category = ["Food seed"]
+	graphic = 250
+	color = "60,179,113"
+	growth = "Young Silverthorn shrub"
+	fitsin = "Sack"
+	bulk = 0
+}
+
+/* Furniture */
+
+item_type "Wooden door" {
+	category = ["Door"]
+	graphic = 197
+	color = "255,73,7"
+	components = ["Plank", "Plank", "Plank"]
+	constructedin = "Carpenter"
+	bulk = 5
+}
+
+item_type "Bone door" {
+	category = ["Door"]
+	graphic = 197
+	color = "255,255,255"
+	components = ["Bone", "Bone", "Bone"]
+	constructedin = "Bone carver"
+	bulk = 5
+}
+
+item_type "Wooden bed" {
+	category = ["Bed"]
+	graphic = 220
+	color = "127,106,0"
+	components = [ "Plank", "Plank", "Plank" ]
+	constructedin = "Carpenter"
+	bulk = 5
+}
+
+item_type "Bone bed" {
+	category = ["Bed"]
+	graphic = 220
+	color = "225,225,225"
+	components = [ "Bone", "Bone", "Bone" ]
+	constructedin = "Bone carver"
+	bulk = 5
+}
+
+item_type "Bone statue" {
+	category = ["Statue"]
+	graphic = 190
+	components = ["Bone", "Bone", "Bone", "Bone", "Bone"]
+	color = "255,255,255"
+	constructedin = "Bone carver"
+	bulk = 6
+}
+
+item_type "Stone statue" {
+	category = ["Statue"]
+	graphic = 190
+	components = ["Rough stone", "Rough stone"]
+	color = "255,255,255"
+	constructedin = "Stone mason"
+	bulk = 8
+}
+
+/* Building materials */
+
+item_type "Rough stone" {
+	category = ["Rough stone"]
+	graphic = 96
+	color = "192,192,192"
+	multiplier = 3
+	constructedin = "Stone quarry"
+	bulk = 3
+}
+
+item_type "Stone block" {
+	category = ["Dressed stone"]
+	graphic = 254
+	color = "192,192,192"
+	components = ["Rough stone"]
+	constructedin = "Stone mason"
+	bulk = 3
+}
+
+item_type "Red clay" {
+	category=["Clay"]
+	graphic = 4
+	color = "220,60,20"
+	multiplier = 5
+	constructedin = "Clay pit"
+}
+
+item_type "Red brick" {
+	category = ["Brick"]
+	graphic = 22
+	color = "200,0,0"
+	components = [ "Clay", "Clay", "Clay", "Charcoal" ]
+	constructedin = "Clay kiln"
+}
+
+item_type "Earth" {
+	category = [ "Earth" ]
+	graphic = 177
+	color = "127,50,0"
+}
+
+/* Metal */
+
+item_type "Bog iron" {
+	category = ["Metal ore"]
+	graphic = 145
+	color = "230,135,80"
+}
+
+item_type "Sponge iron" {
+	category = ["Impure metal"]
+	graphic = 198
+	color = "230,135,80"
+	components = ["Metal ore", "Metal ore", "Metal ore", "Charcoal", "Charcoal", "Charcoal", "Charcoal"]
+	constructedin = "Bloomery"
+	bulk = 3
+}
+
+item_type "Wrought iron" {
+	category = ["Metal bar"]
+	graphic = 170
+	color = "110,110,110"
+	components = ["Impure metal", "Charcoal"]
+	constructedin = "Blacksmith"
+	bulk = 3
+}
+
+/* Leatherworking */
+
+item_type "Hide" {
+	category = ["Hide"]
+	graphic = 245
+	color = "127,25,25"	
+	decay = [ "Filth" ]
+	decaySpeed = 4
+	fruits = [ "Hair" ]
+	fitsin = "Crate"
+}
+
+item_type "Leather" {
+	category = ["Leather"]
+	graphic = 245
+	color = "127,51,0"
+	components = ["Hide", "Powdered bark"]
+	fitsin = "Crate"
+	constructedin = "Tanner"
+}
+
+item_type "Boiled leather" {
+	category = ["Hardened leather"]
+	graphic = 245
+	color = "115,45,20"
+	components = ["Leather", "Firewood", "Water"]
+	fitsin = "Crate"
+	constructedin = "Leather crafter"
+}
+
+/* Weapon component */
+
+item_type "Sharpened stone" {
+	category = ["Sharpened stone"]
+	graphic = 30
+	color = "192,192,192"
+	components = ["Rough stone"]
+	constructedin = "Stone mason"
+	bulk = 2
+}
+
+item_type "Iron axe head" {
+	category = ["Axe head"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron spearhead" {
+	category = ["Metal spearhead"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron arrow heads" {
+	category = ["Metal arrow head"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron sword blade" {
+	category = ["Blade"]
+	graphic = 92
+	color = "110,110,110"
+	components = ["Metal bar", "Metal bar", "Charcoal", "Charcoal"]
+	constructedin = "Weaponsmith"
+	fitsin = "Crate"
+}
+
+item_type "Wooden hilt" {
+	category = ["Hilt"]
+	graphic = 92
+	color = "153,87,38"
+	components = ["Plank"]
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+}
+
+item_type "Bone hilt" {
+	category = ["Hilt"]
+	graphic = 92
+	color = "255,255,255"
+	components = ["Bone"]
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+}
+
+/* Armor component */
+
+item_type "Chitin plate" {
+	category = ["Chitin plate"]
+	graphic = 189
+	color = "100,100,175"
+	components = ["Chitin"]
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+}
+
+item_type "Bone plate" {
+	category = ["Bone plate"]
+	graphic = 189
+	color = "255,255,255"
+	components = ["Bone", "Bone"]
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+}
+
+item_type "Iron sheet" {
+	category = ["Sheet metal"]
+	graphic = 189
+	color = "110,110,110"
+	components = ["Metal bar", "Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+item_type "Iron wire" {
+	category = ["Metal wire"]
+	graphic = 111
+	color = "110,110,110"
+	components = ["Metal bar", "Charcoal"]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+}
+
+/* Weapon */
+
+item_type "Wooden club" {
+	category = ["Blunt weapon"]
+	graphic = 41
+	color = "127,106,0"
+	components = ["Plank"]
+	attack "Bash" {
+		type="blunt"
+		damage="1d10+3"
+		cooldown=25
+		statusEffects=["Concussion"]
+		effectChances=[     20     ]
+	}
+	constructedin = "Carpenter"
+	fitsin = "Crate"
+	durability = 10
+}
+
+item_type "Stone maul" {
+	category = ["Blunt weapon"]
+	graphic = 41
+	color = "192,192,192"
+	components = ["Plank", "Rough stone"]
+	attack "Crush" {
+		type="blunt"
+		damage="1d15+10"
+		cooldown=25
+		statusEffects=["Concussion"]
+		effectChances=[    33    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 2
+	durability = 15
+}
+
+item_type "Stone axe" {
+	category = ["Slashing weapon", "Axe"]
+	graphic = 41
+	color = "192,192,192"
+	components = ["Plank", "Sharpened stone"]
+	attack "Hack" {
+		type="slashing"
+		damage="2d15+9"
+		cooldown=35
+		statusEffects=["Bleeding"]
+		effectChances=[    33    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 2
+	durability = 15
+}
+
+item_type "Stone spear" {
+	category = ["Piercing weapon"]
+	graphic = 41
+	color = "192,192,192"
+	components = ["Plank", "Sharpened stone"]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d15+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    10    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	durability = 15
+}
+
+item_type "Bone dagger" {
+	category = ["Piercing weapon"]
+	graphic = 41
+	color = "200,200,200"
+	components = [ "Bone" ]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d10+7"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    10    ]
+	}
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+	durability = 10
+}
+
+item_type "Poisoned dagger" {
+	category = [ "Piercing weapon" ]
+	graphic = 41
+	color = "0,200,14"
+	components = [ "Bone", "Poison" ]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d10+7"
+		cooldown=25
+		statusEffects=["Bleeding", "Poison"]
+		effectChances=[    10    ,    50   ]
+	}
+	constructedin = "Bone carver"
+	fitsin = "Crate"
+	durability = 10
+}
+
+item_type "Iron spear" {
+	category = ["Piercing weapon"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Plank", "Metal spearhead"]
+	attack "Thrust" {
+		type="piercing"
+		damage="1d30+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    25    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	durability = 30
+}
+
+item_type "Iron war hammer" {
+	category = ["Blunt weapon"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Metal bar", "Metal bar", "Metal bar", "Charcoal", "Charcoal"]
+	attack "Crush" {
+		type="blunt"
+		damage="1d20+15"
+		cooldown=35
+		statusEffects=["Concussion"]
+		effectChances=[    50    ]
+	}
+	constructedin = "Weaponsmith"
+	fitsin = "Crate"
+	bulk = 2
+	durability = 30
+}
+
+item_type "Iron axe" {
+	category = ["Slashing weapon", "Axe"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Plank", "Axe head"]
+	attack "Hack" {
+		type="slashing"
+		damage="2d15+15"
+		cooldown=35
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 2
+	durability = 30
+}
+
+item_type "Iron sword" {
+	category = ["Slashing weapon"]
+	graphic = 41
+    color = "155,128,128"
+    components = ["Hilt", "Blade"]
+    attack "Slash" {
+    	type="slashing"
+		damage="3d15+15"
+		cooldown=35
+		statusEffects=["Bleeding"]
+		effectChances=[    50    ]
+    }
+    constructedin = "Weapon crafter"
+    fitsin = "Crate"
+	durability = 30
+}
+
+item_type "Wooden bow" {
+	category = ["Ranged weapon"]
+	graphic = 41
+	color = "200,64,0"
+	components = ["Plank", "Plank"]
+	attack "Fire" {
+		type="ranged"
+		ammo="Arrow"
+		cooldown=50
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	durability = 10
+}
+
+/* Quiver */
+
+item_type "Quiver" {
+	category = ["Quiver"]
+	graphic = 91
+	color ="200,64,0"
+	components = ["Leather"]
+	containerSize = 20
+	constructedin = "Leather crafter"
+	fitsin = "Crate"
+}
+
+/* Ammunition */
+
+item_type "Wooden arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "128,64,0"
+	components = [ "Plank" ]
+	multiplier = 10
+	attack "Pierce" {
+		type="piercing"
+		damage="1d10+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 0
+}
+
+item_type "Stone-tipped arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "160,160,160"
+	components = ["Plank", "Sharpened stone"]
+	multiplier = 5
+	attack "Pierce" {
+		type="piercing"
+		damage="1d20+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    25    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 0
+}
+
+item_type "Bone arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "200,200,200"
+	components = [ "Plank", "Bone" ]
+	multiplier = 5
+	attack "Pierce" {
+		type="piercing"
+		damage="1d15+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    20    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 0
+}
+
+item_type "Iron arrow" {
+	category = ["Arrow"]
+	graphic = 41
+	color = "155,128,128"
+	components = ["Plank", "Metal arrow head"]
+	multiplier = 5
+	attack "Pierce" {
+		type="piercing"
+		damage="1d25+10"
+		cooldown=25
+		statusEffects=["Bleeding"]
+		effectChances=[    40    ]
+	}
+	constructedin = "Weapon crafter"
+	fitsin = "Crate"
+	bulk = 0
+	durability = 2
+}
+
+/* Armor */
+
+item_type "Padded jack" {
+	category = ["Padded clothing"]
+	graphic = 91
+	color = "255,255,255"
+	components = [ "Cloth", "Cloth", "Cloth", "Cloth", "Cloth" ]
+	resistances {
+		physical = 5
+	}
+	constructedin = "Weaver"
+}
+
+item_type "Leather armor" {
+	category = ["Light armor"]
+	graphic = 91
+	color = "160,82,45"
+	components = ["Leather", "Cloth", "Hardened leather", "Hardened leather"]
+	resistances {
+		physical = 12
+	}
+	constructedin = "Leather crafter"
+	bulk = 2
+}
+
+item_type "Chitin armor" {
+	category = ["Light armor"]
+	graphic = 91
+	color = "100,100,175"
+	components = ["Leather", "Leather", "Leather", "Cloth", "Chitin plate", "Chitin plate"]
+	resistances {
+		physical = 15
+	}
+	constructedin = "Leather crafter"
+	bulk = 2
+}
+
+item_type "Bone armor" {
+	category = ["Light armor"]
+	graphic = 91
+	color = "255,255,255"
+	components = ["Leather", "Leather", "Leather", "Cloth", "Bone plate", "Bone plate"]
+	resistances {
+		physical = 15
+	}
+	constructedin = "Leather crafter"
+	bulk = 3
+}
+
+item_type "Brigandine" {
+	category = ["Medium armor"]
+	graphic = 91
+	color = "140,95,90"
+	components = ["Leather", "Leather", "Leather", "Leather", "Cloth", "Sheet metal", "Sheet metal", "Padded clothing"]
+	resistances {
+		physical = 20
+	}
+	constructedin = "Leather crafter"
+	bulk = 4
+}
+
+item_type "Mail hauberk" {
+	category = ["Medium armor"]
+	graphic = 91
+	color = "112,138,144"
+	components = ["Metal wire", "Metal wire", "Metal wire", "Metal wire", "Metal wire", "Padded clothing", "Charcoal", "Charcoal"]
+	resistances {
+		physical = 25
+	}
+	constructedin = "Armorsmith"
+	bulk = 4
+}
+
+item_type "Plate armor" {
+	category = ["Heavy armor"]
+	graphic = 91
+	color = "190,190,190"
+	components = ["Sheet metal", "Sheet metal", "Sheet metal", "Sheet metal", "Sheet metal", "Metal wire", "Padded clothing", "Cloth", "Leather", "Charcoal", "Charcoal", "Charcoal"]
+	resistances {
+		physical = 40
+	}
+	constructedin = "Armorsmith"
+	bulk = 6
+}
+
+/* Tool */
+
+item_type "Iron anvil" {
+	category = ["Anvil"]
+	graphic = 254
+	color = "155,128,128"
+	components = [ "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Metal bar", "Charcoal", "Charcoal", "Charcoal"]
+	constructedin = "Blacksmith"
+	bulk = 5
+}
+
+item_type "Shovel" {
+	category = ["Shovel"]
+	graphic = 93
+	color = "155,128,128"
+	components = [ "Plank", "Metal bar", "Charcoal" ]
+	constructedin = "Blacksmith"
+	fitsin = "Crate"
+	durability = 50
+}
+
+item_type "Wooden bucket" {
+	category = ["Bucket"]
+	containerSize = 10
+	graphic = 234
+	color = "255,73,7"
+	components = [ "Plank", "Plank" ]
+	constructedin = "Carpenter"
+	bulk = 2
+	durability = 4
+}
+
+/* Trap */
+
+item_type "Iron leghold trap" {
+	category = ["Leghold trap"]
+	graphic = 209
+	color = "155,128,128"
+	components = [ "Sheet metal", "Metal wire", "Metal bar", "Metal bar", "Charcoal", "Charcoal"]
+	constructedin = "Blacksmith"
+	bulk = 3
+}
+
+/* Alchemy */
+
+item_type "Poison antidote" {
+	category = [ "Tonic" ]
+	graphic = 33
+	color="0,240,240"
+	components = [ "Branch", "Wine" ]
+	constructedin = "Alchemist"
+	addStatusEffects=["Drunk"]
+	addEffectChances=[   1   ]
+	removeStatusEffects=["Poison"]
+}
+
+item_type "Healing tonic" {
+	category = [ "Tonic" ]
+	graphic = 33
+	color="0,136,14"
+	components = [ "Shoot", "Shoot", "Water" ]
+	constructedin = "Alchemist"
+	addStatusEffects=["Healing"]
+}
+
+item_type "Mandrake root" {
+	category = [ "Root" ]
+	graphic = 249
+	color = "127,50,0"
+	fruits = [ "Mandrake seed" ]
+	decay = [ "Mandrake seed", "Filth" ]
+	decaySpeed = 12
+	fitsin = "Jar"
+}
+
+item_type "Mandrake poison" {
+	category = [ "Poison" ]
+	graphic = 33
+	color = "0,200,14"
+	components = [ "Root" ]
+	constructedin = "Alchemist"
+}
+
+item_type "Marshmerrow shoot" {
+	category = [ "Shoot" ]
+	graphic = 47
+	color = "0,136,14"
+	fitsin="Jar"
+}
+
+item_type "Dreamvine" {
+	category = [ "Vine" ]
+	graphic = 167
+	color = "77,234,81"
+	fitsin = "Jar"
+}
+
+item_type "Marubium" {
+	category = [ "Branch" ]
+	graphic = 47
+	color = "0,240,240"
+	fruits = [ "Marubium seed" ]
+	fitsin ="Jar"
+}
+
+
+/* Garbage */
+
+item_type "Corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = [ "Bones", "Bones", "Filth", "Filth" ]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide", "Hide", "Body part" ]
+	bulk = 5
+	durability = 5
+	nutrition = 4.5
+}
+
+item_type "Large corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Bones", "Bones", "Filth", "Filth", "Filth"]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide", "Hide", "Hide", "Body part", "Body part" ]
+	bulk = 6
+	durability = 5
+	nutrition = 5.0
+}
+
+item_type "Huge corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Bones", "Bones", "Bones", "Filth", "Filth", "Filth", "Filth", "Body part"]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide", "Hide", "Hide", "Hide", "Body part", "Body part", "Body part", "Body part" ]
+	bulk = 8
+	durability = 5
+	nutrition = 6.0
+}
+
+item_type "Body part" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Filth"]
+	decaySpeed = 2
+	fruits = ["Bones"]
+	bulk = 2
+	durability = 4
+	nutrition = 2.0
+}
+
+item_type "Small corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Bones", "Filth"]
+	decaySpeed = 3
+	fruits = [ "Bones", "Hide" ]
+	bulk = 3
+	durability = 5
+	nutrition = 3.0
+}
+
+item_type "Arthropod corpse" {
+	category = ["Corpse", "Food"]
+	graphic = 37
+	color = "127,0,55"
+	decay = ["Chitin fragment", "Filth"]
+	decaySpeed = 4
+	fruits = [ "Chitin fragment", "Chitin fragment" ]
+	bulk = 4
+	durability = 5
+	nutrition = 3.5
+}
+
+item_type "Young Bloodberry shrub" {
+	category = ["Misc."]
+	graphic = 42
+	color = "255,106,0"
+	growth = "Bloodberry shrub"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Bloodberry shrub" {
+	category = ["Misc."]
+	graphic = 35
+	color = "255,0,0"
+	fruits = [ "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry", "Bloodberry" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Blueleaf sapling" {
+	category = ["Misc."]
+	graphic = 222
+	color = "127,146,255"
+	growth = "Blueleaf tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Blueleaf tree" {
+	category = ["Misc."]
+	graphic = 216
+	color = "0,0,255"
+	fruits = [ "Blueleaf boll", "Blueleaf boll", "Blueleaf boll", "Blueleaf boll" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Nightbloom sapling" {
+	category = ["Misc."]
+	graphic = 214
+	color = "190,255,128"
+	growth = "Nightbloom tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Nightbloom tree" {
+	category = ["Misc."]
+	graphic = 215
+	color = "190,195,155"
+	fruits = [ "Nightbloom", "Nightbloom", "Nightbloom" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young chillweed" {
+	category = [ "Misc." ]
+	graphic = 42
+	color = "221,234,234"
+	growth = "Chillweed bush"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Chillweed bush" {
+	category = [ "Misc." ]
+	graphic = 35
+	color = "221,234,234"
+	fruits = [ "Chillweed leaf", "Chillweed leaf", "Chillweed seed", "Chillweed seed" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young hognut bush" {
+	category = ["Misc."]
+	graphic = 42
+	color = "153,87,38"
+	growth = "Hognut bush"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Hognut bush" {
+	category = ["Misc."]
+	graphic = 42
+	color = "153,87,38"
+	fruits = [ "Hognut", "Hognut", "Hognut" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young Mandrake" {
+	category = [ "Misc." ]
+	graphic = 42
+	color = "127,50,0"
+	growth = "Mandrake"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Mandrake" {
+	category = [ "Misc." ]
+	graphic = 42
+	color = "127,50,0"
+	fruits = [ "Mandrake root" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Lichfruit sapling" {
+	category = ["Misc."]
+	graphic = 214
+	color = "255,255,0"
+	growth = "Stunted lichfruit tree"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Stunted lichfruit tree" {
+	category = ["Misc."]
+	graphic = 215
+	color = "255,255,0"
+	fruits = [ "Lichfruit", "Lichfruit", "Lichfruit leaf" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Ghost cabbage shoot" {
+	category = [ "Misc." ]
+	graphic = 35
+	color="225,222,221"
+	growth = "Ghost cabbage plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Ghost cabbage plant" {
+	category = [ "Misc." ]
+	graphic = 35
+	color = "183,177,174"
+	fruits = [ "Ghost cabbage", "Ghost cabbage" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Radish plant" {
+	category = [ "Misc." ]
+	graphic = 42
+	color="237,21,85"
+	fruits = [ "Radish", "Radish" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young marshmerrow" {
+	category = ["Misc."]
+	graphic = 42
+	color = "0,136,14"
+	growth = "Marshmerrow"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Marshmerrow" {
+	category = ["Misc."]
+	graphic = 35
+	color = "0,136,14"
+	fruits = [ "Marshmerrow shoot", "Marshmerrow seed", "Marshmerrow seed" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young dreamvine" {
+	category = ["Misc."]
+	graphic = 42
+	color="77,234,81"
+	growth = "Dreamvine plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Dreamvine plant" {
+	category = ["Misc."]
+	graphic = 35
+	color="77,234,81"
+	fruits = [ "Dreamvine", "Dreamvine seed", "Dreamvine seed" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young marubium" {
+	category = [ "Misc." ]
+	graphic = 42
+	color="0,240,240"
+	growth = "Marubium plant"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Marubium plant" {
+	category = [ "Misc." ]
+	graphic = 35
+	color="0,240,240"
+	fruits = [ "Marubium", "Marubium" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Young Silverthorn shrub" {
+	category = ["Misc."]
+	graphic = 42
+	color = "143,250,120"
+	growth = "Silverthorn shrub"
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Silverthorn shrub" {
+	category = ["Misc."]
+	graphic = 42
+	color = "143,188,143"
+	fruits = [ "Thornberry", "Thornberry", "Thornberry", "Thornberry" ]
+	decay = [ "Filth" ]
+	decaySpeed = 12
+}
+
+item_type "Flower" {
+	category = ["Garbage"]
+	graphic = 12
+	color = "255,255,255"
+	nutrition = 0.5
+	decay = ["Filth"]
+	decaySpeed = 3
+}
+
+item_type "Debris" {
+	category = ["Garbage"]
+	graphic = 239
+	color = "150, 150, 150"
+	decaySpeed = 2
+	durability = 2
+}
+
+item_type "Ash" {
+	category = ["Garbage"]
+	graphic = 249
+	color = "180, 180, 180"
+	decaySpeed = 12
+}
+
+item_type "Ice" {
+	category = [ "Misc." ]
+	graphic = 219
+	color="170,255,255"
+	bulk = 10
+	decaySpeed = 1
+}
+
+item_type "Gib" {
+	category = ["Garbage"]
+	graphic = 213
+	color = "185,20,30"
+	decaySpeed = 1
+	durability = 10
+}

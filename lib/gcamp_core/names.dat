@@ -1,0 +1,16 @@
+name "orc" {
+	syllablesPre = "Blackeye, Redeye, Bloodeye, Hardhead, Terrorizing, Murderer, Reaver, Slayer, Sureye, Charging, Assaulting, Boar-Tusks, Man-Eating, Pillaging, Killer, Oppressing, Devastating, Grimtooth, Tyrant"
+	syllablesStart = "Snag, Dak, Brub, Waat, Skar, Ug, Dur, Naff, Grot, Gob, Zog, Gut, Wort, Mor, Az, Zhar, Shag, Gor, Kar, Zhu, Ur"
+	syllablesMiddle = "yu, oi, lok, man, nik, rip, trim, az, naf, waaag, ur, bug"
+	syllablesEnd = "grim, naga, gut, snik, shak, bog, gul, rat, bag, zhak, gor"
+	syllablesPost = "the_Longlegged, the_Strong, the_Fat, the_Fearless, the_Slayer, Elfhammer, the_Smasher, Crusher, of_Death, Tree-Hewer, Bloodaxe, Bear-Biter, Sharptooth, Cleaver, Dwarfbane, Man-Eater, Battle-Ready, Goblin-Treader, Annihilator, the_Destroyer, the_Vile, Demon-Smasher, Elf-Crusher, Goblin-Throttler, the_Lunatic"
+	rules = "$s$30m$e_$50p, $50P_$s$30m$e"
+}
+
+name "goblin" {
+	syllablesPre = "Dimwitted, Shortlegged, Fearful, Backstabber, Running, Scurrying, Hiding, Treacherous, Ice-fisher, Plotting, Scheming, Shirking, Lazy, Sleeping"
+	syllablesStart = "Im, Om, Am, Ip, Orp, Irp, Kap, Kop, Kup, Hip, Pan, Hop, Hup, Tep, Tup, Ap, Il, Ir, El, Ib"
+	syllablesEnd = "pik, pak, ak, ik, sit, it, et, ot, ol, ong, onk, op, lik, sik, ok"
+	syllablesPost = "the_Stupid, the_Slow, the_Skinny, the_Coward, the_Weak, the_Lame, the_Puny, the_Snake, the_Traitor, the_Thief, the_Thinker, the_Downtrodden, the_Insignificant, In-the-Way, the_Rat, the_Loon, the_Clown, the_Stabber"
+	rules = "$s$e_$50p, $50P_$s$e"
+}

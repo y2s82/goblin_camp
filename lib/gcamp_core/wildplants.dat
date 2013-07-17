@@ -1,0 +1,362 @@
+plant_type "Ice" {
+	graphic=219
+	color="170,255,255"
+	condition=100
+	minheight=-100.0
+	maxheight=-100.0
+	walkable
+}
+
+plant_type "Pine" {
+	tree
+	graphic=6
+	color="0,200,14"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=50
+	condition=150
+	minheight=-0.07
+	maxheight=4.0
+}
+
+plant_type "Wild Bloodberry bush" {
+	graphic=35
+	color="140,0,0"
+	components=["Bloodberry"]
+	rarity=16
+	condition=10
+	cluster=7
+	harvestable
+	walkable
+	minheight=0.0
+	maxheight=2
+}
+
+plant_type "Wild Blueleaf" {
+	graphic=216
+	color="50,0,200"
+	components=["Blueleaf boll"]
+	rarity=10
+	condition=10
+	harvestable
+	minheight=-0.1
+	maxheight=0.5
+}
+
+plant_type "Dandelion" {
+	graphic=12
+	color="255,242,0"
+	components=["Flower"]
+	rarity=15
+	cluster=3
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Red Poppy" {
+	graphic=12
+	color="237,21,85"
+	components=["Flower"]
+	rarity=15
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Alpine aster" {
+	graphic=12
+	color="230,150,193"
+	components=["Flower"]
+	rarity=15
+	cluster=3
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Blue Skullcap" {
+	graphic=12
+	color="0,0,230"
+	components=["Flower"]
+	rarity=15
+	cluster=3
+	condition=1
+	harvestable
+	walkable
+}
+
+plant_type "Willow" {
+	tree
+	graphic=5
+	color="140,198,14"
+	components=["Wicker", "Wicker", "Wicker", "Wicker", "Wicker"]
+	rarity=300
+	condition=100
+	minheight=-5.0
+	maxheight=-0.01
+}
+
+plant_type "Birch" {
+	tree
+	graphic=215
+	color="224,224,224"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=30
+	condition=150
+	minheight=-0.07
+	maxheight=4.0
+}
+
+plant_type "Spruce" {
+	tree
+	graphic=6
+	color="0,136,14"
+	components=["Wood log", "Wood log", "Wood log", "Wood log", "Wood log"]
+	rarity=50
+	condition=150
+	minheight=-0.07
+	maxheight=4.0
+}
+
+plant_type "Silvervine" {
+	graphic=42
+	color="221,234,234"
+	rarity=275
+	condition=50
+	harvestable
+	minheight=-1
+	maxheight=-0.01
+}
+
+plant_type "Thornbush" {
+	graphic=35
+	color="213,232,83"
+	rarity=300
+	condition=50
+	harvestable
+	minheight=-1
+	maxheight=-0.01
+}
+
+plant_type "Withering tree" {
+	graphic=214
+	color="127,50,0"
+	components=["Wood log"]
+	rarity=0
+	condition=30
+	harvestable
+	minheight=-100.0
+	maxheight=-100.0
+}
+
+plant_type "Redhollow" {
+	tree
+	evil
+	graphic=6
+	color="200,30,30"
+	components=["Wood log", "Wood log", "Wood log"]
+	rarity=50
+	condition=150
+	minheight=-5.0
+	maxheight=4.0
+}
+
+plant_type "Darkroot" {
+	tree
+	evil
+	graphic=5
+	color="100,30,30"
+	components=["Wood log", "Wood log", "Wood log"]
+	rarity=50
+	condition=150
+	minheight=-5.0
+	maxheight=4.0
+}
+
+plant_type "Scorched tree" {
+	tree
+	graphic=141
+	color="75,50,20"
+	rarity=0
+	condition=10
+	minheight=-100.0
+	maxheight=-100.0
+}
+
+plant_type "Lichen" {
+	graphic=35
+	color="92,125,81"
+	rarity=30
+	condition=10
+	cluster=4
+	harvestable
+	walkable
+	minheight=2
+	maxheight=4
+}
+
+plant_type "Moss" {
+	graphic=35
+	color="5,55,5"
+	rarity=30
+	condition=10
+	cluster=4
+	harvestable
+	walkable
+	minheight=0
+	maxheight=2
+}
+
+plant_type "Chillweed" {
+	graphic=35
+	color="221,234,234"
+	components=[ "Chillweed seed" ]
+	rarity=17
+	condition=10
+	cluster=1
+	harvestable
+	walkable
+	minheight=0.0
+	maxheight=3
+}
+
+plant_type "Mandrake shrub" {
+	evil
+	graphic=42
+	color="127,50,0"
+	components=[ "Mandrake root" ]
+	rarity=50
+	condition=150
+	harvestable
+	walkable
+	minheight=0.0
+	maxheight=4
+}
+
+plant_type "Gorgon plant" {
+	evil
+	graphic=42
+	color="100,30,30"
+	components= [ "Flower" ]
+	rarity=100
+	condition=50
+	harvestable
+	minheight=-1
+	maxheight=-0.01
+}
+
+plant_type "Lichfruit growth" {
+	evil
+	graphic=5
+	color="255,255,0"
+	components=["Lichfruit"]
+	rarity=50
+	condition=150
+	harvestable
+	walkable
+	minheight=-5.0
+	maxheight=4.0
+}
+
+plant_type "Wild dreamvine" {
+	graphic=35
+	color="77,234,81"
+	components = [ "Dreamvine seed" ]
+	rarity=20
+	condition=50
+	cluster=1
+	harvestable
+	walkable
+	minheight=2
+	maxheight=4
+}
+
+plant_type "Marshmerrow" {
+	graphic=35
+	color="0,136,14"
+	components = [ "Marshmerrow seed" ]
+	rarity=70
+	condition=50
+	cluster=1
+	harvestable
+	walkable
+	minheight=-1
+	maxheight=-0.01
+}
+
+plant_type "Hognut shrub" {
+	graphic=42
+	color = "153,87,38"
+	components= [ "Hognut" ]
+	rarity=70
+	condition=50
+	cluster=1
+	harvestable
+	minheight=-1
+	maxheight=-0.01
+}
+
+
+plant_type "Marubium shrub" {
+	graphic = 35
+	color="0,240,240"
+	components = [ "Marubium seed" ]
+	rarity=16
+	condition=10
+	cluster=1
+	harvestable
+	walkable
+	minheight=2
+	maxheight=4
+}
+
+plant_type "Wild nightbloom" {
+	graphic = 214
+	color = "190,255,128"
+	components = [ "Nightbloom" ]
+	rarity=16
+	condition=10
+	cluster=2
+	harvestable
+	walkable
+	minheight=0.0
+	maxheight=2
+}
+
+plant_type "Ghost cabbage growth" {
+	evil
+	graphic=42
+	color="183,177,174"
+	components = [ "Ghost cabbage" ]
+	rarity=50
+	condition=10
+	harvestable
+	walkable
+	minheight=0.0
+	maxheight=4
+}
+
+plant_type "Wild radish" {
+	graphic = 42
+	color="237,21,85"
+	components = [ "Radish" ]
+	rarity=20
+	condition=10
+	cluster=1
+	harvestable
+	walkable
+	minheight=1
+	maxheight=3
+}
+
+plant_type "Silverthorn" {
+	graphic=42
+	color="143,188,143"
+	components=["Thornberry"]
+	rarity=100
+	condition=50
+	cluster=3
+	harvestable
+	minheight=-1
+	maxheight=-0.01
+}

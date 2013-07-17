@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleName</key>
+    <string>Goblin Camp</string>
+    <key>CFBundleDisplayName</key>
+    <string>Goblin Camp</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.goblincamp</string>
+    <key>CFBundleVersion</key>
+    <string>0.21</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleSignature</key>
+    <string>gcmp</string>
+    <key>CFBundleExecutable</key>
+    <string>goblin-camp</string>
+    <key>CFBundleIconFile</key>
+    <string>GoblinCamp.icns</string>
+</dict>
+</plist>

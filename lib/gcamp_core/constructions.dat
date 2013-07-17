@@ -1,0 +1,713 @@
+/* Basics */
+
+construction_type "Pile" {
+	tier=0
+	category="Basics"
+	stockpile
+	walkable
+	graphicLength=1
+	graphic=[61]
+	color="255,255,255"
+	maxCondition=10
+	description="Piles designate an area meant for piling stuff."
+	placementType=1
+	slowMovement=10
+}
+
+construction_type "Farm plot" {
+	tier=0
+	category="Basics"
+	farmplot
+	walkable
+	graphicLength=1
+	graphic=[126]
+	maxCondition=10
+	tileReqs=["grass", "mud"]
+	description="Designates an area to be used for agriculture"
+}
+
+construction_type "Totem pole" {
+	tier=1
+	category="Basics"
+	unique
+	centersCamp
+	maxCondition=100
+	materials=["Log", "Log", "Log", "Log", "Log"]
+	graphicLength=3
+	graphic=[201, 205, 187,
+			 186,  10, 186,
+			 200, 205, 188]
+	description="The Totem Pole represents the center of your camp"
+}
+
+construction_type "Pontoon bridge" {
+	tier=1
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=50
+	materials=["Barrel", "Barrel", "Barrel", "Barrel", "Plank", "Plank", "Plank", "Plank", "Rope", "Rope"]
+	graphicLength=2
+	graphic=[157, 157,
+			 157, 157]
+	tileReqs=["grass", "rock", "ditch", "mud", "river", "bog"]
+	description="A bridge composed of barrels and planks"
+}
+
+construction_type "Rampart" {
+	tier=1
+	category="Basics"
+	graphicLength=1
+	graphic=[178]
+	slowMovement=20
+	maxCondition=30
+	materials=["Earth", "Earth"]
+	placementType=2
+	description="Earthen rampart helps slow down creatures"
+}
+
+construction_type "Bone fence" {
+	tier=1
+	category="Basics"
+	graphicLength=1
+	graphic=[20]
+	slowMovement=5
+	maxCondition=10
+	materials=["Bone", "Bone", "Bone", "Bone"]
+	placementType=2
+	description="A rudimentary fence"
+}
+
+construction_type "Palisade" {
+	tier=2
+	category="Basics"
+	wall
+	maxCondition=50
+	materials=["Log","Log","Log"]
+	tileReqs=["grass", "mud"]
+	placementType=2
+	description="A palisade will stop most monsters from gaining free access to your camp"
+}
+
+construction_type "Battlement" {
+	tier=2
+	category="Basics"
+	graphicLength=1
+	graphic=[127]
+	walkable
+	maxCondition=30
+	materials=["Plank","Plank","Plank","Plank","Plank"]
+	description="Creatures with ranged weapons can fire over walls from battlements"
+	passiveStatusEffects=["Highground"]
+}
+
+construction_type "Duckboard" {
+	tier=2
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=30
+	materials=["Plank","Plank","Plank"]
+	graphicLength=1
+	graphic=[19]
+	tileReqs=["grass", "rock", "mud", "bog"]
+	placementType=2
+	description="A wooden platform for easier travel over muddy terrain"
+}
+
+construction_type "Cobblestone road" {
+	tier=3
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=40
+	materials=["Rough stone","Rough stone","Rough stone","Rough stone"]
+	graphicLength=1
+	graphic=[176]
+	tileReqs=["grass", "mud"]
+	placementType=2
+	description="A rough road"
+}
+
+construction_type "Brick wall" {
+	tier=3
+	category="Basics"
+	wall
+	maxCondition=90
+	materials=["Brick","Brick","Brick","Brick","Brick"]
+	placementType=2
+}
+
+construction_type "Brick road" {
+	tier=4
+	category="Basics"
+	bridge
+	walkable
+	maxCondition=50
+	materials=["Brick","Brick","Brick","Brick"]
+	graphicLength=1
+	graphic=[177]
+	tileReqs=["grass", "rock", "mud"]
+	placementType=2
+	description="Brick paved road"
+}
+
+construction_type "Stone wall" {
+	tier=5
+	category="Basics"
+	maxCondition=200
+	materials=["Dressed stone", "Dressed stone", "Dressed stone", "Dressed stone", "Dressed stone",
+						"Dressed stone", "Dressed stone", "Dressed stone", "Dressed stone", "Dressed stone"]
+	graphicLength=1
+	graphic=[219]
+	placementType=2
+}
+
+/* Workshops */
+
+construction_type "Saw pit" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  95, 95, 95,
+			 178, 46, 44]
+	walkable
+	maxCondition=90
+	materials=["Log","Log","Log"]
+	productionx=1
+	productiony=1
+	description="Planks are created in saw pits"
+	tileReqs=["grass", "mud"]
+}
+
+construction_type "Carpenter" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 35, 46,177,
+			  35, 67, 46,
+			 178, 46,177]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=1
+	description="A carpenter's workshop allows your orcs to create basic wooden items"
+}
+
+construction_type "Basket weaver" {
+	tier=0
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 30, 30, 157,
+			  46, 46, 46,
+			  35, 30, 30]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	description="Baskets are mainly used to store berries and fruit"
+}
+
+construction_type "Winery" {
+	tier=0
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10, 33, 35,231]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=0
+}
+
+construction_type "Kitchen" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  95, 95, 127]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+	description="Dry fruits to keep longer, prepare food from basic ingredients"
+	chimneyx=0
+	chimneyy=1
+}
+
+construction_type "Weaver" {
+	tier=1
+	category="Workshops"
+	graphicLength=3
+	graphic=[ 21, 30, 30,
+			  46, 46, 46,
+			  30, 30, 21]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	description="Make cloth, sacks and rope"
+}
+
+construction_type "Bone carver" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,179,  9, 
+			  19, 179,179, 19,
+			  41,  42, 42, 40]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+	description="Bones can be carved into weapons, furniture and decorations"
+}
+
+construction_type "Butcher" {
+	tier=1
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 37,179,179, 37, 
+			  19,179,179, 19,
+			  37, 42, 42, 37]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=2
+}
+
+construction_type "Stone mason" {
+	tier=2
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,157,178,
+			  40, 10, 46,178,
+			 170,157, 46,178]
+	walkable
+	maxCondition=90
+	productionx=2
+	productiony=1
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Weapon crafter" {
+	tier=2
+	category="Workshops"
+	graphicLength=2
+	graphic=[ 91, 92,
+			 124, 46,
+			 124, 46,
+			 123,125]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+}
+
+construction_type "Leather crafter" {
+	tier=2
+	category="Workshops"
+	graphicLength=2
+	graphic=[16, 124,
+			 170, 124,
+			 91, 93,
+			 94, 251]
+	walkable
+	maxCondition=80
+	productionx=1
+	productiony=2
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	chimneyx=1
+	chimneyy=1
+	description="Makes quivers and armor from leather"
+}
+
+construction_type "Tanner" {
+	tier=2
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10,  9, 46,231,
+			  35, 35,  9,231]
+	walkable
+	maxCondition=120
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=1
+	description="Tanners create leather from animal hides"
+}
+
+construction_type "Bakery" {
+	tier=2
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9,179,128,127,
+			  10,179,  9, 16,
+			  10, 95, 95, 16]
+	walkable
+	maxCondition=120
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+			   "Rough stone", "Rough stone", "Rough stone"]
+	productionx=1
+	productiony=2
+	description="Make bread, pies etc"
+	chimneyx=0
+	chimneyy=1
+}
+
+construction_type "Mill" {
+	tier=2
+	category="Workshops"
+	graphicLength=5
+	graphic=[157,177, 30, 46, 46,
+			 157,177, 46, 92, 46,
+			  17, 46, 10,205, 16,
+			  46, 92, 46, 47, 46,
+			  46, 46, 31, 46, 46]
+	walkable
+	maxCondition=250
+	productionx=2
+	productiony=1
+	materials=["Rough stone","Rough stone","Log","Plank","Plank","Plank","Plank","Plank",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	description="Used to grind seeds into flour, for use in baking"
+}
+
+construction_type "Apiary" {
+	tier=2
+	category="Workshops"
+	graphicLength=2
+	graphic=[  9, 10,
+			  10, 10]
+	walkable
+	maxCondition=50
+	productionx=1
+	productiony=0
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	spawnsCreatures="bees"
+	spawnFrequency=500
+	tileReqs=["grass", "mud"]
+	description="Keep bees for honey!"
+}
+
+construction_type "Clay kiln" {
+	tier=2
+	category="Workshops"
+	graphicLength=2
+	graphic=[ 10, 35,
+			  35, 46,
+			 231,  9,
+			   2,173]
+	walkable
+	maxCondition=80
+	materials=["Clay","Clay","Clay","Clay","Clay",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=1
+	productiony=1
+	description="Used to create bricks out of clay"
+	chimneyx=0
+	chimneyy=2
+}
+
+construction_type "Bloomery" {
+	tier=3
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 40, 46,176,191,
+			  40, 10, 46, 10,
+			 170,157,176,217]
+	walkable
+	maxCondition=120
+	productionx=2
+	productiony=1
+	materials=["Brick","Brick","Brick","Brick","Brick","Brick","Brick","Brick","Brick","Brick"]
+	description="Bloomeries are used to smelt iron"
+	chimneyx=2
+	chimneyy=1
+}
+
+construction_type "Blacksmith" {
+    tier=3
+	category="Workshops"
+	graphicLength=3
+	graphic=[176, 20, 28,
+			   9,254,177,
+			  35,177, 46]
+	walkable
+	maxCondition=90
+	productionx=1
+	productiony=1
+	materials=["Rough stone", "Log", "Brick", "Brick", "Brick", "Leather",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+				"Plank","Plank","Plank","Plank","Plank"]
+	description="Create metal bars, and items from them"
+	chimneyx=2
+	chimneyy=0
+}
+
+construction_type "Oil press" {
+	tier=3
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 10, 46, 46,231,
+			  10,  9, 46,231,
+			  35, 153,  9,231]
+	walkable
+	maxCondition=120
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=1
+	description="Creates oil from nuts and vegetables."
+}
+
+construction_type "Alchemist" {
+	tier=4
+	category="Workshops"
+	graphicLength=4
+	graphic=[  9, 179,178, 127, 
+			  10, 179,178, 16,
+			 127,  33, 95, 127]
+	walkable
+	maxCondition=90
+	materials=["Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+	           "Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank"]
+	productionx=2
+	productiony=0
+	description="The alchemist creates tonics, tinctures and poisons."
+}
+
+construction_type "Armorsmith" {
+    tier=4
+	category="Workshops"
+	graphicLength=4
+	graphic=[176, 20, 28, 46,
+			   9,254, 46,177,
+ 			 170,  9, 46,177,
+			  35, 35,177, 46]
+	walkable
+	maxCondition=160
+	productionx=2
+	productiony=1
+	materials=["Rough stone", "Rough stone", "Brick", "Brick", "Brick", "Leather", "Anvil",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+				"Plank","Plank","Plank","Plank","Plank"]
+	description="Create metal armor for your orcs"
+	chimneyx=2
+	chimneyy=0
+}
+
+construction_type "Weaponsmith" {
+    tier=5
+	category="Workshops"
+	graphicLength=4
+	graphic=[ 35, 20,170, 46,
+ 			  35,  9, 46, 46,
+ 			 170,254, 46,177,
+			  46, 35,177,177]
+	walkable
+	maxCondition=160
+	productionx=2
+	productiony=2
+	materials=["Rough stone", "Rough stone", "Brick", "Brick", "Brick", "Leather", "Anvil",
+				"Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank","Plank",
+				"Plank","Plank","Plank","Plank","Plank"]
+	description="Required for advanced metal weapons"
+	chimneyx=2
+	chimneyy=0
+}
+
+/* Permanent */
+
+construction_type "Spawning pool" {
+	tier=0
+	category="Permanent"
+	graphicLength=1
+	graphic=[ 126 ]
+	color="0,255,128"
+	walkable
+	maxCondition=30
+	productionx=0
+	productiony=0
+	permanent
+	unique
+	spawningPool
+	description="A pit of slime, it will spawn new goblins and orcs as long as it is provided with filth and corpses"
+}
+
+construction_type "Clay pit" {
+	tier=2
+	category="Permanent"
+	graphicLength=5
+	graphic=[201, 203, 203, 203, 187,
+			204,  92,  31,  47, 185,
+			204,  16, 176,  17, 185,
+			204,  47,  30,  92, 185,
+			200, 202, 202, 202, 188]
+	walkable
+	maxCondition=500
+	productionx=2
+	productiony=2
+	spawnsCreatures="claypit"
+	spawnFrequency=900
+	permanent
+	color="220,80,70"
+	tileReqs=["grass", "mud"]
+	description="Gives you access to clay."
+}
+
+construction_type "Stone quarry" {
+	tier=2
+	category="Permanent"
+	graphicLength=10
+	graphic=[176,176,178, 44,177,176,177,178,178,176,
+			 177, 46, 46, 44, 44, 44, 46,177,176,177,
+			  46, 46,178,176,177,176, 46, 46, 44,176,
+			 178, 46, 46,176,178,178,177,178, 44, 46,
+			 176, 46,177,178, 32, 32,176,177, 46,178,
+			 176, 46, 46, 44, 32, 32,177,176, 46,177,
+			 177,176,177,178,177,177,176,178, 46,177,
+			 178, 46, 46,177,176,178,176, 44, 46,178,
+			 176, 46,178,176,176,177,176, 44, 46, 46,
+			 178, 46,177,177,178,178,177, 44, 46, 46]
+	walkable
+	maxCondition=1000
+	productionx=3
+	productiony=5
+	spawnsCreatures="underground"
+	spawnFrequency=600
+	permanent
+	tileReqs=["rock"]
+	description="Stone is required for more advanced buildings. Beware underground monsters!"
+}
+
+construction_type "Charcoal pit" {
+    tier=3
+	category="Permanent"
+	graphicLength=5
+	graphic=[ 44, 44, 44, 46, 44,
+			  46, 92, 30, 47, 46,
+			  46, 17,176, 16, 44,
+			  46, 47, 31, 92, 44,
+			  44, 46, 46, 44, 46]
+	walkable
+	maxCondition=250
+	productionx=2
+	productiony=2		
+	spawnsCreatures="fire"
+	spawnFrequency=700
+	permanent
+	color="190, 127, 0"
+	description="Used to make charcoal out of wood logs"
+	chimneyx=2
+	chimneyy=2
+	tileReqs=["grass", "mud"]
+}
+
+/* Furniture */
+
+construction_type "Bed" {
+	tier=0
+	category="Furniture"
+	bed
+	graphicLength=1
+	graphic=[220]
+	walkable
+	maxCondition=10
+	materials=["Bed"]
+	description="Sleeping without a bed makes your creatures tired"
+}
+
+construction_type "Door" {
+	tier=0
+	category="Furniture"
+	door
+	graphicLength=1
+	graphic=[43]
+	walkable
+	blocksLight
+	maxCondition=10
+	materials=["Door"]
+	description="Handy for keeping out handless enemies"
+}
+
+construction_type "Statue" {
+	tier=1
+	category="Furniture"
+	furniture
+	graphicLength=1
+	graphic=[190]
+	maxCondition=20
+	materials=["Statue"]
+	description="Decorate your camp with fearsome statues"
+}
+
+/* Traps */
+
+construction_type "Spiked pit" {
+	tier=1
+	category="Traps"
+	graphicLength=1
+	graphic=[94]
+	color="255,255,255"
+	walkable
+	maxCondition=10
+	materials=["Plank"]
+	description="Spiked pit"
+	attack "Spikes" {
+		type="piercing"
+		damage="1d40+5"
+		statusEffects=["Helpless"]
+	}
+	tileReqs=["ditch"]
+}
+
+construction_type "Bear trap" {
+	tier=3
+	category="Traps"
+	graphicLength=1
+	graphic=[94]
+	color="255,255,255"
+	walkable
+	maxCondition=20
+	materials=["Leghold trap"]
+	description="Bear trap"
+	attack "Jaws" {
+		type="piercing"
+		damage="3d10+10"
+		statusEffects=["Helpless", "Bleeding"]
+		effectChances=[    95    , 		80	 ]
+	}
+}
