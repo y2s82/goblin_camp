@@ -82,7 +82,7 @@ namespace Script {
 		
 		LOG("Python " << Py_GetVersion());
 		
-		// Don't use default search path.
+		// Don't use default search path. FIXME?
 		{
 		#ifdef WINDOWS
 			char pathsep = ';';
@@ -95,6 +95,10 @@ namespace Script {
 			path += pathsep;
 			path += (libDir / "stdlib.zip").string();
 			
+			// FIXME?
+			// std::string defaultpath = Py_GetPath();
+			// path += defaultpath;
+
 			PySys_SetPath(const_cast<char*>(path.c_str()));
 		}
 		

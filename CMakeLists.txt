@@ -32,4 +32,5 @@ add_subdirectory (src)
 #         DESTINATION include)
 
 SET (CMAKE_INSTALL_PREFIX "./pkg/usr")
-install (DIRECTORY lib DESTINATION share)
+install (DIRECTORY lib DESTINATION share/goblincamp)
+install (FILES terminal.png DESTINATION share/goblincamp)
