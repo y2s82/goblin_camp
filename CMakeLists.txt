@@ -23,14 +23,12 @@ configure_file (
 
 # damned snake
 add_subdirectory (vendor/python-modules)
+#add_subdirectory (lib)
 
 # main goblincamp stuff
 add_subdirectory (src)
 
-# add the executable
-
-
-# add the install targets
-#install (TARGETS goblincamp DESTINATION bin)
 #install (FILES "${GOBLICAMP_BINARY_DIR}/version.hpp"
 #         DESTINATION include)
+
+install (DIRECTORY lib DESTINATION lib)

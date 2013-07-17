@@ -63,3 +63,6 @@ target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png 
 
 # have to use c++11 or gnu++11, because lambda expressions
 set_target_properties(goblincamp PROPERTIES COMPILE_FLAGS "-std=gnu++11 -Wall")
+
+# add the install targets
+install (TARGETS goblincamp DESTINATION bin)
