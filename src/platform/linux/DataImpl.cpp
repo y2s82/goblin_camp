@@ -37,6 +37,6 @@ namespace PathsImpl {
 		
 		exec    = fs::path(std::string(buffer));
 		execDir = exec.parent_path();
-		dataDir = fs::path(execDir.parent_path()) / "share/goblin-camp/";
+		dataDir = fs::path(execDir.parent_path()) / "share/goblincamp/";
 	}
 }
