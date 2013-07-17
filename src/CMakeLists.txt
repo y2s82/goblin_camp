@@ -25,6 +25,7 @@ find_library(TCOD tcodgui ${LIB_PATH})
 find_library(TCOD tcodxx ${LIB_PATH})
 
 FIND_PACKAGE(SDL)
+FIND_PACKAGE(SDL_image)
 FIND_PACKAGE(ZLIB)
 
 # TODO: remove unneeded
@@ -58,7 +59,7 @@ include_directories(${Boost_INCLUDE_DIRS})
 link_directories(${Boost_LIBRARY_DIRS})
 
 # Link the executable to the libraries.
-target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL tcod tcodgui tcodxx z python-modules)
+target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL SDL_image tcod tcodgui tcodxx z python-modules)
 
 # have to use c++11 or gnu++11, because lambda expressions
 set_target_properties(goblincamp PROPERTIES COMPILE_FLAGS "-std=gnu++11 -Wall")
