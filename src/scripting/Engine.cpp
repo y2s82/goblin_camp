@@ -82,7 +82,7 @@ namespace Script {
 		
 		LOG("Python " << Py_GetVersion());
 		
-		// Don't use default search path. FIXME?
+		// Don't use default search path. FIXME: don't use bundled stdlib.zip!
 		{
 		#ifdef WINDOWS
 			char pathsep = ';';
