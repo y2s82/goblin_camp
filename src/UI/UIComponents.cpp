@@ -383,7 +383,7 @@ void Panel::ShowModal() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event || TCOD_EVENT_ANY) {
+		if (event & TCOD_EVENT_ANY) {
 		    mouse = TCODMouse::getStatus();
 
 		    MenuResult result = Update(mouse.cx, mouse.cy, mouse.lbutton_pressed!=0, key);
