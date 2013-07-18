@@ -369,7 +369,7 @@ int MainMenu() {
 			TCODConsole::root->print(edgex + width / 2, edgey + ((idx + 1) * 2), entry.label);
 
 			// FIXME: checking here because of seemingly poor menu drawing procedure
-			if (event == TCOD_EVENT_KEY_PRESS) {
+			if (event || TCOD_EVENT_KEY_PRESS) {
 				if (key.c == entry.shortcut && entry.isActive()) {
 					exit     = (entry.function == NULL);
 					function = entry.function;
@@ -386,7 +386,7 @@ int MainMenu() {
 		if (TCODConsole::isWindowClosed()) break;
 
 		// FIXME: probably redundant
-		if (event == TCOD_EVENT_MOUSE_PRESS) {
+		if (event || TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
 		    if (mouse.lbutton) {
 			lButtonDown = true;
@@ -433,8 +433,6 @@ void LoadMenu() {
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
-	// FIXME: lButtonDown shouldn't be needed with evented input?
-	bool lButtonDown = false;
 	TCOD_key_t key;
 	TCOD_mouse_t mouse;
 	TCOD_event_t event;
@@ -478,24 +476,24 @@ void LoadMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event == TCOD_EVENT_KEY_PRESS) {
+		if (event || TCOD_EVENT_KEY_PRESS) {
 		    if (key.vk == TCODK_ESCAPE) {
 			break;
 		    }
 		}
 
+		if (event || TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
-		    if (mouse.lbutton) {
-		    	lButtonDown = true;
-		    }
-		    
+		}
+
+		if (event || TCOD_EVENT_MOUSE_MOVE) {
 		    if (mouse.cx > edgex && mouse.cx < edgex+width) {
 			selected = mouse.cy - (edgey+3);
 		    } else selected = -1;
-		    
-		if (!mouse.lbutton && lButtonDown) {
-			lButtonDown = false;		
-			
+		}
+
+		if (event || TCOD_EVENT_MOUSE_PRESS) {
+		    if (mouse.lbutton) {
 			if (selected < static_cast<int>(list.size()) && selected >= 0) {
 			    if (!Data::LoadGame(list[selected].filename)) {
 				TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -521,6 +519,7 @@ void LoadMenu() {
 			    MainLoop();
 			    break;
 			}
+		    }
 		}
 	}
 }
@@ -550,7 +549,7 @@ void SaveMenu() {
 
 	event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-	if (event == TCOD_EVENT_KEY_PRESS) {
+	if (event || TCOD_EVENT_KEY_PRESS) {
 	    if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
 		saveName.push_back(key.c);
 	    } else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
@@ -713,7 +712,7 @@ void SettingsMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event == TCOD_EVENT_KEY_PRESS) {
+		if (event || TCOD_EVENT_KEY_PRESS) {
 		    if (key.vk == TCODK_ESCAPE) return;
 		    else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
 
@@ -729,48 +728,50 @@ void SettingsMenu() {
 		    }
 		}
 		
-		mouse = TCODMouse::getStatus();
-		if (mouse.lbutton) {
-		    clicked = true;
-		}
-		
-		if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
-		    clicked = false;
-		    int whereY      = mouse.cy - y - 1;
-		    int rendererY   = currentY - y - 1;
-		    int fullscreenY = rendererY - 12;
-		    int tutorialY = rendererY - 10;
-		    int translucentUIY = rendererY - 8;
-		    int compressSavesY = rendererY - 6;
-		    int autosaveY = rendererY - 4;
-		    int pauseOnDangerY = rendererY - 2;
+		// FIXME: don't use 'clicked', use events
+		if (event || TCOD_EVENT_MOUSE) {
+		    mouse = TCODMouse::getStatus();
+		    if (mouse.lbutton) {
+			clicked = true;
+		    }
+
+		    if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
+			clicked = false;
+			int whereY      = mouse.cy - y - 1;
+			int rendererY   = currentY - y - 1;
+			int fullscreenY = rendererY - 12;
+			int tutorialY = rendererY - 10;
+			int translucentUIY = rendererY - 8;
+			int compressSavesY = rendererY - 6;
+			int autosaveY = rendererY - 4;
+			int pauseOnDangerY = rendererY - 2;
 			
-		    if (whereY > 1 && whereY < fullscreenY) {
-			int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
-			if (whereFocus >= 0 && whereFocus < static_cast<int>(fieldCount)) {
-			    focus = &fields[whereFocus];
-			}
-		    } else if (whereY == fullscreenY) {
-			fullscreen = !fullscreen;
-		    } else if (whereY == tutorialY) {
-			tutorial = !tutorial;
-		    } else if (whereY == translucentUIY) {
-			translucentUI = !translucentUI;
-		    } else if (whereY == compressSavesY) {
-			compressSaves = !compressSaves;
-		    } else if (whereY == autosaveY) {
-			autosave = !autosave;
-		    } else if (whereY == pauseOnDangerY) {
-			pauseOnDanger = !pauseOnDanger;
-		    } else if (whereY > rendererY) {
-			int whereRenderer = whereY - rendererY - 1;
-			if (whereRenderer >= 0 && whereRenderer < static_cast<int>(rendererCount)) {
-			    renderer = renderers[whereRenderer].renderer;
-			    useTileset = renderers[whereRenderer].useTileset;
+			if (whereY > 1 && whereY < fullscreenY) {
+			    int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
+			    if (whereFocus >= 0 && whereFocus < static_cast<int>(fieldCount)) {
+				focus = &fields[whereFocus];
+			    }
+			} else if (whereY == fullscreenY) {
+			    fullscreen = !fullscreen;
+			} else if (whereY == tutorialY) {
+			    tutorial = !tutorial;
+			} else if (whereY == translucentUIY) {
+			    translucentUI = !translucentUI;
+			} else if (whereY == compressSavesY) {
+			    compressSaves = !compressSaves;
+			} else if (whereY == autosaveY) {
+			    autosave = !autosave;
+			} else if (whereY == pauseOnDangerY) {
+			    pauseOnDanger = !pauseOnDanger;
+			} else if (whereY > rendererY) {
+			    int whereRenderer = whereY - rendererY - 1;
+			    if (whereRenderer >= 0 && whereRenderer < static_cast<int>(rendererCount)) {
+				renderer = renderers[whereRenderer].renderer;
+				useTileset = renderers[whereRenderer].useTileset;
+			    }
 			}
 		    }
 		}
-
 	}
 	
 	Config::SetStringCVar("resolutionX", width);
