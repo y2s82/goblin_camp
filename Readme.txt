@@ -1,4 +1,4 @@
-This is the old readme. It doesn't reflect the current state of things.
+This is the old readme. It doesn't reflect the current state of things. Whitespace is inconsistent.
 
 --- Goblin Camp ---
 
