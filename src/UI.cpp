@@ -67,6 +67,7 @@ menuOpen(false),
 	placementCallback = boost::bind(Game::CheckPlacement, _1, _2, std::set<TileType>());
 	callback = boost::bind(Game::PlaceConstruction, _1, 0);
 	rectCallback = boost::bind(Game::PlaceStockpile, _1, _2, 0, 0);
+	event = (TCOD_event_t)0; // FIXME: bug Doryen to have TCOD_EVENT_NONE
 	mouseInput = TCODMouse::getStatus();
 	oldMouseInput = mouseInput;
 }
@@ -79,8 +80,12 @@ UI* UI::Inst() {
 void UI::Update() {
 	if (keyHelpTextColor > 0) keyHelpTextColor -= 2;
 	if (keyHelpTextColor < 0) keyHelpTextColor = 0;
-	HandleKeyboard();
-	HandleMouse();
+
+	// FIXME: should probably be elsewhere
+	event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouseInput);
+
+	if (event | TCOD_EVENT_KEY_PRESS) HandleKeyboard();
+	if (event | TCOD_EVENT_MOUSE) HandleMouse();
 }
 
 void UI::HandleKeyboard() {
@@ -90,7 +95,7 @@ void UI::HandleKeyboard() {
 	float diffY = 0;
 
 	//TODO: This isn't pretty, but it works.
-	key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
+	//key = TCODConsole::checkForKeypress(TCOD_KEY_PRESSED);
 	if (!currentMenu || !(currentMenu->Update(-1, -1, false, key) & KEYRESPOND)) {
 		if (!textMode) {
 			if (key.c == keyMap["Exit"]) {

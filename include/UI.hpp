@@ -44,8 +44,9 @@ private:
 	static UI* instance;
 	bool menuOpen;
 	int menuX, menuY;
-	TCOD_mouse_t mouseInput;
 	TCOD_key_t key;
+	TCOD_mouse_t mouseInput;
+	TCOD_event_t event;
 	Panel* currentMenu;
 	UIState _state;
 	boost::function<void(Coordinate)> callback;
