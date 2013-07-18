@@ -527,56 +527,66 @@ void LoadMenu() {
 }
 
 void SaveMenu() {
-	if (!Game::Inst()->Running()) return;
-	std::string saveName;
-	TCODConsole::root->setDefaultForeground(TCODColor::white);
+    if (!Game::Inst()->Running()) return;
+    std::string saveName;
+    TCODConsole::root->setDefaultForeground(TCODColor::white);
+    TCODConsole::root->setDefaultBackground(TCODColor::black);
+
+    // TODO: allow picking from list of previous saves (and choosing it with the mouse!)
+    TCOD_key_t key;
+    TCOD_mouse_t mouse;
+    TCOD_event_t event;
+
+    while (true) {
+	TCODConsole::root->clear();
+	TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15,
+				      Game::Inst()->ScreenHeight()/2-3, 30, 3, true, TCOD_BKGND_SET, "Save name");
+	TCODConsole::root->setDefaultBackground(TCODColor::darkGrey);
+	TCODConsole::root->rect(Game::Inst()->ScreenWidth()/2-14, Game::Inst()->ScreenHeight()/2-2, 28, 1, true);
 	TCODConsole::root->setDefaultBackground(TCODColor::black);
-	while (true) {
-		TCOD_key_t key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
-			saveName.push_back(key.c);
-		} else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
-			saveName.erase(saveName.end() - 1);
+	TCODConsole::root->print(Game::Inst()->ScreenWidth()/2,
+				 Game::Inst()->ScreenHeight()/2-2, "%s", saveName.c_str());
+	TCODConsole::root->flush();
+
+	event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+	if (event == TCOD_EVENT_KEY_PRESS) {
+	    if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
+		saveName.push_back(key.c);
+	    } else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
+		saveName.erase(saveName.end() - 1);
+	    }
+
+	    if (key.vk == TCODK_ESCAPE) {
+		break;
+	    }
+	    else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
+		savesCount = -1;
+		if (!Data::SaveGame(saveName)) {
+		    TCODConsole::root->setDefaultForeground(TCODColor::white);
+		    TCODConsole::root->setDefaultBackground(TCODColor::black);
+		    TCODConsole::root->setAlignment(TCOD_CENTER);
+		    TCODConsole::root->clear();
+
+		    TCODConsole::root->print(
+			Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2,
+			"Could not save the game. Refer to the logfile."
+			);
+
+		    TCODConsole::root->print(
+			Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2 + 1,
+			"Press any key to return to the main menu."
+			);
+
+		    TCODConsole::root->flush();
+		    TCODConsole::waitForKeypress(true);
+		    return;
 		}
-
-		if (key.vk == TCODK_ESCAPE) return;
-		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
-			savesCount = -1;
-			if (!Data::SaveGame(saveName)) {
-				TCODConsole::root->setDefaultForeground(TCODColor::white);
-				TCODConsole::root->setDefaultBackground(TCODColor::black);
-				TCODConsole::root->setAlignment(TCOD_CENTER);
-				TCODConsole::root->clear();
-				
-				TCODConsole::root->print(
-					Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2,
-					"Could not save the game. Refer to the logfile."
-				);
-				
-				TCODConsole::root->print(
-					Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2 + 1,
-					"Press any key to return to the main menu."
-				);
-				
-				TCODConsole::root->flush();
-				TCODConsole::waitForKeypress(true);
-				return;
-			}
-			break;
-		}
-
-		TCODConsole::root->clear();
-		TCODConsole::root->printFrame(Game::Inst()->ScreenWidth()/2-15,
-			Game::Inst()->ScreenHeight()/2-3, 30, 3, true, TCOD_BKGND_SET, "Save name");
-		TCODConsole::root->setDefaultBackground(TCODColor::darkGrey);
-		TCODConsole::root->rect(Game::Inst()->ScreenWidth()/2-14, Game::Inst()->ScreenHeight()/2-2, 28, 1, true);
-		TCODConsole::root->setDefaultBackground(TCODColor::black);
-		TCODConsole::root->print(Game::Inst()->ScreenWidth()/2,
-			Game::Inst()->ScreenHeight()/2-2, "%s", saveName.c_str());
-		TCODConsole::root->flush();
-
+		break;
+	    }
 	}
-	return;
+    }
+    return;
 }
 
 // XXX: No, really.
