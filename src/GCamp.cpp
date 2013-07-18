@@ -827,14 +827,12 @@ void ModsMenu() {
 
 	TCOD_key_t   key;
 	TCOD_mouse_t mouse;
+	TCOD_event_t event;
 
 	int scroll = 0;
 	bool clicked = false;
 
 	while (true) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.vk == TCODK_ESCAPE) return;
-
 		TCODConsole::root->clear();
 
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -846,23 +844,31 @@ void ModsMenu() {
 		TCODConsole::root->putChar(x + w - 2, y + 1,     TCOD_CHAR_ARROW_N, TCOD_BKGND_SET);
 		TCODConsole::root->putChar(x + w - 2, y + h - 2, TCOD_CHAR_ARROW_S, TCOD_BKGND_SET);
 
-		mouse = TCODMouse::getStatus();
-		if (mouse.lbutton) {
-			clicked = true;
+		TCODConsole::root->flush();
+
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+		if (event || TCOD_EVENT_KEY_PRESS) {
+		    if (key.vk == TCODK_ESCAPE) return;
 		}
 
-		if (clicked && !mouse.lbutton) {
+		if (event || TCOD_EVENT_MOUSE) {
+		    mouse = TCODMouse::getStatus();
+		    if (mouse.lbutton) {
+			clicked = true;
+		    }
+		    
+		    if (clicked && !mouse.lbutton) {
 			if (mouse.cx == x + w - 2) {
-				if (mouse.cy == y + 1) {
-					scroll = std::max(0, scroll - 1);
-				} else if (mouse.cy == y + h - 2) {
-					scroll = std::min(subH - h + 3, scroll + 1);
-				}
+			    if (mouse.cy == y + 1) {
+				scroll = std::max(0, scroll - 1);
+			    } else if (mouse.cy == y + h - 2) {
+				scroll = std::min(subH - h + 3, scroll + 1);
+			    }
 			}
 			clicked = false;
+		    }
 		}
-
-		TCODConsole::root->flush();
 	}
 }
 
