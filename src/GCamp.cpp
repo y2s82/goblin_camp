@@ -369,7 +369,7 @@ int MainMenu() {
 			TCODConsole::root->print(edgex + width / 2, edgey + ((idx + 1) * 2), entry.label);
 
 			// FIXME: checking here because of seemingly poor menu drawing procedure
-			if (event || TCOD_EVENT_KEY_PRESS) {
+			if (event & TCOD_EVENT_KEY_PRESS) {
 				if (key.c == entry.shortcut && entry.isActive()) {
 					exit     = (entry.function == NULL);
 					function = entry.function;
@@ -386,13 +386,14 @@ int MainMenu() {
 		if (TCODConsole::isWindowClosed()) break;
 
 		// FIXME: probably redundant
-		if (event || TCOD_EVENT_MOUSE) {
+		if (event & TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
 		    if (mouse.lbutton) {
 			lButtonDown = true;
 		    }
 		}
 
+		// FIXME: don't put this into an event clause until the whole method is properly rewritten with libtcod events
 		if (function != NULL) {
 			function();
 		} else {
@@ -476,23 +477,23 @@ void LoadMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event || TCOD_EVENT_KEY_PRESS) {
+		if (event & TCOD_EVENT_KEY_PRESS) {
 		    if (key.vk == TCODK_ESCAPE) {
 			break;
 		    }
 		}
 
-		if (event || TCOD_EVENT_MOUSE) {
+		if (event & TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
 		}
 
-		if (event || TCOD_EVENT_MOUSE_MOVE) {
+		if (event & TCOD_EVENT_MOUSE_MOVE) {
 		    if (mouse.cx > edgex && mouse.cx < edgex+width) {
 			selected = mouse.cy - (edgey+3);
 		    } else selected = -1;
 		}
 
-		if (event || TCOD_EVENT_MOUSE_PRESS) {
+		if (event & TCOD_EVENT_MOUSE_PRESS) {
 		    if (mouse.lbutton) {
 			if (selected < static_cast<int>(list.size()) && selected >= 0) {
 			    if (!Data::LoadGame(list[selected].filename)) {
@@ -549,7 +550,7 @@ void SaveMenu() {
 
 	event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-	if (event || TCOD_EVENT_KEY_PRESS) {
+	if (event & TCOD_EVENT_KEY_PRESS) {
 	    if (key.c >= ' ' && key.c <= '}' && saveName.size() < 28) {
 		saveName.push_back(key.c);
 	    } else if (key.vk == TCODK_BACKSPACE && saveName.size() > 0) {
@@ -712,7 +713,7 @@ void SettingsMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event || TCOD_EVENT_KEY_PRESS) {
+		if (event & TCOD_EVENT_KEY_PRESS) {
 		    if (key.vk == TCODK_ESCAPE) return;
 		    else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
 
@@ -729,7 +730,7 @@ void SettingsMenu() {
 		}
 		
 		// FIXME: don't use 'clicked', use events
-		if (event || TCOD_EVENT_MOUSE) {
+		if (event & TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
 		    if (mouse.lbutton) {
 			clicked = true;
@@ -849,11 +850,11 @@ void ModsMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event || TCOD_EVENT_KEY_PRESS) {
+		if (event & TCOD_EVENT_KEY_PRESS) {
 		    if (key.vk == TCODK_ESCAPE) return;
 		}
 
-		if (event || TCOD_EVENT_MOUSE) {
+		if (event & TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
 		    if (mouse.lbutton) {
 			clicked = true;
@@ -962,11 +963,11 @@ void TilesetsMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event || TCOD_EVENT_KEY_PRESS) {
+		if (event & TCOD_EVENT_KEY_PRESS) {
 		    if (key.vk == TCODK_ESCAPE) return;
 		}
 
-		if (event || TCOD_EVENT_MOUSE) {
+		if (event & TCOD_EVENT_MOUSE) {
 		    mouse = TCODMouse::getStatus();
 		    if (mouse.lbutton) {
 			clicked = true;
@@ -1053,7 +1054,7 @@ void KeysMenu() {
 
 		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		if (event || TCOD_EVENT_KEY_PRESS) {		
+		if (event & TCOD_EVENT_KEY_PRESS) {		
 		    if (key.vk == TCODK_ESCAPE) return;
 		    else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
 		    
@@ -1062,7 +1063,7 @@ void KeysMenu() {
 		    }
 		}
 
-		if (event || TCOD_EVENT_MOUSE_MOVE) {
+		if (event & TCOD_EVENT_MOUSE_MOVE) {
 		    mouse = TCODMouse::getStatus();
 		    
 		    if (mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy >= y + 3 && mouse.cy < y + h - 1) {
