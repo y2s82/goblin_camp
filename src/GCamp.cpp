@@ -419,18 +419,17 @@ int MainMenu() {
 }
 
 void LoadMenu() {
-	int width = 59; // 2 for borders, 20 for filename, 2 spacer, 20 for date, 2 spacer, 13 for filesize
-	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
-	int selected = -1;
-
 	std::vector<Data::Save> list;
 	Data::GetSavedGames(list);
 	
 	// sort by last modification, newest on top
 	std::sort(list.begin(), list.end(), std::greater<Data::Save>());
 
+	int width = 59; // 2 for borders, 20 for filename, 2 spacer, 20 for date, 2 spacer, 13 for filesize
+	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int height = list.size() + 4;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
+	int selected = -1;
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
@@ -485,46 +484,47 @@ void LoadMenu() {
 		    }
 		}
 
-		mouse = TCODMouse::getStatus();
-		if (mouse.lbutton) {
-			lButtonDown = true;
-		}
-
-		if (mouse.cx > edgex && mouse.cx < edgex+width) {
+		    mouse = TCODMouse::getStatus();
+		    if (mouse.lbutton) {
+		    	lButtonDown = true;
+		    }
+		    
+		    if (mouse.cx > edgex && mouse.cx < edgex+width) {
 			selected = mouse.cy - (edgey+3);
-		} else selected = -1;
-
+		    } else selected = -1;
+		    
 		if (!mouse.lbutton && lButtonDown) {
-			lButtonDown = false;
+			lButtonDown = false;		
 			
 			if (selected < static_cast<int>(list.size()) && selected >= 0) {
-				if (!Data::LoadGame(list[selected].filename)) {
-					TCODConsole::root->setDefaultForeground(TCODColor::white);
-					TCODConsole::root->setDefaultBackground(TCODColor::black);
-					TCODConsole::root->setAlignment(TCOD_CENTER);
-					TCODConsole::root->clear();
-					
-					TCODConsole::root->print(
-						Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2,
-						"Could not load the game. Refer to the logfile."
-					);
-					
-					TCODConsole::root->print(
-						Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2 + 1,
-						"Press any key to return to the main menu."
-					);
-					
-					TCODConsole::root->flush();
-					TCODConsole::waitForKeypress(true);
-					return;
-				}
-
-				MainLoop();
-				break;
+			    if (!Data::LoadGame(list[selected].filename)) {
+				TCODConsole::root->setDefaultForeground(TCODColor::white);
+				TCODConsole::root->setDefaultBackground(TCODColor::black);
+				TCODConsole::root->setAlignment(TCOD_CENTER);
+				TCODConsole::root->clear();
+				
+				TCODConsole::root->print(
+				    Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2,
+				    "Could not load the game. Refer to the logfile."
+				    );
+				
+				TCODConsole::root->print(
+				    Game::Inst()->ScreenWidth() / 2, Game::Inst()->ScreenHeight() / 2 + 1,
+				    "Press any key to return to the main menu."
+				    );
+				
+				TCODConsole::root->flush();
+				TCODConsole::waitForKeypress(true);
+				return;
+			    }
+			    
+			    MainLoop();
+			    break;
 			}
 		}
 	}
 }
+
 
 void SaveMenu() {
     if (!Game::Inst()->Running()) return;
@@ -603,6 +603,7 @@ namespace {
 	};
 }
 
+// TODO: split into smaller functions?
 void SettingsMenu() {
 	std::string width        = Config::GetStringCVar("resolutionX");
 	std::string height       = Config::GetStringCVar("resolutionY");
@@ -640,26 +641,13 @@ void SettingsMenu() {
 	const unsigned int rendererCount = sizeof(renderers) / sizeof(SettingRenderer);
 	const unsigned int fieldCount    = sizeof(fields) / sizeof(SettingField);
 
-	TCOD_mouse_t mouse;
 	TCOD_key_t   key;
+	TCOD_mouse_t mouse;
+	TCOD_event_t event;
+
 	bool         clicked(false);
 
 	while (true) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.vk == TCODK_ESCAPE) return;
-		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
-
-		// if field had 'mask' property it would be bit more generic..
-		if (focus != NULL) {
-			std::string& str = *focus->value;
-
-			if (key.c >= '0' && key.c <= '9' && str.size() < (w - 7)) {
-				str.push_back(key.c);
-			} else if (key.vk == TCODK_BACKSPACE && str.size() > 0) {
-				str.erase(str.end() - 1);
-			}
-		}
-
 		TCODConsole::root->clear();
 
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -723,47 +711,66 @@ void SettingsMenu() {
 
 		TCODConsole::root->flush();
 
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+		if (event == TCOD_EVENT_KEY_PRESS) {
+		    if (key.vk == TCODK_ESCAPE) return;
+		    else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
+
+		    // TODO: if field had 'mask' property it would be bit more generic..
+		    if (focus != NULL) {
+			std::string& str = *focus->value;
+			
+			if (key.c >= '0' && key.c <= '9' && str.size() < (w - 7)) {
+			    str.push_back(key.c);
+			} else if (key.vk == TCODK_BACKSPACE && str.size() > 0) {
+			    str.erase(str.end() - 1);
+			}
+		    }
+		}
+		
 		mouse = TCODMouse::getStatus();
 		if (mouse.lbutton) {
-			clicked = true;
+		    clicked = true;
 		}
-
+		
 		if (clicked && !mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy > y && mouse.cy < y + h) {
-			clicked = false;
-			int whereY      = mouse.cy - y - 1;
-			int rendererY   = currentY - y - 1;
-			int fullscreenY = rendererY - 12;
-			int tutorialY = rendererY - 10;
-			int translucentUIY = rendererY - 8;
-			int compressSavesY = rendererY - 6;
-			int autosaveY = rendererY - 4;
-			int pauseOnDangerY = rendererY - 2;
-
-			if (whereY > 1 && whereY < fullscreenY) {
-				int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
-				if (whereFocus >= 0 && whereFocus < static_cast<int>(fieldCount)) {
-					focus = &fields[whereFocus];
-				}
-			} else if (whereY == fullscreenY) {
-				fullscreen = !fullscreen;
-			} else if (whereY == tutorialY) {
-				tutorial = !tutorial;
-			} else if (whereY == translucentUIY) {
-				translucentUI = !translucentUI;
-			} else if (whereY == compressSavesY) {
-				compressSaves = !compressSaves;
-			} else if (whereY == autosaveY) {
-				autosave = !autosave;
-			} else if (whereY == pauseOnDangerY) {
-				pauseOnDanger = !pauseOnDanger;
-			} else if (whereY > rendererY) {
-				int whereRenderer = whereY - rendererY - 1;
-				if (whereRenderer >= 0 && whereRenderer < static_cast<int>(rendererCount)) {
-					renderer = renderers[whereRenderer].renderer;
-					useTileset = renderers[whereRenderer].useTileset;
-				}
+		    clicked = false;
+		    int whereY      = mouse.cy - y - 1;
+		    int rendererY   = currentY - y - 1;
+		    int fullscreenY = rendererY - 12;
+		    int tutorialY = rendererY - 10;
+		    int translucentUIY = rendererY - 8;
+		    int compressSavesY = rendererY - 6;
+		    int autosaveY = rendererY - 4;
+		    int pauseOnDangerY = rendererY - 2;
+			
+		    if (whereY > 1 && whereY < fullscreenY) {
+			int whereFocus = static_cast<int>(floor((whereY - 2) / 3.));
+			if (whereFocus >= 0 && whereFocus < static_cast<int>(fieldCount)) {
+			    focus = &fields[whereFocus];
 			}
+		    } else if (whereY == fullscreenY) {
+			fullscreen = !fullscreen;
+		    } else if (whereY == tutorialY) {
+			tutorial = !tutorial;
+		    } else if (whereY == translucentUIY) {
+			translucentUI = !translucentUI;
+		    } else if (whereY == compressSavesY) {
+			compressSaves = !compressSaves;
+		    } else if (whereY == autosaveY) {
+			autosave = !autosave;
+		    } else if (whereY == pauseOnDangerY) {
+			pauseOnDanger = !pauseOnDanger;
+		    } else if (whereY > rendererY) {
+			int whereRenderer = whereY - rendererY - 1;
+			if (whereRenderer >= 0 && whereRenderer < static_cast<int>(rendererCount)) {
+			    renderer = renderers[whereRenderer].renderer;
+			    useTileset = renderers[whereRenderer].useTileset;
+			}
+		    }
 		}
+
 	}
 	
 	Config::SetStringCVar("resolutionX", width);
