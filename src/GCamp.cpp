@@ -1022,20 +1022,13 @@ void KeysMenu() {
 	const int x = Game::Inst()->ScreenWidth()/2 - (w / 2);
 	const int y = Game::Inst()->ScreenHeight()/2 - (h / 2);
 	
-	TCOD_mouse_t mouse;
 	TCOD_key_t   key;
+	TCOD_mouse_t mouse;
+	TCOD_event_t event;
 	
 	int focus = 0;
 	
-	while (true) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.vk == TCODK_ESCAPE) return;
-		else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
-		
-		if (key.c >= ' ' && key.c <= '~') {
-			keyMap[labels[focus]] = key.c;
-		}
-		
+	while (true) {		
 		TCODConsole::root->clear();
 		
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -1055,14 +1048,27 @@ void KeysMenu() {
 			
 			TCODConsole::root->setDefaultForeground(TCODColor::white);
 		}
-		
-		mouse = TCODMouse::getStatus();
-		
-		if (mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy >= y + 3 && mouse.cy < y + h - 1) {
-			focus = mouse.cy - y - 3;
-		}
-		
+
 		TCODConsole::root->flush();
+
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+		if (event || TCOD_EVENT_KEY_PRESS) {		
+		    if (key.vk == TCODK_ESCAPE) return;
+		    else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) break;
+		    
+		    if (key.c >= ' ' && key.c <= '~') {
+			keyMap[labels[focus]] = key.c;
+		    }
+		}
+
+		if (event || TCOD_EVENT_MOUSE_MOVE) {
+		    mouse = TCODMouse::getStatus();
+		    
+		    if (mouse.lbutton && mouse.cx > x && mouse.cx < x + w && mouse.cy >= y + 3 && mouse.cy < y + h - 1) {
+			focus = mouse.cy - y - 3;
+		    }
+		}
 	}
 	
 	try {

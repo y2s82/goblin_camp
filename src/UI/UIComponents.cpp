@@ -367,7 +367,9 @@ void Panel::ShowModal() {
 	int _x = (Game::Inst()->ScreenWidth() - width) / 2;
 	int _y = (Game::Inst()->ScreenHeight() - height) / 2;
 	TCOD_key_t key;
-	TCOD_mouse_t mouseStatus;
+	TCOD_mouse_t mouse;
+	TCOD_event_t event;
+
 	TCODMouse::showCursor(true);
 	while (true) {
 		TCODConsole::root->clear();
@@ -379,13 +381,16 @@ void Panel::ShowModal() {
 		Draw(_x, _y, TCODConsole::root);
 		TCODConsole::root->flush();
 
-		key = TCODConsole::checkForKeypress();
-		mouseStatus = TCODMouse::getStatus();
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
-		MenuResult result = Update(mouseStatus.cx, mouseStatus.cy, mouseStatus.lbutton_pressed!=0, key);
-		if((result & DISMISS) || key.vk == TCODK_ESCAPE) {
+		if (event || TCOD_EVENT_ANY) {
+		    mouse = TCODMouse::getStatus();
+
+		    MenuResult result = Update(mouse.cx, mouse.cy, mouse.lbutton_pressed!=0, key);
+		    if((result & DISMISS) || key.vk == TCODK_ESCAPE) {
 			delete this;
 			return;
+		    }
 		}
 	}    
 }
