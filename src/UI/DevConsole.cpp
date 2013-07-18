@@ -187,6 +187,8 @@ void ShowDevConsole() {
 	
 	TCOD_key_t key;
 	TCOD_mouse_t mouse;
+	TCOD_event_t event;
+
 	TCODConsole *c = TCODConsole::root;
 	
 	bool clicked = false;
@@ -196,18 +198,8 @@ void ShowDevConsole() {
 	DevConsole console(w - 2);
 	
 	// I tried to use the UI code. Really. I can't wrap my head around it.
+	// FIXME: That's OK. :)
 	while (true) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.vk == TCODK_ESCAPE) {
-			return;
-		} else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
-			maxScroll = console.Eval();
-		} else if (key.vk == TCODK_BACKSPACE && console.input.size() > 0) {
-			console.input.erase(console.input.end() - 1);
-		} else if (key.c >= ' ' && key.c <= '~') {
-			console.input.push_back(key.c);
-		}
-		
 		c->setDefaultForeground(TCODColor::white);
 		c->setDefaultBackground(TCODColor::black);
 		c->printFrame(x, y, w, h, true, TCOD_BKGND_SET, "Developer console");
@@ -228,13 +220,32 @@ void ShowDevConsole() {
 		c->print(x + 1, y + h - 2, "[In %d]: %s", console.inputID, console.input.c_str());
 		
 		c->flush();
-		
-		mouse = TCODMouse::getStatus();
-		if (mouse.lbutton) {
-			clicked = true;
+
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+		if (event & TCOD_EVENT_KEY_PRESS) {
+		    if (key.vk == TCODK_ESCAPE) {
+			return;
+		    } else if (key.vk == TCODK_ENTER || key.vk == TCODK_KPENTER) {
+			maxScroll = console.Eval();
+		    } else if (key.vk == TCODK_BACKSPACE && console.input.size() > 0) {
+			console.input.erase(console.input.end() - 1);
+		    } else if (key.c >= ' ' && key.c <= '~') {
+			console.input.push_back(key.c);
+		    }
 		}
+
+		// if (event & TCOD_EVENT_MOUSE) {
+		//     mouse = TCODMouse::getStatus();
+		// }
+
+		// if (mouse.lbutton) {
+		// 	clicked = true;
+		// }
 		
-		if (clicked && !mouse.lbutton) {
+		// if (clicked && !mouse.lbutton) {
+		if (event & TCOD_EVENT_MOUSE_PRESS) {
+		    if (mouse.lbutton) {
 			if (mouse.cx == x + w - 2) {
 				if (mouse.cy == y + 1) {
 					scroll = std::max(0, scroll - 1);
@@ -243,6 +254,7 @@ void ShowDevConsole() {
 				}
 			}
 			clicked = false;
+		    }
 		}
 	}
 }
