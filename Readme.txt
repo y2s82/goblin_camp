@@ -1,3 +1,5 @@
+This is the old readme. It doesn't reflect the current state of things.
+
 --- Goblin Camp ---
 
 -- About: --
