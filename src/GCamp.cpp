@@ -327,13 +327,16 @@ int MainMenu() {
 	int height = (entryCount * 2) + 2;
 	int edgey = Game::Inst()->ScreenHeight()/2 - height/2;
 	int selected = -1;
-	TCOD_mouse_t mouseStatus;
-	TCOD_key_t key;
 	bool endCredits = false;
 	bool lButtonDown = false;
 
+	TCOD_key_t key;
+	TCOD_mouse_t mouse;
+	TCOD_event_t event;
+
 	while (!exit) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
+		// FIXME: event checking before console flushing, should be other way around
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
 
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
 		TCODConsole::root->setDefaultBackground(TCODColor::black);
@@ -365,9 +368,12 @@ int MainMenu() {
 
 			TCODConsole::root->print(edgex + width / 2, edgey + ((idx + 1) * 2), entry.label);
 
-			if (key.c == entry.shortcut && entry.isActive()) {
-				exit     = (entry.function == NULL);
-				function = entry.function;
+			// FIXME: checking here because of seemingly poor menu drawing procedure
+			if (event == TCOD_EVENT_KEY_PRESS) {
+				if (key.c == entry.shortcut && entry.isActive()) {
+					exit     = (entry.function == NULL);
+					function = entry.function;
+				}
 			}
 		}
 
@@ -377,21 +383,24 @@ int MainMenu() {
 
 		TCODConsole::root->flush();
 
-		mouseStatus = TCODMouse::getStatus();
-		if (mouseStatus.lbutton) {
-			lButtonDown = true;
-		}
-
 		if (TCODConsole::isWindowClosed()) break;
+
+		// FIXME: probably redundant
+		if (event == TCOD_EVENT_MOUSE_PRESS) {
+		    mouse = TCODMouse::getStatus();
+		    if (mouse.lbutton) {
+			lButtonDown = true;
+		    }
+		}
 
 		if (function != NULL) {
 			function();
 		} else {
-			if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
-				selected = mouseStatus.cy - (edgey+2);
+			if (mouse.cx > edgex && mouse.cx < edgex+width) {
+				selected = mouse.cy - (edgey+2);
 			} else selected = -1;
 
-			if (!mouseStatus.lbutton && lButtonDown) {
+			if (!mouse.lbutton && lButtonDown) {
 				lButtonDown = false;
 				int entry = static_cast<int>(floor(selected / 2.));
 
