@@ -93,11 +93,11 @@ namespace Script {
 			
 			std::string path = libDir.string();
 			path += pathsep;
-			path += (libDir / "stdlib.zip").string();
+			//path += (libDir / "stdlib.zip").string();
 			
 			// FIXME?
-			// std::string defaultpath = Py_GetPath();
-			// path += defaultpath;
+			std::string defaultpath = Py_GetPath();
+			path += defaultpath;
 
 			PySys_SetPath(const_cast<char*>(path.c_str()));
 		}
