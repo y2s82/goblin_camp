@@ -1,6 +1,6 @@
 spell_type "smoke" {
 	graphic = 177
-	color = "45, 45, 45"
+	color = "45,45,45"
 	immaterial
 }
 
