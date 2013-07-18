@@ -900,6 +900,7 @@ void TilesetsMenu() {
 
 	TCOD_key_t   key;
 	TCOD_mouse_t mouse;
+	TCOD_event_t event;
 
 	int originalSelection = -1;
 	int selection = 0;
@@ -919,9 +920,6 @@ void TilesetsMenu() {
 	bool clicked = false;
 
 	while (true) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.vk == TCODK_ESCAPE) return;
-
 		TCODConsole::root->clear();
 
 		TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -959,41 +957,50 @@ void TilesetsMenu() {
 		TCODConsole::root->print(listWidth + buttonDist - 1, screenHeight - 5, "Ok");
 		TCODConsole::root->printFrame(listWidth + 2 * buttonDist - 4, screenHeight - 6, 8, 3);
 		TCODConsole::root->print(listWidth + 2 * buttonDist - 3, screenHeight - 5, "Cancel");
-		mouse = TCODMouse::getStatus();
-		if (mouse.lbutton) {
-			clicked = true;
+
+		TCODConsole::root->flush();
+
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+		if (event || TCOD_EVENT_KEY_PRESS) {
+		    if (key.vk == TCODK_ESCAPE) return;
 		}
 
-		if (clicked && !mouse.lbutton) {
+		if (event || TCOD_EVENT_MOUSE) {
+		    mouse = TCODMouse::getStatus();
+		    if (mouse.lbutton) {
+			clicked = true;
+		    }
+
+		    if (clicked && !mouse.lbutton) {
 			// Left frame click checks
 			if (mouse.cx == listWidth - 2) {
-				if (mouse.cy == 1) {
-					scroll = std::max(0, scroll - 1);
-				} else if (mouse.cy == screenHeight - 2) {
-					scroll = std::max(0, std::min(subH - screenHeight + 3, scroll + 1));
-				}
+			    if (mouse.cy == 1) {
+				scroll = std::max(0, scroll - 1);
+			    } else if (mouse.cy == screenHeight - 2) {
+				scroll = std::max(0, std::min(subH - screenHeight + 3, scroll + 1));
+			    }
 			}
 			else if (mouse.cx > 1 && mouse.cx < listWidth - 2 && mouse.cy > 1 && mouse.cy < screenHeight - 2
-					 && mouse.cy - 2 + scroll < static_cast<int>(tilesetsList.size())) {
-				selection = scroll + mouse.cy - 2;
+				 && mouse.cy - 2 + scroll < static_cast<int>(tilesetsList.size())) {
+			    selection = scroll + mouse.cy - 2;
 			}
 
 			// Button clicks
 			else if (mouse.cy >= screenHeight - 6 && mouse.cy < screenHeight - 3) {
-				if (mouse.cx >= listWidth + buttonDist - 4 && mouse.cx < listWidth + buttonDist + 4) {
-					if (selection != originalSelection) {
-						Config::SetStringCVar("tileset", tilesetsList.at(selection).path.filename().string());
-					}
-					Game::Inst()->ResetRenderer();
-					return;
-				} else if (mouse.cx >= listWidth + 2 * buttonDist - 4 && mouse.cx < listWidth + 2 * buttonDist + 4) {
-					return;
+			    if (mouse.cx >= listWidth + buttonDist - 4 && mouse.cx < listWidth + buttonDist + 4) {
+				if (selection != originalSelection) {
+				    Config::SetStringCVar("tileset", tilesetsList.at(selection).path.filename().string());
 				}
+				Game::Inst()->ResetRenderer();
+				return;
+			    } else if (mouse.cx >= listWidth + 2 * buttonDist - 4 && mouse.cx < listWidth + 2 * buttonDist + 4) {
+				return;
+			    }
 			}
 			clicked = false;
+		    }
 		}
-
-		TCODConsole::root->flush();
 	}
 }
 
