@@ -26,7 +26,7 @@ boost::unordered_map<std::string, SpellType> Spell::spellTypeNames = boost::unor
 std::vector<SpellPreset> Spell::Presets = std::vector<SpellPreset>();
 
 SpellPreset::SpellPreset(std::string vname) : 
-name(vname),
+	name(vname),
 	attacks(std::list<Attack>()),
 	immaterial(false),
 	graphic('?'),
@@ -178,7 +178,7 @@ class SpellListener : public ITCODParserListener {
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
 		if (boost::iequals(name,"name")) { Spell::Presets[spellIndex].name = value.s; }
 		else if (boost::iequals(name,"speed")) { Spell::Presets[spellIndex].speed = value.i; }
-		else if (boost::iequals(name,"color")) { Spell::Presets[spellIndex].color = value.col; }
+		else if (boost::iequals(name,"col")) { Spell::Presets[spellIndex].color = value.col; }
 		else if (boost::iequals(name,"graphic")) { Spell::Presets[spellIndex].graphic = value.i; }
 		else if (boost::iequals(name,"fallbackGraphicsSet")) { Spell::Presets[spellIndex].fallbackGraphicsSet = value.s; }
 		else if (boost::iequals(name,"type")) {
@@ -212,7 +212,7 @@ void Spell::LoadPresets(std::string filename) {
 	TCODParser parser = TCODParser();
 	TCODParserStruct *spellTypeStruct = parser.newStructure("spell_type");
 	spellTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
-	spellTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	spellTypeStruct->addProperty("col", TCOD_TYPE_COLOR, true);
 	spellTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
 	spellTypeStruct->addFlag("immaterial");
 	spellTypeStruct->addProperty("speed", TCOD_TYPE_INT, true);

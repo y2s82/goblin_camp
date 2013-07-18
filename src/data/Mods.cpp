@@ -27,6 +27,7 @@ namespace fs = boost::filesystem;
 #include "Logger.hpp"
 #include "data/Mods.hpp"
 #include "data/Paths.hpp"
+#include "Spell.hpp"
 #include "Construction.hpp"
 #include "Item.hpp"
 #include "NatureObject.hpp"
@@ -153,7 +154,7 @@ namespace {
 			LoadFile("factions",      dir, Faction::LoadPresets, required);
 		} catch (const std::runtime_error& e) {
 			LOG_FUNC("Failed to load mod due to std::runtime_error: " << e.what(), "LoadMod");
-			if (required) Game::Inst()->ErrorScreen();
+			if (required) Game::Inst()->ErrorScreen();  // FIXME: hangs
 		}
 		std::list<TilesetModMetadata> tilesetMods = TileSetLoader::LoadTilesetModMetadata(dir);
 		for (std::list<TilesetModMetadata>::iterator iter = tilesetMods.begin(); iter != tilesetMods.end(); ++iter) {

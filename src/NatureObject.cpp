@@ -129,7 +129,7 @@ class NatureObjectListener : public ITCODParserListener {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				NatureObject::Presets[natureIndex].components.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
 			}
-		} else if (boost::iequals(name, "color")) {
+		} else if (boost::iequals(name, "col")) {
 			NatureObject::Presets[natureIndex].color = value.col;
 		} else if (boost::iequals(name, "rarity")) {
 			NatureObject::Presets[natureIndex].rarity = value.i;
@@ -159,7 +159,7 @@ void NatureObject::LoadPresets(std::string filename) {
 	TCODParser parser = TCODParser();
 	TCODParserStruct* natureObjectTypeStruct = parser.newStructure("plant_type");
 	natureObjectTypeStruct->addProperty("graphic", TCOD_TYPE_INT, true);
-	natureObjectTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	natureObjectTypeStruct->addProperty("col", TCOD_TYPE_COLOR, true);
 	natureObjectTypeStruct->addListProperty("components", TCOD_TYPE_STRING, false);
 	natureObjectTypeStruct->addProperty("rarity", TCOD_TYPE_INT, false);
 	natureObjectTypeStruct->addProperty("condition", TCOD_TYPE_INT, false);

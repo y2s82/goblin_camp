@@ -96,4 +96,4 @@ faction_type "Birds" {
 	friends=["Peaceful animal"]
 	goals = ["steal"]
 	goalSpecifiers=["food"]
-}
+}

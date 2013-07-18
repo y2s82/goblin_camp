@@ -504,7 +504,7 @@ class ConstructionListener : public ITCODParserListener {
 			Construction::Presets[constructionIndex].dynamic = true;
 		} else if (boost::iequals(name, "spawnFrequency")) {
 			Construction::Presets[constructionIndex].spawnFrequency = value.i * UPDATES_PER_SECOND;
-		} else if (boost::iequals(name, "color")) {
+		} else if (boost::iequals(name, "col")) {
 			Construction::Presets[constructionIndex].color = value.col;
 		} else if (boost::iequals(name, "tileReqs")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
@@ -652,7 +652,7 @@ void Construction::LoadPresets(std::string filename) {
 	constructionTypeStruct->addProperty("category", TCOD_TYPE_STRING, true);
 	constructionTypeStruct->addProperty("placementType", TCOD_TYPE_INT, false);
 	constructionTypeStruct->addFlag("blocksLight");
-	constructionTypeStruct->addProperty("color", TCOD_TYPE_COLOR, false);
+	constructionTypeStruct->addProperty("col", TCOD_TYPE_COLOR, false);
 	constructionTypeStruct->addFlag("unique");
 	constructionTypeStruct->addFlag("centersCamp");
 	constructionTypeStruct->addFlag("spawningPool");

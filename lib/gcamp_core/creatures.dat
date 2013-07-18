@@ -5,7 +5,7 @@ npc_type "orc" {
 	needsSleep
 	generateName
 	name="orc"
-	color="0,150,255"
+	col="0,150,255"
 	graphic='o'
 	AI="PlayerNPC"
 	stats {
@@ -34,7 +34,7 @@ npc_type "goblin" {
 	needsSleep
 	generateName
 	name="goblin"
-	color="128,128,128"
+	col="128,128,128"
 	graphic='g'
 	AI="PlayerNPC"
 	stats {
@@ -60,7 +60,7 @@ npc_type "troll" {
 	name="Troll"
 	tier=3
 	tags=["hasHands", "immigrant"]
-	color="128,128,128"
+	col="128,128,128"
 	graphic='T'
 	AI="HostileAnimal"
 	needsNutrition
@@ -98,7 +98,7 @@ npc_type "evil treeman" {
 	tier=6
 	plural="Evil Treemen"
 	tags=["hasHands", "immigrant"]
-	color="200,30,30"
+	col="200,30,30"
 	graphic=6
 	AI="HostileAnimal"
 	stats {
@@ -129,7 +129,7 @@ npc_type "evil treeman" {
 npc_type "giant snail" {
 	name="Giant Snail"
 	tags=["localWildlife"]
-	color="219,199,109"
+	col="219,199,109"
 	graphic='b'
 	AI="PeacefulAnimal"
 	stats {
@@ -154,7 +154,7 @@ npc_type "giant snail" {
 npc_type "snake" {
 	name="Snake"
 	tags=["localWildlife", "angers"]
-	color="0,0,250"
+	col="0,0,250"
 	graphic='S'
 	AI="PeacefulAnimal"
 	stats {
@@ -179,7 +179,7 @@ npc_type "snake" {
 npc_type "unicorn" {
 	name="Unicorn"
 	tags=["localWildlife", "angers"]
-	color="250,250,250"
+	col="250,250,250"
 	graphic='u'
 	AI="PeacefulAnimal"
 	stats {
@@ -211,7 +211,7 @@ npc_type "unicorn" {
 npc_type "will o wisp" { 
 	name="Will o' the wisp"
 	tags=["localWildlife", "flying"]
-	color="255,255,90"
+	col="255,255,90"
 	graphic='*'
 	AI="PeacefulAnimal"
 	stats {
@@ -236,7 +236,7 @@ npc_type "will o wisp" {
 npc_type "wild boar" {
 	name="Wild Boar"
 	tags=["localWildlife", "angers"]
-	color="128,64,0"
+	col="128,64,0"
 	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
@@ -267,7 +267,7 @@ npc_type "netch" {
 	name="Netch"
 	plural="Netches"
 	tags=["localWildlife", "angers", "flying"]
-	color="255,159,64"
+	col="255,159,64"
 	graphic=78
 	AI="PeacefulAnimal"
 	stats {
@@ -293,7 +293,7 @@ npc_type "treeman" {
 	name="Treeman"
 	plural="Treemen"
 	tags=["localWildlife", "angers", "hasHands", "tunneler"]
-	color="0,200,14"
+	col="0,200,14"
 	graphic=6
 	AI="PeacefulAnimal"
 	stats {
@@ -324,7 +324,7 @@ npc_type "elven scout" {
 	tags = ["hasHands", "localWildlife"]
 	tier = 4
 	name = "Elven scout"
-	color = "000,255,000"
+	col = "000,255,000"
 	graphic='@'
 	AI="HostileAnimal"
 	stats {
@@ -353,7 +353,7 @@ npc_type "rabid albino rat" {
 	name="Rabid Albino Rat"
 	tier=0
 	tags = ["attacksRandomly"]
-	color="255,255,255"
+	col="255,255,255"
 	graphic='r'
 	AI="HungryAnimal"
 	stats {
@@ -379,7 +379,7 @@ npc_type "hungry bird" {
 	name="Hungry bird"
 	tier=0
 	tags=["attacksRandomly", "flying"]
-	color="0,0,255"
+	col="0,0,255"
 	graphic='B'
 	AI="HungryAnimal"
 	stats {
@@ -406,7 +406,7 @@ npc_type "starving wolf" {
 	tier=1
 	plural="Starving Wolves"
 	tags = ["attacksRandomly"]
-	color="219,219,219"
+	col="219,219,219"
 	graphic='d'
 	AI="HungryAnimal"
 	stats {
@@ -435,7 +435,7 @@ npc_type "killer bee" {
 	name="Killer Bee"
 	tier=1
 	tags=["attacksRandomly", "flying"]
-	color="255,255,0"
+	col="255,255,0"
 	graphic='a'
 	AI="HostileAnimal"
 	stats {
@@ -463,7 +463,7 @@ npc_type "kobold barbarian" {
 	name="Kobold barbarian"
 	tier=2
 	tags=["attacksRandomly", "hasHands"]
-	color="128,128,0"
+	col="128,128,0"
 	graphic='k'
 	AI="HostileAnimal"
 	stats {
@@ -491,7 +491,7 @@ npc_type "harpy" {
 	tier=3
 	plural="Harpies"
 	tags=["attacksRandomly", "flying"]
-	color="128,128,0"
+	col="128,128,0"
 	graphic='B'
 	AI="HostileAnimal"
 	stats {
@@ -518,7 +518,7 @@ npc_type "skeleton" {
 	name="Skeleton"
 	tier=3
 	tags=["attacksRandomly", "hasHands"]
-	color="250,250,250"
+	col="250,250,250"
 	graphic='Z'
 	AI="HostileAnimal"
 	stats {
@@ -548,7 +548,7 @@ npc_type "bandersnatch" {
 	tier=3
 	plural="Bandersnatches"
 	tags=["attacksRandomly"]
-	color="15,15,150"
+	col="15,15,150"
 	graphic='t'
 	AI="HungryAnimal"
 	stats {
@@ -573,7 +573,7 @@ npc_type "ogre" {
 	name="Ogre"
 	tier=4
 	tags=["attacksRandomly", "hasHands"]
-	color="192,192,192"
+	col="192,192,192"
 	graphic='O'
 	AI="HostileAnimal"
 	stats {
@@ -599,7 +599,7 @@ npc_type "griffon" {
 	name="Griffon"
 	tier=4
 	tags=["attacksRandomly", "flying"]
-	color="240,240,240"
+	col="240,240,240"
 	graphic='B'
 	AI="HostileAnimal"
 	stats {
@@ -625,7 +625,7 @@ npc_type "werewolf" {
 	tier = 4
 	plural="Werewolves"
 	tags = ["attacksRandomly", "hasHands"]
-	color="255,0,0"
+	col="255,0,0"
 	graphic='@'
 	AI="HostileAnimal"
 	stats {
@@ -655,7 +655,7 @@ npc_type "minotaur" {
 	name="Minotaur"
 	tier=4
 	tags=["attacksRandomly", "hasHands"]
-	color="128,128,0"
+	col="128,128,0"
 	graphic='H'
 	AI="HungryAnimal"
 	stats {
@@ -698,7 +698,7 @@ npc_type "raptor" {
 	name="Raptor"
 	tier=4
 	tags=["attacksRandomly", "hasHands"]
-	color="128,128,0"
+	col="128,128,0"
 	graphic='S'
 	AI="HostileAnimal"
 	stats {
@@ -723,7 +723,7 @@ npc_type "feral vampire" {
 	name="Feral vampire"
 	tier = 5
 	tags = ["attacksRandomly", "hasHands"]
-	color="41,209,54"
+	col="41,209,54"
 	graphic='V'
 	AI="HostileAnimal"
 	stats {
@@ -754,7 +754,7 @@ npc_type "giant" {
 	name="Giant"
 	tier=5
 	tags=["attacksRandomly", "hasHands"]
-	color="0,128,128"
+	col="0,128,128"
 	graphic='H'
 	AI="HostileAnimal"
 	stats {
@@ -786,7 +786,7 @@ npc_type "cyclops" {
 	tier=6
 	plural="Cyclopses"
 	tags=["attacksRandomly", "hasHands"]
-	color="230,0,0"
+	col="230,0,0"
 	graphic='H'
 	AI="HostileAnimal"
 	stats {
@@ -814,7 +814,7 @@ npc_type "jabberwock" {
 	tier=6
 	plural="Jabberwocky"
 	tags=["attacksRandomly"]
-	color="255,100,0"
+	col="255,100,0"
 	graphic='J'
 	AI="HungryAnimal"
 	stats {
@@ -846,7 +846,7 @@ npc_type "manticore" {
 	name="Manticore"
 	tier=6
 	tags=["attacksRandomly", "flying"]
-	color="220,204,5"
+	col="220,204,5"
 	graphic='B'
 	AI="HostileAnimal"
 	stats {
@@ -877,7 +877,7 @@ npc_type "human soldier" {
 	tags = ["hasHands", "attacksRandomly"]
 	tier = 6
 	name = "Human soldier"
-	color = "255,255,255"
+	col = "255,255,255"
 	graphic='@'
 	AI="HostileAnimal"
 	stats {
@@ -906,7 +906,7 @@ npc_type "human soldier" {
 
 npc_type "soldier ant" {
 	name="Soldier Ant"
-	color="0,0,255"
+	col="0,0,255"
 	graphic='a'
 	AI="HostileAnimal"
 	stats {
@@ -933,7 +933,7 @@ npc_type "soldier ant" {
 npc_type "kobold raider" {
 	name="Kobold raider"
 	tags=["underground", "hasHands"]
-	color="234,0,0"
+	col="234,0,0"
 	graphic='k'
 	AI="HostileAnimal"
 	stats {
@@ -959,7 +959,7 @@ npc_type "kobold raider" {
 npc_type "giant bat" {
 	name="Giant bat"
 	tags=["underground", "flying"]
-	color="255,0,0"
+	col="255,0,0"
 	graphic='B'
 	AI="HostileAnimal"
 	stats {
@@ -983,7 +983,7 @@ npc_type "giant bat" {
 npc_type "cave worm" {
 	name="Cave worm"
 	tags=["claypit"]
-	color = "220,60,20"
+	col = "220,60,20"
 	graphic='S'
 	AI="HostileAnimal"
 	stats {
@@ -1008,7 +1008,7 @@ npc_type "cave worm" {
 npc_type "raw golem" {
 	name="Raw golem"
 	tags=["claypit", "hasHands"]
-	color="220,80,70"
+	col="220,80,70"
 	graphic='G'
 	AI="HostileAnimal"
 	stats {
@@ -1036,7 +1036,7 @@ npc_type "raw golem" {
 npc_type "fired golem" {
 	name="Fired golem"
 	tags=["claypit", "hasHands"]
-	color="120,22,11"
+	col="120,22,11"
 	graphic='G'
 	AI="HostileAnimal"
 	stats {
@@ -1065,7 +1065,7 @@ npc_type "fired golem" {
 npc_type "angry bee" {
 	name="Angry bee"
 	tags=["flying", "bees"]
-	color="255,255,0"
+	col="255,255,0"
 	graphic='a'
 	AI="HostileAnimal"
 	stats {
@@ -1094,7 +1094,7 @@ npc_type "angry bee" {
 npc_type "honey bee" {
 	name="Honey bee"
 	tags=["flying", "bees"]
-	color="255,255,0"
+	col="255,255,0"
 	graphic='a'
 	AI="PeacefulAnimal"
 	stats {
@@ -1122,7 +1122,7 @@ npc_type "imp" {
 	name="Imp"
 	plural="Imps"
 	tags=["fire", "hasHands"]
-	color="224,73,87"
+	col="224,73,87"
 	graphic='i'
 	AI="HostileAnimal"
 	stats {
@@ -1150,7 +1150,7 @@ npc_type "imp" {
 
 npc_type "salamander" { 
 	name="Salamander"
-	color="255,140,0"
+	col="255,140,0"
 	graphic='S'
 	AI="HostileAnimal"
 	stats {
@@ -1175,7 +1175,7 @@ npc_type "salamander" {
 
 npc_type "fire elemental" {
 	name="Fire Elemental"
-	color = "255,0,0"
+	col = "255,0,0"
 	graphic='E'
 	AI="HostileAnimal"
 	stats {
@@ -1210,7 +1210,7 @@ npc_type "mumak" {
 	plural="Mumakil"
 	tier=3
 	tags=["localWildlife", "migratory", "calm"]
-	color="128,128,128"
+	col="128,128,128"
 	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
@@ -1238,7 +1238,7 @@ npc_type "mastodon" {
 	name="Mastodon"
 	tier=3
 	tags=["localWildlife", "migratory", "calm"]
-	color="100,100,100"
+	col="100,100,100"
 	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
@@ -1267,7 +1267,7 @@ npc_type "Baluchitherium" {
 	plural="Baluchitheria"
 	tier=3
 	tags=["localWildlife", "migratory", "calm"]
-	color="130,130,130"
+	col="130,130,130"
 	graphic='q'
 	AI="PeacefulAnimal"
 	stats {
@@ -1294,7 +1294,7 @@ npc_type "Firebird" {
 	name="firebird"
 	tier=2
 	tags=["localWildlife", "migratory", "flying"]
-	color="178,34,34"
+	col="178,34,34"
 	graphic='B'
 	AI="PeacefulAnimal"
 	stats {
@@ -1317,4 +1317,4 @@ npc_type "Firebird" {
 	spawnAsGroup="2d3+2"
 	death="Small corpse"
 	faction = "Migrator"
-}
+}

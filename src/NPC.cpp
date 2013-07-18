@@ -2184,7 +2184,7 @@ class NPCListener : public ITCODParserListener {
 		if (boost::iequals(name,"name")) { NPC::Presets[npcIndex].name = value.s; }
 		else if (boost::iequals(name,"plural")) { NPC::Presets[npcIndex].plural = value.s; }
 		else if (boost::iequals(name,"speed")) { NPC::Presets[npcIndex].stats[MOVESPEED] = value.i; }
-		else if (boost::iequals(name,"color")) { NPC::Presets[npcIndex].color = value.col; }
+		else if (boost::iequals(name,"col")) { NPC::Presets[npcIndex].color = value.col; }
 		else if (boost::iequals(name,"graphic")) { NPC::Presets[npcIndex].graphic = value.c; }
 		else if (boost::iequals(name,"fallbackGraphicsSet")) { NPC::Presets[npcIndex].fallbackGraphicsSet = value.s; }
 		else if (boost::iequals(name,"health")) { NPC::Presets[npcIndex].health = value.i; }
@@ -2280,7 +2280,7 @@ void NPC::LoadPresets(std::string filename) {
 	TCODParserStruct *npcTypeStruct = parser.newStructure("npc_type");
 	npcTypeStruct->addProperty("name", TCOD_TYPE_STRING, true);
 	npcTypeStruct->addProperty("plural", TCOD_TYPE_STRING, false);
-	npcTypeStruct->addProperty("color", TCOD_TYPE_COLOR, true);
+	npcTypeStruct->addProperty("col", TCOD_TYPE_COLOR, true);
 	npcTypeStruct->addProperty("graphic", TCOD_TYPE_CHAR, true);
 	npcTypeStruct->addFlag("expert");
 	const char* aiTypes[] = { "PlayerNPC", "PeacefulAnimal", "HungryAnimal", "HostileAnimal", NULL }; 
