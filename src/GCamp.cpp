@@ -422,7 +422,6 @@ void LoadMenu() {
 	int width = 59; // 2 for borders, 20 for filename, 2 spacer, 20 for date, 2 spacer, 13 for filesize
 	int edgex = Game::Inst()->ScreenWidth()/2 - width/2;
 	int selected = -1;
-	TCOD_mouse_t mouseStatus;
 
 	std::vector<Data::Save> list;
 	Data::GetSavedGames(list);
@@ -435,15 +434,13 @@ void LoadMenu() {
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
+	// FIXME: lButtonDown shouldn't be needed with evented input?
 	bool lButtonDown = false;
 	TCOD_key_t key;
+	TCOD_mouse_t mouse;
+	TCOD_event_t event;
 	
 	while (true) {
-		key = TCODConsole::checkForKeypress(TCOD_KEY_RELEASED);
-		if (key.vk == TCODK_ESCAPE) {
-			break;
-		}
-		
 		TCODConsole::root->clear();
 
 		TCODConsole::root->printFrame(edgex, edgey, width, height, true, TCOD_BKGND_SET, "Saved games");
@@ -480,16 +477,24 @@ void LoadMenu() {
 
 		TCODConsole::root->flush();
 
-		mouseStatus = TCODMouse::getStatus();
-		if (mouseStatus.lbutton) {
+		event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouse);
+
+		if (event == TCOD_EVENT_KEY_PRESS) {
+		    if (key.vk == TCODK_ESCAPE) {
+			break;
+		    }
+		}
+
+		mouse = TCODMouse::getStatus();
+		if (mouse.lbutton) {
 			lButtonDown = true;
 		}
 
-		if (mouseStatus.cx > edgex && mouseStatus.cx < edgex+width) {
-			selected = mouseStatus.cy - (edgey+3);
+		if (mouse.cx > edgex && mouse.cx < edgex+width) {
+			selected = mouse.cy - (edgey+3);
 		} else selected = -1;
 
-		if (!mouseStatus.lbutton && lButtonDown) {
+		if (!mouse.lbutton && lButtonDown) {
 			lButtonDown = false;
 			
 			if (selected < static_cast<int>(list.size()) && selected >= 0) {
