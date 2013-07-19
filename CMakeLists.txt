@@ -3,9 +3,10 @@
 
 cmake_minimum_required (VERSION 2.6)
 
-project (GOBLINCAMP)
+# TODO: configure depending on OS
+set (CMAKE_INSTALL_PREFIX "./pkg/usr")
 
-# The version number.
+project (GOBLINCAMP)
 set (GOBLINCAMP_VERSION_MAJOR 0)
 set (GOBLINCAMP_VERSION_MINOR 22)
 
@@ -15,22 +16,18 @@ configure_file (
   "${GOBLINCAMP_BINARY_DIR}/version.hpp"
   )
 
-# add the binary tree to the search path for include files
-# so that we will find version.hpp
-#include_directories("${PROJECT_BINARY_DIR}")
-
-#include_directories ("${PROJECT_SOURCE_DIR}/include")
-
-# damned snake
-add_subdirectory (vendor/python-modules)
-#add_subdirectory (lib)
-
-# main goblincamp stuff
-add_subdirectory (src)
+# add so that we will find version.hpp
+#include_directories ("${PROJECT_BINARY_DIR}")
 
 #install (FILES "${GOBLICAMP_BINARY_DIR}/version.hpp"
 #         DESTINATION include)
 
-SET (CMAKE_INSTALL_PREFIX "./pkg/usr")
+# TODO: find out if these can be sourced from system
+add_subdirectory (vendor/python-modules)
+
+# main source tree
+add_subdirectory (src)
+
+# add static files to distribution
 install (DIRECTORY lib DESTINATION share/goblincamp)
 install (FILES terminal.png DESTINATION share/goblincamp)
