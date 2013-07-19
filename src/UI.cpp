@@ -84,8 +84,10 @@ void UI::Update() {
 	// FIXME: should probably be elsewhere
 	event = TCODSystem::checkForEvent(TCOD_EVENT_ANY, &key, &mouseInput);
 
-	if (event | TCOD_EVENT_KEY_PRESS) HandleKeyboard();
-	if (event | TCOD_EVENT_MOUSE) HandleMouse();
+	if (event & TCOD_EVENT_KEY_PRESS)
+	    HandleKeyboard();
+	if (event & TCOD_EVENT_MOUSE)
+	    HandleMouse();
 }
 
 void UI::HandleKeyboard() {
