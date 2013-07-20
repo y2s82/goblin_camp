@@ -1,5 +1,3 @@
-This is the old readme. It doesn't reflect the current state of things. Whitespace is inconsistent.
-
 --- Goblin Camp ---
 
 -- About: --
