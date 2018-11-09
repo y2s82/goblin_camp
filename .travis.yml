@@ -13,4 +13,4 @@ compiler:
     - gcc
     - clang
 script:
-    bjam -j3
+    - bjam -j3
