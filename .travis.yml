@@ -1,5 +1,16 @@
 language: cpp
-env: OMP_NUM_THREADS=4
+env: 
+    global:
+        - OMP_NUM_THREADS=4
+before_install:
+    - sudo apt-get update
+    - sudo apt-get install -y libboost1.54-tools-dev
+    - sudo apt-get install -y libsdl1.2-dev libsdl-image1.2-dev
+    - sudo apt-get install -y libpng++-dev
+    - sudo apt-get install -y zlib1g-dev
+    - sudo apt-get install -y libgl1-mesa-glx
 compiler:
-    - clang
     - gcc
+    - clang
+script:
+    - bjam -j3
