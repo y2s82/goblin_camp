@@ -2,7 +2,7 @@
 #define BOOST_ARCHIVE_BASIC_ARCHIVE_HPP
 
 // MS compatible compilers support #pragma once
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif
 
@@ -15,8 +15,8 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 //  See http://www.boost.org for updates, documentation, and revision history.
-
-#include <cassert>
+#include <cstring> // count
+#include <boost/assert.hpp>
 #include <boost/config.hpp>
 #include <boost/cstdint.hpp> // size_t
 #include <boost/noncopyable.hpp>
@@ -44,7 +44,7 @@ private:
 public:
     library_version_type(): t(0) {};
     explicit library_version_type(const unsigned int & t_) : t(t_){
-        assert(t_ <= boost::integer_traits<base_type>::const_max);
+        BOOST_ASSERT(t_ <= boost::integer_traits<base_type>::const_max);
     }
     library_version_type(const library_version_type & t_) : 
         t(t_.t)
@@ -54,7 +54,7 @@ public:
         return *this;
     }
     // used for text output
-    operator const base_type () const {
+    operator base_type () const {
         return t;
     }                
     // used for text input
@@ -69,7 +69,7 @@ public:
     }   
 };
 
-BOOST_ARCHIVE_DECL(library_version_type)
+BOOST_ARCHIVE_DECL library_version_type
 BOOST_ARCHIVE_VERSION();
 
 class version_type {
@@ -80,7 +80,7 @@ public:
     // should be private - but MPI fails if it's not!!!
     version_type(): t(0) {};
     explicit version_type(const unsigned int & t_) : t(t_){
-        assert(t_ <= boost::integer_traits<base_type>::const_max);
+        BOOST_ASSERT(t_ <= boost::integer_traits<base_type>::const_max);
     }
     version_type(const version_type & t_) : 
         t(t_.t)
@@ -90,7 +90,7 @@ public:
         return *this;
     }
     // used for text output
-    operator const base_type () const {
+    operator base_type () const {
         return t;
     }                
     // used for text intput
@@ -113,10 +113,10 @@ public:
     // should be private - but then can't use BOOST_STRONG_TYPE below
     class_id_type() : t(0) {};
     explicit class_id_type(const int t_) : t(t_){
-        assert(t_ <= boost::integer_traits<base_type>::const_max);
+        BOOST_ASSERT(t_ <= boost::integer_traits<base_type>::const_max);
     }
     explicit class_id_type(const std::size_t t_) : t(t_){
- //       assert(t_ <= boost::integer_traits<base_type>::const_max);
+ //       BOOST_ASSERT(t_ <= boost::integer_traits<base_type>::const_max);
     }
     class_id_type(const class_id_type & t_) : 
         t(t_.t)
@@ -127,11 +127,11 @@ public:
     }
 
     // used for text output
-    operator const int () const {
+    operator base_type () const {
         return t;
     }                
     // used for text input
-    operator int_least16_t &() {
+    operator base_type &() {
         return t;
     }                
     bool operator==(const class_id_type & rhs) const {
@@ -150,8 +150,12 @@ private:
     base_type t;
 public:
     object_id_type(): t(0) {};
-    explicit object_id_type(const unsigned int & t_) : t(t_){
-        assert(t_ <= boost::integer_traits<base_type>::const_max);
+    // note: presumes that size_t >= unsigned int.
+    // use explicit cast to silence useless warning
+    explicit object_id_type(const std::size_t & t_) : t(static_cast<base_type>(t_)){
+        // make quadriple sure that we haven't lost any real integer
+        // precision
+        BOOST_ASSERT(t_ <= boost::integer_traits<base_type>::const_max);
     }
     object_id_type(const object_id_type & t_) : 
         t(t_.t)
@@ -161,11 +165,11 @@ public:
         return *this;
     }
     // used for text output
-    operator const uint_least32_t () const {
+    operator base_type () const {
         return t;
     }                
     // used for text input
-    operator uint_least32_t & () {
+    operator base_type & () {
         return t;
     }                
     bool operator==(const object_id_type & rhs) const {
@@ -220,6 +224,9 @@ struct class_name_type :
     operator char * () {
         return t;
     }
+    std::size_t size() const {
+        return std::strlen(t);
+    }
     explicit class_name_type(const char *key_) 
     : t(const_cast<char *>(key_)){}
     explicit class_name_type(char *key_) 
@@ -238,7 +245,7 @@ enum archive_flags {
     flags_last = 8
 };
 
-BOOST_ARCHIVE_DECL(const char *)
+BOOST_ARCHIVE_DECL const char *
 BOOST_ARCHIVE_SIGNATURE();
 
 /* NOTE : Warning  : Warning : Warning : Warning : Warning
@@ -254,7 +261,7 @@ BOOST_ARCHIVE_SIGNATURE();
 #define BOOST_ARCHIVE_STRONG_TYPEDEF(T, D)         \
     class D : public T {                           \
     public:                                        \
-        explicit D(const T t) : T(t){}             \
+        explicit D(const T tt) : T(tt){}           \
     };                                             \
 /**/
 
@@ -281,5 +288,20 @@ BOOST_CLASS_IMPLEMENTATION(boost::archive::class_name_type, primitive_type)
 BOOST_CLASS_IMPLEMENTATION(boost::archive::object_id_type, primitive_type)
 BOOST_CLASS_IMPLEMENTATION(boost::archive::object_reference_type, primitive_type)
 BOOST_CLASS_IMPLEMENTATION(boost::archive::tracking_type, primitive_type)
+
+#include <boost/serialization/is_bitwise_serializable.hpp>
+
+// set types used internally by the serialization library 
+// to be bitwise serializable
+
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::library_version_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::version_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::class_id_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::class_id_reference_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::class_id_optional_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::class_name_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::object_id_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::object_reference_type)
+BOOST_IS_BITWISE_SERIALIZABLE(boost::archive::tracking_type)
 
 #endif //BOOST_ARCHIVE_BASIC_ARCHIVE_HPP

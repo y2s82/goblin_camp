@@ -6,12 +6,13 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-02-27 15:00:24 -0500 (Wed, 27 Feb 2008) $
+ * $Date$
  */
 
 #include "boost/tokenizer.hpp"
 #include "boost/lexical_cast.hpp"
 #include "boost/date_time/date_parsing.hpp"
+#include "boost/date_time/special_values_parser.hpp"
 #include "boost/cstdint.hpp"
 #include <iostream>
 
@@ -116,6 +117,7 @@ namespace date_time {
         
         break;
       }
+      default: break;
       }//switch
       pos++;
     }
@@ -153,9 +155,10 @@ namespace date_time {
         std::string& first,
         std::string& second)
   {
-    int sep_pos = static_cast<int>(s.find(sep));
+    std::string::size_type sep_pos = s.find(sep);
     first = s.substr(0,sep_pos);
-    second = s.substr(sep_pos+1);
+    if (sep_pos!=std::string::npos)
+        second = s.substr(sep_pos+1);
     return true;
   }
 
@@ -280,6 +283,7 @@ namespace date_time {
             
             break;
           }
+          default: break;
       };
       pos++;
     }
@@ -299,6 +303,25 @@ namespace date_time {
   {
     typedef typename time_type::time_duration_type time_duration;
     typedef typename time_type::date_type date_type;
+    typedef special_values_parser<date_type, std::string::value_type> svp_type;
+
+    // given to_iso_string can produce a special value string
+    // then from_iso_string should be able to read a special value string
+    // the special_values_parser is expensive to set up and not thread-safe
+    // so it cannot be static, so we need to be careful about when we use it
+    if (svp_type::likely(s)) {
+        typedef typename svp_type::stringstream_type ss_type;
+        typedef typename svp_type::stream_itr_type itr_type;
+        typedef typename svp_type::match_results mr_type;
+        svp_type p; // expensive
+        mr_type mr;
+        ss_type ss(s);
+        itr_type itr(ss);
+        itr_type end;
+        if (p.match(itr, end, mr)) {
+            return time_type(static_cast<special_values>(mr.current_match));
+        }
+    }
 
     //split date/time on a unique delimiter char such as ' ' or 'T'
     std::string date_string, tod_string;

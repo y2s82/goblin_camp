@@ -37,18 +37,19 @@
 #ifndef BOOST_IOSTREAMS_SYMMETRIC_FILTER_HPP_INCLUDED
 #define BOOST_IOSTREAMS_SYMMETRIC_FILTER_HPP_INCLUDED
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif
 
-#include <cassert>
-#include <memory>                               // allocator, auto_ptr.
+#include <boost/assert.hpp>
+#include <memory>                               // allocator.
 #include <boost/config.hpp>                     // BOOST_DEDUCED_TYPENAME.
 #include <boost/iostreams/char_traits.hpp>
 #include <boost/iostreams/constants.hpp>        // buffer size.
 #include <boost/iostreams/detail/buffer.hpp>
 #include <boost/iostreams/detail/char_traits.hpp>
 #include <boost/iostreams/detail/config/limits.hpp>
+#include <boost/iostreams/detail/ios.hpp>  // streamsize.
 #include <boost/iostreams/detail/template_params.hpp>
 #include <boost/iostreams/traits.hpp>
 #include <boost/iostreams/operations.hpp>       // read, write.
@@ -85,11 +86,11 @@ public:
     #define BOOST_PP_LOCAL_MACRO(n) \
         BOOST_IOSTREAMS_TEMPLATE_PARAMS(n, T) \
         explicit symmetric_filter( \
-              int buffer_size BOOST_PP_COMMA_IF(n) \
+              std::streamsize buffer_size BOOST_PP_COMMA_IF(n) \
               BOOST_PP_ENUM_BINARY_PARAMS(n, const T, &t) ) \
             : pimpl_(new impl(buffer_size BOOST_PP_COMMA_IF(n) \
                      BOOST_PP_ENUM_PARAMS(n, t))) \
-            { assert(buffer_size > 0); } \
+            { BOOST_ASSERT(buffer_size > 0); } \
         /**/
     #define BOOST_PP_LOCAL_LIMITS (0, BOOST_IOSTREAMS_MAX_FORWARDING_ARITY)
     #include BOOST_PP_LOCAL_ITERATE()
@@ -252,7 +253,7 @@ private:
     // Expands to a sequence of ctors which forward to SymmetricFilter.
     #define BOOST_PP_LOCAL_MACRO(n) \
         BOOST_IOSTREAMS_TEMPLATE_PARAMS(n, T) \
-        impl( int buffer_size BOOST_PP_COMMA_IF(n) \
+        impl( std::streamsize buffer_size BOOST_PP_COMMA_IF(n) \
               BOOST_PP_ENUM_BINARY_PARAMS(n, const T, &t) ) \
             : SymmetricFilter(BOOST_PP_ENUM_PARAMS(n, t)), \
               buf_(buffer_size), state_(0) \
@@ -275,7 +276,7 @@ BOOST_IOSTREAMS_PIPABLE(symmetric_filter, 2)
 template<typename SymmetricFilter, typename Alloc>
 void symmetric_filter<SymmetricFilter, Alloc>::begin_read()
 {
-    assert(!(state() & f_write));
+    BOOST_ASSERT(!(state() & f_write));
     state() |= f_read;
     buf().set(0, 0);
 }
@@ -283,7 +284,7 @@ void symmetric_filter<SymmetricFilter, Alloc>::begin_read()
 template<typename SymmetricFilter, typename Alloc>
 void symmetric_filter<SymmetricFilter, Alloc>::begin_write()
 {
-    assert(!(state() & f_read));
+    BOOST_ASSERT(!(state() & f_read));
     state() |= f_write;
     buf().set(0, buf().size());
 }

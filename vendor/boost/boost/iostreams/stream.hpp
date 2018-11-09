@@ -8,7 +8,7 @@
 #ifndef BOOST_IOSTREAMS_STREAM_HPP_INCLUDED
 #define BOOST_IOSTREAMS_STREAM_HPP_INCLUDED
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif
 
@@ -31,7 +31,7 @@ struct stream_traits {
     typedef Tr                                                 traits_type;
     typedef typename category_of<Device>::type                 mode;
     typedef typename
-            iostreams::select< // Dismbiguation required for Tru64.
+            iostreams::select< // Disambiguation required for Tru64.
                 mpl::and_<
                     is_convertible<mode, input>,
                     is_convertible<mode, output>
@@ -43,7 +43,7 @@ struct stream_traits {
                 BOOST_IOSTREAMS_BASIC_OSTREAM(char_type, traits_type)
             >::type stream_type;
     typedef typename
-            iostreams::select< // Dismbiguation required for Tru64.
+            iostreams::select< // Disambiguation required for Tru64.
                 mpl::and_<
                     is_convertible<mode, input>,
                     is_convertible<mode, output>
@@ -56,8 +56,14 @@ struct stream_traits {
             >::type stream_tag;
 };
 
+#if defined(BOOST_MSVC) && (BOOST_MSVC == 1700)
+# pragma warning(push)
+// https://connect.microsoft.com/VisualStudio/feedback/details/733720/
+# pragma warning(disable: 4250)
+#endif
+
 // By encapsulating initialization in a base, we can define the macro
-// BOOST_IOSTREAMS_DEFINE_FORWARDING_FUNCTIONS to generate constuctors
+// BOOST_IOSTREAMS_DEFINE_FORWARDING_FUNCTIONS to generate constructors
 // without base member initializer lists.
 template< typename Device,
           typename Tr =
@@ -84,6 +90,10 @@ public:
     stream_base() : pbase_type(), stream_type(&member) { }
 };
 
+#if defined(BOOST_MSVC) && (BOOST_MSVC == 1700)
+# pragma warning(pop)
+#endif
+
 } } } // End namespaces detail, iostreams, boost.
 
 #ifdef BOOST_IOSTREAMS_BROKEN_OVERLOAD_RESOLUTION
@@ -92,11 +102,17 @@ public:
 
 namespace boost { namespace iostreams {
 
+#if defined(BOOST_MSVC) && (BOOST_MSVC == 1700)
+# pragma warning(push)
+// https://connect.microsoft.com/VisualStudio/feedback/details/733720/
+# pragma warning(disable: 4250)
+#endif
+
 //
 // Template name: stream.
 // Description: A iostream which reads from and writes to an instance of a
 //      designated device type.
-// Template paramters:
+// Template parameters:
 //      Device - A device type.
 //      Alloc - The allocator type.
 //
@@ -143,6 +159,10 @@ private:
         this->member.open(dev BOOST_IOSTREAMS_PUSH_ARGS()); 
     }
 };
+
+#if defined(BOOST_MSVC) && (BOOST_MSVC == 1700)
+# pragma warning(pop)
+#endif
 
 } } // End namespaces iostreams, boost.
 

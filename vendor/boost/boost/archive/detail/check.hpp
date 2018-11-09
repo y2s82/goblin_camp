@@ -2,7 +2,7 @@
 #define BOOST_ARCHIVE_DETAIL_CHECK_HPP
 
 // MS compatible compilers support #pragma once
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #pragma inline_depth(511)
 #pragma inline_recursion(on)
@@ -50,8 +50,8 @@ namespace detail {
 template<class T>
 inline void check_object_level(){
     typedef 
-        BOOST_DEDUCED_TYPENAME mpl::greater_equal<
-            serialization::implementation_level<T>,
+        typename mpl::greater_equal<
+            serialization::implementation_level< T >,
             mpl::int_<serialization::primitive_type>
         >::type typex;
 
@@ -63,13 +63,13 @@ inline void check_object_level(){
 template<class T>
 inline void check_object_versioning(){
     typedef 
-        BOOST_DEDUCED_TYPENAME mpl::or_<
-            BOOST_DEDUCED_TYPENAME mpl::greater<
-                serialization::implementation_level<T>,
+        typename mpl::or_<
+            typename mpl::greater<
+                serialization::implementation_level< T >,
                 mpl::int_<serialization::object_serializable>
             >,
-            BOOST_DEDUCED_TYPENAME mpl::equal_to<
-                serialization::version<T>,
+            typename mpl::equal_to<
+                serialization::version< T >,
                 mpl::int_<0>
             >
         > typex;
@@ -82,9 +82,9 @@ template<class T>
 inline void check_object_tracking(){
     // presume it has already been determined that
     // T is not a const
-    BOOST_STATIC_ASSERT(! boost::is_const<T>::value);
-    typedef BOOST_DEDUCED_TYPENAME mpl::equal_to<
-        serialization::tracking_level<T>,
+    BOOST_STATIC_ASSERT(! boost::is_const< T >::value);
+    typedef typename mpl::equal_to<
+        serialization::tracking_level< T >,
         mpl::int_<serialization::track_never>
     >::type typex;
     // saving an non-const object of a type not marked "track_never)
@@ -105,14 +105,14 @@ inline void check_pointer_level(){
     // we should only invoke this once we KNOW that T
     // has been used as a pointer!!
     typedef 
-        BOOST_DEDUCED_TYPENAME mpl::or_<
-            BOOST_DEDUCED_TYPENAME mpl::greater<
-                serialization::implementation_level<T>,
+        typename mpl::or_<
+            typename mpl::greater<
+                serialization::implementation_level< T >,
                 mpl::int_<serialization::object_serializable>
             >,
-            BOOST_DEDUCED_TYPENAME mpl::not_<
-                BOOST_DEDUCED_TYPENAME mpl::equal_to<
-                    serialization::tracking_level<T>,
+            typename mpl::not_<
+                typename mpl::equal_to<
+                    serialization::tracking_level< T >,
                     mpl::int_<serialization::track_selectively>
                 >
             >
@@ -139,8 +139,8 @@ inline void check_pointer_level(){
 
 template<class T>
 void inline check_pointer_tracking(){
-    typedef BOOST_DEDUCED_TYPENAME mpl::greater<
-        serialization::tracking_level<T>,
+    typedef typename mpl::greater<
+        serialization::tracking_level< T >,
         mpl::int_<serialization::track_never>
     >::type typex;
     // serializing an object of a type marked "track_never" through a pointer
@@ -151,10 +151,10 @@ void inline check_pointer_tracking(){
 template<class T>
 inline void check_const_loading(){
     typedef
-        BOOST_DEDUCED_TYPENAME mpl::or_<
-            BOOST_DEDUCED_TYPENAME boost::serialization::is_wrapper<T>,
-            BOOST_DEDUCED_TYPENAME mpl::not_<
-                BOOST_DEDUCED_TYPENAME boost::is_const<T>
+        typename mpl::or_<
+            typename boost::serialization::is_wrapper< T >,
+            typename mpl::not_<
+                typename boost::is_const< T >
             >
         >::type typex;
     // cannot load data into a "const" object unless it's a

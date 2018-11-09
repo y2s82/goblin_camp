@@ -7,15 +7,12 @@
 //  Authors: Douglas Gregor
 //           Nick Edmonds
 //           Andrew Lumsdaine
+#include <boost/assert.hpp>
 #include <boost/property_map/parallel/distributed_property_map.hpp>
-#include <boost/graph/parallel/detail/untracked_pair.hpp>
+#include <boost/property_map/parallel/detail/untracked_pair.hpp>
 #include <boost/type_traits/is_base_and_derived.hpp>
 #include <boost/bind.hpp>
-#include <boost/graph/parallel/simple_trigger.hpp>
-
-#ifndef BOOST_GRAPH_USE_MPI
-#error "Parallel BGL files should not be included unless <boost/graph/use_mpi.hpp> has been included"
-#endif
+#include <boost/property_map/parallel/simple_trigger.hpp>
 
 namespace boost { namespace parallel {
 
@@ -46,7 +43,7 @@ PBGL_DISTRIB_PMAP::set_reduce(const Reduce& reduce)
   typedef handle_message<Reduce> Handler;
   data->process_group.replace_handler(Handler(data, reduce));
   Handler* handler = data->process_group.template get_receiver<Handler>();
-  assert(handler);
+  BOOST_ASSERT(handler);
   handler->setup_triggers(data->process_group);
   data->get_default_value = reduce;
   data->has_default_resolver = Reduce::non_default_resolver;
@@ -121,7 +118,7 @@ void
 PBGL_DISTRIB_PMAP
 ::handle_message<Reduce>::operator()(process_id_type source, int tag)
 {
-  assert(false);
+  BOOST_ASSERT(false);
 }
 
 template<typename ProcessGroup, typename GlobalMap, typename StorageMap>
@@ -136,7 +133,7 @@ handle_put(int /*source*/, int /*tag*/,
   shared_ptr<data_t> data(data_ptr);
 
   owner_local_pair p = get(data->global, req.first);
-  assert(p.first == process_id(data->process_group));
+  BOOST_ASSERT(p.first == process_id(data->process_group));
 
   detail::maybe_put(data->storage, p.second,
                     reduce(req.first,
@@ -154,7 +151,7 @@ handle_get(int source, int /*tag*/, const key_type& key,
   using boost::get;
 
   shared_ptr<data_t> data(data_ptr);
-  assert(data);
+  BOOST_ASSERT(data);
 
   owner_local_pair p = get(data->global, key);
   return get(data->storage, p.second);
@@ -168,7 +165,7 @@ handle_multiget(int source, int tag, const std::vector<key_type>& keys,
                 trigger_receive_context)
 {
   shared_ptr<data_t> data(data_ptr);
-  assert(data);
+  BOOST_ASSERT(data);
 
   typedef boost::parallel::detail::untracked_pair<key_type, value_type> key_value;
   std::vector<key_value> results;
@@ -194,7 +191,7 @@ handle_multiget_reply
    trigger_receive_context)
 {
   shared_ptr<data_t> data(data_ptr);
-  assert(data);
+  BOOST_ASSERT(data);
 
   // Index by key
   ghost_cells_key_index_type const& key_index 
@@ -223,7 +220,7 @@ handle_multiput
   using boost::get;
 
   shared_ptr<data_t> data(data_ptr);
-  assert(data);
+  BOOST_ASSERT(data);
 
   std::size_t n = values.size();
   for (std::size_t i = 0; i < n; ++i) {
@@ -242,7 +239,7 @@ void
 PBGL_DISTRIB_PMAP::handle_message<Reduce>::
 setup_triggers(process_group_type& pg)
 {
-  using boost::graph::parallel::simple_trigger;
+  using boost::parallel::simple_trigger;
 
   simple_trigger(pg, property_map_put, this, &handle_message::handle_put);
   simple_trigger(pg, property_map_get, this, &handle_message::handle_get);
@@ -261,7 +258,7 @@ PBGL_DISTRIB_PMAP
 {
   int stage=0; // we only get called at the start now
   shared_ptr<data_t> data(data_ptr);
-  assert(data);
+  BOOST_ASSERT(data);
 
   // Determine in which stage backward consistency messages should be sent.
   int backward_stage = -1;
@@ -295,14 +292,10 @@ PBGL_DISTRIB_PMAP::set_consistency_model(int model)
 {
   data->model = model;
 
-  int stages = 1;
   bool need_on_synchronize = (model != cm_forward);
 
   // Backward consistency is a two-stage process.
   if (model & cm_backward) {
-    if (model & cm_flush) stages = 3;
-    else stages = 2;
-
     // For backward consistency to work, we absolutely cannot throw
     // away any ghost cells.
     data->max_ghost_cells = 0;
@@ -422,7 +415,7 @@ template<typename Resolver>
 void PBGL_DISTRIB_PMAP::data_t::do_reset()
 {
   Resolver* resolver = get_default_value.template target<Resolver>();
-  assert(resolver);
+  BOOST_ASSERT(resolver);
 
   for (iterator i = ghost_cells->begin(); i != ghost_cells->end(); ++i)
     const_cast<value_type&>(i->second) = (*resolver)(i->first);

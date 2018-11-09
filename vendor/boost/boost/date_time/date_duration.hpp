@@ -2,16 +2,17 @@
 #define DATE_TIME_DATE_DURATION__
 
 /* Copyright (c) 2002,2003 CrystalClear Software, Inc.
- * Use, modification and distribution is subject to the 
+ * Use, modification and distribution is subject to the
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author: Jeff Garland, Bart Garst
- * $Date: 2008-11-12 14:37:53 -0500 (Wed, 12 Nov 2008) $
+ * $Date$
  */
 
 
 #include <boost/operators.hpp>
 #include <boost/date_time/special_defs.hpp>
+#include <boost/date_time/compiler_config.hpp>
 
 namespace boost {
 namespace date_time {
@@ -19,21 +20,21 @@ namespace date_time {
 
   //! Duration type with date level resolution
   template<class duration_rep_traits>
-  class date_duration : private
+  class BOOST_SYMBOL_VISIBLE date_duration : private
               boost::less_than_comparable1< date_duration< duration_rep_traits >
             , boost::equality_comparable1< date_duration< duration_rep_traits >
             , boost::addable1< date_duration< duration_rep_traits >
             , boost::subtractable1< date_duration< duration_rep_traits >
             , boost::dividable2< date_duration< duration_rep_traits >, int
             > > > > >
-  { 
+  {
   public:
     typedef typename duration_rep_traits::int_type duration_rep_type;
     typedef typename duration_rep_traits::impl_type duration_rep;
-    
+
     //! Construct from a day count
-    explicit date_duration(duration_rep day_count) : days_(day_count) {};
-    
+    explicit date_duration(duration_rep day_count) : days_(day_count) {}
+
     /*! construct from special_values - only works when
      * instantiated with duration_traits_adapted */
     date_duration(special_values sv) :
@@ -50,6 +51,10 @@ namespace date_time {
     duration_rep get_rep()const
     {
         return days_;
+    }
+    special_values as_special() const
+    {
+        return days_.as_special();
     }
     bool is_special()const
     {
@@ -121,23 +126,23 @@ namespace date_time {
   /*! Struct for instantiating date_duration with <b>NO</b> special values
    * functionality. Allows for transparent implementation of either
    * date_duration<long> or date_duration<int_adapter<long> > */
-  struct duration_traits_long
+  struct BOOST_SYMBOL_VISIBLE duration_traits_long
   {
     typedef long int_type;
     typedef long impl_type;
-    static int_type as_number(impl_type i) { return i; };
+    static int_type as_number(impl_type i) { return i; }
   };
 
   /*! Struct for instantiating date_duration <b>WITH</b> special values
    * functionality. Allows for transparent implementation of either
    * date_duration<long> or date_duration<int_adapter<long> > */
-  struct duration_traits_adapted
+  struct BOOST_SYMBOL_VISIBLE duration_traits_adapted
   {
     typedef long int_type;
     typedef boost::date_time::int_adapter<long> impl_type;
-    static int_type as_number(impl_type i) { return i.as_number(); };
+    static int_type as_number(impl_type i) { return i.as_number(); }
   };
-  
+
 
 } } //namspace date_time
 

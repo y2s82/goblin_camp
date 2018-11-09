@@ -28,6 +28,7 @@
 #include <boost/smart_ptr/bad_weak_ptr.hpp>
 #include <boost/smart_ptr/detail/sp_counted_base.hpp>
 #include <boost/smart_ptr/detail/sp_counted_impl.hpp>
+#include <boost/smart_ptr/detail/sp_disable_deprecated.hpp>
 #include <boost/detail/workaround.hpp>
 // In order to avoid circular dependencies with Boost.TR1
 // we make sure that our include of <memory> doesn't try to
@@ -35,10 +36,27 @@
 // rather than including <memory> directly:
 #include <boost/config/no_tr1/memory.hpp>  // std::auto_ptr
 #include <functional>       // std::less
-#include <new>              // std::bad_alloc
+
+#ifdef BOOST_NO_EXCEPTIONS
+# include <new>              // std::bad_alloc
+#endif
+
+#include <boost/core/addressof.hpp>
+
+#if defined( BOOST_SP_DISABLE_DEPRECATED )
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
 
 namespace boost
 {
+
+namespace movelib
+{
+
+template< class T, class D > class unique_ptr;
+
+} // namespace movelib
 
 namespace detail
 {
@@ -51,6 +69,38 @@ int const   weak_count_id = 0x298C38A4;
 #endif
 
 struct sp_nothrow_tag {};
+
+template< class D > struct sp_inplace_tag
+{
+};
+
+template< class T > class sp_reference_wrapper
+{ 
+public:
+
+    explicit sp_reference_wrapper( T & t): t_( boost::addressof( t ) )
+    {
+    }
+
+    template< class Y > void operator()( Y * p ) const
+    {
+        (*t_)( p );
+    }
+
+private:
+
+    T * t_;
+};
+
+template< class D > struct sp_convert_reference
+{
+    typedef D type;
+};
+
+template< class D > struct sp_convert_reference< D& >
+{
+    typedef sp_reference_wrapper< D > type;
+};
 
 class weak_count;
 
@@ -68,7 +118,14 @@ private:
 
 public:
 
-    shared_count(): pi_(0) // nothrow
+    BOOST_CONSTEXPR shared_count(): pi_(0) // nothrow
+#if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
+        , id_(shared_count_id)
+#endif
+    {
+    }
+
+    BOOST_CONSTEXPR explicit shared_count( sp_counted_base * pi ): pi_( pi ) // nothrow
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
         , id_(shared_count_id)
 #endif
@@ -142,13 +199,56 @@ public:
 #endif
     }
 
+#if !defined( BOOST_NO_FUNCTION_TEMPLATE_ORDERING )
+
+    template< class P, class D > shared_count( P p, sp_inplace_tag<D> ): pi_( 0 )
+#if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
+        , id_(shared_count_id)
+#endif
+    {
+#ifndef BOOST_NO_EXCEPTIONS
+
+        try
+        {
+            pi_ = new sp_counted_impl_pd< P, D >( p );
+        }
+        catch( ... )
+        {
+            D::operator_fn( p ); // delete p
+            throw;
+        }
+
+#else
+
+        pi_ = new sp_counted_impl_pd< P, D >( p );
+
+        if( pi_ == 0 )
+        {
+            D::operator_fn( p ); // delete p
+            boost::throw_exception( std::bad_alloc() );
+        }
+
+#endif // #ifndef BOOST_NO_EXCEPTIONS
+    }
+
+#endif // !defined( BOOST_NO_FUNCTION_TEMPLATE_ORDERING )
+
     template<class P, class D, class A> shared_count( P p, D d, A a ): pi_( 0 )
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
         , id_(shared_count_id)
 #endif
     {
         typedef sp_counted_impl_pda<P, D, A> impl_type;
+
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+        typedef typename std::allocator_traits<A>::template rebind_alloc< impl_type > A2;
+
+#else
+
         typedef typename A::template rebind< impl_type >::other A2;
+
+#endif
 
         A2 a2( a );
 
@@ -156,8 +256,8 @@ public:
 
         try
         {
-            pi_ = a2.allocate( 1, static_cast< impl_type* >( 0 ) );
-            new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
+            pi_ = a2.allocate( 1 );
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
         }
         catch(...)
         {
@@ -173,11 +273,11 @@ public:
 
 #else
 
-        pi_ = a2.allocate( 1, static_cast< impl_type* >( 0 ) );
+        pi_ = a2.allocate( 1 );
 
         if( pi_ != 0 )
         {
-            new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, d, a );
         }
         else
         {
@@ -187,6 +287,65 @@ public:
 
 #endif
     }
+
+#if !defined( BOOST_NO_FUNCTION_TEMPLATE_ORDERING )
+
+    template< class P, class D, class A > shared_count( P p, sp_inplace_tag< D >, A a ): pi_( 0 )
+#if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
+        , id_(shared_count_id)
+#endif
+    {
+        typedef sp_counted_impl_pda< P, D, A > impl_type;
+
+#if !defined( BOOST_NO_CXX11_ALLOCATOR )
+
+        typedef typename std::allocator_traits<A>::template rebind_alloc< impl_type > A2;
+
+#else
+
+        typedef typename A::template rebind< impl_type >::other A2;
+
+#endif
+
+        A2 a2( a );
+
+#ifndef BOOST_NO_EXCEPTIONS
+
+        try
+        {
+            pi_ = a2.allocate( 1 );
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, a );
+        }
+        catch(...)
+        {
+            D::operator_fn( p );
+
+            if( pi_ != 0 )
+            {
+                a2.deallocate( static_cast< impl_type* >( pi_ ), 1 );
+            }
+
+            throw;
+        }
+
+#else
+
+        pi_ = a2.allocate( 1 );
+
+        if( pi_ != 0 )
+        {
+            ::new( static_cast< void* >( pi_ ) ) impl_type( p, a );
+        }
+        else
+        {
+            D::operator_fn( p );
+            boost::throw_exception( std::bad_alloc() );
+        }
+
+#endif // #ifndef BOOST_NO_EXCEPTIONS
+    }
+
+#endif // !defined( BOOST_NO_FUNCTION_TEMPLATE_ORDERING )
 
 #ifndef BOOST_NO_AUTO_PTR
 
@@ -212,6 +371,56 @@ public:
 
 #endif 
 
+#if !defined( BOOST_NO_CXX11_SMART_PTR )
+
+    template<class Y, class D>
+    explicit shared_count( std::unique_ptr<Y, D> & r ): pi_( 0 )
+#if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
+        , id_(shared_count_id)
+#endif
+    {
+        typedef typename sp_convert_reference<D>::type D2;
+
+        D2 d2( r.get_deleter() );
+        pi_ = new sp_counted_impl_pd< typename std::unique_ptr<Y, D>::pointer, D2 >( r.get(), d2 );
+
+#ifdef BOOST_NO_EXCEPTIONS
+
+        if( pi_ == 0 )
+        {
+            boost::throw_exception( std::bad_alloc() );
+        }
+
+#endif
+
+        r.release();
+    }
+
+#endif
+
+    template<class Y, class D>
+    explicit shared_count( boost::movelib::unique_ptr<Y, D> & r ): pi_( 0 )
+#if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
+        , id_(shared_count_id)
+#endif
+    {
+        typedef typename sp_convert_reference<D>::type D2;
+
+        D2 d2( r.get_deleter() );
+        pi_ = new sp_counted_impl_pd< typename boost::movelib::unique_ptr<Y, D>::pointer, D2 >( r.get(), d2 );
+
+#ifdef BOOST_NO_EXCEPTIONS
+
+        if( pi_ == 0 )
+        {
+            boost::throw_exception( std::bad_alloc() );
+        }
+
+#endif
+
+        r.release();
+    }
+
     ~shared_count() // nothrow
     {
         if( pi_ != 0 ) pi_->release();
@@ -228,7 +437,7 @@ public:
         if( pi_ != 0 ) pi_->add_ref_copy();
     }
 
-#if defined( BOOST_HAS_RVALUE_REFS )
+#if !defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
 
     shared_count(shared_count && r): pi_(r.pi_) // nothrow
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
@@ -293,6 +502,16 @@ public:
     {
         return pi_? pi_->get_deleter( ti ): 0;
     }
+
+    void * get_local_deleter( sp_typeinfo const & ti ) const
+    {
+        return pi_? pi_->get_local_deleter( ti ): 0;
+    }
+
+    void * get_untyped_deleter() const
+    {
+        return pi_? pi_->get_untyped_deleter(): 0;
+    }
 };
 
 
@@ -310,7 +529,7 @@ private:
 
 public:
 
-    weak_count(): pi_(0) // nothrow
+    BOOST_CONSTEXPR weak_count(): pi_(0) // nothrow
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
         , id_(weak_count_id)
 #endif
@@ -335,7 +554,7 @@ public:
 
 // Move support
 
-#if defined( BOOST_HAS_RVALUE_REFS )
+#if !defined( BOOST_NO_CXX11_RVALUE_REFERENCES )
 
     weak_count(weak_count && r): pi_(r.pi_) // nothrow
 #if defined(BOOST_SP_ENABLE_DEBUG_HOOKS)
@@ -436,6 +655,10 @@ inline shared_count::shared_count( weak_count const & r, sp_nothrow_tag ): pi_( 
 } // namespace detail
 
 } // namespace boost
+
+#if defined( BOOST_SP_DISABLE_DEPRECATED )
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef __BORLANDC__
 # pragma warn .8027     // Functions containing try are not expanded inline

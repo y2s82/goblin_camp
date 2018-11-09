@@ -8,12 +8,12 @@
 #ifndef BOOST_IOSTREAMS_INVERT_HPP_INCLUDED
 #define BOOST_IOSTREAMS_INVERT_HPP_INCLUDED
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif              
 
 #include <algorithm>                             // copy, min.  
-#include <cassert>
+#include <boost/assert.hpp>
 #include <boost/config.hpp>                      // BOOST_DEDUCED_TYPENAME.       
 #include <boost/detail/workaround.hpp>           // default_filter_buffer_size.
 #include <boost/iostreams/char_traits.hpp>
@@ -36,7 +36,7 @@ namespace boost { namespace iostreams {
 
 //
 // Template name: inverse.
-// Template paramters:
+// Template parameters:
 //      Filter - A model of InputFilter or OutputFilter.
 // Description: Generates an InputFilter from an OutputFilter or
 //      vice versa.
@@ -73,12 +73,12 @@ public:
         { }
 
     template<typename Source>
-    std::streamsize read(Source& src, char* s, std::streamsize n)
+    std::streamsize read(Source& src, char_type* s, std::streamsize n)
     {
         typedef detail::counted_array_sink<char_type>  array_sink;
         typedef composite<filter_ref, array_sink>      filtered_array_sink;
 
-        assert((flags() & f_write) == 0);
+        BOOST_ASSERT((flags() & f_write) == 0);
         if (flags() == 0) {
             flags() = f_read;
             buf().set(0, 0);
@@ -101,12 +101,12 @@ public:
     }
 
     template<typename Sink>
-    std::streamsize write(Sink& dest, const char* s, std::streamsize n)
+    std::streamsize write(Sink& dest, const char_type* s, std::streamsize n)
     {
         typedef detail::counted_array_source<char_type>  array_source;
         typedef composite<filter_ref, array_source>      filtered_array_source;
 
-        assert((flags() & f_read) == 0);
+        BOOST_ASSERT((flags() & f_read) == 0);
         if (flags() == 0) {
             flags() = f_write;
             buf().set(0, 0);
@@ -151,7 +151,7 @@ private:
 
 //
 // Template name: invert.
-// Template paramters:
+// Template parameters:
 //      Filter - A model of InputFilter or OutputFilter.
 // Description: Returns an instance of an appropriate specialization of inverse.
 //

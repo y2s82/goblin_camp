@@ -8,12 +8,12 @@
 #ifndef BOOST_IOSTREAMS_LINE_FILTER_HPP_INCLUDED
 #define BOOST_IOSTREAMS_LINE_FILTER_HPP_INCLUDED
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif
 
 #include <algorithm>                               // min.
-#include <cassert>
+#include <boost/assert.hpp>
 #include <memory>                                  // allocator.
 #include <string>
 #include <boost/config.hpp>                        // BOOST_STATIC_CONSTANT.
@@ -31,19 +31,13 @@ namespace boost { namespace iostreams {
 
 //
 // Template name: line_filter.
-// Template paramters:
+// Template parameters:
 //      Ch - The character type.
 //      Alloc - The allocator type.
 // Description: Filter which processes data one line at a time.
 //
 template< typename Ch,
-          typename Alloc =
-          #if BOOST_WORKAROUND(__GNUC__, < 3)
-              typename std::basic_string<Ch>::allocator_type
-          #else
-              std::allocator<Ch>
-          #endif
-          >
+          typename Alloc = std::allocator<Ch> >
 class basic_line_filter {
 private:
     typedef typename std::basic_string<Ch>::traits_type  string_traits;
@@ -73,7 +67,7 @@ public:
     std::streamsize read(Source& src, char_type* s, std::streamsize n)
     {
         using namespace std;
-        assert(!(flags_ & f_write));
+        BOOST_ASSERT(!(flags_ & f_write));
         flags_ |= f_read;
 
         // Handle unfinished business.
@@ -98,7 +92,7 @@ public:
     std::streamsize write(Sink& snk, const char_type* s, std::streamsize n)
     {
         using namespace std;
-        assert(!(flags_ & f_read));
+        BOOST_ASSERT(!(flags_ & f_read));
         flags_ |= f_write;
 
         // Handle unfinished business.

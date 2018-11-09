@@ -1,5 +1,5 @@
 /*=============================================================================
-    Copyright (c) 2001-2006 Joel de Guzman
+    Copyright (c) 2001-2011 Joel de Guzman
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -7,6 +7,7 @@
 #if !defined(FUSION_FILTER_VIEW_ITERATOR_05062005_0849)
 #define FUSION_FILTER_VIEW_ITERATOR_05062005_0849
 
+#include <boost/fusion/support/config.hpp>
 #include <boost/fusion/iterator/mpl/convert_iterator.hpp>
 #include <boost/fusion/adapted/mpl/mpl_iterator.hpp>
 #include <boost/fusion/iterator/value_of.hpp>
@@ -54,8 +55,9 @@ namespace boost { namespace fusion
         typedef last_iter last_type;
         typedef Pred pred_type;
 
+        BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
         filter_iterator(First const& in_first)
-            : first(filter::call(first_converter::call(in_first))) {}
+            : first(filter::iter_call(first_converter::call(in_first))) {}
 
         first_type first;
 
@@ -64,6 +66,15 @@ namespace boost { namespace fusion
         filter_iterator& operator= (filter_iterator const&);
     };
 }}
+
+#ifdef BOOST_FUSION_WORKAROUND_FOR_LWG_2408
+namespace std
+{
+    template <typename Category, typename First, typename Last, typename Pred>
+    struct iterator_traits< ::boost::fusion::filter_iterator<Category, First, Last, Pred> >
+    { };
+}
+#endif
 
 #endif
 

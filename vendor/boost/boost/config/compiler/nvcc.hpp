@@ -11,77 +11,48 @@
 #  define BOOST_COMPILER "NVIDIA CUDA C++ Compiler"
 #endif
 
+#if defined(__CUDACC_VER_MAJOR__) && defined(__CUDACC_VER_MINOR__) && defined(__CUDACC_VER_BUILD__)
+#  define BOOST_CUDA_VERSION __CUDACC_VER_MAJOR__ * 1000000 + __CUDACC_VER_MINOR__ * 10000 + __CUDACC_VER_BUILD__
+#else
+// We don't really know what the CUDA version is, but it's definitely before 7.5:
+#  define BOOST_CUDA_VERSION 7000000
+#endif
+
 // NVIDIA Specific support
 // BOOST_GPU_ENABLED : Flag a function or a method as being enabled on the host and device
 #define BOOST_GPU_ENABLED __host__ __device__
 
-// Boost support macro for NVCC 
-// NVCC Basically behaves like some flavor of MSVC6 + some specific quirks
-#define BOOST_NO_INCLASS_MEMBER_INITIALIZATION
-#define BOOST_MSVC6_MEMBER_TEMPLATES
-#define BOOST_HAS_UNISTD_H
-#define BOOST_HAS_STDINT_H
-#define BOOST_HAS_SIGACTION
-#define BOOST_HAS_SCHED_YIELD
-#define BOOST_HAS_PTHREADS
-#define BOOST_HAS_PTHREAD_YIELD
-#define BOOST_HAS_PTHREAD_MUTEXATTR_SETTYPE
-#define BOOST_HAS_PARTIAL_STD_ALLOCATOR
-#define BOOST_HAS_NRVO
-#define BOOST_HAS_NL_TYPES_H
-#define BOOST_HAS_NANOSLEEP
-#define BOOST_HAS_LONG_LONG
-#define BOOST_HAS_LOG1P
-#define BOOST_HAS_GETTIMEOFDAY
-#define BOOST_HAS_EXPM1
-#define BOOST_HAS_DIRENT_H
-#define BOOST_HAS_CLOCK_GETTIME
-#define BOOST_NO_VARIADIC_TEMPLATES
-#define BOOST_NO_VARIADIC_MACROS
-#define BOOST_NO_UNICODE_LITERALS
-#define BOOST_NO_TEMPLATE_ALIASES
-#define BOOST_NO_STD_UNORDERED
-#define BOOST_NO_STATIC_ASSERT
-#define BOOST_NO_SFINAE_EXPR
-#define BOOST_NO_SCOPED_ENUMS
-#define BOOST_NO_RVALUE_REFERENCES
-#define BOOST_NO_RAW_LITERALS
-#define BOOST_NO_NULLPTR
-#define BOOST_NO_LAMBDAS
-#define BOOST_NO_INITIALIZER_LISTS
-#define BOOST_NO_MS_INT64_NUMERIC_LIMITS
-#define BOOST_NO_FUNCTION_TEMPLATE_DEFAULT_ARGS
-#define BOOST_NO_EXTERN_TEMPLATE
-#define BOOST_NO_EXPLICIT_CONVERSION_OPERATORS
-#define BOOST_NO_DELETED_FUNCTIONS
-#define BOOST_NO_DEFAULTED_FUNCTIONS
-#define BOOST_NO_DECLTYPE
-#define BOOST_NO_CONSTEXPR
-#define BOOST_NO_CONCEPTS
-#define BOOST_NO_CHAR32_T
-#define BOOST_NO_CHAR16_T
-#define BOOST_NO_AUTO_MULTIDECLARATIONS
-#define BOOST_NO_AUTO_DECLARATIONS
-#define BOOST_NO_0X_HDR_UNORDERED_SET
-#define BOOST_NO_0X_HDR_UNORDERED_MAP
-#define BOOST_NO_0X_HDR_TYPE_TRAITS
-#define BOOST_NO_0X_HDR_TUPLE
-#define BOOST_NO_0X_HDR_THREAD
-#define BOOST_NO_0X_HDR_TYPEINDEX
-#define BOOST_NO_0X_HDR_SYSTEM_ERROR
-#define BOOST_NO_0X_HDR_REGEX
-#define BOOST_NO_0X_HDR_RATIO
-#define BOOST_NO_0X_HDR_RANDOM
-#define BOOST_NO_0X_HDR_MUTEX
-#define BOOST_NO_0X_HDR_MEMORY_CONCEPTS
-#define BOOST_NO_0X_HDR_ITERATOR_CONCEPTS
-#define BOOST_NO_0X_HDR_INITIALIZER_LIST
-#define BOOST_NO_0X_HDR_FUTURE
-#define BOOST_NO_0X_HDR_FORWARD_LIST
-#define BOOST_NO_0X_HDR_CONTAINER_CONCEPTS
-#define BOOST_NO_0X_HDR_CONDITION_VARIABLE
-#define BOOST_NO_0X_HDR_CONCEPTS
-#define BOOST_NO_0X_HDR_CODECVT
-#define BOOST_NO_0X_HDR_CHRONO
-#define BOOST_NO_0X_HDR_ARRAY
+// A bug in version 7.0 of CUDA prevents use of variadic templates in some occasions
+// https://svn.boost.org/trac/boost/ticket/11897
+// This is fixed in 7.5. As the following version macro was introduced in 7.5 an existance
+// check is enough to detect versions < 7.5
+#if BOOST_CUDA_VERSION < 7050000
+#   define BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#endif
+// The same bug is back again in 8.0:
+#if (BOOST_CUDA_VERSION > 8000000) && (BOOST_CUDA_VERSION < 8010000)
+#   define BOOST_NO_CXX11_VARIADIC_TEMPLATES
+#endif
+// Most recent CUDA (8.0) has no constexpr support in msvc mode:
+#if defined(_MSC_VER)
+#  define BOOST_NO_CXX11_CONSTEXPR
+#endif
+
+#ifdef __CUDACC__
+//
+// When compiing .cu files, there's a bunch of stuff that doesn't work with msvc:
+//
+#if defined(_MSC_VER)
+#  define BOOST_NO_CXX14_DIGIT_SEPARATORS
+#  define BOOST_NO_CXX11_UNICODE_LITERALS
+#endif
+//
+// And this one effects the NVCC front end,
+// See https://svn.boost.org/trac/boost/ticket/13049
+//
+#if (BOOST_CUDA_VERSION >= 8000000) && (BOOST_CUDA_VERSION < 8010000)
+#  define BOOST_NO_CXX11_NOEXCEPT
+#endif
+
+#endif
 

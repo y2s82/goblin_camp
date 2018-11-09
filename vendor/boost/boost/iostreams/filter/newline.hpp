@@ -11,11 +11,11 @@
 #ifndef BOOST_IOSTREAMS_NEWLINE_FILTER_HPP_INCLUDED
 #define BOOST_IOSTREAMS_NEWLINE_FILTER_HPP_INCLUDED
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif
 
-#include <cassert>
+#include <boost/assert.hpp>
 #include <cstdio>
 #include <stdexcept>                       // logic_error.
 #include <boost/config.hpp>                // BOOST_STATIC_CONSTANT.
@@ -34,7 +34,7 @@
 #include <boost/iostreams/detail/config/disable_warnings.hpp>
 
 #define BOOST_IOSTREAMS_ASSERT_UNREACHABLE(val) \
-    (assert("unreachable code" == 0), val) \
+    (BOOST_ASSERT("unreachable code" == 0), val) \
     /**/
 
 namespace boost { namespace iostreams {
@@ -135,7 +135,7 @@ public:
         using iostreams::newline::CR;
         using iostreams::newline::LF;
 
-        assert((flags_ & f_write) == 0);
+        BOOST_ASSERT((flags_ & f_write) == 0);
         flags_ |= f_read;
 
         if (flags_ & (f_has_LF | f_has_EOF)) {
@@ -187,7 +187,7 @@ public:
         using iostreams::newline::CR;
         using iostreams::newline::LF;
 
-        assert((flags_ & f_read) == 0);
+        BOOST_ASSERT((flags_ & f_read) == 0);
         flags_ |= f_write;
 
         if ((flags_ & f_has_LF) != 0)
@@ -214,7 +214,6 @@ public:
     template<typename Sink>
     void close(Sink& dest, BOOST_IOS::openmode)
     {
-        typedef typename iostreams::category_of<Sink>::type category;
         if ((flags_ & f_write) != 0 && (flags_ & f_has_CR) != 0)
             newline_if_sink(dest);
         flags_ &= ~f_has_LF; // Restore original flags.

@@ -1,5 +1,5 @@
 /*=============================================================================
-    Copyright (c) 2001-2006 Joel de Guzman
+    Copyright (c) 2001-2011 Joel de Guzman
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying 
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -18,7 +18,7 @@ namespace boost { namespace fusion
     {
         template <typename Tag>
         struct advance_impl;
-    
+
         template <>
         struct advance_impl<vector_iterator_tag>
         {
@@ -28,7 +28,8 @@ namespace boost { namespace fusion
                 typedef typename Iterator::index index;
                 typedef typename Iterator::vector vector;
                 typedef vector_iterator<vector, index::value+N::value> type;
-    
+
+                BOOST_CONSTEXPR BOOST_FUSION_GPU_ENABLED
                 static type
                 call(Iterator const& i)
                 {

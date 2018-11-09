@@ -17,12 +17,11 @@ namespace boost {
 
 namespace units {
 
-struct one { one() {} };
+struct one { BOOST_CONSTEXPR one() {} };
 
 // workaround for pathscale.
-inline one make_one() {
-    one result;
-    return(result);
+inline BOOST_CONSTEXPR one make_one() {
+    return(one());
 }
 
 template<class T>
@@ -44,21 +43,20 @@ struct multiply_typeof_helper<one, one>
 };
 
 template<class T>
-inline T operator*(const one&, const T& t)
+inline BOOST_CONSTEXPR T operator*(const one&, const T& t)
 {
     return(t);
 }
 
 template<class T>
-inline T operator*(const T& t, const one&)
+inline BOOST_CONSTEXPR T operator*(const T& t, const one&)
 {
     return(t);
 }
 
-inline one operator*(const one&, const one&)
+inline BOOST_CONSTEXPR one operator*(const one&, const one&)
 {
-    one result;
-    return(result);
+    return(one());
 }
 
 template<class T>
@@ -80,27 +78,37 @@ struct divide_typeof_helper<one, one>
 };
 
 template<class T>
-inline T operator/(const T& t, const one&)
+inline BOOST_CONSTEXPR T operator/(const T& t, const one&)
 {
     return(t);
 }
 
 template<class T>
-inline T operator/(const one&, const T& t)
+inline BOOST_CONSTEXPR T operator/(const one&, const T& t)
 {
     return(1/t);
 }
 
-inline one operator/(const one&, const one&)
+inline BOOST_CONSTEXPR one operator/(const one&, const one&)
 {
-    one result;
-    return(result);
+    return(one());
 }
 
 template<class T>
-inline bool operator>(const boost::units::one&, const T& t) {
+inline BOOST_CONSTEXPR bool operator>(const boost::units::one&, const T& t) {
     return(1 > t);
 }
+
+template<class T>
+BOOST_CONSTEXPR T one_to_double(const T& t) { return t; }
+
+inline BOOST_CONSTEXPR double one_to_double(const one&) { return 1.0; }
+
+template<class T>
+struct one_to_double_type { typedef T type; };
+
+template<>
+struct one_to_double_type<one> { typedef double type; };
 
 } // namespace units
 

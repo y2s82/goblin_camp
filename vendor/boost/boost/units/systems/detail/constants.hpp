@@ -20,6 +20,8 @@
 #include <boost/units/static_constant.hpp>
 #include <boost/units/units_fwd.hpp>
 #include <boost/units/operators.hpp>
+#include <boost/units/static_rational.hpp>
+#include <boost/units/detail/one.hpp>
 
 namespace boost {
 
@@ -29,22 +31,22 @@ template<class Base>
 struct constant 
 { 
     typedef typename Base::value_type value_type; 
-    operator value_type() const    { return Base().value(); } 
-    value_type value() const       { return Base().value(); } 
-    value_type uncertainty() const { return Base().uncertainty(); } 
-    value_type lower_bound() const { return Base().lower_bound(); } 
-    value_type upper_bound() const { return Base().upper_bound(); } 
+    BOOST_CONSTEXPR operator value_type() const    { return Base().value(); } 
+    BOOST_CONSTEXPR value_type value() const       { return Base().value(); } 
+    BOOST_CONSTEXPR value_type uncertainty() const { return Base().uncertainty(); } 
+    BOOST_CONSTEXPR value_type lower_bound() const { return Base().lower_bound(); } 
+    BOOST_CONSTEXPR value_type upper_bound() const { return Base().upper_bound(); } 
 }; 
 
 template<class Base>
 struct physical_constant 
 { 
     typedef typename Base::value_type value_type; 
-    operator value_type() const    { return Base().value(); } 
-    value_type value() const       { return Base().value(); } 
-    value_type uncertainty() const { return Base().uncertainty(); } 
-    value_type lower_bound() const { return Base().lower_bound(); } 
-    value_type upper_bound() const { return Base().upper_bound(); } 
+    BOOST_CONSTEXPR operator value_type() const    { return Base().value(); } 
+    BOOST_CONSTEXPR value_type value() const       { return Base().value(); } 
+    BOOST_CONSTEXPR value_type uncertainty() const { return Base().uncertainty(); } 
+    BOOST_CONSTEXPR value_type lower_bound() const { return Base().lower_bound(); } 
+    BOOST_CONSTEXPR value_type upper_bound() const { return Base().upper_bound(); } 
 }; 
 
 #define BOOST_UNITS_DEFINE_HELPER(name, symbol, template_name)  \
@@ -62,6 +64,7 @@ struct name ## _typeof_helper<template_name<Arg1, Arg2>, constant<T> >\
 };                                                              \
                                                                 \
 template<class T, class Arg1, class Arg2>                       \
+BOOST_CONSTEXPR                                                 \
 typename name ## _typeof_helper<typename T::value_type, template_name<Arg1, Arg2> >::type \
 operator symbol(const constant<T>& t, const template_name<Arg1, Arg2>& u)\
 {                                                               \
@@ -69,6 +72,7 @@ operator symbol(const constant<T>& t, const template_name<Arg1, Arg2>& u)\
 }                                                               \
                                                                 \
 template<class T, class Arg1, class Arg2>                       \
+BOOST_CONSTEXPR                                                 \
 typename name ## _typeof_helper<template_name<Arg1, Arg2>, typename T::value_type>::type \
 operator symbol(const template_name<Arg1, Arg2>& u, const constant<T>& t)\
 {                                                               \
@@ -95,6 +99,7 @@ struct name ## _typeof_helper<constant<T1>, constant<T2> >          \
 };                                                                  \
                                                                     \
 template<class T1, class T2>                                        \
+BOOST_CONSTEXPR                                                     \
 typename name ## _typeof_helper<typename T1::value_type, typename T2::value_type>::type \
 operator symbol(const constant<T1>& t, const constant<T2>& u)       \
 {                                                                   \
@@ -114,6 +119,7 @@ struct name ## _typeof_helper<T1, constant<T2> >                    \
 };                                                                  \
                                                                     \
 template<class T1, class T2>                                        \
+BOOST_CONSTEXPR                                                     \
 typename name ## _typeof_helper<typename T1::value_type, T2>::type  \
 operator symbol(const constant<T1>& t, const T2& u)                 \
 {                                                                   \
@@ -121,6 +127,7 @@ operator symbol(const constant<T1>& t, const T2& u)                 \
 }                                                                   \
                                                                     \
 template<class T1, class T2>                                        \
+BOOST_CONSTEXPR                                                     \
 typename name ## _typeof_helper<T1, typename T2::value_type>::type  \
 operator symbol(const T1& t, const constant<T2>& u)                 \
 {                                                                   \
@@ -134,15 +141,85 @@ BOOST_UNITS_DEFINE_HELPER(divide, /)
 
 #undef BOOST_UNITS_DEFINE_HELPER
 
-#define BOOST_UNITS_PHYSICAL_CONSTANT(name, type, value_, uncertainty_) \
-struct name ## _t {                                                     \
-    typedef type value_type;                                            \
-    operator value_type() const    { return value_; }                   \
-    value_type value() const       { return value_; }                   \
-    value_type uncertainty() const { return uncertainty_; }             \
-    value_type lower_bound() const { return value_-uncertainty_; }      \
-    value_type upper_bound() const { return value_+uncertainty_; }      \
-};                                                                      \
+#define BOOST_UNITS_DEFINE_HELPER(name, symbol)                     \
+                                                                    \
+template<class T1>                                                  \
+struct name ## _typeof_helper<constant<T1>, one>                    \
+{                                                                   \
+    typedef typename name ## _typeof_helper<typename T1::value_type, one>::type type;\
+};                                                                  \
+                                                                    \
+template<class T2>                                                  \
+struct name ## _typeof_helper<one, constant<T2> >                   \
+{                                                                   \
+    typedef typename name ## _typeof_helper<one, typename T2::value_type>::type type;\
+};                                                                  \
+                                                                    \
+template<class T1>                                                  \
+BOOST_CONSTEXPR                                                     \
+typename name ## _typeof_helper<typename T1::value_type, one>::type \
+operator symbol(const constant<T1>& t, const one& u)                \
+{                                                                   \
+    return(t.value() symbol u);                                     \
+}                                                                   \
+                                                                    \
+template<class T2>                                                  \
+BOOST_CONSTEXPR                                                     \
+typename name ## _typeof_helper<one, typename T2::value_type>::type \
+operator symbol(const one& t, const constant<T2>& u)                \
+{                                                                   \
+    return(t symbol u.value());                                     \
+}
+
+BOOST_UNITS_DEFINE_HELPER(multiply, *)
+BOOST_UNITS_DEFINE_HELPER(divide, /)
+
+#undef BOOST_UNITS_DEFINE_HELPER
+
+template<class T1, long N, long D>
+struct power_typeof_helper<constant<T1>, static_rational<N,D> >
+{
+    typedef power_typeof_helper<typename T1::value_type, static_rational<N,D> > base;
+    typedef typename base::type type;
+    static BOOST_CONSTEXPR type value(const constant<T1>& arg)
+    {
+        return base::value(arg.value());
+    }
+};
+
+#define BOOST_UNITS_DEFINE_HELPER(name, symbol)                     \
+                                                                    \
+template<class T1, class E>                                         \
+struct name ## _typeof_helper<constant<T1> >                        \
+{                                                                   \
+    typedef typename name ## _typeof_helper<typename T1::value_type, E>::type type;\
+};                                                                  \
+                                                                    \
+template<class T1>                                                  \
+BOOST_CONSTEXPR                                                     \
+typename name ## _typeof_helper<typename T1::value_type, one>::type \
+operator symbol(const constant<T1>& t, const one& u)                \
+{                                                                   \
+    return(t.value() symbol u);                                     \
+}                                                                   \
+                                                                    \
+template<class T2>                                                  \
+BOOST_CONSTEXPR                                                     \
+typename name ## _typeof_helper<one, typename T2::value_type>::type \
+operator symbol(const one& t, const constant<T2>& u)                \
+{                                                                   \
+    return(t symbol u.value());                                     \
+}
+
+#define BOOST_UNITS_PHYSICAL_CONSTANT(name, type, value_, uncertainty_)             \
+struct name ## _t {                                                                 \
+    typedef type value_type;                                                        \
+    BOOST_CONSTEXPR operator value_type() const    { return value_; }               \
+    BOOST_CONSTEXPR value_type value() const       { return value_; }               \
+    BOOST_CONSTEXPR value_type uncertainty() const { return uncertainty_; }         \
+    BOOST_CONSTEXPR value_type lower_bound() const { return value_-uncertainty_; }  \
+    BOOST_CONSTEXPR value_type upper_bound() const { return value_+uncertainty_; }  \
+};                                                                                  \
 BOOST_UNITS_STATIC_CONSTANT(name, boost::units::constant<boost::units::physical_constant<name ## _t> >) = { }
 
 // stream output

@@ -39,8 +39,6 @@ namespace detail {
 
     template <typename Array, typename IdxGen, typename Call_Type>
     static void call(Array& a, const IdxGen& idgen, Call_Type c) {
-      typedef typename Array::index_range index_range;
-      typedef typename Array::index index;
       idgen_helper<N-1>::call(a,idgen[c],c);
     }
   };
@@ -50,8 +48,6 @@ namespace detail {
 
     template <typename Array, typename IdxGen, typename Call_Type>
     static void call(Array& a, const IdxGen& idgen, Call_Type) {
-      typedef typename Array::index_range index_range;
-      typedef typename Array::index index;
       a[ idgen ];
     }
   };
@@ -131,6 +127,7 @@ namespace detail {
       function_requires< boost_concepts::WritableIteratorConcept<iterator> >();
       function_requires< boost_concepts::ForwardTraversalConcept<const_iterator> >();
       function_requires< boost_concepts::ReadableIteratorConcept<const_iterator> >();
+      function_requires< boost::OutputIterator<iterator,value_type> >();
       
       // RG - a( CollectionArchetype) when available...
       value_type vt = a[ id ];

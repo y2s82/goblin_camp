@@ -6,7 +6,7 @@
  * Boost Software License, Version 1.0. (See accompanying
  * file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  * Author:  Martin Andrian, Jeff Garland, Bart Garst
- * $Date: 2009-06-04 07:40:18 -0400 (Thu, 04 Jun 2009) $
+ * $Date$
  */
 
 #include <locale>
@@ -46,7 +46,7 @@ namespace boost { namespace date_time {
   template <class date_type,
             class CharT,
             class OutItrT = std::ostreambuf_iterator<CharT, std::char_traits<CharT> > >
-  class date_facet : public std::locale::facet {
+  class BOOST_SYMBOL_VISIBLE date_facet : public std::locale::facet {
   public:
     typedef typename date_type::duration_type duration_type;
     // greg_weekday is gregorian_calendar::day_of_week_type
@@ -208,7 +208,8 @@ namespace boost { namespace date_time {
       //  return do_put_special(next, a_ios, fill_char, d.as_special());
       //}
       //The following line of code required the date to support a to_tm function
-      std::tm dtm = {};
+      std::tm dtm;
+      std::memset(&dtm, 0, sizeof(dtm));
       dtm.tm_mon = m - 1;
       return do_put_tm(next, a_ios, fill_char, dtm, m_month_format);
     }
@@ -219,7 +220,8 @@ namespace boost { namespace date_time {
                 char_type fill_char,
                 const day_type& day) const
     {
-      std::tm dtm = {};
+      std::tm dtm;
+      std::memset(&dtm, 0, sizeof(dtm));
       dtm.tm_mday = day.as_number();
       char_type tmp[3] = {'%','d'};
       string_type temp_format(tmp);
@@ -235,7 +237,8 @@ namespace boost { namespace date_time {
       //  return do_put_special(next, a_ios, fill_char, d.as_special());
       //}
       //The following line of code required the date to support a to_tm function
-      std::tm dtm = {};
+      std::tm dtm;
+      std::memset(&dtm, 0, sizeof(dtm));
       dtm.tm_wday = dow;
       return do_put_tm(next, a_ios, fill_char, dtm, m_weekday_format);
     }
@@ -405,7 +408,7 @@ namespace boost { namespace date_time {
   template <class date_type,
             class CharT,
             class InItrT = std::istreambuf_iterator<CharT, std::char_traits<CharT> > >
-  class date_input_facet : public std::locale::facet {
+  class BOOST_SYMBOL_VISIBLE date_input_facet : public std::locale::facet {
   public:
     typedef typename date_type::duration_type duration_type;
     // greg_weekday is gregorian_calendar::day_of_week_type

@@ -9,34 +9,40 @@
 #ifndef BOOST_TT_HAS_TRIVIAL_DESTRUCTOR_HPP_INCLUDED
 #define BOOST_TT_HAS_TRIVIAL_DESTRUCTOR_HPP_INCLUDED
 
-#include <boost/type_traits/config.hpp>
 #include <boost/type_traits/intrinsics.hpp>
-#include <boost/type_traits/is_pod.hpp>
-#include <boost/type_traits/detail/ice_or.hpp>
+#include <boost/type_traits/integral_constant.hpp>
 
-// should be the last #include
-#include <boost/type_traits/detail/bool_trait_def.hpp>
+#ifdef BOOST_HAS_TRIVIAL_DESTRUCTOR
+
+#if defined(BOOST_INTEL) || defined(BOOST_MSVC)
+#include <boost/type_traits/is_pod.hpp>
+#endif
+#ifdef BOOST_HAS_SGI_TYPE_TRAITS
+#include <boost/type_traits/is_same.hpp>
+#endif
+
+#if defined(__GNUC__) || defined(__clang__) || defined(__SUNPRO_CC)
+#include <boost/type_traits/is_destructible.hpp>
+#endif
 
 namespace boost {
 
-namespace detail {
+template <typename T> struct has_trivial_destructor : public integral_constant<bool, BOOST_HAS_TRIVIAL_DESTRUCTOR(T)>{};
+#else
+#include <boost/type_traits/is_pod.hpp>
 
-template <typename T>
-struct has_trivial_dtor_impl
-{
-   BOOST_STATIC_CONSTANT(bool, value =
-      (::boost::type_traits::ice_or<
-         ::boost::is_pod<T>::value,
-         BOOST_HAS_TRIVIAL_DESTRUCTOR(T)
-      >::value));
-};
+namespace boost{
 
-} // namespace detail
+template <typename T> struct has_trivial_destructor : public integral_constant<bool, ::boost::is_pod<T>::value>{};
+#endif
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_trivial_destructor,T,::boost::detail::has_trivial_dtor_impl<T>::value)
+template <> struct has_trivial_destructor<void> : public false_type{};
+#ifndef BOOST_NO_CV_VOID_SPECIALIZATIONS
+template <> struct has_trivial_destructor<void const> : public false_type{};
+template <> struct has_trivial_destructor<void const volatile> : public false_type{};
+template <> struct has_trivial_destructor<void volatile> : public false_type{};
+#endif
 
 } // namespace boost
-
-#include <boost/type_traits/detail/bool_trait_undef.hpp>
 
 #endif // BOOST_TT_HAS_TRIVIAL_DESTRUCTOR_HPP_INCLUDED

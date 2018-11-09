@@ -8,11 +8,11 @@
 #ifndef BOOST_IOSTREAMS_DETAIL_DIRECT_STREAMBUF_HPP_INCLUDED
 #define BOOST_IOSTREAMS_DETAIL_DIRECT_STREAMBUF_HPP_INCLUDED
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1020)
+#if defined(_MSC_VER)
 # pragma once
 #endif              
 
-#include <cassert>
+#include <boost/assert.hpp>
 #include <cstddef>
 #include <typeinfo>
 #include <utility>                                 // pair.
@@ -67,9 +67,7 @@ public: // stream needs access.
     // Declared in linked_streambuf.
     T* component() { return storage_.get(); }
 protected:
-#if !BOOST_WORKAROUND(__GNUC__, == 2)
     BOOST_IOSTREAMS_USING_PROTECTED_STREAMBUF_MEMBERS(base_type)
-#endif
     direct_streambuf();
 
     //--------------Virtual functions-----------------------------------------//
@@ -234,7 +232,7 @@ typename direct_streambuf<T, Tr>::pos_type direct_streambuf<T, Tr>::seek_impl
         case BOOST_IOS::beg: next = off; break;
         case BOOST_IOS::cur: next = (gptr() - ibeg_) + off; break;
         case BOOST_IOS::end: next = (iend_ - ibeg_) + off; break;
-        default: assert(0);
+        default: BOOST_ASSERT(0);
         }
         if (next < 0 || next > (iend_ - ibeg_))
             boost::throw_exception(bad_seek());
@@ -248,7 +246,7 @@ typename direct_streambuf<T, Tr>::pos_type direct_streambuf<T, Tr>::seek_impl
         case BOOST_IOS::beg: next = off; break;
         case BOOST_IOS::cur: next = (pptr() - obeg_) + off; break;
         case BOOST_IOS::end: next = (oend_ - obeg_) + off; break;
-        default: assert(0);
+        default: BOOST_ASSERT(0);
         }
         if (next < 0 || next > (oend_ - obeg_))
             boost::throw_exception(bad_seek());

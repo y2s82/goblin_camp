@@ -9,31 +9,65 @@
 #ifndef BOOST_TT_HAS_NOTHROW_CONSTRUCTOR_HPP_INCLUDED
 #define BOOST_TT_HAS_NOTHROW_CONSTRUCTOR_HPP_INCLUDED
 
-#include <boost/type_traits/has_trivial_constructor.hpp>
+#include <cstddef> // size_t
+#include <boost/type_traits/intrinsics.hpp>
+#include <boost/type_traits/integral_constant.hpp>
 
-// should be the last #include
-#include <boost/type_traits/detail/bool_trait_def.hpp>
+#ifdef BOOST_HAS_NOTHROW_CONSTRUCTOR
+
+#if defined(BOOST_MSVC) || defined(BOOST_INTEL)
+#include <boost/type_traits/has_trivial_constructor.hpp>
+#endif
+#if defined(__GNUC__ ) || defined(__SUNPRO_CC) || defined(__clang__)
+#include <boost/type_traits/is_default_constructible.hpp>
+#endif
 
 namespace boost {
 
-namespace detail{
+template <class T> struct has_nothrow_constructor : public integral_constant<bool, BOOST_HAS_NOTHROW_CONSTRUCTOR(T)>{};
 
-template <class T>
-struct has_nothrow_constructor_imp{
-   BOOST_STATIC_CONSTANT(bool, value = 
-      (::boost::type_traits::ice_or<
-         ::boost::has_trivial_constructor<T>::value,
-         BOOST_HAS_NOTHROW_CONSTRUCTOR(T)
-      >::value));
-};
+#elif !defined(BOOST_NO_CXX11_NOEXCEPT)
 
+#include <boost/type_traits/is_default_constructible.hpp>
+#include <boost/type_traits/remove_all_extents.hpp>
+
+#ifdef BOOST_MSVC
+#pragma warning(push)
+#pragma warning(disable:4197) // top-level volatile in cast is ignored
+#endif
+
+namespace boost { namespace detail{
+
+   template <class T, bool b> struct has_nothrow_constructor_imp : public boost::integral_constant<bool, false>{};
+   template <class T> struct has_nothrow_constructor_imp<T, true> : public boost::integral_constant<bool, noexcept(T())>{};
+   template <class T, std::size_t N> struct has_nothrow_constructor_imp<T[N], true> : public has_nothrow_constructor_imp<T, true> {};
 }
 
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_nothrow_constructor,T,::boost::detail::has_nothrow_constructor_imp<T>::value)
-BOOST_TT_AUX_BOOL_TRAIT_DEF1(has_nothrow_default_constructor,T,::boost::detail::has_nothrow_constructor_imp<T>::value)
+template <class T> struct has_nothrow_constructor : public detail::has_nothrow_constructor_imp<T, is_default_constructible<T>::value>{};
+
+#ifdef BOOST_MSVC
+#pragma warning(pop)
+#endif
+
+#else
+
+#include <boost/type_traits/has_trivial_constructor.hpp>
+
+namespace boost {
+
+template <class T> struct has_nothrow_constructor : public ::boost::has_trivial_constructor<T> {};
+
+#endif
+
+template<> struct has_nothrow_constructor<void> : public false_type {};
+#ifndef BOOST_NO_CV_VOID_SPECIALIZATIONS
+template<> struct has_nothrow_constructor<void const> : public false_type{};
+template<> struct has_nothrow_constructor<void const volatile> : public false_type{};
+template<> struct has_nothrow_constructor<void volatile> : public false_type{};
+#endif
+
+template <class T> struct has_nothrow_default_constructor : public has_nothrow_constructor<T>{};
 
 } // namespace boost
-
-#include <boost/type_traits/detail/bool_trait_undef.hpp>
 
 #endif // BOOST_TT_HAS_NOTHROW_CONSTRUCTOR_HPP_INCLUDED
