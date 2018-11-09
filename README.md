@@ -1,4 +1,4 @@
-# goblin_camp
+# Goblin Camp Stone Soup
 [![Build Status](https://travis-ci.com/y2s82/goblin_camp.svg?branch=master)](https://travis-ci.com/y2s82/goblin_camp)<br>
 A git-based fork of [Goblin Camp](https://bitbucket.org/genericcontainer/goblin-camp), a [Dwarf-Fortress](http://www.bay12games.com/dwarves/) clone.
 
