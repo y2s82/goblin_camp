@@ -1,0 +1,5 @@
+language: cpp
+env: OMP_NUM_THREADS=4
+compiler:
+    - clang
+    - gcc
