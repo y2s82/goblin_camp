@@ -143,4 +143,4 @@ if $(pyVer[2]) < 6 || ( $(pyVer[2]) = 6 && $(pyVer[3]) < 6 ) {
 ## Triggers the main build.
 ###############################################################################
 
-build-project "Goblin Camp" ;
+build-project "goblin_camp" ;
