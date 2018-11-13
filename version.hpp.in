@@ -1,0 +1,3 @@
+// the configured options and settings for goblincamp
+#define goblincamp_VERSION_MAJOR @goblincamp_VERSION_MAJOR@
+#define goblincamp_VERSION_MINOR @goblincamp_VERSION_MINOR@

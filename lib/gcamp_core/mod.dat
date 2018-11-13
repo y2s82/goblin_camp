@@ -1,0 +1,6 @@
+mod {
+	name    = "Goblin Camp core data"
+	author  = "various"
+	version = "0.22"  // FIXME: generate dynamically
+	// apiVersion deliberately omitted
+}
