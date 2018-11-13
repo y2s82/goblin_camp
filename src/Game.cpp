@@ -585,7 +585,7 @@ void Game::Init(bool firstTime) {
 	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
 	if (firstTime) TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
 	TCODMouse::showCursor(true);
-	TCODConsole::setKeyboardRepeat(500, 10);
+//	TCODConsole::setKeyboardRepeat(500, 10);
 
 	buffer = new TCODConsole(screenWidth, screenHeight);
 	ResetRenderer();
