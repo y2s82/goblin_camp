@@ -37,13 +37,14 @@ find_package (GLUT)
 #include_directories (${PYTHON_INCLUDE_DIRS})
 #link_directories (${PYTHON_LIBRARY_DIRS})
 
+set (PYLIB_PATH /usr/lib/x86_64-linux-gnu)
 message("-- NOTE: CMake prefers python 3 to 2, so it is being specified manually.")
 set (PYTHON_EXECUTABLE /usr/bin/python2)
 set (PYTHON_INCLUDE_DIRS /usr/include/python2.7)
-set (PYTHON_LIBRARIES ${LIB_PATH}/libpython2.7.so)
+set (PYTHON_LIBRARIES ${PYLIB_PATH}/libpython2.7.so)
 
 include_directories (${PYTHON_INCLUDE_DIRS})
-link_directories (${LIB_PATH}/python2.7)
+link_directories (${PYLIB_PATH}/python2.7)
 
 # TODO: update as in http://preney.ca/paul/archives/107
 set (Boost_USE_MULTITHREAD ON)
