@@ -130,7 +130,7 @@ public:
 	}
 	
 	static void ErrorScreen();
-	void GenerateMap(uint32 seed = 0);
+	void GenerateMap(uint32_t seed = 0);
 
 	void Update();
 	float camX, camY;

@@ -35,7 +35,7 @@ PermutationTable::PermutationTable(int pow)
 	}
 }
 
-PermutationTable::PermutationTable(int pow, uint32 seed)
+PermutationTable::PermutationTable(int pow, uint32_t seed)
  : 	table(),
 	power(pow),
 	bitMask((1 << pow) - 1) 
