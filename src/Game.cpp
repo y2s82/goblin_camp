@@ -1277,7 +1277,7 @@ void Game::DeTillFarmPlots() {
 
 //First generates a heightmap, then translates that into the corresponding tiles
 //Third places plantlife according to heightmap, and some wildlife as well
-void Game::GenerateMap(uint32 seed) {
+void Game::GenerateMap(uint32_t seed) {
 	Random::Generator random(seed);
 	
 	Map* map = Map::Inst();

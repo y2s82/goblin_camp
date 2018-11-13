@@ -773,7 +773,7 @@ void Stockpile::load(InputArchive& ar, const unsigned int version) {
 	for (int i = 0; i < colorCount; ++i) {
 		Coordinate pos;
 		ar & pos;
-		uint8 r, g, b;
+		uint8_t r, g, b;
 		ar & r;
 		ar & g;
 		ar & b;
