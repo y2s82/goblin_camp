@@ -53,8 +53,8 @@ before_script:
     - cd ../../..
 jobs:
     include:
-        stage: deploy
-        compiler:
+        - stage: deploy
+          compiler:
               - gcc
-        script:
+          script:
               - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then cmake .;make; fi
