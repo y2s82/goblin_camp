@@ -53,9 +53,8 @@ before_script:
     - cd ../../..
 jobs:
     include:
-        - name: "Deploy Master on GCC / Linux"
-          stage: deploy
-          compiler:
+        stage: deploy
+        compiler:
               - gcc
-          script:
+        script:
               - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then cmake .;make; fi
