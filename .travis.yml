@@ -5,6 +5,18 @@ env:
         - C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include/libtcod
         - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
         - LD_LIBRARY_PATH=/usr/local/lib
+          # COVERITY_SCAN_TOKEN, specific to this project
+        - secure: "2EiQiZ-7Tdei94aN4tgcFA"
+addons:
+    coverity_scan:
+        project:
+            name: y2s82/goblin_camp
+            version: 1.0
+            description: Goblin Camp Stone Soup, a Dwarf Fortress Clone
+        notification_email: y2s1982@gmail.com
+        build_command_prepend: cmake .
+        build_command: make
+        branch_pattern: coverity_scan
 before_install:
     - sudo apt-get update
     - sudo apt-get install -y libboost1.54-all-dev
@@ -39,8 +51,11 @@ before_script:
     - make
     - sudo make install
     - cd ../../..
-compiler:
-    - gcc
-script:
-    - cmake .
-    - make
+jobs:
+    include:
+        - name: "Deploy Master on GCC / Linux"
+          stage: deploy
+          compiler:
+              - gcc
+          script:
+              - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then cmake .;make; fi
