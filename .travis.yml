@@ -1,8 +1,9 @@
 language: cpp
 env: 
-    - OMP_NUM_THREADS=4
-    - C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include/libtcod
-    - LD_LIBRARY_PATH=/usr/local/lib
+    global:
+        - OMP_NUM_THREADS=4
+        - C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include/libtcod
+        - LD_LIBRARY_PATH=/usr/local/lib
 before_install:
     - sudo apt-get update
     - sudo apt-get install -y libboost1.54-tools-dev
@@ -32,9 +33,9 @@ before_script:
     - unzip libtcod-1.9.0.zip
     - cd libtcod-1.9.0/build/scons
     - scons develop
+    - cd ../../..
 compiler:
     - gcc
-    - clang
 script:
     - cmake .
     - make
