@@ -3,6 +3,7 @@ env:
     global:
         - OMP_NUM_THREADS=4
         - C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include/libtcod
+        - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
         - LD_LIBRARY_PATH=/usr/local/lib
 before_install:
     - sudo apt-get update
