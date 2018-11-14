@@ -53,8 +53,7 @@ before_script:
     - cd ../../..
 jobs:
     include:
-        - name: "Deploy Master on GCC / Linux"
-          stage: deploy
+        - stage: deploy
           compiler:
               - gcc
           script:
