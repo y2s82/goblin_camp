@@ -6,7 +6,7 @@ env:
         - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
         - LD_LIBRARY_PATH=/usr/local/lib
           # COVERITY_SCAN_TOKEN, specific to this project
-        - secure: "ZnIVeeZuGxJycVUlyYghiARAStu85kXiEhG6EqSJXc6fmmGO+8nUB5ORNT5t4TL/5VP29+iN/qKlcRHiSqY5BmA3zJU1KXhxFpE2ycTEBnuMsbzf6Rbdt7fwnwsg+pcGiEBZyoEAHGcrqkdX60aYrVOi3Ymdjq3mMbVmmqot3f8="
+        - secure: "TdURtvIU9P38sOkibX1LIYBHU6vdRGIPGHdn4oZ7AZ0/mMQ9fKtxX69VCvyrtAalNClzKXR5pumVZFxfX0hwS5WLHnvWB44hV3wsGo8vz4GF5Ymbb+74HIwKgK51MYk2PoLKnTlJ5E7evJl5E9U8I/4AqPHooPt9mrOPtTZ3VJc="
 before_install:
     - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
     - sudo apt-get update
