@@ -6,7 +6,7 @@ env:
         - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
         - LD_LIBRARY_PATH=/usr/local/lib
           # COVERITY_SCAN_TOKEN, specific to this project
-        - secure: "2EiQiZ-7Tdei94aN4tgcFA"
+        - secure:r94XCr7_xXE12R7kJ1m-ZQ
 addons:
     coverity_scan:
         project:
