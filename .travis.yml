@@ -6,18 +6,9 @@ env:
         - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
         - LD_LIBRARY_PATH=/usr/local/lib
           # COVERITY_SCAN_TOKEN, specific to this project
-        - secure:r94XCr7_xXE12R7kJ1m-ZQ
-addons:
-    coverity_scan:
-        project:
-            name: y2s82/goblin_camp
-            version: 1.0
-            description: Goblin Camp Stone Soup, a Dwarf Fortress Clone
-        notification_email: y2s1982@gmail.com
-        build_command_prepend: cmake .
-        build_command: make
-        branch_pattern: coverity_scan
+        - secure: "ZnIVeeZuGxJycVUlyYghiARAStu85kXiEhG6EqSJXc6fmmGO+8nUB5ORNT5t4TL/5VP29+iN/qKlcRHiSqY5BmA3zJU1KXhxFpE2ycTEBnuMsbzf6Rbdt7fwnwsg+pcGiEBZyoEAHGcrqkdX60aYrVOi3Ymdjq3mMbVmmqot3f8="
 before_install:
+    - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
     - sudo apt-get update
     - sudo apt-get install -y libboost1.54-all-dev
     - sudo apt-get install -y libegl1-mesa-dev libgles2-mesa-dev
@@ -51,6 +42,15 @@ before_script:
     - make
     - sudo make install
     - cd ../../..
+addons:
+    coverity_scan:
+        project:
+            name: "y2s82/goblin_camp"
+            description: "Goblin Camp Stone Soup, a Dwarf Fortress Clone"
+        notification_email: y2s1982@gmail.com
+        build_command_prepend: "cmake ."
+        build_command: "make"
+        branch_pattern: coverity_scan
 jobs:
     include:
         - stage: deploy
