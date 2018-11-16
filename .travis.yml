@@ -6,7 +6,7 @@ env:
         - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
         - LD_LIBRARY_PATH=/usr/local/lib
           # COVERITY_SCAN_TOKEN, specific to this project
-        - secure: "negLaugK/dTjOyNLxeP/bLRsVpeP\+ShpSw6Y8sLYtajLIEWMxwpcACgWzX5jKQEnac/qpXbv3nPs1tUTXkDYmbfi\+uz5oeSMott/8Ua6RH0tMAYP7CgiOF/VHMHES5vQUtcTyUpbyuNM99SBPh2v4cR5TZ30BseIvsx5z7jispKlcl9puwYI9tHoMsstbG17CSq8UCZg2alSjd8jBDCGeHMCi3eQm4OJ6/7j0lfRpMKishdVPMNiMPkH8m\+fn4JLBh2y0nJt8fpR95qVNmJV0tkaTOOkOlCXsl24Xnw\+UfB2lOFglmKdE9cq8lVNHdhI1EYnyVAizYeY5DCngOyOUnshsPq6KzI5Nkw6euRULRONiep\+Bqq2Xn4otWEwQORUnGAOLlV2\+IzNUUolGpw9H0iMFdPV/6N8ia4x94oTAe\+eUjmfVz2OmNIMLlVqlGxp3SlDFrQGwAy0j3M\+V5Eb7ztzqDXvIzgMVyMtL3Pq5XMrCyYZ7268TQK0a\+iVKuPJzpPKuxVlTLUcUfDhGDGk9gw5boEXkxF5HsR9gJ4LQ9zIuno099mPZ1y3qpYfylzxFfQL8rrkuUPlp\+jcMHZtsZkBWwxUdmLfjeJGjqNas6\+n8/yv7iBQ7dP/ldn2GInES\+2p0vvCzBuIMdkTFQ0e0k89bWNG5hzrbG9807ae4dw="
+        - secure: "fknsKzBre+zl5fmeeCT4mREm2n7b0bBoJaaT9DPU3y2CNTb2braHaPULIjHa8nYRLZNOd1dRC+nwkIU1QUAHnloHjFObPmEqNgwfLnRpT68DqPDMOLCb7PWUQ0ZLttFhtWEJ695K9Q1uUd3UYKh3OkuFSXiGJ0tAvzHs8lkg21+Gc/x7/TCoAy39KeHCfpqEu/rJ493Q3gb9I/EcnG3F3hNAp8RFPHEZ8j3WAhKSd3HIInqrlggSIR0KXxAXhydaS7fUFICHYiXFkZkHkgi3ux0IrYUPpt3CXNMgJwNfZA/KwA1aTD+2SQlL5gTJrVYC6jOt/Js48fVykaxsOnErU+Y+srk1kHqjlKyNo1NcJNI/esOIbbkWHC+u6yk/hY+qRM8RojMbF1SCxI4tXciYI+V5s0puMpDK0b3InuDpDLetNjJlyNlJkO8myfmkefSJsqaQUDllS8373Yu+TZogiv7wP5qoNcL8EGYkp6srTKTq+vt6qq/3Es6F8aRunuhuewjUSwIxMh2+Qb51v2/S/yiqF4V80WqQ70AM2OUZERvUh5KOEXzGUuBc2GjVlp9elm2nM403pZGukOJQDBXKnDmXc8YF+rTIFdZgjL0bo/jTJw98QMfVtpsb5Bq8ZEecsgp9q0uni0QwOaQNTvd+LjqPhbrRDZz0kzfgxmXLSl0="
 before_install:
     - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
     - sudo apt-get update
@@ -46,7 +46,7 @@ addons:
     coverity_scan:
         project:
             name: "y2s82/goblin_camp"
-            description: "Goblin Camp Stone Soup, a Dwarf Fortress Clone"
+            description: "goblin camp loves coverity scan. please work."
         notification_email: y2s1982@gmail.com
         build_command_prepend: "cmake ."
         build_command: "make"
