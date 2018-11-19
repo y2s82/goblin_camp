@@ -68,7 +68,6 @@ jobs:
               - libglew-dev
               - freeglut3-dev
               - libsdl2-dev
-              - libtcod-dev
               - g++-8 gcc-8
         script:
           - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
