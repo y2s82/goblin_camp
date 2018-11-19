@@ -48,7 +48,7 @@ jobs:
         addons:
           apt:
             sources:
-              - ppa:ubuntu-toolchain-r/test
+              - sourceline: 'ppa:ubuntu-toolchain-r/test'
             packages:
               - libboost1.54-all-dev
               - libegl1-mesa-dev libgles2-mesa-dev
