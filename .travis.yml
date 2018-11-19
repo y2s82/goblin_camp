@@ -9,23 +9,7 @@ env:
         - LD_LIBRARY_PATH=/usr/local/lib
           # COVERITY_SCAN_TOKEN, specific to this project
         - secure: "fknsKzBre+zl5fmeeCT4mREm2n7b0bBoJaaT9DPU3y2CNTb2braHaPULIjHa8nYRLZNOd1dRC+nwkIU1QUAHnloHjFObPmEqNgwfLnRpT68DqPDMOLCb7PWUQ0ZLttFhtWEJ695K9Q1uUd3UYKh3OkuFSXiGJ0tAvzHs8lkg21+Gc/x7/TCoAy39KeHCfpqEu/rJ493Q3gb9I/EcnG3F3hNAp8RFPHEZ8j3WAhKSd3HIInqrlggSIR0KXxAXhydaS7fUFICHYiXFkZkHkgi3ux0IrYUPpt3CXNMgJwNfZA/KwA1aTD+2SQlL5gTJrVYC6jOt/Js48fVykaxsOnErU+Y+srk1kHqjlKyNo1NcJNI/esOIbbkWHC+u6yk/hY+qRM8RojMbF1SCxI4tXciYI+V5s0puMpDK0b3InuDpDLetNjJlyNlJkO8myfmkefSJsqaQUDllS8373Yu+TZogiv7wP5qoNcL8EGYkp6srTKTq+vt6qq/3Es6F8aRunuhuewjUSwIxMh2+Qb51v2/S/yiqF4V80WqQ70AM2OUZERvUh5KOEXzGUuBc2GjVlp9elm2nM403pZGukOJQDBXKnDmXc8YF+rTIFdZgjL0bo/jTJw98QMfVtpsb5Bq8ZEecsgp9q0uni0QwOaQNTvd+LjqPhbrRDZz0kzfgxmXLSl0="
-addons:
-  apt:
-    sources:
-      - ppa:ubuntu-toolchain-r/test
-    packages:
-    - libboost1.54-all-dev
-    - libegl1-mesa-dev libgles2-mesa-dev
-    - libsdl1.2-dev libsdl-image1.2-dev
-    # - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
-    - libpng++-dev
-    - zlib1g-dev
-    - libgl1-mesa-glx
-    - libglew-dev
-    - freeglut3-dev
-    - libsdl2-dev
-    - libtcod-dev
-    - g++-8 gcc-8
+
 before_install:
     - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
     # - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
@@ -61,6 +45,23 @@ jobs:
         - stage: deploy
           compiler:
               - gcc
+              addons:
+                 apt:
+                  sources:
+                    - ppa:ubuntu-toolchain-r/test
+                  packages:
+                    - libboost1.54-all-dev
+                    - libegl1-mesa-dev libgles2-mesa-dev
+                    - libsdl1.2-dev libsdl-image1.2-dev
+                    # - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
+                    - libpng++-dev
+                    - zlib1g-dev
+                    - libgl1-mesa-glx
+                    - libglew-dev
+                    - freeglut3-dev
+                    - libsdl2-dev
+                    - libtcod-dev
+                    - g++-8 gcc-8
           script:
               - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
               - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then cmake .;make; fi
