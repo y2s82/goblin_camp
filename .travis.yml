@@ -42,26 +42,26 @@ addons:
         branch_pattern: coverity_scan
 jobs:
     include:
-        - stage: deploy
-          compiler:
-              - gcc
-              addons:
-                 apt:
-                  sources:
-                    - ppa:ubuntu-toolchain-r/test
-                  packages:
-                    - libboost1.54-all-dev
-                    - libegl1-mesa-dev libgles2-mesa-dev
-                    - libsdl1.2-dev libsdl-image1.2-dev
-                    # - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
-                    - libpng++-dev
-                    - zlib1g-dev
-                    - libgl1-mesa-glx
-                    - libglew-dev
-                    - freeglut3-dev
-                    - libsdl2-dev
-                    - libtcod-dev
-                    - g++-8 gcc-8
-          script:
-              - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
-              - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then cmake .;make; fi
+      - stage: deploy
+        compiler:
+          - gcc
+        addons:
+          apt:
+            sources:
+              - ppa:ubuntu-toolchain-r/test
+            packages:
+              - libboost1.54-all-dev
+              - libegl1-mesa-dev libgles2-mesa-dev
+              - libsdl1.2-dev libsdl-image1.2-dev
+              # - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
+              - libpng++-dev
+              - zlib1g-dev
+              - libgl1-mesa-glx
+              - libglew-dev
+              - freeglut3-dev
+              - libsdl2-dev
+              - libtcod-dev
+              - g++-8 gcc-8
+        script:
+          - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
+          - if [ ${COVERITY_SCAN_BRANCH} != 1 ]; then cmake .;make; fi
