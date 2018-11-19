@@ -130,7 +130,7 @@ namespace Config {
 	std::string GetStringCVar(const std::string& name) {
 		if (Globals::cvars.find(name) == Globals::cvars.end()) {
 			LOG("WARNING: CVar "<< name << " doesn't exist.");
-			return std::string('\0');
+			return std::string("");
 		}
 		return Globals::cvars[name];
 	}
