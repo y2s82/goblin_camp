@@ -12,7 +12,15 @@ env:
 
 before_install:
     - echo -n | openssl s_client -connect https://scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-    # - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
+    - curl https://github.com/libtcod/libtcod/archive/1.9.0.zip -O libtcod-1.9.0.zip
+    - unzip libtcod-1.9.0.zip
+    - cd libtcod-1.9.0/build/autotools
+    - autoreconf -i
+    - ./configure CFLAGS='-O2'
+    - make
+    - sudo make install
+    - cd ../../..
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
 before_script:
     # - curl -o sdl.tar.gz http://hg.libsdl.org/SDL/archive/007dfe83abf8.tar.gz
     # - tar -xf sdl.tar.gz
@@ -53,7 +61,7 @@ jobs:
               - libboost1.54-all-dev
               - libegl1-mesa-dev libgles2-mesa-dev
               - libsdl1.2-dev libsdl-image1.2-dev
-              # - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
+              - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
               - libpng++-dev
               - zlib1g-dev
               - libgl1-mesa-glx
