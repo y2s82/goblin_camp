@@ -13,23 +13,8 @@ env:
 
 before_install:
     - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-    - curl -o sdl.tar.gz http://hg.libsdl.org/SDL/archive/007dfe83abf8.tar.gz
-    - tar -xf sdl.tar.gz
-    - cd SDL-007dfe83abf8/
-    - mkdir -p build
-    - cd build
-    - ../configure
-    - make
-    - sudo make install
-    - cd ../..
-    - curl https://github.com/libtcod/libtcod/archive/1.9.0.zip -L -o libtcod-1.9.0.zip
-    - unzip libtcod-1.9.0.zip
-    - cd libtcod-1.9.0/build/autotools
-    - autoreconf -i
-    - ./configure CFLAGS='-O2'
-    - make
-    - sudo make install
-    - cd ../../..
+    - chmod u+x install_deps_linux.sh
+    - ./install_deps_linux.sh
 before_script:
     - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
 addons:
