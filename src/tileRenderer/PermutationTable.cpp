@@ -14,9 +14,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
+#include <cstdint>
 #include "stdafx.hpp"
 #include "tileRenderer/PermutationTable.hpp"
- 
+
 PermutationTable::PermutationTable(int pow)
  : 	table(),
 	power(pow),
@@ -35,7 +36,7 @@ PermutationTable::PermutationTable(int pow)
 	}
 }
 
-PermutationTable::PermutationTable(int pow, uint32_t seed)
+PermutationTable::PermutationTable(int pow, std::uint32_t seed)
  : 	table(),
 	power(pow),
 	bitMask((1 << pow) - 1) 
