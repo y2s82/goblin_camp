@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <ctime>
 
 namespace Data {
@@ -24,7 +24,7 @@ namespace Data {
 		std::string filename, size, date;
 		time_t timestamp; // for sorting
 		
-		Save(const std::string&, boost::uintmax_t, time_t);
+		Save(const std::string&, std::uintmax_t, time_t);
 	};
 	
 	// http://www.sgi.com/tech/stl/LessThanComparable.html
