@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <string>
 #include <vector>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 #include <boost/tokenizer.hpp>
 #include <boost/foreach.hpp>
 #include <algorithm>
