@@ -71,7 +71,7 @@ namespace {
 		\param[in]  filesize File size (in bytes).
 		\param[out] dest     A string buffer to receive formatted file size.
 	*/
-	void FormatFileSize(const boost::uintmax_t& filesize, std::string& dest) {
+	void FormatFileSize(const std::uintmax_t& filesize, std::string& dest) {
 		static const char* sizes[] = { "%10.0f b", "%10.2f kB", "%10.2f MB", "%10.2f GB" };
 		static unsigned maxSize = sizeof(sizes) / sizeof(sizes[0]);
 		
@@ -190,7 +190,7 @@ namespace {
 }
 
 namespace Data {
-	Save::Save(const std::string& filename, boost::uintmax_t size, time_t timestamp) : filename(filename), timestamp(timestamp) {
+	Save::Save(const std::string& filename, std::uintmax_t size, time_t timestamp) : filename(filename), timestamp(timestamp) {
 		FormatFileSize(size, this->size);
 		FormatTimestamp(timestamp, this->date);
 	}
