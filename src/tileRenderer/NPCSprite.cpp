@@ -107,15 +107,15 @@ namespace {
 	}
 }
 
-void NPCSprite::Draw(int screenX, int screenY, boost::shared_ptr<NPC> npc) const {
+void NPCSprite::Draw(int screenX, int screenY, std::shared_ptr<NPC> npc) const {
 	if (equipmentAware || paperdoll) {
 		int weaponIndex = -1;
 		int armourIndex = -1;
-		if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
+		if (std::shared_ptr<Item> weapon = npc->Wielding().lock()) {
 			const ItemPreset& itemPreset = Item::Presets[weapon->Type()];
 			weaponIndex = findIndex(itemPreset, weaponTypeNames);
 		}
-		if (boost::shared_ptr<Item> armour = npc->Wearing().lock()) {
+		if (std::shared_ptr<Item> armour = npc->Wearing().lock()) {
 			const ItemPreset& itemPreset = Item::Presets[armour->Type()];
 			armourIndex = findIndex(itemPreset, armourTypeNames);
 		}

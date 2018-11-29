@@ -185,7 +185,7 @@ public:
 
 	std::list<StatusEffectType> statusEffects;
 	
-	static void CreatePourWaterJob(boost::shared_ptr<Job>, Coordinate);
+	static void CreatePourWaterJob(std::shared_ptr<Job>, Coordinate);
 };
 
 BOOST_CLASS_VERSION(Job, 1)

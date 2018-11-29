@@ -92,7 +92,7 @@ public:
 	void SetConstruction(const Coordinate&,int);
 	int GetConstruction(const Coordinate&) const;
 	boost::weak_ptr<WaterNode> GetWater(const Coordinate&);
-	void SetWater(const Coordinate&,boost::shared_ptr<WaterNode>);
+	void SetWater(const Coordinate&,std::shared_ptr<WaterNode>);
 	bool IsLow(const Coordinate&) const;
 	void SetLow(const Coordinate&,bool);
 	bool BlocksWater(const Coordinate&) const;
@@ -106,11 +106,11 @@ public:
 	int GetNatureObject(const Coordinate&) const;
 	std::set<int>* ItemList(const Coordinate&);
 	boost::weak_ptr<FilthNode> GetFilth(const Coordinate&);
-	void SetFilth(const Coordinate&,boost::shared_ptr<FilthNode>);
+	void SetFilth(const Coordinate&,std::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood(const Coordinate&);
-	void SetBlood(const Coordinate&,boost::shared_ptr<BloodNode>);
+	void SetBlood(const Coordinate&,std::shared_ptr<BloodNode>);
 	boost::weak_ptr<FireNode> GetFire(const Coordinate&);
-	void SetFire(const Coordinate&,boost::shared_ptr<FireNode>);
+	void SetFire(const Coordinate&,std::shared_ptr<FireNode>);
 	bool BlocksLight(const Coordinate&) const;
 	void SetBlocksLight(const Coordinate&, bool);
 	bool LineOfSight(const Coordinate&, const Coordinate&);
@@ -153,7 +153,7 @@ public:
 	bool IsDangerous(const Coordinate&, int faction) const;
 	bool IsDangerousCache(const Coordinate&, int faction) const;
 	int GetTerrainMoveCost(const Coordinate&) const;
-	boost::shared_ptr<Weather> weather;
+	std::shared_ptr<Weather> weather;
 	void Update();
 	
 	Coordinate FindRangedAdvantage(const Coordinate&);

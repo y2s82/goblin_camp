@@ -138,7 +138,7 @@ bool WaterNode::Update() {
 			if (timeFromRiverBed > 0) --timeFromRiverBed;
 			divided = ((double)depthSum/waterList.size());
 
-			boost::shared_ptr<Item> item;
+			std::shared_ptr<Item> item;
 			if (!Map::Inst()->ItemList(pos)->empty())
 				item = Game::Inst()->GetItem(*Map::Inst()->ItemList(pos)->begin()).lock();
 
@@ -158,7 +158,7 @@ bool WaterNode::Update() {
 
 			//Loop through neighbouring waternodes
 			for (unsigned int i = 0; i < waterList.size(); ++i) {
-				if (boost::shared_ptr<WaterNode> water = waterList[i].lock()) {
+				if (std::shared_ptr<WaterNode> water = waterList[i].lock()) {
 					water->depth = (int)divided;
 					water->timeFromRiverBed = timeFromRiverBed;
 					water->UpdateGraphic();

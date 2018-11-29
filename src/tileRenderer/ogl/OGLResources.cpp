@@ -48,7 +48,7 @@ namespace {
 	};
 
 	struct ProgramDeleter {
-		ProgramDeleter(GLuint shader, boost::shared_ptr<const unsigned int> vertShader, boost::shared_ptr<const unsigned int> fragShader) 
+		ProgramDeleter(GLuint shader, std::shared_ptr<const unsigned int> vertShader, std::shared_ptr<const unsigned int> fragShader) 
 			: handle(shader),
 		      vertShader(vertShader),
 		      fragShader(fragShader)
@@ -60,42 +60,42 @@ namespace {
         }
 
 		GLuint handle;
-		boost::shared_ptr<const unsigned int> vertShader;
-		boost::shared_ptr<const unsigned int> fragShader;
+		std::shared_ptr<const unsigned int> vertShader;
+		std::shared_ptr<const unsigned int> fragShader;
 	};
 }
 
-boost::shared_ptr<const unsigned int> CreateOGLTexture() {
+std::shared_ptr<const unsigned int> CreateOGLTexture() {
 	GLuint handle = 0;
     glGenTextures(1, &handle);
     if( glGetError() ) {
 		LOG("Failed to create OGL Texture");
-		return boost::shared_ptr<const unsigned int>();    
+		return std::shared_ptr<const unsigned int>();    
 	} else {
-		boost::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, TextureDeleter(handle));
-		return boost::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<TextureDeleter>(innerPtr)->handle);
+		std::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, TextureDeleter(handle));
+		return std::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<TextureDeleter>(innerPtr)->handle);
 	}
 }
 
-boost::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertShaderCode, std::string fragShaderCode) {
-	boost::shared_ptr<const unsigned int> vertShader(CreateOGLShader(vertShaderCode, GL_VERTEX_SHADER));
+std::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertShaderCode, std::string fragShaderCode) {
+	std::shared_ptr<const unsigned int> vertShader(CreateOGLShader(vertShaderCode, GL_VERTEX_SHADER));
 	if (*vertShader == 0) {
-		return boost::shared_ptr<const unsigned int>();
+		return std::shared_ptr<const unsigned int>();
 	}
 
-	boost::shared_ptr<const unsigned int> fragShader(CreateOGLShader(fragShaderCode, GL_FRAGMENT_SHADER));
+	std::shared_ptr<const unsigned int> fragShader(CreateOGLShader(fragShaderCode, GL_FRAGMENT_SHADER));
 	if (*fragShader == 0) {
-		return boost::shared_ptr<const unsigned int>();
+		return std::shared_ptr<const unsigned int>();
 	}
 
 	GLuint programHandle = glCreateProgramObjectARB();
 	if (glGetError()) {
 		LOG("Failed to create OGL Program Object");
-		return boost::shared_ptr<const unsigned int>();    
+		return std::shared_ptr<const unsigned int>();    
 	}
 
-	boost::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, ProgramDeleter(programHandle, vertShader, fragShader));
-	boost::shared_ptr<const unsigned int> program(boost::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<ProgramDeleter>(innerPtr)->handle));
+	std::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, ProgramDeleter(programHandle, vertShader, fragShader));
+	std::shared_ptr<const unsigned int> program(std::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<ProgramDeleter>(innerPtr)->handle));
 	glAttachObjectARB(*program, *vertShader);
 	glAttachObjectARB(*program, *fragShader);
 	glLinkProgramARB(*program);
@@ -113,15 +113,15 @@ boost::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertSha
 			glGetInfoLogARB(*program, infologLength, &charsWritten, infoLog.get());
 			LOG("OPENGL ERROR: Program link Error. " << std::endl << /*infoLog <<*/ std::endl); // FIXME
 	    }
-		return boost::shared_ptr<const unsigned int>();
+		return std::shared_ptr<const unsigned int>();
 	}
 	return program;
 }
 
-boost::shared_ptr<const unsigned int> CreateOGLShader(std::string shader, unsigned int type) {
+std::shared_ptr<const unsigned int> CreateOGLShader(std::string shader, unsigned int type) {
 	GLuint handle = glCreateShaderObjectARB(type);
-	boost::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, ShaderDeleter(handle));
-	boost::shared_ptr<const unsigned int> shaderPtr(boost::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<ShaderDeleter>(innerPtr)->handle));
+	std::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, ShaderDeleter(handle));
+	std::shared_ptr<const unsigned int> shaderPtr(std::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<ShaderDeleter>(innerPtr)->handle));
 	
 	const char * shaderTxt = shader.c_str();
 	glShaderSourceARB(*shaderPtr, 1, &shaderTxt, 0);
@@ -140,7 +140,7 @@ boost::shared_ptr<const unsigned int> CreateOGLShader(std::string shader, unsign
 			glGetInfoLogARB(*shaderPtr, infologLength, &charsWritten, infoLog.get());
 			LOG("GLSL ERROR: " << /*infoLog << */ std::endl);  // FIXME
 		}
-		return boost::shared_ptr<const unsigned int>();
+		return std::shared_ptr<const unsigned int>();
 	}
 
 	return shaderPtr;

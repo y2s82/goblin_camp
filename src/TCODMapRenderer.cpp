@@ -86,12 +86,12 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
 					boost::weak_ptr<WaterNode> wwater = map->GetWater(xy);
-					if (boost::shared_ptr<WaterNode> water = wwater.lock()) {
+					if (std::shared_ptr<WaterNode> water = wwater.lock()) {
 						if (water->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water->GetGraphic(), water->GetColor(), TCODColor::black);
 					}
 					boost::weak_ptr<FilthNode> wfilth = map->GetFilth(xy);
-					if (boost::shared_ptr<FilthNode> filth = wfilth.lock()) {
+					if (std::shared_ptr<FilthNode> filth = wfilth.lock()) {
 						if (filth->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
 					}
@@ -114,9 +114,9 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 		InternalDrawMapItems("static constructions",  Game::Inst()->staticConstructionList, upleft, &minimap);
 		InternalDrawMapItems("dynamic constructions", Game::Inst()->dynamicConstructionList, upleft, &minimap);
 		//TODO: Make this consistent
-		for (std::map<int,boost::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end();) {
+		for (std::map<int,std::shared_ptr<Item> >::iterator itemi = Game::Inst()->itemList.begin(); itemi != Game::Inst()->itemList.end();) {
 			if (!itemi->second) {
-				std::map<int,boost::shared_ptr<Item> >::iterator tmp = itemi;
+				std::map<int,std::shared_ptr<Item> >::iterator tmp = itemi;
 				++itemi;
 				Game::Inst()->itemList.erase(tmp);
 				continue;
@@ -141,7 +141,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (firei->lock()) firei->lock()->Draw(upleft, &minimap);
 	}
-	for (std::list<boost::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
+	for (std::list<std::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {
 		(*spelli)->Draw(upleft, &minimap);
 	}
 

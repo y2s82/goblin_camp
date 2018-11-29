@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <boost/shared_ptr.hpp>
+
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 namespace py = boost::python;
@@ -26,7 +26,7 @@ namespace py = boost::python;
 #include "Logger.hpp"
 
 namespace Script { namespace API {
-	#define ITEM_ALIVE(var) boost::shared_ptr<Item> var = item.lock()
+	#define ITEM_ALIVE(var) std::shared_ptr<Item> var = item.lock()
 	
 	PyItem::PyItem(boost::weak_ptr<Item> item) : item(item) {
 	}

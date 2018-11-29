@@ -26,7 +26,7 @@ TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tile
 {
 	SDL_Surface * temp = IMG_Load(path.string().c_str());
 	if (temp != NULL) {
-		tiles = boost::shared_ptr<SDL_Surface>(SDL_DisplayFormatAlpha(temp), SDL_FreeSurface);
+		tiles = std::shared_ptr<SDL_Surface>(SDL_DisplayFormatAlpha(temp), SDL_FreeSurface);
 		SDL_FreeSurface(temp);
 	}
 	if (tiles) {
@@ -101,6 +101,6 @@ void TileSetTexture::DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, 
 	}
 }
 
-boost::shared_ptr<SDL_Surface> TileSetTexture::GetInternalSurface() {
+std::shared_ptr<SDL_Surface> TileSetTexture::GetInternalSurface() {
 	return tiles;
 }

@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <SDL.h>
-#include <boost/shared_ptr.hpp>
+
 #include <libtcod.hpp>
 #include "tileRenderer/Sprite.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
@@ -30,8 +30,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class SDLSprite : public Sprite
 {
 public:
-	explicit SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
-	template <typename IterT> explicit SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
+	explicit SDLSprite(SDLTilesetRenderer * const renderer, std::shared_ptr<TileSetTexture> tilesetTexture, int tile);
+	template <typename IterT> explicit SDLSprite(SDLTilesetRenderer * const renderer, std::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	~SDLSprite();
 	
 protected:
@@ -40,10 +40,10 @@ protected:
 
 private:
 	SDLTilesetRenderer * renderer;
-	boost::shared_ptr<TileSetTexture> texture;
+	std::shared_ptr<TileSetTexture> texture;
 };
 
-template <typename IterT> SDLSprite::SDLSprite(SDLTilesetRenderer * const renderer, boost::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frames)
+template <typename IterT> SDLSprite::SDLSprite(SDLTilesetRenderer * const renderer, std::shared_ptr<TileSetTexture> tilesetTexture, IterT start, IterT end, bool connectionMap, int frameRate, int frames)
 	: Sprite(start, end, connectionMap, frameRate, frames),
 	  renderer(renderer),
 	  texture(tilesetTexture)

@@ -84,7 +84,7 @@ BOOST_CLASS_VERSION(NatureObject, 1)
 class Ice : public NatureObject {
 	GC_SERIALIZABLE_CLASS
 	
-	boost::shared_ptr<WaterNode> frozenWater;
+	std::shared_ptr<WaterNode> frozenWater;
 public:
 	Ice(Coordinate = Coordinate(0,0), NatureObjectType = 0);
 	~Ice();

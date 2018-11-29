@@ -43,7 +43,7 @@ protected:
 	std::map<ItemCategory, int> amount;
 	std::map<ItemCategory, bool> allowed;
 	std::map<Coordinate, bool> reserved;
-	std::map<Coordinate, boost::shared_ptr<Container> > containers;
+	std::map<Coordinate, std::shared_ptr<Container> > containers;
 	std::map<Coordinate, TCODColor> colors;
 	std::map<ItemCategory, int> limits;
 	std::map<ItemCategory, int> demand;

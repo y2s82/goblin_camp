@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <map>
 #include <list>
 #include <set>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/weak_ptr.hpp>
 #include <boost/unordered_map.hpp>
 
@@ -118,8 +118,8 @@ protected:
 	std::deque<ItemType> jobList;
 	int progress;
 	bool SpawnProductionJob();
-	boost::shared_ptr<Container> container;
-	boost::shared_ptr<Container> materialsUsed;
+	std::shared_ptr<Container> container;
+	std::shared_ptr<Container> materialsUsed;
 	bool stockpile, farmplot;
 	bool dismantle;
 	int time;

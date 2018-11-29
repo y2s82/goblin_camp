@@ -144,7 +144,7 @@ namespace {
 	}
 }
 
-TileSetParserV2::TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactory) :
+TileSetParserV2::TileSetParserV2(std::shared_ptr<TilesetRenderer> spriteFactory) :
 	parser(),
 	spriteFactory(spriteFactory),
 	tileSet(),
@@ -176,11 +176,11 @@ TileSetParserV2::~TileSetParserV2() {
 	
 }
 
-boost::shared_ptr<TileSet> TileSetParserV2::Run(boost::filesystem::path dataFilePath) {
+std::shared_ptr<TileSet> TileSetParserV2::Run(boost::filesystem::path dataFilePath) {
 	tileSetName = "";
 	tileWidth = -1;
 	tileHeight = -1;
-	currentTexture = boost::shared_ptr<TileSetTexture>();
+	currentTexture = std::shared_ptr<TileSetTexture>();
 	tileSetPath = dataFilePath.parent_path();
 	statusEffectFactory.Reset();
 	success = true;
@@ -188,17 +188,17 @@ boost::shared_ptr<TileSet> TileSetParserV2::Run(boost::filesystem::path dataFile
 
 	parser.run(dataFilePath.string().c_str(), this);
 
-	boost::shared_ptr<TileSet> result = tileSet;
+	std::shared_ptr<TileSet> result = tileSet;
 	tileSet.reset();
 	if (success)
 		return result;
-	return boost::shared_ptr<TileSet>();
+	return std::shared_ptr<TileSet>();
 }
 
-void TileSetParserV2::Modify(boost::shared_ptr<TileSet> target, boost::filesystem::path dataFilePath) {
+void TileSetParserV2::Modify(std::shared_ptr<TileSet> target, boost::filesystem::path dataFilePath) {
 	tileWidth = target->TileWidth();
 	tileHeight = target->TileHeight();
-	currentTexture = boost::shared_ptr<TileSetTexture>();
+	currentTexture = std::shared_ptr<TileSetTexture>();
 	tileSetPath = dataFilePath.parent_path();
 	statusEffectFactory.Reset();
 	success = true;
@@ -252,7 +252,7 @@ bool TileSetParserV2::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 
 	// Texture structure
 	if (boost::iequals(str->getName(), "texture")) {
-		currentTexture = boost::shared_ptr<TileSetTexture>(new TileSetTexture(tileSetPath / name, tileWidth, tileHeight));
+		currentTexture = std::shared_ptr<TileSetTexture>(new TileSetTexture(tileSetPath / name, tileWidth, tileHeight));
 		markerFrames.clear();
 		markerFPS = 15;
 		fireFrames.clear();
@@ -553,7 +553,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 		} else {
 			tileWidth = value.i;
 			if (tileWidth != -1 && tileHeight != -1)  {
-				tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+				tileSet = std::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
 				readTexture = true;
 			}
 		}
@@ -566,7 +566,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 		} else {
 			tileHeight = value.i;
 			if (tileWidth != -1 && tileHeight != -1)  {
-				tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+				tileSet = std::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
 				readTexture = true;
 			}
 		}
@@ -623,7 +623,7 @@ bool TileSetParserV2::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 		if (markerFrames.size() > 0) {
 			tileSet->SetMarker(spriteFactory->CreateSprite(currentTexture, markerFrames, false, markerFPS));
 		}
-		currentTexture = boost::shared_ptr<TileSetTexture>();
+		currentTexture = std::shared_ptr<TileSetTexture>();
 		return success;
 	} 
 	
@@ -709,7 +709,7 @@ void TileSetParserV2::error(const char *msg) {
 	success = false;
 }
 
-Sprite_ptr TileSetParserV2::AnimatedSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
+Sprite_ptr TileSetParserV2::AnimatedSpriteFactory::Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture) {
 	return spriteFactory->CreateSprite(currentTexture, sprites, false, fps);
 }
 

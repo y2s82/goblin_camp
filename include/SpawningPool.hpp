@@ -30,7 +30,7 @@ class SpawningPool : public Construction {
 	Coordinate a, b;
 	unsigned int expansion, filth, corpses, spawns;
 	unsigned int expansionLeft, corruptionLeft, spawnsLeft;
-	boost::shared_ptr<Container> corpseContainer;
+	std::shared_ptr<Container> corpseContainer;
 	int jobCount;
 	int burn;
 public:
@@ -47,7 +47,7 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	void Burn();
 	virtual int Build();
-	boost::shared_ptr<Container>& GetContainer();
+	std::shared_ptr<Container>& GetContainer();
 	void Spawn();
 private:
 	Coordinate SpawnLocation();

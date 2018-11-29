@@ -23,16 +23,16 @@ class JobManager {
 	
 	JobManager();
 	static JobManager *instance;
-	std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
-	std::list<boost::shared_ptr<Job> > waitingList;
+	std::list<std::shared_ptr<Job> > availableList[PRIORITY_COUNT];
+	std::list<std::shared_ptr<Job> > waitingList;
 	std::vector<int> menialNPCsWaiting;
 	std::vector<int> expertNPCsWaiting;
 	std::vector<std::vector<boost::weak_ptr<Job> > > toolJobs;
-	std::list<boost::shared_ptr<Job> > failList;
+	std::list<std::shared_ptr<Job> > failList;
 public:
 	static JobManager* Inst();
 	static void Reset();
-	void AddJob(boost::shared_ptr<Job>);
+	void AddJob(std::shared_ptr<Job>);
 	void Draw(Coordinate, int from = 0, int width = 40 ,int height = 40, TCODConsole* = TCODConsole::root);
 	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
 	boost::weak_ptr<Job> GetJob(int);

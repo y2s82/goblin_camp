@@ -458,7 +458,7 @@ void UI::Draw(TCODConsole* console) {
 	}
 	
 	Coordinate mouseTile(Game::Inst()->TileAt(mouseInput.x, mouseInput.y));
-	boost::shared_ptr<MapRenderer> renderer = Game::Inst()->Renderer();
+	std::shared_ptr<MapRenderer> renderer = Game::Inst()->Renderer();
 
 	if (_state == UIPLACEMENT || ((_state == UIABPLACEMENT || _state == UIRECTPLACEMENT) && a.X() == 0)) {
 		renderer->DrawCursor(mouseTile, Coordinate(mouseTile.X() + _blueprint.X() - 1, mouseTile.Y() + _blueprint.Y() - 1), placeable);
@@ -548,14 +548,14 @@ void UI::Draw(TCODConsole* console) {
 		&& (Announce::Inst()->Update(mouseInput.cx, mouseInput.cy, false) & NOMENUHIT)
 		&& !underCursor.empty()) {
 
-			if (boost::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) { strobeEntity->Strobe(); }
+			if (std::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) { strobeEntity->Strobe(); }
 			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
-				if (boost::shared_ptr<Entity> entity = ucit->lock()) {
+				if (std::shared_ptr<Entity> entity = ucit->lock()) {
 					Coordinate mouseLoc = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 					entity->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
 
 					if (entity->CanStrobe()) {
-						if (boost::shared_ptr<Entity> strobeTarget = currentStrobeTarget.lock()) {
+						if (std::shared_ptr<Entity> strobeTarget = currentStrobeTarget.lock()) {
 							if (entity != strobeTarget) {
 								strobeTarget->ResetStrobe();
 							}
@@ -565,7 +565,7 @@ void UI::Draw(TCODConsole* console) {
 							
 				}
 			}
-	} else if (boost::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) {
+	} else if (std::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) {
 		strobeEntity->ResetStrobe();
 		currentStrobeTarget.reset();
 	}
@@ -713,7 +713,7 @@ void UI::ChoosePlantHarvest() {
 	UI::Inst()->SetExtraTooltip("Harvest plants");
 }
 
-void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order) {
+void UI::ChooseOrderTargetCoordinate(std::shared_ptr<Squad> squad, Order order) {
 	UI::Inst()->state(UIPLACEMENT);
 	bool autoClose = true;
 	if (order == PATROL) {
@@ -726,7 +726,7 @@ void UI::ChooseOrderTargetCoordinate(boost::shared_ptr<Squad> squad, Order order
 	Game::Inst()->Renderer()->SetCursorMode(Cursor_Order);
 }
 
-void UI::ChooseOrderTargetEntity(boost::shared_ptr<Squad> squad, Order order) {
+void UI::ChooseOrderTargetEntity(std::shared_ptr<Squad> squad, Order order) {
 	UI::Inst()->state(UIPLACEMENT);
 	UI::Inst()->SetCallback(boost::bind(Game::SetSquadTargetEntity, order, _1, squad));
 	UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
@@ -894,7 +894,7 @@ void UI::ChooseCreateItem() {
 	if (item >= 0) {
 		UI::Inst()->state(UIPLACEMENT);
 		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), false,
-			0, std::vector<boost::weak_ptr<Item> >(), boost::shared_ptr<Container>()));
+			0, std::vector<boost::weak_ptr<Item> >(), std::shared_ptr<Container>()));
 		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 		UI::Inst()->blueprint(Coordinate(1,1));
 		Game::Inst()->Renderer()->SetCursorMode(Item::Presets[item]);
