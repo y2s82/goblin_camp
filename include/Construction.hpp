@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 #include <set>
 
-#include <boost/weak_ptr.hpp>
+
 #include <boost/unordered_map.hpp>
 
 #include "Entity.hpp"
@@ -127,7 +127,7 @@ protected:
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 	bool flammable;
 	int smoke;
-	boost::weak_ptr<Job> repairJob;
+	std::weak_ptr<Job> repairJob;
 	Map* map;
 public:
 	virtual ~Construction();
@@ -155,7 +155,7 @@ public:
 	static std::set<std::string> Categories;
 	static void LoadPresets(std::string);
 	static void ResolveProducts();
-	virtual boost::weak_ptr<Container> Storage() const;
+	virtual std::weak_ptr<Container> Storage() const;
 	bool HasTag(ConstructionTag) const;
 	virtual void Update();
 	virtual void Dismantle(const Coordinate& p);

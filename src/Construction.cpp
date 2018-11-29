@@ -116,15 +116,15 @@ Construction::~Construction() {
 		}
 	}
 	
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (itemi->lock()) {
 			itemi->lock()->SetFaction(PLAYERFACTION); //Return item to player faction
-			itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
+			itemi->lock()->PutInContainer(std::weak_ptr<Item>()); //Set container to none
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
-	if (producer) StockManager::Inst()->UpdateWorkshops(boost::weak_ptr<Construction>(), false);
+	if (producer) StockManager::Inst()->UpdateWorkshops(std::weak_ptr<Construction>(), false);
 
 	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
@@ -189,8 +189,8 @@ int Construction::Build() {
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 
 		int flame = 0;
-		std::list<boost::weak_ptr<Item> > itemsToRemove;
-		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		std::list<std::weak_ptr<Item> > itemsToRemove;
+		for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
 			itemi->lock()->IsFlammable() ? ++flame : --flame;
@@ -201,11 +201,11 @@ int Construction::Build() {
 
 		if (flame > 0) flammable = true;
 
-		for (std::list<boost::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
+		for (std::list<std::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
 			materialsUsed->RemoveItem(*itemi);
 			Game::Inst()->RemoveItem(*itemi);
 			Game::Inst()->CreateItem(materialsUsed->Position(), Item::StringToItemType("debris"), false, -1, 
-				std::vector<boost::weak_ptr<Item> >(), materialsUsed);
+				std::vector<std::weak_ptr<Item> >(), materialsUsed);
 		}
 
 		//TODO: constructions should have the option of having both walkable and unwalkable tiles
@@ -269,7 +269,7 @@ void Construction::CancelJob(int index) {
 		jobList.erase(jobList.begin());
 		//Empty container in case some pickup jobs got done
 		while (!container->empty()) {
-			boost::weak_ptr<Item> item = container->GetFirstItem();
+			std::weak_ptr<Item> item = container->GetFirstItem();
 			container->RemoveItem(item);
 			if (item.lock()) item.lock()->PutInContainer();
 		}
@@ -288,7 +288,7 @@ int Construction::Use() {
 
 		if (smoke == 0) {
 			smoke = 1;
-			for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+			for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
 				if (itemi->lock()->IsCategory(Item::StringToItemCategory("Fuel"))) {
 					smoke = 2;
 					break;
@@ -337,7 +337,7 @@ int Construction::Use() {
 
 			for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
 				allComponentsFound = false;
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+				for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
 					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
 						allComponentsFound = true;
 						break;
@@ -346,11 +346,11 @@ int Construction::Use() {
 			}
 			if (!allComponentsFound) return -1;
 
-			std::vector<boost::weak_ptr<Item> > components;
+			std::vector<std::weak_ptr<Item> > components;
 			std::shared_ptr<Container> itemContainer;
 
 			for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+				for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
 					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
 						if (itemi->lock()->IsCategory(Item::Presets[jobList[0]].containIn)) {
 							//This component is the container our product should be placed in
@@ -722,15 +722,15 @@ bool Construction::SpawnProductionJob() {
 	//Only spawn a job if the construction isn't already reserved
 	if (!reserved) {
 		//First check that the requisite items actually exist
-		std::list<boost::weak_ptr<Item> > componentList;
+		std::list<std::weak_ptr<Item> > componentList;
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-			boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi), Center(), APPLYMINIMUMS);
+			std::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi), Center(), APPLYMINIMUMS);
 			if (item.lock()) {
 				componentList.push_back(item);
 				item.lock()->Reserve(true);
 			} else {
 				//Not all items available, cancel job and unreserve the reserved items.
-				for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+				for (std::list<std::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
 					resi->lock()->Reserve(false);
 				}
 				jobList.pop_front();
@@ -742,7 +742,7 @@ bool Construction::SpawnProductionJob() {
 		}
 
 		//Unreserve the items now, because the individual jobs will reserve them for themselves
-		for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+		for (std::list<std::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
 			resi->lock()->Reserve(false);
 		}
 
@@ -775,7 +775,7 @@ std::cout<<"Couldn't spawn a production job at "<<name<<": Reserved\n";
 	return false;
 }
 
-boost::weak_ptr<Container> Construction::Storage() const {
+std::weak_ptr<Container> Construction::Storage() const {
 	if (condition > 0) return container;
 	else return materialsUsed;
 }
@@ -915,7 +915,7 @@ void Construction::Damage(Attack* attack) {
 }
 
 void Construction::Explode() {
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (std::shared_ptr<Item> item = itemi->lock()) {
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget = Random::ChooseInRadius(Position(), 5);
@@ -994,7 +994,7 @@ void Construction::SpawnRepairJob() {
 }
 
 void Construction::BurnToTheGround() {
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (std::shared_ptr<Item> item = itemi->lock()) {
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget = Random::ChooseInRadius(Position(), 2);

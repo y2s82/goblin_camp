@@ -100,10 +100,10 @@ void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
 			y >= minimapY && y < minimapY + 11) {
 			int actualX = (entity.lock()->Position()-5).X() + x - minimapX;
 			int actualY = (entity.lock()->Position()-5).Y() + y - minimapY;
-			std::list<boost::weak_ptr<Entity> > minimapUnderCursor = std::list<boost::weak_ptr<Entity> >();
+			std::list<std::weak_ptr<Entity> > minimapUnderCursor = std::list<std::weak_ptr<Entity> >();
 			UI::Inst()->HandleUnderCursor(Coordinate(actualX, actualY), &minimapUnderCursor);
 			if (!minimapUnderCursor.empty() && minimapUnderCursor.begin()->lock()) {
-				for (std::list<boost::weak_ptr<Entity> >::iterator ucit = minimapUnderCursor.begin(); ucit != minimapUnderCursor.end(); ++ucit) {
+				for (std::list<std::weak_ptr<Entity> >::iterator ucit = minimapUnderCursor.begin(); ucit != minimapUnderCursor.end(); ++ucit) {
 					ucit->lock()->GetTooltip(actualX, actualY, tooltip);
 				}
 			}
@@ -114,7 +114,7 @@ void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
 	}
 }
 
-void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
+void SideBar::SetEntity(std::weak_ptr<Entity> ent) {
 	entity = ent;
 	npc = construction = false;
 	height = 15;

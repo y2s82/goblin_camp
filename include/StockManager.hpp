@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 #include <list>
 
-#include <boost/weak_ptr.hpp>
+
 #include "data/Serialization.hpp"
 
 class Construction;
@@ -42,14 +42,14 @@ class StockManager {
 	std::set<ItemType> producables;
 	std::set<ItemType> dumpables;
 	std::map<ItemType, ConstructionType> producers;
-	std::multimap<ConstructionType, boost::weak_ptr<Construction> > workshops;
+	std::multimap<ConstructionType, std::weak_ptr<Construction> > workshops;
 	std::set<ItemType> fromTrees; //Trees and stones are a special case, possibly fish in the future as well
 	std::set<ItemType> fromEarth;
-	std::list<boost::weak_ptr<NatureObject> > designatedTrees;
-	std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > > treeFellingJobs;
+	std::list<std::weak_ptr<NatureObject> > designatedTrees;
+	std::list<std::pair<std::weak_ptr<Job>, std::weak_ptr<NatureObject> > > treeFellingJobs;
 	std::set<Coordinate> designatedBog;
-	std::list<boost::weak_ptr<Job> > bogIronJobs;
-	std::list<boost::weak_ptr<Job> > barrelWaterJobs;
+	std::list<std::weak_ptr<Job> > bogIronJobs;
+	std::list<std::weak_ptr<Job> > barrelWaterJobs;
 public:
 	static StockManager* Inst();
 	~StockManager(void);
@@ -65,8 +65,8 @@ public:
 	void SetMinimum(ItemType, int);
 	std::set<ItemType>* Producables();
 
-	void UpdateWorkshops(boost::weak_ptr<Construction>, bool add);
-	void UpdateTreeDesignations(boost::weak_ptr<NatureObject>, bool add);
+	void UpdateWorkshops(std::weak_ptr<Construction>, bool add);
+	void UpdateTreeDesignations(std::weak_ptr<NatureObject>, bool add);
 	void UpdateBogDesignations(Coordinate, bool add);
 };
 

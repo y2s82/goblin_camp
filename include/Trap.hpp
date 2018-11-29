@@ -24,7 +24,7 @@ class Trap : public Construction {
 	GC_SERIALIZABLE_CLASS
 	
 	bool ready;
-	boost::weak_ptr<Job> reloadJob;
+	std::weak_ptr<Job> reloadJob;
 	int readyGraphic;
 public:
 	Trap(ConstructionType = 0, Coordinate = Coordinate(0,0));

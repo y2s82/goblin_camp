@@ -50,7 +50,7 @@ menuOpen(false),
 	_state(UINORMAL),
 	_blueprint(1,1),
 	placeable(false),
-	underCursor(std::list<boost::weak_ptr<Entity> >()),
+	underCursor(std::list<std::weak_ptr<Entity> >()),
 	drawCursor(false),
 	lbuttonPressed(false),
 	mbuttonPressed(false),
@@ -60,7 +60,7 @@ menuOpen(false),
 	draggingPlacement(false),
 	textMode(false),
 	inputString(std::string("")),
-	currentStrobeTarget(boost::weak_ptr<Entity>())
+	currentStrobeTarget(std::weak_ptr<Entity>())
 {
 	currentMenu = Menu::MainMenu();
 	menuHistory.reserve(10);
@@ -373,7 +373,7 @@ void UI::HandleMouse() {
 					}
 				} else { //Current state is not any kind of placement, so open construction/npc context menu if over one
 					if (!underCursor.empty()) sideBar.SetEntity(*underCursor.begin());
-					else sideBar.SetEntity(boost::weak_ptr<Entity>());
+					else sideBar.SetEntity(std::weak_ptr<Entity>());
 				}
 			}
 		}
@@ -549,7 +549,7 @@ void UI::Draw(TCODConsole* console) {
 		&& !underCursor.empty()) {
 
 			if (std::shared_ptr<Entity> strobeEntity = currentStrobeTarget.lock()) { strobeEntity->Strobe(); }
-			for (std::list<boost::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
+			for (std::list<std::weak_ptr<Entity> >::iterator ucit = underCursor.begin(); ucit != underCursor.end(); ++ucit) {
 				if (std::shared_ptr<Entity> entity = ucit->lock()) {
 					Coordinate mouseLoc = Game::Inst()->TileAt(mouseInput.x, mouseInput.y);
 					entity->GetTooltip(mouseLoc.X(), mouseLoc.Y(), tooltip);
@@ -775,14 +775,14 @@ void UI::ChooseDesignateBog() {
 }
 
 
-boost::weak_ptr<Entity> UI::GetEntity(const Coordinate& pos) {
+std::weak_ptr<Entity> UI::GetEntity(const Coordinate& pos) {
 	if (pos.X() >= 0 && pos.X() < Map::Inst()->Width() && pos.Y() >= 0 && pos.Y() < Map::Inst()->Height()) {
 		std::set<int> *npcList = Map::Inst()->NPCList(pos);
 		if (!npcList->empty()) return Game::Inst()->GetNPC((*npcList->begin()));
 
 		std::set<int> *itemList = Map::Inst()->ItemList(pos);
 		if (!itemList->empty()) {
-			std::set<boost::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
+			std::set<std::weak_ptr<Item> >::iterator itemi = Game::Inst()->freeItems.find(Game::Inst()->itemList[*itemList->begin()]);
 			if (itemi != Game::Inst()->freeItems.end()) {
 				return *itemi;
 			}
@@ -794,10 +794,10 @@ boost::weak_ptr<Entity> UI::GetEntity(const Coordinate& pos) {
 		entity = Map::Inst()->GetConstruction(pos);
 		if (entity > -1) return Game::Inst()->GetConstruction(entity);
 	}
-	return boost::weak_ptr<Entity>();
+	return std::weak_ptr<Entity>();
 }
 
-void UI::HandleUnderCursor(const Coordinate& pos, std::list<boost::weak_ptr<Entity> >* result) {
+void UI::HandleUnderCursor(const Coordinate& pos, std::list<std::weak_ptr<Entity> >* result) {
 	result->clear();
 
 	if (Map::Inst()->IsInside(pos)) {
@@ -894,7 +894,7 @@ void UI::ChooseCreateItem() {
 	if (item >= 0) {
 		UI::Inst()->state(UIPLACEMENT);
 		UI::Inst()->SetCallback(boost::bind(&Game::CreateItem, Game::Inst(), _1, ItemType(item), false,
-			0, std::vector<boost::weak_ptr<Item> >(), std::shared_ptr<Container>()));
+			0, std::vector<std::weak_ptr<Item> >(), std::shared_ptr<Container>()));
 		UI::Inst()->SetPlacementCallback(boost::bind(Game::CheckTree, _1, Coordinate(1,1)));
 		UI::Inst()->blueprint(Coordinate(1,1));
 		Game::Inst()->Renderer()->SetCursorMode(Item::Presets[item]);

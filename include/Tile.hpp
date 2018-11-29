@@ -85,7 +85,7 @@ public:
 	void MoveTo(int);
 	void SetConstruction(int);
 	int GetConstruction() const;
-	boost::weak_ptr<WaterNode> GetWater() const;
+	std::weak_ptr<WaterNode> GetWater() const;
 	void SetWater(std::shared_ptr<WaterNode>);
 	bool IsLow() const;
 	void SetLow(bool);
@@ -96,11 +96,11 @@ public:
 	TCODColor GetBackColor() const;
 	void SetNatureObject(int);
 	int GetNatureObject() const;
-	boost::weak_ptr<FilthNode> GetFilth() const;
+	std::weak_ptr<FilthNode> GetFilth() const;
 	void SetFilth(std::shared_ptr<FilthNode>);
-	boost::weak_ptr<BloodNode> GetBlood() const;
+	std::weak_ptr<BloodNode> GetBlood() const;
 	void SetBlood(std::shared_ptr<BloodNode>);
-	boost::weak_ptr<FireNode> GetFire() const;
+	std::weak_ptr<FireNode> GetFire() const;
 	void SetFire(std::shared_ptr<FireNode>);
 	void Mark();
 	void Unmark();

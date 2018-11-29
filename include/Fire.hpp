@@ -30,7 +30,7 @@ class FireNode : public boost::enable_shared_from_this<FireNode> {
 	int graphic;
 	TCODColor color;
 	int temperature;
-	boost::weak_ptr<Job> waterJob;
+	std::weak_ptr<Job> waterJob;
 
 public:
 	FireNode(const Coordinate& = zero, int temperature = 0);

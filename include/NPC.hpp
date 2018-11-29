@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
 #include <boost/function.hpp>
-#include <boost/weak_ptr.hpp>
+
 
 #include <libtcod.hpp>
 
@@ -137,11 +137,11 @@ class NPC : public Entity {
 	bool jobBegun;
 	bool expert;
 
-	boost::weak_ptr<Item> carried;
-	boost::weak_ptr<Item> mainHand;
-	boost::weak_ptr<Item> offHand;
-	boost::weak_ptr<Item> armor;
-	boost::weak_ptr<Container> quiver;
+	std::weak_ptr<Item> carried;
+	std::weak_ptr<Item> mainHand;
+	std::weak_ptr<Item> offHand;
+	std::weak_ptr<Item> armor;
+	std::weak_ptr<Container> quiver;
 
 	int thirst, hunger, weariness;
 	int thinkSpeed;
@@ -152,12 +152,12 @@ class NPC : public Entity {
 	void HandleHunger();
 	void HandleWeariness();
 	int health, maxHealth;
-	boost::weak_ptr<Item> foundItem;
+	std::weak_ptr<Item> foundItem;
 	std::shared_ptr<Container> inventory;
 
-	std::list<boost::weak_ptr<NPC> > nearNpcs;
-	std::list<boost::weak_ptr<NPC> > adjacentNpcs;
-	std::list<boost::weak_ptr<Construction> > nearConstructions;
+	std::list<std::weak_ptr<NPC> > nearNpcs;
+	std::list<std::weak_ptr<NPC> > adjacentNpcs;
+	std::list<std::weak_ptr<Construction> > nearConstructions;
 	bool needsNutrition;
 	bool needsSleep;
 	bool hasHands;
@@ -172,9 +172,9 @@ class NPC : public Entity {
 	int baseResistances[RES_COUNT];
 	int effectiveResistances[RES_COUNT];
 	bool aggressive, coward;
-	boost::weak_ptr<NPC> aggressor;
+	std::weak_ptr<NPC> aggressor;
 	bool dead;
-	boost::weak_ptr<Squad> squad;
+	std::weak_ptr<Squad> squad;
 
 	std::list<Attack> attacks;
 
@@ -204,7 +204,7 @@ class NPC : public Entity {
 
 	std::string GetDeathMsg();
 	std::string GetDeathMsgStrengthLoss();
-	std::string GetDeathMsgCombat(boost::weak_ptr<NPC> other, DamageType);
+	std::string GetDeathMsgCombat(std::weak_ptr<NPC> other, DamageType);
 	std::string GetDeathMsgThirst();
 	std::string GetDeathMsgHunger();
 
@@ -231,9 +231,9 @@ public:
 
 	Task* currentTask() const;
 	Task* nextTask() const;
-	boost::weak_ptr<Job> currentJob() const;
+	std::weak_ptr<Job> currentJob() const;
 	Coordinate currentTarget() const;
-	boost::weak_ptr<Entity> currentEntity() const;
+	std::weak_ptr<Entity> currentEntity() const;
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
@@ -245,33 +245,33 @@ public:
 	bool HasEffect(StatusEffectType) const;
 	std::list<StatusEffect>* StatusEffects();
 	void AbortCurrentJob(bool);
-	void AbortJob(boost::weak_ptr<Job>);
+	void AbortJob(std::weak_ptr<Job>);
 
 	bool Expert() const;
 	void Expert(bool);
 
 	bool Dead() const;
 	void Kill(std::string deathMessage);
-	void PickupItem(boost::weak_ptr<Item>);
-	void DropItem(boost::weak_ptr<Item>);
-	void Hit(boost::weak_ptr<Entity>, bool careful = false);
-	void FireProjectile(boost::weak_ptr<Entity>);
-	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
-	void CastOffensiveSpell(boost::weak_ptr<Entity>);
+	void PickupItem(std::weak_ptr<Item>);
+	void DropItem(std::weak_ptr<Item>);
+	void Hit(std::weak_ptr<Entity>, bool careful = false);
+	void FireProjectile(std::weak_ptr<Entity>);
+	void Damage(Attack*, std::weak_ptr<NPC> aggr = std::weak_ptr<NPC>());
+	void CastOffensiveSpell(std::weak_ptr<Entity>);
 
-	void MemberOf(boost::weak_ptr<Squad>);
-	boost::weak_ptr<Squad> MemberOf() const;
+	void MemberOf(std::weak_ptr<Squad>);
+	std::weak_ptr<Squad> MemberOf() const;
 	void GetMainHandAttack(Attack&);
 	bool WieldingRangedWeapon();
 	void FindNewWeapon();
-	boost::weak_ptr<Item> Wielding() const;
-	boost::weak_ptr<Item> Carrying() const;
+	std::weak_ptr<Item> Wielding() const;
+	std::weak_ptr<Item> Carrying() const;
 	bool HasHands() const;
 	bool IsTunneler() const;
 	bool IsFlying() const; //Special case for pathing's sake. Equivalent to HasEffect(FLYING) except it's threadsafe
 	void FindNewArmor();
-	boost::weak_ptr<Item> Wearing() const;
-	void DecreaseItemCondition(boost::weak_ptr<Item>);
+	std::weak_ptr<Item> Wearing() const;
+	void DecreaseItemCondition(std::weak_ptr<Item>);
 
 	int GetHealth() const;
 	int GetMaxHealth() const;

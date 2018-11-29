@@ -20,7 +20,7 @@
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"

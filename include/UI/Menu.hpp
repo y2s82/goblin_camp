@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+
 #include <libtcod.hpp>
 
 #include "Game.hpp"

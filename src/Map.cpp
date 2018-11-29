@@ -160,9 +160,9 @@ int Map::GetConstruction(const Coordinate& p) const {
 	return -1;
 }
 
-boost::weak_ptr<WaterNode> Map::GetWater(const Coordinate& p) { 
+std::weak_ptr<WaterNode> Map::GetWater(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetWater();
-	return boost::weak_ptr<WaterNode>();
+	return std::weak_ptr<WaterNode>();
 }
 void Map::SetWater(const Coordinate& p, std::shared_ptr<WaterNode> value) { 
 	if (Map::IsInside(p)) {
@@ -227,9 +227,9 @@ int Map::GetNatureObject(const Coordinate& p) const {
 	return -1;
 }
 
-boost::weak_ptr<FilthNode> Map::GetFilth(const Coordinate& p) { 
+std::weak_ptr<FilthNode> Map::GetFilth(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetFilth(); 
-	return boost::weak_ptr<FilthNode>();
+	return std::weak_ptr<FilthNode>();
 }
 void Map::SetFilth(const Coordinate& p, std::shared_ptr<FilthNode> value) { 
 	if (Map::IsInside(p)) {
@@ -238,17 +238,17 @@ void Map::SetFilth(const Coordinate& p, std::shared_ptr<FilthNode> value) {
 	}
 }
 
-boost::weak_ptr<BloodNode> Map::GetBlood(const Coordinate& p) { 
+std::weak_ptr<BloodNode> Map::GetBlood(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetBlood(); 
-	return boost::weak_ptr<BloodNode>();
+	return std::weak_ptr<BloodNode>();
 }
 void Map::SetBlood(const Coordinate& p, std::shared_ptr<BloodNode> value) { 
 	if (Map::IsInside(p)) tile(p).SetBlood(value); 
 }
 
-boost::weak_ptr<FireNode> Map::GetFire(const Coordinate& p) { 
+std::weak_ptr<FireNode> Map::GetFire(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetFire(); 
-	return boost::weak_ptr<FireNode>();
+	return std::weak_ptr<FireNode>();
 }
 void Map::SetFire(const Coordinate& p, std::shared_ptr<FireNode> value) { 
 	if (Map::IsInside(p)) {
@@ -618,7 +618,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 	   map creation -- one minute or more -- while it is O(1) on
 	   water arrays.
 	 */
-	std::vector<boost::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
+	std::vector<std::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
 
 	for (int y = 0; y < Height(); ++y) {
 		for (int x = 0; x < Width(); ++x) {
@@ -659,7 +659,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 				if (tile(pos).flow == NODIRECTION && !waterArray.empty()) {
 					// No slope here, so approximate towards river
-					boost::weak_ptr<WaterNode> randomWater = Random::ChooseElement(waterArray);
+					std::weak_ptr<WaterNode> randomWater = Random::ChooseElement(waterArray);
 					Coordinate coord = randomWater.lock()->Position();
 					if (coord.X() < x) {
 						if (coord.Y() < y)

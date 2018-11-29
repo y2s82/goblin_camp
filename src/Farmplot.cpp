@@ -58,7 +58,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 						console->setChar(screenx, screeny, (graphic[1]));
 
 						if (!containers[p]->empty()) {
-							boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
+							std::weak_ptr<Item> item = containers[p]->GetFirstItem();
 							if (item.lock()) {
 								console->putCharEx(screenx, screeny, item.lock()->GetGraphic(), item.lock()->Color(), TCODColor::black);
 							}
@@ -80,7 +80,7 @@ void FarmPlot::Update() {
 		//Normal plants ought to grow seed -> young plant -> mature plant -> fruits, which means 3
 		//growths before giving fruit. 3 * 2 months means 6 months from seed to fruits
 		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && Random::Generate(4) == 0) {
-			boost::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
+			std::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
 			if (plant.lock() && !plant.lock()->Reserved()) {
 				if (Random::Generate(9) == 0) { //Chance for the plant to die
 					containerIt->second->RemoveItem(plant);
@@ -128,7 +128,7 @@ int FarmPlot::Use() {
 				for (std::map<ItemType, bool>::iterator seedi = allowedSeeds.begin(); seedi != allowedSeeds.end(); ++seedi) {
 					growth[containerIt->first] = -(MONTH_LENGTH / 2) + Random::Generate(MONTH_LENGTH - 1);
 					if (seedi->second) {
-						boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first, Center());
+						std::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first, Center());
 						if (seed.lock()) {
 							std::shared_ptr<Job> plantJob(new Job("Plant " + Item::ItemTypeToString(seedi->first)));
 							plantJob->ReserveEntity(seed);
@@ -187,7 +187,7 @@ bool FarmPlot::Full(ItemType type) {
 				if (containers[p]->empty() && !reserved[p]) return false;
 
 				//Check if a container exists for this ItemCategory that isn't full
-				boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
+				std::weak_ptr<Item> item = containers[p]->GetFirstItem();
 				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
 					std::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
 					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 

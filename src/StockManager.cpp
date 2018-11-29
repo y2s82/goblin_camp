@@ -135,7 +135,7 @@ void StockManager::Update() {
 					//Subtract the amount of active tree felling jobs from the difference
 					difference -= treeFellingJobs.size();
 					//Pick a designated tree and go chop it
-					for (std::list<boost::weak_ptr<NatureObject> >::iterator treei = designatedTrees.begin();
+					for (std::list<std::weak_ptr<NatureObject> >::iterator treei = designatedTrees.begin();
 						treei != designatedTrees.end() && difference > 0; ++treei) {
 							if (!treei->lock()) continue;
 
@@ -158,7 +158,7 @@ void StockManager::Update() {
 								JobManager::Inst()->AddJob(fellJob);
 								--difference;
 								treeFellingJobs.push_back(
-									std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> >(fellJob, *treei));
+									std::pair<std::weak_ptr<Job>, std::weak_ptr<NatureObject> >(fellJob, *treei));
 								treei = designatedTrees.erase(treei);
 							}
 						// Fix MSVC iterator end overflow
@@ -187,7 +187,7 @@ void StockManager::Update() {
 						if (waterLocation.X() >= 0 && waterLocation.Y() >= 0) {
 							std::shared_ptr<Job> barrelWaterJob(new Job("Fill barrel", MED, 0, true));
 							barrelWaterJob->DisregardTerritory();
-							barrelWaterJob->tasks.push_back(Task(FIND, waterLocation, boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
+							barrelWaterJob->tasks.push_back(Task(FIND, waterLocation, std::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
 							barrelWaterJob->tasks.push_back(Task(MOVE));
 							barrelWaterJob->tasks.push_back(Task(TAKE));
 							barrelWaterJob->tasks.push_back(Task(FORGET));
@@ -200,8 +200,8 @@ void StockManager::Update() {
 					}
 				} else {
 					//First get all the workshops capable of producing this product
-					std::pair<std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator,
-						std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator> 
+					std::pair<std::multimap<ConstructionType, std::weak_ptr<Construction> >::iterator,
+						std::multimap<ConstructionType, std::weak_ptr<Construction> >::iterator> 
 						workshopRange = workshops.equal_range(producers[type]);
 					//By dividing the difference by the amount of workshops we get how many jobs each one should handle
 					int workshopCount = std::distance(workshopRange.first, workshopRange.second);
@@ -209,7 +209,7 @@ void StockManager::Update() {
 						//We clamp this value to 10, no point in queuing up more at a time
 						int jobCount = std::min(std::max(1, difference / workshopCount), 10);
 						//Now we just check that each workshop has 'jobCount' amount of jobs for this product
-						for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki =
+						for (std::multimap<ConstructionType, std::weak_ptr<Construction> >::iterator worki =
 							workshopRange.first; worki != workshopRange.second && difference > 0; ++worki) {
 								int jobsFound = 0;
 								for (int jobi = 0; jobi < (signed int)worki->second.lock()->JobList()->size(); ++jobi) {
@@ -252,7 +252,7 @@ void StockManager::Update() {
 	}
 
 	//We need to check our treefelling jobs for successes and cancellations
-	for (std::list<std::pair<boost::weak_ptr<Job>, boost::weak_ptr<NatureObject> > >::iterator jobi =
+	for (std::list<std::pair<std::weak_ptr<Job>, std::weak_ptr<NatureObject> > >::iterator jobi =
 		treeFellingJobs.begin(); jobi != treeFellingJobs.end();) { //*Phew*
 			if (!jobi->first.lock()) {
 				//Job no longer exists, so remove it from our list
@@ -267,7 +267,7 @@ void StockManager::Update() {
 			}
 	}
 
-	for (std::list<boost::weak_ptr<Job> >::iterator jobi = bogIronJobs.begin(); jobi != bogIronJobs.end();) {
+	for (std::list<std::weak_ptr<Job> >::iterator jobi = bogIronJobs.begin(); jobi != bogIronJobs.end();) {
 		if (!jobi->lock()) {
 			jobi = bogIronJobs.erase(jobi);
 		} else {
@@ -275,7 +275,7 @@ void StockManager::Update() {
 		}
 	}
 
-	for (std::list<boost::weak_ptr<Job> >::iterator jobi = barrelWaterJobs.begin(); jobi != barrelWaterJobs.end();) {
+	for (std::list<std::weak_ptr<Job> >::iterator jobi = barrelWaterJobs.begin(); jobi != barrelWaterJobs.end();) {
 		if (!jobi->lock()) {
 			jobi = barrelWaterJobs.erase(jobi);
 		} else {
@@ -319,13 +319,13 @@ int StockManager::TypeQuantity(ItemType type) { return typeQuantities[type]; }
 
 std::set<ItemType>* StockManager::Producables() { return &producables; }
 
-void StockManager::UpdateWorkshops(boost::weak_ptr<Construction> cons, bool add) {
+void StockManager::UpdateWorkshops(std::weak_ptr<Construction> cons, bool add) {
 	if (add) {
-		workshops.insert(std::pair<ConstructionType, boost::weak_ptr<Construction> >(cons.lock()->Type(), cons));
+		workshops.insert(std::pair<ConstructionType, std::weak_ptr<Construction> >(cons.lock()->Type(), cons));
 	} else {
 		//Because it is being removed, this has been called from a destructor which means
 		//that the construction no longer exists, and the weak_ptr should give !lock
-		for (std::multimap<ConstructionType, boost::weak_ptr<Construction> >::iterator worki = workshops.begin();
+		for (std::multimap<ConstructionType, std::weak_ptr<Construction> >::iterator worki = workshops.begin();
 			worki != workshops.end(); ++worki) {
 				if (!worki->second.lock()) {
 					workshops.erase(worki);
@@ -346,12 +346,12 @@ void StockManager::SetMinimum(ItemType item, int value) {
 	minimums[item] = std::max(0, value);
 }
 
-void StockManager::UpdateTreeDesignations(boost::weak_ptr<NatureObject> nObj, bool add) {
+void StockManager::UpdateTreeDesignations(std::weak_ptr<NatureObject> nObj, bool add) {
 	if (std::shared_ptr<NatureObject> natObj = nObj.lock()) {
 		if (add) {
 			designatedTrees.push_back(natObj);
 		} else {
-			for (std::list<boost::weak_ptr<NatureObject> >::iterator desi = designatedTrees.begin();
+			for (std::list<std::weak_ptr<NatureObject> >::iterator desi = designatedTrees.begin();
 				desi != designatedTrees.end();) {
 					//Now that we're iterating through the designations anyway, might as well
 					//do some upkeeping

@@ -28,7 +28,7 @@ namespace py = boost::python;
 namespace Script { namespace API {
 	#define CONSTRUCTION_ALIVE(var) std::shared_ptr<Construction> var = construction.lock()
 	
-	PyConstruction::PyConstruction(boost::weak_ptr<Construction> construction) : construction(construction) {
+	PyConstruction::PyConstruction(std::weak_ptr<Construction> construction) : construction(construction) {
 	}
 	
 	py::tuple PyConstruction::GetPosition() {

@@ -28,7 +28,7 @@ namespace py = boost::python;
 namespace Script { namespace API {
 	#define ITEM_ALIVE(var) std::shared_ptr<Item> var = item.lock()
 	
-	PyItem::PyItem(boost::weak_ptr<Item> item) : item(item) {
+	PyItem::PyItem(std::weak_ptr<Item> item) : item(item) {
 	}
 	
 	py::tuple PyItem::GetPosition() {

@@ -20,7 +20,7 @@
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"
@@ -29,12 +29,12 @@
 
 class ConstructionDialog : public UIContainer {
 private:
-	boost::weak_ptr<Construction> construct;
+	std::weak_ptr<Construction> construct;
 	class ProductList : public Scrollable {
 	private:
-		boost::weak_ptr<Construction> construct;
+		std::weak_ptr<Construction> construct;
 	public:
-		ProductList(boost::weak_ptr<Construction> nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
+		ProductList(std::weak_ptr<Construction> nconstruct): construct(nconstruct), height(0), productPlacement(std::vector<int>()) {}
 		int height;
 		std::vector<int> productPlacement;
 		void Draw(int x, int y, int scroll, int width, int height, TCODConsole *);
@@ -45,9 +45,9 @@ public:
 	ConstructionDialog(int nwidth, int nheight):
 	UIContainer(std::vector<Drawable *>(), 0, 0, nwidth, nheight) {}
 	static Dialog* constructionInfoDialog;
-	static boost::weak_ptr<Construction> cachedConstruct;
-	static Dialog* ConstructionInfoDialog(boost::weak_ptr<Construction>);
-	void Construct(boost::weak_ptr<Construction>);
+	static std::weak_ptr<Construction> cachedConstruct;
+	static Dialog* ConstructionInfoDialog(std::weak_ptr<Construction>);
+	void Construct(std::weak_ptr<Construction>);
 	void Rename();
 	void Dismantle();
 	static void DrawJob(ItemType, int, int, int, int, bool, TCODConsole *);

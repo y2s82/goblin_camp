@@ -219,11 +219,11 @@ void Camp::RemoveWaterZone(Coordinate from, Coordinate to) {
 void Camp::UpdateWaterJobs() {
 
 	//Remove finished jobs
-	for (std::list<boost::weak_ptr<Job> >::iterator jobi = menialWaterJobs.begin(); jobi != menialWaterJobs.end();) {
+	for (std::list<std::weak_ptr<Job> >::iterator jobi = menialWaterJobs.begin(); jobi != menialWaterJobs.end();) {
 		if (!jobi->lock()) jobi = menialWaterJobs.erase(jobi);
 		else ++jobi;
 	}
-	for (std::list<boost::weak_ptr<Job> >::iterator jobi = expertWaterJobs.begin(); jobi != expertWaterJobs.end();) {
+	for (std::list<std::weak_ptr<Job> >::iterator jobi = expertWaterJobs.begin(); jobi != expertWaterJobs.end();) {
 		if (!jobi->lock()) jobi = expertWaterJobs.erase(jobi);
 		else ++jobi;
 	}

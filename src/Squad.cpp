@@ -32,7 +32,7 @@ Squad::Squad(std::string nameValue, int memberValue, int pri) :
 	generalOrder(NOORDER),
 	orders(std::vector<Order>()),
 	targetCoordinates(std::vector<Coordinate>()),
-	targetEntities(std::vector<boost::weak_ptr<Entity> >()),
+	targetEntities(std::vector<std::weak_ptr<Entity> >()),
 	priority(pri),
 	weapon(-1),
 	armor(-1)
@@ -56,7 +56,7 @@ bool Squad::UpdateMembers() {
 		}
 	} else if ((signed int)members.size() > memberReq) {
 		std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(members.back());
-		if (npc) npc->MemberOf(boost::weak_ptr<Squad>());
+		if (npc) npc->MemberOf(std::weak_ptr<Squad>());
 		members.pop_back();
 	}
 
@@ -75,7 +75,7 @@ Order Squad::GetOrder(int &orderIndex) {
 void Squad::AddOrder(Order newOrder) {
 	orders.push_back(newOrder);
 	targetCoordinates.push_back(Coordinate(-1,-1));
-	targetEntities.push_back(boost::weak_ptr<Entity>());
+	targetEntities.push_back(std::weak_ptr<Entity>());
 }
 
 void Squad::ClearOrders() {
@@ -92,13 +92,13 @@ Coordinate Squad::TargetCoordinate(int index) {
 }
 void Squad::AddTargetCoordinate(Coordinate newTarget) {targetCoordinates.back() = newTarget;}
 
-boost::weak_ptr<Entity> Squad::TargetEntity(int index) {
+std::weak_ptr<Entity> Squad::TargetEntity(int index) {
 	if (index >= 0 && index < static_cast<int>(targetEntities.size())) {
 		return targetEntities[index];
-	} else return boost::weak_ptr<Entity>();
+	} else return std::weak_ptr<Entity>();
 }
 
-void Squad::AddTargetEntity(boost::weak_ptr<Entity> newEntity) {targetEntities.back() = newEntity;}
+void Squad::AddTargetEntity(std::weak_ptr<Entity> newEntity) {targetEntities.back() = newEntity;}
 
 int Squad::MemberCount() { return members.size(); }
 int Squad::MemberLimit() { return memberReq; }
@@ -121,7 +121,7 @@ int Squad::Priority() { return priority; }
 void Squad::RemoveAllMembers() {
 	for (std::list<int>::iterator membi = members.begin(); membi != members.end(); ++membi) {
 		std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*membi);
-		if (npc) npc->MemberOf(boost::weak_ptr<Squad>());
+		if (npc) npc->MemberOf(std::weak_ptr<Squad>());
 	}
 	members.clear();
 }

@@ -108,7 +108,7 @@ void SpawningPool::Update() {
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
 				Random::Generate(UPDATES_PER_SECOND * 4) == 0) {
 					std::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", MED));
-					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
+					corpseDumpJob->tasks.push_back(Task(FIND, Position(), std::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
 					corpseDumpJob->tasks.push_back(Task(TAKE));
 					corpseDumpJob->tasks.push_back(Task(FORGET)); 
@@ -129,7 +129,7 @@ void SpawningPool::Update() {
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
-			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
+			std::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
 			if (std::shared_ptr<Item> actualItem = corpse.lock()) {
 				if (actualItem->IsCategory(Item::StringToItemCategory("corpse"))) {
 					++corpses;

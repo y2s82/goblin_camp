@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 #include <boost/function.hpp>
-#include <boost/weak_ptr.hpp>
+
 
 #include "UI/Menu.hpp"
 #include "UI/SideBar.hpp"
@@ -56,7 +56,7 @@ private:
 	bool placeable;
 	Coordinate a,b;
 	std::vector<Panel*> menuHistory;
-	std::list<boost::weak_ptr<Entity> > underCursor;
+	std::list<std::weak_ptr<Entity> > underCursor;
 	bool drawCursor;
 	bool lbuttonPressed, mbuttonPressed, rbuttonPressed;
 	TCOD_mouse_t oldMouseInput;
@@ -69,12 +69,12 @@ private:
 	int inputStringLimit;
 	std::string extraTooltip;
 
-	boost::weak_ptr<Entity> GetEntity(const Coordinate&);
+	std::weak_ptr<Entity> GetEntity(const Coordinate&);
 	int DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcut);
 	void DrawTopBar(TCODConsole*);
 	void HandleKeyboard();
 	void HandleMouse();
-	boost::weak_ptr<Entity> currentStrobeTarget;
+	std::weak_ptr<Entity> currentStrobeTarget;
 public:
 	static UI* Inst();
 	static void Reset();
@@ -120,7 +120,7 @@ public:
 	void HideMenu();
 	void CloseMenu();
 	bool ShiftPressed();
-	void HandleUnderCursor(const Coordinate&, std::list<boost::weak_ptr<Entity> >*);
+	void HandleUnderCursor(const Coordinate&, std::list<std::weak_ptr<Entity> >*);
 	TCOD_key_t getKey();
 	void SetExtraTooltip(std::string);
 };

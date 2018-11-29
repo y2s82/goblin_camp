@@ -27,7 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 JobManager::JobManager() {
 	for (std::vector<ItemCat>::iterator i = Item::Categories.begin(); i != Item::Categories.end(); ++i) {
-		toolJobs.push_back(std::vector<boost::weak_ptr<Job> >());
+		toolJobs.push_back(std::vector<std::weak_ptr<Job> >());
 	}
 }
 JobManager *JobManager::instance = 0;
@@ -52,7 +52,7 @@ void JobManager::AddJob(std::shared_ptr<Job> newJob) {
 	}
 }
 
-void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {
+void JobManager::CancelJob(std::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {
 	if (std::shared_ptr<Job> job = oldJob.lock()) {
 		job->Assign(-1);
 		job->Paused(true);
@@ -71,7 +71,7 @@ void JobManager::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskRes
 
 		//If the job requires a tool, remove it from the toolJobs list
 		if (job->RequiresTool()) {
-			for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[job->GetRequiredTool()].begin(); 
+			for (std::vector<std::weak_ptr<Job> >::iterator jobi = toolJobs[job->GetRequiredTool()].begin(); 
 				jobi != toolJobs[job->GetRequiredTool()].end(); ++jobi) {
 				if (jobi->lock() == job) {
 					toolJobs[job->GetRequiredTool()].erase(jobi);
@@ -118,8 +118,8 @@ void JobManager::Draw(Coordinate pos, int from, int width, int height, TCODConso
 	console->setDefaultForeground(TCODColor::white);
 }
 
-boost::weak_ptr<Job> JobManager::GetJob(int uid) {
-	boost::weak_ptr<Job> job;
+std::weak_ptr<Job> JobManager::GetJob(int uid) {
+	std::weak_ptr<Job> job;
 
 	for (int i = 0; i < PRIORITY_COUNT; ++i) {
 		for (std::list<std::shared_ptr<Job> >::iterator jobi = availableList[i].begin();
@@ -159,7 +159,7 @@ void JobManager::Update() {
 			} else {
 				if (!(*jobIter)->Parent().lock() && !(*jobIter)->PreReqs()->empty()) {
 					//Job has unfinished prereqs, itsn't removable and is NOT a prereq itself
-					for (std::list<boost::weak_ptr<Job> >::iterator pri = (*jobIter)->PreReqs()->begin(); pri != (*jobIter)->PreReqs()->end(); ++pri) {
+					for (std::list<std::weak_ptr<Job> >::iterator pri = (*jobIter)->PreReqs()->begin(); pri != (*jobIter)->PreReqs()->end(); ++pri) {
 						if (pri->lock()) {
 							pri->lock()->Paused(false);
 						}
@@ -187,7 +187,7 @@ void JobManager::Update() {
 
 	//Check tool jobs, remove them if they no longer point to existing jobs
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-		for (std::vector<boost::weak_ptr<Job> >::iterator jobi = toolJobs[i].begin();
+		for (std::vector<std::weak_ptr<Job> >::iterator jobi = toolJobs[i].begin();
 			jobi != toolJobs[i].end();) {
 				if (!jobi->lock()) jobi = toolJobs[i].erase(jobi);
 				else ++jobi;
@@ -209,7 +209,7 @@ int JobManager::JobAmount() {
 	return count;
 }
 
-boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
+std::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 	int count = 0;
 
 	for (int i = 0; i < PRIORITY_COUNT; ++i) {
@@ -223,10 +223,10 @@ boost::weak_ptr<Job> JobManager::GetJobByListIndex(int index) {
 		if (count++ == index) return (*waitingIter);
 	}
 
-	return boost::weak_ptr<Job>();
+	return std::weak_ptr<Job>();
 }
 
-void JobManager::RemoveJob(boost::weak_ptr<Job> wjob) {
+void JobManager::RemoveJob(std::weak_ptr<Job> wjob) {
 	if (std::shared_ptr<Job> job = wjob.lock()) {
 		for (int i = 0; i < PRIORITY_COUNT; ++i) {
 			for (std::list<std::shared_ptr<Job> >::iterator jobi = availableList[i].begin(); jobi != availableList[i].end(); ++jobi) {
@@ -429,7 +429,7 @@ void JobManager::RemoveJob(Action action, Coordinate location) {
 					(*jobi)->Attempts(0);
 					if ((*jobi)->Assigned() >= 0) {
 						std::shared_ptr<NPC> npc = Game::Inst()->GetNPC((*jobi)->Assigned());
-						boost::weak_ptr<Job> jobToRemove = *jobi;
+						std::weak_ptr<Job> jobToRemove = *jobi;
 						++jobi; //AbortJob will cancel the job and the invalidate the old iterator
 						if (npc) npc->AbortJob(jobToRemove);
 					} else {

@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 
 #include <boost/thread/shared_mutex.hpp>
-#include <boost/weak_ptr.hpp>
+
 
 #include "data/Serialization.hpp"
 #include "Job.hpp"
@@ -49,7 +49,7 @@ class Faction {
 
 	static std::map<std::string, int> factionNames;
 	
-	std::list<boost::weak_ptr<NPC> > members;
+	std::list<std::weak_ptr<NPC> > members;
 	std::list<int> membersAsUids;
 	std::map<Coordinate, bool> trapVisible;
 	std::set<FactionType> friends;
@@ -59,7 +59,7 @@ class Faction {
 
 	boost::shared_mutex trapVisibleMutex;
 
-	std::vector<boost::weak_ptr<Job> > jobs;
+	std::vector<std::weak_ptr<Job> > jobs;
 	std::vector<FactionGoal> goals;
 	std::vector<int> goalSpecifiers;
 	int currentGoal;
@@ -72,8 +72,8 @@ class Faction {
 	void TranslateFriends();
 public:
 	Faction(std::string = "Noname faction", int = -1);
-	void AddMember(boost::weak_ptr<NPC>);
-	void RemoveMember(boost::weak_ptr<NPC>);
+	void AddMember(std::weak_ptr<NPC>);
+	void RemoveMember(std::weak_ptr<NPC>);
 	void TrapDiscovered(Coordinate, bool propagate=true);
 	bool IsTrapVisible(Coordinate);
 	void TrapSet(Coordinate, bool visible);
@@ -88,7 +88,7 @@ public:
 	void Reset();
 	void Update();
 	bool FindJob(std::shared_ptr<NPC>);
-	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
+	void CancelJob(std::weak_ptr<Job>, std::string, TaskResult);
 
 	void MakeFriendsWith(FactionType);
 	bool IsFriendsWith(FactionType);

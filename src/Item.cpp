@@ -42,7 +42,7 @@ boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::uno
 std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::GoodEffectAdders = std::multimap<StatusEffectType, ItemType>();
 
-Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) :
+Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<std::weak_ptr<Item> > components) :
 	Entity(),
 
 	type(typeval),
@@ -50,7 +50,7 @@ Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<
 	decayCounter(-1),
 
 	attemptedStore(false),
-	container(boost::weak_ptr<Item>()),
+	container(std::weak_ptr<Item>()),
 	internal(false)
 {
 	SetFaction(owner);
@@ -160,7 +160,7 @@ void Item::Reserve(bool value) {
 	}
 }
 
-void Item::PutInContainer(boost::weak_ptr<Item> con) {
+void Item::PutInContainer(std::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
 
@@ -171,7 +171,7 @@ void Item::PutInContainer(boost::weak_ptr<Item> con) {
 		attemptedStore = true;
 	}
 }
-boost::weak_ptr<Item> Item::ContainedIn() {return container;}
+std::weak_ptr<Item> Item::ContainedIn() {return container;}
 
 int Item::GetGraphic() {return graphic;}
 
@@ -628,7 +628,7 @@ void Item::Impact(int speedChange) {
 	if (speedChange >= 10 && Random::Generate(9) < 7) DecreaseCondition(); //A sudden impact will damage the item
 	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
 		//The item has impacted and broken. Create debris owned by no one
-		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
+		std::vector<std::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
 		Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
 		//Game::Update removes all condition==0 items in the stopped items list, which is where this item will be
 	}
@@ -781,7 +781,7 @@ void OrganicItem::load(InputArchive& ar, const unsigned int version) {
 
 WaterItem::WaterItem(Coordinate pos, ItemType typeVal) : OrganicItem(pos, typeVal) {}
 
-void WaterItem::PutInContainer(boost::weak_ptr<Item> con) {
+void WaterItem::PutInContainer(std::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
 
