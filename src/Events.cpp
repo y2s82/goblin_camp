@@ -63,7 +63,7 @@ void Events::Update(bool safe) {
 	}
 
 	//Remove immigrants that have left/died
-	for (std::vector<boost::weak_ptr<NPC> >::iterator immi = existingImmigrants.begin(); immi != existingImmigrants.end();) {
+	for (std::vector<std::weak_ptr<NPC> >::iterator immi = existingImmigrants.begin(); immi != existingImmigrants.end();) {
 		if (!immi->lock()) immi = existingImmigrants.erase(immi);
 		else ++immi;
 	}

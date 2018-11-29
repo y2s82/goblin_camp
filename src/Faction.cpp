@@ -35,7 +35,7 @@ std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<std::shared_ptr<Faction> > Faction::factions = std::vector<std::shared_ptr<Faction> >();
 
 Faction::Faction(std::string vname, int vindex) : 
-members(std::list<boost::weak_ptr<NPC> >()), 
+members(std::list<std::weak_ptr<NPC> >()), 
 	trapVisible(std::map<Coordinate,bool>()),
 	name(vname),
 	index(vindex),
@@ -48,7 +48,7 @@ members(std::list<boost::weak_ptr<NPC> >()),
 {
 }
 
-void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
+void Faction::AddMember(std::weak_ptr<NPC> newMember) {
 	members.push_back(newMember);
 	if (!active) {
 		active = true;
@@ -56,9 +56,9 @@ void Faction::AddMember(boost::weak_ptr<NPC> newMember) {
 	}
 }
 
-void Faction::RemoveMember(boost::weak_ptr<NPC> member) {
+void Faction::RemoveMember(std::weak_ptr<NPC> member) {
 	bool memberFound = false;
-	for (std::list<boost::weak_ptr<NPC> >::iterator membi = members.begin(); membi != members.end()
+	for (std::list<std::weak_ptr<NPC> >::iterator membi = members.begin(); membi != members.end()
 		&& !memberFound;) {
 		if (membi->lock()) {
 			if (member.lock() && member.lock() == membi->lock()) {
@@ -220,7 +220,7 @@ bool Faction::FindJob(std::shared_ptr<NPC> npc) {
 		case FACTIONSTEAL:
 			if (currentGoal < static_cast<int>(goalSpecifiers.size()) && goalSpecifiers[currentGoal] >= 0) {
 				std::shared_ptr<Job> stealJob(new Job("Steal "+Item::ItemCategoryToString(goalSpecifiers[currentGoal])));
-				boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(goalSpecifiers[currentGoal], npc->Position());
+				std::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(goalSpecifiers[currentGoal], npc->Position());
 				if (item.lock()) {
 					if (GenerateStealJob(stealJob, item.lock())) {
 						npc->StartJob(stealJob);
@@ -267,7 +267,7 @@ bool Faction::FindJob(std::shared_ptr<NPC> npc) {
 	return false;
 }
 
-void Faction::CancelJob(boost::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {}
+void Faction::CancelJob(std::weak_ptr<Job> oldJob, std::string msg, TaskResult result) {}
 
 void Faction::MakeFriendsWith(FactionType otherFaction) {
 	friends.insert(otherFaction);
@@ -299,7 +299,7 @@ void Faction::TranslateMembers() {
 	for (size_t i = 0; i < factions.size(); ++i) {
 		for (std::list<int>::iterator uidi = factions[i]->membersAsUids.begin(); 
 			uidi != factions[i]->membersAsUids.end(); ++uidi) {
-				boost::weak_ptr<NPC> npc = Game::Inst()->GetNPC(*uidi);
+				std::weak_ptr<NPC> npc = Game::Inst()->GetNPC(*uidi);
 				if (npc.lock()) factions[i]->AddMember(npc);
 		}
 	}
@@ -432,7 +432,7 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 
 	std::size_t memberCount = members.size();
 	ar & memberCount;
-	for (std::list<boost::weak_ptr<NPC> >::const_iterator membi = members.begin(); membi != members.end(); ++membi) {
+	for (std::list<std::weak_ptr<NPC> >::const_iterator membi = members.begin(); membi != members.end(); ++membi) {
 		int uid = -1;
 		if (membi->lock()) {
 			uid = membi->lock()->Uid();
@@ -446,7 +446,7 @@ void Faction::save(OutputArchive& ar, const unsigned int version) const {
 
 void Faction::load(InputArchive& ar, const unsigned int version) {
 	if (version == 0) {
-		std::list< boost::weak_ptr<NPC> > unusedList;
+		std::list< std::weak_ptr<NPC> > unusedList;
 		ar & unusedList;
 	}
 	ar & trapVisible;

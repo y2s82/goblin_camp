@@ -31,8 +31,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
-boost::weak_ptr<Construction> ConstructionDialog::cachedConstruct = boost::weak_ptr<Construction>();
-Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction> wcons) {
+std::weak_ptr<Construction> ConstructionDialog::cachedConstruct = std::weak_ptr<Construction>();
+Dialog* ConstructionDialog::ConstructionInfoDialog(std::weak_ptr<Construction> wcons) {
 	if (std::shared_ptr<Construction> cons = wcons.lock()) {
 		if (constructionInfoDialog && (!cachedConstruct.lock() || cons != cachedConstruct.lock())) {
 			delete constructionInfoDialog;
@@ -79,7 +79,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 	return constructionInfoDialog;
 }
 
-void ConstructionDialog::Construct(boost::weak_ptr<Construction> cons) { construct = cons; }
+void ConstructionDialog::Construct(std::weak_ptr<Construction> cons) { construct = cons; }
 
 void ConstructionDialog::Rename() {
 	if (construct.lock()) {

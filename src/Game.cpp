@@ -130,15 +130,15 @@ bool Game::CheckPlacement(Coordinate target, Coordinate size, std::set<TileType>
 
 int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 	//Check if the required materials exist before creating the build job
-	std::list<boost::weak_ptr<Item> > componentList;
+	std::list<std::weak_ptr<Item> > componentList;
 	for (std::list<ItemCategory>::iterator mati = Construction::Presets[construct].materials.begin();
 		mati != Construction::Presets[construct].materials.end(); ++mati) {
-			boost::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target, EMPTY);
+			std::weak_ptr<Item> material = Game::Inst()->FindItemByCategoryFromStockpiles(*mati, target, EMPTY);
 			if (std::shared_ptr<Item> item = material.lock()) {
 				item->Reserve(true);
 				componentList.push_back(item);
 			} else {
-				for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
+				for (std::list<std::weak_ptr<Item> >::iterator compi = componentList.begin();
 					compi != componentList.end(); ++compi) {
 						compi->lock()->Reserve(false);
 				}
@@ -156,7 +156,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		--Construction::AllowedAmount[construct];
 	}
 
-	for (std::list<boost::weak_ptr<Item> >::iterator compi = componentList.begin();
+	for (std::list<std::weak_ptr<Item> >::iterator compi = componentList.begin();
 		compi != componentList.end(); ++compi) {
 			compi->lock()->Reserve(false);
 	}
@@ -198,7 +198,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 		pickupJob->DisregardTerritory();
 		buildJob->PreReqs()->push_back(pickupJob);
 
-		pickupJob->tasks.push_back(Task(FIND, target, boost::weak_ptr<Entity>(), *materialIter, EMPTY));
+		pickupJob->tasks.push_back(Task(FIND, target, std::weak_ptr<Entity>(), *materialIter, EMPTY));
 		pickupJob->tasks.push_back(Task(MOVE));
 		pickupJob->tasks.push_back(Task(TAKE));
 		pickupJob->tasks.push_back(Task(MOVE, newCons->Storage().lock()->Position(), newCons));
@@ -254,7 +254,7 @@ ContinuePlaceStockpile:
 }
 
 //Returns undefined if not found
-Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent, int faction) {
+Coordinate Game::FindClosestAdjacent(Coordinate pos, std::weak_ptr<Entity> ent, int faction) {
 	Coordinate closest = undefined;
 	int leastDistance = std::numeric_limits<int>::max();
 	if (ent.lock()) {
@@ -285,7 +285,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, boost::weak_ptr<Entity> ent
 
 //Returns true/false depending on if the given position is adjacent to the entity
 //Takes into consideration if the entity is a construction, and thus may be larger than just one tile
-bool Game::Adjacent(Coordinate pos, boost::weak_ptr<Entity> ent) {
+bool Game::Adjacent(Coordinate pos, std::weak_ptr<Entity> ent) {
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
 			std::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
@@ -385,26 +385,26 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 			std::set<ItemCategory> categories = Item::Presets[itemType].categories;
 			if (categories.find(Item::StringToItemCategory("weapon")) != categories.end()
 				&& !npc->Wielding().lock()) {
-					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<std::weak_ptr<Item> >(), npc->inventory);
 					std::shared_ptr<Item> item = itemList[itemUid];
 					npc->mainHand = item;
 			} else if (categories.find(Item::StringToItemCategory("armor")) != categories.end()
 				&& !npc->Wearing().lock()) {
-					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<std::weak_ptr<Item> >(), npc->inventory);
 					std::shared_ptr<Item> item = itemList[itemUid];
 					npc->armor = item;
 			} else if (categories.find(Item::StringToItemCategory("quiver")) != categories.end()
 				&& !npc->quiver.lock()) {
-					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<std::weak_ptr<Item> >(), npc->inventory);
 					std::shared_ptr<Item> item = itemList[itemUid];
 					npc->quiver = boost::static_pointer_cast<Container>(item); //Quivers = containers
 			} else if (categories.find(Item::StringToItemCategory("ammunition")) != categories.end()
 				&& npc->quiver.lock() && npc->quiver.lock()->empty()) {
 					for (int i = 0; i < 20 && !npc->quiver.lock()->Full(); ++i) {
-						CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->quiver.lock());
+						CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<std::weak_ptr<Item> >(), npc->quiver.lock());
 					}
 			} else {
-				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<boost::weak_ptr<Item> >(), npc->inventory);
+				int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<std::weak_ptr<Item> >(), npc->inventory);
 				static_cast<void>(itemUid);
 			}
 		}
@@ -626,7 +626,7 @@ void Game::ResetRenderer() {
 	renderer->SetTranslucentUI(Config::GetCVar<bool>("translucentUI"));
 }
 
-void Game::RemoveConstruction(boost::weak_ptr<Construction> cons) {
+void Game::RemoveConstruction(std::weak_ptr<Construction> cons) {
 	if (std::shared_ptr<Construction> construct = cons.lock()) {
 		if (Construction::Presets[construct->type].dynamic) {
 			Game::Inst()->dynamicConstructionList.erase(construct->Uid());
@@ -654,16 +654,16 @@ void Game::DismantleConstruction(Coordinate a, Coordinate b) {
 	}
 }
 
-boost::weak_ptr<Construction> Game::GetConstruction(int uid) {
+std::weak_ptr<Construction> Game::GetConstruction(int uid) {
 	if (staticConstructionList.find(uid) != staticConstructionList.end()) 
 		return staticConstructionList[uid];
 	else if (dynamicConstructionList.find(uid) != dynamicConstructionList.end())
 		return dynamicConstructionList[uid];
-	return boost::weak_ptr<Construction>();
+	return std::weak_ptr<Construction>();
 }
 
 int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction, 
-	std::vector<boost::weak_ptr<Item> > comps, std::shared_ptr<Container> container) {
+	std::vector<std::weak_ptr<Item> > comps, std::shared_ptr<Container> container) {
 		if (type >= 0 && type < static_cast<signed int>(Item::Presets.size())) {
 			std::shared_ptr<Item> newItem;
 			if (Item::Presets[type].organic) {
@@ -718,7 +718,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 		return -1;
 }
 
-void Game::RemoveItem(boost::weak_ptr<Item> witem) {
+void Game::RemoveItem(std::weak_ptr<Item> witem) {
 	if (std::shared_ptr<Item> item = witem.lock()) {
 		Map::Inst()->ItemList(item->Position())->erase(item->uid);
 		if (freeItems.find(witem) != freeItems.end()) freeItems.erase(witem);
@@ -731,12 +731,12 @@ void Game::RemoveItem(boost::weak_ptr<Item> witem) {
 	}
 }
 
-boost::weak_ptr<Item> Game::GetItem(int uid) {
+std::weak_ptr<Item> Game::GetItem(int uid) {
 	if (itemList.find(uid) != itemList.end()) return itemList[uid];
-	return boost::weak_ptr<Item>();
+	return std::weak_ptr<Item>();
 }
 
-void Game::ItemContained(boost::weak_ptr<Item> item, bool con) {
+void Game::ItemContained(std::weak_ptr<Item> item, bool con) {
 	if (!con) {
 		freeItems.insert(item);
 		Map::Inst()->ItemList(item.lock()->Position())->insert(item.lock()->Uid());
@@ -755,10 +755,10 @@ void Game::CreateWater(Coordinate pos, int amount, int time) {
 	//If there is filth here mix it with the water
 	std::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos).lock();
 
-	boost::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos));
+	std::weak_ptr<WaterNode> water(Map::Inst()->GetWater(pos));
 	if (!water.lock()) {
 		std::shared_ptr<WaterNode> newWater(new WaterNode(pos, amount, time));
-		waterList.push_back(boost::weak_ptr<WaterNode>(newWater));
+		waterList.push_back(std::weak_ptr<WaterNode>(newWater));
 		Map::Inst()->SetWater(pos, newWater);
 		if (filth) newWater->AddFilth(filth->Depth());
 	} else {
@@ -772,7 +772,7 @@ void Game::CreateWater(Coordinate pos, int amount, int time) {
 void Game::CreateWaterFromNode(std::shared_ptr<WaterNode> water) {
 	if (water) {
 		std::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(water->Position()).lock();
-		boost::weak_ptr<WaterNode> existingWater(Map::Inst()->GetWater(water->Position()));
+		std::weak_ptr<WaterNode> existingWater(Map::Inst()->GetWater(water->Position()));
 		if (!existingWater.lock()) {
 			waterList.push_back(water);
 			Map::Inst()->SetWater(water->Position(), water);
@@ -793,12 +793,12 @@ int Game::DistanceNPCToCoordinate(int uid, Coordinate pos) {
 
 // TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
 // first.
-boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
+std::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category, Coordinate target, int flags, int value) {
 	int nearestDistance = std::numeric_limits<int>::max();
-	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
+	std::weak_ptr<Item> nearest = std::weak_ptr<Item>();
 	for (std::map<int, std::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
+			std::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				int distance = (flags & MOSTDECAYED ? item.lock()->GetDecay() : Distance(item.lock()->Position(), target));
 				if(distance < nearestDistance) {
@@ -813,12 +813,12 @@ boost::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory catego
 
 // TODO this currently checks every stockpile.  We could maintain some data structure that allowed us to check the closest stockpile(s)
 // first.
-boost::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
+std::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate target, int flags, int value) {
 	int nearestDistance = std::numeric_limits<int>::max();
-	boost::weak_ptr<Item> nearest = boost::weak_ptr<Item>();
+	std::weak_ptr<Item> nearest = std::weak_ptr<Item>();
 	for (std::map<int, std::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			boost::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
+			std::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				int distance = (flags & MOSTDECAYED ? item.lock()->GetDecay() : Distance(item.lock()->Position(), target));
 				if(distance < nearestDistance) {
@@ -866,11 +866,11 @@ Coordinate Game::FindFilth(Coordinate pos) {
 	}
 
 	//If we still haven't found filth just choose the closest filth out of 30 at random
-	std::vector<boost::weak_ptr<FilthNode> > filthArray(filthList.begin(), filthList.end());
+	std::vector<std::weak_ptr<FilthNode> > filthArray(filthList.begin(), filthList.end());
 	Coordinate closest = undefined;
 	int closest_distance = std::numeric_limits<int>::max();
 	for (size_t i = 0; i < std::min(static_cast<size_t>(30), filthArray.size()); ++i) {
-		boost::weak_ptr<FilthNode> filth = Random::ChooseElement(filthArray);
+		std::weak_ptr<FilthNode> filth = Random::ChooseElement(filthArray);
 		std::shared_ptr<FilthNode> candidate = filth.lock();
 		if (candidate) {
 			int distance = Distance(pos, candidate->Position());
@@ -887,7 +887,7 @@ Coordinate Game::FindFilth(Coordinate pos) {
 Coordinate Game::FindWater(Coordinate pos) {
 	Coordinate closest = undefined;
 	int closestDistance = std::numeric_limits<int>::max();
-	for (std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
+	for (std::list<std::weak_ptr<WaterNode> >::iterator wati = waterList.begin(); wati != waterList.end(); ++wati) {
 		if (std::shared_ptr<WaterNode> water = wati->lock()) {
 			if (water->IsCoastal() && water->Depth() > DRINKABLE_WATER_DEPTH) {
 				int waterDistance = Distance(water->Position(), pos);
@@ -988,8 +988,8 @@ void Game::Update() {
 	//expected behaviour of water.
 	if (waterList.size() > 0) {
 		//We have to use two iterators, because wati may be invalidated if the water evaporates and is removed
-		std::list<boost::weak_ptr<WaterNode> >::iterator wati = waterList.end();
-		std::list<boost::weak_ptr<WaterNode> >::iterator nextwati = --wati;
+		std::list<std::weak_ptr<WaterNode> >::iterator wati = waterList.end();
+		std::list<std::weak_ptr<WaterNode> >::iterator nextwati = --wati;
 		while (std::distance(wati, waterList.end()) < 10) {
 			--nextwati;
 			if (wati == waterList.end()) break;
@@ -998,7 +998,7 @@ void Game::Update() {
 		}
 	}
 	
-	std::list<boost::weak_ptr<NPC> > npcsWaitingForRemoval;
+	std::list<std::weak_ptr<NPC> > npcsWaitingForRemoval;
 	for (std::map<int,std::shared_ptr<NPC> >::iterator npci = npcList.begin(); npci != npcList.end(); ++npci) {
 		npci->second->Update();
 		if (!npci->second->Dead()) npci->second->Think();
@@ -1006,7 +1006,7 @@ void Game::Update() {
 	}
 	JobManager::Inst()->AssignJobs();
 	
-	for (std::list<boost::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
+	for (std::list<std::weak_ptr<NPC> >::iterator remNpci = npcsWaitingForRemoval.begin(); remNpci != npcsWaitingForRemoval.end(); ++remNpci) {
 		RemoveNPC(*remNpci);
 	}
 	
@@ -1014,7 +1014,7 @@ void Game::Update() {
 		consi->second->Update();
 	}
 
-	for (std::list<boost::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
+	for (std::list<std::weak_ptr<Item> >::iterator itemi = stoppedItems.begin(); itemi != stoppedItems.end();) {
 		flyingItems.erase(*itemi);
 		if (std::shared_ptr<Item> item = itemi->lock()) {
 			if (item->condition == 0) { //The impact has destroyed the item
@@ -1024,7 +1024,7 @@ void Game::Update() {
 		itemi = stoppedItems.erase(itemi);
 	}
 
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = flyingItems.begin(); itemi != flyingItems.end(); ++itemi) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = flyingItems.begin(); itemi != flyingItems.end(); ++itemi) {
 		if (std::shared_ptr<Item> item = itemi->lock()) item->UpdateVelocity();
 	}
 
@@ -1034,7 +1034,7 @@ void Game::Update() {
 	if (Random::Generate(UPDATES_PER_SECOND * 5 - 1) == 0 || refreshStockpiles) {
 		refreshStockpiles = false;
 		if (freeItems.size() < 100) {
-			for (std::set<boost::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
+			for (std::set<std::weak_ptr<Item> >::iterator itemi = freeItems.begin(); itemi != freeItems.end(); ++itemi) {
 				if (std::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
@@ -1042,7 +1042,7 @@ void Game::Update() {
 			}
 		} else {
 			for (size_t i = 0; i < std::max(static_cast<size_t>(100), freeItems.size()/4); ++i) {
-				std::set<boost::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
+				std::set<std::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (std::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
@@ -1086,7 +1086,7 @@ void Game::Update() {
 		MessageBox::ShowMessageBox("Do you wish to keep watching?", NULL, "Keep watching", boost::bind(&Game::GameOver, Game::Inst()), "Quit");
 	}
 
-	for (std::list<boost::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
+	for (std::list<std::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
 		if (std::shared_ptr<FireNode> fire = fireit->lock()) {
 			if (Random::GenerateBool()) fire->Update();
 			if (fire->GetHeat() <= 0) {
@@ -1112,7 +1112,7 @@ void Game::Update() {
 	}
 }
 
-std::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
+std::shared_ptr<Job> Game::StockpileItem(std::weak_ptr<Item> witem, bool returnJob, bool disregardTerritory, bool reserveItem) {
 	if (std::shared_ptr<Item> item = witem.lock()) {
 		if ((!reserveItem || !item->Reserved()) && item->GetFaction() == PLAYERFACTION) {
 			std::shared_ptr<Stockpile> nearest = std::shared_ptr<Stockpile>();
@@ -1172,7 +1172,7 @@ std::shared_ptr<Job> Game::StockpileItem(boost::weak_ptr<Item> witem, bool retur
 				stockJob->Attempts(1);
 				stockJob->ConnectToEntity(nearest);
 				Coordinate target = Coordinate(-1,-1);
-				boost::weak_ptr<Item> container;
+				std::weak_ptr<Item> container;
 
 				//Check if the item can be contained, and if so if any containers are in the stockpile
 				if (Item::Presets[item->Type()].fitsin >= 0) {
@@ -1507,7 +1507,7 @@ void Game::HarvestWildPlant(Coordinate a, Coordinate b) {
 }
 
 
-void Game::RemoveNatureObject(boost::weak_ptr<NatureObject> natObj) {
+void Game::RemoveNatureObject(std::weak_ptr<NatureObject> natObj) {
 	if (natObj.lock()) {
 		Map::Inst()->SetNatureObject(natObj.lock()->Position(), -1);
 		natureList.erase(natObj.lock()->Uid());
@@ -1541,7 +1541,7 @@ void Game::Undesignate(Coordinate a, Coordinate b) {
 			Coordinate p(x,y);
 			int natUid = Map::Inst()->GetNatureObject(p);
 			if (natUid >= 0) {
-				boost::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
+				std::weak_ptr<NatureObject> natObj = Game::Inst()->natureList[natUid];
 				if (natObj.lock() && natObj.lock()->Tree() && natObj.lock()->Marked()) {
 					//TODO: Implement proper map marker system and change this to use that
 					natObj.lock()->Unmark();
@@ -1619,7 +1619,7 @@ void Game::DecayItems() {
 		}
 	}
 
-	for (std::list<boost::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end();) {
+	for (std::list<std::weak_ptr<BloodNode> >::iterator bli = bloodList.begin(); bli != bloodList.end();) {
 		if (std::shared_ptr<BloodNode> blood = bli->lock()) {
 			blood->Depth(blood->Depth()-50);
 			if (blood->Depth() <= 0) {
@@ -1649,11 +1649,11 @@ void Game::CreateFilth(Coordinate pos, int amount) {
 				return;
 			}
 
-			boost::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos));
+			std::weak_ptr<FilthNode> filth(Map::Inst()->GetFilth(pos));
 			if (!filth.lock()) { //No existing filth node so create one
 				std::shared_ptr<FilthNode> newFilth(new FilthNode(pos, std::min(5, amount)));
 				amount -= 5;
-				filthList.push_back(boost::weak_ptr<FilthNode>(newFilth));
+				filthList.push_back(std::weak_ptr<FilthNode>(newFilth));
 				Map::Inst()->SetFilth(pos, newFilth);
 			} else {
 				int originalDepth = filth.lock()->Depth();
@@ -1754,11 +1754,11 @@ void Game::CreateBlood(Coordinate pos, int amount) {
 		while (amount > 0 && loops < 1000) {
 			++loops;
 
-			boost::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos));
+			std::weak_ptr<BloodNode> blood(Map::Inst()->GetBlood(pos));
 			if (!blood.lock()) { //No existing BloodNode so create one
 				std::shared_ptr<BloodNode> newBlood(new BloodNode(pos, std::min(255, amount)));
 				amount -= 255;
-				bloodList.push_back(boost::weak_ptr<BloodNode>(newBlood));
+				bloodList.push_back(std::weak_ptr<BloodNode>(newBlood));
 				Map::Inst()->SetBlood(pos, newBlood);
 			} else {
 				int originalDepth = blood.lock()->Depth();
@@ -1858,7 +1858,7 @@ bool Game::Paused() { return paused; }
 int Game::CharHeight() const { return charHeight; }
 int Game::CharWidth() const { return charWidth; }
 
-void Game::RemoveNPC(boost::weak_ptr<NPC> wnpc) {
+void Game::RemoveNPC(std::weak_ptr<NPC> wnpc) {
 	if (std::shared_ptr<NPC> npc = wnpc.lock()) {
 		npcList.erase(npc->uid);
 		int faction = npc->GetFaction();
@@ -1925,10 +1925,10 @@ bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
 void Game::Running(bool value) { running = value; }
 bool Game::Running() { return running; }
 
-boost::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, Coordinate closeTo) {
+std::weak_ptr<Construction> Game::FindConstructionByTag(ConstructionTag tag, Coordinate closeTo) {
 	
 	int distance = -1;
-	boost::weak_ptr<Construction> foundConstruct;
+	std::weak_ptr<Construction> foundConstruct;
 
 	for (std::map<int, std::shared_ptr<Construction> >::iterator stati = staticConstructionList.begin();
 		stati != staticConstructionList.end(); ++stati) {
@@ -2209,7 +2209,7 @@ void Game::GatherItems(Coordinate a, Coordinate b) {
 void Game::RemoveFilth(Coordinate pos) {
 	std::shared_ptr<FilthNode> filth = Map::Inst()->GetFilth(pos).lock();
 	if (filth) {
-		for (std::list<boost::weak_ptr<FilthNode> >::iterator filthi = filthList.begin(); filthi != filthList.end(); ++filthi) {
+		for (std::list<std::weak_ptr<FilthNode> >::iterator filthi = filthList.begin(); filthi != filthList.end(); ++filthi) {
 			if (filthi->lock() == filth) {
 				filthList.erase(filthi);
 				break;
@@ -2223,7 +2223,7 @@ void Game::RemoveWater(Coordinate pos, bool removeFromList) {
 	std::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water) {
 		if (removeFromList) {
-			for (std::list<boost::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
+			for (std::list<std::weak_ptr<WaterNode> >::iterator wateri = waterList.begin(); wateri != waterList.end(); ++wateri) {
 				if (wateri->lock() == water) {
 					waterList.erase(wateri);
 					break;
@@ -2275,10 +2275,10 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
 	}
 
-	boost::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos));
+	std::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos));
 	if (!fire.lock()) { //No existing firenode
 		std::shared_ptr<FireNode> newFire(new FireNode(pos, temperature));
-		fireList.push_back(boost::weak_ptr<FireNode>(newFire));
+		fireList.push_back(std::weak_ptr<FireNode>(newFire));
 		Map::Inst()->SetFire(pos, newFire);
 	} else {
 		std::shared_ptr<FireNode> existingFire = fire.lock();
@@ -2398,7 +2398,7 @@ void Game::FillDitch(Coordinate a, Coordinate b) {
 					ditchFillJob->Attempts(2);
 					ditchFillJob->SetRequiredTool(Item::StringToItemCategory("shovel"));
 					ditchFillJob->MarkGround(p);
-					ditchFillJob->tasks.push_back(Task(FIND, p, boost::weak_ptr<Entity>(), Item::StringToItemCategory("earth")));
+					ditchFillJob->tasks.push_back(Task(FIND, p, std::weak_ptr<Entity>(), Item::StringToItemCategory("earth")));
 					ditchFillJob->tasks.push_back(Task(MOVE));
 					ditchFillJob->tasks.push_back(Task(TAKE));
 					ditchFillJob->tasks.push_back(Task(FORGET));
@@ -2423,7 +2423,7 @@ std::shared_ptr<NPC> Game::GetNPC(int uid) const {
 	return std::shared_ptr<NPC>();
 }
 
-boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
+std::weak_ptr<Construction> Game::GetRandomConstruction() const {
 	if (dynamicConstructionList.empty() || 
 		(Random::GenerateBool() && !staticConstructionList.empty())) {
 		int index = Random::Generate(staticConstructionList.size()-1);
@@ -2438,7 +2438,7 @@ boost::weak_ptr<Construction> Game::GetRandomConstruction() const {
 				if (index-- == 0) return consi->second;
 		}
 	}
-	return boost::weak_ptr<Construction>();
+	return std::weak_ptr<Construction>();
 }
 
 namespace {

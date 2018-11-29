@@ -32,7 +32,7 @@ private:
 	std::vector<int> peacefulAnimals;
 	std::vector<int> migratingAnimals;
 	std::vector<int> immigrants;
-	std::vector<boost::weak_ptr<NPC> > existingImmigrants;
+	std::vector<std::weak_ptr<NPC> > existingImmigrants;
 public:
 	Events(Map*);
 	void Update(bool safe = false);

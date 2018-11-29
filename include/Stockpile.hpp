@@ -52,8 +52,8 @@ public:
 	virtual ~Stockpile();
 	int Build();
 	virtual void Draw(Coordinate, TCODConsole*);
-	boost::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0, int value=0);
-	boost::weak_ptr<Item> FindItemByType(ItemType, int flags=0, int value=0);
+	std::weak_ptr<Item> FindItemByCategory(ItemCategory, int flags=0, int value=0);
+	std::weak_ptr<Item> FindItemByType(ItemType, int flags=0, int value=0);
 	int Symbol();
 	void Symbol(int);
 	int Expand(Coordinate,Coordinate);
@@ -62,12 +62,12 @@ public:
 	virtual bool Full(ItemType = -1);
 	virtual Coordinate FreePosition();
 	void ReserveSpot(Coordinate, bool, ItemType);
-	boost::weak_ptr<Container> Storage(Coordinate);
+	std::weak_ptr<Container> Storage(Coordinate);
 	void SwitchAllowed(ItemCategory, bool childrenAlso = true, bool countParentsOnly = false);
 	void SetAllAllowed(bool);
 	virtual void GetTooltip(int x, int y, Tooltip *tooltip);
-	void ItemAdded(boost::weak_ptr<Item>);
-	void ItemRemoved(boost::weak_ptr<Item>);
+	void ItemAdded(std::weak_ptr<Item>);
+	void ItemRemoved(std::weak_ptr<Item>);
 	Coordinate Center();
 	void TranslateInternalContainerListeners();
 	void AdjustLimit(ItemCategory, int);

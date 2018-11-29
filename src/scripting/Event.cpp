@@ -48,19 +48,19 @@ namespace Script { namespace Event {
 		Script::InvokeListeners("onGameLoaded", "(s)", filename.c_str());
 	}
 	
-	void BuildingCreated(boost::weak_ptr<Construction> cons, int x, int y) {
+	void BuildingCreated(std::weak_ptr<Construction> cons, int x, int y) {
 		Script::API::PyConstruction pyconstruction(cons);
 		py::object obj(boost::ref(pyconstruction));
 		Script::InvokeListeners("onBuildingCreated", "(Oii)", obj.ptr(), x, y);
 	}
 	
-	void BuildingDestroyed(boost::weak_ptr<Construction> cons, int x, int y) {
+	void BuildingDestroyed(std::weak_ptr<Construction> cons, int x, int y) {
 		Script::API::PyConstruction pyconstruction(cons);
 		py::object obj(boost::ref(pyconstruction));
 		Script::InvokeListeners("onBuildingDestroyed", "(Oii)", obj.ptr(), x, y);
 	}
 	
-	void ItemCreated(boost::weak_ptr<Item> item, int x, int y) {
+	void ItemCreated(std::weak_ptr<Item> item, int x, int y) {
 		Script::API::PyItem pyitem(item);
 		
 		py::object obj(boost::ref(pyitem));

@@ -89,10 +89,10 @@ NPC::NPC(Coordinate pos, boost::function<bool(std::shared_ptr<NPC>)> findJob,
 	jobBegun(false),
 	expert(false),
 
-	carried(boost::weak_ptr<Item>()),
-	mainHand(boost::weak_ptr<Item>()),
-	offHand(boost::weak_ptr<Item>()),
-	armor(boost::weak_ptr<Item>()),
+	carried(std::weak_ptr<Item>()),
+	mainHand(std::weak_ptr<Item>()),
+	offHand(std::weak_ptr<Item>()),
+	armor(std::weak_ptr<Item>()),
 
 	thirst(0), hunger(0), weariness(0),
 	thinkSpeed(UPDATES_PER_SECOND / 5), //Think 5 times a second
@@ -100,7 +100,7 @@ NPC::NPC(Coordinate pos, boost::function<bool(std::shared_ptr<NPC>)> findJob,
 	statusEffectIterator(statusEffects.end()),
 	statusGraphicCounter(0),
 	health(100), maxHealth(100),
-	foundItem(boost::weak_ptr<Item>()),
+	foundItem(std::weak_ptr<Item>()),
 	inventory(std::shared_ptr<Container>(new Container(pos, 0, 30, -1))),
 
 	needsNutrition(false),
@@ -114,9 +114,9 @@ NPC::NPC(Coordinate pos, boost::function<bool(std::shared_ptr<NPC>)> findJob,
 
 	aggressive(false),
 	coward(false),
-	aggressor(boost::weak_ptr<NPC>()),
+	aggressor(std::weak_ptr<NPC>()),
 	dead(false),
-	squad(boost::weak_ptr<Squad>()),
+	squad(std::weak_ptr<Squad>()),
 
 	attacks(std::list<Attack>()),
 
@@ -189,7 +189,7 @@ Task* NPC::nextTask() const {
 	return 0;
 }
 
-boost::weak_ptr<Job> NPC::currentJob() const { return jobs.empty() ? boost::weak_ptr<Job>() : boost::weak_ptr<Job>(jobs.front()); }
+std::weak_ptr<Job> NPC::currentJob() const { return jobs.empty() ? std::weak_ptr<Job>() : std::weak_ptr<Job>(jobs.front()); }
 
 void NPC::TaskFinished(TaskResult result, std::string msg) {
 #ifdef DEBUG
@@ -206,7 +206,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 				jobs.front()->Complete();
 				jobs.pop_front();
 				taskIndex = 0;
-				foundItem = boost::weak_ptr<Item>();
+				foundItem = std::weak_ptr<Item>();
 				addedTasksToCurrentJob = 0;
 				jobBegun = false;
 			}
@@ -220,7 +220,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 			taskIndex = 0;
 			DropItem(carried);
 			carried.reset();
-			foundItem = boost::weak_ptr<Item>();
+			foundItem = std::weak_ptr<Item>();
 			addedTasksToCurrentJob = 0;
 			jobBegun = false;
 		}
@@ -250,7 +250,7 @@ void NPC::HandleThirst() {
 		if ((*jobIter)->name.find("Drink") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"), Position());
+		std::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Drink"), Position());
 		Coordinate waterCoordinate;
 		if (!item.lock()) {waterCoordinate = Game::Inst()->FindWater(Position());}
 		if (item.lock() || waterCoordinate != undefined) { //Found something to drink
@@ -287,13 +287,13 @@ void NPC::HandleHunger() {
 		if ((*jobIter)->name.find("Eat") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position(), MOSTDECAYED);
+		std::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Prepared food"), Position(), MOSTDECAYED);
 		if (!item.lock()) {item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::StringToItemCategory("Food"), Position(), MOSTDECAYED | AVOIDGARBAGE);}
 		if (!item.lock()) { //Nothing to eat!
 			if (hunger > 48000) { //Nearing death
 				ScanSurroundings();
 				std::shared_ptr<NPC> weakest;
-				for (std::list<boost::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
+				for (std::list<std::weak_ptr<NPC> >::iterator npci = nearNpcs.begin(); npci != nearNpcs.end(); ++npci) {
 					if (npci->lock() && (!weakest || npci->lock()->health < weakest->health)) {
 						weakest = npci->lock();
 					}
@@ -330,7 +330,7 @@ void NPC::HandleWeariness() {
 		else if ((*jobIter)->name.find("Get rid of") != std::string::npos) found = true;
 	}
 	if (!found) {
-		boost::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED, Position());
+		std::weak_ptr<Construction> wbed = Game::Inst()->FindConstructionByTag(BED, Position());
 		std::shared_ptr<Job> sleepJob(new Job("Sleep"));
 		sleepJob->internal = true;
 		if (!squad.lock() && mainHand.lock()) { //Only soldiers go to sleep gripping their weapons
@@ -367,7 +367,7 @@ void NPC::Update() {
 
 	if (Random::Generate(UPDATES_PER_SECOND) == 0) { //Recalculate bulk once a second, items may get unexpectedly destroyed
 		bulk = 0;
-		for (std::set<boost::weak_ptr<Item> >::iterator itemi = inventory->begin(); itemi != inventory->end(); ++itemi) {
+		for (std::set<std::weak_ptr<Item> >::iterator itemi = inventory->begin(); itemi != inventory->end(); ++itemi) {
 			if (itemi->lock())
 				bulk += itemi->lock()->GetBulk();
 		}
@@ -525,7 +525,7 @@ void NPC::UpdateStatusEffects() {
 			ScanSurroundings();
 			if (adjacentNpcs.size() > 0 &&
 				Random::Generate(100) < statusEffectI->contagionChance) {
-					for (std::list<boost::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
+					for (std::list<std::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
 						if (std::shared_ptr<NPC> npc = npci->lock())
 							npc->TransmitEffect(*statusEffectI);
 					}
@@ -585,7 +585,7 @@ void NPC::Think() {
 
 		{
 			std::shared_ptr<NPC> enemy = aggressor.lock();
-			for (std::list<boost::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
+			for (std::list<std::weak_ptr<NPC> >::iterator npci = adjacentNpcs.begin(); npci != adjacentNpcs.end(); ++npci) {
 				if (std::shared_ptr<NPC> adjacentNpc = npci->lock()) {
 					if ((!coward && !factionPtr->IsFriendsWith(adjacentNpc->GetFaction())) || adjacentNpc == enemy) {
 						if (currentTask() && currentTask()->action == KILL) Hit(adjacentNpc, currentTask()->flags != 0);
@@ -712,7 +712,7 @@ MOVENEARend:
 				if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL, "(TAKE)No target entity"); break; }
 				if (Position() == currentEntity().lock()->Position()) {
 					if (boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()) {
-						boost::weak_ptr<Container> cont(boost::static_pointer_cast<Container>(boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));
+						std::weak_ptr<Container> cont(boost::static_pointer_cast<Container>(boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));
 						cont.lock()->RemoveItem(
 							boost::static_pointer_cast<Item>(currentEntity().lock()));
 					}
@@ -763,7 +763,7 @@ MOVENEARend:
 					bulk -= carried.lock()->GetBulk();
 					ApplyEffects(carried.lock());
 					Game::Inst()->RemoveItem(carried);
-					carried = boost::weak_ptr<Item>();
+					carried = std::weak_ptr<Item>();
 				} else if (timer == 0) { //Drink from a water tile
 					if (Game::Adjacent(pos, currentTarget())) {
 							if (std::shared_ptr<WaterNode> water = map->GetWater(currentTarget()).lock()) {
@@ -845,7 +845,7 @@ MOVENEARend:
 					break;
 				}
 CONTINUEEAT:
-				carried = boost::weak_ptr<Item>();
+				carried = std::weak_ptr<Item>();
 				TaskFinished(TASKSUCCESS);
 				break;
 
@@ -880,7 +880,7 @@ CONTINUEEAT:
 					std::shared_ptr<Item> plant = carried.lock();
 					inventory->RemoveItem(carried);
 					bulk -= plant->GetBulk();
-					carried = boost::weak_ptr<Item>();
+					carried = std::weak_ptr<Item>();
 
 					for (std::list<ItemType>::iterator fruiti = Item::Presets[plant->Type()].fruits.begin(); fruiti != Item::Presets[plant->Type()].fruits.end(); ++fruiti) {
 						if (stockpile) {
@@ -899,7 +899,7 @@ CONTINUEEAT:
 					break;
 				} else {
 					inventory->RemoveItem(carried);
-					carried = boost::weak_ptr<Item>();
+					carried = std::weak_ptr<Item>();
 					TaskFinished(TASKFAILFATAL, "(HARVEST)Carrying nonexistant item");
 					break;
 				}
@@ -1187,7 +1187,7 @@ CONTINUEEAT:
 						break;
 					}
 					
-					boost::weak_ptr<WaterNode> wnode = map->GetWater(currentTarget());
+					std::weak_ptr<WaterNode> wnode = map->GetWater(currentTarget());
 					if (wnode.lock() && wnode.lock()->Depth() > 0 && cont->ContainsFilth() == 0) {
 						int waterAmount = std::min(50, wnode.lock()->Depth());
 						wnode.lock()->Depth(wnode.lock()->Depth()-waterAmount);
@@ -1196,7 +1196,7 @@ CONTINUEEAT:
 						break;
 					}
 
-					boost::weak_ptr<FilthNode> fnode = map->GetFilth(currentTarget());
+					std::weak_ptr<FilthNode> fnode = map->GetFilth(currentTarget());
 					if (fnode.lock() && fnode.lock()->Depth() > 0 && cont->ContainsWater() == 0) {
 						int filthAmount = std::min(3, fnode.lock()->Depth());
 						fnode.lock()->Depth(fnode.lock()->Depth()-filthAmount);
@@ -1427,7 +1427,7 @@ void NPC::StartJob(std::shared_ptr<Job> job) {
 		job->tasks.insert(job->tasks.begin(), Task(WIELD));
 		job->tasks.insert(job->tasks.begin(), Task(TAKE));
 		job->tasks.insert(job->tasks.begin(), Task(MOVE));
-		job->tasks.insert(job->tasks.begin(), Task(FIND, Position(), boost::weak_ptr<Entity>(), job->GetRequiredTool()));
+		job->tasks.insert(job->tasks.begin(), Task(FIND, Position(), std::weak_ptr<Entity>(), job->GetRequiredTool()));
 		addedTasksToCurrentJob = 5;
 	}
 
@@ -1570,7 +1570,7 @@ void NPC::Kill(std::string deathMessage) {
 		while (!jobs.empty()) TaskFinished(TASKFAILFATAL, std::string("dead"));
 
 		while (!inventory->empty()) {
-			boost::weak_ptr<Item> witem = inventory->GetFirstItem();
+			std::weak_ptr<Item> witem = inventory->GetFirstItem();
 			if (std::shared_ptr<Item> item = witem.lock()) {
 				item->Position(Position());
 				item->PutInContainer();
@@ -1586,7 +1586,7 @@ void NPC::Kill(std::string deathMessage) {
 	}
 }
 
-void NPC::DropItem(boost::weak_ptr<Item> witem) {
+void NPC::DropItem(std::weak_ptr<Item> witem) {
 	if (std::shared_ptr<Item> item = witem.lock()) {
 		inventory->RemoveItem(item);
 		item->Position(Position());
@@ -1611,10 +1611,10 @@ Coordinate NPC::currentTarget() const {
 	return currentTask()->target;
 }
 
-boost::weak_ptr<Entity> NPC::currentEntity() const {
+std::weak_ptr<Entity> NPC::currentEntity() const {
 	if (currentTask()->entity.lock()) return currentTask()->entity;
-	else if (foundItem.lock()) return boost::weak_ptr<Entity>(foundItem.lock());
-	return boost::weak_ptr<Entity>();
+	else if (foundItem.lock()) return std::weak_ptr<Entity>(foundItem.lock());
+	return std::weak_ptr<Entity>();
 }
 
 
@@ -1783,7 +1783,7 @@ void NPC::PlayerNPCReact(std::shared_ptr<NPC> npc) {
 		}
 
 		//Cowards panic if they see aggressive unfriendlies or their attacker
-		for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
+		for (std::list<std::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 			std::shared_ptr<NPC> otherNpc = npci->lock();
 			if ((!npc->factionPtr->IsFriendsWith(otherNpc->GetFaction()) && otherNpc->aggressive) || 
 				otherNpc == npc->aggressor.lock()) {
@@ -1801,7 +1801,7 @@ void NPC::PlayerNPCReact(std::shared_ptr<NPC> npc) {
 			if (npc->jobs.empty() || npc->currentTask()->action != KILL) {
 				if (!surroundingsScanned) npc->ScanSurroundings(true);
 				surroundingsScanned = true;
-				for (std::list<boost::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
+				for (std::list<std::weak_ptr<NPC> >::iterator npci = npc->nearNpcs.begin(); npci != npc->nearNpcs.end(); ++npci) {
 					if (!npc->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 						JobManager::Inst()->NPCNotWaiting(npc->uid);
 						std::shared_ptr<Job> killJob(new Job("Kill "+npci->lock()->name));
@@ -1834,7 +1834,7 @@ void NPC::AnimalReact(std::shared_ptr<NPC> animal) {
 	//Aggressive animals attack constructions/other creatures depending on faction
 	if (animal->aggressive) {
 		if (animal->factionPtr->GetCurrentGoal() == FACTIONDESTROY && !animal->nearConstructions.empty()) {
-			for (std::list<boost::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
+			for (std::list<std::weak_ptr<Construction> >::iterator consi = animal->nearConstructions.begin(); consi != animal->nearConstructions.end(); ++consi) {
 				if (std::shared_ptr<Construction> construct = consi->lock()) {
 					if (!construct->HasTag(PERMANENT) &&
 						(construct->HasTag(WORKSHOP) || 
@@ -1850,7 +1850,7 @@ void NPC::AnimalReact(std::shared_ptr<NPC> animal) {
 				}
 			}
 		} else {
-			for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+			for (std::list<std::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 				std::shared_ptr<NPC> otherNPC = npci->lock();
 				if (otherNPC && !animal->factionPtr->IsFriendsWith(otherNPC->GetFaction())) {
 					std::shared_ptr<Job> killJob(new Job("Kill "+otherNPC->name));
@@ -1866,7 +1866,7 @@ void NPC::AnimalReact(std::shared_ptr<NPC> animal) {
 
 	//Cowards run away from others
 	if (animal->coward) {
-		for (std::list<boost::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
+		for (std::list<std::weak_ptr<NPC> >::iterator npci = animal->nearNpcs.begin(); npci != animal->nearNpcs.end(); ++npci) {
 			if (!animal->factionPtr->IsFriendsWith(npci->lock()->GetFaction())) {
 				animal->AddEffect(PANIC);
 				animal->run = true;
@@ -1956,7 +1956,7 @@ void NPC::AbortCurrentJob(bool remove_job) {
 	if (remove_job) { JobManager::Inst()->RemoveJob(job); }
 }
 
-void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
+void NPC::Hit(std::weak_ptr<Entity> target, bool careful) {
 	if (target.lock()) {
 		std::shared_ptr<NPC> npc = boost::dynamic_pointer_cast<NPC>(target.lock());
 		std::shared_ptr<Construction> construction = boost::dynamic_pointer_cast<Construction>(target.lock());
@@ -1998,7 +1998,7 @@ void NPC::Hit(boost::weak_ptr<Entity> target, bool careful) {
 	}
 }
 
-void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
+void NPC::FireProjectile(std::weak_ptr<Entity> target) {
 	if (std::shared_ptr<Entity> targetEntity = target.lock()) {
 		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 			if (attacki->Type() == DAMAGE_WIELDED) {
@@ -2020,7 +2020,7 @@ void NPC::FireProjectile(boost::weak_ptr<Entity> target) {
 	}
 }
 
-void NPC::CastOffensiveSpell(boost::weak_ptr<Entity> target) {
+void NPC::CastOffensiveSpell(std::weak_ptr<Entity> target) {
 	if (std::shared_ptr<Entity> targetEntity = target.lock()) {
 		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 			if (attacki->IsProjectileMagic()) {
@@ -2038,7 +2038,7 @@ void NPC::CastOffensiveSpell(boost::weak_ptr<Entity> target) {
 }
 
 
-void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
+void NPC::Damage(Attack* attack, std::weak_ptr<NPC> aggr) {
 	Resistance res;
 
 	switch (attack->Type()) {
@@ -2098,7 +2098,7 @@ void NPC::Damage(Attack* attack, boost::weak_ptr<NPC> aggr) {
 	}
 }
 
-void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
+void NPC::MemberOf(std::weak_ptr<Squad> newSquad) {
 	squad = newSquad;
 	if (!squad.lock()) { //NPC was removed from a squad
 		//Drop weapon, quiver and armor
@@ -2125,7 +2125,7 @@ void NPC::MemberOf(boost::weak_ptr<Squad> newSquad) {
 		aggressive = false;
 	}
 }
-boost::weak_ptr<Squad> NPC::MemberOf() const {return squad;}
+std::weak_ptr<Squad> NPC::MemberOf() const {return squad;}
 
 void NPC::Escape() {
 	if (carried.lock()) {
@@ -2138,11 +2138,11 @@ void NPC::Escape() {
 
 void NPC::DestroyAllItems() {
 	while (!inventory->empty()) {
-		boost::weak_ptr<Item> item = inventory->GetFirstItem();
+		std::weak_ptr<Item> item = inventory->GetFirstItem();
 		inventory->RemoveItem(item);
 		if (std::shared_ptr<Container> container = boost::dynamic_pointer_cast<Container>(item.lock())) {
 			while (!container->empty()) {
-				boost::weak_ptr<Item> item = container->GetFirstItem();
+				std::weak_ptr<Item> item = container->GetFirstItem();
 				container->RemoveItem(item);
 				Game::Inst()->RemoveItem(item);
 			}
@@ -2382,7 +2382,7 @@ void NPC::FindNewWeapon() {
 		weaponValue = mainHand.lock()->RelativeValue();
 	}
 	ItemCategory weaponCategory = squad.lock() ? squad.lock()->Weapon() : Item::StringToItemCategory("Weapon");
-	boost::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, Position(), BETTERTHAN, weaponValue);
+	std::weak_ptr<Item> newWeapon = Game::Inst()->FindItemByCategoryFromStockpiles(weaponCategory, Position(), BETTERTHAN, weaponValue);
 	if (std::shared_ptr<Item> weapon = newWeapon.lock()) {
 		std::shared_ptr<Job> weaponJob(new Job("Grab weapon"));
 		weaponJob->internal = true;
@@ -2400,7 +2400,7 @@ void NPC::FindNewArmor() {
 		armorValue = armor.lock()->RelativeValue();
 	}
 	ItemCategory armorCategory = squad.lock() ? squad.lock()->Armor() : Item::StringToItemCategory("Armor");
-	boost::weak_ptr<Item> newArmor = Game::Inst()->FindItemByCategoryFromStockpiles(armorCategory, Position(), BETTERTHAN, armorValue);
+	std::weak_ptr<Item> newArmor = Game::Inst()->FindItemByCategoryFromStockpiles(armorCategory, Position(), BETTERTHAN, armorValue);
 	if (std::shared_ptr<Item> arm = newArmor.lock()) {
 		std::shared_ptr<Job> armorJob(new Job("Grab armor"));
 		armorJob->internal = true;
@@ -2412,15 +2412,15 @@ void NPC::FindNewArmor() {
 	}
 }
 
-boost::weak_ptr<Item> NPC::Wielding() const {
+std::weak_ptr<Item> NPC::Wielding() const {
 	return mainHand;
 }
 
-boost::weak_ptr<Item> NPC::Carrying() const {
+std::weak_ptr<Item> NPC::Carrying() const {
 	return carried;
 }
 
-boost::weak_ptr<Item> NPC::Wearing() const {
+std::weak_ptr<Item> NPC::Wearing() const {
 	return armor;
 }
 
@@ -2490,7 +2490,7 @@ void NPC::UpdateVelocity() {
 	}
 }
 
-void NPC::PickupItem(boost::weak_ptr<Item> item) {
+void NPC::PickupItem(std::weak_ptr<Item> item) {
 	if (item.lock()) {
 		carried = boost::static_pointer_cast<Item>(item.lock());
 		bulk += item.lock()->GetBulk();
@@ -2536,7 +2536,7 @@ NPCPreset::NPCPreset(std::string typeNameVal) :
 int NPC::GetHealth() const { return health; }
 int NPC::GetMaxHealth() const { return maxHealth; }
 
-void NPC::AbortJob(boost::weak_ptr<Job> wjob) {
+void NPC::AbortJob(std::weak_ptr<Job> wjob) {
 	if (std::shared_ptr<Job> job = wjob.lock()) {
 		for (std::deque<std::shared_ptr<Job> >::iterator jobi = jobs.begin(); jobi != jobs.end(); ++jobi) {
 			if (*jobi == job) {
@@ -2746,7 +2746,7 @@ void NPC::UpdateHealth() {
 /*I opted to place this in NPC instead of it being a method of Item mainly because Item won't know
 if it's being wielded, worn or whatever, and that's important information when an axe breaks in an
 orc's hand, for exmple*/
-void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
+void NPC::DecreaseItemCondition(std::weak_ptr<Item> witem) {
 	if (std::shared_ptr<Item> item = witem.lock()) {
 		int condition = item->DecreaseCondition();
 		if (condition == 0) { //< 0 == does not break, > 0 == not broken
@@ -2761,7 +2761,7 @@ void NPC::DecreaseItemCondition(boost::weak_ptr<Item> witem) {
 			if (offHand.lock() == item) offHand.reset();
 			if (armor.lock() == item) armor.reset();
 			if (quiver.lock() == item) quiver.reset();
-			std::vector<boost::weak_ptr<Item> > component(1, item);
+			std::vector<std::weak_ptr<Item> > component(1, item);
 			Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
 			Game::Inst()->RemoveItem(item);
 		}
@@ -2938,7 +2938,7 @@ std::string NPC::GetDeathMsgHunger() {
 	}
 }
 
-std::string NPC::GetDeathMsgCombat(boost::weak_ptr<NPC> other, DamageType damage) {
+std::string NPC::GetDeathMsgCombat(std::weak_ptr<NPC> other, DamageType damage) {
 	int choice = Random::Generate(4);
 
 	if (std::shared_ptr<NPC> attacker = other.lock()) {

@@ -362,7 +362,7 @@ void TilesetRenderer::DrawSpells() const {
 }
 
 void TilesetRenderer::DrawFires() const {
-	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
+	for (std::list<std::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (std::shared_ptr<FireNode> fire = firei->lock())
 		{
 			Coordinate firePos = fire->Position();
@@ -411,7 +411,7 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 	
 	// Water
 	if (tileSet->IsIceSupported()) {
-		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
+		std::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
 		if (std::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
 				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
@@ -424,7 +424,7 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 			}
 		}
 	} else {
-		boost::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
+		std::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
 		if (std::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
 				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterNoIceConnectionTest, map, pos, _1));

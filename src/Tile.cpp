@@ -218,7 +218,7 @@ void Tile::MoveTo(int uid) {
 void Tile::SetConstruction(int uid) { construction = uid; }
 int Tile::GetConstruction() const { return construction; }
 
-boost::weak_ptr<WaterNode> Tile::GetWater() const {return boost::weak_ptr<WaterNode>(water);}
+std::weak_ptr<WaterNode> Tile::GetWater() const {return std::weak_ptr<WaterNode>(water);}
 void Tile::SetWater(std::shared_ptr<WaterNode> value) {water = value;}
 
 bool Tile::IsLow() const {return low;}
@@ -241,13 +241,13 @@ TCODColor Tile::GetBackColor() const {
 void Tile::SetNatureObject(int val) { natureObject = val; }
 int Tile::GetNatureObject() const { return natureObject; }
 
-boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
+std::weak_ptr<FilthNode> Tile::GetFilth() const {return std::weak_ptr<FilthNode>(filth);}
 void Tile::SetFilth(std::shared_ptr<FilthNode> value) {filth = value;}
 
-boost::weak_ptr<BloodNode> Tile::GetBlood() const {return boost::weak_ptr<BloodNode>(blood);}
+std::weak_ptr<BloodNode> Tile::GetBlood() const {return std::weak_ptr<BloodNode>(blood);}
 void Tile::SetBlood(std::shared_ptr<BloodNode> value) {blood = value;}
 
-boost::weak_ptr<FireNode> Tile::GetFire() const {return boost::weak_ptr<FireNode>(fire);}
+std::weak_ptr<FireNode> Tile::GetFire() const {return std::weak_ptr<FireNode>(fire);}
 void Tile::SetFire(std::shared_ptr<FireNode> value) { fire = value; }
 
 void Tile::Mark() { marked = true; }

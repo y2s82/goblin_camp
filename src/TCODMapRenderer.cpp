@@ -85,12 +85,12 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 				minimap.putCharEx(x-screenDeltaX,y-(screenDeltaY), map->GetGraphic(xy), map->GetForeColor(xy), map->GetBackColor(xy));
 
 				if (!(map->GetOverlayFlags() & TERRAIN_OVERLAY)) {
-					boost::weak_ptr<WaterNode> wwater = map->GetWater(xy);
+					std::weak_ptr<WaterNode> wwater = map->GetWater(xy);
 					if (std::shared_ptr<WaterNode> water = wwater.lock()) {
 						if (water->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, water->GetGraphic(), water->GetColor(), TCODColor::black);
 					}
-					boost::weak_ptr<FilthNode> wfilth = map->GetFilth(xy);
+					std::weak_ptr<FilthNode> wfilth = map->GetFilth(xy);
 					if (std::shared_ptr<FilthNode> filth = wfilth.lock()) {
 						if (filth->Depth() > 0)
 							minimap.putCharEx(x-screenDeltaX, y-screenDeltaY, filth->GetGraphic(), filth->GetColor(), TCODColor::black);
@@ -138,7 +138,7 @@ void TCODMapRenderer::DrawMap(Map* map, float focusX, float focusY, int viewport
 
 
 	InternalDrawMapItems("NPCs",                  Game::Inst()->npcList, upleft, &minimap);
-	for (std::list<boost::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
+	for (std::list<std::weak_ptr<FireNode> >::iterator firei = Game::Inst()->fireList.begin(); firei != Game::Inst()->fireList.end(); ++firei) {
 		if (firei->lock()) firei->lock()->Draw(upleft, &minimap);
 	}
 	for (std::list<std::shared_ptr<Spell> >::iterator spelli = Game::Inst()->spellList.begin(); spelli != Game::Inst()->spellList.end(); ++spelli) {

@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
-#include <boost/weak_ptr.hpp>
+
 
 #include "Random.hpp"
 #include "Logger.hpp"
@@ -85,7 +85,7 @@ bool WaterNode::Update() {
 			if (timeFromRiverBed == 0 && Random::Generate(100) == 0) depth -= 1; //Evaporation
 			if (timeFromRiverBed > 0 && depth < RIVERDEPTH) depth += 10; //Water rushing from the river
 
-			std::vector<boost::weak_ptr<WaterNode> > waterList;
+			std::vector<std::weak_ptr<WaterNode> > waterList;
 			std::vector<Coordinate> coordList;
 			int depthSum = 0;
 

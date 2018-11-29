@@ -91,7 +91,7 @@ public:
 	void MoveFrom(const Coordinate&,int);
 	void SetConstruction(const Coordinate&,int);
 	int GetConstruction(const Coordinate&) const;
-	boost::weak_ptr<WaterNode> GetWater(const Coordinate&);
+	std::weak_ptr<WaterNode> GetWater(const Coordinate&);
 	void SetWater(const Coordinate&,std::shared_ptr<WaterNode>);
 	bool IsLow(const Coordinate&) const;
 	void SetLow(const Coordinate&,bool);
@@ -105,11 +105,11 @@ public:
 	void SetNatureObject(const Coordinate&,int);
 	int GetNatureObject(const Coordinate&) const;
 	std::set<int>* ItemList(const Coordinate&);
-	boost::weak_ptr<FilthNode> GetFilth(const Coordinate&);
+	std::weak_ptr<FilthNode> GetFilth(const Coordinate&);
 	void SetFilth(const Coordinate&,std::shared_ptr<FilthNode>);
-	boost::weak_ptr<BloodNode> GetBlood(const Coordinate&);
+	std::weak_ptr<BloodNode> GetBlood(const Coordinate&);
 	void SetBlood(const Coordinate&,std::shared_ptr<BloodNode>);
-	boost::weak_ptr<FireNode> GetFire(const Coordinate&);
+	std::weak_ptr<FireNode> GetFire(const Coordinate&);
 	void SetFire(const Coordinate&,std::shared_ptr<FireNode>);
 	bool BlocksLight(const Coordinate&) const;
 	void SetBlocksLight(const Coordinate&, bool);
