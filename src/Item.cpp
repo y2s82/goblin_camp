@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/algorithm/string.hpp>
 #ifdef DEBUG
 #include <iostream>
@@ -584,7 +584,7 @@ void Item::UpdateVelocity() {
 					if (map->BlocksWater(t) || !map->IsWalkable(t)) { //We've hit an obstacle
 						Attack attack = GetAttack();
 						if (map->GetConstruction(t) > -1) {
-							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(t)).lock()) {
+							if (std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(t)).lock()) {
 								construct->Damage(&attack);
 							}
 						}
@@ -594,7 +594,7 @@ void Item::UpdateVelocity() {
 					if (map->NPCList(t)->size() > 0) { //Hit a creature
 						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + map->NPCList(t)->size())) {
 							Attack attack = GetAttack();
-							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(t)->begin());
+							std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(t)->begin());
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);

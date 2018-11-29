@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/weak_ptr.hpp>
 
@@ -80,14 +80,14 @@ public:
 
 	static FactionType StringToFactionType(std::string);
 	static std::string FactionTypeToString(FactionType);
-	static std::vector<boost::shared_ptr<Faction> > factions;
+	static std::vector<std::shared_ptr<Faction> > factions;
 
 	static FactionGoal StringToFactionGoal(std::string);
 	static std::string FactionGoalToString(FactionGoal);
 
 	void Reset();
 	void Update();
-	bool FindJob(boost::shared_ptr<NPC>);
+	bool FindJob(std::shared_ptr<NPC>);
 	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
 
 	void MakeFriendsWith(FactionType);
@@ -95,7 +95,7 @@ public:
 	
 	static void InitAfterLoad(); //Initialize faction names, required before loading npcs from a save file
 	static void TranslateMembers(); //Translate member uids into pointers _after_ loading npcs from a save
-	void TransferTrapInfo(boost::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
+	void TransferTrapInfo(std::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
 
 	FactionGoal GetCurrentGoal() const;
 	static void LoadPresets(std::string);

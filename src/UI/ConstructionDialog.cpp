@@ -33,7 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
 boost::weak_ptr<Construction> ConstructionDialog::cachedConstruct = boost::weak_ptr<Construction>();
 Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction> wcons) {
-	if (boost::shared_ptr<Construction> cons = wcons.lock()) {
+	if (std::shared_ptr<Construction> cons = wcons.lock()) {
 		if (constructionInfoDialog && (!cachedConstruct.lock() || cons != cachedConstruct.lock())) {
 			delete constructionInfoDialog;
 			constructionInfoDialog = 0;
@@ -109,7 +109,7 @@ void ConstructionDialog::Expand() {
 }
 
 void ConstructionDialog::CancelJob(int job) {
-	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+	if (std::shared_ptr<Construction> cons = construct.lock()) {
 		cons->CancelJob(job);
 	}
 }
@@ -121,7 +121,7 @@ void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int wid
 }
 
 void ConstructionDialog::ProductList::Draw(int x, int _y, int scroll, int width, int _height, TCODConsole *console) {
-	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+	if (std::shared_ptr<Construction> cons = construct.lock()) {
 		int y = 0;
 		for (int prodi = 0; prodi < (signed int)cons->Products()->size() && y < scroll + _height; ++prodi) {
 			if (y >= scroll) {

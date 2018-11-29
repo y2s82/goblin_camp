@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
+
 
 #include "Water.hpp"
 #include "Filth.hpp"
@@ -53,16 +53,16 @@ class Tile {
 	int moveCost;
 	int construction;
 	bool low, blocksWater;
-	boost::shared_ptr<WaterNode> water;
+	std::shared_ptr<WaterNode> water;
 	int graphic;
 	TCODColor foreColor, originalForeColor;
 	TCODColor backColor;
 	int natureObject;
 	std::set<int> npcList; //Set of NPC uid's
 	std::set<int> itemList; //Set of Item uid's
-	boost::shared_ptr<FilthNode> filth;
-	boost::shared_ptr<BloodNode> blood;
-	boost::shared_ptr<FireNode> fire;
+	std::shared_ptr<FilthNode> filth;
+	std::shared_ptr<BloodNode> blood;
+	std::shared_ptr<FireNode> fire;
 	bool marked;
 	int walkedOver, corruption;
 	bool territory;
@@ -86,7 +86,7 @@ public:
 	void SetConstruction(int);
 	int GetConstruction() const;
 	boost::weak_ptr<WaterNode> GetWater() const;
-	void SetWater(boost::shared_ptr<WaterNode>);
+	void SetWater(std::shared_ptr<WaterNode>);
 	bool IsLow() const;
 	void SetLow(bool);
 	bool BlocksWater() const;
@@ -97,11 +97,11 @@ public:
 	void SetNatureObject(int);
 	int GetNatureObject() const;
 	boost::weak_ptr<FilthNode> GetFilth() const;
-	void SetFilth(boost::shared_ptr<FilthNode>);
+	void SetFilth(std::shared_ptr<FilthNode>);
 	boost::weak_ptr<BloodNode> GetBlood() const;
-	void SetBlood(boost::shared_ptr<BloodNode>);
+	void SetBlood(std::shared_ptr<BloodNode>);
 	boost::weak_ptr<FireNode> GetFire() const;
-	void SetFire(boost::shared_ptr<FireNode>);
+	void SetFire(std::shared_ptr<FireNode>);
 	void Mark();
 	void Unmark();
 	void WalkOver();

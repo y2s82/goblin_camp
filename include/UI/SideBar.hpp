@@ -24,7 +24,7 @@
 
 class SideBar {
 	boost::weak_ptr<Entity> entity;
-	boost::shared_ptr<Drawable> contents;
+	std::shared_ptr<Drawable> contents;
 	int width, height, topY, leftX;
 	bool npc, construction, stockpile, farmplot;
 public:

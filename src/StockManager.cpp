@@ -148,7 +148,7 @@ void StockManager::Update() {
 									}
 							}
 							if (componentInTree) {
-								boost::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
+								std::shared_ptr<Job> fellJob(new Job("Fell tree", MED, 0, true));
 								fellJob->Attempts(50);
 								fellJob->ConnectToEntity(*treei);
 								fellJob->DisregardTerritory();
@@ -170,7 +170,7 @@ void StockManager::Update() {
 						for (int i = bogIronJobs.size(); i < std::max(1, (int)(designatedBog.size() / 100)) && difference > 0; ++i) {
 							unsigned cIndex = Random::ChooseIndex(designatedBog);
 							Coordinate coord = *boost::next(designatedBog.begin(), cIndex);
-							boost::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
+							std::shared_ptr<Job> ironJob(new Job("Gather bog iron", MED, 0, true));
 							ironJob->DisregardTerritory();
 							ironJob->tasks.push_back(Task(MOVE, coord));
 							ironJob->tasks.push_back(Task(BOGIRON));
@@ -185,7 +185,7 @@ void StockManager::Update() {
 					if (difference > 0) {
 						Coordinate waterLocation = Game::Inst()->FindWater(Camp::Inst()->Center());
 						if (waterLocation.X() >= 0 && waterLocation.Y() >= 0) {
-							boost::shared_ptr<Job> barrelWaterJob(new Job("Fill barrel", MED, 0, true));
+							std::shared_ptr<Job> barrelWaterJob(new Job("Fill barrel", MED, 0, true));
 							barrelWaterJob->DisregardTerritory();
 							barrelWaterJob->tasks.push_back(Task(FIND, waterLocation, boost::weak_ptr<Entity>(), Item::StringToItemCategory("Barrel"), EMPTY));
 							barrelWaterJob->tasks.push_back(Task(MOVE));
@@ -234,9 +234,9 @@ void StockManager::Update() {
 			       difference < (minimums[type] <= 0 ? 100 : minimums[type]) * -2) {
 			//The item is eligible for dumping and we have a surplus
 			if (Random::Generate(59) == 0) {
-				if (boost::shared_ptr<SpawningPool> spawningPool = Camp::Inst()->spawningPool.lock()) {
-					boost::shared_ptr<Job> dumpJob(new Job("Dump "+Item::ItemTypeToString(type), LOW));
-					boost::shared_ptr<Item> item = Game::Inst()->FindItemByTypeFromStockpiles(type, spawningPool->Position()).lock();
+				if (std::shared_ptr<SpawningPool> spawningPool = Camp::Inst()->spawningPool.lock()) {
+					std::shared_ptr<Job> dumpJob(new Job("Dump "+Item::ItemTypeToString(type), LOW));
+					std::shared_ptr<Item> item = Game::Inst()->FindItemByTypeFromStockpiles(type, spawningPool->Position()).lock();
 					if (item) {
 						dumpJob->Attempts(1);
 						dumpJob->ReserveEntity(item);
@@ -347,7 +347,7 @@ void StockManager::SetMinimum(ItemType item, int value) {
 }
 
 void StockManager::UpdateTreeDesignations(boost::weak_ptr<NatureObject> nObj, bool add) {
-	if (boost::shared_ptr<NatureObject> natObj = nObj.lock()) {
+	if (std::shared_ptr<NatureObject> natObj = nObj.lock()) {
 		if (add) {
 			designatedTrees.push_back(natObj);
 		} else {

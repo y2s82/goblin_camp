@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <string>
-#include <boost/shared_ptr.hpp>
+
 
 class Construction;
 class Item;

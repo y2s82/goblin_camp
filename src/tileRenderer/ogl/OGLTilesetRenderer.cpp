@@ -34,13 +34,13 @@ using namespace OGLFunctionExtension;
 
 // Note: Libtcod swaps the vertical axis depending on whether the renderer is GLSL or OpenGL.
 
-boost::shared_ptr<TilesetRenderer> CreateOGLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
-	boost::shared_ptr<OGLTilesetRenderer> oglRenderer(new OGLTilesetRenderer(width, height, console));
-	boost::shared_ptr<TileSet> tileset = TileSetLoader::LoadTileSet(oglRenderer, tilesetName);
+std::shared_ptr<TilesetRenderer> CreateOGLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
+	std::shared_ptr<OGLTilesetRenderer> oglRenderer(new OGLTilesetRenderer(width, height, console));
+	std::shared_ptr<TileSet> tileset = TileSetLoader::LoadTileSet(oglRenderer, tilesetName);
 	if (tileset.get() != 0 && oglRenderer->SetTileset(tileset)) {
 		return oglRenderer;
 	}
-	return boost::shared_ptr<TilesetRenderer>();
+	return std::shared_ptr<TilesetRenderer>();
 }
 
 namespace {
@@ -187,17 +187,17 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 		amask = 0xff000000;
 	}
 
-	boost::shared_ptr<SDL_Surface> fontSurface(IMG_Load(Paths::Get(Paths::Font).string().c_str()), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> fontSurface(IMG_Load(Paths::Get(Paths::Font).string().c_str()), SDL_FreeSurface);
 	fontCharW = fontSurface->w / 16;
 	fontCharH = fontSurface->h / 16;
 	fontTexW = MathEx::NextPowerOfTwo(fontCharW * 16);
 	fontTexH = MathEx::NextPowerOfTwo(fontCharH * 16);
 
 	SDL_SetColorKey(fontSurface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(fontSurface->format, 0, 0, 0));
-	boost::shared_ptr<SDL_Surface> tempAlpha(SDL_DisplayFormatAlpha(fontSurface.get()), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> tempAlpha(SDL_DisplayFormatAlpha(fontSurface.get()), SDL_FreeSurface);
 	SDL_SetAlpha(tempAlpha.get(), 0, SDL_ALPHA_TRANSPARENT);
 
-	boost::shared_ptr<SDL_Surface> temp(SDL_CreateRGBSurface(SDL_SWSURFACE, fontTexW, fontTexH, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> temp(SDL_CreateRGBSurface(SDL_SWSURFACE, fontTexW, fontTexH, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	SDL_BlitSurface(tempAlpha.get(), NULL, temp.get(), NULL);
 
 	fontTexture = CreateOGLTexture();
@@ -218,7 +218,7 @@ OGLTilesetRenderer::~OGLTilesetRenderer() {
 	TCODSystem::registerOGLRenderer(0);
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	if (tilesetTexture->Count() <= tile) {
 		return Sprite_ptr();
 	}
@@ -233,7 +233,7 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> ti
 	}
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
 	if (tiles.empty())
 		return Sprite_ptr();
 
@@ -307,7 +307,7 @@ bool OGLTilesetRenderer::TilesetChanged() {
 }
 
 bool OGLTilesetRenderer::AssembleTextures() {
-	boost::shared_ptr<const unsigned int> tempTex(CreateOGLTexture());
+	std::shared_ptr<const unsigned int> tempTex(CreateOGLTexture());
 	GLint texSize; 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
 	
@@ -347,7 +347,7 @@ bool OGLTilesetRenderer::AssembleTextures() {
 		bmask = 0x00ff0000;
 		amask = 0xff000000;
 	}
-	boost::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, tileSet->TileWidth(), tileSet->TileHeight(), 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, tileSet->TileWidth(), tileSet->TileHeight(), 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	if(tempSurface.get() == NULL) {
         LOG("CreateRGBSurface failed: " << SDL_GetError());
 		return false;

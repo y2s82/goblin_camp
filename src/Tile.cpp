@@ -43,7 +43,7 @@ Tile::Tile(TileType newType, int newCost) :
 	construction(-1),
 	low(false),
 	blocksWater(false),
-	water(boost::shared_ptr<WaterNode>()),
+	water(std::shared_ptr<WaterNode>()),
 	graphic('.'),
 	foreColor(TCODColor::white),
 	originalForeColor(TCODColor::white),
@@ -51,9 +51,9 @@ Tile::Tile(TileType newType, int newCost) :
 	natureObject(-1),
 	npcList(std::set<int>()),
 	itemList(std::set<int>()),
-	filth(boost::shared_ptr<FilthNode>()),
-	blood(boost::shared_ptr<BloodNode>()),
-	fire(boost::shared_ptr<FireNode>()),
+	filth(std::shared_ptr<FilthNode>()),
+	blood(std::shared_ptr<BloodNode>()),
+	fire(std::shared_ptr<FireNode>()),
 	marked(false),
 	walkedOver(0),
 	corruption(0),
@@ -219,7 +219,7 @@ void Tile::SetConstruction(int uid) { construction = uid; }
 int Tile::GetConstruction() const { return construction; }
 
 boost::weak_ptr<WaterNode> Tile::GetWater() const {return boost::weak_ptr<WaterNode>(water);}
-void Tile::SetWater(boost::shared_ptr<WaterNode> value) {water = value;}
+void Tile::SetWater(std::shared_ptr<WaterNode> value) {water = value;}
 
 bool Tile::IsLow() const {return low;}
 void Tile::SetLow(bool value) {low = value;}
@@ -242,13 +242,13 @@ void Tile::SetNatureObject(int val) { natureObject = val; }
 int Tile::GetNatureObject() const { return natureObject; }
 
 boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
-void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
+void Tile::SetFilth(std::shared_ptr<FilthNode> value) {filth = value;}
 
 boost::weak_ptr<BloodNode> Tile::GetBlood() const {return boost::weak_ptr<BloodNode>(blood);}
-void Tile::SetBlood(boost::shared_ptr<BloodNode> value) {blood = value;}
+void Tile::SetBlood(std::shared_ptr<BloodNode> value) {blood = value;}
 
 boost::weak_ptr<FireNode> Tile::GetFire() const {return boost::weak_ptr<FireNode>(fire);}
-void Tile::SetFire(boost::shared_ptr<FireNode> value) { fire = value; }
+void Tile::SetFire(std::shared_ptr<FireNode> value) { fire = value; }
 
 void Tile::Mark() { marked = true; }
 void Tile::Unmark() { marked = false; }
@@ -389,7 +389,7 @@ CacheTile::CacheTile() : walkable(true), moveCost(1), construction(false),
 CacheTile& CacheTile::operator=(const Tile& tile) {
 	walkable = tile.walkable;
 	moveCost = tile.moveCost;
-	boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(tile.construction).lock();
+	std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(tile.construction).lock();
 	if (construct) {
 		construction = true;
 		door = construct->HasTag(DOOR);

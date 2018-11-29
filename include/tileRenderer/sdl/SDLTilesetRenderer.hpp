@@ -24,11 +24,11 @@ public:
 	explicit SDLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole = 0);
 	~SDLTilesetRenderer();
 
-	Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
-	Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
+	Sprite_ptr CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, int tile);
+	Sprite_ptr CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	
-	void DrawSprite(int screenX, int screenY, boost::shared_ptr<TileSetTexture> texture, int tile) const;
-	void DrawSpriteCorner(int screenX, int screenY, boost::shared_ptr<TileSetTexture> texture, int tile, Corner corner) const;
+	void DrawSprite(int screenX, int screenY, std::shared_ptr<TileSetTexture> texture, int tile) const;
+	void DrawSpriteCorner(int screenX, int screenY, std::shared_ptr<TileSetTexture> texture, int tile, Corner corner) const;
 
 	void render(void *sdlSurface);  // FIXME: inherited a virtual from ITCODSDLRenderer
 	void render(void *sdlSurface, void*sdlScreen);
@@ -39,7 +39,7 @@ protected:
 	void PostDrawMap();
 	void DrawNullTile(int screenX, int screenY);
 private:
-	boost::shared_ptr<SDL_Surface> mapSurface;
+	std::shared_ptr<SDL_Surface> mapSurface;
 
 	SDL_Rect CalcDest(int screenX, int screenY) const {
 		SDL_Rect dstRect = {

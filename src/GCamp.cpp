@@ -246,7 +246,7 @@ void StartNewGame() {
 		game->CreateItem(corpseLoc[c], Item::StringToItemType("stone axe"));
 		game->CreateItem(corpseLoc[c], Item::StringToItemType("shovel"));
 		int corpseuid = game->CreateItem(corpseLoc[c], Item::StringToItemType("corpse"));
-		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
+		std::shared_ptr<Item> corpse = game->itemList[corpseuid];
 		corpse->Name("Corpse(Human woodsman)");
 		corpse->Color(TCODColor::white);
 		for (int i = 0; i < 6; ++i)

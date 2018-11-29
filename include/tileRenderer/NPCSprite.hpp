@@ -32,7 +32,7 @@ public:
 	bool Exists() const;
 
 	void Draw(int screenX, int screenY) const;
-	void Draw(int screenX, int screenY, boost::shared_ptr<NPC> npc) const;
+	void Draw(int screenX, int screenY, std::shared_ptr<NPC> npc) const;
 
 private:
 	std::vector<Sprite_ptr> sprites;

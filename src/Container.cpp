@@ -48,7 +48,7 @@ Container::~Container() {
 }
 
 bool Container::AddItem(boost::weak_ptr<Item> witem) {
-	boost::shared_ptr<Item> item = witem.lock();
+	std::shared_ptr<Item> item = witem.lock();
 	if (item && capacity >= std::max(item->GetBulk(), 1)) {
 		item->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
@@ -142,7 +142,7 @@ void Container::AddWater(int amount) {
 	if (empty() && filth == 0) { 
 		for (int i = 0; i < amount; ++i) {
 			int waterUid = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Water"));
-			boost::shared_ptr<Item> waterItem = Game::Inst()->GetItem(waterUid).lock();
+			std::shared_ptr<Item> waterItem = Game::Inst()->GetItem(waterUid).lock();
 			
 			if (!AddItem(waterItem)) {
 				Game::Inst()->RemoveItem(waterItem);
@@ -155,7 +155,7 @@ void Container::AddWater(int amount) {
 void Container::RemoveWater(int amount) {
 	for (int i = 0; i < amount; ++i) {
 		for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-			boost::shared_ptr<Item> waterItem = itemi->lock();
+			std::shared_ptr<Item> waterItem = itemi->lock();
 			if (waterItem && waterItem->Type() == Item::StringToItemType("water")) {
 				Game::Inst()->RemoveItem(waterItem);
 				break;
@@ -193,7 +193,7 @@ int Container::GetReservedSpace() { return reservedSpace; }
 void Container::Position(const Coordinate& pos) {
 	Item::Position(pos);
 	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-		boost::shared_ptr<Item> item = itemi->lock();
+		std::shared_ptr<Item> item = itemi->lock();
 		if (item) item->Position(pos);
 	}
 }
@@ -202,7 +202,7 @@ Coordinate Container::Position() {return Item::Position();}
 
 void Container::SetFaction(int faction) {
 	for (std::set<boost::weak_ptr<Item> >::const_iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-		if (boost::shared_ptr<Item> item = itemi->lock()) {
+		if (std::shared_ptr<Item> item = itemi->lock()) {
 			item->SetFaction(faction);
 		}
 	}

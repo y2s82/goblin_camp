@@ -29,7 +29,7 @@ public:
 	~ConstructionSpriteFactory();
 
 	void Reset();
-	ConstructionSprite Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+	ConstructionSprite Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture);
 
 	template <typename IterT> void SetSpriteIndices(IterT start, IterT end);
 	template <typename IterT> void SetUnderConstructionSpriteIndices(IterT start, IterT end);
@@ -59,7 +59,7 @@ public:
 	~NPCSpriteFactory();
 
 	void Reset();
-	NPCSprite Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+	NPCSprite Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture);
 
 	void AddSpriteFrame(int frame);
 	void SetFPS(int fps);
@@ -86,7 +86,7 @@ public:
 	~StatusEffectSpriteFactory();
 
 	void Reset();
-	StatusEffectSprite Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+	StatusEffectSprite Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture);
 
 	void AddSpriteFrame(int frame);
 	void SetFPS(int fps);
@@ -108,7 +108,7 @@ public:
 	~TerrainSpriteFactory();
 	
 	void Reset();
-	TerrainSprite Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+	TerrainSprite Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture);
 
 	template <typename IterT> void SetSpriteIndices(IterT start, IterT end);
 	template <typename IterT> void SetSnowSpriteIndices(IterT start, IterT end);

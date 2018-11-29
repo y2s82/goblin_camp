@@ -277,11 +277,11 @@ bool Job::InvalidFireAllowance() {
 	return false;
 }
 
-void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
+void Job::CreatePourWaterJob(std::shared_ptr<Job> job, Coordinate location) {
 	job->Attempts(1);
 
 	//First search for a container containing water
-	boost::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
+	std::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
 		location).lock();
 	Coordinate waterLocation = Game::Inst()->FindWater(location);
 
@@ -294,7 +294,7 @@ void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
 
 		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
 			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-				boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
+				std::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
 				//Reserve everything inside the container
 				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); 
 					itemi != container->end(); ++itemi) {
