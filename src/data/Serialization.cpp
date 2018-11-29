@@ -26,7 +26,7 @@ and I couldn't come up with a coherent answer just by googling. */
 #include <boost/bind.hpp>
 #include <boost/format.hpp>
 #include <fstream>
-#include <boost/cstdint.hpp>
+#include <cstdint>
 
 #include <boost/iostreams/filtering_stream.hpp>
 #include <boost/iostreams/filter/zlib.hpp>
@@ -93,10 +93,10 @@ namespace io = boost::iostreams;
 
 // Magic constant: reversed fourcc 'GCMP'
 // (so you can see it actually spelled like this when hex-viewing the save).
-const boost::uint32_t saveMagicConst = 0x47434d50;
+const std::uint32_t saveMagicConst = 0x47434d50;
 
 // File format version (8-bit, because it should not change too often).
-const boost::uint8_t fileFormatConst = 0x01;
+const std::uint8_t fileFormatConst = 0x01;
 
 //
 // Save/load entry points
@@ -107,16 +107,16 @@ namespace {
 	template <size_t N> struct Type { };
 
 	#define DEFINE_TYPE(T) template <> struct Type<sizeof(T)> { typedef T uint; }
-	DEFINE_TYPE(boost::uint8_t);
-	DEFINE_TYPE(boost::uint16_t);
-	DEFINE_TYPE(boost::uint32_t);
-	DEFINE_TYPE(boost::uint64_t);
+	DEFINE_TYPE(std::uint8_t);
+	DEFINE_TYPE(std::uint16_t);
+	DEFINE_TYPE(std::uint32_t);
+	DEFINE_TYPE(std::uint64_t);
 	#undef DEFINE_TYPE
 	
 	template <typename T>
 	T ReadUInt(std::istream& stream) {
 		typedef typename Type<sizeof(T) / 2>::uint U;
-		const boost::uint32_t bits = sizeof(U) * 8;
+		const std::uint32_t bits = sizeof(U) * 8;
 		
 		U a = 0, b = 0;
 		a = ReadUInt<U>(stream);
@@ -126,14 +126,14 @@ namespace {
 	}
 	
 	template <>
-	boost::uint8_t ReadUInt<boost::uint8_t>(std::istream& stream) {
-		return static_cast<boost::uint8_t>(stream.get());
+	std::uint8_t ReadUInt<std::uint8_t>(std::istream& stream) {
+		return static_cast<std::uint8_t>(stream.get());
 	}
 	
 	template <typename T>
 	void WriteUInt(std::ostream& stream, T value) {
 		typedef typename Type<sizeof(T) / 2>::uint U;
-		const boost::uint32_t bits = sizeof(U) * 8;
+		const std::uint32_t bits = sizeof(U) * 8;
 		
 		// All types here are unsigned.
 		const U max = static_cast<U>(-1);
@@ -143,7 +143,7 @@ namespace {
 	}
 	
 	template <>
-	void WriteUInt<boost::uint8_t>(std::ostream& stream, boost::uint8_t value) {
+	void WriteUInt<std::uint8_t>(std::ostream& stream, std::uint8_t value) {
 		stream.put(static_cast<char>(value));
 	}
 	
@@ -174,20 +174,20 @@ bool Game::SaveGame(const std::string& filename) {
 		io::filtering_ostream stream;
 		
 		// Write the file header
-		WriteUInt<boost::uint32_t>(rawStream, saveMagicConst);
-		WriteUInt<boost::uint8_t> (rawStream, fileFormatConst);
+		WriteUInt<std::uint32_t>(rawStream, saveMagicConst);
+		WriteUInt<std::uint8_t> (rawStream, fileFormatConst);
 		
 		bool compress = Config::GetCVar<bool>("compressSaves");
 		// compression flag
-		WriteUInt<boost::uint8_t>(rawStream, (compress ? 0x01 : 0x00));
+		WriteUInt<std::uint8_t>(rawStream, (compress ? 0x01 : 0x00));
 		
 		// reserved
-		WriteUInt<boost::uint8_t> (rawStream, 0x00U);
-		WriteUInt<boost::uint16_t>(rawStream, 0x00U);
-		WriteUInt<boost::uint32_t>(rawStream, 0x00UL);
-		WriteUInt<boost::uint64_t>(rawStream, 0x00ULL);
-		WriteUInt<boost::uint64_t>(rawStream, 0x00ULL);
-		WriteUInt<boost::uint64_t>(rawStream, 0x00ULL);
+		WriteUInt<std::uint8_t> (rawStream, 0x00U);
+		WriteUInt<std::uint16_t>(rawStream, 0x00U);
+		WriteUInt<std::uint32_t>(rawStream, 0x00UL);
+		WriteUInt<std::uint64_t>(rawStream, 0x00ULL);
+		WriteUInt<std::uint64_t>(rawStream, 0x00ULL);
+		WriteUInt<std::uint64_t>(rawStream, 0x00ULL);
 		
 		// Write the payload
 		if (compress) {
@@ -196,7 +196,7 @@ bool Game::SaveGame(const std::string& filename) {
 		}
 		
 		stream.push(rawStream);
-		Game::SavingScreen(boost::bind(&WritePayload, boost::ref(stream)));
+		Game::SavingScreen(std::bind(&WritePayload, std::ref(stream)));
 		
 		return true;
 	} catch (const std::exception& e) {
@@ -211,38 +211,38 @@ bool Game::LoadGame(const std::string& filename) {
 		io::filtering_istream stream;
 		
 		// Read and verify the file header
-		if (ReadUInt<boost::uint32_t>(rawStream) != saveMagicConst) {
+		if (ReadUInt<std::uint32_t>(rawStream) != saveMagicConst) {
 			throw std::runtime_error("Invalid magic value.");
 		}
 		
-		if (ReadUInt<boost::uint8_t>(rawStream) != fileFormatConst) {
+		if (ReadUInt<std::uint8_t>(rawStream) != fileFormatConst) {
 			throw std::runtime_error("Invalid file format value.");
 		}
 		
 		// compression
-		boost::uint8_t compressed = ReadUInt<boost::uint8_t>(rawStream);
+		std::uint8_t compressed = ReadUInt<std::uint8_t>(rawStream);
 		
 		if (compressed > 1) {
 			throw std::runtime_error("Invalid compression algorithm.");
 		}
 		
 		// reserved values
-		if (ReadUInt<boost::uint8_t>(rawStream) != 0) {
+		if (ReadUInt<std::uint8_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #1 not 0x00.");
 		}
-		if (ReadUInt<boost::uint16_t>(rawStream) != 0) {
+		if (ReadUInt<std::uint16_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #2 not 0x0000.");
 		}
-		if (ReadUInt<boost::uint32_t>(rawStream) != 0) {
+		if (ReadUInt<std::uint32_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #3 not 0x00000000.");
 		}
-		if (ReadUInt<boost::uint64_t>(rawStream) != 0) {
+		if (ReadUInt<std::uint64_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #4 not 0x0000000000000000.");
 		}
-		if (ReadUInt<boost::uint64_t>(rawStream) != 0) {
+		if (ReadUInt<std::uint64_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #5 not 0x0000000000000000.");
 		}
-		if (ReadUInt<boost::uint64_t>(rawStream) != 0) {
+		if (ReadUInt<std::uint64_t>(rawStream) != 0) {
 			throw std::runtime_error("Forward compatibility: reserved value #6 not 0x0000000000000000.");
 		}
 		
