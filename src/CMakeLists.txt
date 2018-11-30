@@ -51,7 +51,7 @@ include_directories (${Boost_INCLUDE_DIRS})
 link_directories (${Boost_LIBRARY_DIRS})
 
 # link the executable to the libraries
-target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL SDL_image tcod z python-modules pthread)
+target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL SDL_image tcod tcodxx tcodgui z python-modules pthread)
 
 # have to use c++11 or gnu++11, because lambda expressions
 set_target_properties (goblincamp PROPERTIES COMPILE_FLAGS "-std=gnu++11 -Wall")
