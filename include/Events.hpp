@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 /*Events will include all the hardcoded events. Once Python is figured
 out events will be able to be defined in py code, and the hardcoded ones
