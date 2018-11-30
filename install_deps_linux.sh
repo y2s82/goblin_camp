@@ -1,19 +1,9 @@
 #!/bin/bash
 old_dir=$PWD
-curl -o sdl.tar.gz http://hg.libsdl.org/SDL/archive/007dfe83abf8.tar.gz
-tar -xf sdl.tar.gz
-cd SDL-007dfe83abf8/
-mkdir -p build
-cd build
-../configure
-make
-sudo make install
-cd $old_dir 
-curl https://github.com/libtcod/libtcod/archive/1.9.0.zip -L -o libtcod-1.9.0.zip
-unzip libtcod-1.9.0.zip
-cd libtcod-1.9.0/build/autotools
-autoreconf -i
-./configure CFLAGS='-O2'
-make
-sudo make install
+curl -L -o libtcod-1.5.1.tar.gz https://bitbucket.org/libtcod/libtcod/downloads/libtcod-1.5.1-linux64.tar.gz
+tar -xf libtcod-1.5.1.tar.gz
+cd libtcod-1.5.1/
+make -f makefiles/makefile-linux64
+#sudo cp -r include/* /usr/include/libtcod
+#sudo cp libtcod*.so /usr/lib/
 cd $old_dir 
