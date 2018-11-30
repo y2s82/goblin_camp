@@ -1,55 +1,56 @@
 language: cpp
 os:
-  - linux
-env: 
-    global:
-        - OMP_NUM_THREADS=4
-        - C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include/libtcod
-        - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
-        - LD_LIBRARY_PATH=/usr/local/lib
-          # COVERITY_SCAN_TOKEN, specific to this project
-          #        - secure='fknsKzBre+zl5fmeeCT4mREm2n7b0bBoJaaT9DPU3y2CNTb2braHaPULIjHa8nYRLZNOd1dRC+nwkIU1QUAHnloHjFObPmEqNgwfLnRpT68DqPDMOLCb7PWUQ0ZLttFhtWEJ695K9Q1uUd3UYKh3OkuFSXiGJ0tAvzHs8lkg21+Gc/x7/TCoAy39KeHCfpqEu/rJ493Q3gb9I/EcnG3F3hNAp8RFPHEZ8j3WAhKSd3HIInqrlggSIR0KXxAXhydaS7fUFICHYiXFkZkHkgi3ux0IrYUPpt3CXNMgJwNfZA/KwA1aTD+2SQlL5gTJrVYC6jOt/Js48fVykaxsOnErU+Y+srk1kHqjlKyNo1NcJNI/esOIbbkWHC+u6yk/hY+qRM8RojMbF1SCxI4tXciYI+V5s0puMpDK0b3InuDpDLetNjJlyNlJkO8myfmkefSJsqaQUDllS8373Yu+TZogiv7wP5qoNcL8EGYkp6srTKTq+vt6qq/3Es6F8aRunuhuewjUSwIxMh2+Qb51v2/S/yiqF4V80WqQ70AM2OUZERvUh5KOEXzGUuBc2GjVlp9elm2nM403pZGukOJQDBXKnDmXc8YF+rTIFdZgjL0bo/jTJw98QMfVtpsb5Bq8ZEecsgp9q0uni0QwOaQNTvd+LjqPhbrRDZz0kzfgxmXLSl0='
-        - secure: ${COVERITY_SCAN_TOKEN}
-
+- linux
+env:
+  global:
+  - OMP_NUM_THREADS=4
+  - C_INCLUDE_PATH=$C_INCLUDE_PATH:/usr/local/include/libtcod
+  - CPLUS_INCLUDE_PATH=$CPLUS_INCLUDE_PATH:/usr/local/include/libtcod
+  - LD_LIBRARY_PATH=/usr/local/lib
+  - secure: "${COVERITY_SCAN_TOKEN}"
 before_script:
-    - echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
-    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++ g++ /usr/bin/g++-8 
-    - chmod u+x install_deps_linux.sh
-    - ./install_deps_linux.sh
-before_install:
+- echo -n | openssl s_client -connect scan.coverity.com:443 | sed -ne '/-BEGIN CERTIFICATE-/,/-END
+  CERTIFICATE-/p' | sudo tee -a /etc/ssl/certs/ca-
+- sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 60 --slave /usr/bin/g++
+  g++ /usr/bin/g++-8
+- chmod u+x install_deps_linux.sh
+- "./install_deps_linux.sh"
+before_install: 
 addons:
-    coverity_scan:
-        project:
-            name: "y2s82/goblin_camp"
-            description: "goblin camp loves coverity scan. please work."
-        notification_email: y2s1982@gmail.com
-        build_command_prepend: "cmake ."
-        build_command: "make"
-        branch_pattern: coverity_scan
+  coverity_scan:
+    project:
+      name: y2s82/goblin_camp
+      description: goblin camp loves coverity scan. please work.
+    notification_email: y2s1982@gmail.com
+    build_command_prepend: cmake .
+    build_command: make
+    branch_pattern: coverity_scan
 jobs:
-    include:
-      - stage: deploy
-        compiler:
-          - gcc
-        addons:
-          apt:
-            sources:
-              - sourceline: 'ppa:ubuntu-toolchain-r/test'
-            packages:
-              - libboost1.54-all-dev
-              - libegl1-mesa-dev libgles2-mesa-dev
-              - libsdl1.2-dev libsdl-image1.2-dev
-              - libpng++-dev
-              - zlib1g-dev
-              - libgl1-mesa-glx
-              - libglew-dev
-              - freeglut3-dev
-              - g++-8 gcc-8
-        script:
-          - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake .; make; sudo make install;cmake .; sudo make install; tar -cf release.tar pkg; fi
+  include:
+  - stage: deploy
+    compiler:
+    - gcc
+    addons:
+      apt:
+        sources:
+        - sourceline: ppa:ubuntu-toolchain-r/test
+        packages:
+        - libboost1.54-all-dev
+        - libegl1-mesa-dev libgles2-mesa-dev
+        - libsdl1.2-dev libsdl-image1.2-dev
+        - libpng++-dev
+        - zlib1g-dev
+        - libgl1-mesa-glx
+        - libglew-dev
+        - freeglut3-dev
+        - g++-8 gcc-8
+    script:
+    - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake .; make; sudo make install;cmake
+      .; sudo make install; tar -cf release.tar pkg; fi
 deploy:
   provider: releases
-  api_key:  
+  api_key: 
+    secure: huz65z/5BXWeulM9aIHUf+YiZpgRXPRANgeFeTO7XMVrl9cFwKbsdAOVx6tDqlPBlEG58YKy1YhpTFc65Sz45i5UePAAe/WHLpxYjU6yESFgtyoplnSxKwLn31Hsl4fn9C4tLw9Ua7WdE/mselgdlFA5S5QaaNc9Mp/HfiLDmtvXI1O+7i5hYc1giREkAAG0dpSFxShcyKfx2R6xmoO3Hm4M8qn4gv7N8yFqUNcePFtmi5nk3MhIbi4PJCgq4si6JXWJG7oc0bQ9tSHzJOGbej1Ji070DP3RwBEY8RCx3+yz+pMZYsANzk8BiBYDmfv6cGryCymGTq36aAqsx6CXA7ow+5n9FLcwMjVG8wcz6KIWY+WxsH2YWdWgdPjTNJC7/Ht8SxVqBIfd1ThakKpNYwHw5b7Xm9yEPHI4cxcPJG2f85uD50BjZs3a21U+xfz9JW7dQa0ONIFebmmkkCCksWm1L6I+6DA7hy4NXRPhB7kOc32+S1wlBSe9sWeLYTP33JSE/2L1LuDi4kqbO9OMTZiAPblGenlLDHUSU+R2M2Nh9rP0rYDIo1+LYx0f1IMxXO+hMXuSYL4joQK2EQeSLKJJqOvhZD7cXsI2ewqW+FoLCpu7HvbKQ0dXf/GldK5JesnZXTGc9e5LzDYpbPHw8N8UCAzQpGUh28n051BvVaM=
   file: release.tar
   skip_cleanup: true
   on:
