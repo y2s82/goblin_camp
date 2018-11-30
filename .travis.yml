@@ -39,7 +39,6 @@ jobs:
               - libboost1.54-all-dev
               - libegl1-mesa-dev libgles2-mesa-dev
               - libsdl1.2-dev libsdl-image1.2-dev
-              - autoconf automake libtool libasound2-dev libpulse-dev libaudio-dev libx11-dev libxext-dev libxrandr-dev libxcursor-dev libxi-dev libxinerama-dev libxxf86vm-dev libxss-dev libesd0-dev libdbus-1-dev libudev-dev libgles1-mesa-dev
               - libpng++-dev
               - zlib1g-dev
               - libgl1-mesa-glx
@@ -47,7 +46,12 @@ jobs:
               - freeglut3-dev
               - g++-8 gcc-8
         script:
-          - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake .;make; fi
-        after_script:
-          - cd src
-          - ./goblincamp
+          - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake .; make; sudo make install; fi
+          - tar -cf release.tar pkg
+deploy:
+  provider: releases
+  api_key:  
+  file: release.tar
+  skip_cleanup: true
+  on:
+    tags: true
