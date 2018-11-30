@@ -4,6 +4,7 @@
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/17220/badge.svg"/>
 </a>
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9ce43a8ad3284f28888078e434f50ba9)](https://www.codacy.com/app/y2s82/goblin_camp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=y2s82/goblin_camp&amp;utm_campaign=Badge_Grade)
 
 # Goblin Camp Stone Soup
 
