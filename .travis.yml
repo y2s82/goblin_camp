@@ -46,10 +46,7 @@ jobs:
               - freeglut3-dev
               - g++-8 gcc-8
         script:
-          - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake .; make; sudo make install;cmake .; sudo make install; fi
-          - ls -al
-          - pwd
-          - tar -cf release.tar pkg
+          - if [ "${COVERITY_SCAN_BRANCH}" != 1 ]; then cmake .; make; sudo make install;cmake .; sudo make install; tar -cf release.tar pkg; fi
 deploy:
   provider: releases
   api_key:  
