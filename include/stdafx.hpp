@@ -15,12 +15,15 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 /* #pragma once makes gcc complain "warning: #pragma once in main
+#include<memory>
   file"; apparently there are weird issues with #pragma once which
+#include<memory>
   make me fall back to the tried and true #ifndef hack
 
   see: http://www.dreamincode.net/forums/topic/173122-g-%23pragma-once-warnings/
 */
 //#pragma once
+#include<memory>
 #ifndef STDAFX_INCLUDED
 #define STDAFX_INCLUDED
 
