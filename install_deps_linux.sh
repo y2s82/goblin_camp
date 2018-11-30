@@ -4,6 +4,7 @@ curl -L -o libtcod-1.5.1.tar.gz https://bitbucket.org/libtcod/libtcod/downloads/
 tar -xf libtcod-1.5.1.tar.gz
 cd libtcod-1.5.1/
 make -f makefiles/makefile-linux64
+sudo mkdir -p /usr/include/libtcod
 sudo cp -r include/* /usr/include/libtcod
 sudo cp libtcod*.so /usr/lib/
 cd $old_dir 
