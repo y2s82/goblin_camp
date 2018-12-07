@@ -7,8 +7,10 @@
 #
 #Requires: git grep mv sed sort uniq compatible-shell
 #
-#This is a dumb script that takes one argument: bash objects to change into its std:: counterpart
+#This is a dumb script that takes two argument: bash objects to change into its std:: counterpart
 #It will search for the object in all source code, and replace boost:: into std::
+#It will also change the include statement to the STL counterpart.
+#It DOES NOT check for the compatiblility; that job falls onto the programmer
 #
 
 if [[ $# != 2 ]] 
