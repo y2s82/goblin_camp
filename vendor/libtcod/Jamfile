@@ -1,0 +1,30 @@
+###############################################################################
+##### libtcod project
+###############################################################################
+
+import os ;
+
+path-constant HERE : . ;
+
+common-reqs =
+    <include>$(HERE)/include
+;
+
+###############################################################################
+##### Project definition
+###############################################################################
+
+project libtcod
+    : requirements
+      <link>static
+      $(common-reqs)
+    : usage-requirements
+      $(common-reqs)
+;
+
+sources = [ glob $(HERE)/src/*.c ] [ glob $(HERE)/src/*.cpp ] ;
+
+lib tcod
+    : $(sources)
+    : <use>/libpng <use>/zlib <use>/sdl
+;

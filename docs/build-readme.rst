@@ -29,9 +29,9 @@ To build it, you will need:
   operating systems are not supported (and also configurations like building on Linux using winelib).
   Clang compiler should be able to build the codebase, but has not been tested yet. Cross-compiling is
   not yet supported reliably.
-* `BJam`_ **03.1.18** or newer. Build system is based on Boost.Build, which in turn is built on top
+* `BJam`_ **03.1.18**. Build system is based on Boost.Build, which in turn is built on top
   of the BJam.
-* `Python`_ **2.7** — there are few Python scripts used in the process of building Goblin Camp, so you
+* `Python`_ **2.7** x32 — there are few Python scripts used in the process of building Goblin Camp, so you
   will need a working installation. Python is also used as a scripting engine in the game, so you
   will also need a linkable library (either debug or release version). Neither Python 3.x nor older
   versions of 2.x line are suitable to be used with Goblin Camp at the moment.
