@@ -10,8 +10,9 @@
 
 A git-based fork of [Goblin Camp](https://bitbucket.org/genericcontainer/goblin-camp), a [Dwarf-Fortress](http://www.bay12games.com/dwarves/) clone.
 
-This fork aims to investigate and identify possible performance bottleneck of the concept through exploring the Goblin Camp code.
-One of the forseeable outcome is to introduce multithreading, but the project aims to explore other aspects of performance improvements as well.
+This fork aims to:
+- Bring modern improvements (latest standard libraries and dependencies)
+- investigate and identify possible performance bottleneck
 
 ## Projects [link](https://github.com/y2s82/goblin_camp/projects)
 If you are interested in getting involved, we have several projects and bunch of issues in place.  Feel free to browse around and choose the one you feel at home, or make suggestions through issues and make a PR based on it.  Some of the projects are as follows:
