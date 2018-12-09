@@ -17,3 +17,9 @@ Current way takes two stages.
 - Create an issue to add the boost library to the modular install of the boost in the installation script.
 
 ## Thank you.
+If you are interested in finding all files that contains a particular boost library, you can try:
+```sh
+git grep 'boost::weak_ptr' | sed -ne 's/^\([^:]*\):.*$/\1/p' | sort | uniq  
+
+```
+from a sh/bash/zsh/ksh environment.
