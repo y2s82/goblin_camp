@@ -13,11 +13,11 @@ A git-based fork of [Goblin Camp](https://bitbucket.org/genericcontainer/goblin-
 This fork aims to investigate and identify possible performance bottleneck of the concept through exploring the Goblin Camp code.
 One of the forseeable outcome is to introduce multithreading, but the project aims to explore other aspects of performance improvements as well.
 
-# Projects
+# Projects [link](https://github.com/y2s82/goblin_camp/projects)
 If you are interested in getting involved, we have several projects and bunch of issues in place.  Feel free to browse around and choose the one you feel at home, or make suggestions through issues and make a PR based on it.  Some of the projects are as follows:
-## Boost-free goblins
+## Boost-free goblins [link](https://github.com/y2s82/goblin_camp/projects/4)
 This aims to minimize or eliminate Boost libraries from the repository and make the program rely more on STL.  You can find more information in [REMOVING_BOOST.md](REMOVING_BOOST.md) and in the project page.
-## Documentation
+## Documentation [link](https://github.com/y2s82/goblin_camp/projects/2)
 This repository is folked from a mercurial-based repository.  As such, some of the documentation naming and styles are different.  Feel free to update the documentation to fit the git-style.
-## Continuous Integratioin tools
+## Continuous Integratioin tools [link1](https://github.com/y2s82/goblin_camp/projects/1), [link2](https://github.com/y2s82/goblin_camp/projects/3)
 Not all of our CI system are configured properly.  Feel free to contribute to configure them to build in different architectures and environments.
