@@ -13,6 +13,7 @@ A git-based fork of [Goblin Camp](https://bitbucket.org/genericcontainer/goblin-
 This fork aims to:
 - Bring modern improvements (latest standard libraries and dependencies)
 - investigate and identify possible performance bottleneck
+- Close the feature gap with Dwarf Fortress
 
 ## Projects [link](https://github.com/y2s82/goblin_camp/projects)
 If you are interested in getting involved, we have several projects and bunch of issues in place.  Feel free to browse around and choose the one you feel at home, or make suggestions through issues and make a PR based on it.  Some of the projects are as follows:
