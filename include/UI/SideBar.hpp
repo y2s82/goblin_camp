@@ -14,22 +14,23 @@
  You should have received a copy of the GNU General Public License 
  along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <libtcod.hpp>
 #include <vector>
 #include <string>
-#include <boost/weak_ptr.hpp>
+
 
 #include "Entity.hpp"
 
 class SideBar {
-	boost::weak_ptr<Entity> entity;
-	boost::shared_ptr<Drawable> contents;
+	std::weak_ptr<Entity> entity;
+	std::shared_ptr<Drawable> contents;
 	int width, height, topY, leftX;
 	bool npc, construction, stockpile, farmplot;
 public:
 	SideBar();
-	void SetEntity(boost::weak_ptr<Entity>);
+	void SetEntity(std::weak_ptr<Entity>);
 	MenuResult Update(int, int, bool);
 	void Draw(TCODConsole*);
 	void GetTooltip(int, int, Tooltip *, TCODConsole *);

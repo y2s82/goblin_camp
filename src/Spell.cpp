@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -96,7 +97,7 @@ void Spell::UpdateVelocity() {
 					if (!immaterial) {
 						if (Map::Inst()->BlocksWater(t) || !Map::Inst()->IsWalkable(t)) { //We've hit an obstacle
 							if (Map::Inst()->GetConstruction(t) > -1) {
-								if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(t)).lock()) {
+								if (std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(t)).lock()) {
 									for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 										construct->Damage(&*attacki);
 									}
@@ -116,7 +117,7 @@ void Spell::UpdateVelocity() {
 						if (Map::Inst()->NPCList(t)->size() > 0) { //Hit a creature
 							if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + Map::Inst()->NPCList(t)->size())) {
 
-								boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(t)->begin());
+								std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*Map::Inst()->NPCList(t)->begin());
 								for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 									npc->Damage(&*attacki);
 								}

@@ -14,20 +14,21 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
-#include <boost/weak_ptr.hpp>
+
 
 class Construction;
 
 namespace Script { namespace API {
 	struct PyConstruction {
-		PyConstruction(boost::weak_ptr<Construction>);
+		PyConstruction(std::weak_ptr<Construction>);
 		py::tuple GetPosition();
 		std::string GetTypeString();
 		int GetType();
 		
 		static void Expose();
 	private:
-		boost::weak_ptr<Construction> construction;
+		std::weak_ptr<Construction> construction;
 	};
 }}

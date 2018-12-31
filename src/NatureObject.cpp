@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #ifdef DEBUG
@@ -238,7 +239,7 @@ void NatureObject::load(InputArchive& ar, const unsigned int version) {
 Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
 	ice = true;
 	Map::Inst()->SetBlocksWater(pos,true);
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
+	std::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water) {
 		frozenWater = water;
 		Game::Inst()->RemoveWater(pos);

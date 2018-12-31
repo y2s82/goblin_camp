@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
@@ -22,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 struct RawTileData {
 	unsigned int tile;
-	boost::shared_ptr<TileSetTexture> texture;
+	std::shared_ptr<TileSetTexture> texture;
 };
 
 // FIXME
@@ -38,8 +39,8 @@ public:
 	explicit OGLTilesetRenderer(int screenWidth, int screenHeight, TCODConsole * mapConsole = 0);
 	~OGLTilesetRenderer();
 
-	Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile);
-	Sprite_ptr CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
+	Sprite_ptr CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, int tile);
+	Sprite_ptr CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate = 15, int frameCount = 1);
 	
 	inline void DrawSprite(int screenX, int screenY, int tile) {
 		DrawSpriteCorner(screenX, screenY, tile, TopLeft);
@@ -62,17 +63,17 @@ private:
 	typedef std::vector<RawTileData>::iterator rawTileIterator;
 
 	// Tiles texture
-	boost::shared_ptr<const unsigned int> tilesTexture; 
+	std::shared_ptr<const unsigned int> tilesTexture; 
 	unsigned int tilesTextureW;
 	unsigned int tilesTextureH;
 
 	// UI Font
-	boost::shared_ptr<const unsigned int> fontTexture;
+	std::shared_ptr<const unsigned int> fontTexture;
 	unsigned int fontCharW, fontCharH;
 	unsigned int fontTexW, fontTexH;
 
 	// Console Rendering
-	boost::shared_ptr<const unsigned int> consoleProgram;
+	std::shared_ptr<const unsigned int> consoleProgram;
 
 	enum ConsoleTexureTypes {
 		Character,
@@ -80,7 +81,7 @@ private:
 		BackCol,
 		ConsoleTextureTypesCount
 	};
-	boost::array<boost::shared_ptr<const unsigned int>, ConsoleTextureTypesCount> consoleTextures;
+	boost::array<std::shared_ptr<const unsigned int>, ConsoleTextureTypesCount> consoleTextures;
 	unsigned int consoleTexW, consoleTexH;
 	boost::array<std::vector<unsigned char>, ConsoleTextureTypesCount> consoleData;
 	static boost::array<unsigned char, ConsoleTextureTypesCount> consoleDataAlignment;
@@ -89,7 +90,7 @@ private:
 	bool renderInProgress;
 	static const int VIEWPORT_LAYERS = 5;
 	boost::array<ViewportLayer, VIEWPORT_LAYERS> viewportLayers;
-	boost::array<boost::shared_ptr<const unsigned int>, VIEWPORT_LAYERS> viewportTextures;
+	boost::array<std::shared_ptr<const unsigned int>, VIEWPORT_LAYERS> viewportTextures;
 	struct RenderTile {
 		int x;
 		int y;
@@ -100,7 +101,7 @@ private:
 	std::vector<RenderTile> renderQueue;
 	int viewportW, viewportH;
 	int viewportTexW, viewportTexH;
-	boost::shared_ptr<const unsigned int> viewportProgram;
+	std::shared_ptr<const unsigned int> viewportProgram;
 	
 	bool InitialiseConsoleTextures();
 	bool InitialiseConsoleShaders();

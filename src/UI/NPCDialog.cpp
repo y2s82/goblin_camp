@@ -13,6 +13,7 @@
  
  You should have received a copy of the GNU General Public License 
  along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <string>
@@ -36,10 +37,10 @@ Dialog* NPCDialog::NPCListDialog() {
 
 NPCDialog::NPCDialog(): UIContainer(std::vector<Drawable*>(), 0, 0, Game::Inst()->ScreenWidth() - 20, Game::Inst()->ScreenHeight() - 20) {
 	AddComponent(new ScrollPanel(0, 0, width, height, 
-								 new UIList<std::pair<int, boost::shared_ptr<NPC> >, std::map<int, boost::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCDialog::DrawNPC), false));
+								 new UIList<std::pair<int, std::shared_ptr<NPC> >, std::map<int, std::shared_ptr<NPC> > >(&(Game::Inst()->npcList), 0, 0, width - 2, height, NPCDialog::DrawNPC), false));
 }
 
-void NPCDialog::DrawNPC(std::pair<int, boost::shared_ptr<NPC> > npci, int i, int x, int y, int width, bool selected, TCODConsole* console) {
+void NPCDialog::DrawNPC(std::pair<int, std::shared_ptr<NPC> > npci, int i, int x, int y, int width, bool selected, TCODConsole* console) {
 	console->print(x, y, "NPC: %d", npci.second->Uid());
 	console->print(x+11, y, "%s: %s",
 				   npci.second->currentJob().lock() ? npci.second->currentJob().lock()->name.c_str() : "No job",

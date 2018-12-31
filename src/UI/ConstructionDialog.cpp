@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/algorithm/string.hpp>
@@ -31,9 +32,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
-boost::weak_ptr<Construction> ConstructionDialog::cachedConstruct = boost::weak_ptr<Construction>();
-Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction> wcons) {
-	if (boost::shared_ptr<Construction> cons = wcons.lock()) {
+std::weak_ptr<Construction> ConstructionDialog::cachedConstruct = std::weak_ptr<Construction>();
+Dialog* ConstructionDialog::ConstructionInfoDialog(std::weak_ptr<Construction> wcons) {
+	if (std::shared_ptr<Construction> cons = wcons.lock()) {
 		if (constructionInfoDialog && (!cachedConstruct.lock() || cons != cachedConstruct.lock())) {
 			delete constructionInfoDialog;
 			constructionInfoDialog = 0;
@@ -79,7 +80,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 	return constructionInfoDialog;
 }
 
-void ConstructionDialog::Construct(boost::weak_ptr<Construction> cons) { construct = cons; }
+void ConstructionDialog::Construct(std::weak_ptr<Construction> cons) { construct = cons; }
 
 void ConstructionDialog::Rename() {
 	if (construct.lock()) {
@@ -109,7 +110,7 @@ void ConstructionDialog::Expand() {
 }
 
 void ConstructionDialog::CancelJob(int job) {
-	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+	if (std::shared_ptr<Construction> cons = construct.lock()) {
 		cons->CancelJob(job);
 	}
 }
@@ -121,7 +122,7 @@ void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int wid
 }
 
 void ConstructionDialog::ProductList::Draw(int x, int _y, int scroll, int width, int _height, TCODConsole *console) {
-	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+	if (std::shared_ptr<Construction> cons = construct.lock()) {
 		int y = 0;
 		for (int prodi = 0; prodi < (signed int)cons->Products()->size() && y < scroll + _height; ++prodi) {
 			if (y >= scroll) {

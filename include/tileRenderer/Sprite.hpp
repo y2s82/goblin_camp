@@ -14,10 +14,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <boost/noncopyable.hpp>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/function.hpp>
 #include "Coordinate.hpp"
 #include <libtcod.hpp>
@@ -154,7 +155,7 @@ public:
 	bool IsAnimated() const { return ptr && ptr->IsAnimated(); }
 
 private:
-	boost::shared_ptr<Sprite> ptr;
+	std::shared_ptr<Sprite> ptr;
 };
 
 typedef SpritePtr Sprite_ptr;

@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
 
 #include <boost/array.hpp>
@@ -62,11 +63,11 @@ public:
 	void DrawFilthMinor(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
 	void DrawFilthMajor(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
 	void DrawTerritoryOverlay(int screenX, int screenY, bool owned, Sprite::ConnectedFunction) const;
-	void DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) const;
-	void DrawNatureObject(int screenX, int screenY, boost::shared_ptr<NatureObject> plant) const;
-	void DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) const;
-	void DrawSpell(int screenX, int screenY, boost::shared_ptr<Spell> spell) const;
-	void DrawFire(int screenX, int screenY, boost::shared_ptr<FireNode> fire) const;
+	void DrawNPC(int screenX, int screenY, std::shared_ptr<NPC> npc) const;
+	void DrawNatureObject(int screenX, int screenY, std::shared_ptr<NatureObject> plant) const;
+	void DrawItem(int screenX, int screenY, std::shared_ptr<Item> item) const;
+	void DrawSpell(int screenX, int screenY, std::shared_ptr<Spell> spell) const;
+	void DrawFire(int screenX, int screenY, std::shared_ptr<FireNode> fire) const;
 	void DrawBaseConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const;
 	void DrawUnderConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const;
 	void DrawUnreadyTrap(int screenX, int screenY, Construction * trap, const Coordinate& worldPos) const;

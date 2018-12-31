@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include "Construction.hpp"
 #include "UI/Dialog.hpp"
@@ -30,7 +31,7 @@ class SpawningPool : public Construction {
 	Coordinate a, b;
 	unsigned int expansion, filth, corpses, spawns;
 	unsigned int expansionLeft, corruptionLeft, spawnsLeft;
-	boost::shared_ptr<Container> corpseContainer;
+	std::shared_ptr<Container> corpseContainer;
 	int jobCount;
 	int burn;
 public:
@@ -47,7 +48,7 @@ public:
 	virtual void AcceptVisitor(ConstructionVisitor& visitor);
 	void Burn();
 	virtual int Build();
-	boost::shared_ptr<Container>& GetContainer();
+	std::shared_ptr<Container>& GetContainer();
 	void Spawn();
 private:
 	Coordinate SpawnLocation();

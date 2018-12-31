@@ -14,13 +14,14 @@
  You should have received a copy of the GNU General Public License 
  along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <vector>
 
 #include <boost/function.hpp>
 #include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"
@@ -30,7 +31,7 @@
 class NPCDialog : public UIContainer {
 public:
 	NPCDialog();
-	static void DrawNPC(std::pair<int, boost::shared_ptr<NPC> >, int, int, int, int, bool, TCODConsole*);
+	static void DrawNPC(std::pair<int, std::shared_ptr<NPC> >, int, int, int, int, bool, TCODConsole*);
 	static Dialog* npcListDialog;
 	static Dialog* NPCListDialog();
 };

@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include "Construction.hpp"
 #include "data/Serialization.hpp"
@@ -24,7 +25,7 @@ class Trap : public Construction {
 	GC_SERIALIZABLE_CLASS
 	
 	bool ready;
-	boost::weak_ptr<Job> reloadJob;
+	std::weak_ptr<Job> reloadJob;
 	int readyGraphic;
 public:
 	Trap(ConstructionType = 0, Coordinate = Coordinate(0,0));

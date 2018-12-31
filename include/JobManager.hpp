@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include "Job.hpp"
 #include "data/Serialization.hpp"
@@ -23,21 +24,21 @@ class JobManager {
 	
 	JobManager();
 	static JobManager *instance;
-	std::list<boost::shared_ptr<Job> > availableList[PRIORITY_COUNT];
-	std::list<boost::shared_ptr<Job> > waitingList;
+	std::list<std::shared_ptr<Job> > availableList[PRIORITY_COUNT];
+	std::list<std::shared_ptr<Job> > waitingList;
 	std::vector<int> menialNPCsWaiting;
 	std::vector<int> expertNPCsWaiting;
-	std::vector<std::vector<boost::weak_ptr<Job> > > toolJobs;
-	std::list<boost::shared_ptr<Job> > failList;
+	std::vector<std::vector<std::weak_ptr<Job> > > toolJobs;
+	std::list<std::shared_ptr<Job> > failList;
 public:
 	static JobManager* Inst();
 	static void Reset();
-	void AddJob(boost::shared_ptr<Job>);
+	void AddJob(std::shared_ptr<Job>);
 	void Draw(Coordinate, int from = 0, int width = 40 ,int height = 40, TCODConsole* = TCODConsole::root);
-	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
-	boost::weak_ptr<Job> GetJob(int);
-	boost::weak_ptr<Job> GetJobByListIndex(int);
-	void RemoveJob(boost::weak_ptr<Job>);
+	void CancelJob(std::weak_ptr<Job>, std::string, TaskResult);
+	std::weak_ptr<Job> GetJob(int);
+	std::weak_ptr<Job> GetJobByListIndex(int);
+	void RemoveJob(std::weak_ptr<Job>);
 	void RemoveJob(Action, Coordinate); //Can remove more than was intended, use with caution
 	void Update();
 	int JobAmount();

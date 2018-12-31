@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include "tileRenderer/TileSet.hpp"
@@ -158,7 +159,7 @@ void TileSet::DrawTerritoryOverlay(int screenX, int screenY, bool owned, Sprite:
 	}
 }
 
-void TileSet::DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) const {
+void TileSet::DrawNPC(int screenX, int screenY, std::shared_ptr<NPC> npc) const {
 	int hint = npc->GetGraphicsHint();
 	if (hint == -1 || hint >= static_cast<int>(npcSprites.size())) {
 		defaultNPCSprite.Draw(screenX, screenY, npc);
@@ -168,11 +169,11 @@ void TileSet::DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) cons
 
 	if ((TCODSystem::getElapsedMilli() % 1000 < 700)) {
 		if (npc->HasEffect(CARRYING)) {
-			if (boost::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
+			if (std::shared_ptr<Item> carriedItem = npc->Carrying().lock()) {
 				DrawItem(screenX, screenY, carriedItem);
 			}
 		}
-		else if (boost::shared_ptr<Item> wielded = npc->Wielding().lock())
+		else if (std::shared_ptr<Item> wielded = npc->Wielding().lock())
 		{
 			int itemHint = wielded->GetGraphicsHint();
 			if (itemHint != -1 && itemSprites[itemHint].renderWhenWielded)
@@ -209,7 +210,7 @@ void TileSet::DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) cons
 	} 
 }
 
-void TileSet::DrawNatureObject(int screenX, int screenY, boost::shared_ptr<NatureObject> plant) const {
+void TileSet::DrawNatureObject(int screenX, int screenY, std::shared_ptr<NatureObject> plant) const {
 	int hint = plant->GetGraphicsHint();
 	if (hint == -1 || hint >= static_cast<int>(natureObjectSpriteSets.size())) {
 		defaultNatureObjectSpriteSet.tile.Draw(screenX, screenY);
@@ -218,7 +219,7 @@ void TileSet::DrawNatureObject(int screenX, int screenY, boost::shared_ptr<Natur
 	}
 }
 
-void TileSet::DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) const {
+void TileSet::DrawItem(int screenX, int screenY, std::shared_ptr<Item> item) const {
 	int hint = item->GetGraphicsHint();
 	if (hint == -1 || hint >= static_cast<int>(itemSprites.size())) {
 		defaultItemSprite.tile.Draw(screenX, screenY);
@@ -239,8 +240,8 @@ void TileSet::DrawOpenDoor(int screenX, int screenY, Door * door, const Coordina
 namespace {
 	bool ConstructionConnectTo(ConstructionType type, Coordinate origin, Direction dir) {
 		Coordinate pos = origin + Coordinate::DirectionToCoordinate(dir);
-		boost::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(pos));
-		if (boost::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
+		std::weak_ptr<Construction> constructPtr = Game::Inst()->GetConstruction(Map::Inst()->GetConstruction(pos));
+		if (std::shared_ptr<Construction> otherConstruct = constructPtr.lock()) {
 			return otherConstruct->Type() == type;
 		}
 		return false;
@@ -288,9 +289,9 @@ void TileSet::DrawUnreadyTrap(int screenX, int screenY, Construction * trap, con
 }
 
 void TileSet::DrawStockpileContents(int screenX, int screenY, Stockpile * stockpile, const Coordinate& worldPos) const {
-	boost::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
+	std::shared_ptr<Container> storage = stockpile->Storage(worldPos).lock();
 	if (storage && !storage->empty()) {
-		if (boost::shared_ptr<Item> item = storage->GetFirstItem().lock()) {
+		if (std::shared_ptr<Item> item = storage->GetFirstItem().lock()) {
 			DrawItem(screenX, screenY, item);
 		}
 	}
@@ -319,7 +320,7 @@ void TileSet::DrawCursor(int screenX, int screenY, CursorType type, int cursorHi
 	}
 }
 
-void TileSet::DrawSpell(int screenX, int screenY, boost::shared_ptr<Spell> spell) const {
+void TileSet::DrawSpell(int screenX, int screenY, std::shared_ptr<Spell> spell) const {
 	if (spell->GetGraphicsHint() == -1) {
 		defaultSpellSpriteSet.Draw(screenX, screenY);
 	} else {
@@ -327,7 +328,7 @@ void TileSet::DrawSpell(int screenX, int screenY, boost::shared_ptr<Spell> spell
 	}
 }
 
-void TileSet::DrawFire(int screenX, int screenY, boost::shared_ptr<FireNode> fire) const {
+void TileSet::DrawFire(int screenX, int screenY, std::shared_ptr<FireNode> fire) const {
 	fireTile.Draw(screenX, screenY);
 }
 

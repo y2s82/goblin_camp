@@ -14,13 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
 #include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <libtcod.hpp>
 
 #include "Entity.hpp"
@@ -104,8 +105,8 @@ protected:
 	TCODColor color;
 	int graphic;
 	Item(const Coordinate& = zero, ItemType = -1, int owner = -1,
-		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
-	boost::weak_ptr<Item> container;
+		std::vector<std::weak_ptr<Item> > = std::vector<std::weak_ptr<Item> >());
+	std::weak_ptr<Item> container;
 	bool internal;
 
 public:
@@ -134,8 +135,8 @@ public:
 
 	int GetGraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
-	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
-	boost::weak_ptr<Item> ContainedIn();
+	virtual void PutInContainer(std::weak_ptr<Item> = std::weak_ptr<Item>());
+	std::weak_ptr<Item> ContainedIn();
 	ItemType Type();
 	int GetGraphic();
 	TCODColor Color();
@@ -182,7 +183,7 @@ class WaterItem : public OrganicItem {
 
 public:
 	WaterItem(Coordinate=Coordinate(0,0), ItemType=0);
-	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
+	virtual void PutInContainer(std::weak_ptr<Item> = std::weak_ptr<Item>());
 };
 
 BOOST_CLASS_VERSION(WaterItem, 0)

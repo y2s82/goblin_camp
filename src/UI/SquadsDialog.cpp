@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <string>
@@ -39,7 +40,7 @@ SquadsDialog* SquadsDialog::SquadDialog() {
 	if (!squadDialog){
 		UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 50, 20);
 		squadDialog = new SquadsDialog(contents, "Squads", 50, 20);
-		squadDialog->squadList = new UIList<std::pair<std::string, boost::shared_ptr<Squad> >, std::map<std::string, boost::shared_ptr<Squad> > >(
+		squadDialog->squadList = new UIList<std::pair<std::string, std::shared_ptr<Squad> >, std::map<std::string, std::shared_ptr<Squad> > >(
 			&(Game::Inst()->squadList), 0, 0, 46, 16, SquadsDialog::DrawSquad, boost::bind(&SquadsDialog::SelectSquad, squadDialog, _1), true, &SquadsDialog::GetSquadTooltip);
 		Frame *left = new Frame("Existing", std::vector<Drawable *>(), 1, 1, 24, 18);
 		left->AddComponent(new ScrollPanel(1, 0, 23, 18, squadDialog->squadList, false));
@@ -86,7 +87,7 @@ SquadsDialog* SquadsDialog::SquadDialog() {
 	return squadDialog;
 }
 
-void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > squadi, int i, int x, int y, int width, bool selected, TCODConsole *console) {
+void SquadsDialog::DrawSquad(std::pair<std::string, std::shared_ptr<Squad> > squadi, int i, int x, int y, int width, bool selected, TCODConsole *console) {
 	console->setBackgroundFlag(TCOD_BKGND_SET);
 	console->setDefaultBackground(selected ? TCODColor::blue : TCODColor::black);
 	console->print(x, y, "%s (%d/%d)", squadi.first.c_str(), squadi.second->MemberCount(),
@@ -94,7 +95,7 @@ void SquadsDialog::DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> > s
 	console->setDefaultBackground(TCODColor::black);
 }
 
-void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squad> > squadi, Tooltip *tooltip) {
+void SquadsDialog::GetSquadTooltip(std::pair<std::string, std::shared_ptr<Squad> > squadi, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry(squadi.first, TCODColor::white));
 	tooltip->AddEntry(TooltipEntry((boost::format(" Priority: %d") % squadi.second->Priority()).str(), TCODColor::grey));
 
@@ -120,12 +121,12 @@ void SquadsDialog::GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squa
 	tooltip->AddEntry(TooltipEntry((boost::format(" Armor: %s") % Item::ItemCategoryToString(squadi.second->Armor())).str(), TCODColor::grey));
 }
 
-boost::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
-	std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
+std::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
+	std::map<std::string, std::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
 	if (i >= 0 && i < (signed int)Game::Inst()->squadList.size()) {
 		return boost::next(it, i)->second;
 	}
-	return boost::shared_ptr<Squad>();
+	return std::shared_ptr<Squad>();
 }
 
 void SquadsDialog::SelectSquad(int i) {
@@ -150,10 +151,10 @@ bool SquadsDialog::SquadSelected(bool selected) {
 
 void SquadsDialog::CreateSquad() {
 	if(squadName.length() > 0) {
-		Game::Inst()->squadList.insert(std::pair<std::string, boost::shared_ptr<Squad> >
-			(squadName, boost::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
+		Game::Inst()->squadList.insert(std::pair<std::string, std::shared_ptr<Squad> >
+			(squadName, std::shared_ptr<Squad>(new Squad(squadName, squadMembers, squadPriority))));
 		int squad = 0;
-		for (std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
+		for (std::map<std::string, std::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
 			it != Game::Inst()->squadList.end(); ++it) {
 				if (it->first == squadName) {
 					break;
@@ -167,17 +168,17 @@ void SquadsDialog::CreateSquad() {
 }
 
 void SquadsDialog::ModifySquad() {
-	boost::shared_ptr<Squad> tempSquad = GetSquad(squadList->Selected());
+	std::shared_ptr<Squad> tempSquad = GetSquad(squadList->Selected());
 	Game::Inst()->squadList.erase(tempSquad->Name());
 	tempSquad->Name(squadName);
 	Game::Inst()->squadList.insert(std::pair<std::string, 
-		boost::shared_ptr<Squad> >(squadName, tempSquad));
+		std::shared_ptr<Squad> >(squadName, tempSquad));
 	tempSquad->MemberLimit(squadMembers);
 	tempSquad->Priority(squadPriority);
 
 	//Reselect the squad, changing the name may change it's position in the list
 	int squad = 0;
-	for (std::map<std::string, boost::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
+	for (std::map<std::string, std::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
 		it != Game::Inst()->squadList.end(); ++it) {
 			if (it->first == squadName) {
 				break;
@@ -191,7 +192,7 @@ void SquadsDialog::ModifySquad() {
 }
 
 void SquadsDialog::DeleteSquad() {
-	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+	std::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
 	if (squad) {
 		squad->RemoveAllMembers();
 		Game::Inst()->squadList.erase(squad->Name());
@@ -199,7 +200,7 @@ void SquadsDialog::DeleteSquad() {
 }
 
 void SquadsDialog::SelectOrder(Order order) {
-	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+	std::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
 	if (squad) {
 		squad->ClearOrders();
 		squad->SetGeneralOrder(order);
@@ -220,7 +221,7 @@ void SquadsDialog::SelectOrder(Order order) {
 }
 
 bool SquadsDialog::OrderSelected(Order order) {
-	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+	std::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
 	return squad ? squad->GetGeneralOrder() == order : false;
 }
 
@@ -279,7 +280,7 @@ void SquadsDialog::RefreshMarkers() {
 		Map::Inst()->RemoveMarker(*markeri);
 		markeri = markers.erase(markeri);
 	}
-	boost::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
+	std::shared_ptr<Squad> squad = GetSquad(squadList->Selected());
 	if (squad) {
 		int orderIndex = 0;
 		do { 

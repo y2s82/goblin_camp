@@ -13,9 +13,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
-#include <boost/shared_ptr.hpp>
+
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 namespace py = boost::python;
@@ -26,9 +27,9 @@ namespace py = boost::python;
 #include "Logger.hpp"
 
 namespace Script { namespace API {
-	#define CONSTRUCTION_ALIVE(var) boost::shared_ptr<Construction> var = construction.lock()
+	#define CONSTRUCTION_ALIVE(var) std::shared_ptr<Construction> var = construction.lock()
 	
-	PyConstruction::PyConstruction(boost::weak_ptr<Construction> construction) : construction(construction) {
+	PyConstruction::PyConstruction(std::weak_ptr<Construction> construction) : construction(construction) {
 	}
 	
 	py::tuple PyConstruction::GetPosition() {

@@ -15,12 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
 #include <list>
 
 #include <boost/multi_array.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
+
+
 #include <boost/thread/mutex.hpp>
 
 #include <libtcod.hpp>
@@ -85,16 +86,16 @@ class Game {
 	static bool devMode;
 	Coordinate marks[12];
 
-	boost::shared_ptr<Events> events;
+	std::shared_ptr<Events> events;
 
 	std::list<std::pair<int, boost::function<void()> > > delays;
 
-	boost::shared_ptr<MapRenderer> renderer;
+	std::shared_ptr<MapRenderer> renderer;
 	bool gameOver;
 
-	std::map<int, boost::shared_ptr<Construction> > staticConstructionList;
-	std::map<int, boost::shared_ptr<Construction> > dynamicConstructionList;
-	std::map<int, boost::shared_ptr<NPC> > npcList;
+	std::map<int, std::shared_ptr<Construction> > staticConstructionList;
+	std::map<int, std::shared_ptr<Construction> > dynamicConstructionList;
+	std::map<int, std::shared_ptr<NPC> > npcList;
 
 	static bool initializedOnce;
 
@@ -112,7 +113,7 @@ public:
 	static void Exit(bool confirm=true);
 
 	Coordinate TileAt(int pixelX, int pixelY) const;
-	boost::shared_ptr<MapRenderer> Renderer() { return renderer; };
+	std::shared_ptr<MapRenderer> Renderer() { return renderer; };
 
 	int ScreenWidth() const;
 	int ScreenHeight() const;
@@ -166,13 +167,13 @@ public:
 	int DistanceNPCToCoordinate(int, Coordinate);
 	int OrcCount() const; int GoblinCount() const;
 	void OrcCount(int); void GoblinCount(int);
-	void RemoveNPC(boost::weak_ptr<NPC>);
+	void RemoveNPC(std::weak_ptr<NPC>);
 	int FindMilitaryRecruit();
-	std::map<std::string, boost::shared_ptr<Squad> > squadList;
-	std::list<boost::shared_ptr<Squad> > hostileSquadList;
+	std::map<std::string, std::shared_ptr<Squad> > squadList;
+	std::list<std::shared_ptr<Squad> > hostileSquadList;
 	void CreateSquad(std::string);
-	static void SetSquadTargetCoordinate(Order, Coordinate, boost::shared_ptr<Squad>, bool autoClose = true);
-	static void SetSquadTargetEntity(Order, Coordinate, boost::shared_ptr<Squad>);
+	static void SetSquadTargetCoordinate(Order, Coordinate, std::shared_ptr<Squad>, bool autoClose = true);
+	static void SetSquadTargetEntity(Order, Coordinate, std::shared_ptr<Squad>);
 	NPCType GetRandomNPCTypeByTag(std::string tag);
 	std::vector<int> CreateNPCs(int,NPCType,Coordinate,Coordinate);
 	unsigned int PeacefulFaunaCount() const;
@@ -182,58 +183,58 @@ public:
 	void Tire(Coordinate);
 	void Badsleepify(Coordinate);
 	void Diseasify(Coordinate);
-	boost::shared_ptr<NPC> GetNPC(int) const;
+	std::shared_ptr<NPC> GetNPC(int) const;
 
 	/*      CONSTRUCTIONS       CONSTRUCTIONS       CONSTRUCTIONS       */
 	static bool CheckPlacement(Coordinate, Coordinate, std::set<TileType> = std::set<TileType>());
 	static int PlaceConstruction(Coordinate, ConstructionType);
 	static void DismantleConstruction(Coordinate, Coordinate);
-	void RemoveConstruction(boost::weak_ptr<Construction>);
+	void RemoveConstruction(std::weak_ptr<Construction>);
 	static int PlaceStockpile(Coordinate, Coordinate, ConstructionType, int);
 	void RefreshStockpiles() { refreshStockpiles = true; }
-	void RebalanceStockpiles(ItemCategory requiredCategory, boost::shared_ptr<Stockpile> excluded);
-	Coordinate FindClosestAdjacent(Coordinate, boost::weak_ptr<Entity>, int faction = -1);
-	static bool Adjacent(Coordinate, boost::weak_ptr<Entity>);
-	boost::weak_ptr<Construction> GetConstruction(int);
-	boost::weak_ptr<Construction> FindConstructionByTag(ConstructionTag, Coordinate closeTo=Coordinate(-1,-1));
-	boost::weak_ptr<Construction> GetRandomConstruction() const;
+	void RebalanceStockpiles(ItemCategory requiredCategory, std::shared_ptr<Stockpile> excluded);
+	Coordinate FindClosestAdjacent(Coordinate, std::weak_ptr<Entity>, int faction = -1);
+	static bool Adjacent(Coordinate, std::weak_ptr<Entity>);
+	std::weak_ptr<Construction> GetConstruction(int);
+	std::weak_ptr<Construction> FindConstructionByTag(ConstructionTag, Coordinate closeTo=Coordinate(-1,-1));
+	std::weak_ptr<Construction> GetRandomConstruction() const;
 	void Damage(Coordinate);
 	void UpdateFarmPlotSeedAllowances(ItemType);
 
 	/*      ITEMS       ITEMS       ITEMS       */
 	int CreateItem(Coordinate, ItemType, bool stockpile = false,
 		int ownerFaction = 0,
-		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >(),
-		boost::shared_ptr<Container> = boost::shared_ptr<Container>());
-	void RemoveItem(boost::weak_ptr<Item>);
-	boost::weak_ptr<Item> GetItem(int);
-	std::map<int,boost::shared_ptr<Item> > itemList;
-	void ItemContained(boost::weak_ptr<Item>, bool contained);
-	std::set<boost::weak_ptr<Item> > freeItems; //Free as in not contained
-	std::set<boost::weak_ptr<Item> > flyingItems; //These need to be updated
-	std::list<boost::weak_ptr<Item> > stoppedItems; //These need to be removed from flyingItems
+		std::vector<std::weak_ptr<Item> > = std::vector<std::weak_ptr<Item> >(),
+		std::shared_ptr<Container> = std::shared_ptr<Container>());
+	void RemoveItem(std::weak_ptr<Item>);
+	std::weak_ptr<Item> GetItem(int);
+	std::map<int,std::shared_ptr<Item> > itemList;
+	void ItemContained(std::weak_ptr<Item>, bool contained);
+	std::set<std::weak_ptr<Item> > freeItems; //Free as in not contained
+	std::set<std::weak_ptr<Item> > flyingItems; //These need to be updated
+	std::list<std::weak_ptr<Item> > stoppedItems; //These need to be removed from flyingItems
 	static int ItemTypeCount;
 	static int ItemCatCount;
-	boost::shared_ptr<Job> StockpileItem(boost::weak_ptr<Item>, bool returnJob = false, bool disregardTerritory = false, bool reserveItem = true);
-	boost::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, Coordinate, int flags = 0, int value = 0);
-	boost::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, Coordinate, int flags = 0, int value = 0);
+	std::shared_ptr<Job> StockpileItem(std::weak_ptr<Item>, bool returnJob = false, bool disregardTerritory = false, bool reserveItem = true);
+	std::weak_ptr<Item> FindItemByCategoryFromStockpiles(ItemCategory, Coordinate, int flags = 0, int value = 0);
+	std::weak_ptr<Item> FindItemByTypeFromStockpiles(ItemType, Coordinate, int flags = 0, int value = 0);
 	void CreateItems(int,ItemType,Coordinate,Coordinate);
 	void TranslateContainerListeners();
 	void GatherItems(Coordinate a, Coordinate b);
 
 	/*      NATURE      NATURE      NATURE      */
-	std::map<int, boost::shared_ptr<NatureObject> > natureList;
-	std::list<boost::weak_ptr<WaterNode> > waterList;
+	std::map<int, std::shared_ptr<NatureObject> > natureList;
+	std::list<std::weak_ptr<WaterNode> > waterList;
 	void CreateWater(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
-	void CreateWaterFromNode(boost::shared_ptr<WaterNode>);
+	void CreateWaterFromNode(std::shared_ptr<WaterNode>);
 	void RemoveWater(Coordinate, bool removeFromList = true);
 	Coordinate FindWater(Coordinate);
 	Coordinate FindFilth(Coordinate);
 	static bool CheckTree(Coordinate, Coordinate);
 	static void FellTree(Coordinate, Coordinate);
 	static void DesignateTree(Coordinate, Coordinate);
-	void RemoveNatureObject(boost::weak_ptr<NatureObject>);
+	void RemoveNatureObject(std::weak_ptr<NatureObject>);
 	void RemoveNatureObject(Coordinate a, Coordinate b);
 	static void HarvestWildPlant(Coordinate, Coordinate);
 	static void DesignateBog(Coordinate, Coordinate);
@@ -253,12 +254,12 @@ public:
 	void DeTillFarmPlots();
 	void DecayItems();
 
-	std::list<boost::weak_ptr<FilthNode> > filthList;
+	std::list<std::weak_ptr<FilthNode> > filthList;
 	void CreateFilth(Coordinate);
 	void CreateFilth(Coordinate,int);
 	void RemoveFilth(Coordinate);
 
-	std::list<boost::weak_ptr<BloodNode> > bloodList;
+	std::list<std::weak_ptr<BloodNode> > bloodList;
 	void CreateBlood(Coordinate);
 	void CreateBlood(Coordinate,int);
 
@@ -267,13 +268,13 @@ public:
 
 	void AddDelay(int delay, boost::function<void()>);
 
-	std::list<boost::weak_ptr<FireNode> > fireList;
+	std::list<std::weak_ptr<FireNode> > fireList;
 	void CreateFire(Coordinate);
 	void CreateFire(Coordinate,int);
 	void StartFire(Coordinate);
 
-	boost::shared_ptr<Spell> CreateSpell(Coordinate, int type);
-	std::list<boost::shared_ptr<Spell> > spellList;
+	std::shared_ptr<Spell> CreateSpell(Coordinate, int type);
+	std::list<std::shared_ptr<Spell> > spellList;
 
 	int GetAge();
 

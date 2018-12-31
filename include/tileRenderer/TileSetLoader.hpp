@@ -15,8 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
-#include <boost/shared_ptr.hpp>
+
 #include <boost/filesystem.hpp>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetRenderer.hpp"
@@ -42,8 +43,8 @@ struct TilesetModMetadata {
 
 namespace TileSetLoader
 {
-	boost::shared_ptr<TileSet> LoadTileSet(boost::shared_ptr<TilesetRenderer> spriteFactory, std::string name);
-	boost::shared_ptr<TileSet> LoadTileSet(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::filesystem::path path);
+	std::shared_ptr<TileSet> LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, std::string name);
+	std::shared_ptr<TileSet> LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, boost::filesystem::path path);
 	TileSetMetadata LoadTileSetMetadata(boost::filesystem::path path);
 	std::list<TilesetModMetadata> LoadTilesetModMetadata(boost::filesystem::path path);
 }

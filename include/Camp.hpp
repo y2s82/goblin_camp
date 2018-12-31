@@ -14,12 +14,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <set>
 #include <list>
 
-#include <boost/weak_ptr.hpp>
+
 
 #include "Coordinate.hpp"
 #include "data/Serialization.hpp"
@@ -43,8 +44,8 @@ class Camp {
 	Coordinate upperCorner, lowerCorner;
 	bool autoTerritory;
 	std::set<Coordinate> waterZones;
-	std::list<boost::weak_ptr<Job> > menialWaterJobs;
-	std::list<boost::weak_ptr<Job> > expertWaterJobs;
+	std::list<std::weak_ptr<Job> > menialWaterJobs;
+	std::list<std::weak_ptr<Job> > expertWaterJobs;
 	int diseaseModifier;
 public:
 	static Camp* Inst();
@@ -68,7 +69,7 @@ public:
 	Coordinate GetUprTerritoryCorner() const;
 	Coordinate GetLowTerritoryCorner() const;
 	Coordinate GetRandomSpot() const;
-	boost::weak_ptr<SpawningPool> spawningPool;
+	std::weak_ptr<SpawningPool> spawningPool;
 	int GetDiseaseModifier();
 };
 

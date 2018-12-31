@@ -15,9 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
 #include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/filesystem.hpp>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetLoader.hpp"
@@ -33,11 +34,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSetParserV2 : public ITCODParserListener, private boost::noncopyable
 {
 public:
-	explicit TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactory);
+	explicit TileSetParserV2(std::shared_ptr<TilesetRenderer> spriteFactory);
 	~TileSetParserV2();
 
-	boost::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
-	void Modify(boost::shared_ptr<TileSet> tileset, boost::filesystem::path modPath);
+	std::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
+	void Modify(std::shared_ptr<TileSet> tileset, boost::filesystem::path modPath);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
@@ -47,9 +48,9 @@ public:
 
 private:
 	TCODParser parser;
-	boost::shared_ptr<TilesetRenderer> spriteFactory;
+	std::shared_ptr<TilesetRenderer> spriteFactory;
 
-	boost::shared_ptr<TileSet> tileSet;
+	std::shared_ptr<TileSet> tileSet;
 	bool success;
 	bool readTexture;
 	bool extendingExisting;
@@ -69,7 +70,7 @@ private:
 	
 	// Path where textures are found
 	boost::filesystem::path tileSetPath;
-	boost::shared_ptr<TileSetTexture> currentTexture;
+	std::shared_ptr<TileSetTexture> currentTexture;
 
 	std::string tileSetName;
 	int tileWidth;
@@ -87,7 +88,7 @@ private:
 
 		AnimatedSpriteFactory() : sprites(), fps(15) {}
 
-		Sprite_ptr Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+		Sprite_ptr Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture);
 	};
 	AnimatedSpriteFactory animSpriteFactory;
 	ConstructionSpriteFactory constructionFactory;

@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
@@ -246,7 +247,7 @@ void StartNewGame() {
 		game->CreateItem(corpseLoc[c], Item::StringToItemType("stone axe"));
 		game->CreateItem(corpseLoc[c], Item::StringToItemType("shovel"));
 		int corpseuid = game->CreateItem(corpseLoc[c], Item::StringToItemType("corpse"));
-		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
+		std::shared_ptr<Item> corpse = game->itemList[corpseuid];
 		corpse->Name("Corpse(Human woodsman)");
 		corpse->Color(TCODColor::white);
 		for (int i = 0; i < 6; ++i)
