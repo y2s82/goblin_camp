@@ -154,7 +154,7 @@ void Events::SpawnHostileMonsters() {
 		Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 		timeSinceHostileSpawn = 0;
 		if (Config::GetCVar<bool>("pauseOnDanger")) 
-			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
+			Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 	}
 }
 

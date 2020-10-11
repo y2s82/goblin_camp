@@ -45,12 +45,12 @@ public:
 	void FilthFlowsOffEdge(unsigned amount=1);
 	unsigned GetFilthFlownOff();
 
-	boost::unordered_map<std::string, unsigned> deaths;
-	boost::unordered_map<std::string, unsigned> constructionsBuilt;
+	std::unordered_map<std::string, unsigned> deaths;
+	std::unordered_map<std::string, unsigned> constructionsBuilt;
 	void ConstructionBuilt(std::string);
 	unsigned GetConstructionsBuilt();
 
-	boost::unordered_map<std::string, unsigned> itemsBuilt;
+	std::unordered_map<std::string, unsigned> itemsBuilt;
 	void ItemBuilt(std::string);
 	unsigned GetItemsBuilt();
 

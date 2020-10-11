@@ -267,7 +267,7 @@ namespace Data {
 			DoSave(file, result);
 		} else {
 			MessageBox::ShowMessageBox(
-				"Save game exists, overwrite?", boost::bind(DoSave, file, boost::ref(result)), "Yes",
+				"Save game exists, overwrite?", std::bind(DoSave, file, boost::ref(result)), "Yes",
 				NULL, "No");
 		}
 		

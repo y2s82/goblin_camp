@@ -31,9 +31,9 @@ protected:
 	bool selected;
 	char shortcut;
 	bool dismiss;
-	boost::function<void()> callback;
+	std::function<void()> callback;
 public:
-	Button(std::string ntext, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0, bool ndismiss = false):
+	Button(std::string ntext, std::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0, bool ndismiss = false):
 		Drawable(x, y, nwidth, 0),
 		text(ntext),
 		selected(false),
@@ -46,18 +46,18 @@ public:
 
 class LiveButton: public Button {
 private:
-	boost::function<std::string()> textFunc;
+	std::function<std::string()> textFunc;
 public:
-	LiveButton(boost::function<std::string()> ntextFunc, boost::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
+	LiveButton(std::function<std::string()> ntextFunc, std::function<void()> ncallback, int x, int y, int nwidth, char nshortcut = 0):
 		Button("", ncallback, x, y, nwidth, nshortcut), textFunc(ntextFunc) {}
 	void Draw(int, int, TCODConsole *);
 };
 
 class ToggleButton: public Button {
 private:
-	boost::function<bool()> isOn;
+	std::function<bool()> isOn;
 public:
-	ToggleButton(std::string ntext, boost::function<void()> ncallback, boost::function<bool()> nisOn, int x, int y, int nwidth, char nshortcut = 0):
+	ToggleButton(std::string ntext, std::function<void()> ncallback, std::function<bool()> nisOn, int x, int y, int nwidth, char nshortcut = 0):
 		Button(ntext, ncallback, x, y, nwidth, nshortcut), isOn(nisOn) {}
 	void Draw(int, int, TCODConsole *);
 };

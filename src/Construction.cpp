@@ -61,7 +61,7 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 	return Construction::Presets[construct].productionSpot;
 }
 
-boost::unordered_map<std::string, ConstructionType> Construction::constructionNames = boost::unordered_map<std::string, ConstructionType>();
+std::unordered_map<std::string, ConstructionType> Construction::constructionNames = std::unordered_map<std::string, ConstructionType>();
 
 ConstructionType Construction::StringToConstructionType(std::string name) {
 	boost::to_upper(name);
@@ -224,7 +224,7 @@ int Construction::Build() {
 		if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 		else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
 		if (producer) {
-			StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), true);
+			StockManager::Inst()->UpdateWorkshops(std::static_pointer_cast<Construction>(shared_from_this()), true);
 			for (unsigned int prod = 0; prod < Construction::Presets[type].products.size(); ++prod) {
 				StockManager::Inst()->UpdateQuantity(Construction::Presets[type].products[prod], 0);
 			}
@@ -235,7 +235,7 @@ int Construction::Build() {
 		Camp::Inst()->ConstructionBuilt(type);
 		Stats::Inst()->ConstructionBuilt(Construction::Presets[type].name);
 
-		Script::Event::BuildingCreated(boost::static_pointer_cast<Construction>(shared_from_this()), pos.X(), pos.Y());
+		Script::Event::BuildingCreated(std::static_pointer_cast<Construction>(shared_from_this()), pos.X(), pos.Y());
 	}
 	return condition;
 }
@@ -278,7 +278,7 @@ void Construction::CancelJob(int index) {
 	} else if (index > 0 && index < (signed int)jobList.size()) { 
 		jobList.erase(jobList.begin() + index); 
 	} else if (condition <= 0) {
-		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 	}
 	else if (dismantle) dismantle = false; //Stop trying to dismantle
 }
@@ -355,7 +355,7 @@ int Construction::Use() {
 					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
 						if (itemi->lock()->IsCategory(Item::Presets[jobList[0]].containIn)) {
 							//This component is the container our product should be placed in
-							itemContainer = boost::static_pointer_cast<Container>(itemi->lock());
+							itemContainer = std::static_pointer_cast<Container>(itemi->lock());
 						} else {
 							//Just a component of the product
 							components.push_back(*itemi);
@@ -699,7 +699,7 @@ void Construction::ResolveProducts() {
 				// Could use bit more complicated lambda expression to eliminate
 				// separate predicate function entirely, but I think this is more
 				// clear to people not used to Boost.Lambda
-				boost::bind(_ConstructionNameEquals, _1, itemPreset.constructedInRaw)
+				std::bind(_ConstructionNameEquals, _1, itemPreset.constructedInRaw)
 			);
 			
 			if (conIt != Construction::Presets.end()) {
@@ -835,7 +835,7 @@ void Construction::Update() {
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
 
 			if (announceColor == TCODColor::red && Config::GetCVar<bool>("pauseOnDanger")) 
-				Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
+				Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
 			if (amount == 1) {
@@ -874,13 +874,13 @@ void Construction::Dismantle(const Coordinate&) {
 			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
 			JobManager::Inst()->AddJob(dismantleJob);
 		} else {
-			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+			Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 		}
 	}
 }
 
 Panel *Construction::GetContextMenu() {
-	return ConstructionDialog::ConstructionInfoDialog(boost::static_pointer_cast<Construction>(shared_from_this()));
+	return ConstructionDialog::ConstructionInfoDialog(std::static_pointer_cast<Construction>(shared_from_this()));
 }
 	
 void Construction::Damage(Attack* attack) {
@@ -911,7 +911,7 @@ void Construction::Damage(Attack* attack) {
 	if (condition <= 0) {
 		if (attack->Type() != DAMAGE_FIRE) Explode();
 		else BurnToTheGround();
-		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
 

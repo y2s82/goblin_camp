@@ -170,7 +170,7 @@ void FireNode::Update() {
 					} else if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 						/*Stockpiles are a special case. Not being an actual building, fire won't touch them.
 						Instead fire should be able to burn the items stored in the stockpile*/
-						std::shared_ptr<Container> container = boost::static_pointer_cast<Stockpile>(construct)->Storage(pos).lock();
+						std::shared_ptr<Container> container = std::static_pointer_cast<Stockpile>(construct)->Storage(pos).lock();
 						if (container) {
 							std::shared_ptr<Item> item = container->GetFirstItem().lock();
 							if (item && item->IsFlammable()) {
@@ -182,7 +182,7 @@ void FireNode::Update() {
 							}
 						}
 					} else if (construct->HasTag(SPAWNINGPOOL)) {
-						boost::static_pointer_cast<SpawningPool>(construct)->Burn();
+						std::static_pointer_cast<SpawningPool>(construct)->Burn();
 						if (temperature < 15) temperature += 5;
 					}
 				}

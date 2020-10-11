@@ -88,7 +88,7 @@ class Game {
 
 	std::shared_ptr<Events> events;
 
-	std::list<std::pair<int, boost::function<void()> > > delays;
+	std::list<std::pair<int, std::function<void()> > > delays;
 
 	std::shared_ptr<MapRenderer> renderer;
 	bool gameOver;
@@ -122,11 +122,11 @@ public:
 	void ResetRenderer();
 	
 	static boost::mutex loadingScreenMutex;
-	static void ProgressScreen(boost::function<void(void)>, bool isLoading);
-	static void LoadingScreen(boost::function<void(void)> fn) {
+	static void ProgressScreen(std::function<void(void)>, bool isLoading);
+	static void LoadingScreen(std::function<void(void)> fn) {
 		ProgressScreen(fn, true);
 	}
-	static void SavingScreen(boost::function<void(void)> fn) {
+	static void SavingScreen(std::function<void(void)> fn) {
 		ProgressScreen(fn, false);
 	}
 	
@@ -266,7 +266,7 @@ public:
 	void TriggerAttack();
 	void TriggerMigration();
 
-	void AddDelay(int delay, boost::function<void()>);
+	void AddDelay(int delay, std::function<void()>);
 
 	std::list<std::weak_ptr<FireNode> > fireList;
 	void CreateFire(Coordinate);

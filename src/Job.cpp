@@ -295,7 +295,7 @@ void Job::CreatePourWaterJob(std::shared_ptr<Job> job, Coordinate location) {
 
 		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
 			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-				std::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
+				std::shared_ptr<Container> container = std::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
 				//Reserve everything inside the container
 				for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); 
 					itemi != container->end(); ++itemi) {

@@ -21,8 +21,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // Data refactoring: game configuration.
 
 namespace Config {
-	typedef boost::unordered_map<std::string, std::string> CVarMap;
-	typedef boost::unordered_map<std::string, char> KeyMap;
+	typedef std::unordered_map<std::string, std::string> CVarMap;
+	typedef std::unordered_map<std::string, char> KeyMap;
 	
 	void Init();
 	void Save();

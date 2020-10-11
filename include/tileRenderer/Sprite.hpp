@@ -46,8 +46,8 @@ public:
 	bool IsAnimated() const;
 
 	// Connection Map Drawing
-	typedef boost::function<bool (Direction)> ConnectedFunction;
-	typedef boost::function<int (Direction)> LayeredConnectedFunction;
+	typedef std::function<bool (Direction)> ConnectedFunction;
+	typedef std::function<int (Direction)> LayeredConnectedFunction;
 
 	// Standard Tile Drawing
 	void Draw(int screenX, int screenY) const; 

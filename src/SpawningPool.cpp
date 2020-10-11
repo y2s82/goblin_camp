@@ -46,10 +46,10 @@ SpawningPool::SpawningPool(ConstructionType type, const Coordinate& target) : Co
 {
 	container = new UIContainer(std::vector<Drawable*>(), 0, 0, 16, 11);
 	dialog = new Dialog(container, "Spawning Pool", 16, 10);
-	container->AddComponent(new ToggleButton("Dump filth", boost::bind(&SpawningPool::ToggleDumpFilth, this), 
-		boost::bind(&SpawningPool::DumpFilth, this), 2, 2, 12));
-	container->AddComponent(new ToggleButton("Dump corpses", boost::bind(&SpawningPool::ToggleDumpCorpses, this), 
-		boost::bind(&SpawningPool::DumpCorpses, this), 1, 6, 14));
+	container->AddComponent(new ToggleButton("Dump filth", std::bind(&SpawningPool::ToggleDumpFilth, this), 
+		std::bind(&SpawningPool::DumpFilth, this), 2, 2, 12));
+	container->AddComponent(new ToggleButton("Dump corpses", std::bind(&SpawningPool::ToggleDumpCorpses, this), 
+		std::bind(&SpawningPool::DumpCorpses, this), 1, 6, 14));
 	corpseContainer = std::shared_ptr<Container>(new Container(target, 0, 1000, -1));
 }
 
@@ -280,13 +280,13 @@ void SpawningPool::AcceptVisitor(ConstructionVisitor& visitor) {
 void SpawningPool::Burn() {
 	burn += 5;
 	if (burn > 30000) {
-		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
 
 int SpawningPool::Build() {
-	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != boost::static_pointer_cast<SpawningPool>(shared_from_this())) {
-		Camp::Inst()->spawningPool = boost::static_pointer_cast<SpawningPool>(shared_from_this());
+	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != std::static_pointer_cast<SpawningPool>(shared_from_this())) {
+		Camp::Inst()->spawningPool = std::static_pointer_cast<SpawningPool>(shared_from_this());
 	}
 	map->Corrupt(Position(), 100);
 	return Construction::Build();

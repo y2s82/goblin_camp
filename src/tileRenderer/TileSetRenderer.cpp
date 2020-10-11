@@ -281,7 +281,7 @@ void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int vi
 				if (map->GetCorruption(tile) >= 100) {
 					TileType type = map->GetType(tile);
 					const TerrainSprite& terrainSprite = (type == TILESNOW) ? tileSet->GetTerrainSprite(TILEGRASS) : tileSet->GetTerrainSprite(type);
-					terrainSprite.DrawCorruptionOverlay(x, y, boost::bind(&CorruptionConnectionTest, map, tile, _1));
+					terrainSprite.DrawCorruptionOverlay(x, y, std::bind(&CorruptionConnectionTest, map, tile, _1));
 				}
 			}
 		}
@@ -389,24 +389,24 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 	bool corrupted = map->GetCorruption(pos) >= 100;
 	if (type == TILESNOW) {
 		if (corrupted) {
-			terrainSprite.DrawSnowedAndCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+			terrainSprite.DrawSnowedAndCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&GrassConnectionTest, map, pos, _1), std::bind(&SnowConnectionTest, map, pos, _1), std::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else {
-			terrainSprite.DrawSnowed(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&SnowConnectionTest, map, pos, _1));
+			terrainSprite.DrawSnowed(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&GrassConnectionTest, map, pos, _1), std::bind(&SnowConnectionTest, map, pos, _1));
 		}
 	} else if (type == TILEGRASS) {
 		bool burnt = type == TILEGRASS && map->Burnt(pos) >= 10;
 		if (corrupted) {
-			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&GrassConnectionTest, map, pos, _1), std::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else if (burnt) {
-			terrainSprite.DrawBurnt(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1), boost::bind(&BurntConnectionTest, map, pos, _1));
+			terrainSprite.DrawBurnt(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&GrassConnectionTest, map, pos, _1), std::bind(&BurntConnectionTest, map, pos, _1));
 		} else {
-			terrainSprite.Draw(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&GrassConnectionTest, map, pos, _1));
+			terrainSprite.Draw(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&GrassConnectionTest, map, pos, _1));
 		}
 	} else {
 		if (corrupted) {
-			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&TerrainConnectionTest, map, pos, type, _1), boost::bind(&CorruptionConnectionTest, map, pos, _1));
+			terrainSprite.DrawCorrupted(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&TerrainConnectionTest, map, pos, type, _1), std::bind(&CorruptionConnectionTest, map, pos, _1));
 		} else {
-			terrainSprite.Draw(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), boost::bind(&TerrainConnectionTest, map, pos, type, _1));
+			terrainSprite.Draw(screenX, screenY, pos, permutationTable, map->heightMap->getValue(pos.X(), pos.Y()), std::bind(&TerrainConnectionTest, map, pos, type, _1));
 		}
 	}
 	
@@ -415,30 +415,30 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 		std::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
 		if (std::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
-				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
+				tileSet->DrawWater(screenX, screenY, std::bind(&WaterConnectionTest, map, pos, _1));
 			}
 		}
 		int natNum = -1;
 		if ((natNum = map->GetNatureObject(pos)) >= 0) {
 			if (Game::Inst()->natureList[natNum]->IsIce()) {
-				tileSet->DrawIce(screenX, screenY, boost::bind(&WaterConnectionTest, map, pos, _1));
+				tileSet->DrawIce(screenX, screenY, std::bind(&WaterConnectionTest, map, pos, _1));
 			}
 		}
 	} else {
 		std::weak_ptr<WaterNode> waterPtr = map->GetWater(pos);
 		if (std::shared_ptr<WaterNode> water = waterPtr.lock()) {
 			if (water->Depth() > 0) {
-				tileSet->DrawWater(screenX, screenY, boost::bind(&WaterNoIceConnectionTest, map, pos, _1));
+				tileSet->DrawWater(screenX, screenY, std::bind(&WaterNoIceConnectionTest, map, pos, _1));
 			}
 		}
 	}
 	if (std::shared_ptr<BloodNode> blood = map->GetBlood(pos).lock()) {
 		if (blood->Depth() > 0) {
-			tileSet->DrawBlood(screenX, screenY, boost::bind(&BloodConnectionTest, map, pos, _1));
+			tileSet->DrawBlood(screenX, screenY, std::bind(&BloodConnectionTest, map, pos, _1));
 		}
 	}
 	if (map->GroundMarked(pos)) {
-		tileSet->DrawMarkedOverlay(screenX, screenY, boost::bind(&GroundMarkedConnectionTest, map, pos, _1));
+		tileSet->DrawMarkedOverlay(screenX, screenY, std::bind(&GroundMarkedConnectionTest, map, pos, _1));
 	}
 	
 }
@@ -446,16 +446,16 @@ void TilesetRenderer::DrawTerrain(int screenX, int screenY, Coordinate pos) cons
 void TilesetRenderer::DrawFilth(int screenX, int screenY, Coordinate pos) const {
 	if (std::shared_ptr<FilthNode> filth = map->GetFilth(pos).lock()) {
 		if (filth->Depth() > 4) {
-			tileSet->DrawFilthMajor(screenX, screenY, boost::bind(&FilthConnectionTest, map, pos, _1));
+			tileSet->DrawFilthMajor(screenX, screenY, std::bind(&FilthConnectionTest, map, pos, _1));
 		} else if (filth->Depth() > 0) {
-			tileSet->DrawFilthMinor(screenX, screenY, boost::bind(&FilthConnectionTest, map, pos, _1));
+			tileSet->DrawFilthMinor(screenX, screenY, std::bind(&FilthConnectionTest, map, pos, _1));
 		}
 	}
 }
 
 void TilesetRenderer::DrawTerritoryOverlay(int screenX, int screenY, Coordinate pos) const {
 	bool isOwned(map->IsTerritory(pos));
-	tileSet->DrawTerritoryOverlay(screenX, screenY, isOwned, boost::bind(&TerritoryConnectionTest, map, pos, isOwned, _1));
+	tileSet->DrawTerritoryOverlay(screenX, screenY, isOwned, std::bind(&TerritoryConnectionTest, map, pos, isOwned, _1));
 }
 
 bool TilesetRenderer::SetTileset(std::shared_ptr<TileSet> newTileset) {

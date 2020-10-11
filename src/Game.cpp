@@ -260,7 +260,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, std::weak_ptr<Entity> ent, 
 	int leastDistance = std::numeric_limits<int>::max();
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
-			std::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
+			std::shared_ptr<Construction> construct(std::static_pointer_cast<Construction>(ent.lock()));
 			//note on weird (origin,extent) coordinates: we want the *outer* bordure of (position,blueprint)
 			Coordinate origin = construct->Position()-1,
 			           extent = Construction::Blueprint(construct->Type()) + 2;
@@ -289,7 +289,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, std::weak_ptr<Entity> ent, 
 bool Game::Adjacent(Coordinate pos, std::weak_ptr<Entity> ent) {
 	if (ent.lock()) {
 		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
-			std::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(ent.lock()));
+			std::shared_ptr<Construction> construct(std::static_pointer_cast<Construction>(ent.lock()));
 			for (int ix = construct->X()-1; ix <= construct->X() + Construction::Blueprint(construct->Type()).X(); ++ix) {
 				for (int iy = construct->Y()-1; iy <= construct->Y() + Construction::Blueprint(construct->Type()).Y(); ++iy) {
 					if (pos.X() == ix && pos.Y() == iy) { return true; }
@@ -398,7 +398,7 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 				&& !npc->quiver.lock()) {
 					int itemUid = CreateItem(npc->Position(), itemType, false, npc->GetFaction(), std::vector<std::weak_ptr<Item> >(), npc->inventory);
 					std::shared_ptr<Item> item = itemList[itemUid];
-					npc->quiver = boost::static_pointer_cast<Container>(item); //Quivers = containers
+					npc->quiver = std::static_pointer_cast<Container>(item); //Quivers = containers
 			} else if (categories.find(Item::StringToItemCategory("ammunition")) != categories.end()
 				&& npc->quiver.lock() && npc->quiver.lock()->empty()) {
 					for (int i = 0; i < 20 && !npc->quiver.lock()->Full(); ++i) {
@@ -459,8 +459,8 @@ void Game::BumpEntity(int uid) {
 void Game::DoNothing() {}
 
 void Game::Exit(bool confirm) {
-	//boost::function<void()> exitFunc = boost::bind(&Game::Running, Game::Inst(), false);
-	boost::function<void()> exitFunc = boost::bind(&exit, 0);
+	//std::function<void()> exitFunc = std::bind(&Game::Running, Game::Inst(), false);
+	std::function<void()> exitFunc = std::bind(&exit, 0);
 
 	if (confirm) {
 		MessageBox::ShowMessageBox("Really exit?", exitFunc, "Yes", NULL, "No");
@@ -508,7 +508,7 @@ namespace {
 
 boost::mutex Game::loadingScreenMutex;
 
-void Game::ProgressScreen(boost::function<void(void)> blockingCall, bool isLoading) {
+void Game::ProgressScreen(std::function<void(void)> blockingCall, bool isLoading) {
 	// this runs blocking call in a separate thread while spinning on the main one
 	// so that the process doesn't appear to be dead
 	//
@@ -675,7 +675,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 				else
 					orgItem.reset(new OrganicItem(pos, type));
 
-				newItem = boost::static_pointer_cast<Item>(orgItem);
+				newItem = std::static_pointer_cast<Item>(orgItem);
 				orgItem->Nutrition(Item::Presets[type].nutrition);
 				orgItem->Growth(Item::Presets[type].growth);
 				orgItem->SetFaction(ownerFaction);
@@ -723,7 +723,7 @@ void Game::RemoveItem(std::weak_ptr<Item> witem) {
 	if (std::shared_ptr<Item> item = witem.lock()) {
 		Map::Inst()->ItemList(item->Position())->erase(item->uid);
 		if (freeItems.find(witem) != freeItems.end()) freeItems.erase(witem);
-		if (std::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item->container.lock())) {
+		if (std::shared_ptr<Container> container = std::static_pointer_cast<Container>(item->container.lock())) {
 			if (container) {
 				container->RemoveItem(witem);
 			}
@@ -799,7 +799,7 @@ std::weak_ptr<Item> Game::FindItemByCategoryFromStockpiles(ItemCategory category
 	std::weak_ptr<Item> nearest = std::weak_ptr<Item>();
 	for (std::map<int, std::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			std::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
+			std::weak_ptr<Item> item(std::static_pointer_cast<Stockpile>(consIter->second)->FindItemByCategory(category, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				int distance = (flags & MOSTDECAYED ? item.lock()->GetDecay() : Distance(item.lock()->Position(), target));
 				if(distance < nearestDistance) {
@@ -819,7 +819,7 @@ std::weak_ptr<Item> Game::FindItemByTypeFromStockpiles(ItemType type, Coordinate
 	std::weak_ptr<Item> nearest = std::weak_ptr<Item>();
 	for (std::map<int, std::shared_ptr<Construction> >::iterator consIter = staticConstructionList.begin(); consIter != staticConstructionList.end(); ++consIter) {
 		if (consIter->second->stockpile && !consIter->second->farmplot) {
-			std::weak_ptr<Item> item(boost::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
+			std::weak_ptr<Item> item(std::static_pointer_cast<Stockpile>(consIter->second)->FindItemByType(type, flags, value));
 			if (item.lock() && !item.lock()->Reserved()) {
 				int distance = (flags & MOSTDECAYED ? item.lock()->GetDecay() : Distance(item.lock()->Position(), target));
 				if(distance < nearestDistance) {
@@ -1069,7 +1069,7 @@ void Game::Update() {
 
 	if (time % (UPDATES_PER_SECOND * 1) == 0) Camp::Inst()->Update();
 
-	for (std::list<std::pair<int, boost::function<void()> > >::iterator delit = delays.begin(); delit != delays.end();) {
+	for (std::list<std::pair<int, std::function<void()> > >::iterator delit = delays.begin(); delit != delays.end();) {
 		if (--delit->first <= 0) {
 			try {
 				delit->second();
@@ -1084,7 +1084,7 @@ void Game::Update() {
 		gameOver = true;
 		//Game over, display stats
 		DisplayStats();
-		MessageBox::ShowMessageBox("Do you wish to keep watching?", NULL, "Keep watching", boost::bind(&Game::GameOver, Game::Inst()), "Quit");
+		MessageBox::ShowMessageBox("Do you wish to keep watching?", NULL, "Keep watching", std::bind(&Game::GameOver, Game::Inst()), "Quit");
 	}
 
 	for (std::list<std::weak_ptr<FireNode> >::iterator fireit = fireList.begin(); fireit != fireList.end();) {
@@ -1133,7 +1133,7 @@ std::shared_ptr<Job> Game::StockpileItem(std::weak_ptr<Item> witem, bool returnJ
 
 			for (std::map<int,std::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 				if (stocki->second->stockpile) {
-					std::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
+					std::shared_ptr<Stockpile> sp(std::static_pointer_cast<Stockpile>(stocki->second));
 					if (sp->Allowed(Item::Presets[itemType].specificCategories) && !sp->Full(itemType)) {
 
 						//Found a stockpile that both allows the item, and has space
@@ -1180,7 +1180,7 @@ std::shared_ptr<Job> Game::StockpileItem(std::weak_ptr<Item> witem, bool returnJ
 					container = nearest->FindItemByCategory(Item::Presets[item->Type()].fitsin, NOTFULL, item->GetBulk());
 					if (container.lock()) {
 						target = container.lock()->Position();
-						stockJob->ReserveSpace(boost::static_pointer_cast<Container>(container.lock()), item->GetBulk());
+						stockJob->ReserveSpace(std::static_pointer_cast<Container>(container.lock()), item->GetBulk());
 					}
 				}
 
@@ -1271,7 +1271,7 @@ void Game::SpawnTillageJobs() {
 void Game::DeTillFarmPlots() {
 	for (std::map<int,std::shared_ptr<Construction> >::iterator consi = dynamicConstructionList.begin(); consi != dynamicConstructionList.end(); ++consi) {
 		if (consi->second->farmplot) {
-			boost::static_pointer_cast<FarmPlot>(consi->second)->tilled = false;
+			std::static_pointer_cast<FarmPlot>(consi->second)->tilled = false;
 		}
 	}
 }
@@ -2039,19 +2039,19 @@ void Game::ReturnToMark(int i) {
 void Game::TranslateContainerListeners() {
 	for (std::map<int,std::shared_ptr<Item> >::iterator it = itemList.begin(); it != itemList.end(); ++it) {
 		if (boost::dynamic_pointer_cast<Container>(it->second)) {
-			boost::static_pointer_cast<Container>(it->second)->TranslateContainerListeners();
+			std::static_pointer_cast<Container>(it->second)->TranslateContainerListeners();
 		}
 	}
 	for (std::map<int, std::shared_ptr<Construction> >::iterator it = staticConstructionList.begin(); 
 		it != staticConstructionList.end(); ++it) {
 			if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
-				boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
+				std::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
 			}
 	}
 	for (std::map<int, std::shared_ptr<Construction> >::iterator it = dynamicConstructionList.begin(); 
 		it != dynamicConstructionList.end(); ++it) {
 			if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
-				boost::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
+				std::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
 			}
 	}
 }
@@ -2257,8 +2257,8 @@ void Game::Damage(Coordinate pos) {
 	}
 }
 
-void Game::AddDelay(int delay, boost::function<void()> callback) {
-	delays.push_back(std::pair<int, boost::function<void()> >(delay, callback));
+void Game::AddDelay(int delay, std::function<void()> callback) {
+	delays.push_back(std::pair<int, std::function<void()> >(delay, callback));
 }
 
 void Game::GameOver() {
@@ -2273,7 +2273,7 @@ void Game::CreateFire(Coordinate pos, int temperature) {
 	if (fireList.empty()) {
 		Announce::Inst()->AddMsg("Fire!", TCODColor::red, pos);
 		if (Config::GetCVar<bool>("pauseOnDanger"))
-			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
+			Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 	}
 
 	std::weak_ptr<FireNode> fire(Map::Inst()->GetFire(pos));
@@ -2318,7 +2318,7 @@ void Game::UpdateFarmPlotSeedAllowances(ItemType type) {
 				for (std::map<int, std::shared_ptr<Construction> >::iterator dynamicConsi = dynamicConstructionList.begin();
 					dynamicConsi != dynamicConstructionList.end(); ++dynamicConsi) {
 						if (dynamicConsi->second->HasTag(FARMPLOT)) {
-							boost::static_pointer_cast<FarmPlot>(dynamicConsi->second)->AllowedSeeds()->insert(std::pair<ItemType,bool>(type, false));
+							std::static_pointer_cast<FarmPlot>(dynamicConsi->second)->AllowedSeeds()->insert(std::pair<ItemType,bool>(type, false));
 						}
 				}
 			}
@@ -2469,18 +2469,18 @@ void Game::DisplayStats() {
 	Frame *productionFrame = new Frame("Production", std::vector<Drawable*>(), 26, 1, 25, 34);
 	productionFrame->AddComponent(new Label((boost::format("items: %d") % Stats::Inst()->GetItemsBuilt()).str(),1,1,TCOD_LEFT));
 	productionFrame->AddComponent(new ScrollPanel(1, 2, 23, 15,
-		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
-		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
+		std::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
 	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,17,TCOD_LEFT));
 	productionFrame->AddComponent(new ScrollPanel(1, 18, 23, 15,
-		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
-		boost::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
+		std::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
 	contents->AddComponent(productionFrame);
 
 	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 51, 1, 25, 34);
 	deathFrame->AddComponent(new ScrollPanel(1, 1, 23, 32,
-		new UIList<std::pair<std::string, unsigned>, boost::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
-		boost::bind(DrawDeathText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
+		std::bind(DrawDeathText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
 	contents->AddComponent(deathFrame);
 
 	Button *okButton = new Button("OK", NULL, 33, 37, 10, 'o', true);
@@ -2493,7 +2493,7 @@ void Game::DisplayStats() {
 void Game::RebalanceStockpiles(ItemCategory requiredCategory, std::shared_ptr<Stockpile> excluded) {
 	for (std::map<int,std::shared_ptr<Construction> >::iterator stocki = staticConstructionList.begin(); stocki != staticConstructionList.end(); ++stocki) {
 		if (stocki->second->stockpile) {
-			std::shared_ptr<Stockpile> sp(boost::static_pointer_cast<Stockpile>(stocki->second));
+			std::shared_ptr<Stockpile> sp(std::static_pointer_cast<Stockpile>(stocki->second));
 			if (sp != excluded && sp->GetAmount(requiredCategory) > sp->GetDemand(requiredCategory)) {
 				std::shared_ptr<Item> surplus = sp->FindItemByCategory(requiredCategory, EMPTY).lock();
 				if (surplus) {

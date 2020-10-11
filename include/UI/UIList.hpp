@@ -31,15 +31,15 @@ private:
 	C* items;
 	bool selectable;
 	int selection;
-	boost::function<void(T, int, int, int, int, bool, TCODConsole *)> draw;
-	boost::function<void(T, Tooltip *)> getTooltip;
-	boost::function<void(int)> onclick;
+	std::function<void(T, int, int, int, int, bool, TCODConsole *)> draw;
+	std::function<void(T, Tooltip *)> getTooltip;
+	std::function<void(int)> onclick;
 public:
 	UIList<T, C>(
 		C *nitems, int x, int y, int nwidth, int nheight,
-		boost::function<void(T, int, int, int, int, bool, TCODConsole *)> ndraw,
-		boost::function<void(int)> nonclick = 0, bool nselectable = false,
-		boost::function<void(T, Tooltip *)> ntooltip = 0
+		std::function<void(T, int, int, int, int, bool, TCODConsole *)> ndraw,
+		std::function<void(int)> nonclick = 0, bool nselectable = false,
+		std::function<void(T, Tooltip *)> ntooltip = 0
 	):
 		Drawable(x, y, nwidth, nheight),
 		items(nitems),

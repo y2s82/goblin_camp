@@ -179,7 +179,7 @@ public:
 
 	virtual void SetMap(Map* map);
 	
-	static boost::unordered_map<std::string, ConstructionType> constructionNames;
+	static std::unordered_map<std::string, ConstructionType> constructionNames;
 	static ConstructionType StringToConstructionType(std::string);
 	static std::string ConstructionTypeToString(ConstructionType);
 };

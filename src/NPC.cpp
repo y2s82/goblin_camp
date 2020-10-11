@@ -67,8 +67,8 @@ void SkillSet::load(InputArchive& ar, const unsigned int version) {
 std::map<std::string, NPCType> NPC::NPCTypeNames = std::map<std::string, NPCType>();
 std::vector<NPCPreset> NPC::Presets = std::vector<NPCPreset>();
 
-NPC::NPC(Coordinate pos, boost::function<bool(std::shared_ptr<NPC>)> findJob,
-	boost::function<void(std::shared_ptr<NPC>)> react) :
+NPC::NPC(Coordinate pos, std::function<bool(std::shared_ptr<NPC>)> findJob,
+	std::function<void(std::shared_ptr<NPC>)> react) :
 	Entity(),
 
 	type(0),
@@ -232,7 +232,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 	if (result != TASKSUCCESS) {
 		//If we're wielding a container (ie. a tool) spill it's contents
 		if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
-			std::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(mainHand.lock()));
+			std::shared_ptr<Container> cont(std::static_pointer_cast<Container>(mainHand.lock()));
 			if (cont->ContainsWater() > 0) {
 				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
 				cont->RemoveWater(cont->ContainsWater());
@@ -582,7 +582,7 @@ void NPC::Think() {
 	}
 	
 	while (timeCount > UPDATES_PER_SECOND) {
-		if (Random::GenerateBool()) React(boost::static_pointer_cast<NPC>(shared_from_this()));
+		if (Random::GenerateBool()) React(std::static_pointer_cast<NPC>(shared_from_this()));
 
 		{
 			std::shared_ptr<NPC> enemy = aggressor.lock();
@@ -694,7 +694,7 @@ MOVENEARend:
 			case BUILD:
 				if (Game::Adjacent(Position(), currentEntity())) {
 					AddEffect(WORKING);
-					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Build();
+					tmp = std::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
 						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
 						TaskFinished(TASKSUCCESS);
@@ -712,12 +712,12 @@ MOVENEARend:
 			case TAKE:
 				if (!currentEntity().lock()) { TaskFinished(TASKFAILFATAL, "(TAKE)No target entity"); break; }
 				if (Position() == currentEntity().lock()->Position()) {
-					if (boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()) {
-						std::weak_ptr<Container> cont(boost::static_pointer_cast<Container>(boost::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));
+					if (std::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()) {
+						std::weak_ptr<Container> cont(std::static_pointer_cast<Container>(std::static_pointer_cast<Item>(currentEntity().lock())->ContainedIn().lock()));
 						cont.lock()->RemoveItem(
-							boost::static_pointer_cast<Item>(currentEntity().lock()));
+							std::static_pointer_cast<Item>(currentEntity().lock()));
 					}
-					PickupItem(boost::static_pointer_cast<Item>(currentEntity().lock()));
+					PickupItem(std::static_pointer_cast<Item>(currentEntity().lock()));
 					TaskFinished(TASKSUCCESS);
 					break;
 				} else { TaskFinished(TASKFAILFATAL, "(TAKE)Item not found"); break; }
@@ -742,7 +742,7 @@ MOVENEARend:
 						break;
 					}
 					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
-						std::shared_ptr<Container> cont = boost::static_pointer_cast<Container>(currentEntity().lock());
+						std::shared_ptr<Container> cont = std::static_pointer_cast<Container>(currentEntity().lock());
 						if (!cont->AddItem(carried)) {
 							TaskFinished(TASKFAILFATAL, "(PUTIN)Container full");
 							break;
@@ -759,7 +759,7 @@ MOVENEARend:
 
 			case DRINK: //Either we have an item target to drink, or a water tile
 				if (carried.lock()) { //Drink from an item
-					timer = boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+					timer = std::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					inventory->RemoveItem(carried);
 					bulk -= carried.lock()->GetBulk();
 					ApplyEffects(carried.lock());
@@ -802,7 +802,7 @@ MOVENEARend:
 				if (carried.lock()) {
 					//Set the nutrition to the timer variable
 					if (boost::dynamic_pointer_cast<OrganicItem>(carried.lock())) {
-						timer = boost::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
+						timer = std::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					} else timer = 100;
 					inventory->RemoveItem(carried);
 					bulk -= carried.lock()->GetBulk();
@@ -863,7 +863,7 @@ CONTINUEEAT:
 
 			case USE:
 				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
-					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Use();
+					tmp = std::static_pointer_cast<Construction>(currentEntity().lock())->Use();
 					AddEffect(WORKING);
 					if (tmp >= 100) {
 						TaskFinished(TASKSUCCESS);
@@ -906,7 +906,7 @@ CONTINUEEAT:
 				}
 
 			case FELL:
-				if (std::shared_ptr<NatureObject> tree = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
+				if (std::shared_ptr<NatureObject> tree = std::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = tree->Fell(); //This'll be called about 100-150 times per tree
 					if (mainHand.lock() && Random::Generate(300) == 0) DecreaseItemCondition(mainHand);
 					AddEffect(WORKING);
@@ -935,7 +935,7 @@ CONTINUEEAT:
 				break;
 
 			case HARVESTWILDPLANT:
-				if (std::shared_ptr<NatureObject> plant = boost::static_pointer_cast<NatureObject>(currentEntity().lock())) {
+				if (std::shared_ptr<NatureObject> plant = std::static_pointer_cast<NatureObject>(currentEntity().lock())) {
 					tmp = plant->Harvest();
 					AddEffect(WORKING);
 					if (tmp <= 0) {
@@ -1033,7 +1033,7 @@ CONTINUEEAT:
 				weariness -= 25;
 				if (weariness <= 0) {
 					if (std::shared_ptr<Entity> entity = currentEntity().lock()) {
-						if (boost::static_pointer_cast<Construction>(entity)->HasTag(BED)) {
+						if (std::static_pointer_cast<Construction>(entity)->HasTag(BED)) {
 							RemoveEffect(BADSLEEP);
 						}
 					}
@@ -1043,7 +1043,7 @@ CONTINUEEAT:
 				break;
 
 			case DISMANTLE:
-				if (std::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(currentEntity().lock())) {
+				if (std::shared_ptr<Construction> construct = std::static_pointer_cast<Construction>(currentEntity().lock())) {
 					construct->Condition(construct->Condition()-10);
 					AddEffect(WORKING);
 					if (construct->Condition() <= 0) {
@@ -1089,7 +1089,7 @@ CONTINUEEAT:
 							DropItem(quiver);
 							quiver.reset();
 						}
-						quiver = boost::static_pointer_cast<Container>(carried.lock());
+						quiver = std::static_pointer_cast<Container>(carried.lock());
 #ifdef DEBUG
 					std::cout<<name<<" wearing "<<quiver.lock()->Name()<<"\n";
 #endif
@@ -1174,11 +1174,11 @@ CONTINUEEAT:
 				if (carried.lock() && 
 					(carried.lock()->IsCategory(Item::StringToItemCategory("Container")) || 
 					carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
-					cont = boost::static_pointer_cast<Container>(carried.lock());
+					cont = std::static_pointer_cast<Container>(carried.lock());
 				} else if (mainHand.lock() && 
 					(mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")) ||
 					mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
-					cont = boost::static_pointer_cast<Container>(mainHand.lock());
+					cont = std::static_pointer_cast<Container>(mainHand.lock());
 				}
 					
 				if (cont) {
@@ -1217,16 +1217,16 @@ CONTINUEEAT:
 				if (carried.lock() && 
 					(carried.lock()->IsCategory(Item::StringToItemCategory("Container")) || 
 					carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
-					sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
+					sourceContainer = std::static_pointer_cast<Container>(carried.lock());
 				} else if (mainHand.lock() && 
 					(mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")) ||
 					mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")))) {
-					sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
+					sourceContainer = std::static_pointer_cast<Container>(mainHand.lock());
 				}
 
 				if (sourceContainer) {
 					if (currentEntity().lock() && boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
-						std::shared_ptr<Container> targetContainer(boost::static_pointer_cast<Container>(currentEntity().lock()));
+						std::shared_ptr<Container> targetContainer(std::static_pointer_cast<Container>(currentEntity().lock()));
 						if (sourceContainer->ContainsWater() > 0) {
 							targetContainer->AddWater(sourceContainer->ContainsWater());
 							sourceContainer->RemoveWater(sourceContainer->ContainsWater());
@@ -1315,7 +1315,7 @@ CONTINUEEAT:
 
 			case REPAIR:
 				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
-					tmp = boost::static_pointer_cast<Construction>(currentEntity().lock())->Repair();
+					tmp = std::static_pointer_cast<Construction>(currentEntity().lock())->Repair();
 					AddEffect(WORKING);
 					if (tmp >= 100) {
 						if (carried.lock()) { //Repairjobs usually require some material
@@ -1392,8 +1392,8 @@ CONTINUEEAT:
 						jobs.push_back(fleeJob);
 					}
 				}
-			} else if (!GetSquadJob(boost::static_pointer_cast<NPC>(shared_from_this())) && 
-				!FindJob(boost::static_pointer_cast<NPC>(shared_from_this()))) {
+			} else if (!GetSquadJob(std::static_pointer_cast<NPC>(shared_from_this())) && 
+				!FindJob(std::static_pointer_cast<NPC>(shared_from_this()))) {
 				std::shared_ptr<Job> idleJob(new Job("Idle"));
 				idleJob->internal = true;
 				if (faction == PLAYERFACTION) {
@@ -1500,7 +1500,7 @@ void NPC::findPath(Coordinate target) {
 		++pathingThreadCount;
 		threadCountMutex.unlock();
 		pathMutex.unlock();
-		boost::thread pathThread(boost::bind(tFindPath, path, pos.X(), pos.Y(), target.X(), target.Y(), this, true));
+		boost::thread pathThread(std::bind(tFindPath, path, pos.X(), pos.Y(), target.X(), target.Y(), this, true));
 	} else {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
@@ -1596,7 +1596,7 @@ void NPC::DropItem(std::weak_ptr<Item> witem) {
 
 		//If the item is a container with filth in it, spill it on the ground
 		if (boost::dynamic_pointer_cast<Container>(item)) {
-			std::shared_ptr<Container> cont(boost::static_pointer_cast<Container>(item));
+			std::shared_ptr<Container> cont(std::static_pointer_cast<Container>(item));
 			if (cont->ContainsFilth() > 0) {
 				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
 				cont->RemoveFilth(cont->ContainsFilth());
@@ -1989,7 +1989,7 @@ void NPC::Hit(std::weak_ptr<Entity> target, bool careful) {
 				}
 
 				if (npc) {
-					npc->Damage(&attack, boost::static_pointer_cast<NPC>(shared_from_this()));
+					npc->Damage(&attack, std::static_pointer_cast<NPC>(shared_from_this()));
 					Random::Dice dice(attack.Amount());
 					damageDealt += dice.Roll();
 					if (HasTrait(FRESH) && damageDealt > 50) RemoveTrait(FRESH);
@@ -2346,12 +2346,12 @@ NPCType NPC::StringToNPCType(std::string typeName) {
 int NPC::GetNPCSymbol() const { return Presets[type].graphic; }
 
 void NPC::InitializeAIFunctions() {
-	FindJob = boost::bind(&Faction::FindJob, Faction::factions[faction], _1);
-	React = boost::bind(NPC::AnimalReact, _1);
+	FindJob = std::bind(&Faction::FindJob, Faction::factions[faction], _1);
+	React = std::bind(NPC::AnimalReact, _1);
 
 	if (NPC::Presets[type].ai == "PlayerNPC") {
-		FindJob = boost::bind(NPC::JobManagerFinder, _1);
-		React = boost::bind(NPC::PlayerNPCReact, _1);
+		FindJob = std::bind(NPC::JobManagerFinder, _1);
+		React = std::bind(NPC::PlayerNPCReact, _1);
 	}
 }
 
@@ -2493,7 +2493,7 @@ void NPC::UpdateVelocity() {
 
 void NPC::PickupItem(std::weak_ptr<Item> item) {
 	if (item.lock()) {
-		carried = boost::static_pointer_cast<Item>(item.lock());
+		carried = std::static_pointer_cast<Item>(item.lock());
 		bulk += item.lock()->GetBulk();
 		if (!inventory->AddItem(carried)) Announce::Inst()->AddMsg("No space in inventory");
 	}
@@ -2773,10 +2773,10 @@ void NPC::DumpContainer(Coordinate p) {
 	std::shared_ptr<Container> sourceContainer;
 	if (carried.lock() && (carried.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
 		carried.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
-		sourceContainer = boost::static_pointer_cast<Container>(carried.lock());
+		sourceContainer = std::static_pointer_cast<Container>(carried.lock());
 	} else if (mainHand.lock() && (mainHand.lock()->IsCategory(Item::StringToItemCategory("Bucket")) ||
 		mainHand.lock()->IsCategory(Item::StringToItemCategory("Container")))) {
-		sourceContainer = boost::static_pointer_cast<Container>(mainHand.lock());
+		sourceContainer = std::static_pointer_cast<Container>(mainHand.lock());
 	}
 
 	if (sourceContainer) {
@@ -2804,7 +2804,7 @@ void NPC::ValidateCurrentJob() {
 				if (!jobs.front()->tasks[i].entity.lock() || !boost::dynamic_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())) {
 					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target doesn't exist");
 					return;
-				} else if (!boost::static_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())->Marked()) {
+				} else if (!std::static_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())->Marked()) {
 					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target not marked");
 					return;
 				}

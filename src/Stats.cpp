@@ -57,17 +57,17 @@ void Stats::Reset() {
 
 namespace {
 	template<typename A, typename B>
-	void SerializeUnorderedMap(const boost::unordered_map<A,B> &map, OutputArchive& ar) {
+	void SerializeUnorderedMap(const std::unordered_map<A,B> &map, OutputArchive& ar) {
 		size_t size = map.size();
 		ar & size;
-		for (typename boost::unordered_map<A, B>::const_iterator iter = map.begin(); iter != map.end(); ++iter) {
+		for (typename std::unordered_map<A, B>::const_iterator iter = map.begin(); iter != map.end(); ++iter) {
 			ar & iter->first;
 			ar & iter->second;
 		}
 	}
 
 	template<typename A, typename B>
-	void UnserializeUnorderedMap(boost::unordered_map<A,B> &map, InputArchive& ar) {
+	void UnserializeUnorderedMap(std::unordered_map<A,B> &map, InputArchive& ar) {
 		size_t size;
 		ar & size;
 		for (size_t i = 0; i < size; ++i) {

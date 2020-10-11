@@ -119,7 +119,7 @@ private:
 	typedef boost::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
 	typedef boost::array<Sprite_ptr, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
 	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
-	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
+	typedef std::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
 	
 	int tileWidth;
 	int tileHeight;

@@ -51,7 +51,7 @@ class Spell : public Entity {
 	std::list<Attack> attacks;
 	bool immaterial;
 	
-	static boost::unordered_map<std::string, SpellType> spellTypeNames;
+	static std::unordered_map<std::string, SpellType> spellTypeNames;
 public:
 	Spell(const Coordinate& = undefined, int = 0);
 	~Spell();

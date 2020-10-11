@@ -44,12 +44,12 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(std::weak_ptr<Construction> w
 			ConstructionDialog *dialog = new ConstructionDialog(50, 5);
 			constructionInfoDialog = new Dialog(dialog, "", 50, 5);
 			if (!cons->HasTag(FARMPLOT)) {
-				dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
-				dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
+				dialog->AddComponent(new Button("Rename", std::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
+				dialog->AddComponent(new Button("Dismantle", std::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
 			} else {
-				dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 2, 1, 10));
-				dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 18, 1, 13));
-				dialog->AddComponent(new Button("Expand", boost::bind(&ConstructionDialog::Expand, dialog), 37, 1, 10));
+				dialog->AddComponent(new Button("Rename", std::bind(&ConstructionDialog::Rename, dialog), 2, 1, 10));
+				dialog->AddComponent(new Button("Dismantle", std::bind(&ConstructionDialog::Dismantle, dialog), 18, 1, 13));
+				dialog->AddComponent(new Button("Expand", std::bind(&ConstructionDialog::Expand, dialog), 37, 1, 10));
 			}
 
 			if (cons->Producer()) {
@@ -58,7 +58,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(std::weak_ptr<Construction> w
 				dialog->AddComponent(new ScrollPanel(2, 6, 23, 34, 
 					new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
 					ConstructionDialog::DrawJob,
-					boost::bind(&ConstructionDialog::CancelJob, dialog, _1)),
+					std::bind(&ConstructionDialog::CancelJob, dialog, _1)),
 					false));
 				dialog->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
 				ProductList *productList = new ProductList(cons);
@@ -85,8 +85,8 @@ void ConstructionDialog::Construct(std::weak_ptr<Construction> cons) { construct
 void ConstructionDialog::Rename() {
 	if (construct.lock()) {
 		UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 1, 1, 28, 7);
-		contents->AddComponent(new TextBox(0, 1, 28, boost::bind(&Entity::Name, construct.lock()), boost::bind(&Entity::Name, construct.lock(), _1)));
-		contents->AddComponent(new Button("OK", boost::function<void()>(), 11, 3, 6, TCODK_ENTER, true));
+		contents->AddComponent(new TextBox(0, 1, 28, std::bind(&Entity::Name, construct.lock()), std::bind(&Entity::Name, construct.lock(), _1)));
+		contents->AddComponent(new Button("OK", std::function<void()>(), 11, 3, 6, TCODK_ENTER, true));
 		Dialog *renameDialog = new Dialog(contents, "Rename", 30, 8);
 		renameDialog->ShowModal();
 	}
@@ -101,8 +101,8 @@ void ConstructionDialog::Dismantle() {
 
 void ConstructionDialog::Expand() {
 	if (construct.lock()) {
-		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Stockpile::Expand, boost::static_pointer_cast<Stockpile>(construct.lock()), _1, _2);
-		boost::function<bool(Coordinate, Coordinate)> placement = boost::bind(Game::CheckPlacement, _1, Coordinate(1,1), 
+		std::function<void(Coordinate, Coordinate)> rectCall = std::bind(&Stockpile::Expand, std::static_pointer_cast<Stockpile>(construct.lock()), _1, _2);
+		std::function<bool(Coordinate, Coordinate)> placement = std::bind(Game::CheckPlacement, _1, Coordinate(1,1), 
 			Construction::Presets[construct.lock()->Type()].tileReqs);
 		UI::Inst()->CloseMenu();
 		UI::ChooseRectPlacementCursor(rectCall, placement, Cursor_Stockpile);

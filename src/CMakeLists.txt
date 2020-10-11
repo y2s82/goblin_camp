@@ -35,7 +35,7 @@ find_package (GLUT)
 #include_directories (${PYTHON_INCLUDE_DIRS})
 #link_directories (${PYTHON_LIBRARY_DIRS})
 
-set (PYLIB_PATH /usr/lib/x86_64-linux-gnu)
+set (PYLIB_PATH /usr/lib/)
 message("-- NOTE: CMake prefers python 3 to 2, so it is being specified manually.")
 set (PYTHON_EXECUTABLE /usr/bin/python2)
 set (PYTHON_INCLUDE_DIRS /usr/include/python2.7)

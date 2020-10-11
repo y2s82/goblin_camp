@@ -73,10 +73,10 @@ public:
 	}
 	
 	StockPanel(ItemType nItemType, StockManagerDialog *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
-		AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
-								 boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
-		SetTooltip(boost::bind(&StockPanel::_GetTooltip, this, _1, _2, _3));
-		visible = boost::bind(&StockPanel::ShowItem, this);
+		AddComponent(new Spinner(0, 2, 16, std::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
+								 std::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
+		SetTooltip(std::bind(&StockPanel::_GetTooltip, this, _1, _2, _3));
+		visible = std::bind(&StockPanel::ShowItem, this);
 	}
 	
 	void Draw(int x, int y, TCODConsole *console) {

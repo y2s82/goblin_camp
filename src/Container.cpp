@@ -51,7 +51,7 @@ Container::~Container() {
 bool Container::AddItem(std::weak_ptr<Item> witem) {
 	std::shared_ptr<Item> item = witem.lock();
 	if (item && capacity >= std::max(item->GetBulk(), 1)) {
-		item->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
+		item->PutInContainer(std::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
 		capacity -= std::max(item->GetBulk(), 1); //<- so that bulk=0 items take space
 		for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {

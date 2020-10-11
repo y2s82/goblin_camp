@@ -93,8 +93,8 @@ class Item : public Entity {
 	bool flammable;
 	int decayCounter;
 
-	static boost::unordered_map<std::string, ItemType> itemTypeNames;
-	static boost::unordered_map<std::string, ItemCategory> itemCategoryNames;
+	static std::unordered_map<std::string, ItemType> itemTypeNames;
+	static std::unordered_map<std::string, ItemCategory> itemCategoryNames;
 
 	int resistances[RES_COUNT];
 

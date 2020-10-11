@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Random.hpp"
 
-boost::unordered_map<std::string, SpellType> Spell::spellTypeNames = boost::unordered_map<std::string, SpellType>();
+std::unordered_map<std::string, SpellType> Spell::spellTypeNames = std::unordered_map<std::string, SpellType>();
 std::vector<SpellPreset> Spell::Presets = std::vector<SpellPreset>();
 
 SpellPreset::SpellPreset(std::string vname) : 

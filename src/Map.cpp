@@ -97,7 +97,7 @@ bool Map::IsWalkable(const Coordinate& p, void* ptr) const {
 		int constructionId = GetConstruction(p);
 		if (constructionId >= 0) {
 			if (std::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(constructionId).lock()) {
-				if (cons->HasTag(DOOR) && !boost::static_pointer_cast<Door>(cons)->Open()) {
+				if (cons->HasTag(DOOR) && !std::static_pointer_cast<Door>(cons)->Open()) {
 					return false;
 				}
 			}

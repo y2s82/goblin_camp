@@ -81,7 +81,7 @@ void FarmPlot::Update() {
 		//Normal plants ought to grow seed -> young plant -> mature plant -> fruits, which means 3
 		//growths before giving fruit. 3 * 2 months means 6 months from seed to fruits
 		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && Random::Generate(4) == 0) {
-			std::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
+			std::weak_ptr<OrganicItem> plant(std::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
 			if (plant.lock() && !plant.lock()->Reserved()) {
 				if (Random::Generate(9) == 0) { //Chance for the plant to die
 					containerIt->second->RemoveItem(plant);
@@ -133,7 +133,7 @@ int FarmPlot::Use() {
 						if (seed.lock()) {
 							std::shared_ptr<Job> plantJob(new Job("Plant " + Item::ItemTypeToString(seedi->first)));
 							plantJob->ReserveEntity(seed);
-							plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first, seed.lock()->Type());
+							plantJob->ReserveSpot(std::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first, seed.lock()->Type());
 							plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
 							plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
 							plantJob->tasks.push_back(Task(MOVE, containerIt->first));
@@ -190,7 +190,7 @@ bool FarmPlot::Full(ItemType type) {
 				//Check if a container exists for this ItemCategory that isn't full
 				std::weak_ptr<Item> item = containers[p]->GetFirstItem();
 				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-					std::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					std::shared_ptr<Container> container = std::static_pointer_cast<Container>(item.lock());
 					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 
 						container->Capacity() >= Item::Presets[type].bulk) return false;
 				}

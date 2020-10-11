@@ -50,9 +50,9 @@ private:
 	TCOD_event_t event;
 	Panel* currentMenu;
 	UIState _state;
-	boost::function<void(Coordinate)> callback;
-	boost::function<void(Coordinate,Coordinate)> rectCallback;
-	boost::function<bool(Coordinate,Coordinate)> placementCallback;
+	std::function<void(Coordinate)> callback;
+	std::function<void(Coordinate,Coordinate)> rectCallback;
+	std::function<bool(Coordinate,Coordinate)> placementCallback;
 	Coordinate _blueprint;
 	bool placeable;
 	Coordinate a,b;
@@ -100,17 +100,17 @@ public:
 	static void ChooseNaturify();
 	static void ChooseChangeTerritory(bool add);
 	static void ChooseGatherItems();
-	static void ChooseNormalPlacement(boost::function<void(Coordinate)> callback,
-		boost::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip = "");
-	static void ChooseRectPlacement(boost::function<void(Coordinate, Coordinate)> rectCallback,
-		boost::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip = "");
-	static void ChooseRectPlacementCursor(boost::function<void(Coordinate, Coordinate)> rectCallback,
-		boost::function<bool(Coordinate, Coordinate)> placement, CursorType cursor);
-	static void ChooseABPlacement(boost::function<void(Coordinate)> callback,
-		boost::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip = "");
-	void SetCallback(boost::function<void(Coordinate)>);
-	void SetRectCallback(boost::function<void(Coordinate,Coordinate)>);
-	void SetPlacementCallback(boost::function<bool(Coordinate,Coordinate)>);
+	static void ChooseNormalPlacement(std::function<void(Coordinate)> callback,
+		std::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip = "");
+	static void ChooseRectPlacement(std::function<void(Coordinate, Coordinate)> rectCallback,
+		std::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip = "");
+	static void ChooseRectPlacementCursor(std::function<void(Coordinate, Coordinate)> rectCallback,
+		std::function<bool(Coordinate, Coordinate)> placement, CursorType cursor);
+	static void ChooseABPlacement(std::function<void(Coordinate)> callback,
+		std::function<bool(Coordinate, Coordinate)> placement, int cursor, std::string optionalTooltip = "");
+	void SetCallback(std::function<void(Coordinate)>);
+	void SetRectCallback(std::function<void(Coordinate,Coordinate)>);
+	void SetPlacementCallback(std::function<bool(Coordinate,Coordinate)>);
 	Panel* CurrentMenu();
 	void CurrentMenu(Panel*);
 	void AddToHistory(Panel*);

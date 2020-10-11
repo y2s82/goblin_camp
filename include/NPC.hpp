@@ -111,8 +111,8 @@ class NPC : public Entity {
 	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 	
 	NPC(Coordinate = Coordinate(0,0),
-		boost::function<bool(std::shared_ptr<NPC>)> findJob = boost::function<bool(std::shared_ptr<NPC>)>(),
-		boost::function<void(std::shared_ptr<NPC>)> react = boost::function<void(std::shared_ptr<NPC>)>());
+		std::function<bool(std::shared_ptr<NPC>)> findJob = std::function<bool(std::shared_ptr<NPC>)>(),
+		std::function<void(std::shared_ptr<NPC>)> react = std::function<void(std::shared_ptr<NPC>)>());
 	NPCType type;
 	int timeCount;
 	std::deque<std::shared_ptr<Job> > jobs;
@@ -165,8 +165,8 @@ class NPC : public Entity {
 	bool isTunneler;
 	bool isFlying;
 
-	boost::function<bool(std::shared_ptr<NPC>)> FindJob;
-	boost::function<void(std::shared_ptr<NPC>)> React;
+	std::function<bool(std::shared_ptr<NPC>)> FindJob;
+	std::function<void(std::shared_ptr<NPC>)> React;
 
 	int baseStats[STAT_COUNT];
 	int effectiveStats[STAT_COUNT];
