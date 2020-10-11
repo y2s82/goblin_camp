@@ -36,7 +36,7 @@ enum Direction {
 class Coordinate;
 template<> struct std::hash<Coordinate>
 {
-    std::size_t operator()(const Coordinate& coord) const noexcept;
+    inline std::size_t operator()(const Coordinate& coord) const noexcept;
 };
 
 class Coordinate {

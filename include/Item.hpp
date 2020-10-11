@@ -158,7 +158,7 @@ public:
 };
 
 // Not safe at all, but boost allowed it so we don't we
-bool operator<(const std::weak_ptr<Item>& a, const std::weak_ptr<Item>& b) { return a.lock() < b.lock(); }
+inline bool operator<(const std::weak_ptr<Item>& a, const std::weak_ptr<Item>& b) { return a.lock() < b.lock(); }
 
 BOOST_CLASS_VERSION(Item, 0)
 
