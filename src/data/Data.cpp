@@ -13,6 +13,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+#include <boost/filesystem.hpp>
+#include <boost/lexical_cast.hpp>
+#include <functional>
+#include <boost/algorithm/string.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
 #include "stdafx.hpp"
 
 #include <fstream>
@@ -24,13 +31,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/format.hpp>
 #include <libtcod.hpp>
 // http://www.ridgesolutions.ie/index.php/2013/05/30/boost-link-error-undefined-reference-to-boostfilesystemdetailcopy_file/
-#define BOOST_NO_CXX11_SCOPED_ENUMS
-#include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
-#include <functional>
-#include <boost/algorithm/string.hpp>
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
 
 namespace py = boost::python;
 namespace fs = boost::filesystem;

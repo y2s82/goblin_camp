@@ -16,6 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 
+#define BOOST_PYTHON_WORKAROUND
 #include "stdafx.hpp"
 
 namespace py = boost::python;
