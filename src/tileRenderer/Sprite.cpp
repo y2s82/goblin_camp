@@ -51,9 +51,9 @@ namespace {
 		return index;
 	}
 
-	static boost::array<short, 256> BuildExtendedConnectionLookupTable()
+	static std::array<short, 256> BuildExtendedConnectionLookupTable()
 	{
-		boost::array<short,15> lookupTable4Sides =
+		std::array<short,15> lookupTable4Sides =
 		{ {
 			34, // None
 			42, // NE
@@ -71,7 +71,7 @@ namespace {
 			28, // NE + SW + NW
 			23  // SE + SW + NW
 		} };
-		boost::array<short,12> lookupTable3Sides =
+		std::array<short,12> lookupTable3Sides =
 		{ {
 			19, // !N, !SE + !SW
 			17, // !N, !SW
@@ -87,7 +87,7 @@ namespace {
 			21  // !W, !NE		
 		} };
 
-		boost::array<short, 256> result;
+		std::array<short, 256> result;
 		for (int i = 0; i < 256; i++)
 		{
 			bool connectN = i & 0x1;
@@ -135,7 +135,7 @@ namespace {
 	}
 
 	inline int ExtConnectionIndex(Sprite::ConnectedFunction connected) {
-		static boost::array<short,256> lookupTable(BuildExtendedConnectionLookupTable());
+		static std::array<short,256> lookupTable(BuildExtendedConnectionLookupTable());
 		int index = (connected(NORTH) << 0) +
 					(connected(EAST) << 1) +
 					(connected(SOUTH) << 2) +
@@ -148,7 +148,7 @@ namespace {
 	}
 
 	inline int SecondLayerConnectionIndex(int vert, int horiz, int corner) {
-		static boost::array<short, 27> lookupTable = { {
+		static std::array<short, 27> lookupTable = { {
 			    // Vert Layer, Horiz Layer, Corner Layer
 			5,  // 0         , 0          , 0
 			5,  // 0         , 0          , 1
@@ -204,9 +204,9 @@ void Sprite::Draw(int screenX, int screenY, ConnectedFunction connected) const {
 
 void Sprite::Draw(int screenX, int screenY, int connectionLayer, LayeredConnectedFunction connected) const {
 	if (((type & SPRITE_TwoLayerConnectionMap) == SPRITE_TwoLayerConnectionMap) && connectionLayer > 0) {
-		boost::array<int, 2> vertLayer = { {connected(NORTH), connected(SOUTH)} };
-		boost::array<int, 2> horizLayer = { {connected(WEST), connected(EAST)} };
-		boost::array<int, 4> cornerLayer = { {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)} };
+		std::array<int, 2> vertLayer = { {connected(NORTH), connected(SOUTH)} };
+		std::array<int, 2> horizLayer = { {connected(WEST), connected(EAST)} };
+		std::array<int, 4> cornerLayer = { {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)} };
 
 		for (int vertDirection = 0; vertDirection < 2; ++vertDirection) {
 			for (int horizDirection = 0; horizDirection < 2; ++horizDirection) {
@@ -222,9 +222,9 @@ void Sprite::Draw(int screenX, int screenY, int connectionLayer, LayeredConnecte
 }
 
 void Sprite::DrawSimpleConnected(int screenX, int screenY, ConnectedFunction connected) const {
-	boost::array<bool, 2> vertConnected = { { connected(NORTH), connected(SOUTH) } };
-	boost::array<bool, 2> horizConnected = { {connected(WEST), connected(EAST)} };
-	boost::array<bool, 4> cornerConnected = { {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)} };
+	std::array<bool, 2> vertConnected = { { connected(NORTH), connected(SOUTH) } };
+	std::array<bool, 2> horizConnected = { {connected(WEST), connected(EAST)} };
+	std::array<bool, 4> cornerConnected = { {connected(NORTHWEST), connected(NORTHEAST), connected(SOUTHWEST), connected(SOUTHEAST)} };
 	
 	for (int vertDirection = 0; vertDirection < 2; ++vertDirection) {
 		for (int horizDirection = 0; horizDirection < 2; ++horizDirection) {

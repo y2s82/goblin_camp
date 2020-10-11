@@ -27,7 +27,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <SDL_opengl.h>
 #include "MathEx.hpp"
 #include "Logger.hpp"
-#include <boost/scoped_array.hpp>
 
 #include "data/Paths.hpp"
 
@@ -355,7 +354,7 @@ bool OGLTilesetRenderer::AssembleTextures() {
     }
 		
 	tilesTexture = CreateOGLTexture();
-	boost::scoped_array<unsigned char> rawData(new unsigned char[4 * widthPixels * heightPixels]);
+	std::vector<unsigned char> rawData(4 * widthPixels * heightPixels);
 
 	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPixels, heightPixels, 0, GL_BGRA, GL_UNSIGNED_BYTE, rawData.get());
@@ -787,7 +786,7 @@ const bool operator==(const RawTileData& lhs, const RawTileData& rhs) {
 	return lhs.tile == rhs.tile && lhs.texture == rhs.texture;
 }
 
-boost::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = { {1, 3, 4} };
+std::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = { {1, 3, 4} };
 
 bool OGLTilesetRenderer::InitialiseConsoleShaders() {
 	consoleProgram = CreateOGLShaderProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader);

@@ -19,7 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "tileRenderer/TileSetTexture.hpp"
 #include "tileRenderer/ogl/OGLViewportLayer.hpp"
-#include <boost/multi_array.hpp>
 
 struct RawTileData {
 	unsigned int tile;
@@ -81,16 +80,16 @@ private:
 		BackCol,
 		ConsoleTextureTypesCount
 	};
-	boost::array<std::shared_ptr<const unsigned int>, ConsoleTextureTypesCount> consoleTextures;
+	std::array<std::shared_ptr<const unsigned int>, ConsoleTextureTypesCount> consoleTextures;
 	unsigned int consoleTexW, consoleTexH;
-	boost::array<std::vector<unsigned char>, ConsoleTextureTypesCount> consoleData;
-	static boost::array<unsigned char, ConsoleTextureTypesCount> consoleDataAlignment;
+	std::array<std::vector<unsigned char>, ConsoleTextureTypesCount> consoleData;
+	static std::array<unsigned char, ConsoleTextureTypesCount> consoleDataAlignment;
 	
 	// Viewports
 	bool renderInProgress;
 	static const int VIEWPORT_LAYERS = 5;
-	boost::array<ViewportLayer, VIEWPORT_LAYERS> viewportLayers;
-	boost::array<std::shared_ptr<const unsigned int>, VIEWPORT_LAYERS> viewportTextures;
+	std::array<ViewportLayer, VIEWPORT_LAYERS> viewportLayers;
+	std::array<std::shared_ptr<const unsigned int>, VIEWPORT_LAYERS> viewportTextures;
 	struct RenderTile {
 		int x;
 		int y;

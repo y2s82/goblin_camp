@@ -18,7 +18,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 
 
-#include <boost/array.hpp>
 #include <boost/functional/hash.hpp>
 #include <unordered_map>
 #include <SDL.h>
@@ -117,9 +116,9 @@ public:
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite);
 	
 private:
-	typedef boost::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
-	typedef boost::array<Sprite_ptr, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
-	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
+	typedef std::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef std::array<Sprite_ptr, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
+	typedef std::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
 	typedef std::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
 	
 	int tileWidth;
