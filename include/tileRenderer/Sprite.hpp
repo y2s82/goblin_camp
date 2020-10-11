@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 #include<memory>
 
-#include <boost/noncopyable.hpp>
 #include <vector>
 
 #include <functional>
@@ -36,9 +35,10 @@ enum SpriteType
 	SPRITE_ConnectionMap = 0x1E // Connection Map encompasses all variants
 };
 
-class Sprite : private boost::noncopyable
+class Sprite
 {
 public:
+       Sprite(const Sprite &) = delete;
 	virtual ~Sprite() = 0;
 
 	bool IsConnectionMap() const;

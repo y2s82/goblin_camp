@@ -38,9 +38,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/SpellSpriteSet.hpp"
 #include "tileRenderer/TerrainSprite.hpp"
 
-class TileSet : private boost::noncopyable
+class TileSet
 {
 public:
+       TileSet(const TileSet &) = delete;
 	explicit TileSet(std::string tileSetName, int tileW, int tileH);
 	~TileSet();
 

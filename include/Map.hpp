@@ -20,7 +20,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 
 #include <shared_mutex>
-#include <boost/multi_array.hpp>
 #include <unordered_set>
 #include <libtcod.hpp>
 
@@ -35,12 +34,14 @@ class Weather;
 #define TERRAIN_OVERLAY (2 << 0)
 
 class Map : public ITCODPathCallback {
+        static constexpr int HARDCODED_WIDTH = 500;
+        static constexpr int HARDCODED_HEIGHT = 500;
 	GC_SERIALIZABLE_CLASS
 	
 	Map();
 	static Map* instance;
-	boost::multi_array<Tile, 2> tileMap;
-	boost::multi_array<CacheTile, 2> cachedTileMap;
+	std::array<std::array<Tile, HARDCODED_HEIGHT>, HARDCODED_WIDTH> tileMap;
+	std::array<std::array<CacheTile, HARDCODED_WIDTH>, HARDCODED_WIDTH> cachedTileMap;
 	Coordinate extent; //X->width, Y->height
 	float waterlevel;
 	int overlayFlags;

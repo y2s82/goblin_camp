@@ -17,7 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <unordered_set>
-#include <boost/algorithm/string.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/utility.hpp>
@@ -35,13 +34,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Weather.hpp"
 #include "GCamp.hpp"
 
-static const int HARDCODED_WIDTH = 500;
-static const int HARDCODED_HEIGHT = 500;
 
 Map::Map() :
 overlayFlags(0), markerids(0) {
-	tileMap.resize(boost::extents[HARDCODED_WIDTH][HARDCODED_HEIGHT]);
-	cachedTileMap.resize(boost::extents[HARDCODED_WIDTH][HARDCODED_HEIGHT]);
 	heightMap = new TCODHeightMap(HARDCODED_WIDTH,HARDCODED_HEIGHT);
 	extent = Coordinate(HARDCODED_WIDTH, HARDCODED_HEIGHT);
 	for (int i = 0; i < HARDCODED_WIDTH; ++i) {

@@ -17,8 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 #include<memory>
 
-#include <boost/noncopyable.hpp>
-
 #include <filesystem>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetLoader.hpp"
@@ -31,9 +29,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/SpellSpriteSet.hpp"
 #include "tileRenderer/StatusEffectSprite.hpp"
 
-class TileSetParserV2 : public ITCODParserListener, private boost::noncopyable
+class TileSetParserV2 : public ITCODParserListener
 {
 public:
+       TileSetParserV2(const TileSetParserV2&) = delete;
 	explicit TileSetParserV2(std::shared_ptr<TilesetRenderer> spriteFactory);
 	~TileSetParserV2();
 
