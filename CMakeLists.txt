@@ -2,6 +2,9 @@
 # TODO: blame
 
 cmake_minimum_required (VERSION 2.6)
+set (CMAKE_CXX_STANDARD 14)
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 
 # TODO: configure depending on OS
 set (CMAKE_INSTALL_PREFIX "./pkg/usr")
