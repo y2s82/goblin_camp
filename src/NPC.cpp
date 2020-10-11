@@ -31,7 +31,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/split_member.hpp>
 #include <thread>
 #include <boost/multi_array.hpp>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
 #ifdef DEBUG
@@ -701,7 +700,7 @@ MOVENEARend:
 					AddEffect(WORKING);
 					tmp = std::static_pointer_cast<Construction>(currentEntity().lock())->Build();
 					if (tmp > 0) {
-						Announce::Inst()->AddMsg((boost::format("%s completed") % currentEntity().lock()->Name()).str(), TCODColor::white, currentEntity().lock()->Position());
+						Announce::Inst()->AddMsg(currentEntity().lock()->Name() + " completed", TCODColor::white, currentEntity().lock()->Position());
 						TaskFinished(TASKSUCCESS);
 						break;
 					} else if (tmp == BUILD_NOMATERIAL) {
@@ -1543,7 +1542,7 @@ void NPC::GetTooltip(int x, int y, Tooltip *tooltip) {
 	if(faction == PLAYERFACTION && !jobs.empty()) {
 		std::shared_ptr<Job> job = jobs.front();
 		if(job->name != "Idle") {
-			tooltip->AddEntry(TooltipEntry((boost::format("  %s") % job->name).str(), TCODColor::grey));
+			tooltip->AddEntry(TooltipEntry("  " +  job->name, TCODColor::grey));
 		}
 	}
 }
@@ -2136,7 +2135,7 @@ std::weak_ptr<Squad> NPC::MemberOf() const {return squad;}
 
 void NPC::Escape() {
 	if (carried.lock()) {
-		Announce::Inst()->AddMsg((boost::format("%s has escaped with [%s]!") % name % carried.lock()->Name()).str(), 
+		Announce::Inst()->AddMsg(name + " has escaped with [" + carried.lock()->Name() + "]!", 
 			TCODColor::yellow, Position());
 	}
 	DestroyAllItems();

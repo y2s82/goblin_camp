@@ -157,7 +157,7 @@ int Game::PlaceConstruction(Coordinate target, ConstructionType construct) {
 						compi->lock()->Reserve(false);
 				}
 				componentList.clear();
-				Announce::Inst()->AddMsg((boost::format("Cancelled %s: insufficient [%s] in stockpiles") % Construction::Presets[construct].name % Item::ItemCategoryToString(*mati)).str(), TCODColor::red);
+				Announce::Inst()->AddMsg("Cancelled " + Construction::Presets[construct].name + ": insufficient [" + Item::ItemCategoryToString(*mati) + "] in stockpiles", TCODColor::red);
 				return -1;
 			}
 	}
@@ -1909,7 +1909,7 @@ void Game::SetSquadTargetCoordinate(Order order, Coordinate target, std::shared_
 	squad->AddOrder(order);
 	squad->AddTargetCoordinate(target);
 	if (autoClose) UI::Inst()->CloseMenu();
-	Announce::Inst()->AddMsg((boost::format("[%1%] guarding position (%2%,%3%)") % squad->Name() % target.X() % target.Y()).str(), TCODColor::white, target);
+	Announce::Inst()->AddMsg("[" + squad->Name() + "] guarding position (" + std::to_string(target.X()) + "," + std::to_string(target.Y()) + ")", TCODColor::white, target);
 	Map::Inst()->AddMarker(MapMarker(FLASHINGMARKER, 'X', target, UPDATES_PER_SECOND*5, TCODColor::azure));
 }
 void Game::SetSquadTargetEntity(Order order, Coordinate target, std::shared_ptr<Squad> squad) {
@@ -1919,7 +1919,7 @@ void Game::SetSquadTargetEntity(Order order, Coordinate target, std::shared_ptr<
 			squad->AddOrder(order);
 			squad->AddTargetEntity(Game::Inst()->npcList[*npcList->begin()]);
 			UI::Inst()->CloseMenu();
-			Announce::Inst()->AddMsg((boost::format("[%1%] following %2%") % squad->Name() % Game::Inst()->npcList[*npcList->begin()]->Name()).str(), TCODColor::white, target);
+			Announce::Inst()->AddMsg("[" + squad->Name() + "] following " +  Game::Inst()->npcList[*npcList->begin()]->Name(), TCODColor::white, target);
 		}
 	}
 }
@@ -2463,10 +2463,10 @@ std::weak_ptr<Construction> Game::GetRandomConstruction() const {
 
 namespace {
 	void DrawText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
-		console->print(x, y, (boost::format("%s : %d") % text.first % text.second).str().c_str());
+		console->print(x, y, text.first  + " : " + std::to_string(text.second));
 	}
 	void DrawDeathText(std::pair<std::string, unsigned> text, int count, int x, int y, int width, bool selected, TCODConsole *console) {
-		console->print(x, y, (boost::format("%d : %s") % text.second % text.first).str().c_str());
+		console->print(x, y, std::to_string(text.second) + " : " + text.first);
 	}
 }
 
@@ -2474,23 +2474,23 @@ void Game::DisplayStats() {
 	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 77, 39);
 	Dialog *statDialog = new Dialog(contents, "Statistics", 77, 41);
 
-	Label *points = new Label((boost::format("Points: %d") % Stats::Inst()->GetPoints()).str(), 1, 2, TCOD_LEFT);
+	Label *points = new Label("Points: " + std::to_string(Stats::Inst()->GetPoints()), 1, 2, TCOD_LEFT);
 	contents->AddComponent(points);
 
 	Frame *filthFrame = new Frame("Filth", std::vector<Drawable *>(), 1, 4, 25, 4);
-	filthFrame->AddComponent(new Label((boost::format("created: %d") % Stats::Inst()->GetFilthCreated()).str(),1,1,TCOD_LEFT));
-	filthFrame->AddComponent(new Label((boost::format("off-map: %d") % Stats::Inst()->GetFilthFlownOff()).str(),1,2,TCOD_LEFT));
+	filthFrame->AddComponent(new Label("created: " + std::to_string(Stats::Inst()->GetFilthCreated()),1,1,TCOD_LEFT));
+	filthFrame->AddComponent(new Label("off-map: " + std::to_string(Stats::Inst()->GetFilthFlownOff()),1,2,TCOD_LEFT));
 	contents->AddComponent(filthFrame);
 
-	Label *burntItems = new Label((boost::format("Burnt items: %d") % Stats::Inst()->GetItemsBurned()).str(), 1, 9, TCOD_LEFT);
+	Label *burntItems = new Label("Burnt items: " + std::to_string(Stats::Inst()->GetItemsBurned()), 1, 9, TCOD_LEFT);
 	contents->AddComponent(burntItems);
 
 	Frame *productionFrame = new Frame("Production", std::vector<Drawable*>(), 26, 1, 25, 34);
-	productionFrame->AddComponent(new Label((boost::format("items: %d") % Stats::Inst()->GetItemsBuilt()).str(),1,1,TCOD_LEFT));
+	productionFrame->AddComponent(new Label("items: " + std::to_string(Stats::Inst()->GetItemsBuilt()),1,1,TCOD_LEFT));
 	productionFrame->AddComponent(new ScrollPanel(1, 2, 23, 15,
 		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
 		std::bind(DrawText, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7), 0, false, 0)));
-	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,17,TCOD_LEFT));
+	productionFrame->AddComponent(new Label("constructions: " + std::to_string(Stats::Inst()->GetConstructionsBuilt()),1,17,TCOD_LEFT));
 	productionFrame->AddComponent(new ScrollPanel(1, 18, 23, 15,
 		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
 		std::bind(DrawText, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7), 0, false, 0)));

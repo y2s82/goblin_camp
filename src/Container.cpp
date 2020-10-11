@@ -127,7 +127,7 @@ void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
 	for (std::set<std::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 		if (itemi->lock()) capacityUsed += std::max(1, itemi->lock()->GetBulk());
 	}
-	tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (capacity + capacityUsed)).str(), TCODColor::white));
+	tooltip->AddEntry(TooltipEntry(name + " - " + std::to_string(size()) + " items (" + std::to_string(capacityUsed)  + "/" + std::to_string(capacity + capacityUsed), TCODColor::white));
 }
 
 void Container::TranslateContainerListeners() {

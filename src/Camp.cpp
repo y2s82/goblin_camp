@@ -172,7 +172,7 @@ void Camp::ConstructionBuilt(int type) {
 void Camp::DisableAutoTerritory() { autoTerritory = false; }
 void Camp::ToggleAutoTerritory() {
 	autoTerritory = !autoTerritory;
-	Announce::Inst()->AddMsg((boost::format("Automatic territory handling %s") % (autoTerritory ? "enabled" : "disabled")).str(), TCODColor::cyan);
+	Announce::Inst()->AddMsg(std::string("Automatic territory handling ") + (autoTerritory ? "enabled" : "disabled"), TCODColor::cyan);
 }
 
 bool Camp::IsAutoTerritoryEnabled() { return autoTerritory; }

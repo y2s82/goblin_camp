@@ -21,7 +21,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <functional>
 #include <boost/lambda/lambda.hpp>
 #include <functional>
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
 #include <libtcod.hpp>
@@ -616,7 +615,7 @@ class ConstructionListener : public ITCODParserListener {
 						else { 
 							if (multiplier > 0) {
 								Construction::Presets[constructionIndex].description += 
-									(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+									Item::ItemCategoryToString(item) + " x" + std::to_string(multiplier);
 								if (Construction::Presets[constructionIndex].description.length() % 25 != 0)
 									Construction::Presets[constructionIndex].description += std::string(25 - Construction::Presets[constructionIndex].description.length() % 25, ' ');
 							}
@@ -625,7 +624,7 @@ class ConstructionListener : public ITCODParserListener {
 						}
 				}
 				Construction::Presets[constructionIndex].description += 
-					(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+					 Item::ItemCategoryToString(item) + " x" + std::to_string(multiplier);
 
 			}
 		}
@@ -871,7 +870,7 @@ void Construction::Dismantle(const Coordinate&) {
 		}
 
 		if (built) {
-			std::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
+			std::shared_ptr<Job> dismantleJob(new Job("Dismantle " + name, HIGH, 0, false));
 			dismantleJob->ConnectToEntity(shared_from_this());
 			dismantleJob->Attempts(3);
 			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));

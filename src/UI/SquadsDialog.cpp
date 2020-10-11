@@ -22,7 +22,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
 #include "UI/SquadsDialog.hpp"
 #include "UI/ScrollPanel.hpp"
@@ -97,7 +96,7 @@ void SquadsDialog::DrawSquad(std::pair<std::string, std::shared_ptr<Squad> > squ
 
 void SquadsDialog::GetSquadTooltip(std::pair<std::string, std::shared_ptr<Squad> > squadi, Tooltip *tooltip) {
 	tooltip->AddEntry(TooltipEntry(squadi.first, TCODColor::white));
-	tooltip->AddEntry(TooltipEntry((boost::format(" Priority: %d") % squadi.second->Priority()).str(), TCODColor::grey));
+	tooltip->AddEntry(TooltipEntry(" Priority: " + std::to_string(squadi.second->Priority()), TCODColor::grey));
 
 	if(squadi.second->GetGeneralOrder() != NOORDER) {
 		std::string order;
@@ -115,10 +114,10 @@ void SquadsDialog::GetSquadTooltip(std::pair<std::string, std::shared_ptr<Squad>
 			//unreachable as we tested '!= NOORDER'
 			assert(false);
 		}
-		tooltip->AddEntry(TooltipEntry((boost::format(" Orders: %s") % order).str(), TCODColor::grey));
+		tooltip->AddEntry(TooltipEntry(" Orders: " + order, TCODColor::grey));
 	}
-	tooltip->AddEntry(TooltipEntry((boost::format(" Weapon: %s") % Item::ItemCategoryToString(squadi.second->Weapon())).str(), TCODColor::grey));
-	tooltip->AddEntry(TooltipEntry((boost::format(" Armor: %s") % Item::ItemCategoryToString(squadi.second->Armor())).str(), TCODColor::grey));
+	tooltip->AddEntry(TooltipEntry(" Weapon: " + Item::ItemCategoryToString(squadi.second->Weapon()), TCODColor::grey));
+	tooltip->AddEntry(TooltipEntry(" Armor: " + Item::ItemCategoryToString(squadi.second->Armor()), TCODColor::grey));
 }
 
 std::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
@@ -135,7 +134,7 @@ void SquadsDialog::SelectSquad(int i) {
 		squadName = GetSquad(i)->Name();
 		squadPriority = GetSquad(i)->Priority();
 		squadMembers = GetSquad(i)->MemberLimit();
-		orders->SetTitle((boost::format("Orders for %s") % squadName).str());
+		orders->SetTitle("Orders for " + squadName);
 	} else {
 		rightFrame->SetTitle("New Squad");
 		squadName = "";

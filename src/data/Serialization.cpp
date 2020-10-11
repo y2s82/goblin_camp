@@ -24,7 +24,6 @@ and I couldn't come up with a coherent answer just by googling. */
 #pragma warning(push, 2) //Boost::serialization generates a few very long warnings
 
 #include <functional>
-#include <boost/format.hpp>
 #include <fstream>
 #include <cstdint>
 

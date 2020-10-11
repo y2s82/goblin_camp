@@ -21,7 +21,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/algorithm/string.hpp>
 #ifdef DEBUG
 #include <iostream>
-#include <boost/format.hpp>
 #endif
 
 #include <boost/serialization/weak_ptr.hpp>

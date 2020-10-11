@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 #include "stdafx.hpp"
 
-#include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 
 #if DEBUG
@@ -142,10 +141,8 @@ void Events::SpawnHostileMonsters() {
 
 		std::string msg;
 		if (hostileSpawnCount > 1) 
-			msg = (boost::format("%s have been sighted outside your %s!") 
-			% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
-		else msg = (boost::format("A %s has been sighted outside your %s!")
-			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
+			msg = NPC::Presets[monsterType].plural + " have been sighted outside your " + Camp::Inst()->GetName() + "!";
+		else msg = "A " + NPC::Presets[monsterType].name + " has been sighted outside your " + Camp::Inst()->GetName() + "!";
 
 		Coordinate a, b;
 		GenerateEdgeCoordinates(map, a, b);
@@ -193,10 +190,8 @@ void Events::SpawnImmigrants() {
 
 		std::string msg;
 		if (spawnCount > 1) 
-			msg = (boost::format("%s join your %s!") 
-			% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
-		else msg = (boost::format("A %s joins your %s!")
-			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
+			msg = NPC::Presets[monsterType].plural + " join your " + Camp::Inst()->GetName() + "!";
+		else msg = "A " + NPC::Presets[monsterType].name + " joins your " + Camp::Inst()->GetName() + "!";
 
 		Coordinate a, b;
 		GenerateEdgeCoordinates(map, a, b);
@@ -391,8 +386,8 @@ void Events::SpawnMigratingAnimals() {
 		}
 
 		std::string msg;
-		msg = (boost::format("A %s migration is occurring outside your %s.") % NPC::Presets[monsterType].name
-			% Camp::Inst()->GetName()).str();
+		msg = "A " + NPC::Presets[monsterType].name +" migration is occurring outside your " +
+			Camp::Inst()->GetName() + ".";
 		
 		Announce::Inst()->AddMsg(msg, TCODColor::green, (a+b)/2);
 #if DEBUG

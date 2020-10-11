@@ -171,7 +171,7 @@ void SideBar::DrawSeed(std::pair<ItemType, bool> seed, int i, int x, int y, int 
 
 std::string SideBar::NPCSquadLabel(NPC *npc) {
 	if(npc->MemberOf().lock()) {
-		return boost::str(boost::format("S: %s") % npc->MemberOf().lock()->Name());
+		return "S: " + npc->MemberOf().lock()->Name();
 	} else {
 		return "";
 	}
@@ -179,7 +179,7 @@ std::string SideBar::NPCSquadLabel(NPC *npc) {
 
 std::string SideBar::NPCWeaponLabel(NPC *npc) {
 	if(npc->Wielding().lock()) {
-		return boost::str(boost::format("W: %s") % npc->Wielding().lock()->Name());
+		return "W: " + npc->Wielding().lock()->Name();
 	} else {
 		return "";
 	}
@@ -187,7 +187,7 @@ std::string SideBar::NPCWeaponLabel(NPC *npc) {
 
 std::string SideBar::NPCArmorLabel(NPC *npc) {
 	if(npc->Wearing().lock()) {
-		return boost::str(boost::format("A: %s") % npc->Wearing().lock()->Name());
+		return "A: " + npc->Wearing().lock()->Name();
 	} else {
 		return "";
 	}

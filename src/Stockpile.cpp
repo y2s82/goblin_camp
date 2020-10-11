@@ -623,7 +623,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 				tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 				return;
 			}
-			tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % Item::ItemCategoryToString(vecView[i].first) % vecView[i].second).str(), TCODColor::grey));
+			tooltip->AddEntry(TooltipEntry(" " + Item::ItemCategoryToString(vecView[i].first) + " x" + std::to_string(vecView[i].second), TCODColor::grey));
 
 			for(std::vector<ItemCat>::iterator cati = Item::Categories.begin(); cati != Item::Categories.end(); cati++) {
 				if(cati->parent >= 0 && Item::StringToItemCategory(Item::Categories[cati->parent].GetName()) == vecView[i].first) {
@@ -633,7 +633,7 @@ void Stockpile::GetTooltip(int x, int y, Tooltip *tooltip) {
 							tooltip->AddEntry(TooltipEntry(" ...", TCODColor::grey));
 							return;
 						}
-						tooltip->AddEntry(TooltipEntry((boost::format("	 %s x%d") % cati->GetName() % amt).str(), TCODColor::grey));
+						tooltip->AddEntry(TooltipEntry("	 " + cati->GetName() + " x" + std::to_string(amt), TCODColor::grey));
 					}
 				}
 			}

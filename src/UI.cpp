@@ -592,9 +592,9 @@ int UI::DrawShortcutHelp(TCODConsole *console, int x, int y, std::string shortcu
 
 	if(!found) {
 		if(keyMap[shortcut] == ' ') {
-			out.insert(0, (boost::format("%cSpace%c-") % (char)TCOD_COLCTRL_1 % (char)TCOD_COLCTRL_STOP).str());
+			out.insert(0, char(TCOD_COLCTRL_1) + "Space""-" + char(TCOD_COLCTRL_STOP));
 		} else {
-			out.insert(0, (boost::format("%c%c%c-") % (char)TCOD_COLCTRL_1 % (char)toupper(keyMap[shortcut]) % (char)TCOD_COLCTRL_STOP).str());
+			out.insert(0, std::string("") + char(TCOD_COLCTRL_1) + char(toupper(keyMap[shortcut])) + char(TCOD_COLCTRL_STOP));
 		}
 	}
 

@@ -28,7 +28,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
-#include <boost/format.hpp>
 #include <libtcod.hpp>
 // http://www.ridgesolutions.ie/index.php/2013/05/30/boost-link-error-undefined-reference-to-boostfilesystemdetailcopy_file/
 
@@ -72,7 +71,7 @@ namespace {
 		\param[out] dest     A string buffer to receive formatted file size.
 	*/
 	void FormatFileSize(const std::uintmax_t& filesize, std::string& dest) {
-		static const char* sizes[] = { "%10.0f b", "%10.2f kB", "%10.2f MB", "%10.2f GB" };
+		static const char* sizes[] = { " b", " kB", " MB", " GB" };
 		static unsigned maxSize = sizeof(sizes) / sizeof(sizes[0]);
 		
 		long double size = static_cast<long double>(filesize);
@@ -83,7 +82,7 @@ namespace {
 			++idx;
 		}
 		
-		dest = (boost::format(sizes[idx]) % size).str();
+		dest = std::to_string(size) + sizes[idx];
 	}
 	
 	/**
@@ -333,7 +332,7 @@ namespace Data {
 		}
 		
 		std::string png = (
-			Paths::Get(Paths::Screenshots) / ((boost::format("screen%|06|.png") % (largest + 1)).str())
+			Paths::Get(Paths::Screenshots) / ("screen%|" + std::to_string(largest + 1) + "|.png")
 		).string();
 		
 		LOG("Saving screenshot to " << png);

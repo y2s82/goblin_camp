@@ -20,7 +20,6 @@
 #include <libtcod.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
 #include "UI/StockManagerDialog.hpp"
 #include "UI/ScrollPanel.hpp"
@@ -60,14 +59,14 @@ public:
 					compAmt++;
 				} else {
 					if(compName.length() > 0) {
-						tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % compName % compAmt).str(), TCODColor::grey));
+						tooltip->AddEntry(TooltipEntry(" " + compName  + " x" + std::to_string(compAmt), TCODColor::grey));
 					}
 					compName = thisCompName;
 					compAmt = 1;
 				}
 			}
 			if(compName.length() > 0) {
-				tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % compName % compAmt).str(), TCODColor::grey));
+				tooltip->AddEntry(TooltipEntry(" " + compName  + " x" + std::to_string(compAmt), TCODColor::grey));
 			}
 		}
 	}
