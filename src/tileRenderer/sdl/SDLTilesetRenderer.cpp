@@ -53,8 +53,8 @@ SDLTilesetRenderer::SDLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 	amask = 0xff000000;
 #endif
 	SDL_Surface * temp = SDL_CreateRGBSurface(0, MathEx::NextPowerOfTwo(screenWidth), MathEx::NextPowerOfTwo(screenHeight), 32, rmask, gmask, bmask, amask);
-	SDL_SetAlpha(temp, 0, SDL_ALPHA_OPAQUE);
-	mapSurface = std::shared_ptr<SDL_Surface>(SDL_DisplayFormat(temp), SDL_FreeSurface);
+	SDL_SetSurfaceAlphaMod(temp, 255);
+	mapSurface = std::shared_ptr<SDL_Surface>(SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB444, 0), SDL_FreeSurface);
 	SDL_FreeSurface(temp);
 
 	if (!mapSurface)
@@ -163,7 +163,9 @@ void SDLTilesetRenderer::render(void *surf, void*sdl_screen) {
 		}
 	}
 	else {
-		SDL_SetColorKey(tcod,SDL_SRCCOLORKEY, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
+            Uint32 key;
+            SDL_GetColorKey(tcod, &key);
+		SDL_SetColorKey(tcod,key, SDL_MapRGBA(tcod->format, keyColor.r, keyColor.g, keyColor.b, 255));
 	}
 	SDL_LowerBlit(tcod, &srcRect, mapSurface.get(), &dstRect);
 	SDL_LowerBlit(mapSurface.get(), &srcRect, screen, &dstRect);

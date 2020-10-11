@@ -27,7 +27,7 @@ TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tile
 {
 	SDL_Surface * temp = IMG_Load(path.string().c_str());
 	if (temp != NULL) {
-		tiles = std::shared_ptr<SDL_Surface>(SDL_DisplayFormatAlpha(temp), SDL_FreeSurface);
+		tiles = std::shared_ptr<SDL_Surface>(SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGBA8888, 0), SDL_FreeSurface);
 		SDL_FreeSurface(temp);
 	}
 	if (tiles) {

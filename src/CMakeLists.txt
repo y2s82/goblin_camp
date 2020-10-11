@@ -19,14 +19,15 @@ include_directories (${GOBLINCAMP_SOURCE_DIR}/vendor/python-modules)
 
 include_directories(/usr/include
                     /usr/include/libtcod
-		    /usr/include/SDL)
+		    /usr/include/SDL2)
 
 set (LIB_PATH /usr/lib)
 find_library (PNG png ${LIB_PATH})
 find_library (TCOD tcod ${LIB_PATH})
 
-find_package (SDL)
-find_package (SDL_image)
+set(OpenGL_GL_PREFERENCE GLVND)
+find_package (SDL2)
+find_package (SDL2_image)
 find_package (ZLIB)
 
 # TODO: which ones are needed?
@@ -60,7 +61,7 @@ include_directories (${Boost_INCLUDE_DIRS})
 link_directories (${Boost_LIBRARY_DIRS})
 
 # link the executable to the libraries
-target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL SDL_image tcod z python-modules pthread)
+target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL2 SDL2_image tcod z python-modules pthread X11)
 
 # have to use c++11 or gnu++11, because lambda expressions
 set_target_properties (goblincamp PROPERTIES COMPILE_FLAGS "-std=gnu++11 -Wall")

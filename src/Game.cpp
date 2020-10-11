@@ -550,9 +550,10 @@ void Game::ProgressScreen(std::function<void(void)> blockingCall, bool isLoading
 	int spin = 0;
 	do {
 		DrawProgressScreen(x, y, ++spin, isLoading);
-	} while (future.wait_for(std::chrono::milliseconds(500)) == std::future_status::timeout);
+	} while (future.wait_for(std::chrono::milliseconds(500)) != std::future_status::ready);
 	
             future.get(); // will rethrow exception
+            thread.join();
 }
 
 void Game::ErrorScreen() {

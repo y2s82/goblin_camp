@@ -1506,6 +1506,7 @@ void NPC::findPath(Coordinate target) {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
 		std::thread pathThread(std::bind(tFindPath, path, pos.X(), pos.Y(), target.X(), target.Y(), this, true));
+                pathThread.detach();
 	} else {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
