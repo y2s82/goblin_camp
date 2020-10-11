@@ -1444,7 +1444,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 	}
 	while (nextMove > 100) {
 		nextMove -= 100;
-		boost::mutex::scoped_try_lock pathLock(pathMutex);
+		std::mutex::scoped_try_lock pathLock(pathMutex);
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
 			if (pathIndex < path->size() && pathIndex >= 0) {
@@ -1485,7 +1485,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 }
 
 unsigned int NPC::pathingThreadCount = 0;
-boost::mutex NPC::threadCountMutex;
+std::mutex NPC::threadCountMutex;
 void NPC::findPath(Coordinate target) {
 	pathMutex.lock();
 	findPathWorking = true;
@@ -1620,8 +1620,8 @@ std::weak_ptr<Entity> NPC::currentEntity() const {
 
 
 void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool threaded) {
-	boost::mutex::scoped_lock pathLock(npc->pathMutex);
-	boost::shared_lock<boost::shared_mutex> readCacheLock(npc->map->cacheMutex);
+	std::mutex::scoped_lock pathLock(npc->pathMutex);
+	boost::shared_lock<std::shared_mutex> readCacheLock(npc->map->cacheMutex);
 	npc->nopath = !path->compute(x0, y0, x1, y1);
 
 	//TODO factorize with path walkability test

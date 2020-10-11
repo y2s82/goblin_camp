@@ -119,7 +119,7 @@ class NPC : public Entity {
 	int taskIndex;
 	int orderIndex;
 
-	boost::mutex pathMutex;
+	std::mutex pathMutex;
 	TCODPath *path;
 	int pathIndex;
 	bool nopath;
@@ -291,7 +291,7 @@ public:
 	static void AnimalReact(std::shared_ptr<NPC>);
 	
 	static unsigned int pathingThreadCount;
-	static boost::mutex threadCountMutex;
+	static std::mutex threadCountMutex;
 
 	void AddTrait(Trait);
 	void RemoveTrait(Trait);

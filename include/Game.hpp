@@ -121,7 +121,7 @@ public:
 	void Init(bool firstTime);
 	void ResetRenderer();
 	
-	static boost::mutex loadingScreenMutex;
+	static std::mutex loadingScreenMutex;
 	static void ProgressScreen(std::function<void(void)>, bool isLoading);
 	static void LoadingScreen(std::function<void(void)> fn) {
 		ProgressScreen(fn, true);

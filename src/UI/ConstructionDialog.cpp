@@ -30,6 +30,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "Game.hpp"
 #include "Stockpile.hpp"
+#include <functional>
 
 using namespace std::placeholders;
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
@@ -86,7 +87,7 @@ void ConstructionDialog::Construct(std::weak_ptr<Construction> cons) { construct
 void ConstructionDialog::Rename() {
 	if (construct.lock()) {
 		UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 1, 1, 28, 7);
-		contents->AddComponent(new TextBox(0, 1, 28, std::bind(&Entity::Name, construct.lock()), std::bind(&Entity::Name, construct.lock(), _1)));
+		contents->AddComponent(new TextBox(0, 1, 28, std::bind(&Entity::GetName, construct.lock()), std::bind(&Entity::SetName, construct.lock(), _1)));
 		contents->AddComponent(new Button("OK", std::function<void()>(), 11, 3, 6, TCODK_ENTER, true));
 		Dialog *renameDialog = new Dialog(contents, "Rename", 30, 8);
 		renameDialog->ShowModal();

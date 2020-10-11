@@ -75,7 +75,7 @@ void Faction::RemoveMember(std::weak_ptr<NPC> member) {
 }
 
 void Faction::TrapDiscovered(Coordinate trapLocation, bool propagate) {
-	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
+	boost::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = true;
 	//Inform friends
 	if (propagate) {
@@ -86,14 +86,14 @@ void Faction::TrapDiscovered(Coordinate trapLocation, bool propagate) {
 }
 
 bool Faction::IsTrapVisible(Coordinate trapLocation) {
-	boost::shared_lock<boost::shared_mutex> readLock(trapVisibleMutex);
+	boost::shared_lock<std::shared_mutex> readLock(trapVisibleMutex);
 	std::map<Coordinate, bool>::iterator trapi = trapVisible.find(trapLocation);
 	if (trapi == trapVisible.end()) return false;
 	return trapi->second;
 }
 
 void Faction::TrapSet(Coordinate trapLocation, bool visible) {
-	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
+	boost::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = visible;
 }
 
@@ -120,7 +120,7 @@ std::string Faction::FactionTypeToString(FactionType faction) {
 //Reset() does not erase names or goals because these are defined at startup and
 //remain constant
 void Faction::Reset() {
-	boost::unique_lock<boost::shared_mutex> writeLock(trapVisibleMutex);
+	boost::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
 	members.clear();
 	membersAsUids.clear();
 	trapVisible.clear();

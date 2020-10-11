@@ -491,7 +491,7 @@ namespace {
 	const unsigned savingSize  = sizeof saving  / sizeof saving[0];
 	
 	void DrawProgressScreen(int x, int y, int spin, bool isLoading) {
-		boost::lock_guard<boost::mutex> lock(Game::loadingScreenMutex);
+		boost::lock_guard<std::mutex> lock(Game::loadingScreenMutex);
 		
 		SDL_PumpEvents();
 		
@@ -506,7 +506,7 @@ namespace {
 	}
 }
 
-boost::mutex Game::loadingScreenMutex;
+std::mutex Game::loadingScreenMutex;
 
 void Game::ProgressScreen(std::function<void(void)> blockingCall, bool isLoading) {
 	// this runs blocking call in a separate thread while spinning on the main one
@@ -545,7 +545,7 @@ void Game::ProgressScreen(std::function<void(void)> blockingCall, bool isLoading
 }
 
 void Game::ErrorScreen() {
-	boost::lock_guard<boost::mutex> lock(loadingScreenMutex);
+	boost::lock_guard<std::mutex> lock(loadingScreenMutex);
 	
 	Game *game = Game::Inst();
 	TCODConsole::root->setDefaultForeground(TCODColor::white);

@@ -13,6 +13,8 @@ project (GOBLINCAMP)
 set (GOBLINCAMP_VERSION_MAJOR 0)
 set (GOBLINCAMP_VERSION_MINOR 22)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wno-deprecated-declarations")
+
 # TODO: configure version here, use in source
 configure_file (
   "${GOBLINCAMP_SOURCE_DIR}/version.hpp.in"
