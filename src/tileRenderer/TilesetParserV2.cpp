@@ -498,7 +498,7 @@ bool TileSetParserV2::parserProperty(TCODParser *parser,const char *name, TCOD_v
 				for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 					npcSpriteFactory.AddWeaponType(std::string((char*)TCOD_list_get(value.list, i)));
 				}
-			} else if (utils::iequals(name, "armourTypes") || boost::iequals(name, "armorTypes")) {
+			} else if (utils::iequals(name, "armourTypes") || utils::iequals(name, "armorTypes")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 					npcSpriteFactory.AddArmourType(std::string((char*)TCOD_list_get(value.list, i)));
 				}

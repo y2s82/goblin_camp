@@ -2239,7 +2239,7 @@ class NPCListener : public ITCODParserListener {
 		} else if (utils::iequals(name,"tags")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				std::string tag = (char*)TCOD_list_get(value.list,i);
-				NPC::Presets[npcIndex].tags.insert(boost::to_lower_copy(tag));
+				NPC::Presets[npcIndex].tags.insert(utils::to_lower_copy(tag));
 			}
 		} else if (utils::iequals(name,"strength")) {
 			NPC::Presets[npcIndex].stats[STRENGTH] = value.i;

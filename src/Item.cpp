@@ -185,7 +185,7 @@ std::string Item::ItemTypeToString(ItemType type) {
 }
 
 ItemType Item::StringToItemType(std::string str) {
-	boost::to_upper(str);
+	utils::to_upper(str);
 	if (itemTypeNames.find(str) == itemTypeNames.end()) {
 		return -1;
 	}
@@ -199,7 +199,7 @@ std::string Item::ItemCategoryToString(ItemCategory category) {
 }
 
 ItemCategory Item::StringToItemCategory(std::string str) {
-	boost::to_upper(str);
+	utils::to_upper(str);
 	if (itemCategoryNames.find(str) == itemCategoryNames.end()) {
 		return -1;
 	}
@@ -288,7 +288,7 @@ private:
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 		if (name && utils::iequals(str->getName(), "category_type")) {
 			std::string strName(name);
-			boost::to_upper(strName);
+			utils::to_upper(strName);
 			if (Item::itemCategoryNames.find(strName) != Item::itemCategoryNames.end()) {
 				categoryIndex = Item::itemCategoryNames[strName];
 				Item::Categories[categoryIndex] = ItemCat();
@@ -304,7 +304,7 @@ private:
 			}
 		} else if (name && utils::iequals(str->getName(), "item_type")) {
 			std::string strName(name);
-			boost::to_upper(strName);
+			utils::to_upper(strName);
 			if (Item::itemTypeNames.find(strName) != Item::itemTypeNames.end()) {
 				itemIndex = Item::itemTypeNames[strName];
 				Item::Presets[itemIndex] = ItemPreset();

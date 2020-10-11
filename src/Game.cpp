@@ -2027,7 +2027,7 @@ void Game::Reset() {
 NPCType Game::GetRandomNPCTypeByTag(std::string tag) {
 	std::vector<NPCType> npcList;
 	for (size_t i = 0; i < NPC::Presets.size(); ++i) {
-		if (NPC::Presets[i].tags.find(boost::to_lower_copy(tag)) != NPC::Presets[i].tags.end()) {
+		if (NPC::Presets[i].tags.find(utils::to_lower_copy(tag)) != NPC::Presets[i].tags.end()) {
 			npcList.push_back(i);
 		}
 	}

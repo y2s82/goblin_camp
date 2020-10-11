@@ -36,6 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/deque.hpp>
 #include <boost/serialization/list.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Construction.hpp"
 #include "Announce.hpp"
@@ -69,7 +70,7 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 std::unordered_map<std::string, ConstructionType> Construction::constructionNames = std::unordered_map<std::string, ConstructionType>();
 
 ConstructionType Construction::StringToConstructionType(std::string name) {
-	boost::to_upper(name);
+	utils::to_upper(name);
 	if (constructionNames.find(name) == constructionNames.end()) {
 		return -1;
 	}
@@ -417,7 +418,7 @@ class ConstructionListener : public ITCODParserListener {
 
 			//Figure out the index, whether this is a new construction or a redefinition
 			std::string strName(name);
-			boost::to_upper(strName);
+			utils::to_upper(strName);
 			if (Construction::constructionNames.find(strName) != Construction::constructionNames.end()) {
 				constructionIndex = Construction::constructionNames[strName];
 				//A redefinition, so wipe out the earlier one

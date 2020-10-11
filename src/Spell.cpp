@@ -45,7 +45,7 @@ Spell::Spell(const Coordinate& pos, int vtype) : Entity(),
 	color = Spell::Presets[type].color;
 
 	//TODO: I don't like making special cases like this, perhaps a flag instead?
-	if (utils::iequals(Spell::Presets[type].name, "smoke") || boost::iequals(Spell::Presets[type].name, "steam")) {
+	if (utils::iequals(Spell::Presets[type].name, "smoke") || utils::iequals(Spell::Presets[type].name, "steam")) {
 		int add = Random::Generate(50);
 		color.r += add;
 		color.g += add;
