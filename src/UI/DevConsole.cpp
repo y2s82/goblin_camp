@@ -22,8 +22,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <vector>
 #include <cstdint>
-#include <boost/tokenizer.hpp>
-#include <boost/foreach.hpp>
 #include <algorithm>
 
 namespace py = boost::python;
@@ -93,13 +91,6 @@ struct DevConsole {
 	}
 	
 	unsigned Render(bool error) {
-		typedef boost::char_separator<char> SepT;
-		typedef boost::tokenizer<SepT> TokT;
-		
-		SepT sep("\n");
-		TokT inTok(input, sep);
-		TokT outTok(output, sep);
-		
 		canvas.clear();
 		canvas.setAlignment(TCOD_LEFT);
 		canvas.setDefaultBackground(TCODColor::black);
@@ -109,7 +100,9 @@ struct DevConsole {
 		canvas.setDefaultForeground(TCODColor::sky);
 		
 		unsigned y = 1;
-		BOOST_FOREACH(std::string token, inTok) {
+                std::istringstream stream;
+                stream.str(input);
+		for (std::string token; std::getline(stream, token);) {
 			canvas.print(0, y, "%s", token.c_str());
 			++y;
 		}
@@ -121,7 +114,8 @@ struct DevConsole {
 		canvas.setDefaultForeground(error ? TCODColor::amber : TCODColor::chartreuse);
 		
 		++y;
-		BOOST_FOREACH(std::string token, outTok) {
+                stream.str(output);
+		for(std::string token; std::getline(stream, token);) {
 			canvas.print(0, y, "%s", token.c_str());
 			++y;
 		}

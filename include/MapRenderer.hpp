@@ -45,6 +45,7 @@ enum CursorType
 class MapRenderer
 {
 public:
+    MapRenderer() = default;
     MapRenderer(const MapRenderer&) = delete;
 	virtual ~MapRenderer() = 0;
 
