@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/noncopyable.hpp>
 #include <vector>
 
-#include <boost/function.hpp>
+#include <functional>
 #include "Coordinate.hpp"
 #include <libtcod.hpp>
 #include "tileRenderer/Corner.hpp"

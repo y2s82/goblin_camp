@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 #include<memory>
 
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 #include <libtcod.hpp>
 
 #include "data/Serialization.hpp"
@@ -24,7 +24,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Job;
 
-class FireNode : public boost::enable_shared_from_this<FireNode> {
+class FireNode : public std::enable_shared_from_this<FireNode> {
 	GC_SERIALIZABLE_CLASS
 	
 	Coordinate pos;

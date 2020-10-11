@@ -18,8 +18,8 @@
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
+#include <functional>
 
 #include <libtcod.hpp>
 

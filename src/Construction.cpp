@@ -16,9 +16,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 #include "stdafx.hpp"
 
-#include <boost/bind.hpp>
+#include <functional>
 #include <boost/lambda/lambda.hpp>
-#include <boost/lambda/bind.hpp>
+#include <functional>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>
 #include <boost/tokenizer.hpp>
@@ -688,7 +688,6 @@ bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string
 void Construction::ResolveProducts() {
 	typedef std::vector<ConstructionPreset>::iterator conIterator;
 	typedef std::vector<ItemPreset>::iterator itmIterator;
-	using boost::lambda::_1;
 	
 	for (itmIterator it = Item::Presets.begin(); it != Item::Presets.end(); ++it) {
 		ItemPreset& itemPreset = *it;
@@ -979,7 +978,7 @@ int Construction::Repair() {
 
 void Construction::SpawnRepairJob() {
 	if (built && condition < maxCondition && !repairJob.lock()) {
-		std::shared_ptr<Item> repairItem = Game::Inst()->FindItemByCategoryFromStockpiles(*boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials)),
+		std::shared_ptr<Item> repairItem = Game::Inst()->FindItemByCategoryFromStockpiles(*std::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials)),
 			Position()).lock();
 		if (repairItem) {
 			std::shared_ptr<Job> repJob(new Job("Repair " + name));

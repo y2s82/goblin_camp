@@ -18,8 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
 
 #include <libtcod.hpp>
 
@@ -32,7 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class MenuChoice {
 public:
-	MenuChoice(std::string label = "", std::function<void()> = boost::bind(Game::DoNothing), bool = true,
+	MenuChoice(std::string label = "", std::function<void()> = std::bind(Game::DoNothing), bool = true,
 		std::string tooltip = "");
 	std::string label;
 	std::function<void()> callback;

@@ -234,7 +234,7 @@ void Camp::UpdateWaterJobs() {
 		if (Game::Inst()->fireList.size() > 0) {
 			for (int i = 1; static_cast<int>(menialWaterJobs.size()) < Game::Inst()->GoblinCount() && i <= 10; ++i) {
 				std::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, true));
-				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
+				Coordinate location = *std::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					menialWaterJobs.push_back(waterJob);
@@ -244,7 +244,7 @@ void Camp::UpdateWaterJobs() {
 
 			for (int i = 1; static_cast<int>(expertWaterJobs.size()) < Game::Inst()->OrcCount() && i <= 10; ++i) {
 				std::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, false));
-				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
+				Coordinate location = *std::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					expertWaterJobs.push_back(waterJob);
@@ -255,7 +255,7 @@ void Camp::UpdateWaterJobs() {
 		} else {
 			if (menialWaterJobs.size() < 5) {
 				std::shared_ptr<Job> waterJob(new Job("Pour water", LOW, 0, true));
-				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
+				Coordinate location = *std::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					menialWaterJobs.push_back(waterJob);

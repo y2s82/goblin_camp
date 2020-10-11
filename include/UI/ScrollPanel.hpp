@@ -18,8 +18,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
+#include <functional>
+#include <functional>
 
 #include <libtcod.hpp>
 

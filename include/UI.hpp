@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <vector>
 #include <string>
-#include <boost/function.hpp>
+#include <functional>
 
 
 #include "UI/Menu.hpp"

@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/thread/thread.hpp>
 #include <boost/multi_array.hpp>
-#include <boost/function.hpp>
+#include <functional>
 
 
 #include <libtcod.hpp>

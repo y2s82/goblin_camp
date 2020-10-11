@@ -115,7 +115,7 @@ void Container::RemoveListener(ContainerListener *listener) {
 	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++, ++n) {
 		if(*it == listener) {
 			listeners.erase(it);
-			if (n < listenersAsUids.size()) listenersAsUids.erase(boost::next(listenersAsUids.begin(), n));
+			if (n < listenersAsUids.size()) listenersAsUids.erase(std::next(listenersAsUids.begin(), n));
 			return;
 		}
 	}
@@ -133,8 +133,8 @@ void Container::TranslateContainerListeners() {
 	listeners.clear();
 	for (unsigned int i = 0; i < listenersAsUids.size(); ++i) {
 		std::weak_ptr<Construction> cons = Game::Inst()->GetConstruction(listenersAsUids[i]);
-		if (cons.lock() && boost::dynamic_pointer_cast<Stockpile>(cons.lock())) {
-			listeners.push_back(boost::dynamic_pointer_cast<Stockpile>(cons.lock()).get());
+		if (cons.lock() && std::dynamic_pointer_cast<Stockpile>(cons.lock())) {
+			listeners.push_back(std::dynamic_pointer_cast<Stockpile>(cons.lock()).get());
 		}
 	}
 }

@@ -66,7 +66,7 @@ Stockpile::~Stockpile() {
 		for (std::set<std::weak_ptr<Item> >::iterator itemi = conti->second->begin(); itemi != conti->second->end(); ++itemi) {
 			//If the item is also a container, remove 'this' as a listener
 			if (itemi->lock() && itemi->lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-				if (boost::dynamic_pointer_cast<Container>(itemi->lock())) {
+				if (std::dynamic_pointer_cast<Container>(itemi->lock())) {
 					std::shared_ptr<Container> container = std::static_pointer_cast<Container>(itemi->lock());
 					container->RemoveListener(this);
 				}
@@ -112,7 +112,7 @@ std::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, i
 					//The item is the one we want, check that it fullfills all the requisite flags
 					++itemsFound;
 
-					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item)) {
+					if (flags & NOTFULL && std::dynamic_pointer_cast<Container>(item)) {
 						std::shared_ptr<Container> container = std::static_pointer_cast<Container>(item);
 						//value represents bulk in this case. Needs to check Full() because bulk=value=0 is a possibility
 						if (container->Full() || container->Capacity() < value) continue;
@@ -132,7 +132,7 @@ std::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, i
 						}
 					} 
 
-					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item)) {
+					if (flags & EMPTY && std::dynamic_pointer_cast<Container>(item)) {
 						if (!std::static_pointer_cast<Container>(item)->empty() ||
 							std::static_pointer_cast<Container>(item)->GetReservedSpace() > 0) continue;
 					}
@@ -149,7 +149,7 @@ std::weak_ptr<Item> Stockpile::FindItemByCategory(ItemCategory cat, int flags, i
 
 					return item;
 
-				} else if (boost::dynamic_pointer_cast<Container>(item)) {
+				} else if (std::dynamic_pointer_cast<Container>(item)) {
 					//This item is not the one we want, but it might contain what we're looking for.
 					std::weak_ptr<Container> cont = std::static_pointer_cast<Container>(item);
 
@@ -211,7 +211,7 @@ std::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, int
 			if (std::shared_ptr<Item> item = witem.lock()) {
 				if (item->Type() == typeValue && !item->Reserved()) {
 					++itemsFound;
-					if (flags & NOTFULL && boost::dynamic_pointer_cast<Container>(item)) {
+					if (flags & NOTFULL && std::dynamic_pointer_cast<Container>(item)) {
 						std::shared_ptr<Container> container = std::static_pointer_cast<Container>(item);
 						//value represents bulk in this case
 						if (container->Full() || container->Capacity() < value) continue;
@@ -231,7 +231,7 @@ std::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, int
 						}
 					} 
 
-					if (flags & EMPTY && boost::dynamic_pointer_cast<Container>(item)) {
+					if (flags & EMPTY && std::dynamic_pointer_cast<Container>(item)) {
 						if (!std::static_pointer_cast<Container>(item)->empty() ||
 							std::static_pointer_cast<Container>(item)->GetReservedSpace() > 0) continue;
 					}
@@ -247,7 +247,7 @@ std::weak_ptr<Item> Stockpile::FindItemByType(ItemType typeValue, int flags, int
 					}
 					
 					return item;
-				} else if (boost::dynamic_pointer_cast<Container>(item)) {
+				} else if (std::dynamic_pointer_cast<Container>(item)) {
 					std::weak_ptr<Container> cont = std::static_pointer_cast<Container>(item);
 					for (std::set<std::weak_ptr<Item> >::iterator itemi = cont.lock()->begin(); itemi != cont.lock()->end(); ++itemi) {
 						std::shared_ptr<Item> innerItem(itemi->lock());
@@ -420,7 +420,7 @@ Coordinate Stockpile::FreePosition() {
 	if (containers.size() > 0) {
 		//First attempt to find a random position
 		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
-			std::map<Coordinate, std::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
+			std::map<Coordinate, std::shared_ptr<Container> >::iterator conti = std::next(containers.begin(), Random::ChooseIndex(containers));
 			if (conti != containers.end() && conti->second && conti->second->empty() && !reserved[conti->first]) 
 				return conti->first;
 		}
@@ -502,7 +502,7 @@ void Stockpile::SwitchAllowed(ItemCategory cat, bool childrenAlso, bool countPar
 	if (allowed[cat] && limits.find(cat) != limits.end() && limits[cat] == 0) limits[cat] = 10;
 
 	if (childrenAlso) {
-		for (std::map<ItemCategory, bool>::iterator alli = boost::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
+		for (std::map<ItemCategory, bool>::iterator alli = std::next(allowed.find(cat)); alli != allowed.end(); ++alli) {
 			if (Item::Categories[alli->first].parent >= 0 &&
 				Item::Categories[Item::Categories[alli->first].parent].name == Item::Categories[cat].name) {
 				alli->second = allowed[cat];

@@ -15,14 +15,14 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 #include <libtcod.hpp>
 #include "Coordinate.hpp"
 #include "data/Serialization.hpp"
 
 #define RIVERDEPTH 5000
 
-class WaterNode : public boost::enable_shared_from_this<WaterNode> {
+class WaterNode : public std::enable_shared_from_this<WaterNode> {
 	GC_SERIALIZABLE_CLASS
 	
 	Coordinate pos;

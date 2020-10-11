@@ -231,7 +231,7 @@ void NPC::TaskFinished(TaskResult result, std::string msg) {
 
 	if (result != TASKSUCCESS) {
 		//If we're wielding a container (ie. a tool) spill it's contents
-		if (mainHand.lock() && boost::dynamic_pointer_cast<Container>(mainHand.lock())) {
+		if (mainHand.lock() && std::dynamic_pointer_cast<Container>(mainHand.lock())) {
 			std::shared_ptr<Container> cont(std::static_pointer_cast<Container>(mainHand.lock()));
 			if (cont->ContainsWater() > 0) {
 				Game::Inst()->CreateWater(Position(), cont->ContainsWater());
@@ -741,7 +741,7 @@ MOVENEARend:
 						TaskFinished(TASKFAILFATAL, "(PUTIN)Not adjacent to container");
 						break;
 					}
-					if (boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
+					if (std::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						std::shared_ptr<Container> cont = std::static_pointer_cast<Container>(currentEntity().lock());
 						if (!cont->AddItem(carried)) {
 							TaskFinished(TASKFAILFATAL, "(PUTIN)Container full");
@@ -801,7 +801,7 @@ MOVENEARend:
 			case EAT:
 				if (carried.lock()) {
 					//Set the nutrition to the timer variable
-					if (boost::dynamic_pointer_cast<OrganicItem>(carried.lock())) {
+					if (std::dynamic_pointer_cast<OrganicItem>(carried.lock())) {
 						timer = std::static_pointer_cast<OrganicItem>(carried.lock())->Nutrition();
 					} else timer = 100;
 					inventory->RemoveItem(carried);
@@ -862,7 +862,7 @@ CONTINUEEAT:
 				}
 
 			case USE:
-				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
+				if (currentEntity().lock() && std::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
 					tmp = std::static_pointer_cast<Construction>(currentEntity().lock())->Use();
 					AddEffect(WORKING);
 					if (tmp >= 100) {
@@ -1225,7 +1225,7 @@ CONTINUEEAT:
 				}
 
 				if (sourceContainer) {
-					if (currentEntity().lock() && boost::dynamic_pointer_cast<Container>(currentEntity().lock())) {
+					if (currentEntity().lock() && std::dynamic_pointer_cast<Container>(currentEntity().lock())) {
 						std::shared_ptr<Container> targetContainer(std::static_pointer_cast<Container>(currentEntity().lock()));
 						if (sourceContainer->ContainsWater() > 0) {
 							targetContainer->AddWater(sourceContainer->ContainsWater());
@@ -1314,7 +1314,7 @@ CONTINUEEAT:
 				break;
 
 			case REPAIR:
-				if (currentEntity().lock() && boost::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
+				if (currentEntity().lock() && std::dynamic_pointer_cast<Construction>(currentEntity().lock())) {
 					tmp = std::static_pointer_cast<Construction>(currentEntity().lock())->Repair();
 					AddEffect(WORKING);
 					if (tmp >= 100) {
@@ -1595,7 +1595,7 @@ void NPC::DropItem(std::weak_ptr<Item> witem) {
 		bulk -= item->GetBulk();
 
 		//If the item is a container with filth in it, spill it on the ground
-		if (boost::dynamic_pointer_cast<Container>(item)) {
+		if (std::dynamic_pointer_cast<Container>(item)) {
 			std::shared_ptr<Container> cont(std::static_pointer_cast<Container>(item));
 			if (cont->ContainsFilth() > 0) {
 				Game::Inst()->CreateFilth(Position(), cont->ContainsFilth());
@@ -1959,8 +1959,8 @@ void NPC::AbortCurrentJob(bool remove_job) {
 
 void NPC::Hit(std::weak_ptr<Entity> target, bool careful) {
 	if (target.lock()) {
-		std::shared_ptr<NPC> npc = boost::dynamic_pointer_cast<NPC>(target.lock());
-		std::shared_ptr<Construction> construction = boost::dynamic_pointer_cast<Construction>(target.lock());
+		std::shared_ptr<NPC> npc = std::dynamic_pointer_cast<NPC>(target.lock());
+		std::shared_ptr<Construction> construction = std::dynamic_pointer_cast<Construction>(target.lock());
 		for (std::list<Attack>::iterator attacki = attacks.begin(); attacki != attacks.end(); ++attacki) {
 			if (attacki->Cooldown() <= 0) {
 				attacki->ResetCooldown();
@@ -2141,7 +2141,7 @@ void NPC::DestroyAllItems() {
 	while (!inventory->empty()) {
 		std::weak_ptr<Item> item = inventory->GetFirstItem();
 		inventory->RemoveItem(item);
-		if (std::shared_ptr<Container> container = boost::dynamic_pointer_cast<Container>(item.lock())) {
+		if (std::shared_ptr<Container> container = std::dynamic_pointer_cast<Container>(item.lock())) {
 			while (!container->empty()) {
 				std::weak_ptr<Item> item = container->GetFirstItem();
 				container->RemoveItem(item);
@@ -2668,7 +2668,7 @@ void NPC::GoBerserk() {
 		carriedItem->Position(Position());
 		Coordinate target = undefined;
 		if (!nearNpcs.empty()) {
-			std::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
+			std::shared_ptr<NPC> creature = std::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
 			if (creature) target = creature->Position();
 		}
 		if (target == undefined) target = Random::ChooseInRadius(Position(), 7);
@@ -2679,7 +2679,7 @@ void NPC::GoBerserk() {
 	while (!jobs.empty()) TaskFinished(TASKFAILFATAL, "(FAIL)Gone berserk");
 
 	if (!nearNpcs.empty()) {
-		std::shared_ptr<NPC> creature = boost::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
+		std::shared_ptr<NPC> creature = std::next(nearNpcs.begin(), Random::ChooseIndex(nearNpcs))->lock();
 		std::shared_ptr<Job> berserkJob(new Job("Berserk!"));
 		berserkJob->internal = true;
 		berserkJob->tasks.push_back(Task(KILL, creature->Position(), creature));
@@ -2801,7 +2801,7 @@ void NPC::ValidateCurrentJob() {
 
 			case FELL:
 			case HARVESTWILDPLANT:
-				if (!jobs.front()->tasks[i].entity.lock() || !boost::dynamic_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())) {
+				if (!jobs.front()->tasks[i].entity.lock() || !std::dynamic_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())) {
 					TaskFinished(TASKFAILFATAL, "(FELL/HARVESTWILDPLANT)Target doesn't exist");
 					return;
 				} else if (!std::static_pointer_cast<NatureObject>(jobs.front()->tasks[i].entity.lock())->Marked()) {

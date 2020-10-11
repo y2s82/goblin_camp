@@ -124,7 +124,7 @@ void SquadsDialog::GetSquadTooltip(std::pair<std::string, std::shared_ptr<Squad>
 std::shared_ptr<Squad> SquadsDialog::GetSquad(int i) {
 	std::map<std::string, std::shared_ptr<Squad> >::iterator it = Game::Inst()->squadList.begin();
 	if (i >= 0 && i < (signed int)Game::Inst()->squadList.size()) {
-		return boost::next(it, i)->second;
+		return std::next(it, i)->second;
 	}
 	return std::shared_ptr<Squad>();
 }

@@ -412,7 +412,7 @@ void UI::HandleMouse() {
 		currentMenu = 0;
 		if(!underCursor.empty()) {
 			if (underCursor.begin()->lock()) {
-				if (boost::dynamic_pointer_cast<Construction>(underCursor.begin()->lock())) {
+				if (std::dynamic_pointer_cast<Construction>(underCursor.begin()->lock())) {
 					if (!std::static_pointer_cast<Construction>(underCursor.begin()->lock())->DismantlingOrdered())
 						currentMenu = underCursor.begin()->lock()->GetContextMenu();
 				} else {

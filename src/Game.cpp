@@ -259,7 +259,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, std::weak_ptr<Entity> ent, 
 	Coordinate closest = undefined;
 	int leastDistance = std::numeric_limits<int>::max();
 	if (ent.lock()) {
-		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
+		if (std::dynamic_pointer_cast<Construction>(ent.lock())) {
 			std::shared_ptr<Construction> construct(std::static_pointer_cast<Construction>(ent.lock()));
 			//note on weird (origin,extent) coordinates: we want the *outer* bordure of (position,blueprint)
 			Coordinate origin = construct->Position()-1,
@@ -288,7 +288,7 @@ Coordinate Game::FindClosestAdjacent(Coordinate pos, std::weak_ptr<Entity> ent, 
 //Takes into consideration if the entity is a construction, and thus may be larger than just one tile
 bool Game::Adjacent(Coordinate pos, std::weak_ptr<Entity> ent) {
 	if (ent.lock()) {
-		if (boost::dynamic_pointer_cast<Construction>(ent.lock())) {
+		if (std::dynamic_pointer_cast<Construction>(ent.lock())) {
 			std::shared_ptr<Construction> construct(std::static_pointer_cast<Construction>(ent.lock()));
 			for (int ix = construct->X()-1; ix <= construct->X() + Construction::Blueprint(construct->Type()).X(); ++ix) {
 				for (int iy = construct->Y()-1; iy <= construct->Y() + Construction::Blueprint(construct->Type()).Y(); ++iy) {
@@ -1043,7 +1043,7 @@ void Game::Update() {
 			}
 		} else {
 			for (size_t i = 0; i < std::max(static_cast<size_t>(100), freeItems.size()/4); ++i) {
-				std::set<std::weak_ptr<Item> >::iterator itemi = boost::next(freeItems.begin(), Random::ChooseIndex(freeItems));
+				std::set<std::weak_ptr<Item> >::iterator itemi = std::next(freeItems.begin(), Random::ChooseIndex(freeItems));
 				if (std::shared_ptr<Item> item = itemi->lock()) {
 					if (!item->Reserved() && item->GetFaction() == PLAYERFACTION && item->GetVelocity() == 0) 
 						StockpileItem(item);
@@ -1124,7 +1124,7 @@ std::shared_ptr<Job> Game::StockpileItem(std::weak_ptr<Item> witem, bool returnJ
 
 			/* If this is a container and it contains items, then stockpile it based on the items inside
 			instead of the container's type */
-			std::shared_ptr<Container> containerItem = boost::dynamic_pointer_cast<Container>(item);
+			std::shared_ptr<Container> containerItem = std::dynamic_pointer_cast<Container>(item);
 			if (containerItem && !containerItem->empty()) {
 				if (std::shared_ptr<Item> innerItem = containerItem->GetFirstItem().lock()) {
 					itemType = innerItem->Type();
@@ -2038,19 +2038,19 @@ void Game::ReturnToMark(int i) {
 
 void Game::TranslateContainerListeners() {
 	for (std::map<int,std::shared_ptr<Item> >::iterator it = itemList.begin(); it != itemList.end(); ++it) {
-		if (boost::dynamic_pointer_cast<Container>(it->second)) {
+		if (std::dynamic_pointer_cast<Container>(it->second)) {
 			std::static_pointer_cast<Container>(it->second)->TranslateContainerListeners();
 		}
 	}
 	for (std::map<int, std::shared_ptr<Construction> >::iterator it = staticConstructionList.begin(); 
 		it != staticConstructionList.end(); ++it) {
-			if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
+			if (std::dynamic_pointer_cast<Stockpile>(it->second)) {
 				std::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
 			}
 	}
 	for (std::map<int, std::shared_ptr<Construction> >::iterator it = dynamicConstructionList.begin(); 
 		it != dynamicConstructionList.end(); ++it) {
-			if (boost::dynamic_pointer_cast<Stockpile>(it->second)) {
+			if (std::dynamic_pointer_cast<Stockpile>(it->second)) {
 				std::static_pointer_cast<Stockpile>(it->second)->TranslateInternalContainerListeners();
 			}
 	}

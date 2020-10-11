@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 
 
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 #include "data/Serialization.hpp"
 
@@ -36,7 +36,7 @@ enum Order {
 	FOLLOW
 };
 
-class Squad : public boost::enable_shared_from_this<Squad> {
+class Squad : public std::enable_shared_from_this<Squad> {
 	GC_SERIALIZABLE_CLASS
 	
 	std::string name;

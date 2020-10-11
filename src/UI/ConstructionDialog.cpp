@@ -31,6 +31,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Game.hpp"
 #include "Stockpile.hpp"
 
+using namespace std::placeholders;
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
 std::weak_ptr<Construction> ConstructionDialog::cachedConstruct = std::weak_ptr<Construction>();
 Dialog* ConstructionDialog::ConstructionInfoDialog(std::weak_ptr<Construction> wcons) {

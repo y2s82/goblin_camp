@@ -204,7 +204,7 @@ Coordinate FarmPlot::FreePosition() {
 	if (containers.size() > 0) {
 		//First attempt to find a random position
 		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
-			std::map<Coordinate, std::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
+			std::map<Coordinate, std::shared_ptr<Container> >::iterator conti = std::next(containers.begin(), Random::ChooseIndex(containers));
 			if (conti != containers.end() && conti->second->empty() && !reserved[conti->first]) 
 				return conti->first;
 		}
