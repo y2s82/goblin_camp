@@ -19,8 +19,6 @@
 #include <string>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "UI/NPCDialog.hpp"
 #include "UI/ScrollPanel.hpp"

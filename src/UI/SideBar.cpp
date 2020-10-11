@@ -19,8 +19,6 @@
 #include <libtcod.hpp>
 #include <string>
 #include <vector>
-#include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "StatusEffect.hpp"
 #include "Item.hpp"

@@ -102,7 +102,6 @@ using namespace std::placeholders; // so sue me
 #		include <functional>
 #		include <boost/lambda/lambda.hpp>
 #		include <functional>
-#		include <boost/lexical_cast.hpp>
 #		include <boost/date_time/local_time/local_time.hpp>
 #		include <boost/foreach.hpp>
 #		include <boost/assign/list_inserter.hpp>

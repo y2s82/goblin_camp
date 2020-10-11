@@ -31,10 +31,6 @@ namespace Config {
 	void SetStringCVar(const std::string&, const std::string&);
 	std::string GetStringCVar(const std::string&);
 	
-	//template <typename T>
-	//inline T GetCVar(const std::string& name) {
-	//	return boost::lexical_cast<T>(GetStringCVar(name));
-	//}
 	inline bool GetBCVar(const std::string& name) {
 		return GetStringCVar(name) == "true";
 	}

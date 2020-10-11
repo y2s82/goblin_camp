@@ -20,8 +20,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cassert>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "utils.hpp"
 #include "UI/SquadsDialog.hpp"

@@ -18,8 +18,6 @@
 #include <string>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "utils.hpp"
 #include "UI/StockManagerDialog.hpp"

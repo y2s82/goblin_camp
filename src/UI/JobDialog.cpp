@@ -18,8 +18,6 @@
 #include <string>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "UI/JobDialog.hpp"
 #include "JobManager.hpp"

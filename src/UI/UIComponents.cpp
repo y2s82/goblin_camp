@@ -19,8 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cmath>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 
 #include "UI/UIComponents.hpp"
 #include "UI/Label.hpp"

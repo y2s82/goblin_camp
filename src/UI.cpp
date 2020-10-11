@@ -19,9 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <libtcod.hpp>
 #include <string>
 #include <vector>
-#include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/lambda/lambda.hpp>
 
 #include "Random.hpp"
 #include "UI.hpp"
@@ -860,9 +857,9 @@ TCOD_key_t UI::getKey() { return key; }
 void UI::ChooseCreateNPC() {
 	int npc;
 	Menu *NPCChoiceMenu = new Menu(std::vector<MenuChoice>(), "NPC");
-	NPCChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(npc) = -1));
+	NPCChoiceMenu->AddChoice(MenuChoice("None", [&npc]() { npc = -1; }));
 	for (unsigned int i = 0; i < NPC::Presets.size(); ++i) {
-		NPCChoiceMenu->AddChoice(MenuChoice(NPC::Presets[i].name, boost::lambda::var(npc) = i));
+		NPCChoiceMenu->AddChoice(MenuChoice(NPC::Presets[i].name, [&npc, i]() { npc = i; }));
 	}
 	NPCChoiceMenu->ShowModal();
 
@@ -880,15 +877,15 @@ void UI::ChooseCreateItem() {
 	Menu *ItemCategoryMenu = new Menu(std::vector<MenuChoice>(), "Categories");
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		if (Item::Categories[i].parent < 0)
-			ItemCategoryMenu->AddChoice(MenuChoice(Item::Categories[i].name, boost::lambda::var(category) = i));
+			ItemCategoryMenu->AddChoice(MenuChoice(Item::Categories[i].name, [&category, i]() { category =  i;}));
 	}
 	ItemCategoryMenu->ShowModal();
 
 	Menu *ItemChoiceMenu = new Menu(std::vector<MenuChoice>(), "Item");
-	ItemChoiceMenu->AddChoice(MenuChoice("None", boost::lambda::var(item) = -1));
+	ItemChoiceMenu->AddChoice(MenuChoice("None", [&]() { item = -1; }));
 	for (unsigned int i = 0; i < Item::Presets.size(); ++i) {
 		if (Item::Presets[i].categories.find(category) != Item::Presets[i].categories.end())
-			ItemChoiceMenu->AddChoice(MenuChoice(Item::Presets[i].name, boost::lambda::var(item) = i));
+			ItemChoiceMenu->AddChoice(MenuChoice(Item::Presets[i].name, [&item, i]() { item = i; }));
 	}
 	ItemChoiceMenu->ShowModal();
 

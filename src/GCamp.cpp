@@ -17,9 +17,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
@@ -97,7 +94,7 @@ int GCMain(std::vector<std::string>& args) {
 	bool bootTest = false;
 	Globals::noDumpMode = false;
 	
-	BOOST_FOREACH(std::string arg, args) {
+	for (const std::string &arg : args) {
 		if (arg == "-boottest") {
 			bootTest = true;
 		} else if (arg == "-dev") {
@@ -812,7 +809,7 @@ void ModsMenu() {
 
 	int currentY = 0;
 	
-	BOOST_FOREACH(Mods::Metadata mod, modList) {
+	for (const Mods::Metadata &mod : modList) {
 		sub.setDefaultBackground(TCODColor::black);
 		
 		sub.setAlignment(TCOD_CENTER);
@@ -891,7 +888,7 @@ void TilesetsMenu() {
 
 	int currentY = 0;
 	
-	BOOST_FOREACH(TileSetMetadata tileset, tilesetsList) {
+	for (const TileSetMetadata &tileset : tilesetsList) {
 		sub.setDefaultBackground(TCODColor::black);
 		
 		sub.setAlignment(TCOD_LEFT);
@@ -1016,7 +1013,7 @@ void KeysMenu() {
 	int w = 40;
 	const int h = static_cast<int>(keyMap.size()) + 4;
 	
-	BOOST_FOREACH(Config::KeyMap::value_type pair, keyMap) {
+	for (const Config::KeyMap::value_type pair : keyMap) {
 		w = std::max(w, (int)pair.first.size() + 7); // 2 for borders, 5 for [ X ]
 		labels.push_back(pair.first);
 	}
