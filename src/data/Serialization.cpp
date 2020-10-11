@@ -156,8 +156,8 @@ namespace {
 		oarch << *Map::Inst();
 	}
 	
-	void ReadPayload(io::filtering_istream& ifs) {
-		boost::archive::binary_iarchive iarch(ifs);
+	void ReadPayload(io::filtering_istream *ifs) {
+		boost::archive::binary_iarchive iarch(*ifs);
 		iarch >> Entity::uids;
 		iarch >> *Game::Inst();
 		iarch >> *JobManager::Inst();
@@ -253,7 +253,7 @@ bool Game::LoadGame(const std::string& filename) {
 		}
 		
 		stream.push(rawStream);
-		Game::LoadingScreen(std::bind(&ReadPayload, boost::ref(stream)));
+		Game::LoadingScreen(std::bind(&ReadPayload, &stream));
 		Game::Inst()->TranslateContainerListeners();
 		Game::Inst()->ProvideMap();
 		Game::Inst()->Pause();

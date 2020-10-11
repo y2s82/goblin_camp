@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <filesystem>
 
-#include <boost/foreach.hpp>
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 
@@ -192,7 +191,7 @@ namespace Script {
 		
 		Logger::log << "**** Python exception occurred ****\n";
 		try {
-			Globals::printExcFunc(excType, excVal, excTB, none, boost::ref(Globals::stream));
+			Globals::printExcFunc(excType, excVal, excTB, none, Globals::stream);
 		} catch (const py::error_already_set&) {
 			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();

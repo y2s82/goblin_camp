@@ -19,12 +19,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/vector.hpp>
-#include <thread>
-#include <boost/date_time/posix_time/posix_time_duration.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 namespace py = boost::python;
+#include <thread>
 #include<memory>
 #include <future>
 #include "stdafx.hpp"
