@@ -22,5 +22,6 @@ int GCMain(std::vector<std::string>&);
 
 int main(int argc, char **argv) {
 	std::vector<std::string> args(argv, argv + argc);
+        puts("hello");
 	return GCMain(args);
 }

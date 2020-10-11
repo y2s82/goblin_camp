@@ -23,12 +23,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <fstream>
 
 namespace Logger {
-	extern std::ofstream log;
+	extern std::ostream &log;
 	
 	void OpenLogFile(const std::string&);
 	void CloseLogFile();
 	
-	std::ofstream& Prefix(const char* = NULL, int = 0, const char* = NULL);
+	std::ostream& Prefix(const char* = NULL, int = 0, const char* = NULL);
 	const char* Suffix();
 }
 

@@ -130,6 +130,7 @@ namespace Script {
 			
 			LOG("Setting up console namespace.");
 			modImp.attr("load_source")("__gcdevconsole__", (Paths::Get(Paths::GlobalData) / "lib" / "__gcdevconsole__.py").string());
+                        LOG("set up console");
 			
 			py::exec(
 				"log.info('Console ready.')", py::import("__gcdevconsole__").attr("__dict__")
