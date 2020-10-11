@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/utility.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "StockManager.hpp"
 #include "Item.hpp"
@@ -77,10 +78,10 @@ void StockManager::Init() {
 		bool producerFound = false;
 
 		//Bog iron is a hard coded special case, for now. TODO: Think about this
-		if (boost::iequals(Item::Presets[itemIndex].name, "Bog iron") ||
-			boost::iequals(Item::Presets[itemIndex].name, "Water")) {
+		if (utils::iequals(Item::Presets[itemIndex].name, "Bog iron") ||
+			utils::iequals(Item::Presets[itemIndex].name, "Water")) {
 				producables.insert(item);
-				if (boost::iequals(Item::Presets[itemIndex].name, "Bog iron"))
+				if (utils::iequals(Item::Presets[itemIndex].name, "Bog iron"))
 					fromEarth.insert(item);
 				producerFound = true;
 				UpdateQuantity(item, 0);

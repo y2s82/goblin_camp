@@ -15,6 +15,8 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
+#include "utils.hpp"
+
 #include <boost/algorithm/string.hpp>
 #include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
@@ -62,23 +64,23 @@ int Attack::Projectile() {return projectile;}
 void Attack::Projectile(int value) {projectile = value;}
 
 DamageType Attack::StringToDamageType(std::string type) {
-	if (boost::iequals(type, "slashing")) {
+	if (utils::iequals(type, "slashing")) {
 		return DAMAGE_SLASH;
-	} else if (boost::iequals(type, "piercing")) {
+	} else if (utils::iequals(type, "piercing")) {
 		return DAMAGE_PIERCE;
-	} else if (boost::iequals(type, "blunt")) {
+	} else if (utils::iequals(type, "blunt")) {
 		return DAMAGE_BLUNT;
-	} else if (boost::iequals(type, "magic")) {
+	} else if (utils::iequals(type, "magic")) {
 		return DAMAGE_MAGIC;
-	} else if (boost::iequals(type, "fire")) {
+	} else if (utils::iequals(type, "fire")) {
 		return DAMAGE_FIRE;
-	} else if (boost::iequals(type, "cold")) {
+	} else if (utils::iequals(type, "cold")) {
 		return DAMAGE_COLD;
-	} else if (boost::iequals(type, "poison")) {
+	} else if (utils::iequals(type, "poison")) {
 		return DAMAGE_POISON;
-	} else if (boost::iequals(type, "wielded")) {
+	} else if (utils::iequals(type, "wielded")) {
 		return DAMAGE_WIELDED;
-	} else if (boost::iequals(type, "ranged")) {
+	} else if (utils::iequals(type, "ranged")) {
 		return DAMAGE_RANGED;
 	}
 	return DAMAGE_SLASH;

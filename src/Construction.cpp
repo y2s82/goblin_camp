@@ -17,6 +17,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // Boost is so shit, impossible to avoid this getting included otherwise
 #include<memory>
 #include "stdafx.hpp"
+#include "utils.hpp"
 
 #include <functional>
 #include <boost/lambda/lambda.hpp>
@@ -412,7 +413,7 @@ class ConstructionListener : public ITCODParserListener {
 	int constructionIndex;
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (name && boost::iequals(str->getName(), "construction_type")) {
+		if (name && utils::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
 			std::string strName(name);
@@ -435,40 +436,40 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name, "walkable")) {
+		if (utils::iequals(name, "walkable")) {
 			Construction::Presets[constructionIndex].walkable = true;
 			Construction::Presets[constructionIndex].blocksLight = false;
-		} else if (boost::iequals(name, "wall")) {
+		} else if (utils::iequals(name, "wall")) {
 			Construction::Presets[constructionIndex].graphic.push_back(1);
 			Construction::Presets[constructionIndex].graphic.push_back('W');
 			Construction::Presets[constructionIndex].tags[WALL] = true;
-		} else if (boost::iequals(name, "stockpile")) {
+		} else if (utils::iequals(name, "stockpile")) {
 			Construction::Presets[constructionIndex].tags[STOCKPILE] = true;
-		} else if (boost::iequals(name, "farmplot")) {
+		} else if (utils::iequals(name, "farmplot")) {
 			Construction::Presets[constructionIndex].tags[FARMPLOT] = true;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "door")) {
+		} else if (utils::iequals(name, "door")) {
 			Construction::Presets[constructionIndex].tags[DOOR] = true;
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "bed")) {
+		} else if (utils::iequals(name, "bed")) {
 			Construction::Presets[constructionIndex].tags[BED] = true;
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
-		} else if (boost::iequals(name, "furniture")) {
+		} else if (utils::iequals(name, "furniture")) {
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
-		} else if (boost::iequals(name, "permanent")) {
+		} else if (utils::iequals(name, "permanent")) {
 			Construction::Presets[constructionIndex].permanent = true;
 			Construction::Presets[constructionIndex].tags[PERMANENT] = true;
-		} else if (boost::iequals(name, "blocksLight")) {
+		} else if (utils::iequals(name, "blocksLight")) {
 			Construction::Presets[constructionIndex].blocksLight = true;
-		} else if (boost::iequals(name, "unique")) {
+		} else if (utils::iequals(name, "unique")) {
 			Construction::AllowedAmount[constructionIndex] = 1;
-		} else if (boost::iequals(name, "centersCamp")) {
+		} else if (utils::iequals(name, "centersCamp")) {
 			Construction::Presets[constructionIndex].tags[CENTERSCAMP] = true;
-		} else if (boost::iequals(name, "spawningPool")) {
+		} else if (utils::iequals(name, "spawningPool")) {
 			Construction::Presets[constructionIndex].tags[SPAWNINGPOOL] = true;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "bridge")) {
+		} else if (utils::iequals(name, "bridge")) {
 			Construction::Presets[constructionIndex].tags[BRIDGE] = true;
 			Construction::Presets[constructionIndex].moveSpeedModifier = 0;
 		}
@@ -476,42 +477,42 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name, "graphicLength")) {
+		if (utils::iequals(name, "graphicLength")) {
 			if (Construction::Presets[constructionIndex].graphic.size() == 0)
 				Construction::Presets[constructionIndex].graphic.push_back(value.i);
 			else
 				Construction::Presets[constructionIndex].graphic[0] = value.i;
-		} else if (boost::iequals(name, "graphic")) {
+		} else if (utils::iequals(name, "graphic")) {
 			if (Construction::Presets[constructionIndex].graphic.size() == 0) //In case graphicLength hasn't been parsed yet
 				Construction::Presets[constructionIndex].graphic.push_back(1);
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
-		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+		} else if (utils::iequals(name, "fallbackGraphicsSet")) {
 			Construction::Presets[constructionIndex].fallbackGraphicsSet = value.s;
-		} else if (boost::iequals(name, "category")) {
+		} else if (utils::iequals(name, "category")) {
 			Construction::Presets[constructionIndex].category = value.s;
 			Construction::Categories.insert(value.s);
-		} else if (boost::iequals(name, "placementType")) {
+		} else if (utils::iequals(name, "placementType")) {
 			Construction::Presets[constructionIndex].placementType = value.i;
-		} else if (boost::iequals(name, "materials")) {
+		} else if (utils::iequals(name, "materials")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
 			}
-		} else if (boost::iequals(name, "maxCondition")) {
+		} else if (utils::iequals(name, "maxCondition")) {
 			Construction::Presets[constructionIndex].maxCondition = value.i;
-		} else if (boost::iequals(name, "productionx")) {
+		} else if (utils::iequals(name, "productionx")) {
 			Construction::Presets[constructionIndex].productionSpot.X(value.i);
-		} else if (boost::iequals(name, "productiony")) {
+		} else if (utils::iequals(name, "productiony")) {
 			Construction::Presets[constructionIndex].productionSpot.Y(value.i);
-		} else if (boost::iequals(name, "spawnsCreatures")) {
+		} else if (utils::iequals(name, "spawnsCreatures")) {
 			Construction::Presets[constructionIndex].spawnCreaturesTag = value.s;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "spawnFrequency")) {
+		} else if (utils::iequals(name, "spawnFrequency")) {
 			Construction::Presets[constructionIndex].spawnFrequency = value.i * UPDATES_PER_SECOND;
-		} else if (boost::iequals(name, "col")) {
+		} else if (utils::iequals(name, "col")) {
 			Construction::Presets[constructionIndex].color = value.col;
-		} else if (boost::iequals(name, "tileReqs")) {
+		} else if (utils::iequals(name, "tileReqs")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
 				//TILEGRASS changes to TILESNOW in winter
@@ -519,9 +520,9 @@ class ConstructionListener : public ITCODParserListener {
 					Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
 				}
 			}
-		} else if (boost::iequals(name, "tier")) {
+		} else if (utils::iequals(name, "tier")) {
 			Construction::Presets[constructionIndex].tier = value.i;
-		} else if (boost::iequals(name, "description")) {
+		} else if (utils::iequals(name, "description")) {
 			/*Tokenize the description string and add/remove spaces to make it fit nicely
 			into the 25-width tooltip*/
 			/*I was going to use boost::tokenizer but hey it starts giving me assertion failures
@@ -552,33 +553,33 @@ class ConstructionListener : public ITCODParserListener {
 				width += it->length();
 			}
 
-		} else if (boost::iequals(name, "chimneyx")) {
+		} else if (utils::iequals(name, "chimneyx")) {
 			Construction::Presets[constructionIndex].chimney.X(value.i);
-		} else if (boost::iequals(name, "chimneyy")) {
+		} else if (utils::iequals(name, "chimneyy")) {
 			Construction::Presets[constructionIndex].chimney.Y(value.i);
-		} else if (boost::iequals(name,"type")) {
+		} else if (utils::iequals(name,"type")) {
 			Construction::Presets[constructionIndex].trapAttack.Type(Attack::StringToDamageType(value.s));
 			Construction::Presets[constructionIndex].dynamic = true;
 			Construction::Presets[constructionIndex].tags[TRAP] = true;
-		} else if (boost::iequals(name,"damage")) {
+		} else if (utils::iequals(name,"damage")) {
 			Construction::Presets[constructionIndex].trapAttack.Amount(value.dice);
-		} else if (boost::iequals(name,"statusEffects")) {
+		} else if (utils::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Construction::Presets[constructionIndex].trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"effectChances")) {
+		} else if (utils::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].trapAttack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"reloadItem")) {
+		} else if (utils::iequals(name,"reloadItem")) {
 			Construction::Presets[constructionIndex].trapReloadItem = Item::StringToItemCategory(value.s);
-		} else if (boost::iequals(name,"slowMovement")) {
+		} else if (utils::iequals(name,"slowMovement")) {
 			Construction::Presets[constructionIndex].moveSpeedModifier = value.i;
 			Construction::Presets[constructionIndex].walkable = true;
 			Construction::Presets[constructionIndex].blocksLight = false;
-		} else if (boost::iequals(name,"passiveStatusEffects")) {
+		} else if (utils::iequals(name,"passiveStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].passiveStatusEffects.push_back(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)));
 			}
@@ -591,7 +592,7 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (boost::iequals(str->getName(), "construction_type")) {
+		if (utils::iequals(str->getName(), "construction_type")) {
 			Construction::Presets[constructionIndex].blueprint = Coordinate(Construction::Presets[constructionIndex].graphic[0],
 				(Construction::Presets[constructionIndex].graphic.size()-1)/Construction::Presets[constructionIndex].graphic[0]);
 
@@ -686,7 +687,7 @@ void Construction::LoadPresets(std::string filename) {
 }
 
 bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string& name) {
-	return boost::iequals(preset.name, name);
+	return utils::iequals(preset.name, name);
 }
 
 void Construction::ResolveProducts() {

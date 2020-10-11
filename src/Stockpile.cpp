@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Stockpile.hpp"
 #include "Game.hpp"
@@ -48,7 +49,7 @@ Stockpile::Stockpile(ConstructionType type, int newSymbol, Coordinate target) :
 	for (int i = 0; i < Game::ItemCatCount; ++i) {
 		amount.insert(std::pair<ItemCategory, int>(i,0));
 		allowed.insert(std::pair<ItemCategory, bool>(i,true));
-		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
+		if (Item::Categories[i].parent >= 0 && utils::iequals(Item::Categories[Item::Categories[i].parent].GetName(), "Container")) {
 			limits.insert(std::pair<ItemCategory, int>(i,100));
 			demand.insert(std::pair<ItemCategory, int>(i,0)); //Initial demand for each container is 0
 			lastDemandBalance.insert(std::pair<ItemCategory, int>(i,0));

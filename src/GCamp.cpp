@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <algorithm>
 #include <functional>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Camp.hpp"
 #include "GCamp.hpp"
@@ -910,7 +911,7 @@ void TilesetsMenu() {
 		tilesetDir = "default";
 	}
 	for (size_t i = 0; i < tilesetsList.size(); ++i) {
-		if (boost::iequals(tilesetDir, tilesetsList.at(i).path.filename().string())) {
+		if (utils::iequals(tilesetDir, tilesetsList.at(i).path.filename().string())) {
 			selection = static_cast<int>(i);
 			originalSelection = static_cast<int>(i);
 			break;

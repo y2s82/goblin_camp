@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 
+#include "utils.hpp"
 #include "Fire.hpp"
 #include "Random.hpp"
 #include "Map.hpp"
@@ -191,7 +192,7 @@ void FireNode::Update() {
 			//Burn plantlife
 			int natureObject = Map::Inst()->GetNatureObject(pos);
 			if (natureObject >= 0 && 
-				!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
+				!utils::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
 					bool tree = Game::Inst()->natureList[natureObject]->Tree();
 					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
 					if (tree && Random::Generate(4) == 0) {

@@ -27,6 +27,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/set.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Tile.hpp"
 #include "Announce.hpp"
@@ -275,17 +276,17 @@ void Tile::Corrupt(int magnitude) {
 }
 
 TileType Tile::StringToTileType(std::string string) {
-	if (boost::iequals(string, "grass")) {
+	if (utils::iequals(string, "grass")) {
 		return TILEGRASS;
-	} else if (boost::iequals(string, "river")) {
+	} else if (utils::iequals(string, "river")) {
 		return TILERIVERBED;
-	} else if (boost::iequals(string, "ditch")) {
+	} else if (utils::iequals(string, "ditch")) {
 		return TILEDITCH;
-	} else if (boost::iequals(string, "rock")) {
+	} else if (utils::iequals(string, "rock")) {
 		return TILEROCK;
-	} else if (boost::iequals(string, "mud")) {
+	} else if (utils::iequals(string, "mud")) {
 		return TILEMUD;
-	} else if (boost::iequals(string, "bog")) {
+	} else if (utils::iequals(string, "bog")) {
 		return TILEBOG;
 	}
 	return TILENONE;

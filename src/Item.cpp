@@ -25,6 +25,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/serialization/weak_ptr.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Item.hpp"
 #include "Game.hpp"
@@ -269,7 +270,7 @@ public:
 			itemi != presetDecay.end(); ++itemi) {
 				for (std::vector<std::string>::iterator decayi = itemi->second.begin(); 
 					decayi != itemi->second.end(); ++decayi) {
-						if (boost::iequals(*decayi, "Filth"))
+						if (utils::iequals(*decayi, "Filth"))
 							Item::Presets[itemi->first].decayList.push_back(-1);
 						else
 							Item::Presets[itemi->first].decayList.push_back(Item::StringToItemType(*decayi));
@@ -285,7 +286,7 @@ public:
 
 private:
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (name && boost::iequals(str->getName(), "category_type")) {
+		if (name && utils::iequals(str->getName(), "category_type")) {
 			std::string strName(name);
 			boost::to_upper(strName);
 			if (Item::itemCategoryNames.find(strName) != Item::itemCategoryNames.end()) {
@@ -301,7 +302,7 @@ private:
 				Item::itemCategoryNames.insert(std::make_pair(strName, Game::ItemCatCount-1));
 				presetCategoryParent.insert(std::make_pair(categoryIndex, ""));
 			}
-		} else if (name && boost::iequals(str->getName(), "item_type")) {
+		} else if (name && utils::iequals(str->getName(), "item_type")) {
 			std::string strName(name);
 			boost::to_upper(strName);
 			if (Item::itemTypeNames.find(strName) != Item::itemTypeNames.end()) {
@@ -323,118 +324,118 @@ private:
 				Item::itemTypeNames.insert(std::make_pair(strName, Game::ItemTypeCount-1));
 				presetProjectile.insert(std::make_pair(itemIndex, ""));
 			}
-		} else if (boost::iequals(str->getName(), "attack")) {
+		} else if (utils::iequals(str->getName(), "attack")) {
 		}
 
 		return true;
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name, "flammable")) {
+		if (utils::iequals(name, "flammable")) {
 			Item::Categories[categoryIndex].flammable = true;
 		}
 		return true;
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name, "category")) {
+		if (utils::iequals(name, "category")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
 				Item::Presets[itemIndex].categories.insert(cat);
 				Item::Presets[itemIndex].specificCategories.insert(cat);
 			}
-		} else if (boost::iequals(name, "graphic")) {
+		} else if (utils::iequals(name, "graphic")) {
 			Item::Presets[itemIndex].graphic = value.i;
-		} else if (boost::iequals(name, "col")) {
+		} else if (utils::iequals(name, "col")) {
 			Item::Presets[itemIndex].color = value.col;
-		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+		} else if (utils::iequals(name, "fallbackGraphicsSet")) {
 			Item::Presets[itemIndex].fallbackGraphicsSet = value.s;
-		}else if (boost::iequals(name, "components")) {
+		}else if (utils::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
 			}
-		} else if (boost::iequals(name, "containin")) {
+		} else if (utils::iequals(name, "containin")) {
 			Item::Presets[itemIndex].containInRaw = value.s;
-		} else if (boost::iequals(name, "nutrition")) {
+		} else if (utils::iequals(name, "nutrition")) {
 			Item::Presets[itemIndex].nutrition = static_cast<int>(value.f * MONTH_LENGTH);
 			Item::Presets[itemIndex].organic = true;
-		} else if (boost::iequals(name, "growth")) {
+		} else if (utils::iequals(name, "growth")) {
 			presetGrowth[itemIndex] = value.s;
 			Item::Presets[itemIndex].organic = true;
-		} else if (boost::iequals(name, "fruits")) {
+		} else if (utils::iequals(name, "fruits")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				presetFruits[itemIndex].push_back((char*)TCOD_list_get(value.list,i));
 			}
 			Item::Presets[itemIndex].organic = true;
-		} else if (boost::iequals(name, "multiplier")) {
+		} else if (utils::iequals(name, "multiplier")) {
 			Item::Presets[itemIndex].multiplier = value.i;
-		} else if (boost::iequals(name, "containerSize")) {
+		} else if (utils::iequals(name, "containerSize")) {
 			Item::Presets[itemIndex].container = value.i;
-		} else if (boost::iequals(name, "fitsin")) {
+		} else if (utils::iequals(name, "fitsin")) {
 			Item::Presets[itemIndex].fitsInRaw = value.s;
-		} else if (boost::iequals(name, "constructedin")) {
+		} else if (utils::iequals(name, "constructedin")) {
 			Item::Presets[itemIndex].constructedInRaw = value.s;
-		} else if (boost::iequals(name, "decay")) {
+		} else if (utils::iequals(name, "decay")) {
 			Item::Presets[itemIndex].decays = true;
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				presetDecay[itemIndex].push_back((char*)TCOD_list_get(value.list,i));
 			}
-		} else if (boost::iequals(name, "decaySpeed")) {
+		} else if (utils::iequals(name, "decaySpeed")) {
 			Item::Presets[itemIndex].decaySpeed = value.i;
 			Item::Presets[itemIndex].decays = true;
-		} else if (boost::iequals(name,"type")) {
+		} else if (utils::iequals(name,"type")) {
 			Item::Presets[itemIndex].attack.Type(Attack::StringToDamageType(value.s));
-		} else if (boost::iequals(name,"damage")) {
+		} else if (utils::iequals(name,"damage")) {
 			Item::Presets[itemIndex].attack.Amount(value.dice);
-		} else if (boost::iequals(name,"cooldown")) {
+		} else if (utils::iequals(name,"cooldown")) {
 			Item::Presets[itemIndex].attack.CooldownMax(value.i);
-		} else if (boost::iequals(name,"statusEffects")) {
+		} else if (utils::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"effectChances")) {
+		} else if (utils::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].attack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"ammo")) {
+		} else if (utils::iequals(name,"ammo")) {
 			presetProjectile[itemIndex] = value.s;
-		} else if (boost::iequals(name,"parent")) {
+		} else if (utils::iequals(name,"parent")) {
 			presetCategoryParent[categoryIndex] = value.s;
-		} else if (boost::iequals(name,"physical")) {
+		} else if (utils::iequals(name,"physical")) {
 			Item::Presets[itemIndex].resistances[PHYSICAL_RES] = value.i;
-		} else if (boost::iequals(name,"magic")) {
+		} else if (utils::iequals(name,"magic")) {
 			Item::Presets[itemIndex].resistances[MAGIC_RES] = value.i;
-		} else if (boost::iequals(name,"cold")) {
+		} else if (utils::iequals(name,"cold")) {
 			Item::Presets[itemIndex].resistances[COLD_RES] = value.i;
-		} else if (boost::iequals(name,"fire")) {
+		} else if (utils::iequals(name,"fire")) {
 			Item::Presets[itemIndex].resistances[FIRE_RES] = value.i;
-		} else if (boost::iequals(name,"poison")) {
+		} else if (utils::iequals(name,"poison")) {
 			Item::Presets[itemIndex].resistances[POISON_RES] = value.i;
-		} else if (boost::iequals(name,"bleeding")) {
+		} else if (utils::iequals(name,"bleeding")) {
 			Item::Presets[itemIndex].resistances[BLEEDING_RES] = value.i;
-		} else if (boost::iequals(name,"bulk")) {
+		} else if (utils::iequals(name,"bulk")) {
 			Item::Presets[itemIndex].bulk = value.i;
-		} else if (boost::iequals(name,"durability")) {
+		} else if (utils::iequals(name,"durability")) {
 			Item::Presets[itemIndex].condition = value.i;
-		} else if (boost::iequals(name,"addStatusEffects")) {
+		} else if (utils::iequals(name,"addStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"addEffectChances")) {
+		} else if (utils::iequals(name,"addEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].addsEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"removeStatusEffects")) {
+		} else if (utils::iequals(name,"removeStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"removeEffectChances")) {
+		} else if (utils::iequals(name,"removeEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].removesEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
@@ -443,7 +444,7 @@ private:
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (boost::iequals(str->getName(), "category_type")) {
+		if (utils::iequals(str->getName(), "category_type")) {
 			if (presetCategoryParent[categoryIndex] == "")
 				Item::ParentCategories.push_back(Item::Categories[categoryIndex]);
 		}

@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/utility.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Map.hpp"
 #include "Game.hpp"
@@ -331,7 +332,7 @@ void Map::Corrupt(const Coordinate& pos, int magnitude) {
 			if (tile(p).corruption >= 100) {
 				if (tile(p).natureObject >= 0 && 
 					!NatureObject::Presets[Game::Inst()->natureList[tile(p).natureObject]->Type()].evil &&
-					!boost::iequals(Game::Inst()->natureList[tile(p).natureObject]->Name(),"Withering tree") &&
+					!utils::iequals(Game::Inst()->natureList[tile(p).natureObject]->Name(),"Withering tree") &&
 					!Game::Inst()->natureList[tile(p).natureObject]->IsIce()) {
 						bool createTree = Game::Inst()->natureList[tile(p).natureObject]->Tree();
 						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tile(p).natureObject]);

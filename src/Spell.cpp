@@ -19,6 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/algorithm/string.hpp>
 #include <boost/serialization/list.hpp>
 
+#include "utils.hpp"
 #include "Spell.hpp"
 #include "Game.hpp"
 #include "Random.hpp"
@@ -44,7 +45,7 @@ Spell::Spell(const Coordinate& pos, int vtype) : Entity(),
 	color = Spell::Presets[type].color;
 
 	//TODO: I don't like making special cases like this, perhaps a flag instead?
-	if (boost::iequals(Spell::Presets[type].name, "smoke") || boost::iequals(Spell::Presets[type].name, "steam")) {
+	if (utils::iequals(Spell::Presets[type].name, "smoke") || boost::iequals(Spell::Presets[type].name, "steam")) {
 		int add = Random::Generate(50);
 		color.r += add;
 		color.g += add;
@@ -158,7 +159,7 @@ std::string Spell::SpellTypeToString(SpellType type) {
 class SpellListener : public ITCODParserListener {
 	int spellIndex;
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (boost::iequals(str->getName(), "spell_type")) {
+		if (utils::iequals(str->getName(), "spell_type")) {
 			if (Spell::spellTypeNames.find(name) != Spell::spellTypeNames.end()) {
 				spellIndex = Spell::spellTypeNames[name];
 				Spell::Presets[spellIndex] = SpellPreset(name);
@@ -167,34 +168,34 @@ class SpellListener : public ITCODParserListener {
 				Spell::spellTypeNames[name] = Spell::Presets.size()-1;
 				spellIndex = Spell::Presets.size() - 1;
 			}
-		} else if (boost::iequals(str->getName(), "attack")) {
+		} else if (utils::iequals(str->getName(), "attack")) {
 			Spell::Presets[spellIndex].attacks.push_back(Attack());
 		}
 		return true;
 	}
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name,"immaterial")) { Spell::Presets[spellIndex].immaterial = true; }
+		if (utils::iequals(name,"immaterial")) { Spell::Presets[spellIndex].immaterial = true; }
 		return true;
 	}
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name,"name")) { Spell::Presets[spellIndex].name = value.s; }
-		else if (boost::iequals(name,"speed")) { Spell::Presets[spellIndex].speed = value.i; }
-		else if (boost::iequals(name,"col")) { Spell::Presets[spellIndex].color = value.col; }
-		else if (boost::iequals(name,"graphic")) { Spell::Presets[spellIndex].graphic = value.i; }
-		else if (boost::iequals(name,"fallbackGraphicsSet")) { Spell::Presets[spellIndex].fallbackGraphicsSet = value.s; }
-		else if (boost::iequals(name,"type")) {
+		if (utils::iequals(name,"name")) { Spell::Presets[spellIndex].name = value.s; }
+		else if (utils::iequals(name,"speed")) { Spell::Presets[spellIndex].speed = value.i; }
+		else if (utils::iequals(name,"col")) { Spell::Presets[spellIndex].color = value.col; }
+		else if (utils::iequals(name,"graphic")) { Spell::Presets[spellIndex].graphic = value.i; }
+		else if (utils::iequals(name,"fallbackGraphicsSet")) { Spell::Presets[spellIndex].fallbackGraphicsSet = value.s; }
+		else if (utils::iequals(name,"type")) {
 			Spell::Presets[spellIndex].attacks.back().Type(Attack::StringToDamageType(value.s));
-		} else if (boost::iequals(name,"damage")) {
+		} else if (utils::iequals(name,"damage")) {
 			Spell::Presets[spellIndex].attacks.back().Amount(value.dice);
-		} else if (boost::iequals(name,"cooldown")) {
+		} else if (utils::iequals(name,"cooldown")) {
 			Spell::Presets[spellIndex].attacks.back().CooldownMax(value.i);
-		} else if (boost::iequals(name,"statusEffects")) {
+		} else if (utils::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Spell::Presets[spellIndex].attacks.back().StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"effectChances")) {
+		} else if (utils::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Spell::Presets[spellIndex].attacks.back().StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}

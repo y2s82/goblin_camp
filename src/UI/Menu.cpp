@@ -21,6 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "utils.hpp"
 #include "UI/Menu.hpp"
 #include "UI.hpp"
 #include "UI/UIComponents.hpp"
@@ -180,7 +181,7 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
 		menu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
 			ConstructionPreset preset = Construction::Presets[i];
-			if (boost::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier() + 1) {
+			if (utils::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier() + 1) {
 				if(preset.tags[STOCKPILE] || preset.tags[FARMPLOT]) {
 					menu->AddChoice(MenuChoice(preset.name, std::bind(UI::ChooseStockpile, i), preset.tier <= Camp::Inst()->GetTier(), preset.description));
 				} else {

@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "utils.hpp"
 #include "UI/SquadsDialog.hpp"
 #include "UI/ScrollPanel.hpp"
 #include "UI/Label.hpp"
@@ -233,7 +234,7 @@ void SquadsDialog::SelectWeapon() {
 	Menu *weaponChoiceMenu = new Menu(std::vector<MenuChoice>(), "Weapons");
 	weaponChoiceMenu->AddChoice(MenuChoice("None", std::bind(&Squad::SetWeapon, GetSquad(squadList->Selected()), -1)));
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].name, "Weapon")) {
+		if (Item::Categories[i].parent >= 0 && utils::iequals(Item::Categories[Item::Categories[i].parent].name, "Weapon")) {
 			weaponChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), std::bind(&Squad::SetWeapon, GetSquad(squadList->Selected()), i)));
 		}
 	}
@@ -254,7 +255,7 @@ void SquadsDialog::SelectArmor() {
 	Menu *armorChoiceMenu = new Menu(std::vector<MenuChoice>(), "Armor");
 	armorChoiceMenu->AddChoice(MenuChoice("None", std::bind(&Squad::SetArmor, GetSquad(squadList->Selected()), -1)));
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
-		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].name, "Armor")) {
+		if (Item::Categories[i].parent >= 0 && utils::iequals(Item::Categories[Item::Categories[i].parent].name, "Armor")) {
 			armorChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), std::bind(&Squad::SetArmor, GetSquad(squadList->Selected()), i)));
 		}
 	}

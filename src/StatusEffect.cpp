@@ -18,6 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/algorithm/string.hpp>
 #include <boost/serialization/utility.hpp>
 
+#include "utils.hpp"
 #include "StatusEffect.hpp"
 #include "GCamp.hpp"
 #include "Game.hpp"
@@ -339,63 +340,63 @@ bool StatusEffect::IsApplyableStatusEffect(StatusEffectType type) {
 }
 
 StatusEffectType StatusEffect::StringToStatusEffectType(std::string str) {
-	if (boost::iequals(str, "hunger")) {
+	if (utils::iequals(str, "hunger")) {
 		return HUNGER;
-	} else if (boost::iequals(str, "thirst")) {
+	} else if (utils::iequals(str, "thirst")) {
 		return THIRST;
-	} else if (boost::iequals(str, "panic")) {
+	} else if (utils::iequals(str, "panic")) {
 		return PANIC;
-	} else if (boost::iequals(str, "concussion")) {
+	} else if (utils::iequals(str, "concussion")) {
 		return CONCUSSION;
-	} else if (boost::iequals(str, "drowsy")) {
+	} else if (utils::iequals(str, "drowsy")) {
 		return DROWSY;
-	} else if (boost::iequals(str, "sleeping")) {
+	} else if (utils::iequals(str, "sleeping")) {
 		return SLEEPING;
-	} else if (boost::iequals(str, "poison")) {
+	} else if (utils::iequals(str, "poison")) {
 		return POISON;
-	} else if (boost::iequals(str, "bleeding")) {
+	} else if (utils::iequals(str, "bleeding")) {
 		return BLEEDING;
-	} else if (boost::iequals(str, "flying")) {
+	} else if (utils::iequals(str, "flying")) {
 		return FLYING;
-	} else if (boost::iequals(str, "sluggish")) {
+	} else if (utils::iequals(str, "sluggish")) {
 		return BADSLEEP;
-	} else if (boost::iequals(str, "rage")) {
+	} else if (utils::iequals(str, "rage")) {
 		return RAGE;
-	} else if (boost::iequals(str, "swimming")) {
+	} else if (utils::iequals(str, "swimming")) {
 		return SWIM;
-	} else if (boost::iequals(str, "eating")) {
+	} else if (utils::iequals(str, "eating")) {
 		return EATING;
-	} else if (boost::iequals(str, "drinking")) {
+	} else if (utils::iequals(str, "drinking")) {
 		return DRINKING;
-	} else if (boost::iequals(str, "carrying")) {
+	} else if (utils::iequals(str, "carrying")) {
 		return CARRYING;
-	} else if (boost::iequals(str, "working")) {
+	} else if (utils::iequals(str, "working")) {
 		return WORKING;
-	} else if (boost::iequals(str, "burning")) {
+	} else if (utils::iequals(str, "burning")) {
 		return BURNING;
-	} else if (boost::iequals(str, "crackedskull")) {
+	} else if (utils::iequals(str, "crackedskull")) {
 		return CRACKEDSKULLEFFECT;
-	} else if (boost::iequals(str, "invigorated")) {
+	} else if (utils::iequals(str, "invigorated")) {
 		return INVIGORATED;
-	} else if (boost::iequals(str, "drunk")) {
+	} else if (utils::iequals(str, "drunk")) {
 		return DRUNK;
-	} else if (boost::iequals(str, "healing")) {
+	} else if (utils::iequals(str, "healing")) {
 		return HEALING;
-	} else if (boost::iequals(str, "helpless")) {
+	} else if (utils::iequals(str, "helpless")) {
 		return HELPLESS;
-	} else if (boost::iequals(str, "highground")) {
+	} else if (utils::iequals(str, "highground")) {
 		return HIGHGROUND;
-	} else if (boost::iequals(str, "tripped")) {
+	} else if (utils::iequals(str, "tripped")) {
 		return TRIPPED;
-	} else if (boost::iequals(str, "brave")) {
+	} else if (utils::iequals(str, "brave")) {
 		return BRAVE;
-	} else if (boost::iequals(str, "collywobbles")) {
+	} else if (utils::iequals(str, "collywobbles")) {
 		return COLLYWOBBLES;
-	} else if (boost::iequals(str, "droops")) {
+	} else if (utils::iequals(str, "droops")) {
 		return DROOPS;
-	} else if (boost::iequals(str, "rattles")) {
+	} else if (utils::iequals(str, "rattles")) {
 		return RATTLES;
-	} else if (boost::iequals(str, "chills")) {
+	} else if (utils::iequals(str, "chills")) {
 		return CHILLS;
 	}
 	return HUNGER;

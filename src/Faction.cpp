@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string.hpp>
 
+#include "utils.hpp"
 #include "Faction.hpp"
 #include "NPC.hpp"
 #include "Game.hpp"
@@ -98,7 +99,7 @@ void Faction::TrapSet(Coordinate trapLocation, bool visible) {
 }
 
 FactionType Faction::StringToFactionType(std::string name) {
-	if (!boost::iequals(name, "Faction name not found")) {
+	if (!utils::iequals(name, "Faction name not found")) {
 		if (factionNames.find(name) == factionNames.end()) {
 			int index = static_cast<int>(factions.size());
 			factions.push_back(std::shared_ptr<Faction>(new Faction(name, index)));
@@ -314,41 +315,41 @@ class FactionListener : public ITCODParserListener {
 	int factionIndex;
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (boost::iequals(str->getName(), "faction_type")) {
+		if (utils::iequals(str->getName(), "faction_type")) {
 			factionIndex = Faction::StringToFactionType(name);
 		}
 		return true;
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name,"aggressive")) {
+		if (utils::iequals(name,"aggressive")) {
 			Faction::factions[factionIndex]->aggressive = true;
-		} else if (boost::iequals(name,"coward")) {
+		} else if (utils::iequals(name,"coward")) {
 			Faction::factions[factionIndex]->coward = true;
 		}
 		return true;
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name,"goals")) {
+		if (utils::iequals(name,"goals")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				FactionGoal goal = Faction::StringToFactionGoal((char*)TCOD_list_get(value.list,i));
 				Faction::factions[factionIndex]->goals.push_back(goal);
 			}
-		} else if (boost::iequals(name,"goalSpecifiers")) {
+		} else if (utils::iequals(name,"goalSpecifiers")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				std::string specString((char*)TCOD_list_get(value.list,i));
 				int value = Item::StringToItemCategory(specString);
 				if (value < 0) value = boost::lexical_cast<int>(specString);
 				Faction::factions[factionIndex]->goalSpecifiers.push_back(value);
 			}
-		} else if (boost::iequals(name,"activeTime")) {
+		} else if (utils::iequals(name,"activeTime")) {
 			float activeTime = value.f;
 			if (activeTime < 0.0f)
 				Faction::factions[factionIndex]->maxActiveTime = -1;
 			else
 				Faction::factions[factionIndex]->maxActiveTime = static_cast<int>(activeTime * MONTH_LENGTH);
-		} else if (boost::iequals(name,"friends")) {
+		} else if (utils::iequals(name,"friends")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Faction::factions[factionIndex]->friendNames.push_back((char*)TCOD_list_get(value.list,i));
 			}
@@ -384,15 +385,15 @@ void Faction::LoadPresets(std::string filename) {
 }
 
 FactionGoal Faction::StringToFactionGoal(std::string goal) {
-	if (boost::iequals(goal, "destroy")) {
+	if (utils::iequals(goal, "destroy")) {
 		return FACTIONDESTROY;
-	} else if (boost::iequals(goal, "kill")) {
+	} else if (utils::iequals(goal, "kill")) {
 		return FACTIONKILL;
-	} else if (boost::iequals(goal, "steal")) {
+	} else if (utils::iequals(goal, "steal")) {
 		return FACTIONSTEAL;
-	} else if (boost::iequals(goal, "patrol")) {
+	} else if (utils::iequals(goal, "patrol")) {
 		return FACTIONPATROL;
-	} else if (boost::iequals(goal, "idle")) {
+	} else if (utils::iequals(goal, "idle")) {
 		return FACTIONIDLE;
 	}
 	return FACTIONIDLE;

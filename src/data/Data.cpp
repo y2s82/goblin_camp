@@ -34,6 +34,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 namespace py = boost::python;
 namespace fs = boost::filesystem;
 
+#include "utils.hpp"
 #include "data/Config.hpp"
 #include "data/Data.hpp"
 #include "data/Paths.hpp"
@@ -202,7 +203,7 @@ namespace Data {
 	void GetSavedGames(std::vector<Save>& list) {
 		for (fs::directory_iterator it(Paths::Get(Paths::Saves)), end; it != end; ++it) {
 			fs::path save = it->path();
-			if (!boost::iequals(save.extension().string(), ".sav")) continue;
+			if (!utils::iequals(save.extension().string(), ".sav")) continue;
 			
 			save.replace_extension();
 			
@@ -317,7 +318,7 @@ namespace Data {
 		
 		for (fs::directory_iterator it(Paths::Get(Paths::Screenshots)), end; it != end; ++it) {
 			fs::path png = it->path();
-			if (!boost::iequals(png.extension().string(), ".png")) continue;
+			if (!utils::iequals(png.extension().string(), ".png")) continue;
 			
 			png.replace_extension();
 			

@@ -23,6 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 namespace fs = boost::filesystem;
 
+#include "utils.hpp"
 #include "Game.hpp"
 #include "Logger.hpp"
 #include "data/Mods.hpp"
@@ -52,13 +53,13 @@ namespace {
 		}
 		
 		bool parserProperty(TCODParser*, const char *name, TCOD_value_type_t, TCOD_value_t value) {
-			if (boost::iequals(name, "name")) {
+			if (utils::iequals(name, "name")) {
 				ptr->name = value.s;
-			} else if (boost::iequals(name, "author")) {
+			} else if (utils::iequals(name, "author")) {
 				ptr->author = value.s;
-			} else if (boost::iequals(name, "version")) {
+			} else if (utils::iequals(name, "version")) {
 				ptr->version = value.s;
-			} else if (boost::iequals(name, "apiversion")) {
+			} else if (utils::iequals(name, "apiversion")) {
 				ptr->apiVersion = value.i;
 			}
 			

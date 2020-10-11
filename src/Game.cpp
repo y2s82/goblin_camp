@@ -35,6 +35,7 @@ namespace py = boost::python;
 #endif
 
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Game.hpp"
 #include "Tile.hpp"
@@ -366,11 +367,11 @@ int Game::CreateNPC(Coordinate target, NPCType type) {
 		}
 	}
 
-	if (boost::iequals(NPC::NPCTypeToString(type), "orc")) {
+	if (utils::iequals(NPC::NPCTypeToString(type), "orc")) {
 		++orcCount;
 		npc->AddTrait(FRESH);
 	}
-	else if (boost::iequals(NPC::NPCTypeToString(type), "goblin")) {
+	else if (utils::iequals(NPC::NPCTypeToString(type), "goblin")) {
 		++goblinCount;
 		if (Random::Generate(2) == 0) npc->AddTrait(CHICKENHEART);
 	}
@@ -682,7 +683,7 @@ int Game::CreateItem(Coordinate pos, ItemType type, bool store, int ownerFaction
 			if (Item::Presets[type].organic) {
 				std::shared_ptr<OrganicItem> orgItem;
 				
-				if (boost::iequals(Item::ItemTypeToString(type), "water"))
+				if (utils::iequals(Item::ItemTypeToString(type), "water"))
 					orgItem.reset(new WaterItem(pos, type));
 				else
 					orgItem.reset(new OrganicItem(pos, type));
@@ -2175,15 +2176,15 @@ void Game::CreateNatureObject(Coordinate pos, std::string name) {
 	unsigned int natureObjectIndex = 0;
 	for (std::vector<NatureObjectPreset>::iterator preseti = NatureObject::Presets.begin(); preseti != NatureObject::Presets.end();
 		++preseti) {
-			if (boost::iequals(preseti->name, name)) break;
+			if (utils::iequals(preseti->name, name)) break;
 			++natureObjectIndex;
 	}
 
 	if (natureObjectIndex < NatureObject::Presets.size() && 
-		boost::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
+		utils::iequals(NatureObject::Presets[natureObjectIndex].name, name)) {
 		if (Map::Inst()->IsInside(pos) && Map::Inst()->GetNatureObject(pos) < 0 && Map::Inst()->GetConstruction(pos) < 0) {
 			std::shared_ptr<NatureObject> natObj;
-			if (boost::iequals(NatureObject::Presets[natureObjectIndex].name, "Ice"))
+			if (utils::iequals(NatureObject::Presets[natureObjectIndex].name, "Ice"))
 				natObj.reset(new Ice(pos , natureObjectIndex));
 			else
 				natObj.reset(new NatureObject(pos, natureObjectIndex));
@@ -2333,7 +2334,7 @@ int Game::GetAge() { return age; }
 void Game::UpdateFarmPlotSeedAllowances(ItemType type) {
 	for (std::set<ItemCategory>::iterator cati = Item::Presets[type].categories.begin(); cati != Item::Presets[type].categories.end();
 		++cati) {
-			if (boost::iequals(Item::Categories[*cati].name, "seed")) {
+			if (utils::iequals(Item::Categories[*cati].name, "seed")) {
 				for (std::map<int, std::shared_ptr<Construction> >::iterator dynamicConsi = dynamicConstructionList.begin();
 					dynamicConsi != dynamicConstructionList.end(); ++dynamicConsi) {
 						if (dynamicConsi->second->HasTag(FARMPLOT)) {
