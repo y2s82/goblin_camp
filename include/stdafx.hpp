@@ -110,8 +110,6 @@ using namespace std::placeholders; // so sue me
 #		include <boost/cstdint.hpp>
 #		include <boost/numeric/ublas/matrix.hpp>
 #		include <boost/random/mersenne_twister.hpp>
-#		include <boost/random/uniform_int.hpp>
-#		include <boost/random/uniform_01.hpp>
 #		include <boost/random/variate_generator.hpp>
 #		include <filesystem>
 #		include <boost/math/constants/constants.hpp>

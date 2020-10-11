@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <boost/random.hpp>
 #include <ctime>
 #include <cmath>
 #include <algorithm>
@@ -43,7 +42,7 @@ namespace {
 	*/
 	template <typename G, typename D>
 	inline typename D::result_type InternalGenerate(G& generator, D distribution) {
-		return boost::variate_generator<G&, D>(generator, distribution)();
+		return distribution(generator);//boost::variate_generator<G&, D>(generator, distribution)();
 	}
 	
 	/**
@@ -172,7 +171,7 @@ namespace Random {
 		\returns         A random number from specified range.
 	*/
 	int Generator::Generate(int start, int end) {
-		return InternalGenerate(generator, boost::uniform_int<>(start, end));
+		return InternalGenerate(generator, std::uniform_int_distribution(start, end));
 	}
 	
 	/**
@@ -191,7 +190,7 @@ namespace Random {
 		\returns A random number from range [0, 1].
 	*/
 	double Generator::Generate() {
-		return InternalGenerate(generator, boost::uniform_01<>());
+		return InternalGenerate(generator, std::uniform_real_distribution());
 	}
 	
 	/**
