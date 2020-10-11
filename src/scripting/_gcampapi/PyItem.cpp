@@ -13,12 +13,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
 #include<memory>
 #include "stdafx.hpp"
 
 
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
 namespace py = boost::python;
 
 #include "scripting/_gcampapi/PyItem.hpp"

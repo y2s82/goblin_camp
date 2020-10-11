@@ -1,9 +1,17 @@
 # globbing sources can be dangerous, but let's assert there are no stray
 # source files in the tree.
-file(GLOB gc_src . *.cpp data/*.cpp scripting/*.cpp scripting/_gcampapi/*.cpp UI/*.cpp)
+
+# boost craps out with newer c++
+file(GLOB boost_is_shit_src scripting/*.cpp scripting/_gcampapi/*.cpp)
+set_source_files_properties(${boost_is_shit_src} PROPERTIES COMPILE_FLAGS -std=c++14)
+
+file(GLOB gc_src . *.cpp data/*.cpp UI/*.cpp)
+
 file(GLOB gc_platform_src . platform/unix/*.cpp platform/linux/*.cpp)
 file(GLOB gc_render_src . tileRenderer/*.cpp tileRenderer/sdl/*.cpp)
-add_executable (goblincamp ${gc_src} ${gc_platform_src} ${gc_render_src})
+set(nonshit_src ${gc_src} ${gc_platform_src} ${gc_render_src})
+set_source_files_properties(${nonshit_src} PROPERTIES COMPILE_FLAGS -std=c++17)
+add_executable (goblincamp ${nonshit_src} ${boost_is_shit_src})
 
 # Make sure the compiler can find include files
 include_directories (${GOBLINCAMP_SOURCE_DIR}/include)

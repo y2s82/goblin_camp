@@ -13,6 +13,9 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+
 #include "stdafx.hpp"
 
 #include <cassert>
@@ -20,8 +23,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 #include <boost/foreach.hpp>
 
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
 namespace py = boost::python;
 
 #include "data/Config.hpp"

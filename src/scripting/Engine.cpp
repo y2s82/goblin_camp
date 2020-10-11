@@ -13,6 +13,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+
+#define BOOST_FILESYSTEM_VERSION 3
+#include <boost/foreach.hpp>
+#include <boost/filesystem.hpp>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+
 #include "stdafx.hpp"
 
 #include <fstream>
@@ -20,12 +27,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <string>
 #include <list>
-
-#define BOOST_FILESYSTEM_VERSION 3
-#include <boost/foreach.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
 
 namespace py = boost::python;
 namespace fs = boost::filesystem;

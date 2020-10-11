@@ -36,7 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Spell.hpp"
 #include "GCamp.hpp"
 
-#include "MapRenderer.hpp"
+//#include "MapRenderer.hpp"
 #include "data/Serialization.hpp"
 
 #define BFS_MAX_DISTANCE 20
@@ -44,6 +44,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define MONTH_LENGTH (UPDATES_PER_SECOND * 60 * 4)
 
 class Faction;
+class MapRenderer;
 
 enum Season {
 	EarlySpring,

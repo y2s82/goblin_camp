@@ -13,10 +13,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
-
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
+
+#include "stdafx.hpp"
+
 namespace py = boost::python;
 
 #include "scripting/_gcampapi/Functions.hpp"
@@ -85,12 +86,13 @@ namespace Script { namespace API {
 				getID = &Construction::StringToConstructionType;
 			break;
 			case EItem:
-				//spawn = std::bind(&Game::CreateItem, Game::Inst(), _1, _2); // this makes the compiler cry for some reason
+				//spawn = std::bind(&Game::CreateItem, Game::Inst(), std::placeholders::_1, std::placeholders::_2); // this makes the compiler cry for some reason
 				spawn = &_SpawnItem;
 				getID = &Item::StringToItemType;
 			break;
 			case ENPC:
-				spawn = std::bind(&Game::CreateNPC, Game::Inst(), _1, _2);
+                        // FUCKINGS boost, it "provides" its own global _1, with no way to hide them. yay.
+				spawn = std::bind(&Game::CreateNPC, Game::Inst(), std::placeholders::_1, std::placeholders::_2);
 				getID = &NPC::StringToNPCType;
 			break;
 			case EPlant:
