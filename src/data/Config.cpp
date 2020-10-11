@@ -18,9 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <fstream>
 #include <string>
-#include <boost/assign/list_inserter.hpp>
-#include <boost/date_time/local_time/local_time.hpp>
-#include <boost/foreach.hpp>
+#include <chrono>
 
 #include "data/Config.hpp"
 #include "data/Paths.hpp"
@@ -51,16 +49,17 @@ namespace Config {
 	void Save() {
 		std::ofstream config(Paths::Get(Paths::Config).string().c_str());
 		config << "##\n";
-		config << "## Config automatically saved on " << boost::posix_time::second_clock::local_time() << '\n';
+                time_t current = std::chrono::system_clock::to_time_t(std::chrono::system_clock::now());
+		config << "## Config automatically saved on " << std::put_time(std::localtime(&current), "%Y-%m-%d %X") << '\n';
 		config << "##\n";
 		
 		// dump cvars
-		BOOST_FOREACH(CVarMap::value_type pair, Globals::cvars) {
+		for (const CVarMap::value_type &pair : Globals::cvars) {
 			config << "setCVar('" << pair.first << "', '" << pair.second << "')\n";
 		}
 		
 		// dump keys
-		BOOST_FOREACH(KeyMap::value_type pair, Globals::keys) {
+		for(const KeyMap::value_type &pair : Globals::keys) {
 			config << "bindKey('" << pair.first << "', '" << pair.second << "')\n";
 		}
 		
@@ -71,42 +70,40 @@ namespace Config {
 		Creates configuration variables, and default key bindings.
 	*/
 	void Init() {
-		using boost::assign::insert;
+		Globals::cvars = {
+                    {"resolutionX",  "800"},
+                     {"resolutionY",  "600"},
+                     {"fullscreen",   "0"},
+                     {"renderer",     "0"},
+                     {"useTileset",   "0"},
+                     {"tileset",      ""},
+                     {"tutorial",     "1"},
+                     {"riverWidth",   "30"},
+                     {"riverDepth",   "5"},
+                     {"halfRendering","0"},
+                     {"compressSaves","0"},
+                     {"translucentUI","0"},
+                     {"autosave","1"},
+                     {"pauseOnDanger","0"},
+                };
 		
-		insert(Globals::cvars)
-			("resolutionX",  "800")
-			("resolutionY",  "600")
-			("fullscreen",   "0")
-			("renderer",     "0")
-			("useTileset",   "0")
-			("tileset",      "")
-			("tutorial",     "1")
-			("riverWidth",   "30")
-			("riverDepth",   "5")
-			("halfRendering","0")
-			("compressSaves","0")
-			("translucentUI","0")
-			("autosave","1")
-			("pauseOnDanger","0")
-		;
-		
-		insert(Globals::keys)
-			("Exit",          'q')
-			("Basics",        'b')
-			("Workshops",     'w')
-			("Orders",        'o')
-			("Furniture",     'f')
-			("StockManager",  's')
-			("Squads",        'm')
-			("Announcements", 'a')
-			("Center",        'c')
-			("Help",          'h')
-			("Pause",         ' ')
-			("Jobs",          'j')
-			("DevConsole",    '`')
-			("TerrainOverlay",'t')
-			("Permanent",     'p')
-		;
+		Globals::keys = {
+                     {"Exit",          'q'},
+                     {"Basics",        'b'},
+                     {"Workshops",     'w'},
+                     {"Orders",        'o'},
+                     {"Furniture",     'f'},
+                     {"StockManager",  's'},
+                     {"Squads",        'm'},
+                     {"Announcements", 'a'},
+                     {"Center",        'c'},
+                     {"Help",          'h'},
+                     {"Pause",         ' '},
+                     {"Jobs",          'j'},
+                     {"DevConsole",    '`'},
+                     {"TerrainOverlay",'t'},
+                     {"Permanent",     'p'},
+                };
 	}
 	
 	/**

@@ -19,10 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <list>
 
-#include <boost/multi_array.hpp>
-
-
-#include <boost/thread/mutex.hpp>
 
 #include <libtcod.hpp>
 
@@ -36,9 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Spell.hpp"
 #include "GCamp.hpp"
 
-#ifndef BOOST_PYTHON_WORKAROUND
 #include "MapRenderer.hpp"
-#endif
 #include "data/Serialization.hpp"
 
 #define BFS_MAX_DISTANCE 20
