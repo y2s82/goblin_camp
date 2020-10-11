@@ -23,7 +23,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "Entity.hpp"
 #include "UI/UIComponents.hpp"

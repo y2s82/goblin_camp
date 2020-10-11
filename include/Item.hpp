@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <vector>
 #include <list>
 #include <map>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include <libtcod.hpp>
 

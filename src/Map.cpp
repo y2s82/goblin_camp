@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 #include "stdafx.hpp"
 
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <boost/algorithm/string.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/shared_ptr.hpp>
@@ -524,7 +524,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 	Coordinate beginning(px[0], py[0]);
 
-	boost::unordered_set<Coordinate> touched;
+	std::unordered_set<Coordinate> touched;
 	std::priority_queue<std::pair<int, Coordinate> > unfinished;
 
 	unfinished.push(std::pair<int, Coordinate>(0, beginning));
@@ -740,7 +740,7 @@ Coordinate Map::FindRangedAdvantage(const Coordinate& center) {
 
 void Map::UpdateCache() {
 	boost::unique_lock<boost::shared_mutex> writeLock(cacheMutex);
-	for (boost::unordered_set<Coordinate>::iterator tilei = changedTiles.begin(); tilei != changedTiles.end();) {
+	for (std::unordered_set<Coordinate>::iterator tilei = changedTiles.begin(); tilei != changedTiles.end();) {
 		cachedTile(*tilei) = tile(*tilei);
 		tilei = changedTiles.erase(tilei);
 	}

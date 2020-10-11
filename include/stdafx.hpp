@@ -105,7 +105,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/foreach.hpp>
 #		include <boost/assign/list_inserter.hpp>
 #		include <boost/assert.hpp>
-#		include <boost/unordered_map.hpp>
+#		include <unordered_map>
 #		include <boost/cstdint.hpp>
 #		include <boost/numeric/ublas/matrix.hpp>
 #		include <boost/random/mersenne_twister.hpp>

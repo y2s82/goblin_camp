@@ -20,7 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/array.hpp>
 #include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <SDL.h>
 
 #include "MapRenderer.hpp"

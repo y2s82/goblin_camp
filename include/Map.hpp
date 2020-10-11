@@ -21,7 +21,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/multi_array.hpp>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"
@@ -46,7 +46,7 @@ class Map : public ITCODPathCallback {
 	int overlayFlags;
 	std::list< std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
-	boost::unordered_set<Coordinate> changedTiles;
+	std::unordered_set<Coordinate> changedTiles;
 
 	inline const Tile& tile(const Coordinate& p) const {
 		return tileMap[p.X()][p.Y()];
