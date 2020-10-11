@@ -217,8 +217,8 @@ void TilesetRenderer::DrawMap(Map* mapToDraw, float focusX, float focusY, int vi
 	int absStartPixelY = FloorToInt::convert(focusY * tileSet->TileHeight() - viewportH / 2);
 	pixelW = viewportW;
 	pixelH = viewportH;
-	startTileX = FloorToInt::convert(boost::numeric_cast<float>(absStartPixelX) / tileSet->TileWidth());
-	startTileY = FloorToInt::convert(boost::numeric_cast<float>(absStartPixelY) / tileSet->TileHeight());
+	startTileX = FloorToInt::convert(float(absStartPixelX) / tileSet->TileWidth());
+	startTileY = FloorToInt::convert(float(absStartPixelY) / tileSet->TileHeight());
 	mapOffsetX = startTileX * tileSet->TileWidth() - absStartPixelX;
 	mapOffsetY = startTileY * tileSet->TileHeight() - absStartPixelY;
 	tilesX = CeilToInt::convert((focusX * tileSet->TileWidth() + viewportW / 2) / tileSet->TileWidth()) - startTileX;

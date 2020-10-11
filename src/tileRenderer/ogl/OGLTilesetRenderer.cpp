@@ -273,8 +273,8 @@ bool OGLTilesetRenderer::TilesetChanged() {
 		return false;
 	}
 
-	viewportW = CeilToInt::convert(boost::numeric_cast<float>(GetScreenWidth()) / tileSet->TileWidth()) + 2;
-	viewportH = CeilToInt::convert(boost::numeric_cast<float>(GetScreenHeight()) / tileSet->TileHeight()) + 2;
+	viewportW = CeilToInt::convert(float(GetScreenWidth()) / tileSet->TileWidth()) + 2;
+	viewportH = CeilToInt::convert(float(GetScreenHeight()) / tileSet->TileHeight()) + 2;
 
 	// Twice the viewport size, so we can have different corners
 	for (size_t i = 0; i < viewportLayers.size(); ++i) {
@@ -323,7 +323,7 @@ bool OGLTilesetRenderer::AssembleTextures() {
 		return false;
 
 	// Get initial horizontal tiles (based on tex size)
-	tilesTextureW = std::min(texSize / tileSet->TileWidth(), boost::numeric_cast<GLint>(rawTiles.size()));
+	tilesTextureW = std::min(texSize / tileSet->TileWidth(), GLint(rawTiles.size()));
 	GLint widthPixels = std::min(texSize, MathEx::NextPowerOfTwo(tileSet->TileWidth() * tilesTextureW));
 	// Final horizontal tiles
 	tilesTextureW = widthPixels / tileSet->TileWidth();
@@ -522,8 +522,8 @@ void OGLTilesetRenderer::RenderGLSLViewport() {
 	sizeX = 0.5f * tileSet->TileWidth();
 	sizeY = 0.5f * tileSet->TileHeight();
 
-	float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
-	float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+	float offsetX = float(mapOffsetX + startPixelX);
+	float offsetY = float(mapOffsetY + startPixelY);
 
 	float factorX = 1.0f / fontCharW;
 	float factorY = 1.0f / fontCharH;
@@ -558,8 +558,8 @@ void OGLTilesetRenderer::RenderOGLViewport() {
 	float sizeX = 0.5f * tileSet->TileWidth();
 	float sizeY = 0.5f * tileSet->TileHeight();
 
-	float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
-	float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+	float offsetX = float(mapOffsetX + startPixelX);
+	float offsetY = float(mapOffsetY + startPixelY);
 
 	float factorX = 1.0f / fontCharW;
 	float factorY = 1.0f / fontCharH;
