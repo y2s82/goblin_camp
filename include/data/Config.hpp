@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/lexical_cast.hpp>
+#include <string>
 #include <unordered_map>
 
 // Data refactoring: game configuration.
@@ -31,14 +31,23 @@ namespace Config {
 	void SetStringCVar(const std::string&, const std::string&);
 	std::string GetStringCVar(const std::string&);
 	
-	template <typename T>
-	inline T GetCVar(const std::string& name) {
-		return boost::lexical_cast<T>(GetStringCVar(name));
+	//template <typename T>
+	//inline T GetCVar(const std::string& name) {
+	//	return boost::lexical_cast<T>(GetStringCVar(name));
+	//}
+	inline bool GetBCVar(const std::string& name) {
+		return GetStringCVar(name) == "true";
+	}
+	inline int GetICVar(const std::string& name) {
+		return stoi(GetStringCVar(name));
+	}
+	inline float GetFCVar(const std::string& name) {
+		return stof(GetStringCVar(name));
 	}
 	
 	template <typename T>
 	inline void SetCVar(const std::string& name, const T& value) {
-		SetStringCVar(name, boost::lexical_cast<std::string>(value));
+		SetStringCVar(name, std::to_string(value));
 	}
 	
 	const CVarMap& GetCVarMap();

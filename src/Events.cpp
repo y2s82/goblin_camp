@@ -150,7 +150,7 @@ void Events::SpawnHostileMonsters() {
 		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 		Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 		timeSinceHostileSpawn = 0;
-		if (Config::GetCVar<bool>("pauseOnDanger")) 
+		if (Config::GetBCVar("pauseOnDanger")) 
 			Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 	}
 }

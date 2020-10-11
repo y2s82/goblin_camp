@@ -141,7 +141,7 @@ void MainLoop() {
 	game->Running(true);
 
 	int update = -1;
-	if (Config::GetCVar<int>("halfRendering")) update = 0;
+	if (Config::GetICVar("halfRendering")) update = 0;
 
 	int elapsedMilli;
 	int targetMilli = 1000 / (UPDATES_PER_SECOND);
@@ -608,14 +608,14 @@ namespace {
 void SettingsMenu() {
 	std::string width        = Config::GetStringCVar("resolutionX");
 	std::string height       = Config::GetStringCVar("resolutionY");
-	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
-	bool useTileset          = Config::GetCVar<bool>("useTileset");
-	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
-	bool tutorial            = Config::GetCVar<bool>("tutorial");
-	bool translucentUI       = Config::GetCVar<bool>("translucentUI");
-	bool compressSaves       = Config::GetCVar<bool>("compressSaves");
-	bool autosave            = Config::GetCVar<bool>("autosave");
-	bool pauseOnDanger       = Config::GetCVar<bool>("pauseOnDanger");
+	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetICVar("renderer"));
+	bool useTileset          = Config::GetBCVar("useTileset");
+	bool fullscreen          = Config::GetBCVar("fullscreen");
+	bool tutorial            = Config::GetBCVar("tutorial");
+	bool translucentUI       = Config::GetBCVar("translucentUI");
+	bool compressSaves       = Config::GetBCVar("compressSaves");
+	bool autosave            = Config::GetBCVar("autosave");
+	bool pauseOnDanger       = Config::GetBCVar("pauseOnDanger");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 

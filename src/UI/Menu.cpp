@@ -72,7 +72,7 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 		console->setDefaultBackground(TCODColor::black);
 		if (UI::Inst()->KeyHelpTextColor() > 0) {
 			console->setDefaultForeground(TCODColor(0,std::min(255, UI::Inst()->KeyHelpTextColor()),0));
-			console->print(x, y+1+(i*2), boost::lexical_cast<std::string>(i+1).c_str());
+			console->print(x, y+1+(i*2), std::to_string(i+1).c_str());
 		}
 		if (choices[i].enabled) console->setDefaultForeground(TCODColor::white);
 		else console->setDefaultForeground(TCODColor::grey);
@@ -88,8 +88,8 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 
 MenuResult Menu::Update(int x, int y, bool clicked, const TCOD_key_t key) {
 	if (key.c >= '0' && key.c <= '9') {
-		selected(boost::lexical_cast<int>((char)key.c)-1);
-		Callback(boost::lexical_cast<int>((char)key.c)-1);
+		selected((key.c - '0')-1);
+		Callback((key.c - '0')-1);
 	}
 	if (x > 0 && y > 0) {
 		if (x > _x && x < _x + width) {

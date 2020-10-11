@@ -176,7 +176,7 @@ bool Game::SaveGame(const std::string& filename) {
 		WriteUInt<std::uint32_t>(rawStream, saveMagicConst);
 		WriteUInt<std::uint8_t> (rawStream, fileFormatConst);
 		
-		bool compress = Config::GetCVar<bool>("compressSaves");
+		bool compress = Config::GetBCVar("compressSaves");
 		// compression flag
 		WriteUInt<std::uint8_t>(rawStream, (compress ? 0x01 : 0x00));
 		

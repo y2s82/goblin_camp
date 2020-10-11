@@ -576,9 +576,9 @@ void Game::ErrorScreen() {
 }
 
 void Game::Init(bool firstTime) {
-	int width  = Config::GetCVar<int>("resolutionX");
-	int height = Config::GetCVar<int>("resolutionY");
-	bool fullscreen = Config::GetCVar<bool>("fullscreen");
+	int width  = Config::GetICVar("resolutionX");
+	int height = Config::GetICVar("resolutionY");
+	bool fullscreen = Config::GetBCVar("fullscreen");
 
 	if (width <= 0 || height <= 0) {
 		if (fullscreen) {
@@ -596,7 +596,7 @@ void Game::Init(bool firstTime) {
 	srand((unsigned int)std::time(0));
 
 	//Enabling TCOD_RENDERER_GLSL can cause GCamp to crash on exit, apparently it's because of an ATI driver issue.
-	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
+	TCOD_renderer_t renderer_type = static_cast<TCOD_renderer_t>(Config::GetICVar("renderer"));
 	if (firstTime) TCODConsole::initRoot(screenWidth, screenHeight, "Goblin Camp", fullscreen, renderer_type);
 	TCODMouse::showCursor(true);
 //	TCODConsole::setKeyboardRepeat(500, 10);
@@ -618,7 +618,7 @@ void Game::ResetRenderer() {
 
 	renderer.reset();
 
-	if (Config::GetCVar<bool>("useTileset")) {
+	if (Config::GetBCVar("useTileset")) {
 		std::string tilesetName = Config::GetStringCVar("tileset");
 		if (tilesetName.size() == 0) tilesetName = "default";
 	
@@ -637,7 +637,7 @@ void Game::ResetRenderer() {
 	if (running) {
 		renderer->PreparePrefabs();
 	}
-	renderer->SetTranslucentUI(Config::GetCVar<bool>("translucentUI"));
+	renderer->SetTranslucentUI(Config::GetBCVar("translucentUI"));
 }
 
 void Game::RemoveConstruction(std::weak_ptr<Construction> cons) {
@@ -941,7 +941,7 @@ void Game::Update() {
 		case EarlySpring:
 			Announce::Inst()->AddMsg("Spring has begun");
 			++age;
-			if (Config::GetCVar<bool>("autosave")) {
+			if (Config::GetBCVar("autosave")) {
 				std::string saveName = "autosave" + std::string(age % 2 ? "1" : "2");
 				if (Data::SaveGame(saveName, false))
 					Announce::Inst()->AddMsg("Autosaved");
@@ -1330,8 +1330,8 @@ void Game::GenerateMap(uint32_t seed) {
 		//This conditional ensures that the river's beginning and end are at least 100 units apart
 	} while (std::sqrt( std::pow((double)px[0] - px[3], 2) + std::pow((double)py[0] - py[3], 2)) < 100);
 
-	float depth = Config::GetCVar<float>("riverDepth");
-	float width = Config::GetCVar<float>("riverWidth");
+	float depth = Config::GetBCVar("riverDepth");
+	float width = Config::GetBCVar("riverWidth");
 	map->heightMap->digBezier(px, py, width, -depth, width, -depth);
 
 	int hills = 0;
@@ -2292,7 +2292,7 @@ void Game::CreateFire(Coordinate pos) {
 void Game::CreateFire(Coordinate pos, int temperature) {
 	if (fireList.empty()) {
 		Announce::Inst()->AddMsg("Fire!", TCODColor::red, pos);
-		if (Config::GetCVar<bool>("pauseOnDanger"))
+		if (Config::GetBCVar("pauseOnDanger"))
 			Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 	}
 

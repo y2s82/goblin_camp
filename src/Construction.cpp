@@ -839,7 +839,7 @@ void Construction::Update() {
 			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
 
-			if (announceColor == TCODColor::red && Config::GetCVar<bool>("pauseOnDanger")) 
+			if (announceColor == TCODColor::red && Config::GetBCVar("pauseOnDanger")) 
 				Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
