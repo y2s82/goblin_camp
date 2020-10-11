@@ -74,9 +74,11 @@ public:
 	void RemoveAllMembers();
 	ItemCategory Weapon();
 	void Weapon(ItemCategory);
+	void SetWeapon(ItemCategory);
 	void Rearm();
 	ItemCategory Armor();
 	void Armor(ItemCategory);
+	void SetArmor(ItemCategory);
 	void Reequip();
 	void SetGeneralOrder(Order);
 };

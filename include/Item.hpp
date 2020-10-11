@@ -157,6 +157,9 @@ public:
 	int DecreaseCondition(); //Only decreases condition, does NOT handle item removal or debris creation!
 };
 
+// Not safe at all, but boost allowed it so we don't we
+bool operator<(const std::weak_ptr<Item>& a, const std::weak_ptr<Item>& b) { return a.lock() < b.lock(); }
+
 BOOST_CLASS_VERSION(Item, 0)
 
 class OrganicItem : public Item {

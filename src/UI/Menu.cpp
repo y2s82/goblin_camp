@@ -155,7 +155,7 @@ Menu* Menu::MainMenu() {
 		mainMenu->AddChoice(MenuChoice("Squads", std::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
 		mainMenu->AddChoice(MenuChoice("Territory", std::bind(UI::ChangeMenu, Menu::TerritoryMenu())));
 		mainMenu->AddChoice(MenuChoice("Stats", std::bind(&Game::DisplayStats, Game::Inst())));
-		mainMenu->AddChoice(MenuChoice("Main Menu", std::bind(Game::ToMainMenu, true)));
+		mainMenu->AddChoice(MenuChoice("Main Menu", std::bind(Game::GoToMainMenu, true)));
 		mainMenu->AddChoice(MenuChoice("Quit", std::bind(Game::Exit, true)));
 	}
 	return mainMenu;
@@ -249,10 +249,10 @@ Menu* Menu::DevMenu() {
 		devMenu->AddChoice(MenuChoice("Create item", std::bind(UI::ChooseCreateItem)));
 
 		std::function<bool(Coordinate, Coordinate)> checkTree = std::bind(Game::CheckTree, _1, Coordinate(1,1));
-		std::function<void(Coordinate)> call = std::bind(&Game::CreateFilth, Game::Inst(), _1, 100);
+		std::function<void(Coordinate)> call = std::bind(&Game::CreateFilth2, Game::Inst(), _1, 100);
 		devMenu->AddChoice(MenuChoice("Create filth", std::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Filth")));
 		
-		call = std::bind(&Game::CreateWater, Game::Inst(), _1);
+		call = std::bind(&Game::CreateWater1, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Create water", std::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Water")));
 		
 		call = std::bind(&Map::Corrupt, Map::Inst(), _1, 500000);
@@ -260,7 +260,7 @@ Menu* Menu::DevMenu() {
 
 		devMenu->AddChoice(MenuChoice("Naturify world", std::bind(UI::ChooseNaturify)));
 
-		std::function<void(Coordinate, Coordinate)> rectCall = std::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2);
+		std::function<void(Coordinate, Coordinate)> rectCall = std::bind(&Game::RemoveNatureObject2, Game::Inst(), _1, _2);
 		devMenu->AddChoice(MenuChoice("Remove NatureObjects", std::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R', "Remove NatureObjects")));
 		devMenu->AddChoice(MenuChoice("Trigger attack", std::bind(&Game::TriggerAttack, Game::Inst())));
 		devMenu->AddChoice(MenuChoice("Trigger migration", std::bind(&Game::TriggerMigration, Game::Inst())));
@@ -274,7 +274,7 @@ Menu* Menu::DevMenu() {
 		call = std::bind(&Game::Tire, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Tire", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Tire")));
 
-		call = std::bind(&Game::CreateFire, Game::Inst(), _1);
+		call = std::bind(&Game::CreateFire1, Game::Inst(), _1);
 		devMenu->AddChoice(MenuChoice("Fire", std::bind(UI::ChooseNormalPlacement, call, checkTree, '!', "Fire")));
 
 		call = std::bind(&Game::CreateDitch, Game::Inst(), _1);

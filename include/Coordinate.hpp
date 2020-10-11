@@ -32,11 +32,18 @@ enum Direction {
 	NODIRECTION
 };
 
+
+class Coordinate;
+template<> struct std::hash<Coordinate>
+{
+    std::size_t operator()(const Coordinate& coord) const noexcept;
+};
+
 class Coordinate {
 	GC_SERIALIZABLE_CLASS
 	
 	friend int Distance(const Coordinate&, const Coordinate&);
-	friend std::size_t hash_value(const Coordinate&);
+        friend std::size_t std::hash<Coordinate>::operator()(const Coordinate& coord) const noexcept;
 	
 	int x, y;
 
@@ -228,6 +235,12 @@ public:
 		return shrinkRectangle(origin, origin + extent - 1);
 	};
 };
+
+
+std::size_t std::hash<Coordinate>::operator()(const Coordinate& coord) const noexcept
+    {
+        return (coord.y * 500) ^ coord.x;
+    }
 
 inline int Distance(const Coordinate& p, const Coordinate& q) {
 	int distance = 0;

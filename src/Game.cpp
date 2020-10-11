@@ -13,14 +13,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include<memory>
-#include "stdafx.hpp"
-
-#ifdef DEBUG
-#include <iostream>
-#include <cassert>
-#endif
-
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/set.hpp>
@@ -33,6 +25,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 namespace py = boost::python;
+#include<memory>
+#include <future>
+#include "stdafx.hpp"
+
+#ifdef DEBUG
+#include <iostream>
+#include <cassert>
+#endif
+
 
 #include "Random.hpp"
 #include "Game.hpp"
@@ -77,6 +78,18 @@ bool Game::initializedOnce = false;
 Game* Game::instance = 0;
 
 bool Game::devMode = false;
+
+
+// FUCKINGS boost, what the fuck
+// // this doesn't help, that's why the code below looks like shit
+// // because boost is a burning pile of shit
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
+using std::placeholders::_4;
+using std::placeholders::_5;
+using std::placeholders::_6;
+using std::placeholders::_7;
 
 Game::Game() :
 screenWidth(0),
@@ -491,7 +504,7 @@ namespace {
 	const unsigned savingSize  = sizeof saving  / sizeof saving[0];
 	
 	void DrawProgressScreen(int x, int y, int spin, bool isLoading) {
-		boost::lock_guard<std::mutex> lock(Game::loadingScreenMutex);
+		std::lock_guard<std::mutex> lock(Game::loadingScreenMutex);
 		
 		SDL_PumpEvents();
 		
@@ -516,8 +529,8 @@ void Game::ProgressScreen(std::function<void(void)> blockingCall, bool isLoading
 	// locking Game::loadingScreenMutex first!
 	//
 	// XXX heavily experimental
-	boost::promise<void> promise;
-	boost::unique_future<void> future(promise.get_future());
+	std::promise<void> promise;
+	std::future<void> future(promise.get_future());
 	
 	// make copies before launching the thread
 	int x = Game::Inst()->screenWidth  / 2;
@@ -525,27 +538,25 @@ void Game::ProgressScreen(std::function<void(void)> blockingCall, bool isLoading
 	
 	DrawProgressScreen(x, y, 0, isLoading);
 	
-	boost::thread thread([&]() {
+	std::thread thread([&]() {
 		try {
 			blockingCall();
 			promise.set_value();
 		} catch (const std::exception& e) {
-			promise.set_exception(boost::copy_exception(e));
+			promise.set_exception(std::current_exception());
 		}
 	});
 	
 	int spin = 0;
 	do {
 		DrawProgressScreen(x, y, ++spin, isLoading);
-	} while (!future.timed_wait(boost::posix_time::millisec(500)));
+	} while (future.wait_for(std::chrono::milliseconds(500)) == std::future_status::timeout);
 	
-	if (future.has_exception()) {
-		future.get();
-	}
+            future.get(); // will rethrow exception
 }
 
 void Game::ErrorScreen() {
-	boost::lock_guard<std::mutex> lock(loadingScreenMutex);
+	std::lock_guard<std::mutex> lock(loadingScreenMutex);
 	
 	Game *game = Game::Inst();
 	TCODConsole::root->setDefaultForeground(TCODColor::white);
@@ -749,6 +760,9 @@ void Game::ItemContained(std::weak_ptr<Item> item, bool con) {
 }
 
 void Game::CreateWater(Coordinate pos) {
+	CreateWater(pos, 10);
+}
+void Game::CreateWater1(Coordinate pos) {
 	CreateWater(pos, 10);
 }
 
@@ -1637,6 +1651,9 @@ void Game::CreateFilth(Coordinate pos) {
 	CreateFilth(pos, 1);
 }
 
+void Game::CreateFilth2(Coordinate pos, int amount) {
+    CreateFilth(pos, amount);
+}
 void Game::CreateFilth(Coordinate pos, int amount) {
 	Stats::Inst()->FilthCreated(amount);
 	if (Map::Inst()->IsInside(pos)) {
@@ -1920,6 +1937,7 @@ int Game::DiceToInt(TCOD_dice_t dice) {
 	return Random::Dice(dice).Roll();
 }
 
+void Game::GoToMainMenu(bool value) { Game::Inst()->toMainMenu = value; }
 void Game::ToMainMenu(bool value) { Game::Inst()->toMainMenu = value; }
 bool Game::ToMainMenu() { return Game::Inst()->toMainMenu; }
 
@@ -2470,17 +2488,17 @@ void Game::DisplayStats() {
 	productionFrame->AddComponent(new Label((boost::format("items: %d") % Stats::Inst()->GetItemsBuilt()).str(),1,1,TCOD_LEFT));
 	productionFrame->AddComponent(new ScrollPanel(1, 2, 23, 15,
 		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->itemsBuilt, 0, 0, 24, Stats::Inst()->itemsBuilt.size(),
-		std::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		std::bind(DrawText, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7), 0, false, 0)));
 	productionFrame->AddComponent(new Label((boost::format("constructions: %d") % Stats::Inst()->GetConstructionsBuilt()).str(),1,17,TCOD_LEFT));
 	productionFrame->AddComponent(new ScrollPanel(1, 18, 23, 15,
 		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->constructionsBuilt, 0, 0, 24, Stats::Inst()->constructionsBuilt.size(),
-		std::bind(DrawText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		std::bind(DrawText, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7), 0, false, 0)));
 	contents->AddComponent(productionFrame);
 
 	Frame *deathFrame = new Frame("Deaths", std::vector<Drawable *>(), 51, 1, 25, 34);
 	deathFrame->AddComponent(new ScrollPanel(1, 1, 23, 32,
 		new UIList<std::pair<std::string, unsigned>, std::unordered_map<std::string, unsigned> >(&Stats::Inst()->deaths, 0, 0, 24, Stats::Inst()->deaths.size(),
-		std::bind(DrawDeathText, _1, _2, _3, _4, _5, _6, _7), 0, false, 0)));
+		std::bind(DrawDeathText, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3, std::placeholders::_4, std::placeholders::_5, std::placeholders::_6, std::placeholders::_7), 0, false, 0)));
 	contents->AddComponent(deathFrame);
 
 	Button *okButton = new Button("OK", NULL, 33, 37, 10, 'o', true);

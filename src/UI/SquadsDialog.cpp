@@ -232,10 +232,10 @@ std::string SquadsDialog::SelectedSquadWeapon() {
 
 void SquadsDialog::SelectWeapon() {
 	Menu *weaponChoiceMenu = new Menu(std::vector<MenuChoice>(), "Weapons");
-	weaponChoiceMenu->AddChoice(MenuChoice("None", std::bind(&Squad::Weapon, GetSquad(squadList->Selected()), -1)));
+	weaponChoiceMenu->AddChoice(MenuChoice("None", std::bind(&Squad::SetWeapon, GetSquad(squadList->Selected()), -1)));
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].name, "Weapon")) {
-			weaponChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), std::bind(&Squad::Weapon, GetSquad(squadList->Selected()), i)));
+			weaponChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), std::bind(&Squad::SetWeapon, GetSquad(squadList->Selected()), i)));
 		}
 	}
 	weaponChoiceMenu->ShowModal();
@@ -253,10 +253,10 @@ std::string SquadsDialog::SelectedSquadArmor() {
 
 void SquadsDialog::SelectArmor() {
 	Menu *armorChoiceMenu = new Menu(std::vector<MenuChoice>(), "Armor");
-	armorChoiceMenu->AddChoice(MenuChoice("None", std::bind(&Squad::Armor, GetSquad(squadList->Selected()), -1)));
+	armorChoiceMenu->AddChoice(MenuChoice("None", std::bind(&Squad::SetArmor, GetSquad(squadList->Selected()), -1)));
 	for (unsigned int i = 0; i < Item::Categories.size(); ++i) {
 		if (Item::Categories[i].parent >= 0 && boost::iequals(Item::Categories[Item::Categories[i].parent].name, "Armor")) {
-			armorChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), std::bind(&Squad::Armor, GetSquad(squadList->Selected()), i)));
+			armorChoiceMenu->AddChoice(MenuChoice(Item::Categories[i].name.c_str(), std::bind(&Squad::SetArmor, GetSquad(squadList->Selected()), i)));
 		}
 	}
 	armorChoiceMenu->ShowModal();

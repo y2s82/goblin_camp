@@ -20,6 +20,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <list>
 
 #include <thread>
+#include <mutex>
 #include <boost/multi_array.hpp>
 #include <functional>
 

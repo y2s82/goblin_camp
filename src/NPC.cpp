@@ -13,6 +13,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+//#include <boost/serialization/deque.hpp>
+//#include <boost/serialization/weak_ptr.hpp>
+//#include <boost/serialization/list.hpp>
+//#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/set.hpp>
+#include <boost/serialization/shared_ptr.hpp>
+#include <boost/serialization/deque.hpp>
+#include <boost/serialization/weak_ptr.hpp>
+#include <boost/serialization/list.hpp>
+
 #include<memory>
 #include "stdafx.hpp"
 
@@ -28,11 +38,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
-#include <boost/serialization/deque.hpp>
-#include <boost/serialization/weak_ptr.hpp>
-#include <boost/serialization/list.hpp>
-#include <boost/serialization/shared_ptr.hpp>
-#include <boost/serialization/set.hpp>
 
 #include "Random.hpp"
 #include "NPC.hpp"
@@ -1444,7 +1449,7 @@ TaskResult NPC::Move(TaskResult oldResult) {
 	}
 	while (nextMove > 100) {
 		nextMove -= 100;
-		std::mutex::scoped_try_lock pathLock(pathMutex);
+                std::unique_lock pathLock(pathMutex, std::try_to_lock);
 		if (pathLock.owns_lock()) {
 			if (nopath) {nopath = false; return TASKFAILFATAL;}
 			if (pathIndex < path->size() && pathIndex >= 0) {
@@ -1500,7 +1505,7 @@ void NPC::findPath(Coordinate target) {
 		++pathingThreadCount;
 		threadCountMutex.unlock();
 		pathMutex.unlock();
-		boost::thread pathThread(std::bind(tFindPath, path, pos.X(), pos.Y(), target.X(), target.Y(), this, true));
+		std::thread pathThread(std::bind(tFindPath, path, pos.X(), pos.Y(), target.X(), target.Y(), this, true));
 	} else {
 		threadCountMutex.unlock();
 		pathMutex.unlock();
@@ -1620,8 +1625,8 @@ std::weak_ptr<Entity> NPC::currentEntity() const {
 
 
 void tFindPath(TCODPath *path, int x0, int y0, int x1, int y1, NPC* npc, bool threaded) {
-	std::mutex::scoped_lock pathLock(npc->pathMutex);
-	boost::shared_lock<std::shared_mutex> readCacheLock(npc->map->cacheMutex);
+	std::lock_guard<std::mutex> pathLock(npc->pathMutex);
+	std::lock_guard<std::shared_mutex> readCacheLock(npc->map->cacheMutex);
 	npc->nopath = !path->compute(x0, y0, x1, y1);
 
 	//TODO factorize with path walkability test
@@ -3091,7 +3096,8 @@ void NPC::save(OutputArchive& ar, const unsigned int version) const {
 	std::string npcType(NPC::NPCTypeToString(type));
 	ar & npcType;
 	ar & timeCount;
-	ar & jobs;
+	ar << jobs;
+	//ar & jobs;
 	ar & taskIndex;
 	ar & orderIndex;
 	ar & nopath;

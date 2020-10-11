@@ -105,6 +105,7 @@ public:
 	static bool LoadGame(const std::string&);
 	static bool SaveGame(const std::string&);
 	static void ToMainMenu(bool);
+	static void GoToMainMenu(bool);
 	static bool ToMainMenu();
 	void Running(bool);
 	bool Running();
@@ -226,6 +227,7 @@ public:
 	std::map<int, std::shared_ptr<NatureObject> > natureList;
 	std::list<std::weak_ptr<WaterNode> > waterList;
 	void CreateWater(Coordinate);
+	void CreateWater1(Coordinate);
 	void CreateWater(Coordinate,int,int=0);
 	void CreateWaterFromNode(std::shared_ptr<WaterNode>);
 	void RemoveWater(Coordinate, bool removeFromList = true);
@@ -236,6 +238,7 @@ public:
 	static void DesignateTree(Coordinate, Coordinate);
 	void RemoveNatureObject(std::weak_ptr<NatureObject>);
 	void RemoveNatureObject(Coordinate a, Coordinate b);
+	void RemoveNatureObject2(Coordinate a, Coordinate b) { RemoveNatureObject(a, b); }
 	static void HarvestWildPlant(Coordinate, Coordinate);
 	static void DesignateBog(Coordinate, Coordinate);
 	static bool CheckTileType(TileType, Coordinate, Coordinate);
@@ -257,6 +260,7 @@ public:
 	std::list<std::weak_ptr<FilthNode> > filthList;
 	void CreateFilth(Coordinate);
 	void CreateFilth(Coordinate,int);
+	void CreateFilth2(Coordinate,int);
 	void RemoveFilth(Coordinate);
 
 	std::list<std::weak_ptr<BloodNode> > bloodList;
@@ -270,6 +274,7 @@ public:
 
 	std::list<std::weak_ptr<FireNode> > fireList;
 	void CreateFire(Coordinate);
+	void CreateFire1(Coordinate c) { CreateFire(c); }
 	void CreateFire(Coordinate,int);
 	void StartFire(Coordinate);
 

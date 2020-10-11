@@ -129,6 +129,7 @@ void Squad::RemoveAllMembers() {
 
 ItemCategory Squad::Weapon() { return weapon; }
 void Squad::Weapon(ItemCategory value) { weapon = value; }
+void Squad::SetWeapon(ItemCategory value) { weapon = value; }
 
 void Squad::Rearm() {
 	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {
@@ -139,6 +140,7 @@ void Squad::Rearm() {
 
 ItemCategory Squad::Armor() { return armor; }
 void Squad::Armor(ItemCategory value) { armor = value; }
+void Squad::SetArmor(ItemCategory value) { armor = value; }
 
 void Squad::Reequip() {
 	for (std::list<int>::iterator memberi = members.begin(); memberi != members.end(); ++memberi) {

@@ -63,8 +63,6 @@ bool Container::AddItem(std::weak_ptr<Item> witem) {
 	return false;
 }
 
-// Not safe at all, but boost allowed it so we don't we
-bool operator<(const std::weak_ptr<Item>& a, const std::weak_ptr<Item>& b) { return a.lock() < b.lock(); }
 
 void Container::RemoveItem(std::weak_ptr<Item> item) {
 	if (items.find(item) != items.end()) {
