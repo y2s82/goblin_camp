@@ -22,16 +22,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/deque.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/list.hpp>
+#include <boost/serialization/split_member.hpp>
 
 #include<memory>
 #include "stdafx.hpp"
 
 #include <cstdlib>
 #include <string>
-#include <boost/serialization/split_member.hpp>
 #include <thread>
-#include <boost/multi_array.hpp>
-#include <boost/algorithm/string.hpp>
 #include <libtcod.hpp>
 #ifdef DEBUG
 #include <iostream>
