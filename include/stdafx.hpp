@@ -74,7 +74,7 @@ using namespace std::placeholders; // so sue me
 #	endif
 #		include <boost/python/detail/wrap_python.hpp>
 #		include <boost/python.hpp>
-#		include <boost/thread/thread.hpp>
+#		include <thread>
 #		include <boost/multi_array.hpp>
 #		include <boost/shared_ptr.hpp>
 #		include <boost/weak_ptr.hpp>

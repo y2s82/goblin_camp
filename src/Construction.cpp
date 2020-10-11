@@ -13,6 +13,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+//
+// Boost is so shit, impossible to avoid this getting included otherwise
 #include<memory>
 #include "stdafx.hpp"
 
@@ -53,6 +55,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stats.hpp"
 #include "data/Config.hpp"
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
 }

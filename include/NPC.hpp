@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <queue>
 #include <list>
 
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <boost/multi_array.hpp>
 #include <functional>
 

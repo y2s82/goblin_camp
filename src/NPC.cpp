@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <cstdlib>
 #include <string>
 #include <boost/serialization/split_member.hpp>
-#include <boost/thread/thread.hpp>
+#include <thread>
 #include <boost/multi_array.hpp>
 #include <boost/format.hpp>
 #include <boost/algorithm/string.hpp>

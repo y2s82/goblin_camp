@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <utility>
 #include <list>
 
-#include <boost/thread/shared_mutex.hpp>
+#include <shared_mutex>
 #include <boost/multi_array.hpp>
 #include <unordered_set>
 #include <libtcod.hpp>
@@ -159,7 +159,7 @@ public:
 	
 	Coordinate FindRangedAdvantage(const Coordinate&);
 
-	mutable boost::shared_mutex cacheMutex;
+	mutable std::shared_mutex cacheMutex;
 	void UpdateCache();
 	void TileChanged(const Coordinate&);
 };

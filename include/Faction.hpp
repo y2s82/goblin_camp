@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 
 
-#include <boost/thread/shared_mutex.hpp>
+#include <shared_mutex>
 
 
 #include "data/Serialization.hpp"
@@ -58,7 +58,7 @@ class Faction {
 	std::string name;
 	int index;
 
-	boost::shared_mutex trapVisibleMutex;
+	std::shared_mutex trapVisibleMutex;
 
 	std::vector<std::weak_ptr<Job> > jobs;
 	std::vector<FactionGoal> goals;
