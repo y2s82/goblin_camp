@@ -19,5 +19,10 @@ namespace utils {
         to_lower(b);
         return a == b;
     }
+    inline bool icontains(std::string a, std::string b) {
+        to_lower(a);
+        to_lower(b);
+        return a.find(b) != std::string::npos;
+    }
 }
 
