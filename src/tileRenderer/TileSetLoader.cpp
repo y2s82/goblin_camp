@@ -35,7 +35,7 @@ TileSetMetadata::TileSetMetadata()
 {
 }
 
-TileSetMetadata::TileSetMetadata(boost::filesystem::path tilesetPath)
+TileSetMetadata::TileSetMetadata(std::filesystem::path tilesetPath)
 	: path(tilesetPath),
 	  name(),
 	  author(),
@@ -47,7 +47,7 @@ TileSetMetadata::TileSetMetadata(boost::filesystem::path tilesetPath)
 {
 }
 
-TilesetModMetadata::TilesetModMetadata(boost::filesystem::path loc)
+TilesetModMetadata::TilesetModMetadata(std::filesystem::path loc)
 	: location(loc),
 	  width(0),
 	  height(0)
@@ -56,15 +56,15 @@ TilesetModMetadata::TilesetModMetadata(boost::filesystem::path loc)
 
 std::shared_ptr<TileSet> TileSetLoader::LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, std::string tilesetName) {
 	// Resolve path
-	boost::filesystem::path tilesetPath(Paths::Get(Paths::CoreTilesets) / tilesetName);
-	if (!boost::filesystem::is_directory(tilesetPath)) {
+	std::filesystem::path tilesetPath(Paths::Get(Paths::CoreTilesets) / tilesetName);
+	if (!std::filesystem::is_directory(tilesetPath)) {
 		tilesetPath = Paths::Get(Paths::Tilesets) / tilesetName;
 	}
 	return LoadTileSet(spriteFactory, tilesetPath);
 }
 
-std::shared_ptr<TileSet> TileSetLoader::LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, boost::filesystem::path path) {
-	namespace fs = boost::filesystem;
+std::shared_ptr<TileSet> TileSetLoader::LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, std::filesystem::path path) {
+	namespace fs = std::filesystem;
 	fs::path tileSetV1Path(path / "tileset.dat");
 	fs::path tileSetV2Path(path / "tilesetV2.dat");
 
@@ -96,8 +96,8 @@ std::shared_ptr<TileSet> TileSetLoader::LoadTileSet(std::shared_ptr<TilesetRende
 	return tileset; 
 }
 
-TileSetMetadata TileSetLoader::LoadTileSetMetadata(boost::filesystem::path path) {
-	namespace fs = boost::filesystem;
+TileSetMetadata TileSetLoader::LoadTileSetMetadata(std::filesystem::path path) {
+	namespace fs = std::filesystem;
 	fs::path tileSetV1Path(path / "tileset.dat");
 	fs::path tileSetV2Path(path / "tilesetV2.dat");
 		
@@ -111,8 +111,8 @@ TileSetMetadata TileSetLoader::LoadTileSetMetadata(boost::filesystem::path path)
 	return TileSetMetadata();
 }
 
-std::list<TilesetModMetadata> TileSetLoader::LoadTilesetModMetadata(boost::filesystem::path path) {
-	namespace fs = boost::filesystem;
+std::list<TilesetModMetadata> TileSetLoader::LoadTilesetModMetadata(std::filesystem::path path) {
+	namespace fs = std::filesystem;
 	fs::path tileSetV2Path(path / "tilesetModV2.dat");
 	if (fs::exists(tileSetV2Path)) {
 		TileSetModMetadataParserV2 parser = TileSetModMetadataParserV2();

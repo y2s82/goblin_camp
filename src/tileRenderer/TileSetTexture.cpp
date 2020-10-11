@@ -22,7 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetTexture.hpp"
 #include "Logger.hpp"
 
-TileSetTexture::TileSetTexture(boost::filesystem::path path, int tileW, int tileH)
+TileSetTexture::TileSetTexture(std::filesystem::path path, int tileW, int tileH)
 	: tileWidth(tileW), tileHeight(tileH), tileXDim(0), tileYDim(0), tileCount(0), tiles()
 {
 	SDL_Surface * temp = IMG_Load(path.string().c_str());

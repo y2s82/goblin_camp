@@ -25,6 +25,15 @@ typedef boost::numeric::converter<
 > CeilToInt;
 
 namespace MathEx {
+#if defined(__GNUC__) || defined(__clang__)
+	inline int NextPowerOfTwo(int val)
+	{
+            if (!val) {
+                return val;
+            }
+            return uint32_t(2) << (31 ^ __builtin_clz(uint32_t(val)));
+        }
+#else
 	inline int NextPowerOfTwo(int val)
 	{
 		val--;
@@ -36,4 +45,5 @@ namespace MathEx {
 		val++;
 		return val;
 	}
+#endif
 }

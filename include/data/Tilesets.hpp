@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <list>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include "tileRenderer/TileSetLoader.hpp"
 
 namespace Tilesets {

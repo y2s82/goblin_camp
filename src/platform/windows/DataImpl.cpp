@@ -19,13 +19,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <shellapi.h>
 #include <shlobj.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <string>
 #include <vector>
 #include <cstring>
 #include <cstdlib>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 void GCCommandLine(std::vector<std::string>&);
 

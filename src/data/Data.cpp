@@ -14,7 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define BOOST_NO_CXX11_SCOPED_ENUMS
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <boost/lexical_cast.hpp>
 #include <functional>
 #include <boost/algorithm/string.hpp>
@@ -22,6 +22,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/python.hpp>
 #include "stdafx.hpp"
 
+#include <chrono>
 #include <fstream>
 #include <vector>
 #include <string>
@@ -32,7 +33,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 // http://www.ridgesolutions.ie/index.php/2013/05/30/boost-link-error-undefined-reference-to-boostfilesystemdetailcopy_file/
 
 namespace py = boost::python;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #include "utils.hpp"
 #include "data/Config.hpp"
@@ -51,13 +52,15 @@ namespace {
 		\param[in]  timestamp A source UNIX timestamp.
 		\param[out] dest      A string buffer to receive formatted date.
 	*/
-	void FormatTimestamp(const time_t& timestamp, std::string& dest) {
+	void FormatTimestamp(const std::filesystem::file_time_type& timestamp, std::string& dest) {
 		char buffer[21] = { "0000-00-00, 00:00:00" }; 
 		
+                // todo: this feels dumb, but so is boost-inspired std::chrono
+                time_t time = std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<std::chrono::system_clock::duration>(timestamp - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now()));
 		size_t size = 0;
 		struct tm *date;
 		
-		date = localtime(&timestamp);
+		date = localtime(&time);
 		size = strftime(buffer, 21, "%Y-%m-%d, %H:%M:%S", date);
 		buffer[size] = '\0';
 		
@@ -119,10 +122,10 @@ namespace {
 		\param[in]  file   Full path to the save.
 		\param[out] result Boolean indicating success or failure.
 	*/
-	void DoSave(std::string file, bool& result) {
+	void DoSave(std::string file, bool* result) {
 		LOG_FUNC("Saving game to " << file, "DoSave");
 		
-		if ((result = Game::Inst()->SaveGame(file))) {
+		if ((*result = Game::Inst()->SaveGame(file))) {
 			Script::Event::GameSaved(file);
 		}
 	}
@@ -190,7 +193,7 @@ namespace {
 }
 
 namespace Data {
-	Save::Save(const std::string& filename, std::uintmax_t size, time_t timestamp) : filename(filename), timestamp(timestamp) {
+	Save::Save(const std::string& filename, std::uintmax_t size, std::filesystem::file_time_type timestamp) : filename(filename), timestamp(timestamp) {
 		FormatFileSize(size, this->size);
 		FormatTimestamp(timestamp, this->date);
 	}
@@ -264,10 +267,10 @@ namespace Data {
 		bool result = false;
 		
 		if (!fs::exists(file) || !confirm) {
-			DoSave(file, result);
+			DoSave(file, &result);
 		} else {
 			MessageBox::ShowMessageBox(
-				"Save game exists, overwrite?", std::bind(DoSave, file, boost::ref(result)), "Yes",
+				"Save game exists, overwrite?", std::bind(DoSave, file, &result), "Yes",
 				NULL, "No");
 		}
 		

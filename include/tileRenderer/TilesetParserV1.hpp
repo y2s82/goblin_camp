@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <boost/noncopyable.hpp>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "tileRenderer/TileSetLoader.hpp"
@@ -36,7 +36,7 @@ public:
 	explicit TileSetParserV1(std::shared_ptr<TilesetRenderer> spriteFactory);
 	~TileSetParserV1();
 
-	std::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
+	std::shared_ptr<TileSet> Run(std::filesystem::path tileSetPath);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
@@ -61,7 +61,7 @@ private:
 	std::shared_ptr<TileSet> tileSet;
 	bool success;
 
-	boost::filesystem::path tileSetPath;
+	std::filesystem::path tileSetPath;
 
 	std::string tileSetName;
 	int tileWidth;
@@ -112,7 +112,7 @@ class TileSetMetadataParserV1 : public ITCODParserListener {
 public:
 	TileSetMetadataParserV1();
 
-	TileSetMetadata Run(boost::filesystem::path path);
+	TileSetMetadata Run(std::filesystem::path path);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);

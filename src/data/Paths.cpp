@@ -16,8 +16,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <functional>
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include "Logger.hpp"
 #include "data/Paths.hpp"
@@ -222,7 +222,7 @@ namespace Paths {
 		Retrieves reference to a given path. Exists to hide implementation details of path storage.
 		
 		\param[in] what What to return, a member of Path enumeration.
-		\returns        Constant reference to given path (a boost::filesystem::path object).
+		\returns        Constant reference to given path (a std::filesystem::path object).
 	*/
 	const fs::path& Get(Path what) {
 		switch (what) {

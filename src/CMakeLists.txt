@@ -3,14 +3,14 @@
 
 # boost craps out with newer c++
 file(GLOB boost_is_shit_src scripting/*.cpp scripting/_gcampapi/*.cpp)
-set_source_files_properties(${boost_is_shit_src} PROPERTIES COMPILE_FLAGS -std=c++14)
+#set_source_files_properties(${boost_is_shit_src} PROPERTIES COMPILE_FLAGS -std=c++14)
 
 file(GLOB gc_src . *.cpp data/*.cpp UI/*.cpp)
 
 file(GLOB gc_platform_src . platform/unix/*.cpp platform/linux/*.cpp)
 file(GLOB gc_render_src . tileRenderer/*.cpp tileRenderer/sdl/*.cpp)
 set(nonshit_src ${gc_src} ${gc_platform_src} ${gc_render_src})
-set_source_files_properties(${nonshit_src} PROPERTIES COMPILE_FLAGS -std=c++17)
+#set_source_files_properties(${nonshit_src} PROPERTIES COMPILE_FLAGS -std=c++17)
 add_executable (goblincamp ${nonshit_src} ${boost_is_shit_src})
 
 # Make sure the compiler can find include files
@@ -64,7 +64,7 @@ link_directories (${Boost_LIBRARY_DIRS})
 target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL2 SDL2_image tcod z python-modules pthread X11)
 
 # have to use c++11 or gnu++11, because lambda expressions
-set_target_properties (goblincamp PROPERTIES COMPILE_FLAGS "-std=gnu++11 -Wall")
+set_target_properties (goblincamp PROPERTIES COMPILE_FLAGS "-Wall")
 
 # add the install targets
 install (TARGETS goblincamp DESTINATION bin)

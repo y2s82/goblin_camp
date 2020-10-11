@@ -74,7 +74,7 @@ std::shared_ptr<const unsigned int> CreateOGLTexture() {
 		return std::shared_ptr<const unsigned int>();    
 	} else {
 		std::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, TextureDeleter(handle));
-		return std::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<TextureDeleter>(innerPtr)->handle);
+		return std::shared_ptr<const unsigned int>(innerPtr, &std::get_deleter<TextureDeleter>(innerPtr)->handle);
 	}
 }
 
@@ -96,7 +96,7 @@ std::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertShade
 	}
 
 	std::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, ProgramDeleter(programHandle, vertShader, fragShader));
-	std::shared_ptr<const unsigned int> program(std::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<ProgramDeleter>(innerPtr)->handle));
+	std::shared_ptr<const unsigned int> program(std::shared_ptr<const unsigned int>(innerPtr, &std::get_deleter<ProgramDeleter>(innerPtr)->handle));
 	glAttachObjectARB(*program, *vertShader);
 	glAttachObjectARB(*program, *fragShader);
 	glLinkProgramARB(*program);
@@ -122,7 +122,7 @@ std::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertShade
 std::shared_ptr<const unsigned int> CreateOGLShader(std::string shader, unsigned int type) {
 	GLuint handle = glCreateShaderObjectARB(type);
 	std::shared_ptr<unsigned int> innerPtr((unsigned int *) 0, ShaderDeleter(handle));
-	std::shared_ptr<const unsigned int> shaderPtr(std::shared_ptr<const unsigned int>(innerPtr, &boost::get_deleter<ShaderDeleter>(innerPtr)->handle));
+	std::shared_ptr<const unsigned int> shaderPtr(std::shared_ptr<const unsigned int>(innerPtr, &std::get_deleter<ShaderDeleter>(innerPtr)->handle));
 	
 	const char * shaderTxt = shader.c_str();
 	glShaderSourceARB(*shaderPtr, 1, &shaderTxt, 0);

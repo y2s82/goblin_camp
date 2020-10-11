@@ -114,7 +114,7 @@ using namespace std::placeholders; // so sue me
 #		include <boost/random/uniform_int.hpp>
 #		include <boost/random/uniform_01.hpp>
 #		include <boost/random/variate_generator.hpp>
-#		include <boost/filesystem.hpp>
+#		include <filesystem>
 #		include <boost/math/constants/constants.hpp>
 #		include <boost/tuple/tuple.hpp>
 #	if defined(_MSC_VER)

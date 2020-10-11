@@ -16,15 +16,16 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <cstdint>
+#include <filesystem>
 #include <ctime>
 
 namespace Data {
 	// saves
 	struct Save {
 		std::string filename, size, date;
-		time_t timestamp; // for sorting
+		std::filesystem::file_time_type timestamp; // for sorting
 		
-		Save(const std::string&, std::uintmax_t, time_t);
+		Save(const std::string&, std::uintmax_t, std::filesystem::file_time_type);
 	};
 	
 	// http://www.sgi.com/tech/stl/LessThanComparable.html

@@ -18,33 +18,33 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetRenderer.hpp"
 #include "tileRenderer/TileSet.hpp"
 
 struct TileSetMetadata
 {
-	boost::filesystem::path path;
+	std::filesystem::path path;
 	std::string name, author, version, description;
 	int width, height;
 	bool valid;
 	
 	explicit TileSetMetadata();
-	explicit TileSetMetadata(boost::filesystem::path tilesetPath);
+	explicit TileSetMetadata(std::filesystem::path tilesetPath);
 };
 
 struct TilesetModMetadata {
-	boost::filesystem::path location;
+	std::filesystem::path location;
 	int width, height;
 	
-	explicit TilesetModMetadata(boost::filesystem::path loc);
+	explicit TilesetModMetadata(std::filesystem::path loc);
 };
 
 namespace TileSetLoader
 {
 	std::shared_ptr<TileSet> LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, std::string name);
-	std::shared_ptr<TileSet> LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, boost::filesystem::path path);
-	TileSetMetadata LoadTileSetMetadata(boost::filesystem::path path);
-	std::list<TilesetModMetadata> LoadTilesetModMetadata(boost::filesystem::path path);
+	std::shared_ptr<TileSet> LoadTileSet(std::shared_ptr<TilesetRenderer> spriteFactory, std::filesystem::path path);
+	TileSetMetadata LoadTileSetMetadata(std::filesystem::path path);
+	std::list<TilesetModMetadata> LoadTilesetModMetadata(std::filesystem::path path);
 }

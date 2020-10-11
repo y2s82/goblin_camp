@@ -14,14 +14,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
+#include <shared_mutex>
+#include <mutex>
 #include "stdafx.hpp"
 
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/vector.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
+#include <boost/serialization/vector.hpp>
 
 #include "utils.hpp"
 #include "Faction.hpp"
@@ -31,7 +32,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Random.hpp"
 #include "Announce.hpp"
 
-#include <boost/serialization/vector.hpp>
 
 std::map<std::string, int> Faction::factionNames = std::map<std::string, int>();
 std::vector<std::shared_ptr<Faction> > Faction::factions = std::vector<std::shared_ptr<Faction> >();
@@ -76,7 +76,7 @@ void Faction::RemoveMember(std::weak_ptr<NPC> member) {
 }
 
 void Faction::TrapDiscovered(Coordinate trapLocation, bool propagate) {
-	boost::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
+	std::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = true;
 	//Inform friends
 	if (propagate) {
@@ -87,14 +87,14 @@ void Faction::TrapDiscovered(Coordinate trapLocation, bool propagate) {
 }
 
 bool Faction::IsTrapVisible(Coordinate trapLocation) {
-	boost::shared_lock<std::shared_mutex> readLock(trapVisibleMutex);
+	std::shared_lock<std::shared_mutex> readLock(trapVisibleMutex);
 	std::map<Coordinate, bool>::iterator trapi = trapVisible.find(trapLocation);
 	if (trapi == trapVisible.end()) return false;
 	return trapi->second;
 }
 
 void Faction::TrapSet(Coordinate trapLocation, bool visible) {
-	boost::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
+	std::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
 	trapVisible[trapLocation] = visible;
 }
 
@@ -121,7 +121,7 @@ std::string Faction::FactionTypeToString(FactionType faction) {
 //Reset() does not erase names or goals because these are defined at startup and
 //remain constant
 void Faction::Reset() {
-	boost::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
+	std::unique_lock<std::shared_mutex> writeLock(trapVisibleMutex);
 	members.clear();
 	membersAsUids.clear();
 	trapVisible.clear();
@@ -340,7 +340,7 @@ class FactionListener : public ITCODParserListener {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				std::string specString((char*)TCOD_list_get(value.list,i));
 				int value = Item::StringToItemCategory(specString);
-				if (value < 0) value = boost::lexical_cast<int>(specString);
+				if (value < 0) value = std::stoi(specString);
 				Faction::factions[factionIndex]->goalSpecifiers.push_back(value);
 			}
 		} else if (utils::iequals(name,"activeTime")) {
