@@ -18,7 +18,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "tileRenderer/ogl/OGLResources.hpp"
 #include "Logger.hpp"
-#include <boost/scoped_array.hpp>
 
 #include <SDL/SDL_opengl.h>
 #include "tileRenderer/ogl/OGLFunctionExt.hpp"
@@ -108,7 +107,7 @@ std::shared_ptr<const unsigned int> CreateOGLShaderProgram(std::string vertShade
 		int infologLength = 0;
 		glGetObjectParameterivARB(*program, GL_INFO_LOG_LENGTH,&infologLength);
 		if (infologLength > 0) {
-			boost::scoped_array<char> infoLog(new char[infologLength]);
+			std::vector<char> infoLog(infologLength);
 
 			int charsWritten = 0;
 			glGetInfoLogARB(*program, infologLength, &charsWritten, infoLog.get());
@@ -135,7 +134,7 @@ std::shared_ptr<const unsigned int> CreateOGLShader(std::string shader, unsigned
 		int infologLength = 0;
 		glGetObjectParameterivARB(*shaderPtr, GL_INFO_LOG_LENGTH,&infologLength);
 		if(infologLength > 0) {
-			boost::scoped_array<char> infoLog(new char[infologLength]);
+			std::vector<char> infoLog(infologLength);
 
 			int charsWritten = 0;
 			glGetInfoLogARB(*shaderPtr, infologLength, &charsWritten, infoLog.get());

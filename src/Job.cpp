@@ -72,7 +72,7 @@ Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	paused(false),
 	waitingForRemoval(false),
 	reservedEntities(std::list<std::weak_ptr<Entity> >()),
-	reservedSpot(boost::tuple<std::weak_ptr<Stockpile>, Coordinate, ItemType>(std::weak_ptr<Stockpile>(), zero, -1)),
+	reservedSpot({std::weak_ptr<Stockpile>(), zero, -1}),
 	attempts(0),
 	attemptMax(5),
 	connectedEntity(std::weak_ptr<Entity>()),
@@ -158,14 +158,14 @@ void Job::UnreserveEntities() {
 void Job::ReserveSpot(std::weak_ptr<Stockpile> sp, Coordinate pos, ItemType type) {
 	if (sp.lock()) {
 		sp.lock()->ReserveSpot(pos, true, type);
-		reservedSpot = boost::tuple<std::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, pos, type);
+		reservedSpot = {sp, pos, type};
 	}
 }
 
 void Job::UnreserveSpot() {
-	if (reservedSpot.get<0>().lock()) {
-		reservedSpot.get<0>().lock()->ReserveSpot(reservedSpot.get<1>(), false, reservedSpot.get<2>());
-		reservedSpot.get<0>().reset();
+	if (reservedSpot.stockpile.lock()) {
+		reservedSpot.stockpile.lock()->ReserveSpot(reservedSpot.pos, false, reservedSpot.type);
+		reservedSpot.stockpile.reset();
 	}
 }
 
@@ -344,9 +344,9 @@ void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar & paused;
 	ar & waitingForRemoval;
 	ar & reservedEntities;
-	ar & reservedSpot.get<0>();
-	ar & reservedSpot.get<1>();
-	ar & reservedSpot.get<2>();
+	ar & reservedSpot.stockpile;
+	ar & reservedSpot.pos;
+	ar & reservedSpot.type;
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;
@@ -385,7 +385,7 @@ void Job::load(InputArchive& ar, const unsigned int version) {
 	ar & location;
 	ItemType type;
 	ar & type;
-	reservedSpot = boost::tuple<std::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
+	reservedSpot = {sp, location, type};
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;

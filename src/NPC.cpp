@@ -13,16 +13,11 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-//#include <boost/serialization/deque.hpp>
-//#include <boost/serialization/weak_ptr.hpp>
-//#include <boost/serialization/list.hpp>
-//#include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/deque.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/list.hpp>
-#include <boost/serialization/split_member.hpp>
 
 #include<memory>
 #include "stdafx.hpp"

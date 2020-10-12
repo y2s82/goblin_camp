@@ -20,8 +20,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <list>
 
-#include <boost/tuple/tuple.hpp>
-
 #include "Construction.hpp"
 #include "data/Serialization.hpp"
 
@@ -121,7 +119,11 @@ class Job {
 	bool paused;
 	bool waitingForRemoval;
 	std::list<std::weak_ptr<Entity> > reservedEntities;
-	boost::tuple<std::weak_ptr<Stockpile>, Coordinate, ItemType> reservedSpot;
+        struct {
+            std::weak_ptr<Stockpile> stockpile;
+            Coordinate pos;
+            ItemType type;
+        } reservedSpot;
 	int attempts, attemptMax;
 	std::weak_ptr<Entity> connectedEntity;
 	std::weak_ptr<Container> reservedContainer;

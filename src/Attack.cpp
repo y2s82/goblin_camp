@@ -17,9 +17,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "utils.hpp"
 
-#include <boost/algorithm/string.hpp>
-#include <boost/serialization/utility.hpp>
 #include <boost/serialization/vector.hpp>
+#include <boost/serialization/utility.hpp>
 
 #include "Attack.hpp"
 #include "GCamp.hpp"

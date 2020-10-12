@@ -17,8 +17,8 @@
 #include "stdafx.hpp"
 #include "KuhnMunkres.hpp"
 
-std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
-	int n = costs.size1();
+std::vector<int> FindBestMatching(const std::vector<std::vector<int>> &costs) {
+	int n = costs[0].size();
 	std::vector<int> lx(n,0), ly(n,0);
 	std::vector<int> xy(n,0), yx(n,0);
 	std::vector<bool> S(n,false), T(n,false);
@@ -26,7 +26,7 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 	std::vector<int> prev(n,-1);
 	for(int x = 0; x < n; x++) {
 		for(int y = 0; y < n; y++) {
-			lx[x] = std::max(lx[x], costs(x, y));
+			lx[x] = std::max(lx[x], costs[x][y]);
 		}
 		ly[x] = 0;
 		xy[x] = -1;
@@ -50,7 +50,7 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 		}
 		
 		for(int y = 0; y < n; y++) {
-			slack[y] = lx[root] + ly[y] - costs(root, y);
+			slack[y] = lx[root] + ly[y] - costs[root][y];
 			slackx[y] = root;
 		}
 		
@@ -60,7 +60,7 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 			while(rd < wr) {
 				int x = q[rd++];
 				for(int y = 0; y < n; y++) {
-					if(costs(x, y) == lx[x] + ly[y] && !T[y]) {
+					if(costs[x][y] == lx[x] + ly[y] && !T[y]) {
 						if(yx[y] == -1) {
 							foundPath = true;
 							px = x;
@@ -72,8 +72,8 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 						S[yx[y]] = true;
 						prev[yx[y]] = x;
 						for(int sy = 0; sy < n; sy++) {
-							if(lx[yx[y]] + ly[sy] - costs(yx[y], sy) < slack[sy]) {
-								slack[sy] = lx[yx[y]] + ly[sy] - costs(yx[y], sy);
+							if(lx[yx[y]] + ly[sy] - costs[yx[y]][sy] < slack[sy]) {
+								slack[sy] = lx[yx[y]] + ly[sy] - costs[yx[y]][sy];
 								slackx[sy] = yx[y];
 							}
 						}
@@ -121,8 +121,8 @@ std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs) {
 							S[sx] = true;
 							prev[sx] = sp;
 							for(int sy = 0;	sy < n; sy++) {
-								if(lx[sx] + ly[sy] - costs(sx, sy) < slack[sy]) {
-									slack[sy] = lx[sx] + ly[sy] - costs(sx, sy);
+								if(lx[sx] + ly[sy] - costs[sx][sy] < slack[sy]) {
+									slack[sy] = lx[sx] + ly[sy] - costs[sx][sy];
 									slackx[sy] = sx;
 								}
 							}

@@ -327,25 +327,28 @@ void JobManager::AssignJobs() {
 				
 				unsigned int menialMatrixSize = std::max(menialJobsToAssign.size(), menialNPCsWaiting.size());
 				unsigned int expertMatrixSize = std::max(expertJobsToAssign.size(), expertNPCsWaiting.size());
-				boost::numeric::ublas::matrix<int> menialMatrix(menialMatrixSize, menialMatrixSize);
-				boost::numeric::ublas::matrix<int> expertMatrix(expertMatrixSize, expertMatrixSize);
+
+                                std::vector<std::vector<int>> menialMatrix(menialMatrixSize);
+                                for (std::vector<int> &v : menialMatrix) v.resize(menialMatrixSize);
+                                std::vector<std::vector<int>> expertMatrix(expertMatrixSize);
+                                for (std::vector<int> &v : expertMatrix) v.resize(expertMatrixSize);
 
 				for(unsigned int x = 0; x < menialMatrixSize; x++) {
 					for(unsigned int y = 0; y < menialMatrixSize; y++) {
 						if(x >= menialNPCsWaiting.size() || y >= menialJobsToAssign.size()) {
-							menialMatrix(x, y) = 1;
+							menialMatrix[x][y] = 1;
 						} else {
 							std::shared_ptr<Job> job = menialJobsToAssign[y];
 							std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(menialNPCsWaiting[x]);
 							if(!npc || job->tasks.empty() ||
 								(job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
-								menialMatrix(x, y) = 1;
+								menialMatrix[x][y] = 1;
 							} else if (npc) {
-								menialMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+								menialMatrix[x][y] = 10000 - Distance(job->tasks[0].target, npc->Position());
 							}
 							if (npc && job->RequiresTool()) {
 								if (!npc->Wielding().lock() || !npc->Wielding().lock()->IsCategory(job->GetRequiredTool())) {
-									menialMatrix(x, y) -= 2000;
+									menialMatrix[x][y] -= 2000;
 								}
 							}
 						}
@@ -355,19 +358,19 @@ void JobManager::AssignJobs() {
 				for(unsigned int x = 0; x < expertMatrixSize; x++) {
 					for(unsigned int y = 0; y < expertMatrixSize; y++) {
 						if(x >= expertNPCsWaiting.size() || y >= expertJobsToAssign.size()) {
-							expertMatrix(x, y) = 1;
+							expertMatrix[x][y] = 1;
 						} else {
 							std::shared_ptr<Job> job = expertJobsToAssign[y];
 							std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(expertNPCsWaiting[x]);
 							if(!npc || job->tasks.empty() ||
 							   (job->tasks[0].target.X() == 0 && job->tasks[0].target.Y() == 0)) {
-								expertMatrix(x, y) = 1;
+								expertMatrix[x][y] = 1;
 							} else {
-								expertMatrix(x, y) = 10000 - Distance(job->tasks[0].target, npc->Position());
+								expertMatrix[x][y] = 10000 - Distance(job->tasks[0].target, npc->Position());
 							}
 							if (npc && job->RequiresTool()) {
 								if (!npc->Wielding().lock() || !npc->Wielding().lock()->IsCategory(job->GetRequiredTool())) {
-									expertMatrix(x, y) -= 2000;
+									expertMatrix[x][y] -= 2000;
 								}
 							}
 						}

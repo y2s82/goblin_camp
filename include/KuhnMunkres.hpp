@@ -16,6 +16,5 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
 #include <vector>
-#include <boost/numeric/ublas/matrix.hpp>
 
-std::vector<int> FindBestMatching(boost::numeric::ublas::matrix<int> costs);
+std::vector<int> FindBestMatching(const std::vector<std::vector<int>> &costs);
