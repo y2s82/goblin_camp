@@ -13,13 +13,12 @@
  
  You should have received a copy of the GNU General Public License 
  along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
 #include <string>
 #include <vector>
-#include <boost/function.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "StatusEffect.hpp"
 #include "Item.hpp"
@@ -72,10 +71,10 @@ void SideBar::Draw(TCODConsole* console) {
 		if (npc || construction) { //Draw health bar
 			int health;
 			if (npc) {
-				boost::shared_ptr<NPC> creature = boost::static_pointer_cast<NPC>(entity.lock());
+				std::shared_ptr<NPC> creature = std::static_pointer_cast<NPC>(entity.lock());
 				health = (int)(((double)creature->GetHealth() / (double)std::max(1, creature->GetMaxHealth())) * 10);
 			} else {
-				boost::shared_ptr<Construction> construct = boost::static_pointer_cast<Construction>(entity.lock());
+				std::shared_ptr<Construction> construct = std::static_pointer_cast<Construction>(entity.lock());
 				health = (int)(((double)construct->Condition() / (double)std::max(1, construct->GetMaxCondition())) * 10);
 			}
 			for (int i = 0; i < health; ++i) {
@@ -100,10 +99,10 @@ void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
 			y >= minimapY && y < minimapY + 11) {
 			int actualX = (entity.lock()->Position()-5).X() + x - minimapX;
 			int actualY = (entity.lock()->Position()-5).Y() + y - minimapY;
-			std::list<boost::weak_ptr<Entity> > minimapUnderCursor = std::list<boost::weak_ptr<Entity> >();
+			std::list<std::weak_ptr<Entity> > minimapUnderCursor = std::list<std::weak_ptr<Entity> >();
 			UI::Inst()->HandleUnderCursor(Coordinate(actualX, actualY), &minimapUnderCursor);
 			if (!minimapUnderCursor.empty() && minimapUnderCursor.begin()->lock()) {
-				for (std::list<boost::weak_ptr<Entity> >::iterator ucit = minimapUnderCursor.begin(); ucit != minimapUnderCursor.end(); ++ucit) {
+				for (std::list<std::weak_ptr<Entity> >::iterator ucit = minimapUnderCursor.begin(); ucit != minimapUnderCursor.end(); ++ucit) {
 					ucit->lock()->GetTooltip(actualX, actualY, tooltip);
 				}
 			}
@@ -114,39 +113,39 @@ void SideBar::GetTooltip(int x, int y, Tooltip *tooltip, TCODConsole *console) {
 	}
 }
 
-void SideBar::SetEntity(boost::weak_ptr<Entity> ent) {
+void SideBar::SetEntity(std::weak_ptr<Entity> ent) {
 	entity = ent;
 	npc = construction = false;
 	height = 15;
 	contents.reset();
-	if (boost::shared_ptr<NPC> npci = boost::dynamic_pointer_cast<NPC>(entity.lock())) {
+	if (std::shared_ptr<NPC> npci = std::dynamic_pointer_cast<NPC>(entity.lock())) {
 		height = 30;
 		npc = true;
-		contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 15));
-		boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
+		contents = std::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 15));
+		std::shared_ptr<UIContainer> container = std::dynamic_pointer_cast<UIContainer>(contents);
 		Frame *frame = new Frame("Effects", std::vector<Drawable *>(), 0, 0, width - 2, 12);
-		frame->AddComponent(new UIList<StatusEffect, std::list<StatusEffect> >(boost::dynamic_pointer_cast<NPC>(entity.lock())->StatusEffects(), 1, 1, width - 4, 10,
+		frame->AddComponent(new UIList<StatusEffect, std::list<StatusEffect> >(std::dynamic_pointer_cast<NPC>(entity.lock())->StatusEffects(), 1, 1, width - 4, 10,
 																			   SideBar::DrawStatusEffect));
 		container->AddComponent(frame);
-		boost::function<std::string()> func = boost::bind(&SideBar::NPCSquadLabel, npci.get());
-		container->AddComponent(new LiveLabel(boost::bind(&SideBar::NPCSquadLabel, npci.get()), 0, 12, TCOD_LEFT));
-		container->AddComponent(new LiveLabel(boost::bind(&SideBar::NPCWeaponLabel, npci.get()), 0, 13, TCOD_LEFT));
-		container->AddComponent(new LiveLabel(boost::bind(&SideBar::NPCArmorLabel, npci.get()), 0, 14, TCOD_LEFT));
-	} else if (boost::shared_ptr<FarmPlot> fp = boost::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
+		std::function<std::string()> func = std::bind(&SideBar::NPCSquadLabel, npci.get());
+		container->AddComponent(new LiveLabel(std::bind(&SideBar::NPCSquadLabel, npci.get()), 0, 12, TCOD_LEFT));
+		container->AddComponent(new LiveLabel(std::bind(&SideBar::NPCWeaponLabel, npci.get()), 0, 13, TCOD_LEFT));
+		container->AddComponent(new LiveLabel(std::bind(&SideBar::NPCArmorLabel, npci.get()), 0, 14, TCOD_LEFT));
+	} else if (std::shared_ptr<FarmPlot> fp = std::dynamic_pointer_cast<FarmPlot>(entity.lock())) {
 		height = 30;
 		construction = true;
-		contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
-		boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
+		contents = std::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
+		std::shared_ptr<UIContainer> container = std::dynamic_pointer_cast<UIContainer>(contents);
 		container->AddComponent(new ScrollPanel(0, 0, width - 2, 15,
 			new UIList<std::pair<ItemType, bool>, std::map<ItemType, bool> >(fp->AllowedSeeds(), 0, 0, width - 2, fp->AllowedSeeds()->size(),
 												SideBar::DrawSeed,
-												boost::bind(&FarmPlot::SwitchAllowed, fp.get(), _1))));
-	} else if (boost::dynamic_pointer_cast<Construction>(entity.lock())) {
-		boost::shared_ptr<Construction> construct(boost::static_pointer_cast<Construction>(entity.lock()));
+												std::bind(&FarmPlot::SwitchAllowed, fp.get(), _1))));
+	} else if (std::dynamic_pointer_cast<Construction>(entity.lock())) {
+		std::shared_ptr<Construction> construct(std::static_pointer_cast<Construction>(entity.lock()));
 		if (construct->HasTag(WORKSHOP)) {
 			height = 30;
-			contents = boost::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
-			boost::shared_ptr<UIContainer> container = boost::dynamic_pointer_cast<UIContainer>(contents);
+			contents = std::shared_ptr<Drawable>(new UIContainer(std::vector<Drawable *>(), 0, 0, width - 2, 12));
+			std::shared_ptr<UIContainer> container = std::dynamic_pointer_cast<UIContainer>(contents);
 			Frame *frame = new Frame("Production", std::vector<Drawable *>(), 0, 0, width - 2, 12);
 			frame->AddComponent(new UIList<ItemType, std::deque<ItemType> >(construct->JobList(), 1, 1, width - 4, 10,
 																			ConstructionDialog::DrawJob));
@@ -170,7 +169,7 @@ void SideBar::DrawSeed(std::pair<ItemType, bool> seed, int i, int x, int y, int 
 
 std::string SideBar::NPCSquadLabel(NPC *npc) {
 	if(npc->MemberOf().lock()) {
-		return boost::str(boost::format("S: %s") % npc->MemberOf().lock()->Name());
+		return "S: " + npc->MemberOf().lock()->Name();
 	} else {
 		return "";
 	}
@@ -178,7 +177,7 @@ std::string SideBar::NPCSquadLabel(NPC *npc) {
 
 std::string SideBar::NPCWeaponLabel(NPC *npc) {
 	if(npc->Wielding().lock()) {
-		return boost::str(boost::format("W: %s") % npc->Wielding().lock()->Name());
+		return "W: " + npc->Wielding().lock()->Name();
 	} else {
 		return "";
 	}
@@ -186,7 +185,7 @@ std::string SideBar::NPCWeaponLabel(NPC *npc) {
 
 std::string SideBar::NPCArmorLabel(NPC *npc) {
 	if(npc->Wearing().lock()) {
-		return boost::str(boost::format("A: %s") % npc->Wearing().lock()->Name());
+		return "A: " + npc->Wearing().lock()->Name();
 	} else {
 		return "";
 	}

@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/noncopyable.hpp>
 #include <libtcod.hpp>
 #include "NPC.hpp"
 #include "Item.hpp"
@@ -43,9 +42,11 @@ enum CursorType
 	Cursor_Item_Mode
 };
 
-class MapRenderer : private boost::noncopyable
+class MapRenderer
 {
 public:
+    MapRenderer() = default;
+    MapRenderer(const MapRenderer&) = delete;
 	virtual ~MapRenderer() = 0;
 
 	virtual void PreparePrefabs() = 0;

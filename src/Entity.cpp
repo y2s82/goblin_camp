@@ -52,8 +52,10 @@ int Entity::Zone() {return zone;}
 void Entity::Reserve(bool value) {reserved = value;}
 bool Entity::Reserved() {return reserved;}
 
-std::string Entity::Name() { return name; }
+std::string Entity::Name() const { return name; }
+std::string Entity::GetName() const { return name; }
 void Entity::Name(std::string newName) { name = newName; }
+void Entity::SetName(std::string newName) { name = newName; }
 
 void Entity::CancelJob(int) {}
 

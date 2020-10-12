@@ -15,12 +15,12 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/random.hpp>
+#include <random>
 #include <libtcod.hpp>
 #include <Coordinate.hpp>
 
 namespace Random {
-	typedef boost::rand48 GeneratorImpl;
+	typedef std::mt19937 GeneratorImpl;
 
 	struct Dice {
 		Dice(unsigned int, unsigned int = 1, float = 1.f, float = 0.f);

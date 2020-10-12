@@ -23,8 +23,7 @@ and I couldn't come up with a coherent answer just by googling. */
 
 #pragma warning(push, 2) //Boost::serialization generates a few very long warnings
 
-#include <boost/bind.hpp>
-#include <boost/format.hpp>
+#include <functional>
 #include <fstream>
 #include <cstdint>
 
@@ -157,8 +156,8 @@ namespace {
 		oarch << *Map::Inst();
 	}
 	
-	void ReadPayload(io::filtering_istream& ifs) {
-		boost::archive::binary_iarchive iarch(ifs);
+	void ReadPayload(io::filtering_istream *ifs) {
+		boost::archive::binary_iarchive iarch(*ifs);
 		iarch >> Entity::uids;
 		iarch >> *Game::Inst();
 		iarch >> *JobManager::Inst();
@@ -177,7 +176,7 @@ bool Game::SaveGame(const std::string& filename) {
 		WriteUInt<std::uint32_t>(rawStream, saveMagicConst);
 		WriteUInt<std::uint8_t> (rawStream, fileFormatConst);
 		
-		bool compress = Config::GetCVar<bool>("compressSaves");
+		bool compress = Config::GetBCVar("compressSaves");
 		// compression flag
 		WriteUInt<std::uint8_t>(rawStream, (compress ? 0x01 : 0x00));
 		
@@ -254,7 +253,7 @@ bool Game::LoadGame(const std::string& filename) {
 		}
 		
 		stream.push(rawStream);
-		Game::LoadingScreen(boost::bind(&ReadPayload, boost::ref(stream)));
+		Game::LoadingScreen(std::bind(&ReadPayload, &stream));
 		Game::Inst()->TranslateContainerListeners();
 		Game::Inst()->ProvideMap();
 		Game::Inst()->Pause();

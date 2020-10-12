@@ -13,15 +13,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #ifdef DEBUG
 #include <iostream>
 #endif
 
-#include <boost/algorithm/string.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 
+#include "utils.hpp"
 #include "NatureObject.hpp"
 #include "Map.hpp"
 #include "Item.hpp"
@@ -92,7 +93,7 @@ class NatureObjectListener : public ITCODParserListener {
 		bool foundInPreset = false;
 
 		for (size_t i = 0; i < NatureObject::Presets.size(); ++i) {
-			if (boost::iequals(NatureObject::Presets[i].name, name)) {
+			if (utils::iequals(NatureObject::Presets[i].name, name)) {
 				natureIndex = static_cast<int>(i);
 				NatureObject::Presets[i] = NatureObjectPreset();
 				foundInPreset = true;
@@ -110,38 +111,38 @@ class NatureObjectListener : public ITCODParserListener {
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name, "walkable")) {
+		if (utils::iequals(name, "walkable")) {
 			NatureObject::Presets[natureIndex].walkable = true;
-		} else if (boost::iequals(name, "harvestable")) {
+		} else if (utils::iequals(name, "harvestable")) {
 			NatureObject::Presets[natureIndex].harvestable = true;
-		} else if (boost::iequals(name, "tree")) {
+		} else if (utils::iequals(name, "tree")) {
 			NatureObject::Presets[natureIndex].tree = true;
-		} else if (boost::iequals(name, "evil")) {
+		} else if (utils::iequals(name, "evil")) {
 			NatureObject::Presets[natureIndex].evil = true;
 		}
 		return true;
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name, "graphic")) {
+		if (utils::iequals(name, "graphic")) {
 			NatureObject::Presets[natureIndex].graphic = value.i;
-		} else if (boost::iequals(name, "components")) {
+		} else if (utils::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				NatureObject::Presets[natureIndex].components.push_back(Item::StringToItemType((char*)TCOD_list_get(value.list,i)));
 			}
-		} else if (boost::iequals(name, "col")) {
+		} else if (utils::iequals(name, "col")) {
 			NatureObject::Presets[natureIndex].color = value.col;
-		} else if (boost::iequals(name, "rarity")) {
+		} else if (utils::iequals(name, "rarity")) {
 			NatureObject::Presets[natureIndex].rarity = value.i;
-		} else if (boost::iequals(name, "cluster")) {
+		} else if (utils::iequals(name, "cluster")) {
 			NatureObject::Presets[natureIndex].cluster = value.i;
-		} else if (boost::iequals(name, "condition")) {
+		} else if (utils::iequals(name, "condition")) {
 			NatureObject::Presets[natureIndex].condition = value.i;
-		} else if (boost::iequals(name, "minheight")) {
+		} else if (utils::iequals(name, "minheight")) {
 			NatureObject::Presets[natureIndex].minHeight = value.f;
-		} else if (boost::iequals(name, "maxheight")) {
+		} else if (utils::iequals(name, "maxheight")) {
 			NatureObject::Presets[natureIndex].maxHeight = value.f;
-		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+		} else if (utils::iequals(name, "fallbackGraphicsSet")) {
 			NatureObject::Presets[natureIndex].fallbackGraphicsSet = value.s;
 		}
 		return true;
@@ -215,7 +216,7 @@ void NatureObject::load(InputArchive& ar, const unsigned int version) {
 	bool failedToFindType = true;
 	type = 0; //Default to whatever is the first wildplant
 	for (size_t i = 0; i < NatureObject::Presets.size(); ++i) {
-		if (boost::iequals(NatureObject::Presets[i].name, typeName)) {
+		if (utils::iequals(NatureObject::Presets[i].name, typeName)) {
 			type = static_cast<int>(i);
 			failedToFindType = false;
 			break;
@@ -238,7 +239,7 @@ void NatureObject::load(InputArchive& ar, const unsigned int version) {
 Ice::Ice(Coordinate pos, NatureObjectType typeVal) : NatureObject(pos, typeVal) {
 	ice = true;
 	Map::Inst()->SetBlocksWater(pos,true);
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
+	std::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water) {
 		frozenWater = water;
 		Game::Inst()->RemoveWater(pos);

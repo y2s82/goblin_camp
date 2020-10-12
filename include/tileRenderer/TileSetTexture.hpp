@@ -14,9 +14,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/filesystem.hpp>
+
+#include <filesystem>
 #include <SDL.h>
 #include "tileRenderer/Corner.hpp"
 
@@ -31,7 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 class TileSetTexture
 {
 public:
-	explicit TileSetTexture(boost::filesystem::path path, int tileWidth, int tileHeight);
+	explicit TileSetTexture(std::filesystem::path path, int tileWidth, int tileHeight);
 	~TileSetTexture();
 
 	int Count() const;
@@ -48,11 +49,11 @@ public:
 	void DrawTile(int tile, SDL_Surface * dst, SDL_Rect * dstRect) const;
 	void DrawTileCorner(int tile, Corner corner, SDL_Surface * dst, SDL_Rect * dstRect) const;
 
-	boost::shared_ptr<SDL_Surface> GetInternalSurface();
+	std::shared_ptr<SDL_Surface> GetInternalSurface();
 
 private:
 	int tileWidth, tileHeight;
 	int tileXDim, tileYDim;
 	int tileCount;
-	boost::shared_ptr<SDL_Surface> tiles;
+	std::shared_ptr<SDL_Surface> tiles;
 };

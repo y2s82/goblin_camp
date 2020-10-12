@@ -14,9 +14,10 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
-#include <boost/shared_ptr.hpp>
+
 
 class Construction;
 class Item;
@@ -27,9 +28,9 @@ namespace Script {
 		void GameEnd();
 		void GameSaved(const std::string&);
 		void GameLoaded(const std::string&);
-		void BuildingCreated(boost::weak_ptr<Construction>, int, int);
-		void BuildingDestroyed(boost::weak_ptr<Construction>, int, int);
-		void ItemCreated(boost::weak_ptr<Item>, int, int);
+		void BuildingCreated(std::weak_ptr<Construction>, int, int);
+		void BuildingDestroyed(std::weak_ptr<Construction>, int, int);
+		void ItemCreated(std::weak_ptr<Item>, int, int);
 		void TierChanged(int, const std::string&);
 		/*void ItemDestroyed(Item*, int, int);
 		void NPCSpawned(NPC*, Construction*, int, int);

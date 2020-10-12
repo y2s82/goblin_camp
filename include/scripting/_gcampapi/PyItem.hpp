@@ -14,14 +14,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
-#include <boost/weak_ptr.hpp>
+
 
 class Item;
 
 namespace Script { namespace API {
 	struct PyItem {
-		PyItem(boost::weak_ptr<Item>);
+		PyItem(std::weak_ptr<Item>);
 		py::tuple GetPosition();
 		bool SetPosition(int x, int y);
 		py::tuple GetColor();
@@ -32,6 +33,6 @@ namespace Script { namespace API {
 		
 		static void Expose();
 	private:
-		boost::weak_ptr<Item> item;
+		std::weak_ptr<Item> item;
 	};
 }}

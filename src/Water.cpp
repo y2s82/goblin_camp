@@ -13,13 +13,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <cmath>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/weak_ptr.hpp>
+
 
 #include "Random.hpp"
 #include "Logger.hpp"
@@ -85,7 +85,7 @@ bool WaterNode::Update() {
 			if (timeFromRiverBed == 0 && Random::Generate(100) == 0) depth -= 1; //Evaporation
 			if (timeFromRiverBed > 0 && depth < RIVERDEPTH) depth += 10; //Water rushing from the river
 
-			std::vector<boost::weak_ptr<WaterNode> > waterList;
+			std::vector<std::weak_ptr<WaterNode> > waterList;
 			std::vector<Coordinate> coordList;
 			int depthSum = 0;
 
@@ -138,7 +138,7 @@ bool WaterNode::Update() {
 			if (timeFromRiverBed > 0) --timeFromRiverBed;
 			divided = ((double)depthSum/waterList.size());
 
-			boost::shared_ptr<Item> item;
+			std::shared_ptr<Item> item;
 			if (!Map::Inst()->ItemList(pos)->empty())
 				item = Game::Inst()->GetItem(*Map::Inst()->ItemList(pos)->begin()).lock();
 
@@ -158,7 +158,7 @@ bool WaterNode::Update() {
 
 			//Loop through neighbouring waternodes
 			for (unsigned int i = 0; i < waterList.size(); ++i) {
-				if (boost::shared_ptr<WaterNode> water = waterList[i].lock()) {
+				if (std::shared_ptr<WaterNode> water = waterList[i].lock()) {
 					water->depth = (int)divided;
 					water->timeFromRiverBed = timeFromRiverBed;
 					water->UpdateGraphic();

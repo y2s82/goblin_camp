@@ -15,10 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
-#include <boost/noncopyable.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <libtcod.hpp>
 #include "tileRenderer/TileSetLoader.hpp"
 #include "tileRenderer/TileSet.hpp"
@@ -30,14 +29,15 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/SpellSpriteSet.hpp"
 #include "tileRenderer/StatusEffectSprite.hpp"
 
-class TileSetParserV2 : public ITCODParserListener, private boost::noncopyable
+class TileSetParserV2 : public ITCODParserListener
 {
 public:
-	explicit TileSetParserV2(boost::shared_ptr<TilesetRenderer> spriteFactory);
+       TileSetParserV2(const TileSetParserV2&) = delete;
+	explicit TileSetParserV2(std::shared_ptr<TilesetRenderer> spriteFactory);
 	~TileSetParserV2();
 
-	boost::shared_ptr<TileSet> Run(boost::filesystem::path tileSetPath);
-	void Modify(boost::shared_ptr<TileSet> tileset, boost::filesystem::path modPath);
+	std::shared_ptr<TileSet> Run(std::filesystem::path tileSetPath);
+	void Modify(std::shared_ptr<TileSet> tileset, std::filesystem::path modPath);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
@@ -47,9 +47,9 @@ public:
 
 private:
 	TCODParser parser;
-	boost::shared_ptr<TilesetRenderer> spriteFactory;
+	std::shared_ptr<TilesetRenderer> spriteFactory;
 
-	boost::shared_ptr<TileSet> tileSet;
+	std::shared_ptr<TileSet> tileSet;
 	bool success;
 	bool readTexture;
 	bool extendingExisting;
@@ -68,8 +68,8 @@ private:
 	TileSetParserV2::ParserState currentParsingState;
 	
 	// Path where textures are found
-	boost::filesystem::path tileSetPath;
-	boost::shared_ptr<TileSetTexture> currentTexture;
+	std::filesystem::path tileSetPath;
+	std::shared_ptr<TileSetTexture> currentTexture;
 
 	std::string tileSetName;
 	int tileWidth;
@@ -87,7 +87,7 @@ private:
 
 		AnimatedSpriteFactory() : sprites(), fps(15) {}
 
-		Sprite_ptr Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture);
+		Sprite_ptr Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture);
 	};
 	AnimatedSpriteFactory animSpriteFactory;
 	ConstructionSpriteFactory constructionFactory;
@@ -110,7 +110,7 @@ class TileSetMetadataParserV2 : public ITCODParserListener {
 public:
 	TileSetMetadataParserV2();
 
-	TileSetMetadata Run(boost::filesystem::path path);
+	TileSetMetadata Run(std::filesystem::path path);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
@@ -128,7 +128,7 @@ class TileSetModMetadataParserV2 : public ITCODParserListener {
 public:
 	TileSetModMetadataParserV2();
 
-	std::list<TilesetModMetadata> Run(boost::filesystem::path path);
+	std::list<TilesetModMetadata> Run(std::filesystem::path path);
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name);
 	bool parserFlag(TCODParser *parser,const char *name);
@@ -139,6 +139,6 @@ public:
 private:
 	TCODParser parser;
 	std::list<TilesetModMetadata> metadata;
-	boost::filesystem::path location;
+	std::filesystem::path location;
 
 };

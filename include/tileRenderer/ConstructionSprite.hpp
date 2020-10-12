@@ -19,7 +19,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/Sprite.hpp"
 #include "Construction.hpp"
 #include "ConstructionVisitor.hpp"
-#include <boost/shared_ptr.hpp>
+
 
 class ConstructionSprite
 {

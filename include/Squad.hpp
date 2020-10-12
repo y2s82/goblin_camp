@@ -14,13 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <list>
 #include <vector>
 
-#include <boost/weak_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+
+#include <memory>
 
 #include "data/Serialization.hpp"
 
@@ -35,7 +36,7 @@ enum Order {
 	FOLLOW
 };
 
-class Squad : public boost::enable_shared_from_this<Squad> {
+class Squad : public std::enable_shared_from_this<Squad> {
 	GC_SERIALIZABLE_CLASS
 	
 	std::string name;
@@ -45,7 +46,7 @@ class Squad : public boost::enable_shared_from_this<Squad> {
 	Order generalOrder;
 	std::vector<Order> orders;
 	std::vector<Coordinate> targetCoordinates;
-	std::vector<boost::weak_ptr<Entity> > targetEntities;
+	std::vector<std::weak_ptr<Entity> > targetEntities;
 	int priority;
 	ItemCategory weapon;
 	ItemCategory armor;
@@ -60,8 +61,8 @@ public:
 	void ClearOrders();
 	Coordinate TargetCoordinate(int orderIndex);
 	void AddTargetCoordinate(Coordinate);
-	boost::weak_ptr<Entity> TargetEntity(int orderIndex);
-	void AddTargetEntity(boost::weak_ptr<Entity>);
+	std::weak_ptr<Entity> TargetEntity(int orderIndex);
+	void AddTargetEntity(std::weak_ptr<Entity>);
 	int MemberCount();
 	int MemberLimit();
 	void MemberLimit(int);
@@ -73,9 +74,11 @@ public:
 	void RemoveAllMembers();
 	ItemCategory Weapon();
 	void Weapon(ItemCategory);
+	void SetWeapon(ItemCategory);
 	void Rearm();
 	ItemCategory Armor();
 	void Armor(ItemCategory);
+	void SetArmor(ItemCategory);
 	void Reequip();
 	void SetGeneralOrder(Order);
 };

@@ -15,9 +15,9 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <boost/bind.hpp>
-#include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
+#include <functional>
+#include <filesystem>
+namespace fs = std::filesystem;
 
 #include "Logger.hpp"
 #include "data/Paths.hpp"
@@ -173,6 +173,7 @@ namespace Paths {
 		coreTilesetsDir = dataDir / "lib" / "tilesets_core";
 		
 		fs::create_directory(personalDir);
+                puts(personalDir.string().data());
 		Logger::OpenLogFile((personalDir / "goblin-camp.log").string());
 		
 		return portableMode;
@@ -221,7 +222,7 @@ namespace Paths {
 		Retrieves reference to a given path. Exists to hide implementation details of path storage.
 		
 		\param[in] what What to return, a member of Path enumeration.
-		\returns        Constant reference to given path (a boost::filesystem::path object).
+		\returns        Constant reference to given path (a std::filesystem::path object).
 	*/
 	const fs::path& Get(Path what) {
 		switch (what) {

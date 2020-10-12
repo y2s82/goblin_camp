@@ -15,16 +15,25 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/numeric/conversion/cast.hpp>
+#include <cmath>
 
-typedef boost::numeric::converter<
-	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Floor<double>
-> FloorToInt;
-typedef boost::numeric::converter<
-	int, double, boost::numeric::conversion_traits<int, double>, boost::numeric::def_overflow_handler, boost::numeric::Ceil<double>
-> CeilToInt;
+namespace FloorToInt {
+    inline int convert(const double val) { return std::floor(val); }
+}
+namespace CeilToInt {
+    inline int convert(const double val) { return std::ceil(val); }
+}
 
 namespace MathEx {
+#if defined(__GNUC__) || defined(__clang__)
+	inline int NextPowerOfTwo(int val)
+	{
+            if (!val) {
+                return val;
+            }
+            return uint32_t(2) << (31 ^ __builtin_clz(uint32_t(val)));
+        }
+#else
 	inline int NextPowerOfTwo(int val)
 	{
 		val--;
@@ -36,4 +45,5 @@ namespace MathEx {
 		val++;
 		return val;
 	}
+#endif
 }

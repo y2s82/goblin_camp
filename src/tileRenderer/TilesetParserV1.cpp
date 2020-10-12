@@ -13,10 +13,10 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
-#include <boost/algorithm/string.hpp>
-
+#include "utils.hpp"
 #include "tileRenderer/TilesetParserV1.hpp"
 #include "tileRenderer/StatusEffectSprite.hpp"
 #include "Logger.hpp"
@@ -122,7 +122,7 @@ namespace {
 	}
 }
 
-TileSetParserV1::TileSetParserV1(boost::shared_ptr<TilesetRenderer> spriteFactory) :
+TileSetParserV1::TileSetParserV1(std::shared_ptr<TilesetRenderer> spriteFactory) :
 	parser(),
 	spriteFactory(spriteFactory),
 
@@ -156,21 +156,21 @@ TileSetParserV1::~TileSetParserV1() {
 	
 }
 
-boost::shared_ptr<TileSet> TileSetParserV1::Run(boost::filesystem::path dataFilePath) {
+std::shared_ptr<TileSet> TileSetParserV1::Run(std::filesystem::path dataFilePath) {
 	tileSetName = "";
 	tileWidth = -1;
 	tileHeight = -1;
-	currentTexture = boost::shared_ptr<TileSetTexture>();
+	currentTexture = std::shared_ptr<TileSetTexture>();
 	tileSetPath = dataFilePath.parent_path();
 	success = true;
 
 	parser.run(dataFilePath.string().c_str(), this);
 
-	boost::shared_ptr<TileSet> result = tileSet;
+	std::shared_ptr<TileSet> result = tileSet;
 	tileSet.reset();
 	if (success)
 		return result;
-	return boost::shared_ptr<TileSet>();
+	return std::shared_ptr<TileSet>();
 }
 
 void TileSetParserV1::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
@@ -184,7 +184,7 @@ void TileSetParserV1::SetCursorSprites(CursorType type, TCOD_list_t cursors) {
 
 bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
 	// TileSet data (should be first and root)	
-	if (boost::iequals(str->getName(), "tileset_data"))
+	if (utils::iequals(str->getName(), "tileset_data"))
 	{
 		tileSetName = name;
 		if (tileSet) {
@@ -199,8 +199,8 @@ bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 	}
 
 	// Texture structure
-	if (boost::iequals(str->getName(), "tile_texture_data")) {
-		currentTexture = boost::shared_ptr<TileSetTexture>(new TileSetTexture(tileSetPath / name, tileWidth, tileHeight));
+	if (utils::iequals(str->getName(), "tile_texture_data")) {
+		currentTexture = std::shared_ptr<TileSetTexture>(new TileSetTexture(tileSetPath / name, tileWidth, tileHeight));
 		fireSprites.clear();
 		fireFPS = 15;
 		if (currentTexture->Count() == 0) {
@@ -215,19 +215,19 @@ bool TileSetParserV1::parserNewStruct(TCODParser *parser,const TCODParserStruct 
 	}
 	
 	// Sprite Sets
-	if (boost::iequals(str->getName(), "creature_sprite_data")) {
+	if (utils::iequals(str->getName(), "creature_sprite_data")) {
 		npcSprite = NPCSprite();
 		currentSpriteSet = SS_NPC;
-	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "plant_sprite_data")) {
 		natureObjectSpriteSet = NatureObjectSpriteSet();
 		currentSpriteSet = SS_NATURE;
-	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "item_sprite_data")) {
 		itemSprite = ItemSprite();
 		currentSpriteSet = SS_ITEM;
-	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "construction_sprite_data")) {
 		currentSpriteSet = SS_CONSTRUCTION;
 		tempConstruction = TempConstruction(spriteFactory);
-	} else if (boost::iequals(str->getName(), "spell_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "spell_sprite_data")) {
 		tempSpell = TempSpell(spriteFactory);
 		currentSpriteSet = SS_SPELL;
 	}
@@ -239,7 +239,7 @@ bool TileSetParserV1::parserFlag(TCODParser *parser,const char *name) {
 	if (currentTexture) {
 		switch (currentSpriteSet) {
 		case SS_CONSTRUCTION:
-			if (boost::iequals(name, "connection_map")) {
+			if (utils::iequals(name, "connection_map")) {
 				tempConstruction.connectionMapped = true;
 			}
 			break;
@@ -278,157 +278,157 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 		switch (currentSpriteSet) {
 		case SS_NONE:
 			// Terrain
-			if (boost::iequals(name, "unknown_terrain")) {
+			if (utils::iequals(name, "unknown_terrain")) {
 				tileSet->SetTerrain(TILENONE, TerrainSprite(spriteFactory->CreateSprite(currentTexture, value.i)));
-			} else if (boost::iequals(name, "grass_terrain")) {
+			} else if (utils::iequals(name, "grass_terrain")) {
 				tileSet->SetTerrain(TILEGRASS, TerrainSprite(ReadConnectionMap(value.list)));
-			} else if (boost::iequals(name, "ditch_terrain")) {
+			} else if (utils::iequals(name, "ditch_terrain")) {
 				tileSet->SetTerrain(TILEDITCH, TerrainSprite(ReadConnectionMap(value.list)));
-			} else if (boost::iequals(name, "riverbed_terrain")) {
+			} else if (utils::iequals(name, "riverbed_terrain")) {
 				tileSet->SetTerrain(TILERIVERBED, TerrainSprite(ReadConnectionMap(value.list)));
-			} else if (boost::iequals(name, "bog_terrain")) {
+			} else if (utils::iequals(name, "bog_terrain")) {
 				tileSet->SetTerrain(TILEBOG, TerrainSprite(ReadConnectionMap(value.list)));
-			} else if (boost::iequals(name, "rock_terrain")) {
+			} else if (utils::iequals(name, "rock_terrain")) {
 				tileSet->SetTerrain(TILEROCK, TerrainSprite(ReadConnectionMap(value.list)));
-			} else if (boost::iequals(name, "mud_terrain")) {
+			} else if (utils::iequals(name, "mud_terrain")) {
 				tileSet->SetTerrain(TILEMUD, TerrainSprite(ReadConnectionMap(value.list)));
 			} 
 			
 			// Terrain Modifiers
-			else if (boost::iequals(name, "water")) {
+			else if (utils::iequals(name, "water")) {
 				tileSet->SetWaterAndIce(ReadConnectionMap(value.list));
-			} else if (boost::iequals(name, "minor_filth")) {
+			} else if (utils::iequals(name, "minor_filth")) {
 				tileSet->SetFilthMinor(spriteFactory->CreateSprite(currentTexture, value.i));
-			} else if (boost::iequals(name, "major_filth")) {
+			} else if (utils::iequals(name, "major_filth")) {
 				tileSet->SetFilthMajor(ReadConnectionMap(value.list));
-			} else if (boost::iequals(name, "marker")) {
+			} else if (utils::iequals(name, "marker")) {
 				tileSet->SetMarker(spriteFactory->CreateSprite(currentTexture, value.i));
-			} else if (boost::iequals(name, "blood")) {
+			} else if (utils::iequals(name, "blood")) {
 				tileSet->SetBlood(ReadConnectionMap(value.list));
 			} 
 			
 			// Overlays
-			else if (boost::iequals(name, "non_territory")) {
+			else if (utils::iequals(name, "non_territory")) {
 				tileSet->SetNonTerritoryOverlay(spriteFactory->CreateSprite(currentTexture, value.i));
-			} else if (boost::iequals(name, "territory")) {
+			} else if (utils::iequals(name, "territory")) {
 				tileSet->SetTerritoryOverlay(spriteFactory->CreateSprite(currentTexture, value.i));
-			} else if (boost::iequals(name, "marked")) {
+			} else if (utils::iequals(name, "marked")) {
 				tileSet->SetMarkedOverlay(spriteFactory->CreateSprite(currentTexture, value.i));
-			} else if (boost::iequals(name, "corruption")) {
+			} else if (utils::iequals(name, "corruption")) {
 				corruptionOverride = ReadConnectionMap(value.list);
 			}
 
 			// Cursors
-			else if (boost::iequals(name, "default_cursor")) {
+			else if (utils::iequals(name, "default_cursor")) {
 				SetCursorSprites(Cursor_None, value.list);
-			} else if (boost::iequals(name, "construction_cursor")) {
+			} else if (utils::iequals(name, "construction_cursor")) {
 				SetCursorSprites(Cursor_Construct, value.list);
-			} else if (boost::iequals(name, "stockpile_cursor")) {
+			} else if (utils::iequals(name, "stockpile_cursor")) {
 				SetCursorSprites(Cursor_Stockpile, value.list);
-			} else if (boost::iequals(name, "treeFelling_cursor")) {
+			} else if (utils::iequals(name, "treeFelling_cursor")) {
 				SetCursorSprites(Cursor_TreeFelling, value.list);
-			} else if (boost::iequals(name, "harvest_cursor")) {
+			} else if (utils::iequals(name, "harvest_cursor")) {
 				SetCursorSprites(Cursor_Harvest, value.list);
-			} else if (boost::iequals(name, "order_cursor")) {
+			} else if (utils::iequals(name, "order_cursor")) {
 				SetCursorSprites(Cursor_Order, value.list);
-			} else if (boost::iequals(name, "tree_cursor")) {
+			} else if (utils::iequals(name, "tree_cursor")) {
 				SetCursorSprites(Cursor_Tree, value.list);
-			} else if (boost::iequals(name, "dismantle_cursor")) {
+			} else if (utils::iequals(name, "dismantle_cursor")) {
 				SetCursorSprites(Cursor_Dismantle, value.list);
-			} else if (boost::iequals(name, "undesignate_cursor")) {
+			} else if (utils::iequals(name, "undesignate_cursor")) {
 				SetCursorSprites(Cursor_Undesignate, value.list);
-			} else if (boost::iequals(name, "bog_cursor")) {
+			} else if (utils::iequals(name, "bog_cursor")) {
 				SetCursorSprites(Cursor_Bog, value.list);
-			} else if (boost::iequals(name, "dig_cursor")) {
+			} else if (utils::iequals(name, "dig_cursor")) {
 				SetCursorSprites(Cursor_Dig, value.list);
-			} else if (boost::iequals(name, "add_territory_cursor")) {
+			} else if (utils::iequals(name, "add_territory_cursor")) {
 				SetCursorSprites(Cursor_AddTerritory, value.list);
-			} else if (boost::iequals(name, "remove_territory_cursor")) {
+			} else if (utils::iequals(name, "remove_territory_cursor")) {
 				SetCursorSprites(Cursor_RemoveTerritory, value.list);
-			} else if (boost::iequals(name, "gather_cursor")) {
+			} else if (utils::iequals(name, "gather_cursor")) {
 				SetCursorSprites(Cursor_Gather, value.list);
 			} 
 			
 			// Status Effects
-			else if (boost::iequals(name, "default_hungry")) {
+			else if (utils::iequals(name, "default_hungry")) {
 				tileSet->SetStatusSprite(HUNGER, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_thirsty")) {
+			} else if (utils::iequals(name, "default_thirsty")) {
 				tileSet->SetStatusSprite(THIRST, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_panic")) {
+			} else if (utils::iequals(name, "default_panic")) {
 				tileSet->SetStatusSprite(PANIC, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_concussion")) {
+			} else if (utils::iequals(name, "default_concussion")) {
 				tileSet->SetStatusSprite(CONCUSSION, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_drowsy")) {
+			} else if (utils::iequals(name, "default_drowsy")) {
 				tileSet->SetStatusSprite(DROWSY, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_asleep")) {
+			} else if (utils::iequals(name, "default_asleep")) {
 				tileSet->SetStatusSprite(SLEEPING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_poison")) {
+			} else if (utils::iequals(name, "default_poison")) {
 				tileSet->SetStatusSprite(POISON, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_bleeding")) {
+			} else if (utils::iequals(name, "default_bleeding")) {
 				tileSet->SetStatusSprite(BLEEDING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_sluggish")) {
+			} else if (utils::iequals(name, "default_sluggish")) {
 				tileSet->SetStatusSprite(BADSLEEP, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_rage")) {
+			} else if (utils::iequals(name, "default_rage")) {
 				tileSet->SetStatusSprite(RAGE, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_eating")) {
+			} else if (utils::iequals(name, "default_eating")) {
 				tileSet->SetStatusSprite(EATING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_drinking")) {
+			} else if (utils::iequals(name, "default_drinking")) {
 				tileSet->SetStatusSprite(DRINKING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 1, false));
-			} else if (boost::iequals(name, "default_swimming")) {
+			} else if (utils::iequals(name, "default_swimming")) {
 				tileSet->SetStatusSprite(SWIM, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 0, true));
-			} else if (boost::iequals(name, "default_burning")) {
+			} else if (utils::iequals(name, "default_burning")) {
 				tileSet->SetStatusSprite(BURNING, StatusEffectSprite(spriteFactory->CreateSprite(currentTexture, value.i), 0, true));
 			}
 			
-			else if (boost::iequals(name, "default_underconstruction")) {
+			else if (utils::iequals(name, "default_underconstruction")) {
 				tileSet->SetDefaultUnderConstructionSprite(spriteFactory->CreateSprite(currentTexture, value.i));
 			}
 
-			else if (boost::iequals(name, "fireFPS")) {
+			else if (utils::iequals(name, "fireFPS")) {
 				fireFPS = value.i;
 			}
-			else if (boost::iequals(name, "fire")) {
+			else if (utils::iequals(name, "fire")) {
 				for (intptr_t * iter = (intptr_t*)TCOD_list_begin(value.list); iter != (intptr_t*)TCOD_list_end(value.list); ++iter) {
 					fireSprites.push_back(*iter);
 				}
 			}
 			break;
 		case SS_NPC:
-			if (boost::iequals(name, "sprite")) {
+			if (utils::iequals(name, "sprite")) {
 				npcSprite = NPCSprite(spriteFactory->CreateSprite(currentTexture, value.i));
 			}
 			break;
 		case SS_ITEM:
-			if (boost::iequals(name, "sprite")) {
+			if (utils::iequals(name, "sprite")) {
 				itemSprite.tile = spriteFactory->CreateSprite(currentTexture, value.i);
 			}
 			break;
 		case SS_NATURE:
-			if (boost::iequals(name, "sprite")) {
+			if (utils::iequals(name, "sprite")) {
 				natureObjectSpriteSet.tile = spriteFactory->CreateSprite(currentTexture, value.i);
 			}
 			break;
 		case SS_CONSTRUCTION:
 			// Record sprites, under construction sprites for later assembly once width/connection map flag is known
-			if (boost::iequals(name, "sprites")) {
+			if (utils::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tempConstruction.mainSprites.push_back((intptr_t)TCOD_list_get(value.list, i));
-			} else if (boost::iequals(name, "underconstruction_sprites")) {
+			} else if (utils::iequals(name, "underconstruction_sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tempConstruction.underConstructionSprites.push_back((intptr_t)TCOD_list_get(value.list, i));
 			} 
-			else if (boost::iequals(name, "openSprite")) {
+			else if (utils::iequals(name, "openSprite")) {
 				tempConstruction.openDoor = spriteFactory->CreateSprite(currentTexture, value.i);
-			} else if (boost::iequals(name, "width")) {
+			} else if (utils::iequals(name, "width")) {
 				tempConstruction.width = value.i;
 			}
 			break;
 		case SS_SPELL:
 			// Record sprites for later construction once both sprites and framerate is determined
-			if (boost::iequals(name, "sprites")) {
+			if (utils::iequals(name, "sprites")) {
 				for (int i = 0; i < TCOD_list_size(value.list); ++i)
 					tempSpell.sprites.push_back((intptr_t)TCOD_list_get(value.list, i));
-			} else if (boost::iequals(name, "fps")) {
+			} else if (utils::iequals(name, "fps")) {
 				tempSpell.fps = value.i;
 			}
 			break;
@@ -437,16 +437,16 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 	}
 
 	// Mandatory tile set properties
-	if (boost::iequals(name, "tileWidth")) {
+	if (utils::iequals(name, "tileWidth")) {
 		tileWidth = value.i;
 		if (tileWidth != -1 && tileHeight != -1)  {
-			tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+			tileSet = std::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
 		}
 		return success;
-	} else if (boost::iequals(name, "tileHeight")) {
+	} else if (utils::iequals(name, "tileHeight")) {
 		tileHeight = value.i;
 		if (tileWidth != -1 && tileHeight != -1)  {
-			tileSet = boost::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
+			tileSet = std::shared_ptr<TileSet>(new TileSet(tileSetName, tileWidth, tileHeight));
 		}
 		return success;
 	}
@@ -457,11 +457,11 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 	}
 
 	// Optional tile set properties
-	if (boost::iequals(name, "description")) {
+	if (utils::iequals(name, "description")) {
 		tileSet->SetDescription(value.s);
-	} else if (boost::iequals(name, "author")) {
+	} else if (utils::iequals(name, "author")) {
 		tileSet->SetAuthor(value.s);
-	} else if (boost::iequals(name, "version")) {
+	} else if (utils::iequals(name, "version")) {
 		tileSet->SetVersion(value.s);
 	}
 
@@ -469,7 +469,7 @@ bool TileSetParserV1::parserProperty(TCODParser *parser,const char *name, TCOD_v
 }
 
 bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct *str, const char *name) {
-	if (boost::iequals(str->getName(), "tileset_data")) {
+	if (utils::iequals(str->getName(), "tileset_data")) {
 		if (corruptionOverride.Exists()) {
 			for (TileType type = TILENONE; type < TILE_TYPE_COUNT; type = static_cast<TileType>(static_cast<unsigned int>(type) + 1)) {
 				TerrainSprite sprite = tileSet->GetTerrainSprite(type);
@@ -479,33 +479,33 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 			corruptionOverride = Sprite_ptr();
 		}
 	}
-	else if (boost::iequals(str->getName(), "tile_texture_data")) {
+	else if (utils::iequals(str->getName(), "tile_texture_data")) {
 		if (fireSprites.size() > 0) {
 			tileSet->SetFireSprite(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, fireSprites.begin(), fireSprites.end(), false, fireFPS));
 		}
-		currentTexture = boost::shared_ptr<TileSetTexture>();
-	} else if (boost::iequals(str->getName(), "creature_sprite_data")) {
+		currentTexture = std::shared_ptr<TileSetTexture>();
+	} else if (utils::iequals(str->getName(), "creature_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultNPCSprite(npcSprite);
 		} else {
 			tileSet->AddNPCSprite(std::string(name), npcSprite);
 		}
 		currentSpriteSet = SS_NONE;
-	} else if (boost::iequals(str->getName(), "plant_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "plant_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultNatureObjectSpriteSet(natureObjectSpriteSet);
 		} else {
 			tileSet->AddNatureObjectSpriteSet(std::string(name), natureObjectSpriteSet);
 		}
 		currentSpriteSet = SS_NONE;
-	} else if (boost::iequals(str->getName(), "item_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "item_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultItemSprite(itemSprite);
 		} else {
 			tileSet->AddItemSprite(std::string(name), itemSprite);
 		}
 		currentSpriteSet = SS_NONE;
-	} else if (boost::iequals(str->getName(), "construction_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "construction_sprite_data")) {
 		ConstructionSprite constructionSprite = tempConstruction.Build(currentTexture);
 		if (constructionSprite.IsValid()) {
 			if (name == 0) {
@@ -521,7 +521,7 @@ bool TileSetParserV1::parserEndStruct(TCODParser *parser,const TCODParserStruct 
 			}
 		}
 		currentSpriteSet = SS_NONE;
-	} else if (boost::iequals(str->getName(), "spell_sprite_data")) {
+	} else if (utils::iequals(str->getName(), "spell_sprite_data")) {
 		if (name == 0) {
 			tileSet->SetDefaultSpellSpriteSet(tempSpell.Build(currentTexture));
 		} else {
@@ -539,7 +539,7 @@ void TileSetParserV1::error(const char *msg) {
 	success = false;
 }
 
-ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
+ConstructionSprite TileSetParserV1::TempConstruction::Build(std::shared_ptr<TileSetTexture> currentTexture) {
 	ConstructionSprite spriteSet = ConstructionSprite();
 	if (connectionMapped) {
 		if (mainSprites.size() > 0) {
@@ -583,7 +583,7 @@ ConstructionSprite TileSetParserV1::TempConstruction::Build(boost::shared_ptr<Ti
 	return spriteSet;
 }
 
-SpellSpriteSet TileSetParserV1::TempSpell::Build(boost::shared_ptr<TileSetTexture> currentTexture) {
+SpellSpriteSet TileSetParserV1::TempSpell::Build(std::shared_ptr<TileSetTexture> currentTexture) {
 	return SpellSpriteSet(TilesetRenderer::CreateSprite(spriteFactory, currentTexture, sprites.begin(), sprites.end(), false, fps));
 }
 
@@ -595,7 +595,7 @@ TileSetMetadataParserV1::TileSetMetadataParserV1()
 	
 }
 
-TileSetMetadata TileSetMetadataParserV1::Run(boost::filesystem::path dataFilePath) {
+TileSetMetadata TileSetMetadataParserV1::Run(std::filesystem::path dataFilePath) {
 	metadata = TileSetMetadata(dataFilePath.parent_path());
 	metadata.valid = true;
 
@@ -605,15 +605,15 @@ TileSetMetadata TileSetMetadataParserV1::Run(boost::filesystem::path dataFilePat
 }
 
 bool TileSetMetadataParserV1::parserProperty(TCODParser*, const char *name, TCOD_value_type_t, TCOD_value_t value) {
-	if (boost::iequals(name, "author")) {
+	if (utils::iequals(name, "author")) {
 		metadata.author = value.s;
-	} else if (boost::iequals(name, "version")) {
+	} else if (utils::iequals(name, "version")) {
 		metadata.version = value.s;
-	} else if (boost::iequals(name, "description")) {
+	} else if (utils::iequals(name, "description")) {
 		metadata.description = value.s;
-	} else if (boost::iequals(name, "tileWidth")) {
+	} else if (utils::iequals(name, "tileWidth")) {
 		metadata.width = value.i;
-	} else if (boost::iequals(name, "tileHeight")) {
+	} else if (utils::iequals(name, "tileHeight")) {
 		metadata.height = value.i;
 	}
 			
@@ -627,7 +627,7 @@ void TileSetMetadataParserV1::error(const char *err) {
 		
 bool TileSetMetadataParserV1::parserNewStruct(TCODParser*, const TCODParserStruct* str, const char* val) 
 { 
-	if (boost::iequals(str->getName(), "tileset_data")) {
+	if (utils::iequals(str->getName(), "tileset_data")) {
 		metadata.name = val;
 	}
 	return true; 

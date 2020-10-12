@@ -13,10 +13,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
-
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
 
 #if DEBUG
 #include "iostream"
@@ -63,7 +61,7 @@ void Events::Update(bool safe) {
 	}
 
 	//Remove immigrants that have left/died
-	for (std::vector<boost::weak_ptr<NPC> >::iterator immi = existingImmigrants.begin(); immi != existingImmigrants.end();) {
+	for (std::vector<std::weak_ptr<NPC> >::iterator immi = existingImmigrants.begin(); immi != existingImmigrants.end();) {
 		if (!immi->lock()) immi = existingImmigrants.erase(immi);
 		else ++immi;
 	}
@@ -141,10 +139,8 @@ void Events::SpawnHostileMonsters() {
 
 		std::string msg;
 		if (hostileSpawnCount > 1) 
-			msg = (boost::format("%s have been sighted outside your %s!") 
-			% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
-		else msg = (boost::format("A %s has been sighted outside your %s!")
-			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
+			msg = NPC::Presets[monsterType].plural + " have been sighted outside your " + Camp::Inst()->GetName() + "!";
+		else msg = "A " + NPC::Presets[monsterType].name + " has been sighted outside your " + Camp::Inst()->GetName() + "!";
 
 		Coordinate a, b;
 		GenerateEdgeCoordinates(map, a, b);
@@ -152,8 +148,8 @@ void Events::SpawnHostileMonsters() {
 		Game::Inst()->CreateNPCs(hostileSpawnCount, monsterType, a, b);
 		Announce::Inst()->AddMsg(msg, TCODColor::red, Coordinate((a.X() + b.X()) / 2, (a.Y() + b.Y()) / 2));
 		timeSinceHostileSpawn = 0;
-		if (Config::GetCVar<bool>("pauseOnDanger")) 
-			Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
+		if (Config::GetBCVar("pauseOnDanger")) 
+			Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 	}
 }
 
@@ -192,10 +188,8 @@ void Events::SpawnImmigrants() {
 
 		std::string msg;
 		if (spawnCount > 1) 
-			msg = (boost::format("%s join your %s!") 
-			% NPC::Presets[monsterType].plural % Camp::Inst()->GetName()).str();
-		else msg = (boost::format("A %s joins your %s!")
-			% NPC::Presets[monsterType].name % Camp::Inst()->GetName()).str();
+			msg = NPC::Presets[monsterType].plural + " join your " + Camp::Inst()->GetName() + "!";
+		else msg = "A " + NPC::Presets[monsterType].name + " joins your " + Camp::Inst()->GetName() + "!";
 
 		Coordinate a, b;
 		GenerateEdgeCoordinates(map, a, b);
@@ -360,7 +354,7 @@ void Events::SpawnMigratingAnimals() {
 		std::vector<int> uids = Game::Inst()->CreateNPCs(migrationSpawnCount, monsterType, a, b);
 		
 		for(std::vector<int>::iterator uidi = uids.begin(); uidi != uids.end(); uidi++) {
-			boost::shared_ptr<NPC> ptr = Game::Inst()->GetNPC(*uidi);
+			std::shared_ptr<NPC> ptr = Game::Inst()->GetNPC(*uidi);
 			if (!ptr) continue;
 			migrants.push_back(ptr.get());
 		}
@@ -372,7 +366,7 @@ void Events::SpawnMigratingAnimals() {
 		// Create jobs for the migration
 		for(std::vector<NPC*>::iterator mgrnt = migrants.begin();
 			mgrnt != migrants.end(); mgrnt++) {
-			boost::shared_ptr<Job> migrateJob(new Job("Migrate"));
+			std::shared_ptr<Job> migrateJob(new Job("Migrate"));
 			
 			// This is so they don't all disapear into one spot.
 			int fx, fy;
@@ -390,8 +384,8 @@ void Events::SpawnMigratingAnimals() {
 		}
 
 		std::string msg;
-		msg = (boost::format("A %s migration is occurring outside your %s.") % NPC::Presets[monsterType].name
-			% Camp::Inst()->GetName()).str();
+		msg = "A " + NPC::Presets[monsterType].name +" migration is occurring outside your " +
+			Camp::Inst()->GetName() + ".";
 		
 		Announce::Inst()->AddMsg(msg, TCODColor::green, (a+b)/2);
 #if DEBUG

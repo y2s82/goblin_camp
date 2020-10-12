@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include "tileRenderer/ogl/OGLTilesetRenderer.hpp"
@@ -26,7 +27,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <SDL_opengl.h>
 #include "MathEx.hpp"
 #include "Logger.hpp"
-#include <boost/scoped_array.hpp>
 
 #include "data/Paths.hpp"
 
@@ -34,13 +34,13 @@ using namespace OGLFunctionExtension;
 
 // Note: Libtcod swaps the vertical axis depending on whether the renderer is GLSL or OpenGL.
 
-boost::shared_ptr<TilesetRenderer> CreateOGLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
-	boost::shared_ptr<OGLTilesetRenderer> oglRenderer(new OGLTilesetRenderer(width, height, console));
-	boost::shared_ptr<TileSet> tileset = TileSetLoader::LoadTileSet(oglRenderer, tilesetName);
+std::shared_ptr<TilesetRenderer> CreateOGLTilesetRenderer(int width, int height, TCODConsole * console, std::string tilesetName) {
+	std::shared_ptr<OGLTilesetRenderer> oglRenderer(new OGLTilesetRenderer(width, height, console));
+	std::shared_ptr<TileSet> tileset = TileSetLoader::LoadTileSet(oglRenderer, tilesetName);
 	if (tileset.get() != 0 && oglRenderer->SetTileset(tileset)) {
 		return oglRenderer;
 	}
-	return boost::shared_ptr<TilesetRenderer>();
+	return std::shared_ptr<TilesetRenderer>();
 }
 
 namespace {
@@ -187,17 +187,17 @@ OGLTilesetRenderer::OGLTilesetRenderer(int screenWidth, int screenHeight, TCODCo
 		amask = 0xff000000;
 	}
 
-	boost::shared_ptr<SDL_Surface> fontSurface(IMG_Load(Paths::Get(Paths::Font).string().c_str()), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> fontSurface(IMG_Load(Paths::Get(Paths::Font).string().c_str()), SDL_FreeSurface);
 	fontCharW = fontSurface->w / 16;
 	fontCharH = fontSurface->h / 16;
 	fontTexW = MathEx::NextPowerOfTwo(fontCharW * 16);
 	fontTexH = MathEx::NextPowerOfTwo(fontCharH * 16);
 
 	SDL_SetColorKey(fontSurface.get(), SDL_SRCCOLORKEY, SDL_MapRGB(fontSurface->format, 0, 0, 0));
-	boost::shared_ptr<SDL_Surface> tempAlpha(SDL_DisplayFormatAlpha(fontSurface.get()), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> tempAlpha(SDL_DisplayFormatAlpha(fontSurface.get()), SDL_FreeSurface);
 	SDL_SetAlpha(tempAlpha.get(), 0, SDL_ALPHA_TRANSPARENT);
 
-	boost::shared_ptr<SDL_Surface> temp(SDL_CreateRGBSurface(SDL_SWSURFACE, fontTexW, fontTexH, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> temp(SDL_CreateRGBSurface(SDL_SWSURFACE, fontTexW, fontTexH, 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	SDL_BlitSurface(tempAlpha.get(), NULL, temp.get(), NULL);
 
 	fontTexture = CreateOGLTexture();
@@ -218,7 +218,7 @@ OGLTilesetRenderer::~OGLTilesetRenderer() {
 	TCODSystem::registerOGLRenderer(0);
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, int tile) {
 	if (tilesetTexture->Count() <= tile) {
 		return Sprite_ptr();
 	}
@@ -233,7 +233,7 @@ Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> ti
 	}
 }
 
-Sprite_ptr OGLTilesetRenderer::CreateSprite(boost::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
+Sprite_ptr OGLTilesetRenderer::CreateSprite(std::shared_ptr<TileSetTexture> tilesetTexture, const std::vector<int>& tiles, bool connectionMap, int frameRate, int frameCount) {
 	if (tiles.empty())
 		return Sprite_ptr();
 
@@ -272,8 +272,8 @@ bool OGLTilesetRenderer::TilesetChanged() {
 		return false;
 	}
 
-	viewportW = CeilToInt::convert(boost::numeric_cast<float>(GetScreenWidth()) / tileSet->TileWidth()) + 2;
-	viewportH = CeilToInt::convert(boost::numeric_cast<float>(GetScreenHeight()) / tileSet->TileHeight()) + 2;
+	viewportW = CeilToInt::convert(float(GetScreenWidth()) / tileSet->TileWidth()) + 2;
+	viewportH = CeilToInt::convert(float(GetScreenHeight()) / tileSet->TileHeight()) + 2;
 
 	// Twice the viewport size, so we can have different corners
 	for (size_t i = 0; i < viewportLayers.size(); ++i) {
@@ -307,7 +307,7 @@ bool OGLTilesetRenderer::TilesetChanged() {
 }
 
 bool OGLTilesetRenderer::AssembleTextures() {
-	boost::shared_ptr<const unsigned int> tempTex(CreateOGLTexture());
+	std::shared_ptr<const unsigned int> tempTex(CreateOGLTexture());
 	GLint texSize; 
 	glGetIntegerv(GL_MAX_TEXTURE_SIZE, &texSize);
 	
@@ -322,7 +322,7 @@ bool OGLTilesetRenderer::AssembleTextures() {
 		return false;
 
 	// Get initial horizontal tiles (based on tex size)
-	tilesTextureW = std::min(texSize / tileSet->TileWidth(), boost::numeric_cast<GLint>(rawTiles.size()));
+	tilesTextureW = std::min(texSize / tileSet->TileWidth(), GLint(rawTiles.size()));
 	GLint widthPixels = std::min(texSize, MathEx::NextPowerOfTwo(tileSet->TileWidth() * tilesTextureW));
 	// Final horizontal tiles
 	tilesTextureW = widthPixels / tileSet->TileWidth();
@@ -347,14 +347,14 @@ bool OGLTilesetRenderer::AssembleTextures() {
 		bmask = 0x00ff0000;
 		amask = 0xff000000;
 	}
-	boost::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, tileSet->TileWidth(), tileSet->TileHeight(), 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
+	std::shared_ptr<SDL_Surface> tempSurface(SDL_CreateRGBSurface(SDL_SWSURFACE, tileSet->TileWidth(), tileSet->TileHeight(), 32, bmask, gmask, rmask, amask), SDL_FreeSurface);
 	if(tempSurface.get() == NULL) {
         LOG("CreateRGBSurface failed: " << SDL_GetError());
 		return false;
     }
 		
 	tilesTexture = CreateOGLTexture();
-	boost::scoped_array<unsigned char> rawData(new unsigned char[4 * widthPixels * heightPixels]);
+	std::vector<unsigned char> rawData(4 * widthPixels * heightPixels);
 
 	glBindTexture(GL_TEXTURE_2D, *tilesTexture);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, widthPixels, heightPixels, 0, GL_BGRA, GL_UNSIGNED_BYTE, rawData.get());
@@ -521,8 +521,8 @@ void OGLTilesetRenderer::RenderGLSLViewport() {
 	sizeX = 0.5f * tileSet->TileWidth();
 	sizeY = 0.5f * tileSet->TileHeight();
 
-	float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
-	float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+	float offsetX = float(mapOffsetX + startPixelX);
+	float offsetY = float(mapOffsetY + startPixelY);
 
 	float factorX = 1.0f / fontCharW;
 	float factorY = 1.0f / fontCharH;
@@ -557,8 +557,8 @@ void OGLTilesetRenderer::RenderOGLViewport() {
 	float sizeX = 0.5f * tileSet->TileWidth();
 	float sizeY = 0.5f * tileSet->TileHeight();
 
-	float offsetX = boost::numeric_cast<float>(mapOffsetX + startPixelX);
-	float offsetY = boost::numeric_cast<float>(mapOffsetY + startPixelY);
+	float offsetX = float(mapOffsetX + startPixelX);
+	float offsetY = float(mapOffsetY + startPixelY);
 
 	float factorX = 1.0f / fontCharW;
 	float factorY = 1.0f / fontCharH;
@@ -786,7 +786,7 @@ const bool operator==(const RawTileData& lhs, const RawTileData& rhs) {
 	return lhs.tile == rhs.tile && lhs.texture == rhs.texture;
 }
 
-boost::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = { {1, 3, 4} };
+std::array<unsigned char, OGLTilesetRenderer::ConsoleTextureTypesCount> OGLTilesetRenderer::consoleDataAlignment = { {1, 3, 4} };
 
 bool OGLTilesetRenderer::InitialiseConsoleShaders() {
 	consoleProgram = CreateOGLShaderProgram(TCOD_con_vertex_shader, TCOD_con_pixel_shader);

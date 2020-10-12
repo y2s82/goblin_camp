@@ -3,12 +3,18 @@
 
 cmake_minimum_required (VERSION 2.6)
 
+set (CMAKE_CXX_STANDARD 17)
+set(CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # TODO: configure depending on OS
 set (CMAKE_INSTALL_PREFIX "./pkg/usr")
 
 project (GOBLINCAMP)
 set (GOBLINCAMP_VERSION_MAJOR 0)
 set (GOBLINCAMP_VERSION_MINOR 22)
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-attributes -Wno-deprecated-declarations")
 
 # TODO: configure version here, use in source
 configure_file (

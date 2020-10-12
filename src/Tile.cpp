@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <string>
@@ -22,10 +23,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <iostream>
 #endif
 
-#include <boost/algorithm/string.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/set.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Tile.hpp"
 #include "Announce.hpp"
@@ -43,7 +44,7 @@ Tile::Tile(TileType newType, int newCost) :
 	construction(-1),
 	low(false),
 	blocksWater(false),
-	water(boost::shared_ptr<WaterNode>()),
+	water(std::shared_ptr<WaterNode>()),
 	graphic('.'),
 	foreColor(TCODColor::white),
 	originalForeColor(TCODColor::white),
@@ -51,9 +52,9 @@ Tile::Tile(TileType newType, int newCost) :
 	natureObject(-1),
 	npcList(std::set<int>()),
 	itemList(std::set<int>()),
-	filth(boost::shared_ptr<FilthNode>()),
-	blood(boost::shared_ptr<BloodNode>()),
-	fire(boost::shared_ptr<FireNode>()),
+	filth(std::shared_ptr<FilthNode>()),
+	blood(std::shared_ptr<BloodNode>()),
+	fire(std::shared_ptr<FireNode>()),
 	marked(false),
 	walkedOver(0),
 	corruption(0),
@@ -218,8 +219,8 @@ void Tile::MoveTo(int uid) {
 void Tile::SetConstruction(int uid) { construction = uid; }
 int Tile::GetConstruction() const { return construction; }
 
-boost::weak_ptr<WaterNode> Tile::GetWater() const {return boost::weak_ptr<WaterNode>(water);}
-void Tile::SetWater(boost::shared_ptr<WaterNode> value) {water = value;}
+std::weak_ptr<WaterNode> Tile::GetWater() const {return std::weak_ptr<WaterNode>(water);}
+void Tile::SetWater(std::shared_ptr<WaterNode> value) {water = value;}
 
 bool Tile::IsLow() const {return low;}
 void Tile::SetLow(bool value) {low = value;}
@@ -241,14 +242,14 @@ TCODColor Tile::GetBackColor() const {
 void Tile::SetNatureObject(int val) { natureObject = val; }
 int Tile::GetNatureObject() const { return natureObject; }
 
-boost::weak_ptr<FilthNode> Tile::GetFilth() const {return boost::weak_ptr<FilthNode>(filth);}
-void Tile::SetFilth(boost::shared_ptr<FilthNode> value) {filth = value;}
+std::weak_ptr<FilthNode> Tile::GetFilth() const {return std::weak_ptr<FilthNode>(filth);}
+void Tile::SetFilth(std::shared_ptr<FilthNode> value) {filth = value;}
 
-boost::weak_ptr<BloodNode> Tile::GetBlood() const {return boost::weak_ptr<BloodNode>(blood);}
-void Tile::SetBlood(boost::shared_ptr<BloodNode> value) {blood = value;}
+std::weak_ptr<BloodNode> Tile::GetBlood() const {return std::weak_ptr<BloodNode>(blood);}
+void Tile::SetBlood(std::shared_ptr<BloodNode> value) {blood = value;}
 
-boost::weak_ptr<FireNode> Tile::GetFire() const {return boost::weak_ptr<FireNode>(fire);}
-void Tile::SetFire(boost::shared_ptr<FireNode> value) { fire = value; }
+std::weak_ptr<FireNode> Tile::GetFire() const {return std::weak_ptr<FireNode>(fire);}
+void Tile::SetFire(std::shared_ptr<FireNode> value) { fire = value; }
 
 void Tile::Mark() { marked = true; }
 void Tile::Unmark() { marked = false; }
@@ -274,17 +275,17 @@ void Tile::Corrupt(int magnitude) {
 }
 
 TileType Tile::StringToTileType(std::string string) {
-	if (boost::iequals(string, "grass")) {
+	if (utils::iequals(string, "grass")) {
 		return TILEGRASS;
-	} else if (boost::iequals(string, "river")) {
+	} else if (utils::iequals(string, "river")) {
 		return TILERIVERBED;
-	} else if (boost::iequals(string, "ditch")) {
+	} else if (utils::iequals(string, "ditch")) {
 		return TILEDITCH;
-	} else if (boost::iequals(string, "rock")) {
+	} else if (utils::iequals(string, "rock")) {
 		return TILEROCK;
-	} else if (boost::iequals(string, "mud")) {
+	} else if (utils::iequals(string, "mud")) {
 		return TILEMUD;
-	} else if (boost::iequals(string, "bog")) {
+	} else if (utils::iequals(string, "bog")) {
 		return TILEBOG;
 	}
 	return TILENONE;
@@ -389,7 +390,7 @@ CacheTile::CacheTile() : walkable(true), moveCost(1), construction(false),
 CacheTile& CacheTile::operator=(const Tile& tile) {
 	walkable = tile.walkable;
 	moveCost = tile.moveCost;
-	boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(tile.construction).lock();
+	std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(tile.construction).lock();
 	if (construct) {
 		construction = true;
 		door = construct->HasTag(DOOR);

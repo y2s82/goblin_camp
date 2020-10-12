@@ -13,14 +13,13 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+//
+#include<memory>
 #include "stdafx.hpp"
+#include "utils.hpp"
 
-#include <boost/bind.hpp>
-#include <boost/lambda/lambda.hpp>
-#include <boost/lambda/bind.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/tokenizer.hpp>
+#include <functional>
+#include <functional>
 #include <libtcod.hpp>
 #ifdef DEBUG
 #	include <iostream>
@@ -33,6 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <boost/serialization/deque.hpp>
 #include <boost/serialization/list.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Construction.hpp"
 #include "Announce.hpp"
@@ -52,6 +52,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stats.hpp"
 #include "data/Config.hpp"
 
+using std::placeholders::_1;
+using std::placeholders::_2;
+using std::placeholders::_3;
 Coordinate Construction::Blueprint(ConstructionType construct) {
 	return Construction::Presets[construct].blueprint;
 }
@@ -60,10 +63,10 @@ Coordinate Construction::ProductionSpot(ConstructionType construct) {
 	return Construction::Presets[construct].productionSpot;
 }
 
-boost::unordered_map<std::string, ConstructionType> Construction::constructionNames = boost::unordered_map<std::string, ConstructionType>();
+std::unordered_map<std::string, ConstructionType> Construction::constructionNames = std::unordered_map<std::string, ConstructionType>();
 
 ConstructionType Construction::StringToConstructionType(std::string name) {
-	boost::to_upper(name);
+	utils::to_upper(name);
 	if (constructionNames.find(name) == constructionNames.end()) {
 		return -1;
 	}
@@ -81,8 +84,8 @@ Construction::Construction(ConstructionType vtype, const Coordinate& target) : E
 	type(vtype),
 	producer(false),
 	progress(0),
-	container(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, -1, 1000, -1))),
-	materialsUsed(boost::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, -1, 1000, -1))),
+	container(std::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, -1, 1000, -1))),
+	materialsUsed(std::shared_ptr<Container>(new Container(Construction::Presets[type].productionSpot + target, -1, 1000, -1))),
 	dismantle(false),
 	time(0),
 	built(false),
@@ -116,15 +119,15 @@ Construction::~Construction() {
 		}
 	}
 	
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 		if (itemi->lock()) {
 			itemi->lock()->SetFaction(PLAYERFACTION); //Return item to player faction
-			itemi->lock()->PutInContainer(boost::weak_ptr<Item>()); //Set container to none
+			itemi->lock()->PutInContainer(std::weak_ptr<Item>()); //Set container to none
 		}
 	}
 	while (!materialsUsed->empty()) { materialsUsed->RemoveItem(materialsUsed->GetFirstItem()); }
 
-	if (producer) StockManager::Inst()->UpdateWorkshops(boost::weak_ptr<Construction>(), false);
+	if (producer) StockManager::Inst()->UpdateWorkshops(std::weak_ptr<Construction>(), false);
 
 	if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 	else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
@@ -189,8 +192,8 @@ int Construction::Build() {
 		if ((signed int)materials.size() != materialsUsed->size()) return BUILD_NOMATERIAL;
 
 		int flame = 0;
-		std::list<boost::weak_ptr<Item> > itemsToRemove;
-		for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		std::list<std::weak_ptr<Item> > itemsToRemove;
+		for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
 			color = TCODColor::lerp(color, itemi->lock()->Color(), 0.75f);
 			itemi->lock()->SetFaction(-1); //Remove from player faction so it doesn't show up in stocks
 			itemi->lock()->IsFlammable() ? ++flame : --flame;
@@ -201,11 +204,11 @@ int Construction::Build() {
 
 		if (flame > 0) flammable = true;
 
-		for (std::list<boost::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
+		for (std::list<std::weak_ptr<Item> >::iterator itemi = itemsToRemove.begin(); itemi != itemsToRemove.end(); ++itemi) {
 			materialsUsed->RemoveItem(*itemi);
 			Game::Inst()->RemoveItem(*itemi);
 			Game::Inst()->CreateItem(materialsUsed->Position(), Item::StringToItemType("debris"), false, -1, 
-				std::vector<boost::weak_ptr<Item> >(), materialsUsed);
+				std::vector<std::weak_ptr<Item> >(), materialsUsed);
 		}
 
 		//TODO: constructions should have the option of having both walkable and unwalkable tiles
@@ -223,7 +226,7 @@ int Construction::Build() {
 		if (Construction::Presets[type].tags[WALL]) { UpdateWallGraphic(); }
 		else if (Construction::Presets[type].tags[DOOR]) { UpdateWallGraphic(true, false); }
 		if (producer) {
-			StockManager::Inst()->UpdateWorkshops(boost::static_pointer_cast<Construction>(shared_from_this()), true);
+			StockManager::Inst()->UpdateWorkshops(std::static_pointer_cast<Construction>(shared_from_this()), true);
 			for (unsigned int prod = 0; prod < Construction::Presets[type].products.size(); ++prod) {
 				StockManager::Inst()->UpdateQuantity(Construction::Presets[type].products[prod], 0);
 			}
@@ -234,7 +237,7 @@ int Construction::Build() {
 		Camp::Inst()->ConstructionBuilt(type);
 		Stats::Inst()->ConstructionBuilt(Construction::Presets[type].name);
 
-		Script::Event::BuildingCreated(boost::static_pointer_cast<Construction>(shared_from_this()), pos.X(), pos.Y());
+		Script::Event::BuildingCreated(std::static_pointer_cast<Construction>(shared_from_this()), pos.X(), pos.Y());
 	}
 	return condition;
 }
@@ -269,7 +272,7 @@ void Construction::CancelJob(int index) {
 		jobList.erase(jobList.begin());
 		//Empty container in case some pickup jobs got done
 		while (!container->empty()) {
-			boost::weak_ptr<Item> item = container->GetFirstItem();
+			std::weak_ptr<Item> item = container->GetFirstItem();
 			container->RemoveItem(item);
 			if (item.lock()) item.lock()->PutInContainer();
 		}
@@ -277,7 +280,7 @@ void Construction::CancelJob(int index) {
 	} else if (index > 0 && index < (signed int)jobList.size()) { 
 		jobList.erase(jobList.begin() + index); 
 	} else if (condition <= 0) {
-		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 	}
 	else if (dismantle) dismantle = false; //Stop trying to dismantle
 }
@@ -288,7 +291,7 @@ int Construction::Use() {
 
 		if (smoke == 0) {
 			smoke = 1;
-			for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+			for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
 				if (itemi->lock()->IsCategory(Item::StringToItemCategory("Fuel"))) {
 					smoke = 2;
 					break;
@@ -300,7 +303,7 @@ int Construction::Use() {
 
 		if (smoke == 2 && Construction::Presets[type].chimney != undefined) {
 			if (Random::Generate(9) == 0) {
-				boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Position()+Construction::Presets[type].chimney, Spell::StringToSpellType("smoke"));
+				std::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(Position()+Construction::Presets[type].chimney, Spell::StringToSpellType("smoke"));
 				Coordinate direction;
 				Direction wind = map->GetWindDirection();
 				if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(25, 75));
@@ -310,7 +313,7 @@ int Construction::Use() {
 				direction += Random::ChooseInRadius(3);
 				smoke->CalculateFlightPath(Position()+ Construction::Presets[type].chimney + direction, 5, 1);
 				if (Random::Generate(50000) == 0) {
-					boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("spark"));
+					std::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("spark"));
 					int distance = Random::Generate(0, 15);
 					if (distance < 12) {
 						distance = 1;
@@ -337,7 +340,7 @@ int Construction::Use() {
 
 			for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
 				allComponentsFound = false;
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+				for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
 					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
 						allComponentsFound = true;
 						break;
@@ -346,15 +349,15 @@ int Construction::Use() {
 			}
 			if (!allComponentsFound) return -1;
 
-			std::vector<boost::weak_ptr<Item> > components;
-			boost::shared_ptr<Container> itemContainer;
+			std::vector<std::weak_ptr<Item> > components;
+			std::shared_ptr<Container> itemContainer;
 
 			for (int compi = 0; compi < (signed int)Item::Components(jobList[0]).size(); ++compi) {
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
+				for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); itemi != container->end(); ++itemi) {
 					if (itemi->lock()->IsCategory(Item::Components(jobList[0], compi))) {
 						if (itemi->lock()->IsCategory(Item::Presets[jobList[0]].containIn)) {
 							//This component is the container our product should be placed in
-							itemContainer = boost::static_pointer_cast<Container>(itemi->lock());
+							itemContainer = std::static_pointer_cast<Container>(itemi->lock());
 						} else {
 							//Just a component of the product
 							components.push_back(*itemi);
@@ -407,11 +410,11 @@ class ConstructionListener : public ITCODParserListener {
 	int constructionIndex;
 
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (name && boost::iequals(str->getName(), "construction_type")) {
+		if (name && utils::iequals(str->getName(), "construction_type")) {
 
 			//Figure out the index, whether this is a new construction or a redefinition
 			std::string strName(name);
-			boost::to_upper(strName);
+			utils::to_upper(strName);
 			if (Construction::constructionNames.find(strName) != Construction::constructionNames.end()) {
 				constructionIndex = Construction::constructionNames[strName];
 				//A redefinition, so wipe out the earlier one
@@ -430,40 +433,40 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name, "walkable")) {
+		if (utils::iequals(name, "walkable")) {
 			Construction::Presets[constructionIndex].walkable = true;
 			Construction::Presets[constructionIndex].blocksLight = false;
-		} else if (boost::iequals(name, "wall")) {
+		} else if (utils::iequals(name, "wall")) {
 			Construction::Presets[constructionIndex].graphic.push_back(1);
 			Construction::Presets[constructionIndex].graphic.push_back('W');
 			Construction::Presets[constructionIndex].tags[WALL] = true;
-		} else if (boost::iequals(name, "stockpile")) {
+		} else if (utils::iequals(name, "stockpile")) {
 			Construction::Presets[constructionIndex].tags[STOCKPILE] = true;
-		} else if (boost::iequals(name, "farmplot")) {
+		} else if (utils::iequals(name, "farmplot")) {
 			Construction::Presets[constructionIndex].tags[FARMPLOT] = true;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "door")) {
+		} else if (utils::iequals(name, "door")) {
 			Construction::Presets[constructionIndex].tags[DOOR] = true;
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "bed")) {
+		} else if (utils::iequals(name, "bed")) {
 			Construction::Presets[constructionIndex].tags[BED] = true;
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
-		} else if (boost::iequals(name, "furniture")) {
+		} else if (utils::iequals(name, "furniture")) {
 			Construction::Presets[constructionIndex].tags[FURNITURE] = true;
-		} else if (boost::iequals(name, "permanent")) {
+		} else if (utils::iequals(name, "permanent")) {
 			Construction::Presets[constructionIndex].permanent = true;
 			Construction::Presets[constructionIndex].tags[PERMANENT] = true;
-		} else if (boost::iequals(name, "blocksLight")) {
+		} else if (utils::iequals(name, "blocksLight")) {
 			Construction::Presets[constructionIndex].blocksLight = true;
-		} else if (boost::iequals(name, "unique")) {
+		} else if (utils::iequals(name, "unique")) {
 			Construction::AllowedAmount[constructionIndex] = 1;
-		} else if (boost::iequals(name, "centersCamp")) {
+		} else if (utils::iequals(name, "centersCamp")) {
 			Construction::Presets[constructionIndex].tags[CENTERSCAMP] = true;
-		} else if (boost::iequals(name, "spawningPool")) {
+		} else if (utils::iequals(name, "spawningPool")) {
 			Construction::Presets[constructionIndex].tags[SPAWNINGPOOL] = true;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "bridge")) {
+		} else if (utils::iequals(name, "bridge")) {
 			Construction::Presets[constructionIndex].tags[BRIDGE] = true;
 			Construction::Presets[constructionIndex].moveSpeedModifier = 0;
 		}
@@ -471,42 +474,42 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name, "graphicLength")) {
+		if (utils::iequals(name, "graphicLength")) {
 			if (Construction::Presets[constructionIndex].graphic.size() == 0)
 				Construction::Presets[constructionIndex].graphic.push_back(value.i);
 			else
 				Construction::Presets[constructionIndex].graphic[0] = value.i;
-		} else if (boost::iequals(name, "graphic")) {
+		} else if (utils::iequals(name, "graphic")) {
 			if (Construction::Presets[constructionIndex].graphic.size() == 0) //In case graphicLength hasn't been parsed yet
 				Construction::Presets[constructionIndex].graphic.push_back(1);
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].graphic.push_back((intptr_t)TCOD_list_get(value.list,i));
 			}
-		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+		} else if (utils::iequals(name, "fallbackGraphicsSet")) {
 			Construction::Presets[constructionIndex].fallbackGraphicsSet = value.s;
-		} else if (boost::iequals(name, "category")) {
+		} else if (utils::iequals(name, "category")) {
 			Construction::Presets[constructionIndex].category = value.s;
 			Construction::Categories.insert(value.s);
-		} else if (boost::iequals(name, "placementType")) {
+		} else if (utils::iequals(name, "placementType")) {
 			Construction::Presets[constructionIndex].placementType = value.i;
-		} else if (boost::iequals(name, "materials")) {
+		} else if (utils::iequals(name, "materials")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].materials.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list,i)));
 			}
-		} else if (boost::iequals(name, "maxCondition")) {
+		} else if (utils::iequals(name, "maxCondition")) {
 			Construction::Presets[constructionIndex].maxCondition = value.i;
-		} else if (boost::iequals(name, "productionx")) {
+		} else if (utils::iequals(name, "productionx")) {
 			Construction::Presets[constructionIndex].productionSpot.X(value.i);
-		} else if (boost::iequals(name, "productiony")) {
+		} else if (utils::iequals(name, "productiony")) {
 			Construction::Presets[constructionIndex].productionSpot.Y(value.i);
-		} else if (boost::iequals(name, "spawnsCreatures")) {
+		} else if (utils::iequals(name, "spawnsCreatures")) {
 			Construction::Presets[constructionIndex].spawnCreaturesTag = value.s;
 			Construction::Presets[constructionIndex].dynamic = true;
-		} else if (boost::iequals(name, "spawnFrequency")) {
+		} else if (utils::iequals(name, "spawnFrequency")) {
 			Construction::Presets[constructionIndex].spawnFrequency = value.i * UPDATES_PER_SECOND;
-		} else if (boost::iequals(name, "col")) {
+		} else if (utils::iequals(name, "col")) {
 			Construction::Presets[constructionIndex].color = value.col;
-		} else if (boost::iequals(name, "tileReqs")) {
+		} else if (utils::iequals(name, "tileReqs")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].tileReqs.insert(Tile::StringToTileType((char*)TCOD_list_get(value.list,i)));
 				//TILEGRASS changes to TILESNOW in winter
@@ -514,9 +517,9 @@ class ConstructionListener : public ITCODParserListener {
 					Construction::Presets[constructionIndex].tileReqs.insert(TILESNOW);
 				}
 			}
-		} else if (boost::iequals(name, "tier")) {
+		} else if (utils::iequals(name, "tier")) {
 			Construction::Presets[constructionIndex].tier = value.i;
-		} else if (boost::iequals(name, "description")) {
+		} else if (utils::iequals(name, "description")) {
 			/*Tokenize the description string and add/remove spaces to make it fit nicely
 			into the 25-width tooltip*/
 			/*I was going to use boost::tokenizer but hey it starts giving me assertion failures
@@ -547,33 +550,33 @@ class ConstructionListener : public ITCODParserListener {
 				width += it->length();
 			}
 
-		} else if (boost::iequals(name, "chimneyx")) {
+		} else if (utils::iequals(name, "chimneyx")) {
 			Construction::Presets[constructionIndex].chimney.X(value.i);
-		} else if (boost::iequals(name, "chimneyy")) {
+		} else if (utils::iequals(name, "chimneyy")) {
 			Construction::Presets[constructionIndex].chimney.Y(value.i);
-		} else if (boost::iequals(name,"type")) {
+		} else if (utils::iequals(name,"type")) {
 			Construction::Presets[constructionIndex].trapAttack.Type(Attack::StringToDamageType(value.s));
 			Construction::Presets[constructionIndex].dynamic = true;
 			Construction::Presets[constructionIndex].tags[TRAP] = true;
-		} else if (boost::iequals(name,"damage")) {
+		} else if (utils::iequals(name,"damage")) {
 			Construction::Presets[constructionIndex].trapAttack.Amount(value.dice);
-		} else if (boost::iequals(name,"statusEffects")) {
+		} else if (utils::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Construction::Presets[constructionIndex].trapAttack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"effectChances")) {
+		} else if (utils::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].trapAttack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"reloadItem")) {
+		} else if (utils::iequals(name,"reloadItem")) {
 			Construction::Presets[constructionIndex].trapReloadItem = Item::StringToItemCategory(value.s);
-		} else if (boost::iequals(name,"slowMovement")) {
+		} else if (utils::iequals(name,"slowMovement")) {
 			Construction::Presets[constructionIndex].moveSpeedModifier = value.i;
 			Construction::Presets[constructionIndex].walkable = true;
 			Construction::Presets[constructionIndex].blocksLight = false;
-		} else if (boost::iequals(name,"passiveStatusEffects")) {
+		} else if (utils::iequals(name,"passiveStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Construction::Presets[constructionIndex].passiveStatusEffects.push_back(StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i)));
 			}
@@ -586,7 +589,7 @@ class ConstructionListener : public ITCODParserListener {
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (boost::iequals(str->getName(), "construction_type")) {
+		if (utils::iequals(str->getName(), "construction_type")) {
 			Construction::Presets[constructionIndex].blueprint = Coordinate(Construction::Presets[constructionIndex].graphic[0],
 				(Construction::Presets[constructionIndex].graphic.size()-1)/Construction::Presets[constructionIndex].graphic[0]);
 
@@ -610,7 +613,7 @@ class ConstructionListener : public ITCODParserListener {
 						else { 
 							if (multiplier > 0) {
 								Construction::Presets[constructionIndex].description += 
-									(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+									Item::ItemCategoryToString(item) + " x" + std::to_string(multiplier);
 								if (Construction::Presets[constructionIndex].description.length() % 25 != 0)
 									Construction::Presets[constructionIndex].description += std::string(25 - Construction::Presets[constructionIndex].description.length() % 25, ' ');
 							}
@@ -619,7 +622,7 @@ class ConstructionListener : public ITCODParserListener {
 						}
 				}
 				Construction::Presets[constructionIndex].description += 
-					(boost::format("%s x%d") % Item::ItemCategoryToString(item) % multiplier).str();
+					 Item::ItemCategoryToString(item) + " x" + std::to_string(multiplier);
 
 			}
 		}
@@ -681,13 +684,12 @@ void Construction::LoadPresets(std::string filename) {
 }
 
 bool _ConstructionNameEquals(const ConstructionPreset& preset, const std::string& name) {
-	return boost::iequals(preset.name, name);
+	return utils::iequals(preset.name, name);
 }
 
 void Construction::ResolveProducts() {
 	typedef std::vector<ConstructionPreset>::iterator conIterator;
 	typedef std::vector<ItemPreset>::iterator itmIterator;
-	using boost::lambda::_1;
 	
 	for (itmIterator it = Item::Presets.begin(); it != Item::Presets.end(); ++it) {
 		ItemPreset& itemPreset = *it;
@@ -698,7 +700,7 @@ void Construction::ResolveProducts() {
 				// Could use bit more complicated lambda expression to eliminate
 				// separate predicate function entirely, but I think this is more
 				// clear to people not used to Boost.Lambda
-				boost::bind(_ConstructionNameEquals, _1, itemPreset.constructedInRaw)
+				std::bind(_ConstructionNameEquals, _1, itemPreset.constructedInRaw)
 			);
 			
 			if (conIt != Construction::Presets.end()) {
@@ -722,15 +724,15 @@ bool Construction::SpawnProductionJob() {
 	//Only spawn a job if the construction isn't already reserved
 	if (!reserved) {
 		//First check that the requisite items actually exist
-		std::list<boost::weak_ptr<Item> > componentList;
+		std::list<std::weak_ptr<Item> > componentList;
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-			boost::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi), Center(), APPLYMINIMUMS);
+			std::weak_ptr<Item> item = Game::Inst()->FindItemByCategoryFromStockpiles(Item::Components(jobList.front(), compi), Center(), APPLYMINIMUMS);
 			if (item.lock()) {
 				componentList.push_back(item);
 				item.lock()->Reserve(true);
 			} else {
 				//Not all items available, cancel job and unreserve the reserved items.
-				for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+				for (std::list<std::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
 					resi->lock()->Reserve(false);
 				}
 				jobList.pop_front();
@@ -742,18 +744,18 @@ bool Construction::SpawnProductionJob() {
 		}
 
 		//Unreserve the items now, because the individual jobs will reserve them for themselves
-		for (std::list<boost::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
+		for (std::list<std::weak_ptr<Item> >::iterator resi = componentList.begin(); resi != componentList.end(); ++resi) {
 			resi->lock()->Reserve(false);
 		}
 
 
-		boost::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
+		std::shared_ptr<Job> newProductionJob(new Job("Produce "+Item::ItemTypeToString(jobList.front()), MED, 0, false));
 		newProductionJob->ConnectToEntity(shared_from_this());
 		newProductionJob->ReserveEntity(shared_from_this());
 
 		for (int compi = 0; compi < (signed int)Item::Components(jobList.front()).size(); ++compi) {
-			boost::shared_ptr<Job> newPickupJob(new Job("Pickup " + Item::ItemCategoryToString(Item::Components(jobList.front(), compi)) + " for " + Presets[Type()].name));
-			newPickupJob->tasks.push_back(Task(FIND, Center(), boost::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS | EMPTY));
+			std::shared_ptr<Job> newPickupJob(new Job("Pickup " + Item::ItemCategoryToString(Item::Components(jobList.front(), compi)) + " for " + Presets[Type()].name));
+			newPickupJob->tasks.push_back(Task(FIND, Center(), std::shared_ptr<Entity>(), Item::Components(jobList.front(), compi), APPLYMINIMUMS | EMPTY));
 			newPickupJob->tasks.push_back(Task(MOVE));
 			newPickupJob->tasks.push_back(Task(TAKE));
 			newPickupJob->tasks.push_back(Task(MOVE, container->Position(), container));
@@ -775,7 +777,7 @@ std::cout<<"Couldn't spawn a production job at "<<name<<": Reserved\n";
 	return false;
 }
 
-boost::weak_ptr<Container> Construction::Storage() const {
+std::weak_ptr<Container> Construction::Storage() const {
 	if (condition > 0) return container;
 	else return materialsUsed;
 }
@@ -791,7 +793,7 @@ void Construction::UpdateWallGraphic(bool recurse, bool self) {
 		consId[i] = map->GetConstruction(posDir[i]);
 		wod[i] = false;
 		if (consId[i] > -1) {
-			boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(consId[i]).lock();
+			std::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(consId[i]).lock();
 			if (cons && cons->Condition() > 0 && !cons->dismantle
 				&& (Construction::Presets[cons->Type()].tags[WALL] || Construction::Presets[cons->Type()].tags[DOOR]))
 			{
@@ -833,8 +835,8 @@ void Construction::Update() {
 			TCODColor announceColor = NPC::Presets[monsterType].tags.find("friendly") != 
 				NPC::Presets[monsterType].tags.end() ? TCODColor::green : TCODColor::red;
 
-			if (announceColor == TCODColor::red && Config::GetCVar<bool>("pauseOnDanger")) 
-				Game::Inst()->AddDelay(UPDATES_PER_SECOND, boost::bind(&Game::Pause, Game::Inst()));
+			if (announceColor == TCODColor::red && Config::GetBCVar("pauseOnDanger")) 
+				Game::Inst()->AddDelay(UPDATES_PER_SECOND, std::bind(&Game::Pause, Game::Inst()));
 
 			int amount = Game::DiceToInt(NPC::Presets[monsterType].group);
 			if (amount == 1) {
@@ -849,7 +851,7 @@ void Construction::Update() {
 	}
 
 	if (!Construction::Presets[type].passiveStatusEffects.empty() && !map->NPCList(pos)->empty()) {
-		boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(pos)->begin());
+		std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(pos)->begin());
 		if (!npc->HasEffect(FLYING)) {
 			for (size_t i = 0; i < Construction::Presets[type].passiveStatusEffects.size(); ++i) {
 				npc->AddEffect(Construction::Presets[type].passiveStatusEffects[i]);
@@ -866,20 +868,20 @@ void Construction::Dismantle(const Coordinate&) {
 		}
 
 		if (built) {
-			boost::shared_ptr<Job> dismantleJob(new Job((boost::format("Dismantle %s") % name).str(), HIGH, 0, false));
+			std::shared_ptr<Job> dismantleJob(new Job("Dismantle " + name, HIGH, 0, false));
 			dismantleJob->ConnectToEntity(shared_from_this());
 			dismantleJob->Attempts(3);
 			dismantleJob->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
 			dismantleJob->tasks.push_back(Task(DISMANTLE, Position(), shared_from_this()));
 			JobManager::Inst()->AddJob(dismantleJob);
 		} else {
-			Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+			Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 		}
 	}
 }
 
 Panel *Construction::GetContextMenu() {
-	return ConstructionDialog::ConstructionInfoDialog(boost::static_pointer_cast<Construction>(shared_from_this()));
+	return ConstructionDialog::ConstructionInfoDialog(std::static_pointer_cast<Construction>(shared_from_this()));
 }
 	
 void Construction::Damage(Attack* attack) {
@@ -910,13 +912,13 @@ void Construction::Damage(Attack* attack) {
 	if (condition <= 0) {
 		if (attack->Type() != DAMAGE_FIRE) Explode();
 		else BurnToTheGround();
-		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
 
 void Construction::Explode() {
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
-		if (boost::shared_ptr<Item> item = itemi->lock()) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		if (std::shared_ptr<Item> item = itemi->lock()) {
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget = Random::ChooseInRadius(Position(), 5);
 			item->CalculateFlightPath(randomTarget, 50, GetHeight());
@@ -978,10 +980,10 @@ int Construction::Repair() {
 
 void Construction::SpawnRepairJob() {
 	if (built && condition < maxCondition && !repairJob.lock()) {
-		boost::shared_ptr<Item> repairItem = Game::Inst()->FindItemByCategoryFromStockpiles(*boost::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials)),
+		std::shared_ptr<Item> repairItem = Game::Inst()->FindItemByCategoryFromStockpiles(*std::next(Construction::Presets[type].materials.begin(), Random::ChooseIndex(Construction::Presets[type].materials)),
 			Position()).lock();
 		if (repairItem) {
-			boost::shared_ptr<Job> repJob(new Job("Repair " + name));
+			std::shared_ptr<Job> repJob(new Job("Repair " + name));
 			repJob->ReserveEntity(repairItem);
 			repJob->tasks.push_back(Task(MOVE, repairItem->Position()));
 			repJob->tasks.push_back(Task(TAKE, repairItem->Position(), repairItem));
@@ -994,8 +996,8 @@ void Construction::SpawnRepairJob() {
 }
 
 void Construction::BurnToTheGround() {
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
-		if (boost::shared_ptr<Item> item = itemi->lock()) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = materialsUsed->begin(); itemi != materialsUsed->end(); ++itemi) {
+		if (std::shared_ptr<Item> item = itemi->lock()) {
 			item->PutInContainer(); //Set container to none
 			Coordinate randomTarget = Random::ChooseInRadius(Position(), 2);
 			item->Position(randomTarget);

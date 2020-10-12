@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/serialization/shared_ptr.hpp>
@@ -39,17 +40,17 @@ SpawningPool::SpawningPool(ConstructionType type, const Coordinate& target) : Co
 	expansionLeft(0),
 	corruptionLeft(0),
 	spawnsLeft(0),
-	corpseContainer(boost::shared_ptr<Container>()),
+	corpseContainer(std::shared_ptr<Container>()),
 	jobCount(0),
 	burn(0)
 {
 	container = new UIContainer(std::vector<Drawable*>(), 0, 0, 16, 11);
 	dialog = new Dialog(container, "Spawning Pool", 16, 10);
-	container->AddComponent(new ToggleButton("Dump filth", boost::bind(&SpawningPool::ToggleDumpFilth, this), 
-		boost::bind(&SpawningPool::DumpFilth, this), 2, 2, 12));
-	container->AddComponent(new ToggleButton("Dump corpses", boost::bind(&SpawningPool::ToggleDumpCorpses, this), 
-		boost::bind(&SpawningPool::DumpCorpses, this), 1, 6, 14));
-	corpseContainer = boost::shared_ptr<Container>(new Container(target, 0, 1000, -1));
+	container->AddComponent(new ToggleButton("Dump filth", std::bind(&SpawningPool::ToggleDumpFilth, this), 
+		std::bind(&SpawningPool::DumpFilth, this), 2, 2, 12));
+	container->AddComponent(new ToggleButton("Dump corpses", std::bind(&SpawningPool::ToggleDumpCorpses, this), 
+		std::bind(&SpawningPool::DumpCorpses, this), 1, 6, 14));
+	corpseContainer = std::shared_ptr<Container>(new Container(target, 0, 1000, -1));
 }
 
 Panel* SpawningPool::GetContextMenu() {
@@ -88,7 +89,7 @@ void SpawningPool::Update() {
 		if (jobCount < 4) {
 			if (dumpFilth && Random::Generate(UPDATES_PER_SECOND * 4) == 0) {
 				if (Game::Inst()->filthList.size() > 0) {
-					boost::shared_ptr<Job> filthDumpJob(new Job("Dump filth", MED));
+					std::shared_ptr<Job> filthDumpJob(new Job("Dump filth", MED));
 					filthDumpJob->SetRequiredTool(Item::StringToItemCategory("Bucket"));
 					filthDumpJob->Attempts(1);
 					Coordinate filthLocation = Game::Inst()->FindFilth(Position());
@@ -107,8 +108,8 @@ void SpawningPool::Update() {
 			}
 			if (dumpCorpses && StockManager::Inst()->CategoryQuantity(Item::StringToItemCategory("Corpse")) > 0 &&
 				Random::Generate(UPDATES_PER_SECOND * 4) == 0) {
-					boost::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", MED));
-					corpseDumpJob->tasks.push_back(Task(FIND, Position(), boost::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
+					std::shared_ptr<Job> corpseDumpJob(new Job("Dump corpse", MED));
+					corpseDumpJob->tasks.push_back(Task(FIND, Position(), std::weak_ptr<Entity>(), Item::StringToItemCategory("Corpse")));
 					corpseDumpJob->tasks.push_back(Task(MOVE));
 					corpseDumpJob->tasks.push_back(Task(TAKE));
 					corpseDumpJob->tasks.push_back(Task(FORGET)); 
@@ -122,15 +123,15 @@ void SpawningPool::Update() {
 
 		//Spawn / Expand
 		if (map->GetFilth(pos).lock() && map->GetFilth(pos).lock()->Depth() > 0) {
-			boost::shared_ptr<FilthNode> filthNode = map->GetFilth(pos).lock();
+			std::shared_ptr<FilthNode> filthNode = map->GetFilth(pos).lock();
 			filth += filthNode->Depth();
 			Stats::Inst()->AddPoints(filthNode->Depth());
 			corruptionLeft += filthNode->Depth() * std::min(100 * filth, 10000U);
 			filthNode->Depth(0);
 		}
 		while (!corpseContainer->empty()) {
-			boost::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
-			if (boost::shared_ptr<Item> actualItem = corpse.lock()) {
+			std::weak_ptr<Item> corpse = corpseContainer->GetFirstItem();
+			if (std::shared_ptr<Item> actualItem = corpse.lock()) {
 				if (actualItem->IsCategory(Item::StringToItemCategory("corpse"))) {
 					++corpses;
 					Stats::Inst()->AddPoints(100);
@@ -208,7 +209,7 @@ void SpawningPool::Expand(bool message) {
 		}
 		//Destroy buildings
 		if (map->GetConstruction(location) >= 0) {
-			if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(location)).lock()) {
+			if (std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(location)).lock()) {
 				if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 					construct->Dismantle(location);
 				} else {
@@ -279,19 +280,19 @@ void SpawningPool::AcceptVisitor(ConstructionVisitor& visitor) {
 void SpawningPool::Burn() {
 	burn += 5;
 	if (burn > 30000) {
-		Game::Inst()->RemoveConstruction(boost::static_pointer_cast<Construction>(shared_from_this()));
+		Game::Inst()->RemoveConstruction(std::static_pointer_cast<Construction>(shared_from_this()));
 	}
 }
 
 int SpawningPool::Build() {
-	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != boost::static_pointer_cast<SpawningPool>(shared_from_this())) {
-		Camp::Inst()->spawningPool = boost::static_pointer_cast<SpawningPool>(shared_from_this());
+	if (!Camp::Inst()->spawningPool.lock() || Camp::Inst()->spawningPool.lock() != std::static_pointer_cast<SpawningPool>(shared_from_this())) {
+		Camp::Inst()->spawningPool = std::static_pointer_cast<SpawningPool>(shared_from_this());
 	}
 	map->Corrupt(Position(), 100);
 	return Construction::Build();
 }
 
-boost::shared_ptr<Container>& SpawningPool::GetContainer() { return corpseContainer; }
+std::shared_ptr<Container>& SpawningPool::GetContainer() { return corpseContainer; }
 
 void SpawningPool::Spawn() {
 	Coordinate spawnLocation = SpawningPool::SpawnLocation();

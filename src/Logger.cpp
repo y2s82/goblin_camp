@@ -18,22 +18,24 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <fstream>
 #include <cassert>
 
-#include <boost/date_time/local_time/local_time.hpp>
-#define BOOST_FILESYSTEM_VERSION 3
-#include <boost/filesystem.hpp>
+//#include <boost/date_time/local_time/local_time.hpp>
+#include <filesystem>
+#include <iostream>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #include "Logger.hpp"
 
 namespace Logger {
-	std::ofstream log;
+	std::ostream &log = std::cerr;
 	
-	std::ofstream& Prefix(const char *file, int line, const char *function) {
-		log <<
-			"C++ (`" << fs::path(file).filename().string() << "` @ " <<
-			line << "), `" << function << "`:\n\t"
-		;
+	std::ostream& Prefix(const char *file, int line, const char *function) {
+            printf("%s:%d %s: ", file, line, function);
+		//log <<
+		//	"C++ (`" << fs::path(file).filename().string() << "` @ " <<
+		//	line << "), `" << function << "`:\n\t"
+		//;
+            log << file << ":" << line << " " << function << "\t";
 		return log;
 	}
 	
@@ -43,17 +45,17 @@ namespace Logger {
 	
 	void OpenLogFile(const std::string& logFile) {
 		// no buffering
-		log.rdbuf()->pubsetbuf(0, 0);
-		log.open(logFile.c_str());
-		log.rdbuf()->pubsetbuf(0, 0);
-		
-		LOG("Log opened " << boost::posix_time::second_clock::local_time());
-		// Instead of explicit closing: to ensure it's always flushed at the end, even when we bail out with exit().
-		atexit(CloseLogFile);
+		//log.rdbuf()->pubsetbuf(0, 0);
+		//log.open(logFile.c_str());
+		//log.rdbuf()->pubsetbuf(0, 0);
+		//
+		//LOG("Log opened " << boost::posix_time::second_clock::local_time());
+		//// Instead of explicit closing: to ensure it's always flushed at the end, even when we bail out with exit().
+		//atexit(CloseLogFile);
 	}
 	
 	void CloseLogFile() {
 		LOG("Log closed");
-		log.close();
+		//log.close();
 	}
 }

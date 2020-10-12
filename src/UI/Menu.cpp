@@ -18,10 +18,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
+#include "utils.hpp"
 #include "UI/Menu.hpp"
 #include "UI.hpp"
 #include "UI/UIComponents.hpp"
@@ -34,7 +32,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Map.hpp"
 #include "Weather.hpp"
 
-MenuChoice::MenuChoice(std::string ntext, boost::function<void()> cb, bool nenabled, std::string ntooltip) {
+MenuChoice::MenuChoice(std::string ntext, std::function<void()> cb, bool nenabled, std::string ntooltip) {
 	label = ntext;
 	callback = cb;
 	enabled = nenabled;
@@ -72,7 +70,7 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 		console->setDefaultBackground(TCODColor::black);
 		if (UI::Inst()->KeyHelpTextColor() > 0) {
 			console->setDefaultForeground(TCODColor(0,std::min(255, UI::Inst()->KeyHelpTextColor()),0));
-			console->print(x, y+1+(i*2), boost::lexical_cast<std::string>(i+1).c_str());
+			console->print(x, y+1+(i*2), std::to_string(i+1).c_str());
 		}
 		if (choices[i].enabled) console->setDefaultForeground(TCODColor::white);
 		else console->setDefaultForeground(TCODColor::grey);
@@ -88,8 +86,8 @@ void Menu::Draw(int x, int y, TCODConsole* console) {
 
 MenuResult Menu::Update(int x, int y, bool clicked, const TCOD_key_t key) {
 	if (key.c >= '0' && key.c <= '9') {
-		selected(boost::lexical_cast<int>((char)key.c)-1);
-		Callback(boost::lexical_cast<int>((char)key.c)-1);
+		selected((key.c - '0')-1);
+		Callback((key.c - '0')-1);
 	}
 	if (x > 0 && y > 0) {
 		if (x > _x && x < _x + width) {
@@ -142,21 +140,21 @@ Menu* Menu::MainMenu() {
 			menuTier = Camp::Inst()->GetTier();
 		}
 		mainMenu = new Menu(std::vector<MenuChoice>());
-		if (Game::Inst()->DevMode()) mainMenu->AddChoice(MenuChoice("Dev", boost::bind(UI::ChangeMenu, Menu::DevMenu())));
-		mainMenu->AddChoice(MenuChoice("Build", boost::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
-		mainMenu->AddChoice(MenuChoice("Dismantle", boost::bind(UI::ChooseDismantle)));		
-		mainMenu->AddChoice(MenuChoice("Orders", boost::bind(UI::ChangeMenu, Menu::OrdersMenu())));
-		mainMenu->AddChoice(MenuChoice("Stock Manager", boost::bind(UI::ChangeMenu, StockManagerDialog::StocksDialog())));
-		mainMenu->AddChoice(MenuChoice("Jobs", boost::bind(UI::ChangeMenu, JobDialog::JobListingDialog())));
+		if (Game::Inst()->DevMode()) mainMenu->AddChoice(MenuChoice("Dev", std::bind(UI::ChangeMenu, Menu::DevMenu())));
+		mainMenu->AddChoice(MenuChoice("Build", std::bind(UI::ChangeMenu, Menu::ConstructionMenu())));
+		mainMenu->AddChoice(MenuChoice("Dismantle", std::bind(UI::ChooseDismantle)));		
+		mainMenu->AddChoice(MenuChoice("Orders", std::bind(UI::ChangeMenu, Menu::OrdersMenu())));
+		mainMenu->AddChoice(MenuChoice("Stock Manager", std::bind(UI::ChangeMenu, StockManagerDialog::StocksDialog())));
+		mainMenu->AddChoice(MenuChoice("Jobs", std::bind(UI::ChangeMenu, JobDialog::JobListingDialog())));
 #ifdef DEBUG
-		mainMenu->AddChoice(MenuChoice("NPC List", boost::bind(UI::ChangeMenu, NPCDialog::NPCListDialog())));
+		mainMenu->AddChoice(MenuChoice("NPC List", std::bind(UI::ChangeMenu, NPCDialog::NPCListDialog())));
 #endif
-		mainMenu->AddChoice(MenuChoice("Announcements", boost::bind(UI::ChangeMenu, AnnounceDialog::AnnouncementsDialog())));
-		mainMenu->AddChoice(MenuChoice("Squads", boost::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
-		mainMenu->AddChoice(MenuChoice("Territory", boost::bind(UI::ChangeMenu, Menu::TerritoryMenu())));
-		mainMenu->AddChoice(MenuChoice("Stats", boost::bind(&Game::DisplayStats, Game::Inst())));
-		mainMenu->AddChoice(MenuChoice("Main Menu", boost::bind(Game::ToMainMenu, true)));
-		mainMenu->AddChoice(MenuChoice("Quit", boost::bind(Game::Exit, true)));
+		mainMenu->AddChoice(MenuChoice("Announcements", std::bind(UI::ChangeMenu, AnnounceDialog::AnnouncementsDialog())));
+		mainMenu->AddChoice(MenuChoice("Squads", std::bind(UI::ChangeMenu, SquadsDialog::SquadDialog())));
+		mainMenu->AddChoice(MenuChoice("Territory", std::bind(UI::ChangeMenu, Menu::TerritoryMenu())));
+		mainMenu->AddChoice(MenuChoice("Stats", std::bind(&Game::DisplayStats, Game::Inst())));
+		mainMenu->AddChoice(MenuChoice("Main Menu", std::bind(Game::GoToMainMenu, true)));
+		mainMenu->AddChoice(MenuChoice("Quit", std::bind(Game::Exit, true)));
 	}
 	return mainMenu;
 }
@@ -166,7 +164,7 @@ Menu* Menu::ConstructionMenu() {
 	if (!constructionMenu) {
 		constructionMenu = new Menu(std::vector<MenuChoice>());
 		for(std::set<std::string>::iterator it = Construction::Categories.begin(); it != Construction::Categories.end(); it++) {
-			constructionMenu->AddChoice(MenuChoice(*it, boost::bind(UI::ChangeMenu, Menu::ConstructionCategoryMenu(*it))));
+			constructionMenu->AddChoice(MenuChoice(*it, std::bind(UI::ChangeMenu, Menu::ConstructionCategoryMenu(*it))));
 		}
 	}
 	return constructionMenu;
@@ -181,15 +179,15 @@ Menu* Menu::ConstructionCategoryMenu(std::string category) {
 		menu = new Menu(std::vector<MenuChoice>());
 		for (int i = 0; i < (signed int)Construction::Presets.size(); ++i) {
 			ConstructionPreset preset = Construction::Presets[i];
-			if (boost::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier() + 1) {
+			if (utils::iequals(preset.category, category) && preset.tier <= Camp::Inst()->GetTier() + 1) {
 				if(preset.tags[STOCKPILE] || preset.tags[FARMPLOT]) {
-					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseStockpile, i), preset.tier <= Camp::Inst()->GetTier(), preset.description));
+					menu->AddChoice(MenuChoice(preset.name, std::bind(UI::ChooseStockpile, i), preset.tier <= Camp::Inst()->GetTier(), preset.description));
 				} else {
 					UIState placementType = UIPLACEMENT;
 					if(preset.placementType > 0 && preset.placementType < UICOUNT) {
 						placementType = (UIState)preset.placementType;
 					}
-					menu->AddChoice(MenuChoice(preset.name, boost::bind(UI::ChooseConstruct, i, placementType), preset.tier <= Camp::Inst()->GetTier(), preset.description));
+					menu->AddChoice(MenuChoice(preset.name, std::bind(UI::ChooseConstruct, i, placementType), preset.tier <= Camp::Inst()->GetTier(), preset.description));
 				}
 			}
 		}
@@ -217,25 +215,25 @@ Menu* Menu::OrdersMenu() {
 	if (!ordersMenu) {
 		ordersMenu = new Menu(std::vector<MenuChoice>());
 
-		boost::function<bool(Coordinate, Coordinate)> checkDitch = boost::bind(Game::CheckTileType, TILEDITCH, _1, _2);
-		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(Game::FillDitch, _1, _2);
+		std::function<bool(Coordinate, Coordinate)> checkDitch = std::bind(Game::CheckTileType, TILEDITCH, _1, _2);
+		std::function<void(Coordinate, Coordinate)> rectCall = std::bind(Game::FillDitch, _1, _2);
 
-		ordersMenu->AddChoice(MenuChoice("Fell trees", boost::bind(UI::ChooseTreeFelling)));
-		ordersMenu->AddChoice(MenuChoice("Designate trees", boost::bind(UI::ChooseDesignateTree)));
-		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", boost::bind(UI::ChoosePlantHarvest)));
-		ordersMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseDig)));
-		ordersMenu->AddChoice(MenuChoice("Fill ditches", boost::bind(UI::ChooseRectPlacement, rectCall, checkDitch, 178, "Fill ditches")));
-		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", boost::bind(UI::ChooseDesignateBog)));
-		ordersMenu->AddChoice(MenuChoice("Gather items", boost::bind(UI::ChooseGatherItems)));
+		ordersMenu->AddChoice(MenuChoice("Fell trees", std::bind(UI::ChooseTreeFelling)));
+		ordersMenu->AddChoice(MenuChoice("Designate trees", std::bind(UI::ChooseDesignateTree)));
+		ordersMenu->AddChoice(MenuChoice("Harvest wild plants", std::bind(UI::ChoosePlantHarvest)));
+		ordersMenu->AddChoice(MenuChoice("Dig", std::bind(UI::ChooseDig)));
+		ordersMenu->AddChoice(MenuChoice("Fill ditches", std::bind(UI::ChooseRectPlacement, rectCall, checkDitch, 178, "Fill ditches")));
+		ordersMenu->AddChoice(MenuChoice("Designate bog for iron", std::bind(UI::ChooseDesignateBog)));
+		ordersMenu->AddChoice(MenuChoice("Gather items", std::bind(UI::ChooseGatherItems)));
 
-		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
-		rectCall = boost::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
-		ordersMenu->AddChoice(MenuChoice("Pour water", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W', "Pour water")));
+		std::function<bool(Coordinate, Coordinate)> checkTree = std::bind(Game::CheckTree, _1, Coordinate(1,1));
+		rectCall = std::bind(&Camp::AddWaterZone, Camp::Inst(), _1, _2);
+		ordersMenu->AddChoice(MenuChoice("Pour water", std::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'W', "Pour water")));
 
-		boost::function<void(Coordinate)> call = boost::bind(&Game::StartFire, Game::Inst(), _1);
-		ordersMenu->AddChoice(MenuChoice("Start fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'F', "Start fire")));
+		std::function<void(Coordinate)> call = std::bind(&Game::StartFire, Game::Inst(), _1);
+		ordersMenu->AddChoice(MenuChoice("Start fire", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'F', "Start fire")));
 
-		ordersMenu->AddChoice(MenuChoice("Undesignate", boost::bind(UI::ChooseUndesignate)));
+		ordersMenu->AddChoice(MenuChoice("Undesignate", std::bind(UI::ChooseUndesignate)));
 	}
 	return ordersMenu;
 }
@@ -245,48 +243,48 @@ Menu* Menu::DevMenu() {
 	if (!devMenu) {
 		devMenu = new Menu(std::vector<MenuChoice>());
 
-		devMenu->AddChoice(MenuChoice("Create NPC", boost::bind(UI::ChooseCreateNPC)));
-		devMenu->AddChoice(MenuChoice("Create item", boost::bind(UI::ChooseCreateItem)));
+		devMenu->AddChoice(MenuChoice("Create NPC", std::bind(UI::ChooseCreateNPC)));
+		devMenu->AddChoice(MenuChoice("Create item", std::bind(UI::ChooseCreateItem)));
 
-		boost::function<bool(Coordinate, Coordinate)> checkTree = boost::bind(Game::CheckTree, _1, Coordinate(1,1));
-		boost::function<void(Coordinate)> call = boost::bind(&Game::CreateFilth, Game::Inst(), _1, 100);
-		devMenu->AddChoice(MenuChoice("Create filth", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Filth")));
+		std::function<bool(Coordinate, Coordinate)> checkTree = std::bind(Game::CheckTree, _1, Coordinate(1,1));
+		std::function<void(Coordinate)> call = std::bind(&Game::CreateFilth2, Game::Inst(), _1, 100);
+		devMenu->AddChoice(MenuChoice("Create filth", std::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Filth")));
 		
-		call = boost::bind(&Game::CreateWater, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Create water", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Water")));
+		call = std::bind(&Game::CreateWater1, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Create water", std::bind(UI::ChooseNormalPlacement, call, checkTree, '~', "Water")));
 		
-		call = boost::bind(&Map::Corrupt, Map::Inst(), _1, 500000);
-		devMenu->AddChoice(MenuChoice("Corrupt", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'C', "Corrupt")));
+		call = std::bind(&Map::Corrupt, Map::Inst(), _1, 500000);
+		devMenu->AddChoice(MenuChoice("Corrupt", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'C', "Corrupt")));
 
-		devMenu->AddChoice(MenuChoice("Naturify world", boost::bind(UI::ChooseNaturify)));
+		devMenu->AddChoice(MenuChoice("Naturify world", std::bind(UI::ChooseNaturify)));
 
-		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Game::RemoveNatureObject, Game::Inst(), _1, _2);
-		devMenu->AddChoice(MenuChoice("Remove NatureObjects", boost::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R', "Remove NatureObjects")));
-		devMenu->AddChoice(MenuChoice("Trigger attack", boost::bind(&Game::TriggerAttack, Game::Inst())));
-		devMenu->AddChoice(MenuChoice("Trigger migration", boost::bind(&Game::TriggerMigration, Game::Inst())));
+		std::function<void(Coordinate, Coordinate)> rectCall = std::bind(&Game::RemoveNatureObject2, Game::Inst(), _1, _2);
+		devMenu->AddChoice(MenuChoice("Remove NatureObjects", std::bind(UI::ChooseRectPlacement, rectCall, checkTree, 'R', "Remove NatureObjects")));
+		devMenu->AddChoice(MenuChoice("Trigger attack", std::bind(&Game::TriggerAttack, Game::Inst())));
+		devMenu->AddChoice(MenuChoice("Trigger migration", std::bind(&Game::TriggerMigration, Game::Inst())));
 		
-		call = boost::bind(&Game::Damage, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Explode", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'E', "Explode")));
+		call = std::bind(&Game::Damage, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Explode", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'E', "Explode")));
 		
-		call = boost::bind(&Game::Hungerize, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Hungerize", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'H', "Hunger")));
+		call = std::bind(&Game::Hungerize, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Hungerize", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'H', "Hunger")));
 
-		call = boost::bind(&Game::Tire, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Tire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Tire")));
+		call = std::bind(&Game::Tire, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Tire", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Tire")));
 
-		call = boost::bind(&Game::CreateFire, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Fire", boost::bind(UI::ChooseNormalPlacement, call, checkTree, '!', "Fire")));
+		call = std::bind(&Game::CreateFire1, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Fire", std::bind(UI::ChooseNormalPlacement, call, checkTree, '!', "Fire")));
 
-		call = boost::bind(&Game::CreateDitch, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Dig", boost::bind(UI::ChooseABPlacement, call, checkTree, '_', "Dig")));
+		call = std::bind(&Game::CreateDitch, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Dig", std::bind(UI::ChooseABPlacement, call, checkTree, '_', "Dig")));
 
-		call = boost::bind(&Game::Thirstify, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Thirstify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Thirst")));
-		call = boost::bind(&Game::Badsleepify, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Badsleepify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Bad sleep")));
+		call = std::bind(&Game::Thirstify, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Thirstify", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Thirst")));
+		call = std::bind(&Game::Badsleepify, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Badsleepify", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'T', "Bad sleep")));
 
-		call = boost::bind(&Game::Diseasify, Game::Inst(), _1);
-		devMenu->AddChoice(MenuChoice("Diseasify", boost::bind(UI::ChooseNormalPlacement, call, checkTree, 'D', "Disease")));
+		call = std::bind(&Game::Diseasify, Game::Inst(), _1);
+		devMenu->AddChoice(MenuChoice("Diseasify", std::bind(UI::ChooseNormalPlacement, call, checkTree, 'D', "Disease")));
 	}
 	return devMenu;
 }
@@ -314,10 +312,10 @@ Menu* Menu::territoryMenu = 0;
 Menu* Menu::TerritoryMenu() {
 	if (!territoryMenu) {
 		territoryMenu = new Menu(std::vector<MenuChoice>());
-		territoryMenu->AddChoice(MenuChoice("Toggle territory overlay", boost::bind(&Map::ToggleOverlay, Map::Inst(), TERRITORY_OVERLAY)));
-		territoryMenu->AddChoice(MenuChoice("Expand territory", boost::bind(UI::ChooseChangeTerritory, true)));
-		territoryMenu->AddChoice(MenuChoice("Shrink territory", boost::bind(UI::ChooseChangeTerritory, false)));
-		territoryMenu->AddChoice(MenuChoice("Toggle automatic territory", boost::bind(&Camp::ToggleAutoTerritory, Camp::Inst())));
+		territoryMenu->AddChoice(MenuChoice("Toggle territory overlay", std::bind(&Map::ToggleOverlay, Map::Inst(), TERRITORY_OVERLAY)));
+		territoryMenu->AddChoice(MenuChoice("Expand territory", std::bind(UI::ChooseChangeTerritory, true)));
+		territoryMenu->AddChoice(MenuChoice("Shrink territory", std::bind(UI::ChooseChangeTerritory, false)));
+		territoryMenu->AddChoice(MenuChoice("Toggle automatic territory", std::bind(&Camp::ToggleAutoTerritory, Camp::Inst())));
 	}
 	return territoryMenu;
 }

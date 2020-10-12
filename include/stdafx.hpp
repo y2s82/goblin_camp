@@ -15,12 +15,17 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 /* #pragma once makes gcc complain "warning: #pragma once in main
+#include<memory>
   file"; apparently there are weird issues with #pragma once which
+#include<memory>
   make me fall back to the tried and true #ifndef hack
 
   see: http://www.dreamincode.net/forums/topic/173122-g-%23pragma-once-warnings/
 */
 //#pragma once
+#include<memory>
+#include <functional>
+using namespace std::placeholders; // so sue me
 #ifndef STDAFX_INCLUDED
 #define STDAFX_INCLUDED
 
@@ -69,7 +74,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #	endif
 #		include <boost/python/detail/wrap_python.hpp>
 #		include <boost/python.hpp>
-#		include <boost/thread/thread.hpp>
+#		include <thread>
 #		include <boost/multi_array.hpp>
 #		include <boost/shared_ptr.hpp>
 #		include <boost/weak_ptr.hpp>
@@ -87,29 +92,26 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #		include <boost/serialization/export.hpp>
 #		include <boost/serialization/array.hpp>
 #		include <boost/serialization/vector.hpp>
-#		include <boost/enable_shared_from_this.hpp>
+#		include <memory>
 #		include <boost/format.hpp>
 #		include <boost/algorithm/string.hpp>
 #		include <boost/accumulators/accumulators.hpp>
 #		include <boost/accumulators/statistics/mean.hpp>
 #		include <boost/accumulators/statistics/weighted_mean.hpp>
-#		include <boost/function.hpp>
-#		include <boost/bind.hpp>
+#		include <functional>
+#		include <functional>
 #		include <boost/lambda/lambda.hpp>
-#		include <boost/lambda/bind.hpp>
-#		include <boost/lexical_cast.hpp>
+#		include <functional>
 #		include <boost/date_time/local_time/local_time.hpp>
 #		include <boost/foreach.hpp>
 #		include <boost/assign/list_inserter.hpp>
 #		include <boost/assert.hpp>
-#		include <boost/unordered_map.hpp>
+#		include <unordered_map>
 #		include <boost/cstdint.hpp>
 #		include <boost/numeric/ublas/matrix.hpp>
 #		include <boost/random/mersenne_twister.hpp>
-#		include <boost/random/uniform_int.hpp>
-#		include <boost/random/uniform_01.hpp>
 #		include <boost/random/variate_generator.hpp>
-#		include <boost/filesystem.hpp>
+#		include <filesystem>
 #		include <boost/math/constants/constants.hpp>
 #		include <boost/tuple/tuple.hpp>
 #	if defined(_MSC_VER)

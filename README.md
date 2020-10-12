@@ -6,6 +6,8 @@
 </a>
 [![Codacy Badge](https://api.codacy.com/project/badge/Grade/9ce43a8ad3284f28888078e434f50ba9)](https://www.codacy.com/app/y2s82/goblin_camp?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=y2s82/goblin_camp&amp;utm_campaign=Badge_Grade)
 
+You need git master version of tcod, or it will crash on launch.
+
 # Goblin Camp Stone Soup
 
 A git-based fork of [Goblin Camp](https://bitbucket.org/genericcontainer/goblin-camp), a [Dwarf-Fortress](http://www.bay12games.com/dwarves/) clone.

@@ -13,9 +13,8 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
-
-#include <boost/algorithm/string.hpp>
 
 #include "UI/ConstructionDialog.hpp"
 #include "UI/Button.hpp"
@@ -29,11 +28,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "UI.hpp"
 #include "Game.hpp"
 #include "Stockpile.hpp"
+#include <functional>
 
+using namespace std::placeholders;
 Dialog* ConstructionDialog::constructionInfoDialog = 0;
-boost::weak_ptr<Construction> ConstructionDialog::cachedConstruct = boost::weak_ptr<Construction>();
-Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction> wcons) {
-	if (boost::shared_ptr<Construction> cons = wcons.lock()) {
+std::weak_ptr<Construction> ConstructionDialog::cachedConstruct = std::weak_ptr<Construction>();
+Dialog* ConstructionDialog::ConstructionInfoDialog(std::weak_ptr<Construction> wcons) {
+	if (std::shared_ptr<Construction> cons = wcons.lock()) {
 		if (constructionInfoDialog && (!cachedConstruct.lock() || cons != cachedConstruct.lock())) {
 			delete constructionInfoDialog;
 			constructionInfoDialog = 0;
@@ -43,12 +44,12 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 			ConstructionDialog *dialog = new ConstructionDialog(50, 5);
 			constructionInfoDialog = new Dialog(dialog, "", 50, 5);
 			if (!cons->HasTag(FARMPLOT)) {
-				dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
-				dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
+				dialog->AddComponent(new Button("Rename", std::bind(&ConstructionDialog::Rename, dialog), 12, 1, 10));
+				dialog->AddComponent(new Button("Dismantle", std::bind(&ConstructionDialog::Dismantle, dialog), 28, 1, 13));
 			} else {
-				dialog->AddComponent(new Button("Rename", boost::bind(&ConstructionDialog::Rename, dialog), 2, 1, 10));
-				dialog->AddComponent(new Button("Dismantle", boost::bind(&ConstructionDialog::Dismantle, dialog), 18, 1, 13));
-				dialog->AddComponent(new Button("Expand", boost::bind(&ConstructionDialog::Expand, dialog), 37, 1, 10));
+				dialog->AddComponent(new Button("Rename", std::bind(&ConstructionDialog::Rename, dialog), 2, 1, 10));
+				dialog->AddComponent(new Button("Dismantle", std::bind(&ConstructionDialog::Dismantle, dialog), 18, 1, 13));
+				dialog->AddComponent(new Button("Expand", std::bind(&ConstructionDialog::Expand, dialog), 37, 1, 10));
 			}
 
 			if (cons->Producer()) {
@@ -57,7 +58,7 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 				dialog->AddComponent(new ScrollPanel(2, 6, 23, 34, 
 					new UIList<ItemType, std::deque<ItemType> >(cons->JobList(), 0, 0, 20, 34, 
 					ConstructionDialog::DrawJob,
-					boost::bind(&ConstructionDialog::CancelJob, dialog, _1)),
+					std::bind(&ConstructionDialog::CancelJob, dialog, _1)),
 					false));
 				dialog->AddComponent(new Label("Product List", 26, 5, TCOD_LEFT));
 				ProductList *productList = new ProductList(cons);
@@ -79,13 +80,13 @@ Dialog* ConstructionDialog::ConstructionInfoDialog(boost::weak_ptr<Construction>
 	return constructionInfoDialog;
 }
 
-void ConstructionDialog::Construct(boost::weak_ptr<Construction> cons) { construct = cons; }
+void ConstructionDialog::Construct(std::weak_ptr<Construction> cons) { construct = cons; }
 
 void ConstructionDialog::Rename() {
 	if (construct.lock()) {
 		UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 1, 1, 28, 7);
-		contents->AddComponent(new TextBox(0, 1, 28, boost::bind(&Entity::Name, construct.lock()), boost::bind(&Entity::Name, construct.lock(), _1)));
-		contents->AddComponent(new Button("OK", boost::function<void()>(), 11, 3, 6, TCODK_ENTER, true));
+		contents->AddComponent(new TextBox(0, 1, 28, std::bind(&Entity::GetName, construct.lock()), std::bind(&Entity::SetName, construct.lock(), _1)));
+		contents->AddComponent(new Button("OK", std::function<void()>(), 11, 3, 6, TCODK_ENTER, true));
 		Dialog *renameDialog = new Dialog(contents, "Rename", 30, 8);
 		renameDialog->ShowModal();
 	}
@@ -100,8 +101,8 @@ void ConstructionDialog::Dismantle() {
 
 void ConstructionDialog::Expand() {
 	if (construct.lock()) {
-		boost::function<void(Coordinate, Coordinate)> rectCall = boost::bind(&Stockpile::Expand, boost::static_pointer_cast<Stockpile>(construct.lock()), _1, _2);
-		boost::function<bool(Coordinate, Coordinate)> placement = boost::bind(Game::CheckPlacement, _1, Coordinate(1,1), 
+		std::function<void(Coordinate, Coordinate)> rectCall = std::bind(&Stockpile::Expand, std::static_pointer_cast<Stockpile>(construct.lock()), _1, _2);
+		std::function<bool(Coordinate, Coordinate)> placement = std::bind(Game::CheckPlacement, _1, Coordinate(1,1), 
 			Construction::Presets[construct.lock()->Type()].tileReqs);
 		UI::Inst()->CloseMenu();
 		UI::ChooseRectPlacementCursor(rectCall, placement, Cursor_Stockpile);
@@ -109,7 +110,7 @@ void ConstructionDialog::Expand() {
 }
 
 void ConstructionDialog::CancelJob(int job) {
-	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+	if (std::shared_ptr<Construction> cons = construct.lock()) {
 		cons->CancelJob(job);
 	}
 }
@@ -121,7 +122,7 @@ void ConstructionDialog::DrawJob(ItemType category, int i, int x, int y, int wid
 }
 
 void ConstructionDialog::ProductList::Draw(int x, int _y, int scroll, int width, int _height, TCODConsole *console) {
-	if (boost::shared_ptr<Construction> cons = construct.lock()) {
+	if (std::shared_ptr<Construction> cons = construct.lock()) {
 		int y = 0;
 		for (int prodi = 0; prodi < (signed int)cons->Products()->size() && y < scroll + _height; ++prodi) {
 			if (y >= scroll) {

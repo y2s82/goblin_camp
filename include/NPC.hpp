@@ -14,14 +14,15 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <queue>
 #include <list>
 
-#include <boost/thread/thread.hpp>
-#include <boost/multi_array.hpp>
-#include <boost/function.hpp>
-#include <boost/weak_ptr.hpp>
+#include <thread>
+#include <mutex>
+#include <functional>
+
 
 #include <libtcod.hpp>
 
@@ -110,15 +111,15 @@ class NPC : public Entity {
 	friend void tFindPath(TCODPath*, int, int, int, int, NPC*, bool);
 	
 	NPC(Coordinate = Coordinate(0,0),
-		boost::function<bool(boost::shared_ptr<NPC>)> findJob = boost::function<bool(boost::shared_ptr<NPC>)>(),
-		boost::function<void(boost::shared_ptr<NPC>)> react = boost::function<void(boost::shared_ptr<NPC>)>());
+		std::function<bool(std::shared_ptr<NPC>)> findJob = std::function<bool(std::shared_ptr<NPC>)>(),
+		std::function<void(std::shared_ptr<NPC>)> react = std::function<void(std::shared_ptr<NPC>)>());
 	NPCType type;
 	int timeCount;
-	std::deque<boost::shared_ptr<Job> > jobs;
+	std::deque<std::shared_ptr<Job> > jobs;
 	int taskIndex;
 	int orderIndex;
 
-	boost::mutex pathMutex;
+	std::mutex pathMutex;
 	TCODPath *path;
 	int pathIndex;
 	bool nopath;
@@ -137,11 +138,11 @@ class NPC : public Entity {
 	bool jobBegun;
 	bool expert;
 
-	boost::weak_ptr<Item> carried;
-	boost::weak_ptr<Item> mainHand;
-	boost::weak_ptr<Item> offHand;
-	boost::weak_ptr<Item> armor;
-	boost::weak_ptr<Container> quiver;
+	std::weak_ptr<Item> carried;
+	std::weak_ptr<Item> mainHand;
+	std::weak_ptr<Item> offHand;
+	std::weak_ptr<Item> armor;
+	std::weak_ptr<Container> quiver;
 
 	int thirst, hunger, weariness;
 	int thinkSpeed;
@@ -152,29 +153,29 @@ class NPC : public Entity {
 	void HandleHunger();
 	void HandleWeariness();
 	int health, maxHealth;
-	boost::weak_ptr<Item> foundItem;
-	boost::shared_ptr<Container> inventory;
+	std::weak_ptr<Item> foundItem;
+	std::shared_ptr<Container> inventory;
 
-	std::list<boost::weak_ptr<NPC> > nearNpcs;
-	std::list<boost::weak_ptr<NPC> > adjacentNpcs;
-	std::list<boost::weak_ptr<Construction> > nearConstructions;
+	std::list<std::weak_ptr<NPC> > nearNpcs;
+	std::list<std::weak_ptr<NPC> > adjacentNpcs;
+	std::list<std::weak_ptr<Construction> > nearConstructions;
 	bool needsNutrition;
 	bool needsSleep;
 	bool hasHands;
 	bool isTunneler;
 	bool isFlying;
 
-	boost::function<bool(boost::shared_ptr<NPC>)> FindJob;
-	boost::function<void(boost::shared_ptr<NPC>)> React;
+	std::function<bool(std::shared_ptr<NPC>)> FindJob;
+	std::function<void(std::shared_ptr<NPC>)> React;
 
 	int baseStats[STAT_COUNT];
 	int effectiveStats[STAT_COUNT];
 	int baseResistances[RES_COUNT];
 	int effectiveResistances[RES_COUNT];
 	bool aggressive, coward;
-	boost::weak_ptr<NPC> aggressor;
+	std::weak_ptr<NPC> aggressor;
 	bool dead;
-	boost::weak_ptr<Squad> squad;
+	std::weak_ptr<Squad> squad;
 
 	std::list<Attack> attacks;
 
@@ -200,11 +201,11 @@ class NPC : public Entity {
 	bool statusEffectsChanged;
 
 	void UpdateHealth();
-	boost::shared_ptr<Faction> factionPtr;
+	std::shared_ptr<Faction> factionPtr;
 
 	std::string GetDeathMsg();
 	std::string GetDeathMsgStrengthLoss();
-	std::string GetDeathMsgCombat(boost::weak_ptr<NPC> other, DamageType);
+	std::string GetDeathMsgCombat(std::weak_ptr<NPC> other, DamageType);
 	std::string GetDeathMsgThirst();
 	std::string GetDeathMsgHunger();
 
@@ -231,47 +232,47 @@ public:
 
 	Task* currentTask() const;
 	Task* nextTask() const;
-	boost::weak_ptr<Job> currentJob() const;
+	std::weak_ptr<Job> currentJob() const;
 	Coordinate currentTarget() const;
-	boost::weak_ptr<Entity> currentEntity() const;
+	std::weak_ptr<Entity> currentEntity() const;
 	void TaskFinished(TaskResult, std::string = "");
 	TaskResult Move(TaskResult);
 	void findPath(Coordinate);
 	bool IsPathWalkable();
-	void StartJob(boost::shared_ptr<Job>);
+	void StartJob(std::shared_ptr<Job>);
 	void AddEffect(StatusEffectType);
 	void AddEffect(StatusEffect);
 	void RemoveEffect(StatusEffectType);
 	bool HasEffect(StatusEffectType) const;
 	std::list<StatusEffect>* StatusEffects();
 	void AbortCurrentJob(bool);
-	void AbortJob(boost::weak_ptr<Job>);
+	void AbortJob(std::weak_ptr<Job>);
 
 	bool Expert() const;
 	void Expert(bool);
 
 	bool Dead() const;
 	void Kill(std::string deathMessage);
-	void PickupItem(boost::weak_ptr<Item>);
-	void DropItem(boost::weak_ptr<Item>);
-	void Hit(boost::weak_ptr<Entity>, bool careful = false);
-	void FireProjectile(boost::weak_ptr<Entity>);
-	void Damage(Attack*, boost::weak_ptr<NPC> aggr = boost::weak_ptr<NPC>());
-	void CastOffensiveSpell(boost::weak_ptr<Entity>);
+	void PickupItem(std::weak_ptr<Item>);
+	void DropItem(std::weak_ptr<Item>);
+	void Hit(std::weak_ptr<Entity>, bool careful = false);
+	void FireProjectile(std::weak_ptr<Entity>);
+	void Damage(Attack*, std::weak_ptr<NPC> aggr = std::weak_ptr<NPC>());
+	void CastOffensiveSpell(std::weak_ptr<Entity>);
 
-	void MemberOf(boost::weak_ptr<Squad>);
-	boost::weak_ptr<Squad> MemberOf() const;
+	void MemberOf(std::weak_ptr<Squad>);
+	std::weak_ptr<Squad> MemberOf() const;
 	void GetMainHandAttack(Attack&);
 	bool WieldingRangedWeapon();
 	void FindNewWeapon();
-	boost::weak_ptr<Item> Wielding() const;
-	boost::weak_ptr<Item> Carrying() const;
+	std::weak_ptr<Item> Wielding() const;
+	std::weak_ptr<Item> Carrying() const;
 	bool HasHands() const;
 	bool IsTunneler() const;
 	bool IsFlying() const; //Special case for pathing's sake. Equivalent to HasEffect(FLYING) except it's threadsafe
 	void FindNewArmor();
-	boost::weak_ptr<Item> Wearing() const;
-	void DecreaseItemCondition(boost::weak_ptr<Item>);
+	std::weak_ptr<Item> Wearing() const;
+	void DecreaseItemCondition(std::weak_ptr<Item>);
 
 	int GetHealth() const;
 	int GetMaxHealth() const;
@@ -284,20 +285,20 @@ public:
 
 	void InitializeAIFunctions();
 
-	static bool GetSquadJob(boost::shared_ptr<NPC>);
-	static bool JobManagerFinder(boost::shared_ptr<NPC>);
-	static void PlayerNPCReact(boost::shared_ptr<NPC>);
-	static void AnimalReact(boost::shared_ptr<NPC>);
+	static bool GetSquadJob(std::shared_ptr<NPC>);
+	static bool JobManagerFinder(std::shared_ptr<NPC>);
+	static void PlayerNPCReact(std::shared_ptr<NPC>);
+	static void AnimalReact(std::shared_ptr<NPC>);
 	
 	static unsigned int pathingThreadCount;
-	static boost::mutex threadCountMutex;
+	static std::mutex threadCountMutex;
 
 	void AddTrait(Trait);
 	void RemoveTrait(Trait);
 	bool HasTrait(Trait) const;
 
 	void GoBerserk();
-	void ApplyEffects(boost::shared_ptr<Item>);
+	void ApplyEffects(std::shared_ptr<Item>);
 
 	void DumpContainer(Coordinate);
 	void ValidateCurrentJob();

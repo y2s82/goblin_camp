@@ -14,6 +14,7 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <vector>
@@ -84,7 +85,7 @@ BOOST_CLASS_VERSION(NatureObject, 1)
 class Ice : public NatureObject {
 	GC_SERIALIZABLE_CLASS
 	
-	boost::shared_ptr<WaterNode> frozenWater;
+	std::shared_ptr<WaterNode> frozenWater;
 public:
 	Ice(Coordinate = Coordinate(0,0), NatureObjectType = 0);
 	~Ice();

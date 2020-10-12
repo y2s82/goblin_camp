@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/serialization/map.hpp>
@@ -58,7 +59,7 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 						console->setChar(screenx, screeny, (graphic[1]));
 
 						if (!containers[p]->empty()) {
-							boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
+							std::weak_ptr<Item> item = containers[p]->GetFirstItem();
 							if (item.lock()) {
 								console->putCharEx(screenx, screeny, item.lock()->GetGraphic(), item.lock()->Color(), TCODColor::black);
 							}
@@ -75,12 +76,12 @@ void FarmPlot::Draw(Coordinate upleft, TCODConsole* console) {
 
 void FarmPlot::Update() {
 	if (!tilled) graphic[1] = 176;
-	for (std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin(); containerIt != containers.end(); ++containerIt) {
+	for (std::map<Coordinate, std::shared_ptr<Container> >::iterator containerIt = containers.begin(); containerIt != containers.end(); ++containerIt) {
 		++growth[containerIt->first];
 		//Normal plants ought to grow seed -> young plant -> mature plant -> fruits, which means 3
 		//growths before giving fruit. 3 * 2 months means 6 months from seed to fruits
 		if (!containerIt->second->empty() && growth[containerIt->first] > MONTH_LENGTH * 2 && Random::Generate(4) == 0) {
-			boost::weak_ptr<OrganicItem> plant(boost::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
+			std::weak_ptr<OrganicItem> plant(std::static_pointer_cast<OrganicItem>(containerIt->second->GetFirstItem().lock()));
 			if (plant.lock() && !plant.lock()->Reserved()) {
 				if (Random::Generate(9) == 0) { //Chance for the plant to die
 					containerIt->second->RemoveItem(plant);
@@ -95,7 +96,7 @@ void FarmPlot::Update() {
 						Game::Inst()->RemoveItem(plant);
 						growth[containerIt->first] = 0;
 					} else { //Plant has grown to full maturity, and should be harvested
-						boost::shared_ptr<Job> harvestJob(new Job("Harvest", HIGH, 0, true));
+						std::shared_ptr<Job> harvestJob(new Job("Harvest", HIGH, 0, true));
 						harvestJob->ReserveEntity(plant);
 						harvestJob->tasks.push_back(Task(MOVE, plant.lock()->Position()));
 						harvestJob->tasks.push_back(Task(TAKE, plant.lock()->Position(), plant));
@@ -117,7 +118,7 @@ int FarmPlot::Use() {
 		progress = 0;
 
 		bool seedsLeft = true;
-		std::map<Coordinate, boost::shared_ptr<Container> >::iterator containerIt = containers.begin();
+		std::map<Coordinate, std::shared_ptr<Container> >::iterator containerIt = containers.begin();
 		while (seedsLeft && containerIt != containers.end()) {
 			while (!containerIt->second->empty() || reserved[containerIt->first]) {
 				++containerIt;
@@ -128,11 +129,11 @@ int FarmPlot::Use() {
 				for (std::map<ItemType, bool>::iterator seedi = allowedSeeds.begin(); seedi != allowedSeeds.end(); ++seedi) {
 					growth[containerIt->first] = -(MONTH_LENGTH / 2) + Random::Generate(MONTH_LENGTH - 1);
 					if (seedi->second) {
-						boost::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first, Center());
+						std::weak_ptr<Item> seed = Game::Inst()->FindItemByTypeFromStockpiles(seedi->first, Center());
 						if (seed.lock()) {
-							boost::shared_ptr<Job> plantJob(new Job("Plant " + Item::ItemTypeToString(seedi->first)));
+							std::shared_ptr<Job> plantJob(new Job("Plant " + Item::ItemTypeToString(seedi->first)));
 							plantJob->ReserveEntity(seed);
-							plantJob->ReserveSpot(boost::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first, seed.lock()->Type());
+							plantJob->ReserveSpot(std::static_pointer_cast<Stockpile>(shared_from_this()), containerIt->first, seed.lock()->Type());
 							plantJob->tasks.push_back(Task(MOVE, seed.lock()->Position()));
 							plantJob->tasks.push_back(Task(TAKE, seed.lock()->Position(), seed));
 							plantJob->tasks.push_back(Task(MOVE, containerIt->first));
@@ -187,9 +188,9 @@ bool FarmPlot::Full(ItemType type) {
 				if (containers[p]->empty() && !reserved[p]) return false;
 
 				//Check if a container exists for this ItemCategory that isn't full
-				boost::weak_ptr<Item> item = containers[p]->GetFirstItem();
+				std::weak_ptr<Item> item = containers[p]->GetFirstItem();
 				if (item.lock() && item.lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-					boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(item.lock());
+					std::shared_ptr<Container> container = std::static_pointer_cast<Container>(item.lock());
 					if (type != -1 && container->IsCategory(Item::Presets[type].fitsin) && 
 						container->Capacity() >= Item::Presets[type].bulk) return false;
 				}
@@ -203,7 +204,7 @@ Coordinate FarmPlot::FreePosition() {
 	if (containers.size() > 0) {
 		//First attempt to find a random position
 		for (int i = 0; i < std::max(1, (signed int)containers.size()/4); ++i) {
-			std::map<Coordinate, boost::shared_ptr<Container> >::iterator conti = boost::next(containers.begin(), Random::ChooseIndex(containers));
+			std::map<Coordinate, std::shared_ptr<Container> >::iterator conti = std::next(containers.begin(), Random::ChooseIndex(containers));
 			if (conti != containers.end() && conti->second->empty() && !reserved[conti->first]) 
 				return conti->first;
 		}

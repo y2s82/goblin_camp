@@ -16,7 +16,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include "stdafx.hpp"
 #include "tileRenderer/TerrainSprite.hpp"
-#include <boost/bind.hpp>
+#include <functional>
 
 TerrainSprite::TerrainSprite()
 	: sprites(),
@@ -198,7 +198,7 @@ void TerrainSprite::DrawBaseLayer(int screenX, int screenY, Coordinate coords, c
 			sprites[heightLayer * numSprites + permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % numSprites].Draw(screenX,screenY);			
 		} else {
 			if (sprites[heightLayer].IsConnectionMap()) {
-				sprites[heightLayer].Draw(screenX, screenY, boost::bind(&WangConnected, &permTable, coords, _1));
+				sprites[heightLayer].Draw(screenX, screenY, std::bind(&WangConnected, &permTable, coords, _1));
 			} else {
 				sprites[heightLayer].Draw(screenX, screenY);
 			}
@@ -213,7 +213,7 @@ void TerrainSprite::DrawSnowLayer(int screenX, int screenY, Coordinate coords, c
 			snowSprites.at(permTable.Hash(permTable.Hash(coords.X()) + coords.Y()) % snowSprites.size()).Draw(screenX, screenY);			
 		} else if (snowSprites.size() == 1) {
 			if (snowSprites[0].IsConnectionMap()) {
-				snowSprites[0].Draw(screenX, screenY, boost::bind(&WangConnected, &permTable, coords, _1));
+				snowSprites[0].Draw(screenX, screenY, std::bind(&WangConnected, &permTable, coords, _1));
 			} else {
 				snowSprites.at(0).Draw(screenX, screenY);
 			}

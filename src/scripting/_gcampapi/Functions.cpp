@@ -13,10 +13,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
-#include "stdafx.hpp"
-
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
+
+#define BOOST_PYTHON_WORKAROUND
+#include "stdafx.hpp"
+
 namespace py = boost::python;
 
 #include "scripting/_gcampapi/Functions.hpp"
@@ -75,8 +77,8 @@ namespace Script { namespace API {
 	// XXX:  it doesn't 'spawn' constructions, it builds them (as in will fail and return -1 when there are no resources)
 	// TODO: make it spawn, and reserve building for something else
 	int SpawnEntity(EntityType type, const std::string& name, int x, int y) {
-		boost::function<int(Coordinate, int)> spawn;
-		boost::function<int(std::string)> getID;
+		std::function<int(Coordinate, int)> spawn;
+		std::function<int(std::string)> getID;
 		Coordinate coords(x, y);
 		
 		switch (type) {
@@ -85,12 +87,13 @@ namespace Script { namespace API {
 				getID = &Construction::StringToConstructionType;
 			break;
 			case EItem:
-				//spawn = boost::bind(&Game::CreateItem, Game::Inst(), _1, _2); // this makes the compiler cry for some reason
+				//spawn = std::bind(&Game::CreateItem, Game::Inst(), std::placeholders::_1, std::placeholders::_2); // this makes the compiler cry for some reason
 				spawn = &_SpawnItem;
 				getID = &Item::StringToItemType;
 			break;
 			case ENPC:
-				spawn = boost::bind(&Game::CreateNPC, Game::Inst(), _1, _2);
+                        // FUCKINGS boost, it "provides" its own global _1, with no way to hide them. yay.
+				spawn = std::bind(&Game::CreateNPC, Game::Inst(), std::placeholders::_1, std::placeholders::_2);
 				getID = &NPC::StringToNPCType;
 			break;
 			case EPlant:

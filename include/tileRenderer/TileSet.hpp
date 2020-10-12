@@ -15,11 +15,10 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
 
-#include <boost/array.hpp>
-#include <boost/functional/hash.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <SDL.h>
 
 #include "MapRenderer.hpp"
@@ -37,9 +36,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/SpellSpriteSet.hpp"
 #include "tileRenderer/TerrainSprite.hpp"
 
-class TileSet : private boost::noncopyable
+class TileSet
 {
 public:
+       TileSet(const TileSet &) = delete;
 	explicit TileSet(std::string tileSetName, int tileW, int tileH);
 	~TileSet();
 
@@ -62,11 +62,11 @@ public:
 	void DrawFilthMinor(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
 	void DrawFilthMajor(int screenX, int screenY, Sprite::LayeredConnectedFunction) const;
 	void DrawTerritoryOverlay(int screenX, int screenY, bool owned, Sprite::ConnectedFunction) const;
-	void DrawNPC(int screenX, int screenY, boost::shared_ptr<NPC> npc) const;
-	void DrawNatureObject(int screenX, int screenY, boost::shared_ptr<NatureObject> plant) const;
-	void DrawItem(int screenX, int screenY, boost::shared_ptr<Item> item) const;
-	void DrawSpell(int screenX, int screenY, boost::shared_ptr<Spell> spell) const;
-	void DrawFire(int screenX, int screenY, boost::shared_ptr<FireNode> fire) const;
+	void DrawNPC(int screenX, int screenY, std::shared_ptr<NPC> npc) const;
+	void DrawNatureObject(int screenX, int screenY, std::shared_ptr<NatureObject> plant) const;
+	void DrawItem(int screenX, int screenY, std::shared_ptr<Item> item) const;
+	void DrawSpell(int screenX, int screenY, std::shared_ptr<Spell> spell) const;
+	void DrawFire(int screenX, int screenY, std::shared_ptr<FireNode> fire) const;
 	void DrawBaseConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const;
 	void DrawUnderConstruction(int screenX, int screenY, Construction * construction, const Coordinate& worldPos) const;
 	void DrawUnreadyTrap(int screenX, int screenY, Construction * trap, const Coordinate& worldPos) const;
@@ -115,10 +115,10 @@ public:
 	void SetDefaultSpellSpriteSet(const SpellSpriteSet& sprite);
 	
 private:
-	typedef boost::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
-	typedef boost::array<Sprite_ptr, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
-	typedef boost::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
-	typedef boost::unordered_map< std::string, int, boost::hash<std::string> > LookupMap;
+	typedef std::array<TerrainSprite, TILE_TYPE_COUNT> TileTypeSpriteArray;
+	typedef std::array<Sprite_ptr, Cursor_Simple_Mode_Count> CursorTypeSpriteArray;
+	typedef std::array<StatusEffectSprite, STATUS_EFFECT_COUNT> StatusEffectSpriteArray;
+	typedef std::unordered_map< std::string, int > LookupMap;
 	
 	int tileWidth;
 	int tileHeight;

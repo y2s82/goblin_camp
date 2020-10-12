@@ -13,15 +13,15 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+
 #include "stdafx.hpp"
 
 #include <cassert>
 #include <cstdarg>
 #include <list>
-#include <boost/foreach.hpp>
 
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
 namespace py = boost::python;
 
 #include "data/Config.hpp"
@@ -77,7 +77,7 @@ namespace Script {
 	}
 	
 	void InvokeListeners(const char *method, PyObject *args) {
-		BOOST_FOREACH(py::object listener, Globals::listeners) {
+		for(const py::object &listener : Globals::listeners) {
 			if (!PyObject_HasAttrString(listener.ptr(), method)) {
 				continue;
 			}

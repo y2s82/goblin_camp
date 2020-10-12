@@ -13,14 +13,15 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
-#include <boost/unordered_set.hpp>
-#include <boost/algorithm/string.hpp>
+#include <unordered_set>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/shared_ptr.hpp>
 #include <boost/serialization/utility.hpp>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Map.hpp"
 #include "Game.hpp"
@@ -33,13 +34,9 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Weather.hpp"
 #include "GCamp.hpp"
 
-static const int HARDCODED_WIDTH = 500;
-static const int HARDCODED_HEIGHT = 500;
 
 Map::Map() :
 overlayFlags(0), markerids(0) {
-	tileMap.resize(boost::extents[HARDCODED_WIDTH][HARDCODED_HEIGHT]);
-	cachedTileMap.resize(boost::extents[HARDCODED_WIDTH][HARDCODED_HEIGHT]);
 	heightMap = new TCODHeightMap(HARDCODED_WIDTH,HARDCODED_HEIGHT);
 	extent = Coordinate(HARDCODED_WIDTH, HARDCODED_HEIGHT);
 	for (int i = 0; i < HARDCODED_WIDTH; ++i) {
@@ -50,7 +47,7 @@ overlayFlags(0), markerids(0) {
 		}
 	}
 	waterlevel = -0.8f;
-	weather = boost::shared_ptr<Weather>(new Weather(this));
+	weather = std::shared_ptr<Weather>(new Weather(this));
 }
 
 Map::~Map() {
@@ -95,8 +92,8 @@ bool Map::IsWalkable(const Coordinate& p, void* ptr) const {
 	if (!static_cast<NPC*>(ptr)->HasHands()) {
 		int constructionId = GetConstruction(p);
 		if (constructionId >= 0) {
-			if (boost::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(constructionId).lock()) {
-				if (cons->HasTag(DOOR) && !boost::static_pointer_cast<Door>(cons)->Open()) {
+			if (std::shared_ptr<Construction> cons = Game::Inst()->GetConstruction(constructionId).lock()) {
+				if (cons->HasTag(DOOR) && !std::static_pointer_cast<Door>(cons)->Open()) {
 					return false;
 				}
 			}
@@ -160,11 +157,11 @@ int Map::GetConstruction(const Coordinate& p) const {
 	return -1;
 }
 
-boost::weak_ptr<WaterNode> Map::GetWater(const Coordinate& p) { 
+std::weak_ptr<WaterNode> Map::GetWater(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetWater();
-	return boost::weak_ptr<WaterNode>();
+	return std::weak_ptr<WaterNode>();
 }
-void Map::SetWater(const Coordinate& p, boost::shared_ptr<WaterNode> value) { 
+void Map::SetWater(const Coordinate& p, std::shared_ptr<WaterNode> value) { 
 	if (Map::IsInside(p)) {
 		tile(p).SetWater(value);
 		changedTiles.insert(p);
@@ -227,30 +224,30 @@ int Map::GetNatureObject(const Coordinate& p) const {
 	return -1;
 }
 
-boost::weak_ptr<FilthNode> Map::GetFilth(const Coordinate& p) { 
+std::weak_ptr<FilthNode> Map::GetFilth(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetFilth(); 
-	return boost::weak_ptr<FilthNode>();
+	return std::weak_ptr<FilthNode>();
 }
-void Map::SetFilth(const Coordinate& p, boost::shared_ptr<FilthNode> value) { 
+void Map::SetFilth(const Coordinate& p, std::shared_ptr<FilthNode> value) { 
 	if (Map::IsInside(p)) {
 		tile(p).SetFilth(value);
 		changedTiles.insert(p);
 	}
 }
 
-boost::weak_ptr<BloodNode> Map::GetBlood(const Coordinate& p) { 
+std::weak_ptr<BloodNode> Map::GetBlood(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetBlood(); 
-	return boost::weak_ptr<BloodNode>();
+	return std::weak_ptr<BloodNode>();
 }
-void Map::SetBlood(const Coordinate& p, boost::shared_ptr<BloodNode> value) { 
+void Map::SetBlood(const Coordinate& p, std::shared_ptr<BloodNode> value) { 
 	if (Map::IsInside(p)) tile(p).SetBlood(value); 
 }
 
-boost::weak_ptr<FireNode> Map::GetFire(const Coordinate& p) { 
+std::weak_ptr<FireNode> Map::GetFire(const Coordinate& p) { 
 	if (Map::IsInside(p)) return tile(p).GetFire(); 
-	return boost::weak_ptr<FireNode>();
+	return std::weak_ptr<FireNode>();
 }
-void Map::SetFire(const Coordinate& p, boost::shared_ptr<FireNode> value) { 
+void Map::SetFire(const Coordinate& p, std::shared_ptr<FireNode> value) { 
 	if (Map::IsInside(p)) {
 		tile(p).SetFire(value);
 		changedTiles.insert(p);
@@ -285,7 +282,7 @@ void Map::Unmark(const Coordinate& p) { tile(p).Unmark(); }
 int Map::GetMoveModifier(const Coordinate& p) {
 	int modifier = 0;
 
-	boost::shared_ptr<Construction> construction;
+	std::shared_ptr<Construction> construction;
 	if (tile(p).construction >= 0) construction = Game::Inst()->GetConstruction(tile(p).construction).lock();
 	bool bridge = false;
 	if (construction) bridge = (construction->Built() && construction->HasTag(BRIDGE));
@@ -295,7 +292,7 @@ int Map::GetMoveModifier(const Coordinate& p) {
 	else if (tile(p).GetType() == TILEMUD && !bridge) { //Mud adds 6 if there's no bridge
 		modifier += 6;
 	}
-	if (boost::shared_ptr<WaterNode> water = tile(p).GetWater().lock()) { //Water adds 'depth' without a bridge
+	if (std::shared_ptr<WaterNode> water = tile(p).GetWater().lock()) { //Water adds 'depth' without a bridge
 		if (!bridge) modifier += water->Depth();
 	}
 
@@ -330,7 +327,7 @@ void Map::Corrupt(const Coordinate& pos, int magnitude) {
 			if (tile(p).corruption >= 100) {
 				if (tile(p).natureObject >= 0 && 
 					!NatureObject::Presets[Game::Inst()->natureList[tile(p).natureObject]->Type()].evil &&
-					!boost::iequals(Game::Inst()->natureList[tile(p).natureObject]->Name(),"Withering tree") &&
+					!utils::iequals(Game::Inst()->natureList[tile(p).natureObject]->Name(),"Withering tree") &&
 					!Game::Inst()->natureList[tile(p).natureObject]->IsIce()) {
 						bool createTree = Game::Inst()->natureList[tile(p).natureObject]->Tree();
 						Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[tile(p).natureObject]);
@@ -415,8 +412,8 @@ void Map::FindEquivalentMoveTarget(const Coordinate& current, Coordinate& move, 
 
 bool Map::IsUnbridgedWater(const Coordinate& p) {
 	if (Map::IsInside(p)) {
-		if (boost::shared_ptr<WaterNode> water = tile(p).water) {
-			boost::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tile(p).construction).lock();
+		if (std::shared_ptr<WaterNode> water = tile(p).water) {
+			std::shared_ptr<Construction> construction = Game::Inst()->GetConstruction(tile(p).construction).lock();
 			if (water->Depth() > 0 && (!construction || !construction->Built() || !construction->HasTag(BRIDGE))) return true;
 		}
 	}
@@ -523,7 +520,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 	Coordinate beginning(px[0], py[0]);
 
-	boost::unordered_set<Coordinate> touched;
+	std::unordered_set<Coordinate> touched;
 	std::priority_queue<std::pair<int, Coordinate> > unfinished;
 
 	unfinished.push(std::pair<int, Coordinate>(0, beginning));
@@ -618,7 +615,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 	   map creation -- one minute or more -- while it is O(1) on
 	   water arrays.
 	 */
-	std::vector<boost::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
+	std::vector<std::weak_ptr<WaterNode> > waterArray(Game::Inst()->waterList.begin(), Game::Inst()->waterList.end());
 
 	for (int y = 0; y < Height(); ++y) {
 		for (int x = 0; x < Width(); ++x) {
@@ -659,7 +656,7 @@ void Map::CalculateFlow(int px[4], int py[4]) {
 
 				if (tile(pos).flow == NODIRECTION && !waterArray.empty()) {
 					// No slope here, so approximate towards river
-					boost::weak_ptr<WaterNode> randomWater = Random::ChooseElement(waterArray);
+					std::weak_ptr<WaterNode> randomWater = Random::ChooseElement(waterArray);
 					Coordinate coord = randomWater.lock()->Position();
 					if (coord.X() < x) {
 						if (coord.Y() < y)
@@ -738,8 +735,8 @@ Coordinate Map::FindRangedAdvantage(const Coordinate& center) {
 }
 
 void Map::UpdateCache() {
-	boost::unique_lock<boost::shared_mutex> writeLock(cacheMutex);
-	for (boost::unordered_set<Coordinate>::iterator tilei = changedTiles.begin(); tilei != changedTiles.end();) {
+	std::unique_lock<std::shared_mutex> writeLock(cacheMutex);
+	for (std::unordered_set<Coordinate>::iterator tilei = changedTiles.begin(); tilei != changedTiles.end();) {
 		cachedTile(*tilei) = tile(*tilei);
 		tilei = changedTiles.erase(tilei);
 	}

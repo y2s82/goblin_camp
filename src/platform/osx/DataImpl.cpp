@@ -18,11 +18,11 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <CoreFoundation/CoreFoundation.h>
 #import  <Carbon/Carbon.h>
 
-#include <boost/filesystem.hpp>
+#include <filesystem>
 #include <string>
 #include <cstring>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 namespace PathsImpl {
 	void FindPersonalDirectory(fs::path& dir) {

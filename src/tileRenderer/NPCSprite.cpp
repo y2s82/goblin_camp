@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 
 #include "stdafx.hpp"
 #include "tileRenderer/NPCSprite.hpp"
@@ -107,15 +108,15 @@ namespace {
 	}
 }
 
-void NPCSprite::Draw(int screenX, int screenY, boost::shared_ptr<NPC> npc) const {
+void NPCSprite::Draw(int screenX, int screenY, std::shared_ptr<NPC> npc) const {
 	if (equipmentAware || paperdoll) {
 		int weaponIndex = -1;
 		int armourIndex = -1;
-		if (boost::shared_ptr<Item> weapon = npc->Wielding().lock()) {
+		if (std::shared_ptr<Item> weapon = npc->Wielding().lock()) {
 			const ItemPreset& itemPreset = Item::Presets[weapon->Type()];
 			weaponIndex = findIndex(itemPreset, weaponTypeNames);
 		}
-		if (boost::shared_ptr<Item> armour = npc->Wearing().lock()) {
+		if (std::shared_ptr<Item> armour = npc->Wearing().lock()) {
 			const ItemPreset& itemPreset = Item::Presets[armour->Type()];
 			armourIndex = findIndex(itemPreset, armourTypeNames);
 		}

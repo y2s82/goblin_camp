@@ -18,10 +18,8 @@
 #include <string>
 
 #include <libtcod.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/format.hpp>
 
+#include "utils.hpp"
 #include "UI/StockManagerDialog.hpp"
 #include "UI/ScrollPanel.hpp"
 #include "StockManager.hpp"
@@ -37,12 +35,12 @@ private:
 	StockManagerDialog *owner;
 public:
 	bool ShowItem() {
-		if (boost::icontains(Item::Presets[itemType].name, owner->GetFilter()))
+		if (utils::icontains(Item::Presets[itemType].name, owner->GetFilter()))
 			return StockManager::Inst()->TypeQuantity(itemType) > -1;
 		else {
 			for (std::set<ItemCategory>::iterator cati = Item::Presets[itemType].categories.begin();
 				cati != Item::Presets[itemType].categories.end(); ++cati) {
-					if (boost::icontains(Item::Categories[*cati].name, owner->GetFilter()))
+					if (utils::icontains(Item::Categories[*cati].name, owner->GetFilter()))
 						return StockManager::Inst()->TypeQuantity(itemType) > -1;
 			}
 		}
@@ -60,23 +58,23 @@ public:
 					compAmt++;
 				} else {
 					if(compName.length() > 0) {
-						tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % compName % compAmt).str(), TCODColor::grey));
+						tooltip->AddEntry(TooltipEntry(" " + compName  + " x" + std::to_string(compAmt), TCODColor::grey));
 					}
 					compName = thisCompName;
 					compAmt = 1;
 				}
 			}
 			if(compName.length() > 0) {
-				tooltip->AddEntry(TooltipEntry((boost::format(" %s x%d") % compName % compAmt).str(), TCODColor::grey));
+				tooltip->AddEntry(TooltipEntry(" " + compName  + " x" + std::to_string(compAmt), TCODColor::grey));
 			}
 		}
 	}
 	
 	StockPanel(ItemType nItemType, StockManagerDialog *nowner): UIContainer(std::vector<Drawable *>(), 0, 0, 16, 4), itemType(nItemType), owner(nowner) {
-		AddComponent(new Spinner(0, 2, 16, boost::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
-								 boost::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
-		SetTooltip(boost::bind(&StockPanel::_GetTooltip, this, _1, _2, _3));
-		visible = boost::bind(&StockPanel::ShowItem, this);
+		AddComponent(new Spinner(0, 2, 16, std::bind(&StockManager::Minimum, StockManager::Inst(), itemType), 
+								 std::bind(&StockManager::SetMinimum, StockManager::Inst(), itemType, _1)));
+		SetTooltip(std::bind(&StockPanel::_GetTooltip, this, _1, _2, _3));
+		visible = std::bind(&StockPanel::ShowItem, this);
 	}
 	
 	void Draw(int x, int y, TCODConsole *console) {

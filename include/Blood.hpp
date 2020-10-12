@@ -15,13 +15,13 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 #include <libtcod.hpp>
 
 #include "Coordinate.hpp"
 #include "data/Serialization.hpp"
 
-class BloodNode : public boost::enable_shared_from_this<BloodNode> {
+class BloodNode : public std::enable_shared_from_this<BloodNode> {
 	GC_SERIALIZABLE_CLASS
 	
 	Coordinate pos;

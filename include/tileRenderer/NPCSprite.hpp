@@ -15,6 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #pragma once
+#include<memory>
 
 #include "NPC.hpp"
 #include "tileRenderer/Sprite.hpp"
@@ -32,7 +33,7 @@ public:
 	bool Exists() const;
 
 	void Draw(int screenX, int screenY) const;
-	void Draw(int screenX, int screenY, boost::shared_ptr<NPC> npc) const;
+	void Draw(int screenX, int screenY, std::shared_ptr<NPC> npc) const;
 
 private:
 	std::vector<Sprite_ptr> sprites;

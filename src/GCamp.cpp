@@ -13,18 +13,16 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
-#include <boost/format.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/foreach.hpp>
 #include <cstdlib>
 #include <cmath>
 #include <algorithm>
 #include <functional>
 
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Camp.hpp"
 #include "GCamp.hpp"
@@ -96,7 +94,7 @@ int GCMain(std::vector<std::string>& args) {
 	bool bootTest = false;
 	Globals::noDumpMode = false;
 	
-	BOOST_FOREACH(std::string arg, args) {
+	for (const std::string &arg : args) {
 		if (arg == "-boottest") {
 			bootTest = true;
 		} else if (arg == "-dev") {
@@ -140,7 +138,7 @@ void MainLoop() {
 	game->Running(true);
 
 	int update = -1;
-	if (Config::GetCVar<int>("halfRendering")) update = 0;
+	if (Config::GetICVar("halfRendering")) update = 0;
 
 	int elapsedMilli;
 	int targetMilli = 1000 / (UPDATES_PER_SECOND);
@@ -246,7 +244,7 @@ void StartNewGame() {
 		game->CreateItem(corpseLoc[c], Item::StringToItemType("stone axe"));
 		game->CreateItem(corpseLoc[c], Item::StringToItemType("shovel"));
 		int corpseuid = game->CreateItem(corpseLoc[c], Item::StringToItemType("corpse"));
-		boost::shared_ptr<Item> corpse = game->itemList[corpseuid];
+		std::shared_ptr<Item> corpse = game->itemList[corpseuid];
 		corpse->Name("Corpse(Human woodsman)");
 		corpse->Color(TCODColor::white);
 		for (int i = 0; i < 6; ++i)
@@ -290,7 +288,7 @@ namespace {
 }
 
 void ConfirmStartNewGame() {
-	boost::function<void(void)> run(boost::bind(&Game::LoadingScreen, &StartNewGame));
+	std::function<void(void)> run(std::bind(&Game::LoadingScreen, &StartNewGame));
 	
 	if (Game::Inst()->Running()) {
 		MessageBox::ShowMessageBox(
@@ -607,14 +605,14 @@ namespace {
 void SettingsMenu() {
 	std::string width        = Config::GetStringCVar("resolutionX");
 	std::string height       = Config::GetStringCVar("resolutionY");
-	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetCVar<int>("renderer"));
-	bool useTileset          = Config::GetCVar<bool>("useTileset");
-	bool fullscreen          = Config::GetCVar<bool>("fullscreen");
-	bool tutorial            = Config::GetCVar<bool>("tutorial");
-	bool translucentUI       = Config::GetCVar<bool>("translucentUI");
-	bool compressSaves       = Config::GetCVar<bool>("compressSaves");
-	bool autosave            = Config::GetCVar<bool>("autosave");
-	bool pauseOnDanger       = Config::GetCVar<bool>("pauseOnDanger");
+	TCOD_renderer_t renderer = static_cast<TCOD_renderer_t>(Config::GetICVar("renderer"));
+	bool useTileset          = Config::GetBCVar("useTileset");
+	bool fullscreen          = Config::GetBCVar("fullscreen");
+	bool tutorial            = Config::GetBCVar("tutorial");
+	bool translucentUI       = Config::GetBCVar("translucentUI");
+	bool compressSaves       = Config::GetBCVar("compressSaves");
+	bool autosave            = Config::GetBCVar("autosave");
+	bool pauseOnDanger       = Config::GetBCVar("pauseOnDanger");
 
 	TCODConsole::root->setAlignment(TCOD_LEFT);
 
@@ -811,7 +809,7 @@ void ModsMenu() {
 
 	int currentY = 0;
 	
-	BOOST_FOREACH(Mods::Metadata mod, modList) {
+	for (const Mods::Metadata &mod : modList) {
 		sub.setDefaultBackground(TCODColor::black);
 		
 		sub.setAlignment(TCOD_CENTER);
@@ -890,7 +888,7 @@ void TilesetsMenu() {
 
 	int currentY = 0;
 	
-	BOOST_FOREACH(TileSetMetadata tileset, tilesetsList) {
+	for (const TileSetMetadata &tileset : tilesetsList) {
 		sub.setDefaultBackground(TCODColor::black);
 		
 		sub.setAlignment(TCOD_LEFT);
@@ -910,7 +908,7 @@ void TilesetsMenu() {
 		tilesetDir = "default";
 	}
 	for (size_t i = 0; i < tilesetsList.size(); ++i) {
-		if (boost::iequals(tilesetDir, tilesetsList.at(i).path.filename().string())) {
+		if (utils::iequals(tilesetDir, tilesetsList.at(i).path.filename().string())) {
 			selection = static_cast<int>(i);
 			originalSelection = static_cast<int>(i);
 			break;
@@ -1015,7 +1013,7 @@ void KeysMenu() {
 	int w = 40;
 	const int h = static_cast<int>(keyMap.size()) + 4;
 	
-	BOOST_FOREACH(Config::KeyMap::value_type pair, keyMap) {
+	for (const Config::KeyMap::value_type pair : keyMap) {
 		w = std::max(w, (int)pair.first.size() + 7); // 2 for borders, 5 for [ X ]
 		labels.push_back(pair.first);
 	}

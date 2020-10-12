@@ -13,18 +13,18 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <libtcod.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/algorithm/string.hpp>
-#ifdef DEBUG
-#include <iostream>
-#include <boost/format.hpp>
-#endif
 
 #include <boost/serialization/weak_ptr.hpp>
+#ifdef DEBUG
+#include <iostream>
+#endif
 
+
+#include "utils.hpp"
 #include "Random.hpp"
 #include "Item.hpp"
 #include "Game.hpp"
@@ -37,12 +37,12 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 std::vector<ItemPreset> Item::Presets = std::vector<ItemPreset>();
 std::vector<ItemCat> Item::Categories = std::vector<ItemCat>();
 std::vector<ItemCat> Item::ParentCategories = std::vector<ItemCat>();
-boost::unordered_map<std::string, ItemType> Item::itemTypeNames = boost::unordered_map<std::string, ItemType>();
-boost::unordered_map<std::string, ItemType> Item::itemCategoryNames = boost::unordered_map<std::string, ItemType>();
+std::unordered_map<std::string, ItemType> Item::itemTypeNames = std::unordered_map<std::string, ItemType>();
+std::unordered_map<std::string, ItemType> Item::itemCategoryNames = std::unordered_map<std::string, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::EffectRemovers = std::multimap<StatusEffectType, ItemType>();
 std::multimap<StatusEffectType, ItemType> Item::GoodEffectAdders = std::multimap<StatusEffectType, ItemType>();
 
-Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<boost::weak_ptr<Item> > components) :
+Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<std::weak_ptr<Item> > components) :
 	Entity(),
 
 	type(typeval),
@@ -50,7 +50,7 @@ Item::Item(const Coordinate& startPos, ItemType typeval, int owner, std::vector<
 	decayCounter(-1),
 
 	attemptedStore(false),
-	container(boost::weak_ptr<Item>()),
+	container(std::weak_ptr<Item>()),
 	internal(false)
 {
 	SetFaction(owner);
@@ -156,22 +156,22 @@ void Item::Reserve(bool value) {
 	reserved = value;
 	if (!reserved && !container.lock() && !attemptedStore) {
 		attemptedStore = true;
-		Game::Inst()->StockpileItem(boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->StockpileItem(std::static_pointer_cast<Item>(shared_from_this()));
 	}
 }
 
-void Item::PutInContainer(boost::weak_ptr<Item> con) {
+void Item::PutInContainer(std::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
 
-	Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
+	Game::Inst()->ItemContained(std::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
 
 	if (!container.lock() && !reserved) {
-		Game::Inst()->StockpileItem(boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->StockpileItem(std::static_pointer_cast<Item>(shared_from_this()));
 		attemptedStore = true;
 	}
 }
-boost::weak_ptr<Item> Item::ContainedIn() {return container;}
+std::weak_ptr<Item> Item::ContainedIn() {return container;}
 
 int Item::GetGraphic() {return graphic;}
 
@@ -184,7 +184,7 @@ std::string Item::ItemTypeToString(ItemType type) {
 }
 
 ItemType Item::StringToItemType(std::string str) {
-	boost::to_upper(str);
+	utils::to_upper(str);
 	if (itemTypeNames.find(str) == itemTypeNames.end()) {
 		return -1;
 	}
@@ -198,7 +198,7 @@ std::string Item::ItemCategoryToString(ItemCategory category) {
 }
 
 ItemCategory Item::StringToItemCategory(std::string str) {
-	boost::to_upper(str);
+	utils::to_upper(str);
 	if (itemCategoryNames.find(str) == itemCategoryNames.end()) {
 		return -1;
 	}
@@ -269,7 +269,7 @@ public:
 			itemi != presetDecay.end(); ++itemi) {
 				for (std::vector<std::string>::iterator decayi = itemi->second.begin(); 
 					decayi != itemi->second.end(); ++decayi) {
-						if (boost::iequals(*decayi, "Filth"))
+						if (utils::iequals(*decayi, "Filth"))
 							Item::Presets[itemi->first].decayList.push_back(-1);
 						else
 							Item::Presets[itemi->first].decayList.push_back(Item::StringToItemType(*decayi));
@@ -285,9 +285,9 @@ public:
 
 private:
 	bool parserNewStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (name && boost::iequals(str->getName(), "category_type")) {
+		if (name && utils::iequals(str->getName(), "category_type")) {
 			std::string strName(name);
-			boost::to_upper(strName);
+			utils::to_upper(strName);
 			if (Item::itemCategoryNames.find(strName) != Item::itemCategoryNames.end()) {
 				categoryIndex = Item::itemCategoryNames[strName];
 				Item::Categories[categoryIndex] = ItemCat();
@@ -301,9 +301,9 @@ private:
 				Item::itemCategoryNames.insert(std::make_pair(strName, Game::ItemCatCount-1));
 				presetCategoryParent.insert(std::make_pair(categoryIndex, ""));
 			}
-		} else if (name && boost::iequals(str->getName(), "item_type")) {
+		} else if (name && utils::iequals(str->getName(), "item_type")) {
 			std::string strName(name);
-			boost::to_upper(strName);
+			utils::to_upper(strName);
 			if (Item::itemTypeNames.find(strName) != Item::itemTypeNames.end()) {
 				itemIndex = Item::itemTypeNames[strName];
 				Item::Presets[itemIndex] = ItemPreset();
@@ -323,118 +323,118 @@ private:
 				Item::itemTypeNames.insert(std::make_pair(strName, Game::ItemTypeCount-1));
 				presetProjectile.insert(std::make_pair(itemIndex, ""));
 			}
-		} else if (boost::iequals(str->getName(), "attack")) {
+		} else if (utils::iequals(str->getName(), "attack")) {
 		}
 
 		return true;
 	}
 
 	bool parserFlag(TCODParser *parser,const char *name) {
-		if (boost::iequals(name, "flammable")) {
+		if (utils::iequals(name, "flammable")) {
 			Item::Categories[categoryIndex].flammable = true;
 		}
 		return true;
 	}
 
 	bool parserProperty(TCODParser *parser,const char *name, TCOD_value_type_t type, TCOD_value_t value) {
-		if (boost::iequals(name, "category")) {
+		if (utils::iequals(name, "category")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				ItemCategory cat = Item::StringToItemCategory((char*)TCOD_list_get(value.list,i));
 				Item::Presets[itemIndex].categories.insert(cat);
 				Item::Presets[itemIndex].specificCategories.insert(cat);
 			}
-		} else if (boost::iequals(name, "graphic")) {
+		} else if (utils::iequals(name, "graphic")) {
 			Item::Presets[itemIndex].graphic = value.i;
-		} else if (boost::iequals(name, "col")) {
+		} else if (utils::iequals(name, "col")) {
 			Item::Presets[itemIndex].color = value.col;
-		} else if (boost::iequals(name, "fallbackGraphicsSet")) {
+		} else if (utils::iequals(name, "fallbackGraphicsSet")) {
 			Item::Presets[itemIndex].fallbackGraphicsSet = value.s;
-		}else if (boost::iequals(name, "components")) {
+		}else if (utils::iequals(name, "components")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].components.push_back(Item::StringToItemCategory((char*)TCOD_list_get(value.list, i)));
 			}
-		} else if (boost::iequals(name, "containin")) {
+		} else if (utils::iequals(name, "containin")) {
 			Item::Presets[itemIndex].containInRaw = value.s;
-		} else if (boost::iequals(name, "nutrition")) {
+		} else if (utils::iequals(name, "nutrition")) {
 			Item::Presets[itemIndex].nutrition = static_cast<int>(value.f * MONTH_LENGTH);
 			Item::Presets[itemIndex].organic = true;
-		} else if (boost::iequals(name, "growth")) {
+		} else if (utils::iequals(name, "growth")) {
 			presetGrowth[itemIndex] = value.s;
 			Item::Presets[itemIndex].organic = true;
-		} else if (boost::iequals(name, "fruits")) {
+		} else if (utils::iequals(name, "fruits")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				presetFruits[itemIndex].push_back((char*)TCOD_list_get(value.list,i));
 			}
 			Item::Presets[itemIndex].organic = true;
-		} else if (boost::iequals(name, "multiplier")) {
+		} else if (utils::iequals(name, "multiplier")) {
 			Item::Presets[itemIndex].multiplier = value.i;
-		} else if (boost::iequals(name, "containerSize")) {
+		} else if (utils::iequals(name, "containerSize")) {
 			Item::Presets[itemIndex].container = value.i;
-		} else if (boost::iequals(name, "fitsin")) {
+		} else if (utils::iequals(name, "fitsin")) {
 			Item::Presets[itemIndex].fitsInRaw = value.s;
-		} else if (boost::iequals(name, "constructedin")) {
+		} else if (utils::iequals(name, "constructedin")) {
 			Item::Presets[itemIndex].constructedInRaw = value.s;
-		} else if (boost::iequals(name, "decay")) {
+		} else if (utils::iequals(name, "decay")) {
 			Item::Presets[itemIndex].decays = true;
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				presetDecay[itemIndex].push_back((char*)TCOD_list_get(value.list,i));
 			}
-		} else if (boost::iequals(name, "decaySpeed")) {
+		} else if (utils::iequals(name, "decaySpeed")) {
 			Item::Presets[itemIndex].decaySpeed = value.i;
 			Item::Presets[itemIndex].decays = true;
-		} else if (boost::iequals(name,"type")) {
+		} else if (utils::iequals(name,"type")) {
 			Item::Presets[itemIndex].attack.Type(Attack::StringToDamageType(value.s));
-		} else if (boost::iequals(name,"damage")) {
+		} else if (utils::iequals(name,"damage")) {
 			Item::Presets[itemIndex].attack.Amount(value.dice);
-		} else if (boost::iequals(name,"cooldown")) {
+		} else if (utils::iequals(name,"cooldown")) {
 			Item::Presets[itemIndex].attack.CooldownMax(value.i);
-		} else if (boost::iequals(name,"statusEffects")) {
+		} else if (utils::iequals(name,"statusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Item::Presets[itemIndex].attack.StatusEffects()->push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"effectChances")) {
+		} else if (utils::iequals(name,"effectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].attack.StatusEffects()->at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"ammo")) {
+		} else if (utils::iequals(name,"ammo")) {
 			presetProjectile[itemIndex] = value.s;
-		} else if (boost::iequals(name,"parent")) {
+		} else if (utils::iequals(name,"parent")) {
 			presetCategoryParent[categoryIndex] = value.s;
-		} else if (boost::iequals(name,"physical")) {
+		} else if (utils::iequals(name,"physical")) {
 			Item::Presets[itemIndex].resistances[PHYSICAL_RES] = value.i;
-		} else if (boost::iequals(name,"magic")) {
+		} else if (utils::iequals(name,"magic")) {
 			Item::Presets[itemIndex].resistances[MAGIC_RES] = value.i;
-		} else if (boost::iequals(name,"cold")) {
+		} else if (utils::iequals(name,"cold")) {
 			Item::Presets[itemIndex].resistances[COLD_RES] = value.i;
-		} else if (boost::iequals(name,"fire")) {
+		} else if (utils::iequals(name,"fire")) {
 			Item::Presets[itemIndex].resistances[FIRE_RES] = value.i;
-		} else if (boost::iequals(name,"poison")) {
+		} else if (utils::iequals(name,"poison")) {
 			Item::Presets[itemIndex].resistances[POISON_RES] = value.i;
-		} else if (boost::iequals(name,"bleeding")) {
+		} else if (utils::iequals(name,"bleeding")) {
 			Item::Presets[itemIndex].resistances[BLEEDING_RES] = value.i;
-		} else if (boost::iequals(name,"bulk")) {
+		} else if (utils::iequals(name,"bulk")) {
 			Item::Presets[itemIndex].bulk = value.i;
-		} else if (boost::iequals(name,"durability")) {
+		} else if (utils::iequals(name,"durability")) {
 			Item::Presets[itemIndex].condition = value.i;
-		} else if (boost::iequals(name,"addStatusEffects")) {
+		} else if (utils::iequals(name,"addStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Item::Presets[itemIndex].addsEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"addEffectChances")) {
+		} else if (utils::iequals(name,"addEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].addsEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
-		} else if (boost::iequals(name,"removeStatusEffects")) {
+		} else if (utils::iequals(name,"removeStatusEffects")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				StatusEffectType type = StatusEffect::StringToStatusEffectType((char*)TCOD_list_get(value.list,i));
 				if (StatusEffect::IsApplyableStatusEffect(type))
 					Item::Presets[itemIndex].removesEffects.push_back(std::pair<StatusEffectType, int>(type, 100));
 			}
-		} else if (boost::iequals(name,"removeEffectChances")) {
+		} else if (utils::iequals(name,"removeEffectChances")) {
 			for (int i = 0; i < TCOD_list_size(value.list); ++i) {
 				Item::Presets[itemIndex].removesEffects.at(i).second = (intptr_t)TCOD_list_get(value.list,i);
 			}
@@ -443,7 +443,7 @@ private:
 	}
 
 	bool parserEndStruct(TCODParser *parser,const TCODParserStruct *str,const char *name) {
-		if (boost::iequals(str->getName(), "category_type")) {
+		if (utils::iequals(str->getName(), "category_type")) {
 			if (presetCategoryParent[categoryIndex] == "")
 				Item::ParentCategories.push_back(Item::Categories[categoryIndex]);
 		}
@@ -550,10 +550,10 @@ int Item::Resistance(int i) const { return resistances[i]; }
 void Item::SetVelocity(int speed) {
 	velocity = speed;
 	if (speed > 0) {
-		Game::Inst()->flyingItems.insert(boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->flyingItems.insert(std::static_pointer_cast<Item>(shared_from_this()));
 	} else {
 		//The item has moved before but has now stopped
-		Game::Inst()->stoppedItems.push_back(boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->stoppedItems.push_back(std::static_pointer_cast<Item>(shared_from_this()));
 		if (!map->IsWalkable(pos)) {
 			for (int radius = 1; radius < 10; ++radius) {
 				//TODO consider using something more believable here; the item would jump over 9 walls?
@@ -584,7 +584,7 @@ void Item::UpdateVelocity() {
 					if (map->BlocksWater(t) || !map->IsWalkable(t)) { //We've hit an obstacle
 						Attack attack = GetAttack();
 						if (map->GetConstruction(t) > -1) {
-							if (boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(t)).lock()) {
+							if (std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(map->GetConstruction(t)).lock()) {
 								construct->Damage(&attack);
 							}
 						}
@@ -594,7 +594,7 @@ void Item::UpdateVelocity() {
 					if (map->NPCList(t)->size() > 0) { //Hit a creature
 						if (Random::Generate(std::max(1, flightPath.back().height) - 1) < (signed int)(2 + map->NPCList(t)->size())) {
 							Attack attack = GetAttack();
-							boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(t)->begin());
+							std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(t)->begin());
 							npc->Damage(&attack);
 
 							Position(flightPath.back().coord);
@@ -628,7 +628,7 @@ void Item::Impact(int speedChange) {
 	if (speedChange >= 10 && Random::Generate(9) < 7) DecreaseCondition(); //A sudden impact will damage the item
 	if (condition == 0) { //Note that condition < 0 means that it is not damaged by impacts
 		//The item has impacted and broken. Create debris owned by no one
-		std::vector<boost::weak_ptr<Item> > component(1, boost::static_pointer_cast<Item>(shared_from_this()));
+		std::vector<std::weak_ptr<Item> > component(1, std::static_pointer_cast<Item>(shared_from_this()));
 		Game::Inst()->CreateItem(Position(), Item::StringToItemType("debris"), false, -1, component);
 		//Game::Update removes all condition==0 items in the stopped items list, which is where this item will be
 	}
@@ -781,16 +781,16 @@ void OrganicItem::load(InputArchive& ar, const unsigned int version) {
 
 WaterItem::WaterItem(Coordinate pos, ItemType typeVal) : OrganicItem(pos, typeVal) {}
 
-void WaterItem::PutInContainer(boost::weak_ptr<Item> con) {
+void WaterItem::PutInContainer(std::weak_ptr<Item> con) {
 	container = con;
 	attemptedStore = false;
 
-	Game::Inst()->ItemContained(boost::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
+	Game::Inst()->ItemContained(std::static_pointer_cast<Item>(shared_from_this()), !!container.lock());
 
 	if (!container.lock() && !reserved) {
 		//WaterItems transform into an actual waternode if not contained
 		Game::Inst()->CreateWater(Position(), 1);
-		Game::Inst()->RemoveItem(boost::static_pointer_cast<Item>(shared_from_this()));
+		Game::Inst()->RemoveItem(std::static_pointer_cast<Item>(shared_from_this()));
 	}
 }
 

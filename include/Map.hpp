@@ -14,13 +14,13 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <utility>
 #include <list>
 
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/multi_array.hpp>
-#include <boost/unordered_set.hpp>
+#include <shared_mutex>
+#include <unordered_set>
 #include <libtcod.hpp>
 
 #include "Tile.hpp"
@@ -34,18 +34,20 @@ class Weather;
 #define TERRAIN_OVERLAY (2 << 0)
 
 class Map : public ITCODPathCallback {
+        static constexpr int HARDCODED_WIDTH = 500;
+        static constexpr int HARDCODED_HEIGHT = 500;
 	GC_SERIALIZABLE_CLASS
 	
 	Map();
 	static Map* instance;
-	boost::multi_array<Tile, 2> tileMap;
-	boost::multi_array<CacheTile, 2> cachedTileMap;
+	std::array<std::array<Tile, HARDCODED_HEIGHT>, HARDCODED_WIDTH> tileMap;
+	std::array<std::array<CacheTile, HARDCODED_WIDTH>, HARDCODED_WIDTH> cachedTileMap;
 	Coordinate extent; //X->width, Y->height
 	float waterlevel;
 	int overlayFlags;
 	std::list< std::pair<unsigned int, MapMarker> > mapMarkers;
 	unsigned int markerids;
-	boost::unordered_set<Coordinate> changedTiles;
+	std::unordered_set<Coordinate> changedTiles;
 
 	inline const Tile& tile(const Coordinate& p) const {
 		return tileMap[p.X()][p.Y()];
@@ -91,8 +93,8 @@ public:
 	void MoveFrom(const Coordinate&,int);
 	void SetConstruction(const Coordinate&,int);
 	int GetConstruction(const Coordinate&) const;
-	boost::weak_ptr<WaterNode> GetWater(const Coordinate&);
-	void SetWater(const Coordinate&,boost::shared_ptr<WaterNode>);
+	std::weak_ptr<WaterNode> GetWater(const Coordinate&);
+	void SetWater(const Coordinate&,std::shared_ptr<WaterNode>);
 	bool IsLow(const Coordinate&) const;
 	void SetLow(const Coordinate&,bool);
 	bool BlocksWater(const Coordinate&) const;
@@ -105,12 +107,12 @@ public:
 	void SetNatureObject(const Coordinate&,int);
 	int GetNatureObject(const Coordinate&) const;
 	std::set<int>* ItemList(const Coordinate&);
-	boost::weak_ptr<FilthNode> GetFilth(const Coordinate&);
-	void SetFilth(const Coordinate&,boost::shared_ptr<FilthNode>);
-	boost::weak_ptr<BloodNode> GetBlood(const Coordinate&);
-	void SetBlood(const Coordinate&,boost::shared_ptr<BloodNode>);
-	boost::weak_ptr<FireNode> GetFire(const Coordinate&);
-	void SetFire(const Coordinate&,boost::shared_ptr<FireNode>);
+	std::weak_ptr<FilthNode> GetFilth(const Coordinate&);
+	void SetFilth(const Coordinate&,std::shared_ptr<FilthNode>);
+	std::weak_ptr<BloodNode> GetBlood(const Coordinate&);
+	void SetBlood(const Coordinate&,std::shared_ptr<BloodNode>);
+	std::weak_ptr<FireNode> GetFire(const Coordinate&);
+	void SetFire(const Coordinate&,std::shared_ptr<FireNode>);
 	bool BlocksLight(const Coordinate&) const;
 	void SetBlocksLight(const Coordinate&, bool);
 	bool LineOfSight(const Coordinate&, const Coordinate&);
@@ -153,12 +155,12 @@ public:
 	bool IsDangerous(const Coordinate&, int faction) const;
 	bool IsDangerousCache(const Coordinate&, int faction) const;
 	int GetTerrainMoveCost(const Coordinate&) const;
-	boost::shared_ptr<Weather> weather;
+	std::shared_ptr<Weather> weather;
 	void Update();
 	
 	Coordinate FindRangedAdvantage(const Coordinate&);
 
-	mutable boost::shared_mutex cacheMutex;
+	mutable std::shared_mutex cacheMutex;
 	void UpdateCache();
 	void TileChanged(const Coordinate&);
 };

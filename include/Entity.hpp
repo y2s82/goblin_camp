@@ -18,7 +18,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <set>
 #include <string>
 #include <list>
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 
 #include "UI/UIComponents.hpp"
 #include "UI/Tooltip.hpp"
@@ -36,7 +36,7 @@ struct FlightPath {
 	int height;
 };
 
-class Entity: public boost::enable_shared_from_this<Entity> {
+class Entity: public std::enable_shared_from_this<Entity> {
 	GC_SERIALIZABLE_CLASS
 	
 protected:
@@ -66,8 +66,10 @@ public:
 	int Zone();
 	virtual void Reserve(bool);
 	bool Reserved();
-	std::string Name();
+	std::string Name() const;
+	std::string GetName() const; // because I can't be arsed to figure out overloads with std::bind
 	void Name(std::string);
+	void SetName(std::string);
 	virtual void CancelJob(int=0);
 	virtual void SetFaction(int);
 	virtual int GetFaction() const;

@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/serialization/weak_ptr.hpp>
@@ -32,7 +33,7 @@ ready(true){
 void Trap::Update() {
 	if (built) {
 		if (ready && !map->NPCList(pos)->empty()) {
-			boost::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(pos)->begin());
+			std::shared_ptr<NPC> npc = Game::Inst()->GetNPC(*map->NPCList(pos)->begin());
 			if (npc && !npc->HasEffect(FLYING)) {
 				ready = false;
 				graphic[1] = 62;
@@ -67,7 +68,7 @@ int Trap::Use() {
 void Trap::SpawnRepairJob() {
 	Construction::SpawnRepairJob();
 	if (!ready && !reloadJob.lock()) { //Spawn reload job if one doesn't already exist
-		boost::shared_ptr<Job> reload(new Job("Reset "+name));
+		std::shared_ptr<Job> reload(new Job("Reset "+name));
 		reload->tasks.push_back(Task(MOVEADJACENT, Position(), shared_from_this()));
 		reload->tasks.push_back(Task(USE, Position(), shared_from_this()));
 		reload->DisregardTerritory();

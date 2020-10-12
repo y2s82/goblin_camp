@@ -17,10 +17,13 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <vector>
 #include <string>
+#include <SDL2/SDL_log.h>
 
 int GCMain(std::vector<std::string>&);
 
 int main(int argc, char **argv) {
+    SDL_LogSetAllPriority(SDL_LOG_PRIORITY_VERBOSE);
 	std::vector<std::string> args(argv, argv + argc);
+        puts("hello");
 	return GCMain(args);
 }

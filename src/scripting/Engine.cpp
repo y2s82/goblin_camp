@@ -13,6 +13,12 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+
+#include <filesystem>
+
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
+
 #include "stdafx.hpp"
 
 #include <fstream>
@@ -21,14 +27,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <string>
 #include <list>
 
-#define BOOST_FILESYSTEM_VERSION 3
-#include <boost/foreach.hpp>
-#include <boost/filesystem.hpp>
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
-
 namespace py = boost::python;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #include "data/Paths.hpp"
 #include "scripting/Engine.hpp"
@@ -129,6 +129,7 @@ namespace Script {
 			
 			LOG("Setting up console namespace.");
 			modImp.attr("load_source")("__gcdevconsole__", (Paths::Get(Paths::GlobalData) / "lib" / "__gcdevconsole__.py").string());
+                        LOG("set up console");
 			
 			py::exec(
 				"log.info('Console ready.')", py::import("__gcdevconsole__").attr("__dict__")
@@ -190,7 +191,7 @@ namespace Script {
 		
 		Logger::log << "**** Python exception occurred ****\n";
 		try {
-			Globals::printExcFunc(excType, excVal, excTB, none, boost::ref(Globals::stream));
+			Globals::printExcFunc(excType, excVal, excTB, none, Globals::stream);
 		} catch (const py::error_already_set&) {
 			Logger::log << " < INTERNAL ERROR > \n";
 			PyErr_Print();

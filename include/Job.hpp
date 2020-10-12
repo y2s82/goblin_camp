@@ -14,12 +14,11 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <queue>
 #include <string>
 #include <list>
-
-#include <boost/tuple/tuple.hpp>
 
 #include "Construction.hpp"
 #include "data/Serialization.hpp"
@@ -97,9 +96,9 @@ enum TaskResult {
 class Task {
 	GC_SERIALIZABLE_CLASS
 public:
-	Task(Action = NOACTION, Coordinate = Coordinate(-1,-1), boost::weak_ptr<Entity> = boost::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
+	Task(Action = NOACTION, Coordinate = Coordinate(-1,-1), std::weak_ptr<Entity> = std::weak_ptr<Entity>(), ItemCategory = 0, int flags = 0);
 	Coordinate target;
-	boost::weak_ptr<Entity> entity;
+	std::weak_ptr<Entity> entity;
 	Action action;
 	ItemCategory item;
 	int flags;
@@ -112,18 +111,22 @@ class Job {
 	
 	JobPriority _priority;
 	JobCompletion completion;
-	std::list<boost::weak_ptr<Job> > preReqs;
-	boost::weak_ptr<Job> parent;
+	std::list<std::weak_ptr<Job> > preReqs;
+	std::weak_ptr<Job> parent;
 	int npcUid;
 	int _zone;
 	bool menial;
 	bool paused;
 	bool waitingForRemoval;
-	std::list<boost::weak_ptr<Entity> > reservedEntities;
-	boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType> reservedSpot;
+	std::list<std::weak_ptr<Entity> > reservedEntities;
+        struct {
+            std::weak_ptr<Stockpile> stockpile;
+            Coordinate pos;
+            ItemType type;
+        } reservedSpot;
 	int attempts, attemptMax;
-	boost::weak_ptr<Entity> connectedEntity;
-	boost::weak_ptr<Container> reservedContainer;
+	std::weak_ptr<Entity> connectedEntity;
+	std::weak_ptr<Container> reservedContainer;
 	int reservedSpace;
 	ItemCategory tool;
 	Coordinate markedGround;
@@ -142,9 +145,9 @@ public:
 	void Fail();
 	bool PreReqsCompleted();
 	bool ParentCompleted();
-	std::list<boost::weak_ptr<Job> >* PreReqs();
-	boost::weak_ptr<Job> Parent();
-	void Parent(boost::weak_ptr<Job>);
+	std::list<std::weak_ptr<Job> >* PreReqs();
+	std::weak_ptr<Job> Parent();
+	void Parent(std::weak_ptr<Job>);
 	void Assign(int);
 	int Assigned();
 	void zone(int);
@@ -155,13 +158,13 @@ public:
 	void Remove();
 	bool Removable();
 
-	void ReserveEntity(boost::weak_ptr<Entity>);
+	void ReserveEntity(std::weak_ptr<Entity>);
 	void UnreserveEntities();
-	void ReserveSpot(boost::weak_ptr<Stockpile>, Coordinate, ItemType);
+	void ReserveSpot(std::weak_ptr<Stockpile>, Coordinate, ItemType);
 	void UnreserveSpot();
-	void ConnectToEntity(boost::weak_ptr<Entity>);
-	boost::weak_ptr<Entity> ConnectedEntity();
-	void ReserveSpace(boost::weak_ptr<Container>, int bulk = 1);
+	void ConnectToEntity(std::weak_ptr<Entity>);
+	std::weak_ptr<Entity> ConnectedEntity();
+	void ReserveSpace(std::weak_ptr<Container>, int bulk = 1);
 
 	bool internal;
 	int Attempts();
@@ -185,7 +188,7 @@ public:
 
 	std::list<StatusEffectType> statusEffects;
 	
-	static void CreatePourWaterJob(boost::shared_ptr<Job>, Coordinate);
+	static void CreatePourWaterJob(std::shared_ptr<Job>, Coordinate);
 };
 
 BOOST_CLASS_VERSION(Job, 1)

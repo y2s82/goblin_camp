@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 
 #include "Entity.hpp"
 #include "Attack.hpp"
@@ -51,7 +51,7 @@ class Spell : public Entity {
 	std::list<Attack> attacks;
 	bool immaterial;
 	
-	static boost::unordered_map<std::string, SpellType> spellTypeNames;
+	static std::unordered_map<std::string, SpellType> spellTypeNames;
 public:
 	Spell(const Coordinate& = undefined, int = 0);
 	~Spell();

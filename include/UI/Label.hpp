@@ -18,9 +18,9 @@
 #include <string>
 #include <vector>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+#include <functional>
+#include <functional>
+
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"
@@ -37,10 +37,10 @@ public:
 
 class LiveLabel: public Drawable {
 private:
-	boost::function<std::string()> text;
+	std::function<std::string()> text;
 	TCOD_alignment_t align;
 public:
-	LiveLabel(boost::function<std::string()> ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
+	LiveLabel(std::function<std::string()> ntext, int x, int y, TCOD_alignment_t nalign = TCOD_CENTER) :
 	Drawable(x, y, 0, 1), text(ntext), align(nalign) {}
 	void Draw(int, int, TCODConsole *);
 };

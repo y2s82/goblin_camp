@@ -22,8 +22,8 @@
 #include "UI/Label.hpp"
 #include "UI/Button.hpp"
 
-void MessageBox::ShowMessageBox(std::string text, boost::function<void()> firstAction, std::string firstButton,
-	boost::function<void()> secondAction, std::string secondButton) {
+void MessageBox::ShowMessageBox(std::string text, std::function<void()> firstAction, std::string firstButton,
+	std::function<void()> secondAction, std::string secondButton) {
 	UIContainer *contents = new UIContainer(std::vector<Drawable *>(), 0, 0, 54, (text.length() / 50) + 8);
 	Dialog *dialog = new Dialog(contents, "", 54, (text.length() / 50) + 8);
 	int i = 0;

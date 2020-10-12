@@ -13,28 +13,27 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#define BOOST_NO_CXX11_SCOPED_ENUMS
+#include <filesystem>
+#include <functional>
+#include <boost/python/detail/wrap_python.hpp>
+#include <boost/python.hpp>
 #include "stdafx.hpp"
 
+#include <chrono>
 #include <fstream>
 #include <vector>
 #include <string>
 #include <cstdlib>
 #include <cstring>
 #include <algorithm>
-#include <boost/format.hpp>
 #include <libtcod.hpp>
 // http://www.ridgesolutions.ie/index.php/2013/05/30/boost-link-error-undefined-reference-to-boostfilesystemdetailcopy_file/
-#define BOOST_NO_CXX11_SCOPED_ENUMS
-#include <boost/filesystem.hpp>
-#include <boost/lexical_cast.hpp>
-#include <boost/bind.hpp>
-#include <boost/algorithm/string.hpp>
-#include <boost/python/detail/wrap_python.hpp>
-#include <boost/python.hpp>
 
 namespace py = boost::python;
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
+#include "utils.hpp"
 #include "data/Config.hpp"
 #include "data/Data.hpp"
 #include "data/Paths.hpp"
@@ -51,13 +50,15 @@ namespace {
 		\param[in]  timestamp A source UNIX timestamp.
 		\param[out] dest      A string buffer to receive formatted date.
 	*/
-	void FormatTimestamp(const time_t& timestamp, std::string& dest) {
+	void FormatTimestamp(const std::filesystem::file_time_type& timestamp, std::string& dest) {
 		char buffer[21] = { "0000-00-00, 00:00:00" }; 
 		
+                // todo: this feels dumb, but so is boost-inspired std::chrono
+                time_t time = std::chrono::system_clock::to_time_t(std::chrono::time_point_cast<std::chrono::system_clock::duration>(timestamp - std::filesystem::file_time_type::clock::now() + std::chrono::system_clock::now()));
 		size_t size = 0;
 		struct tm *date;
 		
-		date = localtime(&timestamp);
+		date = localtime(&time);
 		size = strftime(buffer, 21, "%Y-%m-%d, %H:%M:%S", date);
 		buffer[size] = '\0';
 		
@@ -72,7 +73,7 @@ namespace {
 		\param[out] dest     A string buffer to receive formatted file size.
 	*/
 	void FormatFileSize(const std::uintmax_t& filesize, std::string& dest) {
-		static const char* sizes[] = { "%10.0f b", "%10.2f kB", "%10.2f MB", "%10.2f GB" };
+		static const char* sizes[] = { " b", " kB", " MB", " GB" };
 		static unsigned maxSize = sizeof(sizes) / sizeof(sizes[0]);
 		
 		long double size = static_cast<long double>(filesize);
@@ -83,7 +84,7 @@ namespace {
 			++idx;
 		}
 		
-		dest = (boost::format(sizes[idx]) % size).str();
+		dest = std::to_string(size) + sizes[idx];
 	}
 	
 	/**
@@ -119,10 +120,10 @@ namespace {
 		\param[in]  file   Full path to the save.
 		\param[out] result Boolean indicating success or failure.
 	*/
-	void DoSave(std::string file, bool& result) {
+	void DoSave(std::string file, bool* result) {
 		LOG_FUNC("Saving game to " << file, "DoSave");
 		
-		if ((result = Game::Inst()->SaveGame(file))) {
+		if ((*result = Game::Inst()->SaveGame(file))) {
 			Script::Event::GameSaved(file);
 		}
 	}
@@ -190,7 +191,7 @@ namespace {
 }
 
 namespace Data {
-	Save::Save(const std::string& filename, std::uintmax_t size, time_t timestamp) : filename(filename), timestamp(timestamp) {
+	Save::Save(const std::string& filename, std::uintmax_t size, std::filesystem::file_time_type timestamp) : filename(filename), timestamp(timestamp) {
 		FormatFileSize(size, this->size);
 		FormatTimestamp(timestamp, this->date);
 	}
@@ -203,7 +204,7 @@ namespace Data {
 	void GetSavedGames(std::vector<Save>& list) {
 		for (fs::directory_iterator it(Paths::Get(Paths::Saves)), end; it != end; ++it) {
 			fs::path save = it->path();
-			if (!boost::iequals(save.extension().string(), ".sav")) continue;
+			if (!utils::iequals(save.extension().string(), ".sav")) continue;
 			
 			save.replace_extension();
 			
@@ -264,10 +265,10 @@ namespace Data {
 		bool result = false;
 		
 		if (!fs::exists(file) || !confirm) {
-			DoSave(file, result);
+			DoSave(file, &result);
 		} else {
 			MessageBox::ShowMessageBox(
-				"Save game exists, overwrite?", boost::bind(DoSave, file, boost::ref(result)), "Yes",
+				"Save game exists, overwrite?", std::bind(DoSave, file, &result), "Yes",
 				NULL, "No");
 		}
 		
@@ -318,14 +319,14 @@ namespace Data {
 		
 		for (fs::directory_iterator it(Paths::Get(Paths::Screenshots)), end; it != end; ++it) {
 			fs::path png = it->path();
-			if (!boost::iequals(png.extension().string(), ".png")) continue;
+			if (!utils::iequals(png.extension().string(), ".png")) continue;
 			
 			png.replace_extension();
 			
 			std::string file = png.filename().string();
 			try {
 				// screens are saved as screenXXXXXX.png
-				largest = std::max(largest, boost::lexical_cast<unsigned int>(file.substr(6)));
+				largest = std::max(largest, unsigned(stoi(file.substr(6))));
 			} catch (const std::exception& e) {
 				// not worth terminating the game for
 				(void)e; // variable not referenced warning
@@ -333,7 +334,7 @@ namespace Data {
 		}
 		
 		std::string png = (
-			Paths::Get(Paths::Screenshots) / ((boost::format("screen%|06|.png") % (largest + 1)).str())
+			Paths::Get(Paths::Screenshots) / ("screen%|" + std::to_string(largest + 1) + "|.png")
 		).string();
 		
 		LOG("Saving screenshot to " << png);

@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 
 #include "stdafx.hpp"
 #include "tileRenderer/SpriteSetFactories.hpp"
@@ -43,7 +44,7 @@ void ConstructionSpriteFactory::Reset() {
 	connectionMapped = false;
 }
 
-ConstructionSprite ConstructionSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
+ConstructionSprite ConstructionSpriteFactory::Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture) {
 	ConstructionSprite spriteSet = ConstructionSprite();
 	if (connectionMapped) {
 		if (spriteIndices.size() > 0) {
@@ -122,7 +123,7 @@ void NPCSpriteFactory::Reset() {
 	paperdoll = false;
 }
 
-NPCSprite NPCSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
+NPCSprite NPCSpriteFactory::Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture) {
 	if (equipmentMap) {
 		if (frames.size() == (weaponTypes.size() + 1) * (armourTypes.size() + 1)) {
 			std::vector<Sprite_ptr> sprites;
@@ -200,7 +201,7 @@ void StatusEffectSpriteFactory::Reset() {
 	flashRate = 1;
 }
 
-StatusEffectSprite StatusEffectSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
+StatusEffectSprite StatusEffectSpriteFactory::Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture) {
 	StatusEffectSprite result(spriteFactory->CreateSprite(currentTexture, frames, false, fps), flashRate, alwaysOn);
 	Reset();
 	return result;
@@ -246,7 +247,7 @@ TerrainSpriteFactory::TerrainSpriteFactory()
 TerrainSpriteFactory::~TerrainSpriteFactory() {
 } 
 
-TerrainSprite TerrainSpriteFactory::Build(boost::shared_ptr<TilesetRenderer> spriteFactory, boost::shared_ptr<TileSetTexture> currentTexture) {
+TerrainSprite TerrainSpriteFactory::Build(std::shared_ptr<TilesetRenderer> spriteFactory, std::shared_ptr<TileSetTexture> currentTexture) {
 	std::vector<Sprite_ptr> sprites;
 	if (wang) {
 		int indicesPerSprite = spriteIndices.size() / (heightSplits.size() + 1);

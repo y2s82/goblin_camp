@@ -14,14 +14,15 @@
  You should have received a copy of the GNU General Public License 
  along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <vector>
 #include <list>
 
-#include <boost/function.hpp>
-#include <boost/bind.hpp>
-#include <boost/weak_ptr.hpp>
+#include <functional>
+#include <functional>
+
 #include <libtcod.hpp>
 
 #include "UIComponents.hpp"
@@ -34,8 +35,8 @@ private:
 	std::string squadName;
 	int squadMembers;
 	int squadPriority;
-	boost::shared_ptr<Squad> GetSquad(int);
-	UIList<std::pair<std::string, boost::shared_ptr<Squad> >, std::map<std::string, boost::shared_ptr<Squad> > > *squadList;
+	std::shared_ptr<Squad> GetSquad(int);
+	UIList<std::pair<std::string, std::shared_ptr<Squad> >, std::map<std::string, std::shared_ptr<Squad> > > *squadList;
 	Frame *rightFrame;
 	Frame *orders;
 	std::list<int> markers;
@@ -45,8 +46,8 @@ public:
 		Dialog(ncontents, ntitle, nwidth, nheight), squadName(""), squadMembers(1), squadPriority(0) {}
 	static SquadsDialog* squadDialog;
 	static SquadsDialog* SquadDialog();
-	static void DrawSquad(std::pair<std::string, boost::shared_ptr<Squad> >, int, int, int, int, bool, TCODConsole *);
-	static void GetSquadTooltip(std::pair<std::string, boost::shared_ptr<Squad> >, Tooltip *);
+	static void DrawSquad(std::pair<std::string, std::shared_ptr<Squad> >, int, int, int, int, bool, TCODConsole *);
+	static void GetSquadTooltip(std::pair<std::string, std::shared_ptr<Squad> >, Tooltip *);
 	void SelectSquad(int i);
 	bool SquadSelected(bool selected);
 	void CreateSquad();

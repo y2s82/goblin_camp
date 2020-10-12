@@ -13,14 +13,14 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/serialization/weak_ptr.hpp>
-#include <boost/algorithm/string.hpp>
-
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 
+#include "utils.hpp"
 #include "Fire.hpp"
 #include "Random.hpp"
 #include "Map.hpp"
@@ -70,11 +70,11 @@ void FireNode::Update() {
 
 	if (temperature > 800) temperature = 800;
 
-	boost::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
+	std::shared_ptr<WaterNode> water = Map::Inst()->GetWater(pos).lock();
 	if (water && water->Depth() > 0 && Map::Inst()->IsUnbridgedWater(pos)) {
 		temperature = 0;
 		water->Depth(water->Depth()-1);
-		boost::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("steam"));
+		std::shared_ptr<Spell> steam = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("steam"));
 
 		Coordinate direction;
 		Direction wind = Map::Inst()->GetWindDirection();
@@ -96,7 +96,7 @@ void FireNode::Update() {
 		int inverseSparkChance = 150 - std::max(0, ((temperature - 50) / 8));
 
 		if (Random::Generate(inverseSparkChance) == 0) {
-			boost::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("spark"));
+			std::shared_ptr<Spell> spark = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("spark"));
 			int distance = Random::Generate(0, 15);
 			if (distance < 12) {
 				distance = 1;
@@ -119,7 +119,7 @@ void FireNode::Update() {
 		}
 
 		if (Random::Generate(60) == 0) {
-			boost::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("smoke"));
+			std::shared_ptr<Spell> smoke = Game::Inst()->CreateSpell(pos, Spell::StringToSpellType("smoke"));
 			Coordinate direction;
 			Direction wind = Map::Inst()->GetWindDirection();
 			if (wind == NORTH || wind == NORTHEAST || wind == NORTHWEST) direction.Y(Random::Generate(25, 75));
@@ -138,7 +138,7 @@ void FireNode::Update() {
 
 			//Burn items
 			for (std::set<int>::iterator itemi = Map::Inst()->ItemList(pos)->begin(); itemi != Map::Inst()->ItemList(pos)->end(); ++itemi) {
-				boost::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
+				std::shared_ptr<Item> item = Game::Inst()->GetItem(*itemi).lock();
 				if (item && item->IsFlammable()) {
 					Game::Inst()->CreateItem(item->Position(), Item::StringToItemType("ash"));
 					Game::Inst()->RemoveItem(item);
@@ -151,7 +151,7 @@ void FireNode::Update() {
 			//Burn constructions
 			int cons = Map::Inst()->GetConstruction(pos);
 			if (cons >= 0) {
-				boost::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
+				std::shared_ptr<Construction> construct = Game::Inst()->GetConstruction(cons).lock();
 				if (construct) {
 					if (construct->IsFlammable()) {
 						if (Random::Generate(29) == 0) {
@@ -169,9 +169,9 @@ void FireNode::Update() {
 					} else if (construct->HasTag(STOCKPILE) || construct->HasTag(FARMPLOT)) {
 						/*Stockpiles are a special case. Not being an actual building, fire won't touch them.
 						Instead fire should be able to burn the items stored in the stockpile*/
-						boost::shared_ptr<Container> container = boost::static_pointer_cast<Stockpile>(construct)->Storage(pos).lock();
+						std::shared_ptr<Container> container = std::static_pointer_cast<Stockpile>(construct)->Storage(pos).lock();
 						if (container) {
-							boost::shared_ptr<Item> item = container->GetFirstItem().lock();
+							std::shared_ptr<Item> item = container->GetFirstItem().lock();
 							if (item && item->IsFlammable()) {
 								container->RemoveItem(item);
 								item->PutInContainer();
@@ -181,7 +181,7 @@ void FireNode::Update() {
 							}
 						}
 					} else if (construct->HasTag(SPAWNINGPOOL)) {
-						boost::static_pointer_cast<SpawningPool>(construct)->Burn();
+						std::static_pointer_cast<SpawningPool>(construct)->Burn();
 						if (temperature < 15) temperature += 5;
 					}
 				}
@@ -190,7 +190,7 @@ void FireNode::Update() {
 			//Burn plantlife
 			int natureObject = Map::Inst()->GetNatureObject(pos);
 			if (natureObject >= 0 && 
-				!boost::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
+				!utils::iequals(Game::Inst()->natureList[natureObject]->Name(), "Scorched tree")) {
 					bool tree = Game::Inst()->natureList[natureObject]->Tree();
 					Game::Inst()->RemoveNatureObject(Game::Inst()->natureList[natureObject]);
 					if (tree && Random::Generate(4) == 0) {
@@ -201,7 +201,7 @@ void FireNode::Update() {
 
 			//Create pour water job here if in player territory
 			if (Map::Inst()->IsTerritory(pos) && !waterJob.lock()) {
-				boost::shared_ptr<Job> pourWaterJob(new Job("Douse flames", VERYHIGH));
+				std::shared_ptr<Job> pourWaterJob(new Job("Douse flames", VERYHIGH));
 				Job::CreatePourWaterJob(pourWaterJob, pos);
 				if (pourWaterJob) {
 					pourWaterJob->MarkGround(pos);

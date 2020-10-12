@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #ifdef DEBUG
@@ -21,7 +22,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 #include <string>
 #include <libtcod.hpp>
-#include <boost/algorithm/string.hpp>
 #include <boost/serialization/weak_ptr.hpp>
 #include <boost/serialization/list.hpp>
 #include <boost/serialization/vector.hpp>
@@ -36,7 +36,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Door.hpp"
 #include "Farmplot.hpp"
 
-Task::Task(Action act, Coordinate tar, boost::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
+Task::Task(Action act, Coordinate tar, std::weak_ptr<Entity> ent, ItemCategory itt, int fla) :
 	target(tar),
 	entity(ent),
 	action(act),
@@ -64,18 +64,18 @@ void Task::load(InputArchive& ar, const unsigned int version) {
 Job::Job(std::string value, JobPriority pri, int z, bool m) :
 	_priority(pri),
 	completion(ONGOING),
-	parent(boost::weak_ptr<Job>()),
+	parent(std::weak_ptr<Job>()),
 	npcUid(-1),
 	_zone(z),
 	menial(m),
 	paused(false),
 	waitingForRemoval(false),
-	reservedEntities(std::list<boost::weak_ptr<Entity> >()),
-	reservedSpot(boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(boost::weak_ptr<Stockpile>(), zero, -1)),
+	reservedEntities(std::list<std::weak_ptr<Entity> >()),
+	reservedSpot({std::weak_ptr<Stockpile>(), zero, -1}),
 	attempts(0),
 	attemptMax(5),
-	connectedEntity(boost::weak_ptr<Entity>()),
-	reservedContainer(boost::weak_ptr<Container>()),
+	connectedEntity(std::weak_ptr<Entity>()),
+	reservedContainer(std::weak_ptr<Container>()),
 	reservedSpace(0),
 	tool(-1),
 	markedGround(undefined),
@@ -109,9 +109,9 @@ JobPriority Job::priority() { return _priority; }
 
 bool Job::Completed() {return (completion == SUCCESS || completion == FAILURE);}
 void Job::Complete() {completion = SUCCESS;}
-std::list<boost::weak_ptr<Job> >* Job::PreReqs() {return &preReqs;}
-boost::weak_ptr<Job> Job::Parent() {return parent;}
-void Job::Parent(boost::weak_ptr<Job> value) {parent = value;}
+std::list<std::weak_ptr<Job> >* Job::PreReqs() {return &preReqs;}
+std::weak_ptr<Job> Job::Parent() {return parent;}
+void Job::Parent(std::weak_ptr<Job> value) {parent = value;}
 void Job::Assign(int uid) {npcUid = uid;}
 int Job::Assigned() {return npcUid;}
 void Job::zone(int value) {_zone = value;}
@@ -129,7 +129,7 @@ bool Job::Attempt() {
 }
 
 bool Job::PreReqsCompleted() {
-	for (std::list<boost::weak_ptr<Job> >::iterator preReqIter = preReqs.begin(); preReqIter != preReqs.end(); ++preReqIter) {
+	for (std::list<std::weak_ptr<Job> >::iterator preReqIter = preReqs.begin(); preReqIter != preReqs.end(); ++preReqIter) {
 		if (preReqIter->lock() && !preReqIter->lock()->Completed()) return false;
 	}
 	return true;
@@ -140,7 +140,7 @@ bool Job::ParentCompleted() {
 	return parent.lock()->Completed();
 }
 
-void Job::ReserveEntity(boost::weak_ptr<Entity> entity) {
+void Job::ReserveEntity(std::weak_ptr<Entity> entity) {
 	if (entity.lock()) {
 		reservedEntities.push_back(entity);
 		entity.lock()->Reserve(true);
@@ -148,23 +148,23 @@ void Job::ReserveEntity(boost::weak_ptr<Entity> entity) {
 }
 
 void Job::UnreserveEntities() {
-	for (std::list<boost::weak_ptr<Entity> >::iterator itemI = reservedEntities.begin(); itemI != reservedEntities.end(); ++itemI) {
+	for (std::list<std::weak_ptr<Entity> >::iterator itemI = reservedEntities.begin(); itemI != reservedEntities.end(); ++itemI) {
 		if (itemI->lock()) itemI->lock()->Reserve(false);
 	}
 	reservedEntities.clear();
 }
 
-void Job::ReserveSpot(boost::weak_ptr<Stockpile> sp, Coordinate pos, ItemType type) {
+void Job::ReserveSpot(std::weak_ptr<Stockpile> sp, Coordinate pos, ItemType type) {
 	if (sp.lock()) {
 		sp.lock()->ReserveSpot(pos, true, type);
-		reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, pos, type);
+		reservedSpot = {sp, pos, type};
 	}
 }
 
 void Job::UnreserveSpot() {
-	if (reservedSpot.get<0>().lock()) {
-		reservedSpot.get<0>().lock()->ReserveSpot(reservedSpot.get<1>(), false, reservedSpot.get<2>());
-		reservedSpot.get<0>().reset();
+	if (reservedSpot.stockpile.lock()) {
+		reservedSpot.stockpile.lock()->ReserveSpot(reservedSpot.pos, false, reservedSpot.type);
+		reservedSpot.stockpile.reset();
 	}
 }
 
@@ -208,11 +208,11 @@ std::string Job::ActionToString(Action action) {
 	}
 }
 
-void Job::ConnectToEntity(boost::weak_ptr<Entity> ent) {
+void Job::ConnectToEntity(std::weak_ptr<Entity> ent) {
 	connectedEntity = ent;
 }
 
-void Job::ReserveSpace(boost::weak_ptr<Container> cont, int bulk) {
+void Job::ReserveSpace(std::weak_ptr<Container> cont, int bulk) {
 	if (cont.lock()) {
 		cont.lock()->ReserveSpace(true, bulk);
 		reservedContainer = cont;
@@ -220,7 +220,7 @@ void Job::ReserveSpace(boost::weak_ptr<Container> cont, int bulk) {
 	}
 }
 
-boost::weak_ptr<Entity> Job::ConnectedEntity() { return connectedEntity; }
+std::weak_ptr<Entity> Job::ConnectedEntity() { return connectedEntity; }
 
 bool Job::RequiresTool() { return tool != -1; }
 
@@ -277,11 +277,11 @@ bool Job::InvalidFireAllowance() {
 	return false;
 }
 
-void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
+void Job::CreatePourWaterJob(std::shared_ptr<Job> job, Coordinate location) {
 	job->Attempts(1);
 
 	//First search for a container containing water
-	boost::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
+	std::shared_ptr<Item> waterItem = Game::Inst()->FindItemByTypeFromStockpiles(Item::StringToItemType("Water"),
 		location).lock();
 	Coordinate waterLocation = Game::Inst()->FindWater(location);
 
@@ -294,9 +294,9 @@ void Job::CreatePourWaterJob(boost::shared_ptr<Job> job, Coordinate location) {
 
 		if (distanceToItem < distanceToWater && waterItem->ContainedIn().lock() && 
 			waterItem->ContainedIn().lock()->IsCategory(Item::StringToItemCategory("Container"))) {
-				boost::shared_ptr<Container> container = boost::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
+				std::shared_ptr<Container> container = std::static_pointer_cast<Container>(waterItem->ContainedIn().lock());
 				//Reserve everything inside the container
-				for (std::set<boost::weak_ptr<Item> >::iterator itemi = container->begin(); 
+				for (std::set<std::weak_ptr<Item> >::iterator itemi = container->begin(); 
 					itemi != container->end(); ++itemi) {
 						job->ReserveEntity(*itemi);
 				}
@@ -343,9 +343,9 @@ void Job::save(OutputArchive& ar, const unsigned int version) const {
 	ar & paused;
 	ar & waitingForRemoval;
 	ar & reservedEntities;
-	ar & reservedSpot.get<0>();
-	ar & reservedSpot.get<1>();
-	ar & reservedSpot.get<2>();
+	ar & reservedSpot.stockpile;
+	ar & reservedSpot.pos;
+	ar & reservedSpot.type;
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;
@@ -378,13 +378,13 @@ void Job::load(InputArchive& ar, const unsigned int version) {
 	ar & paused;
 	ar & waitingForRemoval;
 	ar & reservedEntities;
-	boost::weak_ptr<Stockpile> sp;
+	std::weak_ptr<Stockpile> sp;
 	ar & sp;
 	Coordinate location;
 	ar & location;
 	ItemType type;
 	ar & type;
-	reservedSpot = boost::tuple<boost::weak_ptr<Stockpile>, Coordinate, ItemType>(sp, location, type);
+	reservedSpot = {sp, location, type};
 	ar & attempts;
 	ar & attemptMax;
 	ar & connectedEntity;

@@ -14,13 +14,14 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <string>
 #include <vector>
 #include <list>
 #include <map>
-#include <boost/unordered_map.hpp>
-#include <boost/shared_ptr.hpp>
+#include <unordered_map>
+
 #include <libtcod.hpp>
 
 #include "Entity.hpp"
@@ -92,8 +93,8 @@ class Item : public Entity {
 	bool flammable;
 	int decayCounter;
 
-	static boost::unordered_map<std::string, ItemType> itemTypeNames;
-	static boost::unordered_map<std::string, ItemCategory> itemCategoryNames;
+	static std::unordered_map<std::string, ItemType> itemTypeNames;
+	static std::unordered_map<std::string, ItemCategory> itemCategoryNames;
 
 	int resistances[RES_COUNT];
 
@@ -104,8 +105,8 @@ protected:
 	TCODColor color;
 	int graphic;
 	Item(const Coordinate& = zero, ItemType = -1, int owner = -1,
-		std::vector<boost::weak_ptr<Item> > = std::vector<boost::weak_ptr<Item> >());
-	boost::weak_ptr<Item> container;
+		std::vector<std::weak_ptr<Item> > = std::vector<std::weak_ptr<Item> >());
+	std::weak_ptr<Item> container;
 	bool internal;
 
 public:
@@ -134,8 +135,8 @@ public:
 
 	int GetGraphicsHint() const;
 	virtual void Draw(Coordinate, TCODConsole*);
-	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
-	boost::weak_ptr<Item> ContainedIn();
+	virtual void PutInContainer(std::weak_ptr<Item> = std::weak_ptr<Item>());
+	std::weak_ptr<Item> ContainedIn();
 	ItemType Type();
 	int GetGraphic();
 	TCODColor Color();
@@ -155,6 +156,9 @@ public:
 	bool IsFlammable();
 	int DecreaseCondition(); //Only decreases condition, does NOT handle item removal or debris creation!
 };
+
+// Not safe at all, but boost allowed it so we don't we
+inline bool operator<(const std::weak_ptr<Item>& a, const std::weak_ptr<Item>& b) { return a.lock() < b.lock(); }
 
 BOOST_CLASS_VERSION(Item, 0)
 
@@ -182,7 +186,7 @@ class WaterItem : public OrganicItem {
 
 public:
 	WaterItem(Coordinate=Coordinate(0,0), ItemType=0);
-	virtual void PutInContainer(boost::weak_ptr<Item> = boost::weak_ptr<Item>());
+	virtual void PutInContainer(std::weak_ptr<Item> = std::weak_ptr<Item>());
 };
 
 BOOST_CLASS_VERSION(WaterItem, 0)

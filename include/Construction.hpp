@@ -14,15 +14,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <vector>
 #include <deque>
 #include <map>
 #include <list>
 #include <set>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <boost/unordered_map.hpp>
+
+
+#include <unordered_map>
 
 #include "Entity.hpp"
 #include "UI/UIComponents.hpp"
@@ -118,8 +119,8 @@ protected:
 	std::deque<ItemType> jobList;
 	int progress;
 	bool SpawnProductionJob();
-	boost::shared_ptr<Container> container;
-	boost::shared_ptr<Container> materialsUsed;
+	std::shared_ptr<Container> container;
+	std::shared_ptr<Container> materialsUsed;
 	bool stockpile, farmplot;
 	bool dismantle;
 	int time;
@@ -127,7 +128,7 @@ protected:
 	void UpdateWallGraphic(bool recurse = true, bool self = true);
 	bool flammable;
 	int smoke;
-	boost::weak_ptr<Job> repairJob;
+	std::weak_ptr<Job> repairJob;
 	Map* map;
 public:
 	virtual ~Construction();
@@ -155,7 +156,7 @@ public:
 	static std::set<std::string> Categories;
 	static void LoadPresets(std::string);
 	static void ResolveProducts();
-	virtual boost::weak_ptr<Container> Storage() const;
+	virtual std::weak_ptr<Container> Storage() const;
 	bool HasTag(ConstructionTag) const;
 	virtual void Update();
 	virtual void Dismantle(const Coordinate& p);
@@ -178,7 +179,7 @@ public:
 
 	virtual void SetMap(Map* map);
 	
-	static boost::unordered_map<std::string, ConstructionType> constructionNames;
+	static std::unordered_map<std::string, ConstructionType> constructionNames;
 	static ConstructionType StringToConstructionType(std::string);
 	static std::string ConstructionTypeToString(ConstructionType);
 };

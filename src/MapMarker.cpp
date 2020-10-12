@@ -15,8 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
-#include <boost/math/constants/constants.hpp>
-
 #include "MapMarker.hpp"
 #include "Random.hpp"
 #include "Coordinate.hpp"
@@ -30,7 +28,7 @@ bool MapMarker::Update() {
 	if (duration > 0) --duration;
 	color = TCODColor::lerp(origColor, TCODColor::white, std::abs(std::sin(counter)));
 	counter += 0.1f;
-	if (counter > boost::math::constants::pi<float>()) counter = 0.0f;
+	if (counter > M_PI) counter = 0.0f;
 	return duration != 0;
 }
 

@@ -15,7 +15,6 @@ You should have received a copy of the GNU General Public License
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
 
-#include <boost/array.hpp>
 #include <cstdlib> // int abs(int)
 
 #include "data/Serialization.hpp"
@@ -32,11 +31,18 @@ enum Direction {
 	NODIRECTION
 };
 
+
+class Coordinate;
+template<> struct std::hash<Coordinate>
+{
+    inline std::size_t operator()(const Coordinate& coord) const noexcept;
+};
+
 class Coordinate {
 	GC_SERIALIZABLE_CLASS
 	
 	friend int Distance(const Coordinate&, const Coordinate&);
-	friend std::size_t hash_value(const Coordinate&);
+        friend std::size_t std::hash<Coordinate>::operator()(const Coordinate& coord) const noexcept;
 	
 	int x, y;
 
@@ -55,7 +61,7 @@ public:
 	}
 
 	static Coordinate DirectionToCoordinate(Direction dir) {
-		static boost::array<Coordinate,9> coordsToDirs = 
+		static std::array<Coordinate,9> coordsToDirs = 
 		{ // gcc complains unless there are two level of braces
 		  // see http://stackoverflow.com/questions/2687701/question-on-boost-array-initializer
 			{Coordinate(0,-1),  // North
@@ -228,6 +234,12 @@ public:
 		return shrinkRectangle(origin, origin + extent - 1);
 	};
 };
+
+
+std::size_t std::hash<Coordinate>::operator()(const Coordinate& coord) const noexcept
+    {
+        return (coord.y * 500) ^ coord.x;
+    }
 
 inline int Distance(const Coordinate& p, const Coordinate& q) {
 	int distance = 0;

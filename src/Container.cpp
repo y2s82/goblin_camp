@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/serialization/vector.hpp>
@@ -27,7 +28,7 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "Stockpile.hpp"
 
 Container::Container(
-	Coordinate pos, ItemType type, int capValue, int faction, std::vector<boost::weak_ptr<Item> > components,
+	Coordinate pos, ItemType type, int capValue, int faction, std::vector<std::weak_ptr<Item> > components,
 	std::vector<ContainerListener*> nlisteners
 ) :
 	Item(pos, type, faction, components),
@@ -41,16 +42,16 @@ Container::Container(
 
 Container::~Container() {
 	while (!items.empty()) {
-		boost::weak_ptr<Item> item = GetFirstItem();
+		std::weak_ptr<Item> item = GetFirstItem();
 		RemoveItem(item);
 		if (item.lock()) item.lock()->PutInContainer();
 	}
 }
 
-bool Container::AddItem(boost::weak_ptr<Item> witem) {
-	boost::shared_ptr<Item> item = witem.lock();
+bool Container::AddItem(std::weak_ptr<Item> witem) {
+	std::shared_ptr<Item> item = witem.lock();
 	if (item && capacity >= std::max(item->GetBulk(), 1)) {
-		item->PutInContainer(boost::static_pointer_cast<Item>(shared_from_this()));
+		item->PutInContainer(std::static_pointer_cast<Item>(shared_from_this()));
 		items.insert(item);
 		capacity -= std::max(item->GetBulk(), 1); //<- so that bulk=0 items take space
 		for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++) {
@@ -62,7 +63,8 @@ bool Container::AddItem(boost::weak_ptr<Item> witem) {
 	return false;
 }
 
-void Container::RemoveItem(boost::weak_ptr<Item> item) {
+
+void Container::RemoveItem(std::weak_ptr<Item> item) {
 	if (items.find(item) != items.end()) {
 		items.erase(item);
 		if (item.lock()) {
@@ -75,24 +77,24 @@ void Container::RemoveItem(boost::weak_ptr<Item> item) {
 	}
 }
 
-boost::weak_ptr<Item> Container::GetItem(boost::weak_ptr<Item> item) {
+std::weak_ptr<Item> Container::GetItem(std::weak_ptr<Item> item) {
 	return *items.find(item);
 }
 
-std::set<boost::weak_ptr<Item> >* Container::GetItems() { return &items; }
+std::set<std::weak_ptr<Item> >* Container::GetItems() { return &items; }
 
 bool Container::empty() { return items.empty(); }
 int Container::size() { return items.size(); }
 
 int Container::Capacity() { return capacity-reservedSpace; }
 
-boost::weak_ptr<Item> Container::GetFirstItem() { 
-	if (items.empty()) return boost::weak_ptr<Item>();
+std::weak_ptr<Item> Container::GetFirstItem() { 
+	if (items.empty()) return std::weak_ptr<Item>();
 	return *items.begin(); 
 }
 
-std::set<boost::weak_ptr<Item> >::iterator Container::begin() { return items.begin(); }
-std::set<boost::weak_ptr<Item> >::iterator Container::end() { return items.end(); }
+std::set<std::weak_ptr<Item> >::iterator Container::begin() { return items.begin(); }
+std::set<std::weak_ptr<Item> >::iterator Container::end() { return items.end(); }
 bool Container::Full() {
 	return (capacity-reservedSpace <= 0);
 }
@@ -114,7 +116,7 @@ void Container::RemoveListener(ContainerListener *listener) {
 	for(std::vector<ContainerListener*>::iterator it = listeners.begin(); it != listeners.end(); it++, ++n) {
 		if(*it == listener) {
 			listeners.erase(it);
-			if (n < listenersAsUids.size()) listenersAsUids.erase(boost::next(listenersAsUids.begin(), n));
+			if (n < listenersAsUids.size()) listenersAsUids.erase(std::next(listenersAsUids.begin(), n));
 			return;
 		}
 	}
@@ -122,18 +124,18 @@ void Container::RemoveListener(ContainerListener *listener) {
 
 void Container::GetTooltip(int x, int y, Tooltip *tooltip) {
 	int capacityUsed = 0;
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
 		if (itemi->lock()) capacityUsed += std::max(1, itemi->lock()->GetBulk());
 	}
-	tooltip->AddEntry(TooltipEntry((boost::format("%s - %d items (%d/%d)") % name % size() % capacityUsed % (capacity + capacityUsed)).str(), TCODColor::white));
+	tooltip->AddEntry(TooltipEntry(name + " - " + std::to_string(size()) + " items (" + std::to_string(capacityUsed)  + "/" + std::to_string(capacity + capacityUsed), TCODColor::white));
 }
 
 void Container::TranslateContainerListeners() {
 	listeners.clear();
 	for (unsigned int i = 0; i < listenersAsUids.size(); ++i) {
-		boost::weak_ptr<Construction> cons = Game::Inst()->GetConstruction(listenersAsUids[i]);
-		if (cons.lock() && boost::dynamic_pointer_cast<Stockpile>(cons.lock())) {
-			listeners.push_back(boost::dynamic_pointer_cast<Stockpile>(cons.lock()).get());
+		std::weak_ptr<Construction> cons = Game::Inst()->GetConstruction(listenersAsUids[i]);
+		if (cons.lock() && std::dynamic_pointer_cast<Stockpile>(cons.lock())) {
+			listeners.push_back(std::dynamic_pointer_cast<Stockpile>(cons.lock()).get());
 		}
 	}
 }
@@ -142,7 +144,7 @@ void Container::AddWater(int amount) {
 	if (empty() && filth == 0) { 
 		for (int i = 0; i < amount; ++i) {
 			int waterUid = Game::Inst()->CreateItem(Position(), Item::StringToItemType("Water"));
-			boost::shared_ptr<Item> waterItem = Game::Inst()->GetItem(waterUid).lock();
+			std::shared_ptr<Item> waterItem = Game::Inst()->GetItem(waterUid).lock();
 			
 			if (!AddItem(waterItem)) {
 				Game::Inst()->RemoveItem(waterItem);
@@ -154,8 +156,8 @@ void Container::AddWater(int amount) {
 
 void Container::RemoveWater(int amount) {
 	for (int i = 0; i < amount; ++i) {
-		for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-			boost::shared_ptr<Item> waterItem = itemi->lock();
+		for (std::set<std::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+			std::shared_ptr<Item> waterItem = itemi->lock();
 			if (waterItem && waterItem->Type() == Item::StringToItemType("water")) {
 				Game::Inst()->RemoveItem(waterItem);
 				break;
@@ -192,8 +194,8 @@ int Container::GetReservedSpace() { return reservedSpace; }
 
 void Container::Position(const Coordinate& pos) {
 	Item::Position(pos);
-	for (std::set<boost::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-		boost::shared_ptr<Item> item = itemi->lock();
+	for (std::set<std::weak_ptr<Item> >::iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+		std::shared_ptr<Item> item = itemi->lock();
 		if (item) item->Position(pos);
 	}
 }
@@ -201,8 +203,8 @@ void Container::Position(const Coordinate& pos) {
 Coordinate Container::Position() {return Item::Position();}
 
 void Container::SetFaction(int faction) {
-	for (std::set<boost::weak_ptr<Item> >::const_iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
-		if (boost::shared_ptr<Item> item = itemi->lock()) {
+	for (std::set<std::weak_ptr<Item> >::const_iterator itemi = items.begin(); itemi != items.end(); ++itemi) {
+		if (std::shared_ptr<Item> item = itemi->lock()) {
 			item->SetFaction(faction);
 		}
 	}

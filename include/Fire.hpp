@@ -14,8 +14,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
 #include <libtcod.hpp>
 
 #include "data/Serialization.hpp"
@@ -23,14 +24,14 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 
 class Job;
 
-class FireNode : public boost::enable_shared_from_this<FireNode> {
+class FireNode : public std::enable_shared_from_this<FireNode> {
 	GC_SERIALIZABLE_CLASS
 	
 	Coordinate pos;
 	int graphic;
 	TCODColor color;
 	int temperature;
-	boost::weak_ptr<Job> waterJob;
+	std::weak_ptr<Job> waterJob;
 
 public:
 	FireNode(const Coordinate& = zero, int temperature = 0);

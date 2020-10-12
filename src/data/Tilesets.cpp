@@ -19,11 +19,10 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetLoader.hpp"
 
 #include <string>
-#include <boost/assert.hpp>
 #include <libtcod.hpp>
-#include <boost/filesystem.hpp>
+#include <filesystem>
 
-namespace fs = boost::filesystem;
+namespace fs = std::filesystem;
 
 #include "Game.hpp"
 #include "Logger.hpp"

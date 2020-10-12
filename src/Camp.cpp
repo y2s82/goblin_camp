@@ -13,6 +13,7 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
+#include<memory>
 #include "stdafx.hpp"
 
 #include <boost/serialization/set.hpp>
@@ -171,7 +172,7 @@ void Camp::ConstructionBuilt(int type) {
 void Camp::DisableAutoTerritory() { autoTerritory = false; }
 void Camp::ToggleAutoTerritory() {
 	autoTerritory = !autoTerritory;
-	Announce::Inst()->AddMsg((boost::format("Automatic territory handling %s") % (autoTerritory ? "enabled" : "disabled")).str(), TCODColor::cyan);
+	Announce::Inst()->AddMsg(std::string("Automatic territory handling ") + (autoTerritory ? "enabled" : "disabled"), TCODColor::cyan);
 }
 
 bool Camp::IsAutoTerritoryEnabled() { return autoTerritory; }
@@ -219,11 +220,11 @@ void Camp::RemoveWaterZone(Coordinate from, Coordinate to) {
 void Camp::UpdateWaterJobs() {
 
 	//Remove finished jobs
-	for (std::list<boost::weak_ptr<Job> >::iterator jobi = menialWaterJobs.begin(); jobi != menialWaterJobs.end();) {
+	for (std::list<std::weak_ptr<Job> >::iterator jobi = menialWaterJobs.begin(); jobi != menialWaterJobs.end();) {
 		if (!jobi->lock()) jobi = menialWaterJobs.erase(jobi);
 		else ++jobi;
 	}
-	for (std::list<boost::weak_ptr<Job> >::iterator jobi = expertWaterJobs.begin(); jobi != expertWaterJobs.end();) {
+	for (std::list<std::weak_ptr<Job> >::iterator jobi = expertWaterJobs.begin(); jobi != expertWaterJobs.end();) {
 		if (!jobi->lock()) jobi = expertWaterJobs.erase(jobi);
 		else ++jobi;
 	}
@@ -232,8 +233,8 @@ void Camp::UpdateWaterJobs() {
 		//The amount and priority of water pouring jobs depends on if there's fire anywhere
 		if (Game::Inst()->fireList.size() > 0) {
 			for (int i = 1; static_cast<int>(menialWaterJobs.size()) < Game::Inst()->GoblinCount() && i <= 10; ++i) {
-				boost::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, true));
-				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
+				std::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, true));
+				Coordinate location = *std::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					menialWaterJobs.push_back(waterJob);
@@ -242,8 +243,8 @@ void Camp::UpdateWaterJobs() {
 			}
 
 			for (int i = 1; static_cast<int>(expertWaterJobs.size()) < Game::Inst()->OrcCount() && i <= 10; ++i) {
-				boost::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, false));
-				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
+				std::shared_ptr<Job> waterJob(new Job("Pour water", VERYHIGH, 0, false));
+				Coordinate location = *std::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					expertWaterJobs.push_back(waterJob);
@@ -253,8 +254,8 @@ void Camp::UpdateWaterJobs() {
 
 		} else {
 			if (menialWaterJobs.size() < 5) {
-				boost::shared_ptr<Job> waterJob(new Job("Pour water", LOW, 0, true));
-				Coordinate location = *boost::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
+				std::shared_ptr<Job> waterJob(new Job("Pour water", LOW, 0, true));
+				Coordinate location = *std::next(waterZones.begin(), Random::Generate(waterZones.size()-1));
 				Job::CreatePourWaterJob(waterJob, location);
 				if (waterJob) {
 					menialWaterJobs.push_back(waterJob);

@@ -14,15 +14,16 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License 
 along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #pragma once
+#include<memory>
 
 #include <list>
 #include <map>
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/thread/shared_mutex.hpp>
-#include <boost/weak_ptr.hpp>
+
+#include <shared_mutex>
+
 
 #include "data/Serialization.hpp"
 #include "Job.hpp"
@@ -49,7 +50,7 @@ class Faction {
 
 	static std::map<std::string, int> factionNames;
 	
-	std::list<boost::weak_ptr<NPC> > members;
+	std::list<std::weak_ptr<NPC> > members;
 	std::list<int> membersAsUids;
 	std::map<Coordinate, bool> trapVisible;
 	std::set<FactionType> friends;
@@ -57,9 +58,9 @@ class Faction {
 	std::string name;
 	int index;
 
-	boost::shared_mutex trapVisibleMutex;
+	std::shared_mutex trapVisibleMutex;
 
-	std::vector<boost::weak_ptr<Job> > jobs;
+	std::vector<std::weak_ptr<Job> > jobs;
 	std::vector<FactionGoal> goals;
 	std::vector<int> goalSpecifiers;
 	int currentGoal;
@@ -72,30 +73,30 @@ class Faction {
 	void TranslateFriends();
 public:
 	Faction(std::string = "Noname faction", int = -1);
-	void AddMember(boost::weak_ptr<NPC>);
-	void RemoveMember(boost::weak_ptr<NPC>);
+	void AddMember(std::weak_ptr<NPC>);
+	void RemoveMember(std::weak_ptr<NPC>);
 	void TrapDiscovered(Coordinate, bool propagate=true);
 	bool IsTrapVisible(Coordinate);
 	void TrapSet(Coordinate, bool visible);
 
 	static FactionType StringToFactionType(std::string);
 	static std::string FactionTypeToString(FactionType);
-	static std::vector<boost::shared_ptr<Faction> > factions;
+	static std::vector<std::shared_ptr<Faction> > factions;
 
 	static FactionGoal StringToFactionGoal(std::string);
 	static std::string FactionGoalToString(FactionGoal);
 
 	void Reset();
 	void Update();
-	bool FindJob(boost::shared_ptr<NPC>);
-	void CancelJob(boost::weak_ptr<Job>, std::string, TaskResult);
+	bool FindJob(std::shared_ptr<NPC>);
+	void CancelJob(std::weak_ptr<Job>, std::string, TaskResult);
 
 	void MakeFriendsWith(FactionType);
 	bool IsFriendsWith(FactionType);
 	
 	static void InitAfterLoad(); //Initialize faction names, required before loading npcs from a save file
 	static void TranslateMembers(); //Translate member uids into pointers _after_ loading npcs from a save
-	void TransferTrapInfo(boost::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
+	void TransferTrapInfo(std::shared_ptr<Faction>); //One way transfer, not used for sharing trap data between friendly factions
 
 	FactionGoal GetCurrentGoal() const;
 	static void LoadPresets(std::string);
