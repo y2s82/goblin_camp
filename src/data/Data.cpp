@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #define BOOST_NO_CXX11_SCOPED_ENUMS
 #include <filesystem>
 #include <functional>
-#include <boost/algorithm/string.hpp>
 #include <boost/python/detail/wrap_python.hpp>
 #include <boost/python.hpp>
 #include "stdafx.hpp"

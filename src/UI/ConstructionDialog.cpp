@@ -16,8 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 #include "stdafx.hpp"
 
-#include <boost/algorithm/string.hpp>
-
 #include "UI/ConstructionDialog.hpp"
 #include "UI/Button.hpp"
 #include "UI/ScrollPanel.hpp"

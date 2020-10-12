@@ -16,10 +16,8 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "stdafx.hpp"
 
 #include <string>
-#include <boost/assert.hpp>
 #include <libtcod.hpp>
 #include <filesystem>
-#include <boost/algorithm/string.hpp>
 
 namespace fs = std::filesystem;
 
@@ -49,7 +47,7 @@ namespace {
 		Mods::Metadata *ptr;
 		
 		ModListener(Mods::Metadata *ptr) : ptr(ptr) {
-			BOOST_ASSERT(ptr != NULL);
+			assert(ptr != NULL);
 		}
 		
 		bool parserProperty(TCODParser*, const char *name, TCOD_value_type_t, TCOD_value_t value) {

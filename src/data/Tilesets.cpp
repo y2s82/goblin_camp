@@ -19,7 +19,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include "tileRenderer/TileSetLoader.hpp"
 
 #include <string>
-#include <boost/assert.hpp>
 #include <libtcod.hpp>
 #include <filesystem>
 

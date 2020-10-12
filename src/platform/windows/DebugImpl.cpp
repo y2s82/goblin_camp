@@ -21,7 +21,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include <SDL.h>
 #include <SDL_syswm.h>
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
 #include <sstream>
 

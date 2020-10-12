@@ -56,7 +56,7 @@ link_directories (${PYLIB_PATH}/python2.7)
 # TODO: update as in http://preney.ca/paul/archives/107
 set (Boost_USE_MULTITHREAD ON)
 set(Boost_PYTHON_VERSION 2.7)
-find_package (Boost COMPONENTS date_time filesystem iostreams python random serialization system thread REQUIRED)
+find_package (Boost COMPONENTS python iostreams serialization REQUIRED)
 include_directories (${Boost_INCLUDE_DIRS})
 link_directories (${Boost_LIBRARY_DIRS})
 

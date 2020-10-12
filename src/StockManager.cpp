@@ -16,7 +16,6 @@ along with Goblin Camp. If not, see <http://www.gnu.org/licenses/>.*/
 #include<memory>
 #include "stdafx.hpp"
 
-#include <boost/algorithm/string.hpp>
 #include <boost/serialization/map.hpp>
 #include <boost/serialization/set.hpp>
 #include <boost/serialization/weak_ptr.hpp>
