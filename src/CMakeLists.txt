@@ -1,17 +1,10 @@
 # globbing sources can be dangerous, but let's assert there are no stray
 # source files in the tree.
 
-# boost craps out with newer c++
-file(GLOB boost_is_shit_src scripting/*.cpp scripting/_gcampapi/*.cpp)
-#set_source_files_properties(${boost_is_shit_src} PROPERTIES COMPILE_FLAGS -std=c++14)
-
-file(GLOB gc_src . *.cpp data/*.cpp UI/*.cpp)
-
+file(GLOB gc_src . *.cpp data/*.cpp UI/*.cpp scripting/*.cpp scripting/_gcampapi/*.cpp)
 file(GLOB gc_platform_src . platform/unix/*.cpp platform/linux/*.cpp)
 file(GLOB gc_render_src . tileRenderer/*.cpp tileRenderer/sdl/*.cpp)
-set(nonshit_src ${gc_src} ${gc_platform_src} ${gc_render_src})
-#set_source_files_properties(${nonshit_src} PROPERTIES COMPILE_FLAGS -std=c++17)
-add_executable (goblincamp ${nonshit_src} ${boost_is_shit_src})
+add_executable (goblincamp ${gc_src} ${gc_platform_src} ${gc_render_src})
 
 # Make sure the compiler can find include files
 include_directories (${GOBLINCAMP_SOURCE_DIR}/include)
@@ -61,7 +54,7 @@ include_directories (${Boost_INCLUDE_DIRS})
 link_directories (${Boost_LIBRARY_DIRS})
 
 # link the executable to the libraries
-target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL2 SDL2_image tcod z python-modules pthread X11)
+target_link_libraries (goblincamp ${Boost_LIBRARIES} ${PYTHON_LIBRARIES} GL png SDL2 SDL2_image tcod z python-modules pthread)
 
 # have to use c++11 or gnu++11, because lambda expressions
 set_target_properties (goblincamp PROPERTIES COMPILE_FLAGS "-Wall")
